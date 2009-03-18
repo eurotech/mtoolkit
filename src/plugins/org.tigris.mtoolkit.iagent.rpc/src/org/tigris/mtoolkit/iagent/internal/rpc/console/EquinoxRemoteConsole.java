@@ -1,0 +1,149 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2009 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
+package org.tigris.mtoolkit.iagent.internal.rpc.console;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.osgi.framework.console.CommandInterpreter;
+import org.eclipse.osgi.framework.console.CommandProvider;
+import org.eclipse.osgi.framework.internal.core.AbstractBundle;
+import org.eclipse.osgi.framework.internal.core.Framework;
+import org.eclipse.osgi.framework.internal.core.FrameworkCommandProvider;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import org.tigris.mtoolkit.iagent.pmp.PMPException;
+import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.rpc.Remote;
+import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
+
+
+public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Remote {
+
+	private ServiceTracker providersTrack;
+	private BundleContext context;
+	private FrameworkCommandProvider frameworkProvider;
+	private boolean fwProviderInitializationTried = false;
+
+	public void register(BundleContext bundleContext) {
+		// make sure we are on equinox
+		Framework.class.getName();
+		this.context = bundleContext;
+		providersTrack = new ServiceTracker(bundleContext, CommandProvider.class.getName(), null);
+		super.register(bundleContext);
+	}
+
+	public void unregister() {
+		super.unregister();
+		providersTrack.close();
+	}
+	
+	public void registerOutput(RemoteObject remoteObject) throws PMPException {
+		super.registerOutput(remoteObject);
+		printPrompt();
+	}
+
+	public Class[] remoteInterfaces() {
+		return new Class[] { RemoteConsole.class };
+	}
+
+	public void executeCommand(String line) {
+		try {
+			if (line == null || line.trim().length() == 0)
+				return;
+			providersTrack.open();
+			Object[] providers;
+			synchronized (providersTrack) {
+				providers = providersTrack.getServices();
+				if (!fwProviderInitializationTried) {
+					fwProviderInitializationTried = true;
+					boolean frameworkProviderRegistered = false;
+					if (providers != null)
+						for (int i = 0; i < providers.length; i++) {
+							if (providers[i] instanceof FrameworkCommandProvider) {
+								frameworkProviderRegistered = true;
+								break;
+							}
+						}
+					if (!frameworkProviderRegistered) {
+						try {
+							Framework fw = getEquinoxFramework(context);
+							if (fw != null) {
+								frameworkProvider = (FrameworkCommandProvider) invokeConstructor(FrameworkCommandProvider.class, fw);
+								if (frameworkProvider != null)
+									frameworkProvider.intialize();
+							}
+						} catch (Throwable e) {
+							// TODO: Add logging
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			CommandInterpreter interpreter = new EquinoxCommandInterpreter(line, providers, this);
+			String nextLine = interpreter.nextArgument();
+			if (nextLine != null)
+				interpreter.execute(nextLine);
+		} finally {
+			printPrompt();
+		}
+	}
+
+	void printPrompt() {
+		print(System.getProperty("line.separator") + "osgi>");
+	}
+
+	private Framework getEquinoxFramework(BundleContext context) {
+		Bundle bundle = context.getBundle();
+		if (bundle instanceof AbstractBundle) {
+			Framework framework = (Framework) getFieldValue(bundle, "framework");
+			return framework;
+		} else
+			return null;
+	}
+
+	private Object getFieldValue(Object obj, String fieldName) {
+		Class c = obj.getClass();
+		Field f = null;
+		try {
+			f = c.getDeclaredField(fieldName);
+			return f.get(obj);
+		} catch (NoSuchFieldException e) {
+			// TODO: Add logging
+			e.printStackTrace();
+			return null;
+		} catch (IllegalAccessException e) {
+			f.setAccessible(true);
+			try {
+				return f.get(obj);
+			} catch (IllegalAccessException e1) {
+				// TODO: Add logging
+				e1.printStackTrace();
+				return null;
+			}
+		}
+	}
+	
+	private Object invokeConstructor(Class clazz, Object parameter) throws Exception {
+		try {
+			Constructor c = clazz.getConstructor(new Class[] { parameter.getClass() });
+			return c.newInstance(new Object[] { parameter });
+		} catch (InvocationTargetException e) {
+			if (e.getTargetException() instanceof Exception)
+				throw (Exception) e.getTargetException();
+			// TODO: Add logging
+			e.getTargetException().printStackTrace();
+			return null;
+		}
+	}
+}

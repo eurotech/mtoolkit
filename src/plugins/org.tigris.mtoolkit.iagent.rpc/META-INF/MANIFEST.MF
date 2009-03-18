@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.tigris.mtoolkit.iagent.rpc;singleton:=true
+Bundle-Name: mToolkit Instrumentation Agent RPC Bundle
+Bundle-Activator: org.tigris.mtoolkit.iagent.internal.rpc.Activator
+Bundle-Version: 2.0.0.qualifier
+Bundle-Vendor: Tigris.org
+Bundle-Description: Instrumentation Agent Remote API.
+Bundle-Category: rpc
+Export-Package: org.tigris.mtoolkit.iagent;rpc=split;version="2.0.0";mandatory:=rpc,
+ org.tigris.mtoolkit.iagent.internal.pmp;version="1.0.0";x-friends:="org.tigris.mtoolkit.iagent",
+ org.tigris.mtoolkit.iagent.internal.utils;version="1.0.0";x-friends:="org.tigris.mtoolkit.iagent",
+ org.tigris.mtoolkit.iagent.pmp;version="1.0.0";x-friends:="org.tigris.mtoolkit.iagent",
+ org.tigris.mtoolkit.iagent.rpc;version="2.0.0";x-friends:="org.tigris.mtoolkit.iagent"
+Import-Package: org.eclipse.core.runtime.adaptor;resolution:=optional,
+ org.eclipse.osgi.framework.console;resolution:=optional,
+ org.eclipse.osgi.framework.internal.core;resolution:=optional,
+ com.prosyst.util.parser;resolution:=optional,
+ org.osgi.framework;version="[1.3.0,2.0.0)",
+ org.osgi.service.application;version="[1.0.0,2.0.0)";resolution:=optional,
+ org.osgi.service.deploymentadmin;version="[1.0.0,2.0.0)";resolution:=optional,
+ org.osgi.service.event;version="[1.1.0,2.0.0)";resolution:=optional,
+ org.osgi.service.packageadmin;version="1.2.0",
+ org.osgi.service.startlevel;version="1.1.0",
+ org.osgi.util.tracker;version="1.3.0"
+DynamicImport-Package: org.osgi.service.event,
+ org.osgi.service.deploymentadmin,
+ org.osgi.service.application
+Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1

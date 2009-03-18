@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.tigris.mtoolkit.cdeditor.internal.ComponentDescriptionEditor"
+            contributorClass="org.tigris.mtoolkit.cdeditor.internal.ComponentDescriptionEditorContributor"
+            extensions="xml"
+            icon="icons/obj16/cd_nav.gif"
+            id="org.tigris.mtoolkit.cdeditor.ComponentDescriptionEditor"
+            name="Component Description Editor">
+         <contentTypeBinding
+               contentTypeId="org.tigris.mtoolkit.cdeditor.componentDescription">
+         </contentTypeBinding>
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.eclipse.core.runtime.xml"
+            describer="org.tigris.mtoolkit.cdeditor.internal.integration.ComponentDescriptionContentDescriber"
+            file-extensions="xml"
+            id="componentDescription"
+            name="OSGi Component Description"
+            priority="normal">
+      </content-type>
+   </extension>
+   <extension
+      id="wizard"
+      name="Component"
+      point="org.eclipse.ui.newWizards">
+   <category
+         name="OSGi"
+         id="org.tigris.mtoolkit.osgi.category">
+   </category>
+   <wizard
+         name="Components Description"
+         icon="icons/obj16/newcd_wiz.gif"
+         category="org.tigris.mtoolkit.osgi.category"
+         class="org.tigris.mtoolkit.cdeditor.internal.wizards.NewComponentDescriptionWizard"
+         id="org.tigris.mtoolkit.cdeditor.newwizard">
+      <description>
+      	Create a file for the component description
+      </description>
+   </wizard>
+</extension>
+   <extension
+         id="componentDescriptionBuilder"
+         name="OSGi Component Descriptions Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="false">
+         <run
+               class="org.tigris.mtoolkit.cdeditor.internal.integration.ComponentDescriptionBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         id="problem"
+         name="Component Descriptions Problem" 
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.tigris.mtoolkit.cdeditor.internal.integration.ComponentProjectContext"
+            class="org.tigris.mtoolkit.cdeditor.internal.ContextAdapterFactory">
+         <adapter
+               type="org.eclipse.core.resources.IProject">
+         </adapter>
+         <adapter
+               type="org.eclipse.jdt.core.IJavaProject">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.core.resources.IProject"
+            class="org.tigris.mtoolkit.cdeditor.internal.ProjectAdapterFactory">
+         <adapter
+               type="org.tigris.mtoolkit.cdeditor.internal.model.IEclipseContext">
+         </adapter>
+      </factory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            adaptable="true"
+            class="org.tigris.mtoolkit.cdeditor.internal.integration.ProjectPropertyPage"
+            id="org.tigris.mtoolkit.cdeditor.projectProperties"
+            name="Component Descriptions"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IProject">
+      </page>
+   </extension>
+   
+</plugin>

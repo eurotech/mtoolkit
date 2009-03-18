@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension point="org.eclipse.ui.views">
+      <category
+         name="%OSGiSet.Category"
+         id="org.tigris.mtoolkit.osgi">
+      </category>
+      <view
+         name="%OSGiSet.RemoteConsole"
+         icon="images/console.gif"
+         category="org.tigris.mtoolkit.osgi"
+         class="org.tigris.mtoolkit.osgimanagement.internal.ConsoleView"
+         id="org.tigris.mtoolkit.osgimanagement.internal.consoleview">
+      </view>
+      <view
+         name="%OSGiSet.FrameworkView"
+         icon="images/frameworks.gif"
+         category="org.tigris.mtoolkit.osgi"
+         class="org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView"
+         id="org.tigris.mtoolkit.osgimanagement.frameworkview">
+      </view>
+   </extension>
+
+  <extension point="org.tigris.mtoolkit.common.preferencesPages">
+     <page class="org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage"
+           id="org.tigris.mtoolkit.osgimanagement.preferences.FrameworkPreferencesPage"
+           index="20"
+           name="%FrameworkPreferencesPage.name">
+     </page>
+  </extension> 
+
+
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+         <dynamic
+               class="org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallToFrameworkMenu"
+               id="org.tigris.mtoolkit.osgimanagement.installto">
+            <visibleWhen>
+               <reference
+                     definitionId="org.tigris.mtoolkit.osgimanagement.installto.selection">
+               </reference>
+            </visibleWhen>
+         </dynamic>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="org.tigris.mtoolkit.osgimanagement.installto.selection">
+         <with
+               variable="selection">
+            <iterate>
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <or>
+                     <and>
+                        <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="org.eclipse.pde.PluginNature">
+                        </test>
+                        <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="org.eclipse.jdt.core.javanature">
+                        </test>
+                        <instanceof
+                              value="org.eclipse.core.resources.IProject">
+                        </instanceof>
+                     </and>
+                     <test
+                           property="org.eclipse.core.resources.extension"
+                           value="jar">
+                     </test>
+                     <test
+                           property="org.eclipse.core.resources.extension"
+                           value="dp">
+                     </test>
+                     <and>
+                        <test
+                              property="org.eclipse.core.resources.extension"
+                              value="dpp">
+                        </test>
+                        <test
+                              property="org.tigris.mtoolkit.osgimanagement.dpgenerator"
+                              value="true">
+                        </test>
+                     </and>
+                     <test
+                           property="org.eclipse.core.resources.contentTypeId"
+                           value="org.tigris.mtoolkit.osgimanagement.zip">
+                     </test>
+                  </or>
+               </adapt>
+            </iterate>
+            <count
+                  value="+">
+            </count>
+         </with>
+      </definition>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.tigris.mtoolkit.osgimanagement.internal.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            file-extensions="zip,jar,dp"
+            id="org.tigris.mtoolkit.osgimanagement.zip"
+            name="Zip Archive"
+            priority="normal">
+         <describer
+               class="org.eclipse.core.runtime.content.BinarySignatureDescriber">
+            <parameter
+                  name="signature"
+                  value="50 4B 03 04">
+            </parameter>
+         </describer>
+      </content-type>
+   </extension>
+
+
+</plugin>

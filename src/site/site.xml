@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="mToolkit Update Site">
+   </description>
+   <feature url="features/org.tigris.mtoolkit_3.0.0.qualifier.jar" id="org.tigris.mtoolkit" version="3.0.0.qualifier">
+      <category name="mtoolkit"/>
+   </feature>
+   <feature url="features/org.tigris.mtoolkit.sdk_3.0.0.qualifier.jar" id="org.tigris.mtoolkit.sdk" version="3.0.0.qualifier">
+      <category name="mtoolkit"/>
+   </feature>
+   <category-def name="mtoolkit" label="mToolkit"/>
+</site>
