@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository class='org.eclipse.equinox.internal.p2.artifact.repository.simple.SimpleArtifactRepository' version='1.0.0'?>
+<repository name='mToolkit Artifacts' type='org.eclipse.equinox.p2.artifact.repository.simpleRepository' version='1'>
+  <properties size='3'>
+    <property name='p2.compressed' value='false'/>
+    <property name='p2.timestamp' value='1237384691249'/>
+    <property name='download.contentType' value='application/zip'/>
+  </properties>
+  <mappings size='3'>
+    <rule filter='(&amp; (classifier=osgi.bundle))' output='${repoUrl}/plugins/${id}_${version}.jar'/>
+    <rule filter='(&amp; (classifier=binary))' output='${repoUrl}/binary/${id}_${version}'/>
+    <rule filter='(&amp; (classifier=org.eclipse.update.feature))' output='${repoUrl}/features/${id}_${version}.jar'/>
+  </mappings>
+  <artifacts size='13'>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement' version='4.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='251891'/>
+        <property name='download.size' value='251891'/>
+        <property name='download.md5' value='b5f076eedaf6353a977e746ff4fac0a9'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit.source' version='3.0.0.20090318-1300-7E--7J99r9OEm4EO99'>
+      <properties size='2'>
+        <property name='artifact.size' value='0'/>
+        <property name='download.size' value='5066'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.cdeditor' version='1.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='329472'/>
+        <property name='download.size' value='329472'/>
+        <property name='download.md5' value='5a52f5f2779ee82b6e7feaac05c26a47'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit' version='3.0.0.20090318-1300-7E--7J99r9OEm4EO99'>
+      <properties size='2'>
+        <property name='artifact.size' value='0'/>
+        <property name='download.size' value='5099'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.source' version='2.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='54183'/>
+        <property name='download.size' value='54183'/>
+        <property name='download.md5' value='602a8aa355b06abc5e499b2eebe6399c'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit.sdk' version='3.0.0.20090318-1300-77--7CH2BAPDKtDUHp6OeBB8KAAs'>
+      <properties size='2'>
+        <property name='artifact.size' value='0'/>
+        <property name='download.size' value='5038'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent' version='2.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='65327'/>
+        <property name='download.size' value='65327'/>
+        <property name='download.md5' value='f40fee1532cbd209e6fdc7b0fea20cf0'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.rpc' version='2.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='126904'/>
+        <property name='download.size' value='126904'/>
+        <property name='download.md5' value='02abb697e069e21f4cc12e7ba7082d65'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.common' version='4.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='24702'/>
+        <property name='download.size' value='24702'/>
+        <property name='download.md5' value='24db09fd002c8109392efb8f6422a314'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.rpc.source' version='2.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='86772'/>
+        <property name='download.size' value='86772'/>
+        <property name='download.md5' value='5de5bc6180f19ca8c197c890eae608b0'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.source' version='4.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='124607'/>
+        <property name='download.size' value='124607'/>
+        <property name='download.md5' value='7911d3145143b8c8ea1b19a7810650e4'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.cdeditor.source' version='1.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='166849'/>
+        <property name='download.size' value='166849'/>
+        <property name='download.md5' value='a959a18efe1721d3185a5df462808126'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.common.source' version='4.0.0.20090318-1300'>
+      <properties size='4'>
+        <property name='artifact.size' value='12960'/>
+        <property name='download.size' value='12960'/>
+        <property name='download.md5' value='fea9f3b7d86c964fbc3387227a35c9ad'/>
+        <property name='download.contentType' value='application/zip'/>
+      </properties>
+    </artifact>
+  </artifacts>
+</repository>
