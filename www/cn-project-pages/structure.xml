@@ -6,5 +6,11 @@
     <directory>Download and Install</directory>
     <ordinal>1</ordinal>
   </page>
+  <page>
+    <id>pRN3p8</id>
+    <name>Getting Started</name>
+    <directory>Getting Started</directory>
+    <ordinal>2</ordinal>
+  </page>
 </structure>
 
