@@ -1,0 +1,24 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><h3>What is Remote OSGi Management</h3>
+<p>
+Remote OSGi Management plug-in gives you ability to inspect and manage a remotely running OSGi framework. The view gives you quick access to the list of installed bundles, their headers, registered and used services and ability to manage bundles' lifecycle - install/uninstall/start/stop is all there, at the tip of your fingers.
+<p>
+<h3>How to connect to a remote OSGi framework</h3>
+<p>
+You can connect to any R4-compliant OSGi framework after you had installed a small bundle, which gives access to the internals of the remote OSGi framework.
+<ol>
+<li>Navigate to <eclipse>/plugins/ folder and locate org.tigris.mtoolkit.iagent.rpc_2.0.0.xxxx.jar plugin. Note: <eclipse> is your Eclipse installation folder, where mToolkit is installed. <li>
+<li>Install the selected bundle in OSGi framework and activate it. For more information on how to install and activate a bundle, please consult the documentation of your OSGi framework vendor.<li>
+<li>Confirm that the bundle is properly installed and in ACTIVE state.<li>
+</ol>
+</p>
+<p>
+After the above steps, you are ready to connect to the remote OSGi framework.
+
+<ol>
+<li>Open Frameworks view by selecting Window -> Show View -> Other... and select mToolkit -> Frameworks entry.<li>
+<li>Add new framework, selecting the Add Framework button and entering the name and the IP of the remote framework.<li>
+<li>Close the dialog by selecting Connect button. This will connect to the remote framework immediately. The list of installed bundles should be retrieved shortly.<li>
+</ol>
+
+You can start exploring the view.
+</p>
