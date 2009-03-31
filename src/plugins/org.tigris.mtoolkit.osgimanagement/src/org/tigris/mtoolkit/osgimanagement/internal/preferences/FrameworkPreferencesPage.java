@@ -79,6 +79,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
     super.performDefaults();
     enableAutoConnectButton.setSelection(autoConnectDefault);
     enableInfoLogButton.setSelection(infoLogDefault);
+    enableAutoStartButton.setSelection(autoStartAfterInstall);
   }
   
   public boolean performOk() {
@@ -109,7 +110,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
   
   private void loadSettings() {
     FrameworkConnectorFactory.isAutoConnectEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT);
-    FrameworkConnectorFactory.isAutoStartBundlesEnabled= getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
+    FrameworkConnectorFactory.isAutoStartBundlesEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
     BrowserErrorHandler.isInfoLogEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
   }
 
