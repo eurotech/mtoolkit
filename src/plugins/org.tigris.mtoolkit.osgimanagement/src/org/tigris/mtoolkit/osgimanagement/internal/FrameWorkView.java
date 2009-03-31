@@ -210,7 +210,11 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout());
+		GridLayout layout = new GridLayout();
+		layout.marginHeight = 1;
+		layout.marginWidth = 1;
+		parent.setLayout(layout);
+		
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
 		searchPanel = new SearchPane(parent, SWT.NONE, tree);
