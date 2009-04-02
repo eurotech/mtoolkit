@@ -27,7 +27,6 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 
-
 public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Remote {
 
 	private ServiceTracker providersTrack;
@@ -47,7 +46,7 @@ public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Re
 		super.unregister();
 		providersTrack.close();
 	}
-	
+
 	public void registerOutput(RemoteObject remoteObject) throws PMPException {
 		super.registerOutput(remoteObject);
 		printPrompt();
@@ -63,33 +62,7 @@ public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Re
 				return;
 			providersTrack.open();
 			Object[] providers;
-			synchronized (providersTrack) {
-				providers = providersTrack.getServices();
-				if (!fwProviderInitializationTried) {
-					fwProviderInitializationTried = true;
-					boolean frameworkProviderRegistered = false;
-					if (providers != null)
-						for (int i = 0; i < providers.length; i++) {
-							if (providers[i] instanceof FrameworkCommandProvider) {
-								frameworkProviderRegistered = true;
-								break;
-							}
-						}
-					if (!frameworkProviderRegistered) {
-						try {
-							Framework fw = getEquinoxFramework(context);
-							if (fw != null) {
-								frameworkProvider = (FrameworkCommandProvider) invokeConstructor(FrameworkCommandProvider.class, fw);
-								if (frameworkProvider != null)
-									frameworkProvider.intialize();
-							}
-						} catch (Throwable e) {
-							// TODO: Add logging
-							e.printStackTrace();
-						}
-					}
-				}
-			}
+			providers = getCommandProviders();
 			CommandInterpreter interpreter = new EquinoxCommandInterpreter(line, providers, this);
 			String nextLine = interpreter.nextArgument();
 			if (nextLine != null)
@@ -97,6 +70,39 @@ public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Re
 		} finally {
 			printPrompt();
 		}
+	}
+
+	private Object[] getCommandProviders() {
+		Object[] providers;
+		synchronized (providersTrack) {
+			providers = providersTrack.getServices();
+			if (!fwProviderInitializationTried) {
+				fwProviderInitializationTried = true;
+				boolean frameworkProviderRegistered = false;
+				if (providers != null)
+					for (int i = 0; i < providers.length; i++) {
+						if (providers[i] instanceof FrameworkCommandProvider) {
+							frameworkProviderRegistered = true;
+							break;
+						}
+					}
+				if (!frameworkProviderRegistered) {
+					try {
+						Framework fw = getEquinoxFramework(context);
+						if (fw != null) {
+							frameworkProvider = (FrameworkCommandProvider) invokeConstructor(
+									FrameworkCommandProvider.class, fw);
+							if (frameworkProvider != null)
+								frameworkProvider.intialize();
+						}
+					} catch (Throwable e) {
+						// TODO: Add logging
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return providers;
 	}
 
 	void printPrompt() {
@@ -133,7 +139,7 @@ public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Re
 			}
 		}
 	}
-	
+
 	private Object invokeConstructor(Class clazz, Object parameter) throws Exception {
 		try {
 			Constructor c = clazz.getConstructor(new Class[] { parameter.getClass() });
