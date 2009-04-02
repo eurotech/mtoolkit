@@ -17,7 +17,6 @@ import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 
-
 /**
  * This implementation uses the PMP Service to receive remote events.
  */
@@ -25,7 +24,7 @@ class PMPEventsManager extends Thread {
 
 	private PMPOutputStream os;
 	private PMPEvent first;
-	private PMPEvent last;
+	private PMPEvent last = null;
 	private boolean waiting = false;
 
 	PMPSessionThread session;
@@ -103,7 +102,8 @@ class PMPEventsManager extends Thread {
 		session.debug("Delivering event : " + event);
 		if (event instanceof ListenerEvent) {
 			if (!go)
-				// don't deliver listener events to the server, the connection has been closed
+				// don't deliver listener events to the server, the connection
+				// has been closed
 				return;
 			ListenerEvent levent = (ListenerEvent) event;
 			switch (levent.op) {
@@ -135,7 +135,8 @@ class PMPEventsManager extends Thread {
 	private Hashtable listeners = new Hashtable(10);
 
 	/**
-	 * Registers an {@link EventListener org.tigris.mtoolkit.iagent.internal.event.EventListener}
+	 * Registers an {@link EventListener
+	 * org.tigris.mtoolkit.iagent.internal.event.EventListener}
 	 * 
 	 * @param el
 	 *            the EventListener
@@ -172,7 +173,8 @@ class PMPEventsManager extends Thread {
 	}
 
 	/**
-	 * Unregisters a {@link EventListener org.tigris.mtoolkit.iagent.internal.event.EventListener}
+	 * Unregisters a {@link EventListener
+	 * org.tigris.mtoolkit.iagent.internal.event.EventListener}
 	 * 
 	 * @param el
 	 *            the EventListener
@@ -184,28 +186,33 @@ class PMPEventsManager extends Thread {
 	}
 
 	private void removeEventListener0(EventListener el, String evType) {
-		try {
-			Vector ls = (Vector) listeners.get(evType);
-			if (ls != null) {
-				ls.removeElement(el);
-				if (ls.size() == 0) {
-					ls = null;
-					listeners.remove(evType);
-					if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType))
-						return;
-					PMPAnswer answer = new PMPAnswer(session);
-					os.begin(answer);
-					os.write(PMPSessionThread.REMOVE_LS);
-					PMPData.writeString(evType, os);
-					os.end(true);
-					answer.get(session.is.timeout);
-					if (!answer.success) {
-						throw new PMPException(answer.errMsg);
+		// synchronize over listeners vector, otherwise the add/remove listener
+		// operations can be executed in reverse order on the remote side,
+		// resulting in no more events
+		synchronized (listeners) {
+			try {
+				Vector ls = (Vector) listeners.get(evType);
+				if (ls != null) {
+					ls.removeElement(el);
+					if (ls.size() == 0) {
+						ls = null;
+						listeners.remove(evType);
+						if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType))
+							return;
+						PMPAnswer answer = new PMPAnswer(session);
+						os.begin(answer);
+						os.write(PMPSessionThread.REMOVE_LS);
+						PMPData.writeString(evType, os);
+						os.end(true);
+						answer.get(session.is.timeout);
+						if (!answer.success) {
+							throw new PMPException(answer.errMsg);
+						}
 					}
 				}
+			} catch (Exception exc) { // PMPException, IOException
+				session.error("error unregitering event listener", exc);
 			}
-		} catch (Exception exc) { // PMPException, IOException
-			session.error("error unregitering event listener", exc);
 		}
 	}
 
