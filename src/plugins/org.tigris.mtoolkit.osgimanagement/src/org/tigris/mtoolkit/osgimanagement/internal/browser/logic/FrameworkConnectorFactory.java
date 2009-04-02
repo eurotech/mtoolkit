@@ -98,7 +98,7 @@ public class FrameworkConnectorFactory implements ConstantsDistributor, DeviceCo
         monitor.beginTask(Messages.retrieve_bundles_info, rBundles.length);
       }
 
-      fw.getBundlesNode();
+			Model bundleRoot = fw.getBundlesNode();
 			for (int i=0; i < rBundles.length; i++) {
 			  addBundle(rBundles[i], fw);
 			  if (monitor != null) {
@@ -108,7 +108,10 @@ public class FrameworkConnectorFactory implements ConstantsDistributor, DeviceCo
 			    monitor.worked(1);
 			  }
 			}
-    }
+			if (fw.getViewType() == FrameWork.SERVICES_VIEW) {
+				fw.removeElement(bundleRoot);				
+			}
+		}
     if (monitor != null) {
       monitor.done();
     }
@@ -280,6 +283,9 @@ public class FrameworkConnectorFactory implements ConstantsDistributor, DeviceCo
       }
       category.addElement(bundle);
       framework.bundleHash.put(new Long(bundle.getID()), bundle);
+			if (framework.getViewType() == FrameWork.SERVICES_VIEW) {
+				framework.removeElement(category.getParent());
+			}
     } catch (IllegalArgumentException e) {
       // bundle was uninstalled
     }
@@ -311,8 +317,10 @@ public class FrameworkConnectorFactory implements ConstantsDistributor, DeviceCo
       }
       for (int i=0; i < dps.length; i++) {
         DeploymentPackage dpNode = new DeploymentPackage(dps[i], framework.getDPNode(), framework);
-        deplPackagesNode.addElement(dpNode);
         dpHash.put(dps[i].getName(), dpNode);
+        if(framework.getViewType() != FrameWork.SERVICES_VIEW) {
+        	deplPackagesNode.addElement(dpNode);
+        }
         if (monitor != null) {
           if (monitor.isCanceled()) {
             return;

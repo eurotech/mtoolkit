@@ -68,6 +68,9 @@ public class DeploymentPackage extends Model {
               }
             }
           }
+          if(framework.getViewType() == FrameWork.SERVICES_VIEW) {
+        	  framework.removeElement(bundleNode.getParent().getParent());
+          }
         }
       } catch (IllegalStateException e) {
         // bundle was uninstalled
