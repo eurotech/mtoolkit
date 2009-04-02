@@ -152,6 +152,7 @@ public final class Messages extends NLS {
 
 	public static String unknown_category_label;
 	public static String refresh_framework_info;
+	public static String refresh_bundles_info;
 	public static String connect_framework;
 	public static String install_to_framework;
 	public static String _1;

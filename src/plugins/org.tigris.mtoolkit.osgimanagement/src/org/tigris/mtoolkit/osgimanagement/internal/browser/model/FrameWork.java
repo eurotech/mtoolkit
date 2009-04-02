@@ -717,8 +717,8 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
                   }
                 }
                 if (!added) {
-                  Bundle usedInBundle = new Bundle(bundle.getName(), bCategory, bundle.getRemoteBundle(), bundle.getState(), bundle.getType(), bundle.getCategory());
-                  bCategory.addElement(usedInBundle);
+                	Bundle usedInBundle = new Bundle(bundle.getName(), bCategory, bundle.getRemoteBundle(), bundle.getState(), bundle.getType(), bundle.getCategory());
+                	bCategory.addElement(usedInBundle);
                 }
               }
             }
@@ -760,7 +760,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
           }
           
           DeploymentPackage dpNode = new DeploymentPackage(remoteDP, getDPNode(), FrameWork.this);
-          dpNodeRoot.addElement(dpNode);
+      	  dpNodeRoot.addElement(dpNode);
           dpHash.put(remoteDP.getName(), dpNode);
         } catch (IAgentException e1) {
           e1.printStackTrace();
@@ -939,77 +939,90 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
     return connectionListener;
   }
   
-  public void refreshBundleAction(Bundle sourceBundle) {
-    try {
-      long id = sourceBundle.getID();
-      RemoteService regServ[] = sourceBundle.getRemoteBundle().getRegisteredServices();
-      RemoteService usedServ[] = sourceBundle.getRemoteBundle().getServicesInUse();
-      
-      Bundle bundle = findBundleInDP(id);
-      if (bundle != null) {
-        updateBundleServices(bundle, regServ, usedServ);
-      }
-      
-      bundle = findBundle(id);
-      updateBundleServices(bundle, regServ, usedServ);
+	public void refreshBundleAction(final Bundle sourceBundle) {
+		Job job = new Job(Messages.refresh_bundles_info) {
 
-      
-      // remove bundle in services view
-      for (int i=servicesViewVector.size()-1; i>=0; i--) {
-        Model service = (Model) servicesViewVector.elementAt(i);
-        Model children[] = service.getChildren();
-        for (int j=0; j<children.length; j++) {
-          Model bundles[] = children[j].getChildren();
-          for (int k=0; k<bundles.length; k++) {
-            bundle = (Bundle) bundles[k];
-            if (bundle.getID() == id) {
-              children[j].removeElement(bundle);
-              // remove bundles registered services
-              if (j == 0) {
-                servicesViewVector.removeElementAt(i);
-                removeElement(service);
-              }
-            }
-          }
-        }
-      }
-      
-      for (int i=0; i<regServ.length; i++) {
-        String objClass[] = regServ[i].getObjectClass();
-        for (int j=0; j<objClass.length; j++) {
-          ObjectClass oc = new ObjectClass(this, objClass[j]+" [Service "+regServ[i].getServiceId()+"]", new Long(regServ[i].getServiceId()), regServ[i]);
-          BundlesCategory regCategory = new BundlesCategory(oc, BundlesCategory.REGISTERED);
-          BundlesCategory usedCategory = new BundlesCategory(oc, BundlesCategory.IN_USE);
-          oc.addElement(regCategory);
-          oc.addElement(usedCategory);
-          Bundle newBundle = new Bundle(sourceBundle.getName(), regCategory, sourceBundle.getRemoteBundle(), sourceBundle.getState(), sourceBundle.getType(), sourceBundle.getCategory());
-          regCategory.addElement(newBundle);
-          servicesViewVector.addElement(oc);
-          if (viewType == SERVICES_VIEW) {
-            addElement(oc);
-            oc.updateViewers();
-          }
-        }
-      }
-      
-      for (int i=0; i<usedServ.length; i++) {
-        long usedInId = usedServ[i].getServiceId();
-        for (int j=0; j<servicesViewVector.size(); j++) {
-          ObjectClass oc = (ObjectClass) servicesViewVector.elementAt(j);
-          if (oc.getService().getServiceId() == usedInId) {
-            oc.getChildren()[1].addElement(new Bundle(sourceBundle.getName(), oc.getChildren()[1], sourceBundle.getRemoteBundle(), sourceBundle.getState(), sourceBundle.getType(), sourceBundle.getCategory()));
-            break;
-          }
-        }
-      }
-      
-    } catch (IAgentException e) {
-      BrowserErrorHandler.processError(e, true);
-    } catch (IllegalStateException e) {
-      BrowserErrorHandler.processError(e, true);
-    }
-    
-  }
+			protected IStatus run(IProgressMonitor monitor) {
+				FrameWork.this.monitor = monitor;
+				try {
+					long id = sourceBundle.getID();
+					RemoteService regServ[] = sourceBundle.getRemoteBundle().getRegisteredServices();
+					RemoteService usedServ[] = sourceBundle.getRemoteBundle().getServicesInUse();
+
+					Bundle bundle = findBundleInDP(id);
+					if (bundle != null) {
+						updateBundleServices(bundle, regServ, usedServ);
+					}
+
+					bundle = findBundle(id);
+					updateBundleServices(bundle, regServ, usedServ);
+
+					// remove bundle in services view
+					for (int i = servicesViewVector.size() - 1; i >= 0; i--) {
+						Model service = (Model) servicesViewVector.elementAt(i);
+						Model children[] = service.getChildren();
+						for (int j = 0; j < children.length; j++) {
+							Model bundles[] = children[j].getChildren();
+							for (int k = 0; k < bundles.length; k++) {
+								bundle = (Bundle) bundles[k];
+								if (bundle.getID() == id) {
+									children[j].removeElement(bundle);
+									// remove bundles registered services
+									if (j == 0) {
+										servicesViewVector.removeElementAt(i);
+										removeElement(service);
+									}
+								}
+							}
+						}
+					}
+
+					for (int i = 0; i < regServ.length; i++) {
+						String objClass[] = regServ[i].getObjectClass();
+						for (int j = 0; j < objClass.length; j++) {
+							ObjectClass oc = new ObjectClass(FrameWork.this, objClass[j] + " [Service "
+									+ regServ[i].getServiceId() + "]", new Long(regServ[i].getServiceId()), regServ[i]);
+							BundlesCategory regCategory = new BundlesCategory(oc, BundlesCategory.REGISTERED);
+							BundlesCategory usedCategory = new BundlesCategory(oc, BundlesCategory.IN_USE);
+							oc.addElement(regCategory);
+							oc.addElement(usedCategory);
+							Bundle newBundle = new Bundle(sourceBundle.getName(), regCategory, sourceBundle
+									.getRemoteBundle(), sourceBundle.getState(), sourceBundle.getType(), sourceBundle
+									.getCategory());
+							regCategory.addElement(newBundle);
+							servicesViewVector.addElement(oc);
+							if (viewType == SERVICES_VIEW) {
+								addElement(oc);
+								oc.updateViewers();
+							}
+						}
+					}
+
+					for (int i = 0; i < usedServ.length; i++) {
+						long usedInId = usedServ[i].getServiceId();
+						for (int j = 0; j < servicesViewVector.size(); j++) {
+							ObjectClass oc = (ObjectClass) servicesViewVector.elementAt(j);
+							if (oc.getService().getServiceId() == usedInId) {
+								oc.getChildren()[1].addElement(new Bundle(sourceBundle.getName(), oc.getChildren()[1],
+										sourceBundle.getRemoteBundle(), sourceBundle.getState(),
+										sourceBundle.getType(), sourceBundle.getCategory()));
+								break;
+							}
+						}
+					}
+
+				} catch (IAgentException e) {
+					BrowserErrorHandler.processError(e, true);
+				} catch (IllegalStateException e) {
+					BrowserErrorHandler.processError(e, true);
+				}
+				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+			}
+
+		};
+		job.schedule();
+
+	}
   
   private void updateBundleServices(Bundle bundle, RemoteService regServ[], RemoteService usedServ[]) throws IAgentException {
     bundle.removeChildren();
