@@ -32,15 +32,13 @@ public class Error implements Externalizable {
 	 */
 	public static final int DEPLOYMENT_UNINSTALLED_CODE = -10001;
 
+	private static final byte CODE_PRESENT = 0x02;
+	private static final byte MESSAGE_PRESENT = 0x04;
+	private static final byte DETAILS_PRESENT = 0x01;
+
 	private int code;
-
 	private String message;
-
 	private String details;
-
-	private final static byte CODE_PRESENT = 0x02;
-	private final static byte MESSAGE_PRESENT = 0x04;
-	private final static byte DETAILS_PRESENT = 0x01;
 
 	public Error(int code, String message, String details) {
 		this.code = code;

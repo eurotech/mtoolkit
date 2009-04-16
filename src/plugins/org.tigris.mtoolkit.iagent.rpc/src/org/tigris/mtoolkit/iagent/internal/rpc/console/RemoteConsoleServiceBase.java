@@ -166,12 +166,13 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 
 	protected class WriteDispatcher extends Thread {
 
-		private volatile boolean running = true;
 		public PMPConnection conn;
 		public CircularBuffer buffer;
 		public RemoteMethod method;
 		public RemoteObject object;
 
+		private volatile boolean running = true;
+		
 		public WriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object) throws PMPException {
 			super("Remote Console Dispatcher");
 			this.conn = conn;

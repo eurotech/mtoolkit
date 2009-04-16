@@ -82,7 +82,7 @@ public interface RemoteBundleAdmin {
    */
   Object stopBundle(long id, int flags);
 
-  boolean resolveBundles(long ids[]);
+  boolean resolveBundles(long[] ids);
 
   long[] listBundles();
 

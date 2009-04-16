@@ -84,12 +84,12 @@ public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Re
 
 	private class DispatcherOutput extends OutputStream {
 		private WriteDispatcher dispatcher;
+		private byte[] singleByte = new byte[1];
 
 		DispatcherOutput(WriteDispatcher dispatcher) {
 			this.dispatcher = dispatcher;
 		}
 
-		private byte[] singleByte = new byte[1];
 
 		public void write(byte[] var0, int var1, int var2) throws IOException {
 			dispatcher.buffer.write(var0, var1, var2);

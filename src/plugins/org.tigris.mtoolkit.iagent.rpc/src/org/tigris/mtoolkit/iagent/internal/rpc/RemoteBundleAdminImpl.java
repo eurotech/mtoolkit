@@ -48,14 +48,18 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
 
 public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, SynchronousBundleListener {
 
+	  public static final String SYNCH_BUNDLE_EVENTS = "synch_bundle_event";
+	  public static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
+	  public static final String EVENT_TYPE_KEY = "type";
+	  public static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
+	  
   private static final String PROP_SYSTEM_BUNDLES_LIST = "iagent.system.bundles.list";
-  public static final String SYNCH_BUNDLE_EVENTS = "synch_bundle_event";
-  public static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
   private static final String SYSTEM_BUNDLES_FILE_NAME = "system_bundles.txt";
   private static final String SYSTEM_BUNDLES_RESOURCE_NAME = "/" + SYSTEM_BUNDLES_FILE_NAME;
 
-  public static final String EVENT_TYPE_KEY = "type";
-  public static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
+  private ServiceTracker packageAdminTrack;
+  private ServiceRegistration registration;
+  private BundleContext bc;
 
   private Set loadedSymbolicNames;
   private Bundle systemBundle;
@@ -63,10 +67,6 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
   public Class[] remoteInterfaces() {
     return new Class[] {RemoteBundleAdmin.class};
   }
-
-  private ServiceTracker packageAdminTrack;
-  private ServiceRegistration registration;
-  private BundleContext bc;
 
   public void register(BundleContext bc) {
     log("[register] Registering remote Bundle Admin...");
@@ -232,7 +232,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
     return null;
   }
 
-  public boolean resolveBundles(long ids[]) {
+  public boolean resolveBundles(long[] ids) {
     if (ids == null){
       log("[resolveBundles] Passed bundle ids must not be null");
       throw new IllegalArgumentException("Passed bundle ids must be not null");

@@ -34,9 +34,10 @@ import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 
 public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin, EventHandler {
+	
+	  public static final String DEPLOYMENT_EVENT = "d_event";
 
   private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
-  public static final String DEPLOYMENT_EVENT = "d_event";
   private static final String EVENT_TYPE_KEY = "type";
   private static final String EVENT_DEPLOYMENT_PACKAGE_KEY = "deployment.package";
 
