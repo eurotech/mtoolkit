@@ -2,6 +2,8 @@
 <?eclipse version="3.3"?>
 <plugin>
    <extension-point id="preferencesPages" name="mToolkit Preferences Pages" schema="schema/preferencesPages.exsd"/>
+   <extension-point id="installationItemProcessors" name="Inastallation Item Processors" schema="schema/installationItemProcessors.exsd"/>
+   <extension-point id="installationItemProviders" name="Installation Item Providers" schema="schema/installationItemProviders.exsd"/>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -10,5 +12,48 @@
             name="mToolkit"
             >
       </page>
+   </extension>
+   
+    <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+         <dynamic
+               class="org.tigris.mtoolkit.common.internal.installation.InstallToMenu"
+               id="org.tigris.mtoolkit.osgimanagement.installto">
+            <visibleWhen>
+               <reference
+                     definitionId="org.tigris.mtoolkit.osgimanagement.installto.selection">
+               </reference>
+          
+            </visibleWhen>
+         </dynamic>
+      </menuContribution>
+   </extension>
+   
+   <extension point="org.eclipse.core.expressions.propertyTesters">
+    <propertyTester
+        id="org.tigris.mtoolkit.osgimanagement.PropertyTester"
+        type="org.eclipse.core.resources.IResource"
+        namespace="org.tigris.mtoolkit.osgimanagement"
+        properties="matchesPattern"
+        class="org.tigris.mtoolkit.common.ResourcePropertyTester">
+     </propertyTester>
+	</extension>
+   
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="org.tigris.mtoolkit.osgimanagement.installto.selection">
+         <with
+               variable="selection">
+            <iterate>
+            <adapt
+                     type="org.eclipse.core.resources.IResource">
+               	<test property="org.tigris.mtoolkit.osgimanagement.matchesPattern"/>
+             </adapt>              
+            </iterate>
+         </with>
+      </definition>
    </extension>
 </plugin>
