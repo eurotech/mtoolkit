@@ -28,136 +28,134 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
-
 public class ViewLabelProvider extends LabelProvider implements ConstantsDistributor {
 
-  private static final String ROOT_ICON = "homefolder.gif"; //$NON-NLS-1$
-  private static final String DP_ICON = "dpackage.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_EXTENSION_INSTALLED = "bundle_extension_installed.gif"; //$NON-NLS-1$
-  private static final String OBJECT_CLASS_ICON = "objectClass.gif"; //$NON-NLS-1$
-  private static final String SERVICES_CATEGORY_ICON = "services.gif"; //$NON-NLS-1$
-  private static final String CATEGORY_ICON = "category.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_FRAGMENT_INSTALLED = "bundle_fragment_installed.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_EXTENSION = "bundle_extension.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_FRAGMENT = "bundle_fragment.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_STOPPING = "bundle_stopping.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_STARTING = "bundle_starting.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_INSTALLED = "bundle_installed.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_UNINSTALLED = "bundle_uninstalled.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_UNKNOWN = "bundle_unk.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_RESOLVED = "bundle_resolved.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_ICON_ACTIVE = "bundle_active.gif"; //$NON-NLS-1$
-  private static final String DP_NODE_ICON = "dp_package.gif"; //$NON-NLS-1$
-  private static final String BUNDLE_NODE_ICON = "bundles_package.gif"; //$NON-NLS-1$
+	private static final String ROOT_ICON = "homefolder.gif"; //$NON-NLS-1$
+	private static final String DP_ICON = "dpackage.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_EXTENSION_INSTALLED = "bundle_extension_installed.gif"; //$NON-NLS-1$
+	private static final String OBJECT_CLASS_ICON = "objectClass.gif"; //$NON-NLS-1$
+	private static final String SERVICES_CATEGORY_ICON = "services.gif"; //$NON-NLS-1$
+	private static final String CATEGORY_ICON = "category.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_FRAGMENT_INSTALLED = "bundle_fragment_installed.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_EXTENSION = "bundle_extension.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_FRAGMENT = "bundle_fragment.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_STOPPING = "bundle_stopping.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_STARTING = "bundle_starting.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_INSTALLED = "bundle_installed.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_UNINSTALLED = "bundle_uninstalled.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_UNKNOWN = "bundle_unk.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_RESOLVED = "bundle_resolved.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_ICON_ACTIVE = "bundle_active.gif"; //$NON-NLS-1$
+	private static final String DP_NODE_ICON = "dp_package.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_NODE_ICON = "bundles_package.gif"; //$NON-NLS-1$
 
-
-// Override to return proper image for every element
-  public Image getImage(Object element) {
-    if (element instanceof FrameWork) {
-      FrameWork framework = (FrameWork)element;
-      if (framework.isConnected()) {
-        return ImageHolder.getImage(SERVER_ICON_CONNECTED);
-      } else {
+	// Override to return proper image for every element
+	public Image getImage(Object element) {
+		if (element instanceof FrameWork) {
+			FrameWork framework = (FrameWork) element;
+			if (framework.isConnected()) {
+				return ImageHolder.getImage(SERVER_ICON_CONNECTED);
+			} else {
 				return ImageHolder.getImage(SERVER_ICON_DISCONNECTED);
-      }
-    }
-    if (element instanceof Category) {
-      return ImageHolder.getImage(ViewLabelProvider.CATEGORY_ICON);
-    }
-    if (element instanceof Bundle) {
-      Bundle bundle = (Bundle)element;
-      int state = bundle.getState();
+			}
+		}
+		if (element instanceof Category) {
+			return ImageHolder.getImage(ViewLabelProvider.CATEGORY_ICON);
+		}
+		if (element instanceof Bundle) {
+			Bundle bundle = (Bundle) element;
+			int state = bundle.getState();
 
-      if (state == org.osgi.framework.Bundle.INSTALLED) {
-        if (bundle.getType() != 0 ) {
-          if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
-            return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT_INSTALLED);
-          } else {
-            return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION_INSTALLED);
-          }
-        }
-        return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_INSTALLED);
-      } else if (bundle.getType() != 0 ) {
-        if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT);
-        } else {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION);
-        }
-      } else {
-        if (state == 0) 
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNKNOWN);
+			if (state == org.osgi.framework.Bundle.INSTALLED) {
+				if (bundle.getType() != 0) {
+					if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
+						return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT_INSTALLED);
+					} else {
+						return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION_INSTALLED);
+					}
+				}
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_INSTALLED);
+			} else if (bundle.getType() != 0) {
+				if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT);
+				} else {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION);
+				}
+			} else {
+				if (state == 0)
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNKNOWN);
 
-        switch (state) {
-        case org.osgi.framework.Bundle.UNINSTALLED : {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNINSTALLED);
-        }
-        case org.osgi.framework.Bundle.RESOLVED : {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
-        }
-        case org.osgi.framework.Bundle.STARTING : {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STARTING);
-        }
-        case org.osgi.framework.Bundle.STOPPING : {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STOPPING);
-        }
-        case org.osgi.framework.Bundle.ACTIVE : {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_ACTIVE);
-        }
-        default : {
-          return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
-        }
-        }
-      }
-    }
-    if ((element instanceof ServicesCategory) || (element instanceof BundlesCategory)) {
-      return ImageHolder.getImage(ViewLabelProvider.SERVICES_CATEGORY_ICON);
-    }
-    if (element instanceof ObjectClass) {
-      return ImageHolder.getImage(ViewLabelProvider.OBJECT_CLASS_ICON);
-    }
-    if (element instanceof TreeRoot) {
-      return ImageHolder.getImage(ViewLabelProvider.ROOT_ICON);
-    }
-    if (element instanceof SimpleNode) {
-      if (((SimpleNode)element).getName().equals(Messages.bundles_node_label)) {
-        return ImageHolder.getImage(ViewLabelProvider.BUNDLE_NODE_ICON);
-      } else {
-        return ImageHolder.getImage(ViewLabelProvider.DP_NODE_ICON);
-      }
-    }
-    if (element instanceof DeploymentPackage) {
-      return ImageHolder.getImage(ViewLabelProvider.DP_ICON);
-    }
-    return null;
-  }
+				switch (state) {
+				case org.osgi.framework.Bundle.UNINSTALLED: {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNINSTALLED);
+				}
+				case org.osgi.framework.Bundle.RESOLVED: {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
+				}
+				case org.osgi.framework.Bundle.STARTING: {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STARTING);
+				}
+				case org.osgi.framework.Bundle.STOPPING: {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STOPPING);
+				}
+				case org.osgi.framework.Bundle.ACTIVE: {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_ACTIVE);
+				}
+				default: {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
+				}
+				}
+			}
+		}
+		if ((element instanceof ServicesCategory) || (element instanceof BundlesCategory)) {
+			return ImageHolder.getImage(ViewLabelProvider.SERVICES_CATEGORY_ICON);
+		}
+		if (element instanceof ObjectClass) {
+			return ImageHolder.getImage(ViewLabelProvider.OBJECT_CLASS_ICON);
+		}
+		if (element instanceof TreeRoot) {
+			return ImageHolder.getImage(ViewLabelProvider.ROOT_ICON);
+		}
+		if (element instanceof SimpleNode) {
+			if (((SimpleNode) element).getName().equals(Messages.bundles_node_label)) {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_NODE_ICON);
+			} else {
+				return ImageHolder.getImage(ViewLabelProvider.DP_NODE_ICON);
+			}
+		}
+		if (element instanceof DeploymentPackage) {
+			return ImageHolder.getImage(ViewLabelProvider.DP_ICON);
+		}
+		return null;
+	}
 
-  // Override to dispose Images properly
-  public void dispose() {
-  }
-  
-  
-	/* (non-Javadoc)
+	// Override to dispose Images properly
+	public void dispose() {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {
-    if (element instanceof Bundle) {
-      Bundle bundle = (Bundle)element;
-      String text = bundle.getName();
-      
-      if (bundle.isShowID()) {
-        text += " [" + String.valueOf(bundle.getID()) + "]";  
-      }
-      if (bundle.isShowVersion()) {
-        try {
-          text += " [" + String.valueOf(bundle.getVersion()) + "]";
-        } catch (IAgentException e) {
-          BrowserErrorHandler.processError(e, NLS.bind(Messages.cant_get_bundle_version, String.valueOf(bundle.getID())), false);
-        } catch (IllegalStateException e) {
-          BrowserErrorHandler.processError(e, NLS.bind(Messages.cant_get_bundle_version, String.valueOf(bundle.getID())), false);
-        }
-      }
-      return text;
-    }
+		if (element instanceof Bundle) {
+			Bundle bundle = (Bundle) element;
+			String text = bundle.getName();
+
+			if (bundle.isShowID()) {
+				text += " [" + String.valueOf(bundle.getID()) + "]";
+			}
+			if (bundle.isShowVersion()) {
+				try {
+					text += " [" + String.valueOf(bundle.getVersion()) + "]";
+				} catch (IAgentException e) {
+					BrowserErrorHandler.processError(e, NLS.bind(Messages.cant_get_bundle_version,
+						String.valueOf(bundle.getID())), false);
+				}
+			}
+			return text;
+		}
 		return super.getText(element);
 	}
 
