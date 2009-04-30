@@ -14,7 +14,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-
 public class ReflectionUtils {
 
 	public static class InvocationException extends Exception {
@@ -36,10 +35,11 @@ public class ReflectionUtils {
 		public InvocationException(Throwable cause) {
 			super(cause);
 		}
-		
+
 	}
-	
-	public static Object invokeMethod(Object obj, String methodName, Class[] parameterTypes, Object[] parameterValues) throws InvocationException {
+
+	public static Object invokeMethod(Object obj, String methodName, Class[] parameterTypes, Object[] parameterValues)
+					throws InvocationException {
 		if (obj == null)
 			throw new NullPointerException();
 		Class clazz = obj.getClass();
@@ -59,12 +59,13 @@ public class ReflectionUtils {
 			throw new InvocationException(e.getTargetException());
 		}
 	}
-	
+
 	public static Object invokeMethod(Object obj, String methodName) throws InvocationException {
 		return invokeMethod(obj, methodName, null, null);
 	}
-	
-	public static Object invokeStaticMethod(String className, String methodName, Class[] parameterTypes, Object[] parameterValues) throws InvocationException {
+
+	public static Object invokeStaticMethod(String className, String methodName, Class[] parameterTypes,
+					Object[] parameterValues) throws InvocationException {
 		Class cl;
 		try {
 			cl = ReflectionUtils.class.getClassLoader().loadClass(className);
@@ -84,12 +85,13 @@ public class ReflectionUtils {
 			throw new InvocationException(e.getTargetException());
 		}
 	}
-	
+
 	public static Object invokeStaticMethod(String className, String methodName) throws InvocationException {
 		return invokeStaticMethod(className, methodName, null, null);
 	}
-	
-	public static Object newInstance(String className, Class[] parameterTypes, Object[] parameterValues) throws InvocationException {
+
+	public static Object newInstance(String className, Class[] parameterTypes, Object[] parameterValues)
+					throws InvocationException {
 		try {
 			Class clazz = ReflectionUtils.class.getClassLoader().loadClass(className);
 			Constructor c = clazz.getConstructor(parameterTypes);

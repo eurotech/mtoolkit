@@ -19,48 +19,47 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-
 public class InstallDPAction extends SelectionProviderAction {
 
-  private TreeViewer parentView;
+	private TreeViewer parentView;
 
-  public InstallDPAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-    this.parentView = (TreeViewer)provider;
-  }
+	public InstallDPAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+		this.parentView = (TreeViewer) provider;
+	}
 
-  // run method
-  public void run() {
-    Model node = (Model) getStructuredSelection().getFirstElement();
-    FrameWork framework = node.findFramework();
-    MenuFactory.installDPAction(framework, parentView);
-    getSelectionProvider().setSelection(getSelection());
-  }
+	// run method
+	public void run() {
+		Model node = (Model) getStructuredSelection().getFirstElement();
+		FrameWork framework = node.findFramework();
+		MenuFactory.installDPAction(framework, parentView);
+		getSelectionProvider().setSelection(getSelection());
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 0) {
-      setEnabled(false);
-      return;
-    }
-    FrameWork fw = ((Model)selection.getFirstElement()).findFramework();
-    boolean enabled = true;
-    if (fw == null || !fw.isConnected()) {
-      enabled = false;
-    } else {
-      Iterator iterator = selection.iterator();
-      while (iterator.hasNext()) {
-        Model model = (Model)iterator.next();
-        if (model.findFramework() != fw) {
-          enabled = false;
-          break;
-        }
-      }
-    }
-    setEnabled(enabled);
-  }
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 0) {
+			setEnabled(false);
+			return;
+		}
+		FrameWork fw = ((Model) selection.getFirstElement()).findFramework();
+		boolean enabled = true;
+		if (fw == null || !fw.isConnected()) {
+			enabled = false;
+		} else {
+			Iterator iterator = selection.iterator();
+			while (iterator.hasNext()) {
+				Model model = (Model) iterator.next();
+				if (model.findFramework() != fw) {
+					enabled = false;
+					break;
+				}
+			}
+		}
+		setEnabled(enabled);
+	}
 }

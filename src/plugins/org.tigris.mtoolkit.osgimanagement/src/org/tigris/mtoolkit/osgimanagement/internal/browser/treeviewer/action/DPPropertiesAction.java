@@ -16,35 +16,34 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 
-
 public class DPPropertiesAction extends SelectionProviderAction {
 
-  private TreeViewer parentView;
+	private TreeViewer parentView;
 
-  public DPPropertiesAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-    this.parentView = (TreeViewer)provider;
-  }
+	public DPPropertiesAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+		this.parentView = (TreeViewer) provider;
+	}
 
-  // run method
-  public void run() {
-    DeploymentPackage dp = (DeploymentPackage)getStructuredSelection().getFirstElement();
-    MenuFactory.dpPropertiesAction(dp, parentView);
-    // needed to update workbench menu and toolbar status
-    getSelectionProvider().setSelection(getSelection());
-  }
+	// run method
+	public void run() {
+		DeploymentPackage dp = (DeploymentPackage) getStructuredSelection().getFirstElement();
+		MenuFactory.dpPropertiesAction(dp, parentView);
+		// needed to update workbench menu and toolbar status
+		getSelectionProvider().setSelection(getSelection());
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof DeploymentPackage) {
-      this.setEnabled(true);
-    } else {
-      this.setEnabled(false);
-    }
-  }
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof DeploymentPackage) {
+			this.setEnabled(true);
+		} else {
+			this.setEnabled(false);
+		}
+	}
 
 }

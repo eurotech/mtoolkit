@@ -15,22 +15,21 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SearchPane;
 
-
 public class FindAction extends SelectionProviderAction {
 
-  private SearchPane searchPanel;
-  
-  public FindAction(ISelectionProvider provider, SearchPane searchPanel, String label) {
-    super(provider, label);
-    this.searchPanel = searchPanel;
-  }
+	private SearchPane searchPanel;
 
-  // run method
-  public void run() {
-    searchPanel.show();
-  }
+	public FindAction(ISelectionProvider provider, SearchPane searchPanel, String label) {
+		super(provider, label);
+		this.searchPanel = searchPanel;
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-  }
+	// run method
+	public void run() {
+		searchPanel.show();
+	}
+
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+	}
 }

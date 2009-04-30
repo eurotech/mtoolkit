@@ -20,55 +20,54 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-
 public class DeInstallBundleAction extends SelectionProviderAction {
 
-  public DeInstallBundleAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-  }
+	public DeInstallBundleAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+	}
 
-  // run method
-  public void run() {
-    ISelection selection = getSelection();
-    Iterator iterator = getStructuredSelection().iterator();
-    while (iterator.hasNext()) {
-      Bundle bundle = (Bundle)iterator.next();
-      MenuFactory.deinstallBundleAction(bundle);
-    }
-    getSelectionProvider().setSelection(selection);
-  }
+	// run method
+	public void run() {
+		ISelection selection = getSelection();
+		Iterator iterator = getStructuredSelection().iterator();
+		while (iterator.hasNext()) {
+			Bundle bundle = (Bundle) iterator.next();
+			MenuFactory.deinstallBundleAction(bundle);
+		}
+		getSelectionProvider().setSelection(selection);
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 0) {
-      setEnabled(false);
-      return;
-    }
-    boolean enabled = true;
-    
-    Iterator iterator = selection.iterator();
-    while (iterator.hasNext()) {
-      Model model = (Model)iterator.next();
-      if (!(model instanceof Bundle)) {
-        enabled = false;
-        break;
-      }
-      Bundle bundle = (Bundle) model;
-      try {
-        if (bundle.getState() == org.osgi.framework.Bundle.UNINSTALLED 
-          || bundle.getRemoteBundle().isSystemBundle()) {
-          enabled = false;
-          break;
-        }
-      } catch (IAgentException e) {
-        enabled = false;
-      }
-    }
-    this.setEnabled(enabled);
-  }
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 0) {
+			setEnabled(false);
+			return;
+		}
+		boolean enabled = true;
+
+		Iterator iterator = selection.iterator();
+		while (iterator.hasNext()) {
+			Model model = (Model) iterator.next();
+			if (!(model instanceof Bundle)) {
+				enabled = false;
+				break;
+			}
+			Bundle bundle = (Bundle) model;
+			try {
+				if (bundle.getState() == org.osgi.framework.Bundle.UNINSTALLED
+								|| bundle.getRemoteBundle().isSystemBundle()) {
+					enabled = false;
+					break;
+				}
+			} catch (IAgentException e) {
+				enabled = false;
+			}
+		}
+		this.setEnabled(enabled);
+	}
 
 }

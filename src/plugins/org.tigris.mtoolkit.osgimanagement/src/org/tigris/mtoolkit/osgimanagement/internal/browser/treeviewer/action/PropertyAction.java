@@ -16,35 +16,32 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
-
 public class PropertyAction extends SelectionProviderAction {
 
-  private TreeViewer parentView;
-  
-  public PropertyAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-    this.parentView = (TreeViewer)provider;
-  }
+	private TreeViewer parentView;
 
+	public PropertyAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+		this.parentView = (TreeViewer) provider;
+	}
 
-  // run method
-  public void run() {
-    FrameWork framework = (FrameWork)getStructuredSelection().getFirstElement();
-    MenuFactory.frameworkPropertiesAction(framework, parentView);
-    getSelectionProvider().setSelection(getSelection());
-  }
+	// run method
+	public void run() {
+		FrameWork framework = (FrameWork) getStructuredSelection().getFirstElement();
+		MenuFactory.frameworkPropertiesAction(framework, parentView);
+		getSelectionProvider().setSelection(getSelection());
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof FrameWork) {
-      this.setEnabled(true);
-    } else {
-      this.setEnabled(false);
-    }
-  }
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof FrameWork) {
+			this.setEnabled(true);
+		} else {
+			this.setEnabled(false);
+		}
+	}
 }
-

@@ -39,16 +39,13 @@ public class ServicePropertiesAction extends SelectionProviderAction {
 	public void run() {
 		Display display = Display.getCurrent();
 		RemoteService service = null;
-		ObjectClass object = (ObjectClass) getStructuredSelection()
-				.getFirstElement();
+		ObjectClass object = (ObjectClass) getStructuredSelection().getFirstElement();
 		service = object.getService();
 		if (service != null) {
-			ServicePropertiesDialog dialog = new ServicePropertiesDialog(
-					display.getActiveShell());
+			ServicePropertiesDialog dialog = new ServicePropertiesDialog(display.getActiveShell());
 			dialog.open();
 			try {
-				ServicePropertiesPage mainControl = (ServicePropertiesPage) dialog
-						.getMainControl();
+				ServicePropertiesPage mainControl = (ServicePropertiesPage) dialog.getMainControl();
 				mainControl.setServiceName("Service " + service.getServiceId()); //$NON-NLS-1$
 				mainControl.setData(service);
 			} catch (IAgentException e) {
@@ -70,8 +67,7 @@ public class ServicePropertiesAction extends SelectionProviderAction {
 	}
 
 	public void updateState(IStructuredSelection selection) {
-		if (selection.size() == 1
-				&& getStructuredSelection().getFirstElement() instanceof ObjectClass) {
+		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof ObjectClass) {
 			this.setEnabled(true);
 		} else {
 			this.setEnabled(false);

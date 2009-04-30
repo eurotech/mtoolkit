@@ -21,46 +21,47 @@ import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-
 public class ShowFrameworkConsole extends SelectionProviderAction {
 
-  private TreeViewer tree;
-  
-  public ShowFrameworkConsole(ISelectionProvider provider, String label, TreeViewer tree) {
-    super(provider, label);
-    this.tree = tree;
-  }
+	private TreeViewer tree;
 
-  public void run() {
-    IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
-    Model model = (Model) selection.getFirstElement();
-    final FrameWork fw = model.findFramework();
-    
-      try {
-        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.tigris.mtoolkit.osgimanagement.internal.consoleview"); //$NON-NLS-1$
-        Display display = Display.getCurrent();
-        if (display == null) display = Display.getDefault();
-        display.asyncExec(new Runnable() {
-          public void run() {
-            ConsoleView.setActiveServer(fw.getName());
-          }
-        });
-      } catch (PartInitException e) {
-        e.printStackTrace();
-      }    
-  }
+	public ShowFrameworkConsole(ISelectionProvider provider, String label, TreeViewer tree) {
+		super(provider, label);
+		this.tree = tree;
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() != 1 || !(selection.getFirstElement() instanceof Model) || 
-        ((Model)selection.getFirstElement()).findFramework().autoConnected) {
-      setEnabled(false);
-    } else {
-      setEnabled(true);
-    }
-  }
+	public void run() {
+		IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
+		Model model = (Model) selection.getFirstElement();
+		final FrameWork fw = model.findFramework();
+
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.tigris.mtoolkit.osgimanagement.internal.consoleview"); //$NON-NLS-1$
+			Display display = Display.getCurrent();
+			if (display == null)
+				display = Display.getDefault();
+			display.asyncExec(new Runnable() {
+				public void run() {
+					ConsoleView.setActiveServer(fw.getName());
+				}
+			});
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() != 1
+						|| !(selection.getFirstElement() instanceof Model)
+						|| ((Model) selection.getFirstElement()).findFramework().autoConnected) {
+			setEnabled(false);
+		} else {
+			setEnabled(true);
+		}
+	}
 }

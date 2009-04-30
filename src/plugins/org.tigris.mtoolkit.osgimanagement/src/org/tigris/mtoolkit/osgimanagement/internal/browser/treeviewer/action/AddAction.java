@@ -16,24 +16,23 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 
-
 public class AddAction extends SelectionProviderAction {
 
-  private TreeViewer parentView;
-  
-  public AddAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-    this.parentView = (TreeViewer)provider;
-  }
+	private TreeViewer parentView;
 
-  // run method
-  public void run() {
-    MenuFactory.addFrameworkAction(FrameWorkView.getTreeRoot(), parentView);
-    getSelectionProvider().setSelection(getSelection());
-  }
+	public AddAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+		this.parentView = (TreeViewer) provider;
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    this.setEnabled(true);
-  }
+	// run method
+	public void run() {
+		MenuFactory.addFrameworkAction(FrameWorkView.getTreeRoot(), parentView);
+		getSelectionProvider().setSelection(getSelection());
+	}
+
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		this.setEnabled(true);
+	}
 }

@@ -26,23 +26,24 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 public class PluginExporter_34 implements PluginExporter {
 
 	private volatile IStatus result;
-	
-	
+
 	public void exportPlugins(Object info) {
 		try {
 			Object obj = ReflectionUtils.newInstance("org.eclipse.pde.internal.ui.build.PluginExportJob", new Class[] { FeatureExportInfo.class }, new Object[] { info }); //$NON-NLS-1$
 
-			((Job)obj).setUser(true);
-			((Job)obj).setProperty(IProgressConstants.ICON_PROPERTY, PDEPluginImages.DESC_PLUGIN_OBJ);
-			((Job)obj).addJobChangeListener(new JobChangeAdapter() {
+			((Job) obj).setUser(true);
+			((Job) obj).setProperty(IProgressConstants.ICON_PROPERTY, PDEPluginImages.DESC_PLUGIN_OBJ);
+			((Job) obj).addJobChangeListener(new JobChangeAdapter() {
 				public void done(IJobChangeEvent event) {
 					result = event.getResult();
 				}
 			});
 
-			((Job)obj).schedule();
+			((Job) obj).schedule();
 		} catch (ReflectionUtils.InvocationException e) {
-			result = new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Plugin exporter is not compatible with current version of Eclipse", e); //$NON-NLS-1$
+			result = new Status(IStatus.ERROR,
+				FrameworkPlugin.PLUGIN_ID,
+				"Plugin exporter is not compatible with current version of Eclipse", e); //$NON-NLS-1$
 		}
 	}
 
@@ -53,7 +54,7 @@ public class PluginExporter_34 implements PluginExporter {
 	public boolean hasFinished() {
 		return result != null;
 	}
-	
+
 	public static boolean isCompatible() {
 		Version pdeCoreVersion = new Version((String) Platform.getBundle("org.eclipse.pde.ui").getHeaders().get("Bundle-Version")); //$NON-NLS-1$ //$NON-NLS-2$
 		Version compatibleRange = new Version("3.5.0"); //$NON-NLS-1$

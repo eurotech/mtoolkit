@@ -18,44 +18,42 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-
 public class DeInstallDPAction extends SelectionProviderAction {
 
-  public DeInstallDPAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-  }
+	public DeInstallDPAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+	}
 
-  // run method
-  public void run() {
-    Iterator iterator = getStructuredSelection().iterator();
-    while (iterator.hasNext()) {
-      DeploymentPackage dp = (DeploymentPackage)iterator.next();
-      MenuFactory.deinstallDPAction(dp);
-    }
-    getSelectionProvider().setSelection(getSelection());
-  }
+	// run method
+	public void run() {
+		Iterator iterator = getStructuredSelection().iterator();
+		while (iterator.hasNext()) {
+			DeploymentPackage dp = (DeploymentPackage) iterator.next();
+			MenuFactory.deinstallDPAction(dp);
+		}
+		getSelectionProvider().setSelection(getSelection());
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 0) {
-      setEnabled(false);
-      return;
-    }
-    boolean enabled = true;
-    Iterator iterator = selection.iterator();
-    while (iterator.hasNext()) {
-      Model model = (Model)iterator.next();
-      if (!(model instanceof DeploymentPackage)) {
-        enabled = false;
-        break;
-      }
-    }
-    this.setEnabled(enabled);
-  }
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
 
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 0) {
+			setEnabled(false);
+			return;
+		}
+		boolean enabled = true;
+		Iterator iterator = selection.iterator();
+		while (iterator.hasNext()) {
+			Model model = (Model) iterator.next();
+			if (!(model instanceof DeploymentPackage)) {
+				enabled = false;
+				break;
+			}
+		}
+		this.setEnabled(enabled);
+	}
 
 }

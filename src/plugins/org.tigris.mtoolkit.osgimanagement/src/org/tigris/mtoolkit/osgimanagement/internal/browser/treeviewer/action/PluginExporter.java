@@ -15,7 +15,10 @@ import org.eclipse.core.runtime.IStatus;
 public interface PluginExporter {
 
 	void exportPlugins(Object info);
+
 	boolean hasFinished();
+
 	IStatus getResult();
+
 	String getQualifier();
 }

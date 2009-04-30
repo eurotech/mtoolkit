@@ -18,52 +18,49 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-
 public class RemoveAction extends SelectionProviderAction {
 
-  public RemoveAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-  }
+	public RemoveAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+	}
 
+	// run method
+	public void run() {
+		Iterator iterator = getStructuredSelection().iterator();
+		while (iterator.hasNext()) {
+			FrameWork framework = (FrameWork) iterator.next();
+			if (framework.isConnected()) {
+				MenuFactory.disconnectFrameworkAction(framework);
+			}
+			MenuFactory.removeFrameworkAction(framework);
+		}
+	}
 
-  // run method
-  public void run() {
-    Iterator iterator = getStructuredSelection().iterator();
-    while (iterator.hasNext()) {
-      FrameWork framework = (FrameWork)iterator.next();
-      if (framework.isConnected()) {
-        MenuFactory.disconnectFrameworkAction(framework);
-      }
-      MenuFactory.removeFrameworkAction(framework);
-    }
-  }
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 0) {
-      setEnabled(false);
-      return;
-    }
-    boolean enabled = true;
-    
-    Iterator iterator = selection.iterator();
-    while (iterator.hasNext()) {
-      Model model = (Model)iterator.next();
-      if (!(model instanceof FrameWork)) {
-        enabled = false;
-        break;
-      }
-      FrameWork framework = (FrameWork) model;
-      if (framework.autoConnected) {
-        enabled = false;
-        break;
-      }
-    }
-    this.setEnabled(enabled);
-  }
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 0) {
+			setEnabled(false);
+			return;
+		}
+		boolean enabled = true;
+
+		Iterator iterator = selection.iterator();
+		while (iterator.hasNext()) {
+			Model model = (Model) iterator.next();
+			if (!(model instanceof FrameWork)) {
+				enabled = false;
+				break;
+			}
+			FrameWork framework = (FrameWork) model;
+			if (framework.autoConnected) {
+				enabled = false;
+				break;
+			}
+		}
+		this.setEnabled(enabled);
+	}
 }
-

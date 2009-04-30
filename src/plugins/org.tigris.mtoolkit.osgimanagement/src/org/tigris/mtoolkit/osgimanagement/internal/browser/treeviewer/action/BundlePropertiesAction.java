@@ -16,34 +16,38 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
-
 public class BundlePropertiesAction extends SelectionProviderAction {
 
-  private TreeViewer parentView;
+	private TreeViewer parentView;
 
-  public BundlePropertiesAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-    this.parentView = (TreeViewer)provider;
-  }
+	public BundlePropertiesAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+		this.parentView = (TreeViewer) provider;
+	}
 
-  // run method
-  public void run() {
-    Bundle bundle = (Bundle)getStructuredSelection().getFirstElement();
-    MenuFactory.bundlePropertiesAction(bundle, parentView);
-    // needed to update workbench menu and toolbar status
-    getSelectionProvider().setSelection(getSelection());
-  }
+	// run method
+	public void run() {
+		Bundle bundle = (Bundle) getStructuredSelection().getFirstElement();
+		MenuFactory.bundlePropertiesAction(bundle, parentView);
+		// needed to update workbench menu and toolbar status
+		getSelectionProvider().setSelection(getSelection());
+	}
 
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof Bundle && (((Bundle)getStructuredSelection().getFirstElement()).getState() & (org.osgi.framework.Bundle.INSTALLED | org.osgi.framework.Bundle.RESOLVED | org.osgi.framework.Bundle.STARTING | org.osgi.framework.Bundle.ACTIVE | org.osgi.framework.Bundle.STOPPING)) != 0) {
-      this.setEnabled(true);
-    } else {
-      this.setEnabled(false);
-    }
-  }
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 1
+						&& getStructuredSelection().getFirstElement() instanceof Bundle
+						&& (((Bundle) getStructuredSelection().getFirstElement()).getState() & (org.osgi.framework.Bundle.INSTALLED
+										| org.osgi.framework.Bundle.RESOLVED
+										| org.osgi.framework.Bundle.STARTING
+										| org.osgi.framework.Bundle.ACTIVE | org.osgi.framework.Bundle.STOPPING)) != 0) {
+			this.setEnabled(true);
+		} else {
+			this.setEnabled(false);
+		}
+	}
 }
