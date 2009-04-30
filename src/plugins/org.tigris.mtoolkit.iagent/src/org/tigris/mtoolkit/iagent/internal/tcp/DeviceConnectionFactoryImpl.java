@@ -17,22 +17,22 @@ import org.tigris.mtoolkit.iagent.DeviceConnectorFactory;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 
-
 /**
- * Device connection factory providing DeviceConnectors working over TCP transport 
- *
+ * Device connection factory providing DeviceConnectors working over TCP
+ * transport
+ * 
  */
 public class DeviceConnectionFactoryImpl implements DeviceConnectorFactory {
 
-  public DeviceConnector createClientConnection(Dictionary aConProps) throws IAgentException {
-    return new DeviceConnectorImpl(aConProps);
-  }
+	public DeviceConnector createClientConnection(Dictionary aConProps) throws IAgentException {
+		return new DeviceConnectorImpl(aConProps);
+	}
 
-  public DeviceConnector createServerConnection(Dictionary aConProps) throws IAgentException {
-    throw new UnsupportedOperationException();
-  }
+	public DeviceConnector createServerConnection(Dictionary aConProps) throws IAgentException {
+		throw new UnsupportedOperationException();
+	}
 
-  public int getConnectionType() {
-    return DeviceConnector.TYPE_TCP;
-  }
+	public int getConnectionType() {
+		return DeviceConnector.TYPE_TCP;
+	}
 }

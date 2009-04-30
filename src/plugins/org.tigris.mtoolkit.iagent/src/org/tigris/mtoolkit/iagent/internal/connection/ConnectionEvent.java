@@ -10,64 +10,63 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.connection;
 
-
 /**
  * Event, fired when change in the state of internal connection occur
  * 
  */
 public class ConnectionEvent {
 
-  /**
-   * Event type, indicating a connection was established.
-   */
-  public final static int CONNECTED = 1;
-  
-  /**
-   * Event type, indicating a connection was closed. It doesn't specify which
-   * end initiated the disconnection.
-   */
-  public final static int DISCONNECTED = 2;
-  
-  private int type;
-  
-  private AbstractConnection connection;
-  
-  public ConnectionEvent(int type, AbstractConnection connection) {
-    this.type = type;
-    this.connection = connection;
-  }
+	/**
+	 * Event type, indicating a connection was established.
+	 */
+	public final static int CONNECTED = 1;
 
-  /**
-   * Returns the type of the event
-   * 
-   * @return
-   */
-  public int getType() {
-    return type;
-  }
+	/**
+	 * Event type, indicating a connection was closed. It doesn't specify which
+	 * end initiated the disconnection.
+	 */
+	public final static int DISCONNECTED = 2;
 
-  /**
-   * Returns the associated connection
-   * 
-   * @return
-   */
-  public AbstractConnection getConnection() {
-    return connection;
-  }
+	private int type;
 
-  public String toString() {
-    return "ConnectionEvent[type=" + convertType(type) + "; connection=" + connection + "]";
-  }
-  
-  private String convertType(int type) {
-    switch (type) {
-    case CONNECTED:
-      return "CONNECTED";
-    case DISCONNECTED:
-      return "DISCONNECTED";
-    default:
-      return "UNKNOWN(" + type + ")";
-    }
-  }
-  
+	private AbstractConnection connection;
+
+	public ConnectionEvent(int type, AbstractConnection connection) {
+		this.type = type;
+		this.connection = connection;
+	}
+
+	/**
+	 * Returns the type of the event
+	 * 
+	 * @return
+	 */
+	public int getType() {
+		return type;
+	}
+
+	/**
+	 * Returns the associated connection
+	 * 
+	 * @return
+	 */
+	public AbstractConnection getConnection() {
+		return connection;
+	}
+
+	public String toString() {
+		return "ConnectionEvent[type=" + convertType(type) + "; connection=" + connection + "]";
+	}
+
+	private String convertType(int type) {
+		switch (type) {
+		case CONNECTED:
+			return "CONNECTED";
+		case DISCONNECTED:
+			return "DISCONNECTED";
+		default:
+			return "UNKNOWN(" + type + ")";
+		}
+	}
+
 }

@@ -10,23 +10,25 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent;
 
-
 /**
- * Provides disconnection listener interface for the {@link DeviceConnector}'s associated connection
+ * Provides disconnection listener interface for the {@link DeviceConnector}'s
+ * associated connection
  * 
  * @version 1.0
  */
 public interface DeviceConnectionListener {
-  
-  /**
-   * Called when the {@link DeviceConnector}'s associated connection is disconnected.
-   */
-  public void disconnected(DeviceConnector connector);
 
-  /**
-   * Called when new {@link DeviceConnector} is connected.
-   * @param connector
-   */
-  public void connected(DeviceConnector connector);
-  
+	/**
+	 * Called when the {@link DeviceConnector}'s associated connection is
+	 * disconnected.
+	 */
+	public void disconnected(DeviceConnector connector);
+
+	/**
+	 * Called when new {@link DeviceConnector} is connected.
+	 * 
+	 * @param connector
+	 */
+	public void connected(DeviceConnector connector);
+
 }

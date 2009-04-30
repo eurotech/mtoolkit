@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.iagent.event;
 
 import org.tigris.mtoolkit.iagent.RemoteDP;
 
-
 /**
  * Event object containing details about remote deployment package event.
  * 
@@ -21,46 +20,46 @@ import org.tigris.mtoolkit.iagent.RemoteDP;
  */
 public class RemoteDPEvent extends RemoteEvent {
 
-  /**
-   * Constant indicating that a deployment package has been installed or
-   * updated.
-   */
-  public static final int INSTALLED = 1 << 0;
-  
-  /**
-   * Constant indicating that a deployment package has been uninstalled.
-   */
-  public static final int UNINSTALLED = 1 << 1;
+	/**
+	 * Constant indicating that a deployment package has been installed or
+	 * updated.
+	 */
+	public static final int INSTALLED = 1 << 0;
 
-  private RemoteDP dp;
+	/**
+	 * Constant indicating that a deployment package has been uninstalled.
+	 */
+	public static final int UNINSTALLED = 1 << 1;
 
-  public RemoteDPEvent(RemoteDP dp, int type) {
-    super(type);
-    this.dp = dp;
-  }
+	private RemoteDP dp;
 
-  /**
-   * Returns the deployment package which has been changed in some way.
-   * 
-   * @return a {@link RemoteDP} object associated with this event
-   */
-  public RemoteDP getDeploymentPackage() {
-    return dp;
-  }
+	public RemoteDPEvent(RemoteDP dp, int type) {
+		super(type);
+		this.dp = dp;
+	}
 
-  public String toString() {
-    return "RemoteDPEvent[dp=" + dp + ";type=" + convertType(getType()) + "]";
-  }
+	/**
+	 * Returns the deployment package which has been changed in some way.
+	 * 
+	 * @return a {@link RemoteDP} object associated with this event
+	 */
+	public RemoteDP getDeploymentPackage() {
+		return dp;
+	}
 
-  private String convertType(int type) {
-    switch (type) {
-    case INSTALLED:
-      return "INSTALLED";
-    case UNINSTALLED:
-      return "UNINSTALLED";
-    default:
-      return "UNKNOWN(" + type + ")";
-    }
-  }
+	public String toString() {
+		return "RemoteDPEvent[dp=" + dp + ";type=" + convertType(getType()) + "]";
+	}
+
+	private String convertType(int type) {
+		switch (type) {
+		case INSTALLED:
+			return "INSTALLED";
+		case UNINSTALLED:
+			return "UNINSTALLED";
+		default:
+			return "UNKNOWN(" + type + ")";
+		}
+	}
 
 }

@@ -18,19 +18,19 @@ package org.tigris.mtoolkit.iagent.event;
  */
 public class RemoteEvent {
 
-  private int type;
+	private int type;
 
-  public RemoteEvent(int type) {
-    this.type = type;
-  }
+	public RemoteEvent(int type) {
+		this.type = type;
+	}
 
-  /**
-   * Returns the type of the event. Specific type constants are defined in the
-   * successors of this class.
-   * 
-   * @return the type of the event
-   */
-  public int getType() {
-    return type;
-  }
+	/**
+	 * Returns the type of the event. Specific type constants are defined in the
+	 * successors of this class.
+	 * 
+	 * @return the type of the event
+	 */
+	public int getType() {
+		return type;
+	}
 }

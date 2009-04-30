@@ -10,21 +10,20 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.connection;
 
-
 /**
- * Listeners implementing this interface will be notified for changes
- * in the state of the underlying connections.
+ * Listeners implementing this interface will be notified for changes in the
+ * state of the underlying connections.
  * 
  * @author Danail Nachev
- *
+ * 
  */
 public interface ConnectionListener {
 
-  /**
-   * Called when a change in the state of a connection occur
-   * 
-   * @param event
-   */
-  public void connectionChanged(ConnectionEvent event);
-  
+	/**
+	 * Called when a change in the state of a connection occur
+	 * 
+	 * @param event
+	 */
+	public void connectionChanged(ConnectionEvent event);
+
 }

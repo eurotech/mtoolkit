@@ -12,20 +12,20 @@ package org.tigris.mtoolkit.iagent.internal;
 
 /**
  * Class used for general debug purposes
- *
+ * 
  * @author Alexander Petkov
  */
 public class IAgentLog {
-  
-  public static void error(String msg, Throwable t) {
-    System.out.println("[IAgent.ERROR] " + msg);
-    if (t != null) {
-      t.printStackTrace(System.out);
-    }
-  }
-  
-  public static void error(String msg) {
-    error(msg, null);
-  }
-  
+
+	public static void error(String msg, Throwable t) {
+		System.out.println("[IAgent.ERROR] " + msg);
+		if (t != null) {
+			t.printStackTrace(System.out);
+		}
+	}
+
+	public static void error(String msg) {
+		error(msg, null);
+	}
+
 }
