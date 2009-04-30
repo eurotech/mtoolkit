@@ -14,19 +14,21 @@ import java.util.Dictionary;
 
 public interface RemoteServiceAdmin {
 
-  public static final String CUSTOM_SERVICE_EVENT = "iagent_service_event";
+	public static final String CUSTOM_SERVICE_EVENT = "iagent_service_event";
 
-public Dictionary[] getAllRemoteServices(String clazz, String filter);
-  
-  public Dictionary getProperties(long id);
-  
-  public long[] getUsingBundles(long id);
-  
-  public long getBundle(long id);
-  
-  public boolean isServiceStale(long id);
-  
-  public String checkFilter(String filter);
-  
-  public long getRemoteServiceID();
+	public static final String CUSTOM_PROPERTY_EVENT = "iagent_property_event";
+
+	public Dictionary[] getAllRemoteServices(String clazz, String filter);
+
+	public Dictionary getProperties(long id);
+
+	public long[] getUsingBundles(long id);
+
+	public long getBundle(long id);
+
+	public boolean isServiceStale(long id);
+
+	public String checkFilter(String filter);
+
+	public long getRemoteServiceID();
 }
