@@ -67,7 +67,9 @@
         <module name="UnnecessaryParentheses"/>
         <module name="LeftCurly"/>
         <module name="RightCurly"/>
-        <module name="RedundantModifier"/>
+        <module name="RedundantModifier">
+            <property name="severity" value="ignore"/>
+        </module>
         <module name="EmptyForInitializerPad"/>
         <module name="EmptyForIteratorPad"/>
         <module name="AnonInnerLength"/>
