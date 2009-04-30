@@ -16,55 +16,53 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-
 public class ConnectAction extends SelectionProviderAction {
 
-  public ConnectAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-  }
+	public ConnectAction(ISelectionProvider provider, String label) {
+		super(provider, label);
+	}
 
-  public void run() {
-    setEnabled(false);
-    ISelection selection = getSelection();
-    Iterator iterator = getStructuredSelection().iterator();
-    while (iterator.hasNext()) {
-      FrameWork framework = (FrameWork)iterator.next();
-      MenuFactory.connectFrameworkAction(framework);
-      // needed to update workbench menu and toolbar status
-    }
-    getSelectionProvider().setSelection(selection);
-  }
-  
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-  
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 0) {
-      setEnabled(false);
-      return;
-    }
-    boolean enabled = true;
-    
-    Iterator iterator = selection.iterator();
-    while (iterator.hasNext()) {
-      Model model = (Model)iterator.next();
-      if (!(model instanceof FrameWork)) {
-        enabled = false;
-        break;
-      }
-      FrameWork framework = (FrameWork) model;
-      if (framework.isConnected() || framework.isConnecting() || FrameworkConnectorFactory.tmpConnectingFWs.contains(framework)) {
-        enabled = false;
-        break;
-      }
-    }
-    this.setEnabled(enabled);
-  }
+	public void run() {
+		setEnabled(false);
+		ISelection selection = getSelection();
+		Iterator iterator = getStructuredSelection().iterator();
+		while (iterator.hasNext()) {
+			FrameWork framework = (FrameWork) iterator.next();
+			MenuFactory.connectFrameworkAction(framework);
+			// needed to update workbench menu and toolbar status
+		}
+		getSelectionProvider().setSelection(selection);
+	}
+
+	// override to react properly to selection change
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		if (selection.size() == 0) {
+			setEnabled(false);
+			return;
+		}
+		boolean enabled = true;
+
+		Iterator iterator = selection.iterator();
+		while (iterator.hasNext()) {
+			Model model = (Model) iterator.next();
+			if (!(model instanceof FrameWork)) {
+				enabled = false;
+				break;
+			}
+			FrameWork framework = (FrameWork) model;
+			if (framework.isConnected() || framework.isConnecting() || ConnectFrameworkJob.isConnecting(framework)) {
+				enabled = false;
+				break;
+			}
+		}
+		this.setEnabled(enabled);
+	}
 }
-
