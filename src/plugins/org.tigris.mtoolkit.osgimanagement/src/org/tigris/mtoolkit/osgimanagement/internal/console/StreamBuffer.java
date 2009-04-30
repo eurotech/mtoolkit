@@ -10,31 +10,30 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.console;
 
-
 public class StreamBuffer implements ConsoleListener {
-	
+
 	private final static int MAX_CAPACITY = 1024000;
 	private StringBuffer sb = new StringBuffer();
-	
+
 	public StreamBuffer() {
-	} 
-	
+	}
+
 	public void append(String text) {
-		int len = sb.length() + text.length(); 
+		int len = sb.length() + text.length();
 		if (len > MAX_CAPACITY) {
 			sb.delete(0, len - MAX_CAPACITY);
 		}
 		sb.append(text);
 	}
-	
+
 	public String get() {
 		return sb.toString();
-	} 
-	
+	}
+
 	public void clear() {
 		sb.setLength(0);
 	}
-	
+
 	public void dumpText(String text) {
 		append(text);
 	}
@@ -42,7 +41,7 @@ public class StreamBuffer implements ConsoleListener {
 	public void appendText(String text) {
 		append(text);
 	}
-  
+
 	public void consoleTerminated() {
 		clear();
 	}

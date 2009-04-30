@@ -11,7 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.console;
 
 public interface MenuItemListener {
-  
-  public void menuSelected(MenuItem mi);
+
+	public void menuSelected(MenuItem mi);
 
 }

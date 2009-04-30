@@ -164,7 +164,7 @@ public final class Messages extends NLS {
 	public static String rcp_bundle_missing_message;
 	public static String get_iagent_button_label;
 	public static String save_as_dialog_title;
-	
+
 	public static String unknown_category_label;
 	public static String refresh_framework_info;
 	public static String refresh_bundles_info;
@@ -229,15 +229,14 @@ public final class Messages extends NLS {
 	public static String Toolbar_DP_Label;
 
 	public static String value_column_label;
-	
+
 	public static String no_frameworks_connected_label;
 	public static String start_bundle_failure_title;
-
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
-	
+
 	public static String get(String fieldName) {
 		try {
 			Field f = Messages.class.getField(fieldName);

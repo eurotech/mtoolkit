@@ -15,15 +15,14 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 
-
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-  public void initializeDefaultPreferences() {
-    IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-    store.setDefault(ConstantsDistributor.MEMENTO_AUTOCONNECT, FrameworkPreferencesPage.autoConnectDefault);
-    store.setDefault(ConstantsDistributor.MEMENTO_INFO_LOG, FrameworkPreferencesPage.infoLogDefault);
-    store.setDefault(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL, FrameworkPreferencesPage.autoStartAfterInstall);
-  }
-  
+	public void initializeDefaultPreferences() {
+		IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
+		store.setDefault(ConstantsDistributor.MEMENTO_AUTOCONNECT, FrameworkPreferencesPage.autoConnectDefault);
+		store.setDefault(ConstantsDistributor.MEMENTO_INFO_LOG, FrameworkPreferencesPage.infoLogDefault);
+		store.setDefault(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL,
+			FrameworkPreferencesPage.autoStartAfterInstall);
+	}
 
 }

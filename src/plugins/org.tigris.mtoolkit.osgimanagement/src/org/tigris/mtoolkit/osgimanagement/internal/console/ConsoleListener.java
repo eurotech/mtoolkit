@@ -13,13 +13,13 @@ package org.tigris.mtoolkit.osgimanagement.internal.console;
 public interface ConsoleListener {
 
 	public void clear();
-  
-  public void dumpText(String text);
 
-  public void appendText(String text);
-  
-  public void consoleTerminated();
-  
+	public void dumpText(String text);
+
+	public void appendText(String text);
+
+	public void consoleTerminated();
+
 	public void disconnected();
 
 }

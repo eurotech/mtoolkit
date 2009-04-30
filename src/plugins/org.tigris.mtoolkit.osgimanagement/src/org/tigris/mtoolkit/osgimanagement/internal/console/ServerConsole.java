@@ -22,9 +22,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 
-
 public class ServerConsole {
-  
+
 	private String server;
 	private String tabName;
 	private CTabFolder tabFolder;
@@ -32,14 +31,14 @@ public class ServerConsole {
 	private MenuItem menuItem;
 	private Console console;
 	private ConsoleManager cManager;
-  
+
 	private int indexOnTab = 0;
-  
+
 	private final static int NOT_CONNECTED = 0;
 	private final static int CONNECTED = 1;
-	
+
 	private int connectionState = NOT_CONNECTED;
-  
+
 	public ServerConsole(String serverName, CTabFolder folder, IActionBars aBars) {
 		server = serverName;
 		tabName = NLS.bind(Messages.Not_Connected, serverName);
@@ -47,20 +46,20 @@ public class ServerConsole {
 
 		tabItem = new CTabItem(tabFolder, 0);
 		tabItem.setText(tabName);
-    
+
 		menuItem = new MenuItem(serverName, MenuItem.AS_CHECK_BOX);
 		menuItem.setChecked(true);
-    
+
 		console = new Console(tabFolder, SWT.CENTER, aBars);
 		console.setEditable(false);
 		tabItem.setControl(console);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(console, IHelpContextIds.CONSOLE);
 	}
-  
+
 	public CTabItem getTabItem() {
 		return tabItem;
 	}
-  
+
 	public MenuItem getMenuItem() {
 		return menuItem;
 	}
@@ -68,24 +67,24 @@ public class ServerConsole {
 	public String getServerName() {
 		return server;
 	}
-  
+
 	public void renameServer(String newName) {
 		server = newName;
 		switch (connectionState) {
-			case NOT_CONNECTED:
-				tabName = NLS.bind(Messages.Not_Connected, server);
-				break;
-			case CONNECTED:
-				tabName = NLS.bind(Messages.Connected_To, server);
-				break;
+		case NOT_CONNECTED:
+			tabName = NLS.bind(Messages.Not_Connected, server);
+			break;
+		case CONNECTED:
+			tabName = NLS.bind(Messages.Connected_To, server);
+			break;
 		}
-    
+
 		if (!tabItem.isDisposed()) {
 			tabItem.setText(tabName);
 		}
 		menuItem.setText(server);
 	}
-  
+
 	public void connectConsole(DeviceConnector connector) {
 		cManager = new RemoteConsoleManager(console, connector, this);
 		updateAfterConnect();
@@ -93,32 +92,32 @@ public class ServerConsole {
 		tabItem.setText(tabName);
 		connectionState = CONNECTED;
 	}
-  
+
 	private void updateAfterConnect() {
 		setTabItemVisible(true);
 		menuItem.setChecked(true);
 		console.setConsoleManager(cManager);
 		console.setEditable(true);
 	}
-  
+
 	public void disconnect() {
 		if (connectionState != NOT_CONNECTED) {
 			disconnected();
 		}
 	}
-  
+
 	public boolean isConnected() {
 		return connectionState != NOT_CONNECTED;
 	}
-  
+
 	public void setFocusOnConsole() {
 		console.setFocus();
 	}
-  
-  
+
 	void disconnected() {
 		console.setConsoleManager(null);
-		if (cManager != null) cManager.freeResources();
+		if (cManager != null)
+			cManager.freeResources();
 		cManager = null;
 		connectionState = NOT_CONNECTED;
 		if (!console.isDisposed() && FrameworkPlugin.getDefault() != null) {
@@ -130,16 +129,17 @@ public class ServerConsole {
 							tabItem.setText(tabName);
 						}
 						console.setEditable(false);
-					} catch (org.eclipse.swt.SWTException ex) {}
+					} catch (org.eclipse.swt.SWTException ex) {
+					}
 				}
 			});
 		}
 		ConsoleView.serverConsoleWasDisconnected(server);
 	}
-  
+
 	public void setTabItemVisible(boolean isVisible) {
 		if (tabItem.isDisposed() == !isVisible) {
-			//no need to change anything
+			// no need to change anything
 			return;
 		}
 		if (isVisible) {
@@ -151,19 +151,19 @@ public class ServerConsole {
 			tabItem.setControl(console);
 		} else {
 			indexOnTab = tabFolder.indexOf(tabItem);
-			if (console != null && console.isVisible()) 
-				console.setVisible(false); 
+			if (console != null && console.isVisible())
+				console.setVisible(false);
 			tabItem.dispose();
 		}
 	}
-  
+
 	public ConsoleListener getConsoleListener() {
 		if (cManager instanceof ConsoleListener) {
-			return (ConsoleListener)cManager;
+			return (ConsoleListener) cManager;
 		}
 		return null;
 	}
-  
+
 	public String getText() {
 		String text = ""; //$NON-NLS-1$
 		if (console != null) {
@@ -177,5 +177,5 @@ public class ServerConsole {
 
 		return text;
 	}
-	
+
 }

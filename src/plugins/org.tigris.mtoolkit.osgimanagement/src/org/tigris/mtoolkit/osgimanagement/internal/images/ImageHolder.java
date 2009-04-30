@@ -18,6 +18,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 public class ImageHolder {
 
 	private static final String IMAGES_PATH = "/images/";
+
 	public static Image getImage(String key) {
 		ImageRegistry imgRegistry = FrameworkPlugin.getDefault().getImageRegistry();
 		Image image = imgRegistry.get(key);

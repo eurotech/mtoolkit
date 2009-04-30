@@ -12,9 +12,9 @@ package org.tigris.mtoolkit.osgimanagement.internal;
 
 public class StoreConstants {
 
-  public static String MAX_NUMBER_OF_ROWS_KEY = "maxNumberOfRowsKey"; //$NON-NLS-1$
-  public static String REMOTE_CONSOLE_KEY = "remoteConsoleKey"; //$NON-NLS-1$
-  public static String SWITCH_FOCUS_KEY = "switchFocusKey"; //$NON-NLS-1$
-  public static String MAX_NUMBER_OF_ROWS_CHECK_KEY = "maxNumberOfRowsCheckKey"; //$NON-NLS-1$
+	public static String MAX_NUMBER_OF_ROWS_KEY = "maxNumberOfRowsKey"; //$NON-NLS-1$
+	public static String REMOTE_CONSOLE_KEY = "remoteConsoleKey"; //$NON-NLS-1$
+	public static String SWITCH_FOCUS_KEY = "switchFocusKey"; //$NON-NLS-1$
+	public static String MAX_NUMBER_OF_ROWS_CHECK_KEY = "maxNumberOfRowsCheckKey"; //$NON-NLS-1$
 
 }
