@@ -16,7 +16,8 @@ import org.eclipse.swt.widgets.Control;
 
 public interface IMToolkitPreferencePage extends IPreferencePage {
 
-    Control createContents(Composite parent);
-    void performDefaults();
+	Control createContents(Composite parent);
+
+	void performDefaults();
 
 }

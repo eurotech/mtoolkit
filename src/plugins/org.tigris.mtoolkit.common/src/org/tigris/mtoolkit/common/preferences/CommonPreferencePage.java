@@ -35,7 +35,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
-
 public class CommonPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private List preferencePages;
@@ -60,10 +59,11 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 					if (page instanceof IMToolkitPreferencePage) {
 						this.page = (IMToolkitPreferencePage) page;
 					} else {
-						// TODO: Enhance the message with the id of the extension
-						UtilitiesPlugin.getDefault().getLog().log(
-							new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, "Contributed extension doesn't implement proper class")
-						);
+						// TODO: Enhance the message with the id of the
+						// extension
+						UtilitiesPlugin.getDefault().getLog().log(new Status(IStatus.ERROR,
+							UtilitiesPlugin.PLUGIN_ID,
+							"Contributed extension doesn't implement proper class"));
 					}
 				} catch (CoreException e) {
 					UtilitiesPlugin.getDefault().getLog().log(e.getStatus());
@@ -85,7 +85,7 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 				name = "Unknown";
 			return name;
 		}
-		
+
 		private int getIndex() {
 			if (!indexParsed) {
 				if (element != null) {
@@ -124,7 +124,8 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+	 * @see
+	 * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
 	}
@@ -133,13 +134,12 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 		if (preferencePages == null) {
 			preferencePages = new ArrayList();
 
-			IConfigurationElement[] elements = Platform.getExtensionRegistry()
-					.getConfigurationElementsFor("org.tigris.mtoolkit.common.preferencesPages");
+			IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor("org.tigris.mtoolkit.common.preferencesPages");
 			for (int i = 0; i < elements.length; i++) {
 				IConfigurationElement element = elements[i];
 				preferencePages.add(new PreferencePageWrapper(element));
 			}
-			
+
 			// sort them
 			Collections.sort(preferencePages);
 		}
@@ -161,7 +161,7 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 			pageName.setFont(getBoldFont(pageName.getFont()));
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			pageName.setLayoutData(gd);
-			
+
 			final Composite externalPrefPage = new Composite(prefPane, SWT.NONE);
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			externalPrefPage.setLayoutData(gd);
@@ -177,11 +177,11 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 		}
 		return prefPane;
 	}
-	
+
 	public Font getBoldFont(Font font) {
 		FontData data[] = font.getFontData();
 		FontData boldData[] = new FontData[data.length];
-		
+
 		for (int i = 0; i < data.length; i++) {
 			FontData fontData = data[i];
 			boldData[i] = new FontData(fontData.getName(), fontData.getHeight(), fontData.getStyle() | SWT.BOLD);
