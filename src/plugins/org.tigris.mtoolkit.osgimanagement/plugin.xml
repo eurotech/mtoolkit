@@ -33,75 +33,6 @@
 
 
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-         <dynamic
-               class="org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallToFrameworkMenu"
-               id="org.tigris.mtoolkit.osgimanagement.installto">
-            <visibleWhen>
-               <reference
-                     definitionId="org.tigris.mtoolkit.osgimanagement.installto.selection">
-               </reference>
-            </visibleWhen>
-         </dynamic>
-      </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.core.expressions.definitions">
-      <definition
-            id="org.tigris.mtoolkit.osgimanagement.installto.selection">
-         <with
-               variable="selection">
-            <iterate>
-               <adapt
-                     type="org.eclipse.core.resources.IResource">
-                  <or>
-                     <and>
-                        <test
-                              property="org.eclipse.core.resources.projectNature"
-                              value="org.eclipse.pde.PluginNature">
-                        </test>
-                        <test
-                              property="org.eclipse.core.resources.projectNature"
-                              value="org.eclipse.jdt.core.javanature">
-                        </test>
-                        <instanceof
-                              value="org.eclipse.core.resources.IProject">
-                        </instanceof>
-                     </and>
-                     <test
-                           property="org.eclipse.core.resources.extension"
-                           value="jar">
-                     </test>
-                     <test
-                           property="org.eclipse.core.resources.extension"
-                           value="dp">
-                     </test>
-                     <and>
-                        <test
-                              property="org.eclipse.core.resources.extension"
-                              value="dpp">
-                        </test>
-                        <test
-                              property="org.tigris.mtoolkit.osgimanagement.dpgenerator"
-                              value="true">
-                        </test>
-                     </and>
-                     <test
-                           property="org.eclipse.core.resources.contentTypeId"
-                           value="org.tigris.mtoolkit.osgimanagement.zip">
-                     </test>
-                  </or>
-               </adapt>
-            </iterate>
-            <count
-                  value="+">
-            </count>
-         </with>
-      </definition>
-   </extension>
-   <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
             class="org.tigris.mtoolkit.osgimanagement.internal.preferences.PreferenceInitializer">
@@ -122,6 +53,39 @@
             </parameter>
          </describer>
       </content-type>
+   </extension>
+   <extension
+         point="org.tigris.mtoolkit.common.installationItemProviders">
+      <provider
+            class="org.tigris.mtoolkit.osgimanagement.internal.installation.WorkspaceFileProvider"
+            id="org.tigris.mtoolkit.osgimanagement.deploymentprovider"
+            extension="dp"
+            type="application/vnd.osgi.dp">
+      </provider>
+      <provider
+            class="org.tigris.mtoolkit.osgimanagement.internal.installation.WorkspaceFileProvider"
+            id="org.tigris.mtoolkit.osgimanagement.jarprovider"
+            extension="jar"
+            type="application/java-archive">
+      </provider>
+      <provider
+            class="org.tigris.mtoolkit.osgimanagement.internal.installation.WorkspaceFileProvider"
+            id="org.tigris.mtoolkit.osgimanagement.jarprovider"
+            extension="zip"
+            type="application/zip">
+      </provider>
+      <provider
+            class="org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider"
+            id="org.tigris.mtoolkit.osgimanagement.pluginprovider">
+      </provider>
+   </extension>
+   <extension
+         point="org.tigris.mtoolkit.common.installationItemProcessors">
+      <processor
+            class="org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor"
+            id="org.tigris.mtoolkit.osgimanagement.frameworkprocessor"
+            selectionDialog="org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkSelectionDialog">
+      </processor>
    </extension>
 
 
