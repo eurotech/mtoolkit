@@ -16,37 +16,36 @@ import java.util.Iterator;
 
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 
-
 public class TreeRoot extends Model {
 
-  private ArrayList listeners;
+	private ArrayList listeners;
 
-  public TreeRoot(String name, Model parent) {
-    super(name, parent);
-    listeners = new ArrayList();
- }
+	public TreeRoot(String name, Model parent) {
+		super(name, parent);
+		listeners = new ArrayList();
+	}
 
-  public HashMap getFrameWorkMap() {
-    Iterator iter = elementList.iterator();
-    HashMap result = new HashMap(getSize());
-    while (iter.hasNext()) {
-			FrameWork element = (FrameWork)iter.next();
-      result.put(element.getName(), element);
+	public HashMap getFrameWorkMap() {
+		Iterator iter = elementList.iterator();
+		HashMap result = new HashMap(getSize());
+		while (iter.hasNext()) {
+			FrameWork element = (FrameWork) iter.next();
+			result.put(element.getName(), element);
 		}
-    return result;
-  }
-  
-  protected ArrayList getListeners() {
-    return listeners;
-  }
+		return result;
+	}
 
-  public void addListener(ContentChangeListener newListener) {
-    if (!listeners.contains(newListener)) {
-      listeners.add(newListener);
-    }
-  }
+	protected ArrayList getListeners() {
+		return listeners;
+	}
 
-  public void removeListener(ContentChangeListener oldListener) {
-    listeners.remove(oldListener);
-  }
+	public void addListener(ContentChangeListener newListener) {
+		if (!listeners.contains(newListener)) {
+			listeners.add(newListener);
+		}
+	}
+
+	public void removeListener(ContentChangeListener oldListener) {
+		listeners.remove(oldListener);
+	}
 }

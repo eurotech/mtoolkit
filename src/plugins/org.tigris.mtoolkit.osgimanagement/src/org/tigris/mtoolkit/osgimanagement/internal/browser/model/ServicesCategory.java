@@ -14,33 +14,31 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 
 public class ServicesCategory extends Model {
 
-  private int type;
-  public static String[] nodes;
-  public static int REGISTERED = 0;
-  public static int IN_USE = 1;
+	private int type;
+	public static String[] nodes;
+	public static int REGISTERED = 0;
+	public static int IN_USE = 1;
 
-  static {
-    nodes = new String[2];
-    nodes[0] = Messages.registered_services;
-    nodes[1] = Messages.services_in_use;
-  }
+	static {
+		nodes = new String[2];
+		nodes[0] = Messages.registered_services;
+		nodes[1] = Messages.services_in_use;
+	}
 
-  /**
+	/**
 	 * @param type
 	 */
 	private static String getTitle(int type) {
 		if ((type > 2) || (type < 0)) {
-      type = 0;
+			type = 0;
 		}
 		return nodes[type];
 	}
 
-
-  public ServicesCategory(Model parent, int type) {
-    super(getTitle(type), parent);
-    this.type = type; 
-  }
-
+	public ServicesCategory(Model parent, int type) {
+		super(getTitle(type), parent);
+		this.type = type;
+	}
 
 	public int getKind() {
 		return type;

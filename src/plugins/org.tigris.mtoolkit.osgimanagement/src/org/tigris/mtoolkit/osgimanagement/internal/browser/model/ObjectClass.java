@@ -12,22 +12,20 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import org.tigris.mtoolkit.iagent.RemoteService;
 
-
 public class ObjectClass extends Model {
 
-  private Long nameID;
-  private RemoteService service;
+	private Long nameID;
+	private RemoteService service;
 
-  public ObjectClass(Model parent, String name, Long nameID, RemoteService service) {
-    super(name, parent);
-    this.nameID = nameID;
-    this.service = service;
-  }
+	public ObjectClass(Model parent, String name, Long nameID, RemoteService service) {
+		super(name, parent);
+		this.nameID = nameID;
+		this.service = service;
+	}
 
-  public Long getNameID() {
-    return nameID;
-  }
-
+	public Long getNameID() {
+		return nameID;
+	}
 
 	/**
 	 * @return
@@ -36,20 +34,19 @@ public class ObjectClass extends Model {
 		return service;
 	}
 
-
 	/**
 	 * @param id
 	 */
 	protected void removeBundle(long id) {
 		if ((elementList != null) && (elementList.size() > 0)) {
-      Model[] categories = getChildren();      
-      Model[] bundles = categories[1].getChildren();
-      for (int i=0; i < bundles.length; i++) {
-        if (((Bundle)bundles[i]).getID() == id) {
-          categories[1].removeElement(bundles[i]);
-          return;
-        }
-      }
-		}		
+			Model[] categories = getChildren();
+			Model[] bundles = categories[1].getChildren();
+			for (int i = 0; i < bundles.length; i++) {
+				if (((Bundle) bundles[i]).getID() == id) {
+					categories[1].removeElement(bundles[i]);
+					return;
+				}
+			}
+		}
 	}
 }
