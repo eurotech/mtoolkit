@@ -272,6 +272,11 @@ public class IAgentErrors {
 	public static final int ERROR_BUNDLE_UNKNOWN = -6000;
 
 	/**
+	 * Code error indicating that the bundle has been uninstalled.
+	 */
+	public static final int ERROR_BUNDLE_UNINSTALLED = -6999;
+
+	/**
 	 * Code error indicating that application exception was thrown on the remote
 	 * site.<br>
 	 * 
@@ -295,6 +300,24 @@ public class IAgentErrors {
 	 * 
 	 */
 	public static final int ERROR_DEPLOYMENT_UNKNOWN = -8000;
+
+	/**
+	 * Code error indicating that referenced deployment package has been
+	 * uninstalled or updated.
+	 */
+	public static final int ERROR_DEPLOYMENT_STALE = -8999;
+
+	/**
+	 * Code error indicating that service related problem has occured, which
+	 * cannot be described with the remaining codes.
+	 */
+	public static final int ERROR_SERVICE_UNKNOWN = -9000;
+
+	/**
+	 * Code error indicating that the service has been unregistered and it is no
+	 * longer available.
+	 */
+	public static final int ERROR_SERVICE_UNREGISTERED = -9999;
 
 	/**
 	 * Converts error code found in IAgentException to the originating code
@@ -323,29 +346,4 @@ public class IAgentErrors {
 	public static int toApplicationExceptionCode(int iAgentCode) {
 		return ExceptionCodeHelper.toApplicationExceptionCode(iAgentCode);
 	}
-
-	/**
-	 * Code indicates that there are too many applications defined in the
-	 * bundle/DP
-	 * 
-	 * @deprecated This constant is deprecated in favor of
-	 *             {@link #ERROR_APPLICATION_TOO_MANY_APPLICATIONS}
-	 */
-	public static final int ERR_TOO_MANY_APPLICATIONS = ERROR_APPLICATION_TOO_MANY_APPLICATIONS;
-
-	/**
-	 * Code indicates that no applications are defined in the bundle/DP
-	 * 
-	 * @deprecated This constant is deprecated in favor of
-	 *             {@link #ERROR_APPLICATION_NO_APPLICATION_FOUND}
-	 */
-	public static final int ERR_NO_APPLICATION_FOUND = ERROR_APPLICATION_NO_APPLICATION_FOUND;
-
-	/**
-	 * Code indicates that application launching failed.
-	 * 
-	 * @deprecated This constant is deprecated and is replaced by the constants
-	 *             defined in ApplicationAdmin error code range.
-	 */
-	public static final int ERROR_LAUNCHING_APPLICATION = -4017;
 }
