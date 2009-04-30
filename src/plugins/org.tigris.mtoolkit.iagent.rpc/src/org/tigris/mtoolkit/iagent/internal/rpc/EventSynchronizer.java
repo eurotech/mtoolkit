@@ -28,12 +28,13 @@ public class EventSynchronizer extends Thread {
 		super("IAgent RPC Event Thread");
 		setDaemon(true);
 	}
-	
+
 	void setPMPServer(PMPServer server) {
 		this.server = server;
 		server.addEventSource(RemoteBundleAdminImpl.SYNCH_BUNDLE_EVENTS);
 		server.addEventSource(RemoteBundleAdminImpl.SYSTEM_BUNDLE_EVENT);
 		server.addEventSource(RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
+		server.addEventSource(RemoteServiceAdmin.CUSTOM_PROPERTY_EVENT);
 		server.addEventSource(RemoteDeploymentAdminImpl.DEPLOYMENT_EVENT);
 	}
 
@@ -64,6 +65,7 @@ public class EventSynchronizer extends Thread {
 			server.removeEventSource(RemoteBundleAdminImpl.SYNCH_BUNDLE_EVENTS);
 			server.removeEventSource(RemoteBundleAdminImpl.SYSTEM_BUNDLE_EVENT);
 			server.removeEventSource(RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
+			server.removeEventSource(RemoteServiceAdmin.CUSTOM_PROPERTY_EVENT);
 			server.removeEventSource(RemoteDeploymentAdminImpl.DEPLOYMENT_EVENT);
 		}
 	}
