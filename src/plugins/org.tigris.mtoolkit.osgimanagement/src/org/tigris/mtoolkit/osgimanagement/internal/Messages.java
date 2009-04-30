@@ -21,7 +21,6 @@ public final class Messages extends NLS {
 
 	public static String Not_Connected;
 	public static String Connected_To;
-	public static String Remote_Console;
 	public static String edit_action_N;
 	public static String edit_action_mark_N;
 	public static String edit_action_cut_N;
@@ -119,10 +118,19 @@ public final class Messages extends NLS {
 	public static String no_plugin_exporter_available;
 	public static String bundle_deinstalled_message;
 
+	public static String bundle_startup_failure;
+
+	public static String bundle_update_failure;
+
 	public static String bundle_filter_label;
 	public static String bundle_installation_failure;
+	public static String bundle_start_failure;
+
+	public static String bundle_stop_failure;
 
 	public static String bundle_installed_message;
+
+	public static String bundle_is_uninstalled;
 	public static String bundle_updated_message;
 	public static String dp_deinstalled_message;
 	public static String dp_installed_message;
@@ -145,11 +153,18 @@ public final class Messages extends NLS {
 	public static String stop_bundle;
 	public static String start_bundle;
 	public static String update_bundle;
+
+	public static String update_file_not_found;
 	public static String install_dp;
 	public static String install_bundle;
 	public static String uninstall_dp;
 	public static String uninstall_bundle;
 
+	public static String rcp_bundle_missing_title;
+	public static String rcp_bundle_missing_message;
+	public static String get_iagent_button_label;
+	public static String save_as_dialog_title;
+	
 	public static String unknown_category_label;
 	public static String refresh_framework_info;
 	public static String refresh_bundles_info;
@@ -215,8 +230,8 @@ public final class Messages extends NLS {
 
 	public static String value_column_label;
 	
-	public static String install_to_menu_label;
 	public static String no_frameworks_connected_label;
+	public static String start_bundle_failure_title;
 
 
 	static {
