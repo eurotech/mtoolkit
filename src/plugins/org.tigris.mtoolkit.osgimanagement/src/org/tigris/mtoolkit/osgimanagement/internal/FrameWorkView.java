@@ -117,6 +117,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class FrameWorkView extends ViewPart implements IPartListener, ConstantsDistributor, KeyListener {
 
+	public static final String VIEW_ID = FrameworkPlugin.PLUGIN_ID + ".frameworkview";
+
 	private static final String BUNDLE_PROPERTIES_IMAGE_PATH = "bundle_properties.gif"; //$NON-NLS-1$
 	private static final String DP_PROPERTIES_IMAGE_PATH = "dp_properties.gif"; //$NON-NLS-1$
 	private static final String UPDATE_BUNDLE_IMAGE_PATH = "update_bundle.gif"; //$NON-NLS-1$
@@ -179,8 +181,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	public static FrameWorkView getActiveInstance() {
 		FrameWorkView resultView = null;
 		try {
-			IWorkbenchPage activePage = FrameworkPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage();
+			IWorkbenchPage activePage = FrameworkPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			resultView = (FrameWorkView) activeInstances.get(new Integer(activePage.hashCode()));
 		} catch (NullPointerException e) {
 			// do nothing
@@ -214,7 +215,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		layout.marginHeight = 1;
 		layout.marginWidth = 1;
 		parent.setLayout(layout);
-		
+
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
 		searchPanel = new SearchPane(parent, SWT.NONE, tree);
@@ -333,8 +334,12 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		bundlesMenu2.add(new Separator());
 		bundlesMenu2.add(installBundleAction);
 
-		Action actions[] = new Action[] { startAction, stopAction, updateBundleAction, deinstallBundleAction,
-				bundlePropertiesAction, installBundleAction };
+		Action actions[] = new Action[] { startAction,
+			stopAction,
+			updateBundleAction,
+			deinstallBundleAction,
+			bundlePropertiesAction,
+			installBundleAction };
 		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(actions);
 		bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 		bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
@@ -391,14 +396,20 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			ParameterizedCommand pscmd = new ParameterizedCommand(scmd, null);
 
 			KeySequence keySequence = KeySequence.getInstance("CTRL+F"); //$NON-NLS-1$
-			Binding newKey = new KeyBinding(keySequence, pscmd, defaultSchemeId, sampleContextId, null, null, null,
-					Binding.USER);
+			Binding newKey = new KeyBinding(keySequence,
+				pscmd,
+				defaultSchemeId,
+				sampleContextId,
+				null,
+				null,
+				null,
+				Binding.USER);
 
 			Binding[] bindings = bindingService.getBindings();
 			boolean found = false;
 			for (int i = 0; i < bindings.length; i++) {
 				if (bindings[i].getParameterizedCommand() != null
-						&& bindings[i].getParameterizedCommand().getId().equals(FIND_COMMAND_ID)) {
+								&& bindings[i].getParameterizedCommand().getId().equals(FIND_COMMAND_ID)) {
 					found = true;
 					break;
 				}
@@ -468,8 +479,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		servicePropertiesAction = new ServicePropertiesAction(tree, Messages.service_properties_action_label); // icobgr
 		gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
 		viewAction = new ViewAction(tree, Messages.services_view_action_label, tree);
-		showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label,
-				tree);
+		showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label, tree);
 		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree);
 
 		dpPropertiesAction = new DPPropertiesAction(tree, Messages.show_dp_properties_action_label);
@@ -480,8 +490,9 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 		findAction = new FindAction(tree, searchPanel, Messages.find_action_label);
 		showConsoleAction = new ShowFrameworkConsole(tree, Messages.show_framework_console, tree);
-		refreshAction = new RefreshAction(tree, Messages.refresh_framework_action_label,
-				Messages.refresh_bundle_action_label);
+		refreshAction = new RefreshAction(tree,
+			Messages.refresh_framework_action_label,
+			Messages.refresh_bundle_action_label);
 
 		mgr = new MenuManager();
 		mgr.setRemoveAllWhenShown(true);
