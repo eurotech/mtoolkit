@@ -17,34 +17,39 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public class ProgressInputStream extends InputStream {
 
-  byte b[] = new byte[1];
-  private InputStream source;
-  private IProgressMonitor monitor;
-  
-  public ProgressInputStream(InputStream source, IProgressMonitor monitor) {
-    this.source = source;
-    this.monitor = monitor;
-  }
-  
-  public int read() throws IOException {
-    return read(b);
-  }
-  
-  public int read(byte b[]) throws IOException {
-    return read(b, 0, b.length);
-  }
+	byte[] b = new byte[1];
+	private InputStream source;
+	private IProgressMonitor monitor;
 
-  public int read(byte b[], int off, int len) throws IOException {
-    int read = source.read(b, off, len);
-    if (read != -1) {
-      monitor.worked(read);
-    }
-    return read;
-  }
-  
-  public void close() throws IOException {
-    monitor.done();
-    source.close();
-  }
+	public ProgressInputStream(InputStream source, IProgressMonitor monitor) {
+		this.source = source;
+		this.monitor = monitor;
+	}
+
+	public int read() throws IOException {
+		return read(b) != -1 ? b[0] : -1;
+	}
+
+	public int read(byte[] b) throws IOException {
+		return read(b, 0, b.length);
+	}
+
+	public int read(byte[] b, int off, int len) throws IOException {
+		int read = source.read(b, off, len);
+		if (read != -1) {
+			monitor.worked(read);
+		}
+		return read;
+	}
+
+	public long skip(long n) throws IOException {
+		long skipped = source.skip(n);
+		monitor.worked((int) skipped);
+		return skipped;
+	}
+
+	public void close() throws IOException {
+		source.close();
+	}
 
 }
