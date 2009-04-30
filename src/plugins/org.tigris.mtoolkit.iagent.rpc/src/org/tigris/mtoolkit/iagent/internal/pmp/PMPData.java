@@ -23,14 +23,13 @@ import java.util.Enumeration;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.rpc.Externalizable;
 
-
 class PMPData extends ObjectInputStream {
 
 	protected static final String[] TYPES1 = { "int", "byte", "char", "short", "long", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			"float", "double", "boolean", "void" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		"float", "double", "boolean", "void" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	protected static final String[] TYPES2 = { "java.lang.Integer", "java.lang.Byte", //$NON-NLS-1$ //$NON-NLS-2$
-			"java.lang.Character", "java.lang.Short", "java.lang.Long", "java.lang.Float", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			"java.lang.Double", "java.lang.Boolean", "java.lang.Void", "java.lang.String" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		"java.lang.Character", "java.lang.Short", "java.lang.Long", "java.lang.Float", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		"java.lang.Double", "java.lang.Boolean", "java.lang.Void", "java.lang.String" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	private static final String[] TYPES3 = { "I", "B", "F", "D", "S", "C", "J", "Z" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 	private static final String JAVA_LANG = "java.lang"; //$NON-NLS-1$
 	private static Class IS;
@@ -206,7 +205,7 @@ class PMPData extends ObjectInputStream {
 	}
 
 	private static void readDictionary(Dictionary obj, ClassLoader loader, int maxSize, int strLen, PMPInputStream is)
-			throws Exception {
+					throws Exception {
 		int size = readInt(is);
 		for (int i = 0; i < size; i++) {
 			Object key = readObject(null, loader, is, null, maxSize, strLen, null);
@@ -411,7 +410,7 @@ class PMPData extends ObjectInputStream {
 	}
 
 	protected static Object readObject(Class clazz, ClassLoader loader, PMPInputStream is, String newName, int maxSize,
-			int strLen, String prevName) throws IOException {
+					int strLen, String prevName) throws IOException {
 		if (!checkFlag(is))
 			return null;
 		String className = new String();

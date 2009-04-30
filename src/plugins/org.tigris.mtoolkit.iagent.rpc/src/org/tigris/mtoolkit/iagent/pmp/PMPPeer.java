@@ -11,7 +11,7 @@
 package org.tigris.mtoolkit.iagent.pmp;
 
 public interface PMPPeer {
-	
+
 	/**
 	 * Registers listener to receive events whenever one host is connected or
 	 * disconected to the pmp service
@@ -32,6 +32,5 @@ public interface PMPPeer {
 	 */
 
 	public void removeConnectionListener(PMPConnectionListener listener);
-
 
 }

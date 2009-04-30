@@ -26,7 +26,6 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 
-
 public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
 
 	/** constant used for the pmp configuration */
@@ -84,8 +83,10 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 			}
 			try {
 				if (run) {
-					PMPSessionThread newSession = new PMPSessionThread(this, client, createSessionId(), client
-							.getInetAddress().toString());
+					PMPSessionThread newSession = new PMPSessionThread(this,
+						client,
+						createSessionId(),
+						client.getInetAddress().toString());
 					addElement(newSession);
 				}
 			} catch (Exception exc) {
@@ -236,6 +237,5 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 	public String getRole() {
 		return "Server";
 	}
-	
-	
+
 }

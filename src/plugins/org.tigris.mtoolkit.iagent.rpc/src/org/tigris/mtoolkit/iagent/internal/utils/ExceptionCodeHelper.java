@@ -14,36 +14,36 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 
 public class ExceptionCodeHelper {
 
-  public static int toDeploymentExceptionCode(int code) {
-    if (code < IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN && code > -9000) {
-      return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN - code;
-    } else {
-      return 0;
-    }
-  }
+	public static int toDeploymentExceptionCode(int code) {
+		if (code < IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN && code > -9000) {
+			return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN - code;
+		} else {
+			return 0;
+		}
+	}
 
-  public static int toApplicationExceptionCode(int code) {
-    if (code < IAgentErrors.ERROR_APPLICATION_UNKNOWN && code > IAgentErrors.ERROR_APPLICATION_NO_APPLICATION_FOUND) {
-      return IAgentErrors.ERROR_APPLICATION_UNKNOWN - code;
-    } else {
-      return 0;
-    }
-  }
+	public static int toApplicationExceptionCode(int code) {
+		if (code < IAgentErrors.ERROR_APPLICATION_UNKNOWN && code > IAgentErrors.ERROR_APPLICATION_NO_APPLICATION_FOUND) {
+			return IAgentErrors.ERROR_APPLICATION_UNKNOWN - code;
+		} else {
+			return 0;
+		}
+	}
 
-  public static int fromApplicationExceptionCode(int code) {
-    if (code < 1) {
-      return IAgentErrors.ERROR_APPLICATION_UNKNOWN;
-    } else {
-      return IAgentErrors.ERROR_APPLICATION_UNKNOWN - code;
-    }
-  }
+	public static int fromApplicationExceptionCode(int code) {
+		if (code < 1) {
+			return IAgentErrors.ERROR_APPLICATION_UNKNOWN;
+		} else {
+			return IAgentErrors.ERROR_APPLICATION_UNKNOWN - code;
+		}
+	}
 
-  public static int fromDeploymentExceptionCode(int code) {
-    if (code < 1) {
-      return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN;
-    } else {
-      return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN - code;
-    }
-  }
+	public static int fromDeploymentExceptionCode(int code) {
+		if (code < 1) {
+			return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN;
+		} else {
+			return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN - code;
+		}
+	}
 
 }

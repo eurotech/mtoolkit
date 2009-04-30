@@ -18,7 +18,6 @@ import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPContext;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 
-
 public class InvocationThread implements Runnable, PMPContext {
 
 	private static ThreadLocal invocationContext = new ThreadLocal();
@@ -31,8 +30,13 @@ public class InvocationThread implements Runnable, PMPContext {
 	private short msgID;
 	private Object obj;
 
-	public InvocationThread(PMPSessionThread session, Method m, Object obj, boolean serflag, Object context,
-			Object[] args, short msgID) {
+	public InvocationThread(PMPSessionThread session,
+							Method m,
+							Object obj,
+							boolean serflag,
+							Object context,
+							Object[] args,
+							short msgID) {
 		this.session = session;
 		this.m = m;
 		this.obj = obj;
@@ -94,10 +98,13 @@ public class InvocationThread implements Runnable, PMPContext {
 				result = new RemoteInputStream((InputStream) result);
 				interfaces = ((Remote) result).remoteInterfaces();
 			} else if (!(result instanceof Remote)
-					|| !PMPServiceImpl.checkInstance(interfaces = ((Remote) result).remoteInterfaces(), result
-							.getClass())) {
-				String errMsg = "Method result " + result
-						+ " Is not instance of " + Remote.class.getName() + " or one of its remote interfaces";
+							|| !PMPServiceImpl.checkInstance(interfaces = ((Remote) result).remoteInterfaces(),
+								result.getClass())) {
+				String errMsg = "Method result "
+								+ result
+								+ " Is not instance of "
+								+ Remote.class.getName()
+								+ " or one of its remote interfaces";
 				session.debug(errMsg);
 				session.writeInvocationError(errMsg, msgID);
 				return;

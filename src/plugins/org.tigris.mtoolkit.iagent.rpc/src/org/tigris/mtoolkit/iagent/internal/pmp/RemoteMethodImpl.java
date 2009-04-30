@@ -42,8 +42,12 @@ class RemoteMethodImpl implements RemoteMethod {
 	private boolean changed = false;
 	private ClassLoader loader;
 
-	protected RemoteMethodImpl(String name, String returnType, String[] argTypes, Connection c, int methodID,
-			RemoteObjectImpl ro) {
+	protected RemoteMethodImpl(	String name,
+								String returnType,
+								String[] argTypes,
+								Connection c,
+								int methodID,
+								RemoteObjectImpl ro) {
 		this.c = c;
 		this.methodID = methodID;
 		this.ro = ro;

@@ -15,7 +15,6 @@ import java.util.Vector;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener;
 
-
 class PMPConnectionDispatcher extends Thread {
 
 	private boolean go;

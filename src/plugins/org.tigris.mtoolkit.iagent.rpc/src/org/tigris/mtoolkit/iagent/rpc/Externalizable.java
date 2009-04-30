@@ -14,21 +14,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Interface for custum serialization.
- * Classes that implements this interface must have 
- * public emty constructor so deserialization can be done.
+ * Interface for custum serialization. Classes that implements this interface
+ * must have public emty constructor so deserialization can be done.
  */
 public interface Externalizable {
-  
-  /**
-   * Use this method for serialization of object state.
-   */  
-  public void writeObject(OutputStream oStream) throws Exception;
-  
-  /**
-   * Use this method to deserializion of object state.
-   */
-  public void readObject(InputStream iStream) throws Exception;
-  
-  
+
+	/**
+	 * Use this method for serialization of object state.
+	 */
+	public void writeObject(OutputStream oStream) throws Exception;
+
+	/**
+	 * Use this method to deserializion of object state.
+	 */
+	public void readObject(InputStream iStream) throws Exception;
+
 }

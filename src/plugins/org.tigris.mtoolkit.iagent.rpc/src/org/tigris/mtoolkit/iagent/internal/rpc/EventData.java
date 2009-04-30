@@ -33,9 +33,11 @@ public class EventData {
 
 	public String toString() {
 		return "EventData[event="
-				+ (conEvent instanceof Dictionary ? DebugUtils
-						.convertForDebug((Dictionary) conEvent) : conEvent)
-				+ "; type=" + eventType + "]";
+						+ (conEvent instanceof Dictionary	? DebugUtils.convertForDebug((Dictionary) conEvent)
+															: conEvent)
+						+ "; type="
+						+ eventType
+						+ "]";
 	}
 
 }

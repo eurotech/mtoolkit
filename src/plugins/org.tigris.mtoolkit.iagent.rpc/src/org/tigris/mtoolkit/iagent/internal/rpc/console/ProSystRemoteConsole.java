@@ -34,7 +34,7 @@ public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Re
 	}
 
 	protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
-			throws PMPException {
+					throws PMPException {
 		return new ProSystWriteDispatcher(conn, buffer, remoteObject);
 	}
 
@@ -55,7 +55,7 @@ public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Re
 		private ParserService parserInstance;
 
 		public ProSystWriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object)
-				throws PMPException {
+						throws PMPException {
 			super(conn, buffer, object);
 		}
 
@@ -89,7 +89,6 @@ public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Re
 		DispatcherOutput(WriteDispatcher dispatcher) {
 			this.dispatcher = dispatcher;
 		}
-
 
 		public void write(byte[] var0, int var1, int var2) throws IOException {
 			dispatcher.buffer.write(var0, var1, var2);

@@ -117,12 +117,17 @@ public final class ObjectInfo {
 			return Array.newInstance(componentClass, 0).getClass();
 		}
 		// not an array
-		return name.equals(PMPData.TYPES1[0]) ? int.class : name.equals(PMPData.TYPES1[4]) ? long.class : name
-				.equals(PMPData.TYPES1[3]) ? short.class : name.equals(PMPData.TYPES1[1]) ? byte.class : name
-				.equals(PMPData.TYPES1[2]) ? char.class : name.equals(PMPData.TYPES1[5]) ? float.class : name
-				.equals(PMPData.TYPES1[6]) ? double.class : name.equals(PMPData.TYPES1[8]) ? void.class : name
-				.equals(PMPData.TYPES1[7]) ? boolean.class : obj.getClass().getClassLoader() == null ? Class
-				.forName(name) : obj.getClass().getClassLoader().loadClass(name);
+		return name.equals(PMPData.TYPES1[0])	? int.class
+												: name.equals(PMPData.TYPES1[4]) ? long.class
+																				: name.equals(PMPData.TYPES1[3]) ? short.class
+																												: name.equals(PMPData.TYPES1[1]) ? byte.class
+																																				: name.equals(PMPData.TYPES1[2]) ? char.class
+																																												: name.equals(PMPData.TYPES1[5]) ? float.class
+																																																				: name.equals(PMPData.TYPES1[6]) ? double.class
+																																																												: name.equals(PMPData.TYPES1[8]) ? void.class
+																																																																				: name.equals(PMPData.TYPES1[7]) ? boolean.class
+																																																																												: obj.getClass().getClassLoader() == null	? Class.forName(name)
+																																																																																							: obj.getClass().getClassLoader().loadClass(name);
 	}
 
 	/** puts an ObjectInfo instance in the free objects' queue */

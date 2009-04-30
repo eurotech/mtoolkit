@@ -16,7 +16,6 @@ import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 
-
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 	protected boolean running = false;
 
@@ -106,6 +105,5 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 	public String getRole() {
 		return "Client";
 	}
-	
-	
+
 }

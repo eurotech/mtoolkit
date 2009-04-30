@@ -33,13 +33,13 @@ public class EquinoxCommandInterpreter implements CommandInterpreter {
 
 	/** The command line in StringTokenizer form */
 	private StringTokenizer tok;
-	
+
 	private boolean firstCommand = true;
-	
+
 	private Object[] commandProviders;
-	
+
 	private RemoteConsoleServiceBase console;
-	
+
 	public EquinoxCommandInterpreter(String cmd, Object[] commandProviders, RemoteConsoleServiceBase console) {
 		tok = new StringTokenizer(cmd);
 		this.commandProviders = commandProviders;
@@ -51,8 +51,8 @@ public class EquinoxCommandInterpreter implements CommandInterpreter {
 			return innerExecute(cmd);
 		firstCommand = false;
 		Object retval = null;
-		Class[] parameterTypes = new Class[] {CommandInterpreter.class};
-		Object[] parameters = new Object[] {this};
+		Class[] parameterTypes = new Class[] { CommandInterpreter.class };
+		Object[] parameters = new Object[] { this };
 		boolean executed = false;
 		int size = commandProviders.length;
 		for (int i = 0; !executed && (i < size); i++) {
@@ -62,16 +62,20 @@ public class EquinoxCommandInterpreter implements CommandInterpreter {
 				retval = method.invoke(target, parameters);
 				executed = true; // stop after the command has been found
 			} catch (NoSuchMethodException ite) {
-				// keep going - maybe another command provider will be able to execute this command
+				// keep going - maybe another command provider will be able to
+				// execute this command
 			} catch (InvocationTargetException ite) {
-				executed = true; // don't want to keep trying - we found the method but got an error
+				executed = true; // don't want to keep trying - we found the
+									// method but got an error
 				printStackTrace(ite.getTargetException());
 			} catch (Exception ee) {
-				executed = true; // don't want to keep trying - we got an error we don't understand
+				executed = true; // don't want to keep trying - we got an error
+									// we don't understand
 				printStackTrace(ee);
 			}
 		}
-		// if no command was found to execute, display help for all registered command providers
+		// if no command was found to execute, display help for all registered
+		// command providers
 		if (!executed) {
 			for (int i = 0; i < size; i++) {
 				try {
@@ -84,7 +88,7 @@ public class EquinoxCommandInterpreter implements CommandInterpreter {
 		}
 		return retval;
 	}
-	
+
 	private Object innerExecute(String cmd) {
 		if (cmd != null && cmd.length() > 0) {
 			CommandInterpreter intcp = new EquinoxCommandInterpreter(cmd, commandProviders, console);
@@ -181,11 +185,11 @@ public class EquinoxCommandInterpreter implements CommandInterpreter {
 	public void printStackTrace(Throwable t) {
 		console.print(generateStackTrace(t));
 	}
-	
+
 	private String generateStackTrace(Throwable t) {
 		StringWriter stringWriter = new StringWriter();
 		PrintWriter out = new PrintWriter(stringWriter);
-		
+
 		t.printStackTrace(out);
 
 		Method[] methods = t.getClass().getMethods();
@@ -196,7 +200,8 @@ public class EquinoxCommandInterpreter implements CommandInterpreter {
 		for (int i = 0; i < size; i++) {
 			Method method = methods[i];
 
-			if (Modifier.isPublic(method.getModifiers()) && method.getName().startsWith("get") && throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) { //$NON-NLS-1$
+			if (Modifier.isPublic(method.getModifiers())
+							&& method.getName().startsWith("get") && throwable.isAssignableFrom(method.getReturnType()) && (method.getParameterTypes().length == 0)) { //$NON-NLS-1$
 				try {
 					Throwable nested = (Throwable) method.invoke(t, null);
 

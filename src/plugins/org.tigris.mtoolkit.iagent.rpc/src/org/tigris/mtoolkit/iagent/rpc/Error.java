@@ -98,7 +98,6 @@ public class Error implements Externalizable {
 	}
 
 	public String toString() {
-		return "Error[code=" + code + ";message=" + message + ";details="
-				+ details + "]";
+		return "Error[code=" + code + ";message=" + message + ";details=" + details + "]";
 	}
 }

@@ -15,7 +15,6 @@ import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 
-
 /**
  * Contains the methods necessary for connecting to the PMP Service and for
  * getting references to the services registered in the Framework.
@@ -151,8 +150,7 @@ class Connection implements PMPConnection {
 	 * @see RemoteObject
 	 */
 
-	public RemoteObject getReference(String clazz, String filter, long bid)
-			throws PMPException {
+	public RemoteObject getReference(String clazz, String filter, long bid) throws PMPException {
 		PMPAnswer answer = new PMPAnswer(reader);
 		short msgID = 0;
 		try {
@@ -256,7 +254,7 @@ class Connection implements PMPConnection {
 	}
 
 	protected Object invoke(Object[] args, String[] argTypes, boolean serflag, int objID, int methodID,
-			String expReturnType, ClassLoader loader, boolean changed, Connection cr) throws PMPException {
+					String expReturnType, ClassLoader loader, boolean changed, Connection cr) throws PMPException {
 		PMPAnswer answer = new PMPAnswer(reader);
 		answer.loader = loader;
 		if (changed)
@@ -324,8 +322,7 @@ class Connection implements PMPConnection {
 			}
 			if (!answer.expectsReturn)
 				return null;
-			return (serflag) ? answer.obj : (answer.objID > 0) ? new RemoteObjectImpl(answer.objID, cr)
-					: null;
+			return (serflag) ? answer.obj : (answer.objID > 0) ? new RemoteObjectImpl(answer.objID, cr) : null;
 			// }
 			// else return null;
 		} catch (Exception exc) {
@@ -339,14 +336,16 @@ class Connection implements PMPConnection {
 	}
 
 	private String getClassName(String name) {
-		return name.equals(PMPData.TYPES1[0]) ? PMPData.TYPES2[0] : name.equals(PMPData.TYPES1[4]) ? PMPData.TYPES2[4]
-				: name.equals(PMPData.TYPES1[3]) ? PMPData.TYPES2[3]
-						: name.equals(PMPData.TYPES1[1]) ? PMPData.TYPES2[1]
-								: name.equals(PMPData.TYPES1[2]) ? PMPData.TYPES2[2]
-										: name.equals(PMPData.TYPES1[5]) ? PMPData.TYPES2[5] : name
-												.equals(PMPData.TYPES1[6]) ? PMPData.TYPES2[6] : name
-												.equals(PMPData.TYPES1[8]) ? PMPData.TYPES2[8] : name
-												.equals(PMPData.TYPES1[7]) ? PMPData.TYPES2[7] : null;
+		return name.equals(PMPData.TYPES1[0])	? PMPData.TYPES2[0]
+												: name.equals(PMPData.TYPES1[4]) ? PMPData.TYPES2[4]
+																				: name.equals(PMPData.TYPES1[3]) ? PMPData.TYPES2[3]
+																												: name.equals(PMPData.TYPES1[1]) ? PMPData.TYPES2[1]
+																																				: name.equals(PMPData.TYPES1[2]) ? PMPData.TYPES2[2]
+																																												: name.equals(PMPData.TYPES1[5]) ? PMPData.TYPES2[5]
+																																																				: name.equals(PMPData.TYPES1[6]) ? PMPData.TYPES2[6]
+																																																												: name.equals(PMPData.TYPES1[8]) ? PMPData.TYPES2[8]
+																																																																				: name.equals(PMPData.TYPES1[7]) ? PMPData.TYPES2[7]
+																																																																												: null;
 	}
 
 	protected void dump(String s) {

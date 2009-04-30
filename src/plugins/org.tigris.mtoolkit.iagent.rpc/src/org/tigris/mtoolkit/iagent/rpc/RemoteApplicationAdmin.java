@@ -53,7 +53,7 @@ public interface RemoteApplicationAdmin {
 	 * @return - the state as string.
 	 */
 	public String getState(String ApplicationId);
-	
+
 	public long getRemoteServiceID();
 
 	void unregister(BundleContext bc);

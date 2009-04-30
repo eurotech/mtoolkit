@@ -16,9 +16,9 @@ class ListenerEvent extends PMPEvent {
 
 	public static final byte ADD_LISTENER_OP = 1;
 	public static final byte REMOVE_LISTENER_OP = 2;
-	
+
 	public byte op;
-	
+
 	public ListenerEvent(byte op, String evType, EventListener listener) {
 		super(evType, listener);
 		this.op = op;

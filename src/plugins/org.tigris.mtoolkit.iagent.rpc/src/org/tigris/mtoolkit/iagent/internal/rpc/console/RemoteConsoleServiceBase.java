@@ -28,18 +28,17 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 
-
 public abstract class RemoteConsoleServiceBase implements RemoteConsole {
-	
+
 	private Map dispatchers = new HashMap();
 	private ServiceRegistration registration;
-	
+
 	private PrintStream oldSystemOut;
 	private PrintStream oldSystemErr;
 	private PrintStream newSystemStream = new PrintStream(new RedirectedSystemOutput());
-	
+
 	private boolean replacedSystemOutputs = false;
-	
+
 	private EventListener closeConnectionHandler = new EventListener() {
 		public void event(Object event, String evType) {
 			if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType)) {
@@ -51,12 +50,12 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 	public void register(BundleContext context) {
 		registration = context.registerService(RemoteConsole.class.getName(), this, null);
 	}
-	
+
 	public void unregister() {
 		registration.unregister();
 		restoreSystemOutputs();
 	}
-	
+
 	public void registerOutput(RemoteObject remoteObject) throws PMPException {
 		PMPConnection conn = InvocationThread.getContext().getConnection();
 		WriteDispatcher dispatcher = createDispatcher(conn, new CircularBuffer(), remoteObject);
@@ -69,11 +68,12 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 			replaceSystemOutputs();
 		}
 	}
-	
-	protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject) throws PMPException {
+
+	protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
+					throws PMPException {
 		return new WriteDispatcher(conn, buffer, remoteObject);
 	}
-	
+
 	public synchronized void releaseConsole() {
 		PMPConnection conn = InvocationThread.getContext().getConnection();
 		doReleaseConsole(conn);
@@ -88,12 +88,13 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 				restoreSystemOutputs();
 		}
 	}
+
 	protected void print(String msg) {
 		// TODO: Handle different encodings
 		byte[] msgBytes = msg.getBytes();
 		print(msgBytes, 0, msgBytes.length);
 	}
-	
+
 	protected void print(byte[] buf, int off, int len) {
 		PMPConnection conn = InvocationThread.getContext().getConnection();
 		WriteDispatcher dispatcher;
@@ -107,7 +108,7 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 			dispatcher.notifyAll();
 		}
 	}
-	
+
 	protected synchronized void replaceSystemOutputs() {
 		if (replacedSystemOutputs)
 			return;
@@ -117,7 +118,7 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 		System.setErr(newSystemStream);
 		replacedSystemOutputs = true;
 	}
-	
+
 	protected synchronized void restoreSystemOutputs() {
 		if (replacedSystemOutputs) {
 			if (System.out == newSystemStream)
@@ -131,7 +132,7 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 	private class RedirectedSystemOutput extends OutputStream {
 
 		private byte[] singleByte = new byte[1];
-		
+
 		public synchronized void write(byte[] var0, int var1, int var2) throws IOException {
 			oldSystemOut.write(var0, var1, var2);
 			synchronized (dispatchers) {
@@ -157,7 +158,7 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 		public synchronized void flush() throws IOException {
 			oldSystemOut.flush();
 		}
-		
+
 	}
 
 	protected WriteDispatcher getDispatcher(PMPConnection conn) {
@@ -172,14 +173,15 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 		public RemoteObject object;
 
 		private volatile boolean running = true;
-		
+
 		public WriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object) throws PMPException {
 			super("Remote Console Dispatcher");
 			this.conn = conn;
 			this.buffer = buffer;
 			this.object = object;
-			method = object.getMethod("write", new String[] { byte[].class.getName(), Integer.TYPE.getName(),
-					Integer.TYPE.getName() });
+			method = object.getMethod("write", new String[] { byte[].class.getName(),
+				Integer.TYPE.getName(),
+				Integer.TYPE.getName() });
 		}
 
 		public void run() {

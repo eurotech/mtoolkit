@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.pmp;
 
-
 /**
  * Contains the methods for getting references to the services registered in the
  * remote Framework.
@@ -95,7 +94,7 @@ public interface PMPConnection {
 	 */
 
 	public void addEventListener(EventListener el, String[] eventTypes) throws IllegalArgumentException;
-	
+
 	/**
 	 * Unregisters an EventListener
 	 * 

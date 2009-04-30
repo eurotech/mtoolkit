@@ -16,9 +16,9 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 public interface RemoteConsole {
 
 	public void registerOutput(RemoteObject remoteObject) throws PMPException;
-	
+
 	public void executeCommand(String line);
-	
+
 	public void releaseConsole();
-	
+
 }

@@ -17,24 +17,24 @@ import org.osgi.framework.BundleContext;
 
 public interface RemoteDeploymentAdmin {
 
-  void unregister(BundleContext bc);
+	void unregister(BundleContext bc);
 
-  Dictionary listDeploymentPackages();
+	Dictionary listDeploymentPackages();
 
-  Object getDeploymentPackageHeader(String name, String version, String headerName);
+	Object getDeploymentPackageHeader(String name, String version, String headerName);
 
-  Dictionary getDeploymentPackageBundles(String name, String version);
+	Dictionary getDeploymentPackageBundles(String name, String version);
 
-  // returns bid or -1 if the bundle is missing
-  long getDeploymentPackageBundle(String dpName, String version, String symbolicName);
+	// returns bid or -1 if the bundle is missing
+	long getDeploymentPackageBundle(String dpName, String version, String symbolicName);
 
-  Object uninstallDeploymentPackage(String dpName, String version, boolean force);
+	Object uninstallDeploymentPackage(String dpName, String version, boolean force);
 
-  boolean isDeploymentPackageStale(String dpName, String version);
+	boolean isDeploymentPackageStale(String dpName, String version);
 
-  String getDeploymentPackageVersion(String dpName);
+	String getDeploymentPackageVersion(String dpName);
 
-  Object installDeploymentPackage(InputStream in);
+	Object installDeploymentPackage(InputStream in);
 
-  public long getRemoteServiceID();
+	public long getRemoteServiceID();
 }

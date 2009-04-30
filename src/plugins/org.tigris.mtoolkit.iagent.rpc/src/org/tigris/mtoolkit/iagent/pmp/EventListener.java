@@ -14,13 +14,15 @@ package org.tigris.mtoolkit.iagent.pmp;
  * Interface for receiving custom events.
  */
 public interface EventListener {
-  
-  /**
-   * An event is received.
-   *
-   * @param event  The event.  
-   * @param evType the event type.
-   */
-  public void event(Object event, String evType);
-  
+
+	/**
+	 * An event is received.
+	 * 
+	 * @param event
+	 *            The event.
+	 * @param evType
+	 *            the event type.
+	 */
+	public void event(Object event, String evType);
+
 }

@@ -17,7 +17,6 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.iagent.internal.pmp.Server;
 
-
 public class PMPServerFactory {
 
 	/** constant used for the pmp configuration */

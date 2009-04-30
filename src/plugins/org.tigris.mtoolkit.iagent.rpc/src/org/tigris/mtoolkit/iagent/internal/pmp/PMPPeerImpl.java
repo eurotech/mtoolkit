@@ -18,7 +18,6 @@ import org.tigris.mtoolkit.iagent.internal.utils.ThreadPool;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPPeer;
 
-
 public class PMPPeerImpl implements PMPPeer {
 
 	protected List connections = new ArrayList();
@@ -52,7 +51,7 @@ public class PMPPeerImpl implements PMPPeer {
 	protected synchronized String createSessionId() {
 		return String.valueOf(numSessions++);
 	}
-	
+
 	protected void closeConnections(String reason) {
 		synchronized (connections) {
 			PMPSessionThread[] copied = (PMPSessionThread[]) connections.toArray(new PMPSessionThread[connections.size()]);
@@ -89,7 +88,7 @@ public class PMPPeerImpl implements PMPPeer {
 	protected byte addListener(String evType, PMPSessionThread listener) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	public String getRole() {
 		return "Peer";
 	}

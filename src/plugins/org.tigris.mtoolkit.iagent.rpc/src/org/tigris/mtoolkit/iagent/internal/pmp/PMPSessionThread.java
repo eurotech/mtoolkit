@@ -20,7 +20,6 @@ import java.util.Vector;
 
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadPool;
 
-
 public class PMPSessionThread extends Thread {
 
 	protected PMPOutputStream os;
@@ -276,7 +275,8 @@ public class PMPSessionThread extends Thread {
 	protected int addRemoteObject(ObjectInfo info) {
 		synchronized (objects) {
 			do {
-				if (++objID < 0) objID = 1;
+				if (++objID < 0)
+					objID = 1;
 				if (objects.get(new Integer(objID)) == null)
 					break;
 			} while (true);
@@ -348,7 +348,7 @@ public class PMPSessionThread extends Thread {
 				os.begin(msgID);
 				try {
 					os.write(CONNECT_REPLY);
-					os.write(1);	// success
+					os.write(1); // success
 					PMPData.writeString(ioExc.toString(), os);
 					os.end(false);
 				} catch (Exception exc) {
@@ -363,7 +363,7 @@ public class PMPSessionThread extends Thread {
 		try {
 			os.begin(msgID);
 			os.write(CONNECT_REPLY);
-			os.write(0);	// failure
+			os.write(0); // failure
 			os.end(false);
 		} catch (Exception exc) {
 			error(ERRMSG2, exc);
@@ -472,8 +472,13 @@ public class PMPSessionThread extends Thread {
 				if (refs)
 					readReal = (is.read() == 1);
 				if (readReal) {
-					args[i] = PMPData.readObject(null, info.obj.getClass().getClassLoader(), is, new String(), maxA,
-							-1, null);
+					args[i] = PMPData.readObject(null,
+						info.obj.getClass().getClassLoader(),
+						is,
+						new String(),
+						maxA,
+						-1,
+						null);
 				} else {
 					int tempID = PMPData.readInt(is);
 					args[i] = ((ObjectInfo) objects.get(new Integer(tempID))).obj;
@@ -915,8 +920,12 @@ public class PMPSessionThread extends Thread {
 				if (argTypes[i] == null)
 					return "Read Error";
 			}
-			methods[pos] = new RemoteMethodImpl(name, returnType, argTypes, answer.connection, pos + 1,
-					answer.requestingRObj);
+			methods[pos] = new RemoteMethodImpl(name,
+				returnType,
+				argTypes,
+				answer.connection,
+				pos + 1,
+				answer.requestingRObj);
 			return null;
 		} catch (IOException ioExc) {
 			return ioExc.toString();

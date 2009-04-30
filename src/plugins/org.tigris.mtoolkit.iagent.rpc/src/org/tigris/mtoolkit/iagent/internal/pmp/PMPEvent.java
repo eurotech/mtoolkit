@@ -21,8 +21,7 @@ public class PMPEvent {
 	 * The type of the custom event contained in this BasicEvent
 	 */
 	public String eventType;
-	
-	  
+
 	/**
 	 * Constructs a BasicEvent that represents a custom event.
 	 * 
@@ -35,9 +34,9 @@ public class PMPEvent {
 		this.eventType = evType;
 		this.data = event;
 	}
-	
-	public static final String ADD_LISTENER_OPERATION = "add_listener"; 
+
+	public static final String ADD_LISTENER_OPERATION = "add_listener";
 	public static final String REMOVE_LISTENER_OPERATION = "remove_listener";
-	
-	/* package */ PMPEvent next;
+
+	/* package */PMPEvent next;
 }
