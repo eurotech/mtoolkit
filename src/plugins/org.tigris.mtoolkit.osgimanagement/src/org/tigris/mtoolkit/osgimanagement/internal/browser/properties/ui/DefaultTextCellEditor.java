@@ -15,19 +15,19 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 
 public class DefaultTextCellEditor extends TextCellEditor {
-  
-  private int fColumn;
-  
-  public DefaultTextCellEditor(TableViewer tableViewer, int column) {
-    super(tableViewer.getTable());
-    fColumn = column;
-    text.setEditable(false);
-  }
 
-  protected void doSetValue(Object value) {
-    Assert.isTrue(text != null && (value instanceof PropertyObject));
-    String newText = fColumn == 0 ? ((PropertyObject)value).name : ((PropertyObject)value).value;
-    super.doSetValue(newText);
-  }
+	private int fColumn;
+
+	public DefaultTextCellEditor(TableViewer tableViewer, int column) {
+		super(tableViewer.getTable());
+		fColumn = column;
+		text.setEditable(false);
+	}
+
+	protected void doSetValue(Object value) {
+		Assert.isTrue(text != null && (value instanceof PropertyObject));
+		String newText = fColumn == 0 ? ((PropertyObject) value).name : ((PropertyObject) value).value;
+		super.doSetValue(newText);
+	}
 
 }

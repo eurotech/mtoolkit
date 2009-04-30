@@ -19,7 +19,6 @@ import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 
-
 public class ServicePropertiesPage extends PropertiesPage {
 
 	public ServicePropertiesPage() {
@@ -45,23 +44,19 @@ public class ServicePropertiesPage extends PropertiesPage {
 				if (value instanceof String[]) {
 					String[] values = (String[]) value;
 					if (values.length == 1) {
-						PropertyObject object = new PropertyObject(key,
-								values[0]);
+						PropertyObject object = new PropertyObject(key, values[0]);
 						data.addElement(object);
 					} else {
 						for (int j = 0; j < values.length; j++) {
 							StringBuffer buff = new StringBuffer();
-							buff.append(key).append("[").append(
-									String.valueOf(j + 1)).append("]");
+							buff.append(key).append("[").append(String.valueOf(j + 1)).append("]");
 							String key2 = buff.toString();
-							PropertyObject object = new PropertyObject(key2,
-									values[j]);
+							PropertyObject object = new PropertyObject(key2, values[j]);
 							data.addElement(object);
 						}
 					}
 				} else {
-					PropertyObject object = new PropertyObject(key, value
-							.toString());
+					PropertyObject object = new PropertyObject(key, value.toString());
 					data.addElement(object);
 				}
 			}

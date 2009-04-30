@@ -29,9 +29,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 
-
-public class PropertiesDialog extends Window implements ConstantsDistributor,
-		SelectionListener {
+public class PropertiesDialog extends Window implements ConstantsDistributor, SelectionListener {
 
 	private PropertiesPage mainControl;
 	private Button closeBtn;
@@ -40,8 +38,7 @@ public class PropertiesDialog extends Window implements ConstantsDistributor,
 
 	public PropertiesDialog(Shell shell, boolean bundleProps) {
 		super(shell);
-		this.setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL
-				| SWT.RESIZE);
+		this.setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL | SWT.RESIZE);
 		this.bundlePropsDialog = bundleProps;
 	}
 
@@ -67,8 +64,7 @@ public class PropertiesDialog extends Window implements ConstantsDistributor,
 		buttonsArea.setLayout(buttonsGrid);
 		closeBtn = new Button(buttonsArea, SWT.PUSH);
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-		data.widthHint = Dialog.convertHorizontalDLUsToPixels(fontMetrics,
-				IDialogConstants.BUTTON_WIDTH);
+		data.widthHint = Dialog.convertHorizontalDLUsToPixels(fontMetrics, IDialogConstants.BUTTON_WIDTH);
 		closeBtn.setLayoutData(data);
 
 		closeBtn.setText(Messages.close_button_label);
@@ -99,10 +95,8 @@ public class PropertiesDialog extends Window implements ConstantsDistributor,
 	}
 
 	protected void attachHelp(Composite container) {
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(
-				container,
-				bundlePropsDialog ? IHelpContextIds.PROPERTY_BUNDLE
-						: IHelpContextIds.PROPERTY_PACKAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+			bundlePropsDialog ? IHelpContextIds.PROPERTY_BUNDLE : IHelpContextIds.PROPERTY_PACKAGE);
 	}
 
 	/*

@@ -42,8 +42,7 @@ public class PropertiesPage extends PropertyPage {
 				if (parent == null) {
 					return null;
 				}
-				PropertyObject[] result = new PropertyObject[((Vector) parent)
-						.size()];
+				PropertyObject[] result = new PropertyObject[((Vector) parent).size()];
 				result = (PropertyObject[]) ((Vector) parent).toArray(result);
 
 				if (result != null) {
@@ -62,8 +61,7 @@ public class PropertiesPage extends PropertyPage {
 		}
 	}
 
-	public class TableLabelProvider extends LabelProvider implements
-			ITableLabelProvider {
+	public class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
@@ -99,8 +97,11 @@ public class PropertiesPage extends PropertyPage {
 		propertiesGroup.setLayoutData(gd);
 		propertiesGroup.setLayout(new GridLayout());
 
-		Table table = new Table(propertiesGroup, SWT.BORDER | SWT.SINGLE
-				| SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		Table table = new Table(propertiesGroup, SWT.BORDER
+						| SWT.SINGLE
+						| SWT.H_SCROLL
+						| SWT.V_SCROLL
+						| SWT.FULL_SELECTION);
 		table.setLayout(new GridLayout());
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		table.setHeaderVisible(true);
@@ -118,9 +119,8 @@ public class PropertiesPage extends PropertyPage {
 		tableViewer.setLabelProvider(new TableLabelProvider());
 
 		tableViewer.setColumnProperties(new String[2]);
-		DefaultTextCellEditor editors[] = new DefaultTextCellEditor[] {
-				new DefaultTextCellEditor(tableViewer, 0),
-				new DefaultTextCellEditor(tableViewer, 1) };
+		DefaultTextCellEditor editors[] = new DefaultTextCellEditor[] { new DefaultTextCellEditor(tableViewer, 0),
+			new DefaultTextCellEditor(tableViewer, 1) };
 		tableViewer.setCellEditors(editors);
 		tableViewer.setCellModifier(new DefaultCellModifier());
 

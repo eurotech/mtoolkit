@@ -11,33 +11,33 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
 /**
- * Describes a key-value pair, describing an element in the list of values of 
- * an service property object.
+ * Describes a key-value pair, describing an element in the list of values of an
+ * service property object.
  * 
  */
 public class PropertyObject implements Cloneable {
-  
-  String name;
-  String value;
-  
-  public PropertyObject(String name, String value) {
-    this.name = name;
-    this.value = value;
-  }
-  
-  public void setName(String name) {
-    this.name = name;    
-  } 
-  
-  public String getName() {
-    return name;
-  }
-  
-  public void setValue(String value) {
-    this.value = value;
-  }
-  
-  public String getValue() {
-    return value;
-  }
+
+	String name;
+	String value;
+
+	public PropertyObject(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return value;
+	}
 }

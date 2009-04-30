@@ -13,15 +13,15 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 import org.eclipse.jface.viewers.ICellModifier;
 
 public class DefaultCellModifier implements ICellModifier {
-  
-  public boolean canModify(Object element, String property) {
-    return true;
-  }
 
-  public Object getValue(Object element, String property) {
-    return element;
-  }
+	public boolean canModify(Object element, String property) {
+		return true;
+	}
 
-  public void modify(Object element, String property, Object value) {
-  }
+	public Object getValue(Object element, String property) {
+		return element;
+	}
+
+	public void modify(Object element, String property, Object value) {
+	}
 }

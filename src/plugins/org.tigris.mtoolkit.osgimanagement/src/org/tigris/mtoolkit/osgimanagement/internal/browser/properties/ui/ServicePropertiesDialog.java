@@ -16,7 +16,6 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 
-
 public class ServicePropertiesDialog extends PropertiesDialog {
 
 	public ServicePropertiesDialog(Shell shell) {
@@ -32,7 +31,6 @@ public class ServicePropertiesDialog extends PropertiesDialog {
 	}
 
 	protected void attachHelp(Composite container) {
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
-				IHelpContextIds.PROPERTY_SERVICE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_SERVICE);
 	}
 }
