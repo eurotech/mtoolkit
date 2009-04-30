@@ -19,75 +19,75 @@ import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
 import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
-
 public class PMPConnectionListener implements ConnectionListener {
 
-  private FrameWork fw;
-  private String frameworkName;
-  private DeviceConnector connector;
-  private boolean autoConnected;
-  boolean shouldInstallIAgent = false;
-  
-  public PMPConnectionListener(FrameWork fw, String frameworkName, DeviceConnector connector, boolean autoConnected) {
-    this.fw = fw;
-    this.frameworkName = frameworkName;
-    this.connector = connector;
-    this.autoConnected = autoConnected;
-    try {
-      ((DeviceConnectorImpl)connector).getConnectionManager().addConnectionListener(this);
-    } catch (IAgentException e) {
-      e.printStackTrace();
-      BrowserErrorHandler.processError(e, connector);
-    }
-  }
-  
-  public void connectionChanged(ConnectionEvent e) {
-    if (e.getConnection().getType() != ConnectionManager.PMP_CONNECTION) return;
-    BrowserErrorHandler.debug("PMP Connection Changed "+ (e.getType() == ConnectionEvent.CONNECTED ? "CONNECTED" : "DISCONNECTED")+" "+connector.getProperties().get("framework-name")+" "+connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-    if (e.getType() == ConnectionEvent.DISCONNECTED) {
-      disconnected();
-    } else if (e.getType() == ConnectionEvent.CONNECTED) {
-      connected();
-    }
-  }
+	private FrameWork fw;
+	private String frameworkName;
+	private DeviceConnector connector;
+	private boolean autoConnected;
+	boolean shouldInstallIAgent = false;
 
-  public void disconnected() {
-    if (!autoConnected) {
-      FrameworkConnectorFactory.disconnectConsole(frameworkName);
-    }
+	public PMPConnectionListener(FrameWork fw, String frameworkName, DeviceConnector connector, boolean autoConnected) {
+		this.fw = fw;
+		this.frameworkName = frameworkName;
+		this.connector = connector;
+		this.autoConnected = autoConnected;
+		try {
+			((DeviceConnectorImpl) connector).getConnectionManager().addConnectionListener(this);
+		} catch (IAgentException e) {
+			e.printStackTrace();
+			BrowserErrorHandler.processError(e, connector);
+		}
+	}
 
-    // if disconnect event received while connect thread is running
-    // block disconnect until connect thread is finished/breaked
-    synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
-    }
+	public void connectionChanged(ConnectionEvent e) {
+		if (e.getConnection().getType() != ConnectionManager.PMP_CONNECTION)
+			return;
+		BrowserErrorHandler.debug("PMP Connection Changed " + (e.getType() == ConnectionEvent.CONNECTED	? "CONNECTED" : "DISCONNECTED") + " " + connector.getProperties().get("framework-name") + " " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+		if (e.getType() == ConnectionEvent.DISCONNECTED) {
+			disconnected();
+		} else if (e.getType() == ConnectionEvent.CONNECTED) {
+			connected();
+		}
+	}
 
-    fw.disconnect();
-  }
-  
-  
-  public void connected() {
-    if (fw.isConnected()) return;
-    new Thread() {
-      public void run() {
-        try {
-          // force creation of pmp connection
-          if (!connector.getVMManager().isVMActive()) {
-            return; 
-          }
-        } catch (IAgentException e) {
-          e.printStackTrace();
-          BrowserErrorHandler.processError(e, fw);
-          return;
-        }
+	public void disconnected() {
+		if (!autoConnected) {
+			FrameworkConnectorFactory.disconnectConsole(frameworkName);
+		}
 
-        if (fw != null) {
-          fw.connected(connector);
-        }
-        if (!autoConnected && fw.isConnected()) {
-          ConsoleView.connectServer(frameworkName, connector);
-        }
-      }
-    }.start();
-  }
+		// if disconnect event received while connect thread is running
+		// block disconnect until connect thread is finished/breaked
+		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		}
+
+		fw.disconnect();
+	}
+
+	public void connected() {
+		if (fw.isConnected())
+			return;
+		new Thread() {
+			public void run() {
+				try {
+					// force creation of pmp connection
+					if (!connector.getVMManager().isVMActive()) {
+						return;
+					}
+				} catch (IAgentException e) {
+					e.printStackTrace();
+					BrowserErrorHandler.processError(e, fw);
+					return;
+				}
+
+				if (fw != null) {
+					fw.connected(connector);
+				}
+				if (!autoConnected && fw.isConnected()) {
+					ConsoleView.connectServer(frameworkName, connector);
+				}
+			}
+		}.start();
+	}
 
 }

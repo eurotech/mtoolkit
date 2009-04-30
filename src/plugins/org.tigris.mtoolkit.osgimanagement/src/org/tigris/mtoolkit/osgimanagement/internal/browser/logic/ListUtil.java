@@ -18,49 +18,50 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 
-
 public class ListUtil {
 
-  static class NameSorter extends ViewerSorter {
-    public boolean isSorterProperty(Object element, Object propertyId) {
-      return propertyId.equals(IBasicPropertyConstants.P_TEXT);
-    }
-  }
+	static class NameSorter extends ViewerSorter {
+		public boolean isSorterProperty(Object element, Object propertyId) {
+			return propertyId.equals(IBasicPropertyConstants.P_TEXT);
+		}
+	}
 
-  public static class BundleSorter extends NameSorter {
-    public int compare(Viewer viewer, Object e1, Object e2) {
-      int result = 0;
-      Object name1 = getName(e1);
-      Object name2 = getName(e2);
-      if (name1 != null && name2 != null) {
-        if (name1 instanceof Long) {
-          result = ((Long)name1).compareTo((Long)name2);
-        } else {
-          result = getComparator().compare((String)name1, (String)name2);
-        }
-        
-      }       
-      if (result != 0) {
-        return result;
-      } else {
-        result = super.compare(viewer, e1, e2);
-        return result;
-      }
-    }
+	public static class BundleSorter extends NameSorter {
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			int result = 0;
+			Object name1 = getName(e1);
+			Object name2 = getName(e2);
+			if (name1 != null && name2 != null) {
+				if (name1 instanceof Long) {
+					result = ((Long) name1).compareTo((Long) name2);
+				} else {
+					result = getComparator().compare((String) name1, (String) name2);
+				}
 
-    private Object getName(Object object) {
-      if (object instanceof Category) return ((Model)object).getName();
-      if (object instanceof Bundle) return ((Model)object).getName();
-      if (object instanceof ObjectClass) return ((ObjectClass)object).getNameID();
-      return null;
-    }
+			}
+			if (result != 0) {
+				return result;
+			} else {
+				result = super.compare(viewer, e1, e2);
+				return result;
+			}
+		}
 
-  }
+		private Object getName(Object object) {
+			if (object instanceof Category)
+				return ((Model) object).getName();
+			if (object instanceof Bundle)
+				return ((Model) object).getName();
+			if (object instanceof ObjectClass)
+				return ((ObjectClass) object).getNameID();
+			return null;
+		}
 
-  public static final ViewerSorter BUNDLE_SORTER = new BundleSorter();
-  
+	}
 
-public ListUtil() {
-  super();
-}
+	public static final ViewerSorter BUNDLE_SORTER = new BundleSorter();
+
+	public ListUtil() {
+		super();
+	}
 }

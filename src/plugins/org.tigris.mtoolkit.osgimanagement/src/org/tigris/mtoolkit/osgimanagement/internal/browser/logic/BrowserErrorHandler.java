@@ -25,15 +25,13 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
-
 public class BrowserErrorHandler {
 
 	private static boolean internalShell;
 	private static Shell shell;
 	public static boolean isInfoLogEnabled = FrameworkPreferencesPage.infoLogDefault;
 
-	private static final boolean debug = Boolean
-			.getBoolean("mtoolkit.osgimanagement.debug"); //$NON-NLS-1$
+	private static final boolean debug = Boolean.getBoolean("mtoolkit.osgimanagement.debug"); //$NON-NLS-1$
 
 	// Process given error as a String message
 	public static void processError(String message) {
@@ -47,9 +45,7 @@ public class BrowserErrorHandler {
 					shell = getShell();
 					if (shell != null) {
 						if (!shell.isDisposed()) {
-							MessageDialog
-									.openError(shell, Messages.standard_error_title,
-											message);
+							MessageDialog.openError(shell, Messages.standard_error_title, message);
 						}
 						manageShell(shell);
 					}
@@ -78,12 +74,10 @@ public class BrowserErrorHandler {
 		processError(t, connector, Messages.no_reason_message);
 	}
 
-	public static void processError(Throwable t, DeviceConnector connector,
-			String reason) {
+	public static void processError(Throwable t, DeviceConnector connector, String reason) {
 		boolean display = true;
-		Boolean autoConnected = connector == null ? new Boolean(false)
-				: (Boolean) connector.getProperties().get(
-						"framework-connection-immediate"); //$NON-NLS-1$
+		Boolean autoConnected = connector == null	? new Boolean(false)
+													: (Boolean) connector.getProperties().get("framework-connection-immediate"); //$NON-NLS-1$
 		if (autoConnected == null || autoConnected.booleanValue()) {
 			display = false;
 		}
@@ -92,8 +86,7 @@ public class BrowserErrorHandler {
 
 	// Process given exception with no reason given
 	public static void processError(Throwable t, boolean showDialog) {
-		processError(t, Messages.no_reason_message,
-				showDialog);
+		processError(t, Messages.no_reason_message, showDialog);
 	}
 
 	public static void processError(Throwable t, String reason) {
@@ -101,8 +94,7 @@ public class BrowserErrorHandler {
 	}
 
 	// Process given exception with reason
-	public static void processError(final Throwable t, String info,
-			boolean display) {
+	public static void processError(final Throwable t, String info, boolean display) {
 
 		// Subsitute missing exception message
 		final String reason;
@@ -113,17 +105,14 @@ public class BrowserErrorHandler {
 		}
 
 		if (display) {
-			if (t instanceof IAgentException
-					|| t instanceof IllegalStateException) {
+			if (t instanceof IAgentException || t instanceof IllegalStateException) {
 				String infoCode = ""; //$NON-NLS-1$
 				if (t instanceof IAgentException) {
 					int errorCode = ((IAgentException) t).getErrorCode();
 					if (errorCode != -1 && errorCode != 0) {
 						infoCode = Messages.get(String.valueOf(errorCode).replace('-', '_'));
 					}
-					if (info == null
-							|| Messages.no_reason_message
-									.equals(info)) {
+					if (info == null || Messages.no_reason_message.equals(info)) {
 						info = infoCode;
 					}
 				}
@@ -133,11 +122,11 @@ public class BrowserErrorHandler {
 						shell = getShell();
 						if (shell != null) {
 							if (!shell.isDisposed()) {
-								PluginUtilities
-										.showErrorDialog(
-												shell,
-												Messages.standard_error_title,
-												trueMessage, reason, t);
+								PluginUtilities.showErrorDialog(shell,
+									Messages.standard_error_title,
+									trueMessage,
+									reason,
+									t);
 							}
 							manageShell(shell);
 						}
@@ -148,10 +137,8 @@ public class BrowserErrorHandler {
 			}
 		}
 
-		if (t instanceof IAgentException
-				&& ((IAgentException) t).getCauseException() != null) {
-			dumpToLog(IStatus.ERROR, reason, ((IAgentException) t)
-					.getCauseException());
+		if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
+			dumpToLog(IStatus.ERROR, reason, ((IAgentException) t).getCauseException());
 		} else {
 			dumpToLog(IStatus.ERROR, reason, t);
 		}
@@ -164,9 +151,7 @@ public class BrowserErrorHandler {
 					shell = getShell();
 					if (shell != null) {
 						if (!shell.isDisposed()) {
-							PluginUtilities.showWarningDialog(shell,
-									Messages.standard_error_title,
-									info, null);
+							PluginUtilities.showWarningDialog(shell, Messages.standard_error_title, info, null);
 						}
 						manageShell(shell);
 					}
@@ -177,8 +162,7 @@ public class BrowserErrorHandler {
 		dumpToLog(IStatus.WARNING, info, null);
 	}
 
-	public static void processWarning(final Throwable t, String info,
-			boolean display) {
+	public static void processWarning(final Throwable t, String info, boolean display) {
 		// Subsitute missing exception message
 		final String reason;
 		if (t.getMessage() == null) {
@@ -199,11 +183,10 @@ public class BrowserErrorHandler {
 						shell = getShell();
 						if (shell != null) {
 							if (!shell.isDisposed()) {
-								PluginUtilities
-										.showWarningDialog(
-												shell,
-												Messages.standard_error_title,
-												trueMessage, reason);
+								PluginUtilities.showWarningDialog(shell,
+									Messages.standard_error_title,
+									trueMessage,
+									reason);
 							}
 							manageShell(shell);
 						}
@@ -212,10 +195,8 @@ public class BrowserErrorHandler {
 			}
 		}
 
-		if (t instanceof IAgentException
-				&& ((IAgentException) t).getCauseException() != null) {
-			dumpToLog(IStatus.WARNING, reason, ((IAgentException) t)
-					.getCauseException());
+		if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
+			dumpToLog(IStatus.WARNING, reason, ((IAgentException) t).getCauseException());
 		} else {
 			dumpToLog(IStatus.WARNING, reason, t);
 		}
@@ -259,8 +240,7 @@ public class BrowserErrorHandler {
 			text = ""; //$NON-NLS-1$
 		}
 
-		IStatus status = new Status(severity, plugin.getId(), IStatus.OK, text,
-				t);
+		IStatus status = new Status(severity, plugin.getId(), IStatus.OK, text, t);
 		log.log(status);
 	}
 

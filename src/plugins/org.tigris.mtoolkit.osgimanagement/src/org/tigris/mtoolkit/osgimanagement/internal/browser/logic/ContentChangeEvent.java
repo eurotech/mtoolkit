@@ -13,14 +13,13 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
 public class ContentChangeEvent {
-  private Model actedUpon;
-  
-  public ContentChangeEvent(Model target) {
-    actedUpon = target;
-  }
-  
-  public Model getTarget() {
-    return actedUpon;
-  }
-}
+	private Model actedUpon;
 
+	public ContentChangeEvent(Model target) {
+		actedUpon = target;
+	}
+
+	public Model getTarget() {
+		return actedUpon;
+	}
+}
