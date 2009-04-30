@@ -12,8 +12,9 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
 public interface ContentChangeListener {
 
-  public void elementAdded(ContentChangeEvent event);
+	public void elementAdded(ContentChangeEvent event);
 
-  public void elementRemoved(ContentChangeEvent event);
+	public void elementChanged(ContentChangeEvent event);
+
+	public void elementRemoved(ContentChangeEvent event);
 }
-
