@@ -15,7 +15,8 @@ import java.io.OutputStream;
 /**
  * Provides control over the virtual machine. Every method of this class will
  * throw exception right after calling it, if the {@link DeviceConnector} from,
- * which this object is retrieved is disconnected from the remote OSGi framework.
+ * which this object is retrieved is disconnected from the remote OSGi
+ * framework.
  * 
  */
 public interface VMManager {
@@ -29,8 +30,8 @@ public interface VMManager {
 	 * 
 	 * The normal operation is restored in one of the following cases:<br>
 	 * <ul>
-	 * <li>The connection to the remote OSGi runtime is closed, either normally or because of
-	 * an error</li>
+	 * <li>The connection to the remote OSGi runtime is closed, either normally
+	 * or because of an error</li>
 	 * <li>The method is called with a null argument</li>
 	 * </ul>
 	 * <br>
@@ -39,7 +40,6 @@ public interface VMManager {
 	 *            OutputStream object to which the framework should write or
 	 *            null to restore the normal operation
 	 * @throws IAgentException
-	 * @throws {@link IllegalStateException} if there is no active framework
 	 */
 	public void redirectFrameworkOutput(OutputStream os) throws IAgentException;
 
@@ -52,4 +52,12 @@ public interface VMManager {
 	 * @throws IAgentException
 	 */
 	public void executeFrameworkCommand(String command) throws IAgentException;
+
+	/**
+	 * Returns the start level of the remote OSGi framework
+	 * 
+	 * @return the start level of the remote framework
+	 * @throws IAgentException
+	 */
+	public int getFrameworkStartLevel() throws IAgentException;
 }
