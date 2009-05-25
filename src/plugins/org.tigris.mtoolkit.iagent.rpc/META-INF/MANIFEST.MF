@@ -26,7 +26,5 @@ Import-Package: org.eclipse.core.runtime.adaptor;resolution:=optional,
 DynamicImport-Package: org.osgi.service.event,
  org.osgi.service.deploymentadmin,
  org.osgi.service.application
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1
 
