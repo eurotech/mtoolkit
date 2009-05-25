@@ -75,8 +75,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		Control contents = super.createContents(parent);
 		getShell().setText("Install to");
 		setTitle("OSGi Framework");
-		setMessage("Select OSGi Framework from the list",
-				IMessageProvider.INFORMATION);
+		setMessage("Select OSGi Framework from the list", IMessageProvider.INFORMATION);
 
 		updateButtonsState();
 
@@ -96,7 +95,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		gridData.widthHint = 340;
 		gridData.verticalSpan = 3;
 		frameworkViewer.getTable().setLayoutData(gridData);
-		//frameworkViewer.getTable().setLinesVisible(true);
+		// frameworkViewer.getTable().setLinesVisible(true);
 		frameworkViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateButtonsState();
@@ -175,7 +174,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 
 		btnEdit.setEnabled(selected != -1);
 		btnRem.setEnabled(selected != -1);
-		
+
 		Button btnOK = getButton(IDialogConstants.OK_ID);
 		if (btnOK != null) {
 			btnOK.setEnabled(selected != -1);
@@ -267,7 +266,8 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 				shell.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 						((TableViewer) viewer).remove(event.getTarget());
-						// TableViewer.remove() doesn't call selection change listeners
+						// TableViewer.remove() doesn't call selection change
+						// listeners
 						updateButtonsState();
 					}
 				});
