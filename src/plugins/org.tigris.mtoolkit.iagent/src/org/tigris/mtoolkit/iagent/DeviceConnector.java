@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -265,7 +266,6 @@ public abstract class DeviceConnector {
 	 */
 	public abstract Dictionary getProperties();
 
-	public abstract Map getDeviceProperties();
 
 	/**
 	 * Removes a listener from the listener list. This means that the listener
