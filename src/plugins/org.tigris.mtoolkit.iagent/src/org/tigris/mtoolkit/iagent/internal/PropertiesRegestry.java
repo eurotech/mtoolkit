@@ -1,7 +1,6 @@
 package org.tigris.mtoolkit.iagent.internal;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Hashtable;
 
 import org.osgi.service.event.EventAdmin;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -16,38 +15,39 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 public class PropertiesRegestry implements RemoteDevicePropertyListener {
 
 	private final static String[] propertyMap = { RemoteDeploymentAdmin.class.getName(),
-		EventAdmin.class.getName(),
-		RemoteApplicationAdmin.class.getName(),
-		RemoteConsole.class.getName() };
+											EventAdmin.class.getName(),
+											RemoteApplicationAdmin.class.getName(),
+											RemoteConsole.class.getName() };
 
 	private ServiceManager serviceManager = null;
 	private DeviceConnectorImpl connector = null;
-	private HashMap connectionProperties;
+	private Hashtable connectionProperties = new Hashtable();
 
 	public PropertiesRegestry(ServiceManager serviceManager, DeviceConnectorImpl connector) {
 		this.connector = connector;
 		this.serviceManager = serviceManager;
-		connectionProperties = new HashMap();
+		this.connectionProperties.clear();
+		
 		initializeDeviceProperties();
 	}
 
 	private void initializeDeviceProperties() {
 		for (int i = 0; i < propertyMap.length; i++) {
 			try {
-				updateProperty(i);
+				updateProperty(i, true);
 			} catch (IAgentException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void updateProperty(int propertyIndex) throws IAgentException {
+	private void updateProperty(int propertyIndex, boolean state) throws IAgentException {
 		RemoteService[] eventServices = serviceManager.getAllRemoteServices(propertyMap[propertyIndex], null);
-		boolean state = true;
 		if (eventServices == null || (eventServices.length == 0))
 			state = false;
-
-		connectionProperties.put(propertyMap[propertyIndex], new Boolean(state));
+		synchronized (connectionProperties) {
+			connectionProperties.put(propertyMap[propertyIndex], new Boolean(state));	
+		}
 		connector.fireDevicePropertyEvent(propertyIndex, state);
 	}
 
@@ -55,7 +55,7 @@ public class PropertiesRegestry implements RemoteDevicePropertyListener {
 		connectionProperties.put(propertyMap[e.getType()], new Boolean(e.getEventState()));
 	}
 
-	public Map getDeviceProperties() {
-		return (Map) connectionProperties;
+	public Hashtable getDeviceProperties() {
+		return connectionProperties;
 	}
 }
