@@ -23,6 +23,7 @@ public class BundlePropertiesAction extends SelectionProviderAction {
 	public BundlePropertiesAction(ISelectionProvider provider, String label) {
 		super(provider, label);
 		this.parentView = (TreeViewer) provider;
+		this.setText(label + "@Alt+Enter");
 	}
 
 	// run method
