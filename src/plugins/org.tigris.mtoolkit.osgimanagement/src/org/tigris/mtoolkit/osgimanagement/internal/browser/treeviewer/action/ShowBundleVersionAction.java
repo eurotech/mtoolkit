@@ -10,18 +10,22 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
 public class ShowBundleVersionAction extends SelectionProviderAction {
 
 	private TreeViewer tree;
+	private List frameworks = new ArrayList();
 
 	public ShowBundleVersionAction(ISelectionProvider provider, String label, TreeViewer tree) {
 		super(provider, label);
@@ -29,12 +33,11 @@ public class ShowBundleVersionAction extends SelectionProviderAction {
 	}
 
 	public void run() {
-		boolean newState = !((Bundle) getStructuredSelection().getFirstElement()).isShowVersion();
+		boolean newState = !((Bundle) ((FrameWork) frameworks.get(0)).bundleHash.values().iterator().next()).isShowVersion();
 
-		Iterator iterator = getStructuredSelection().iterator();
-		while (iterator.hasNext()) {
-			Bundle bundle = (Bundle) iterator.next();
-			bundle.setShowVersion(newState);
+		for (int i = 0; i < frameworks.size(); i++) {
+			FrameWork fw = (FrameWork) frameworks.get(i);
+			((Bundle) fw.bundleHash.values().iterator().next()).setShowVersion(newState);
 		}
 		tree.refresh();
 	}
@@ -49,22 +52,33 @@ public class ShowBundleVersionAction extends SelectionProviderAction {
 			setEnabled(false);
 			return;
 		}
-		boolean enabled = true;
 
-		Iterator iterator = selection.iterator();
-		while (iterator.hasNext()) {
-			Model model = (Model) iterator.next();
-			if (!(model instanceof Bundle)) {
-				enabled = false;
-				break;
+		Iterator iter = selection.iterator();
+		frameworks.clear();
+
+		while (iter.hasNext()) {
+			Object element = iter.next();
+			FrameWork fw = null;
+			if (element instanceof FrameWork)
+				fw = (FrameWork) element;
+			if (element instanceof Model)
+				fw = ((Model) element).findFramework();
+			if (fw != null && fw.isConnected() && !frameworks.contains(fw)) {
+				frameworks.add(fw);
 			}
 		}
-		this.setEnabled(enabled);
 
-		if (enabled && ((Bundle) selection.getFirstElement()).isShowVersion()) {
-			setChecked(true);
-		} else {
-			setChecked(false);
+		if (frameworks.isEmpty()) {
+			this.setEnabled(false);
+			return;
 		}
+		this.setEnabled(true);
+
+		Bundle bundle = (Bundle) ((FrameWork) frameworks.get(0)).bundleHash.values().iterator().next();
+		boolean versionShown = bundle.isShowVersion();
+		if (versionShown)
+			setChecked(true);
+		else
+			setChecked(false);
 	}
 }
