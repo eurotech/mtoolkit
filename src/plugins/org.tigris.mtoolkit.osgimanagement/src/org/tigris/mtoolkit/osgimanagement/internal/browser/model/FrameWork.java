@@ -49,6 +49,8 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 	private boolean showBundlesID = false;
 	private boolean showBundlesVersion = false;
+	private boolean showServicePropertiesInTree = false;
+	private int viewBeforeRefresh = BUNDLES_VIEW;
 
 	public Hashtable bundleHash;
 	public Hashtable categoryHash;
@@ -87,7 +89,8 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	public Model getBundlesNode() {
 		if (bundles == null) {
 			bundles = new SimpleNode(Messages.bundles_node_label, this);
-			addElement(bundles);
+			if (getViewType() == BUNDLES_VIEW)
+				addElement(bundles);
 		}
 		return bundles;
 	}
@@ -95,14 +98,14 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	public Model getDPNode() {
 		if (deplPackages == null) {
 			deplPackages = new SimpleNode(Messages.dpackages_node_label, this);
-			addElement(deplPackages);
+			if (getViewType() == BUNDLES_VIEW)
+				addElement(deplPackages);
 		}
 		return deplPackages;
 	}
 
 	public void removeElement(Model element) {
 		super.removeElement(element);
-
 		if (element == bundles) {
 			bundles = null;
 		}
@@ -200,6 +203,8 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 	private void connectFramework() {
 		try {
+			FrameWorkView.removeFilter();
+
 			connecting = true;
 			if (connector != null) {
 				bundleHash = new Hashtable();
@@ -223,10 +228,17 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					BrowserErrorHandler.processError(e, connector);
 				}
 
-				viewType = BUNDLES_VIEW;
+				if (refreshing) {
+					viewType = viewBeforeRefresh;
+				} else {
+					viewType = BUNDLES_VIEW;
+				}
+				// taka tuk ne e nared zaradi na4ina po kojto se dobavqt
+				// elementite
 				try {
 					if (monitor != null && monitor.isCanceled())
 						return;
+
 					FrameworkConnectorFactory.addBundles(this, true, monitor);
 					if (monitor != null && monitor.isCanceled())
 						return;
@@ -253,6 +265,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 				}
 			}
 			updateContextMenuStates();
+			FrameWorkView.addFilter();
 		} catch (Throwable t) {
 			t.printStackTrace();
 		} finally {
@@ -338,7 +351,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		if (!refreshing) {
 			BrowserErrorHandler.processInfo(connector.getProperties().get("framework-name") + " successfully " + "disconnected", false); //$NON-NLS-1$
 		}
-
 	}
 
 	public void setDPHash(Hashtable hash) {
@@ -522,6 +534,14 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		showBundlesVersion = b;
 	}
 
+	public void setShowServicePropertiesInTree(boolean state) {
+		showServicePropertiesInTree = state;
+	}
+
+	public boolean isShownServicePropertiss() {
+		return showServicePropertiesInTree;
+	}
+
 	// find and update nodes for bundle in "Bundles" and "Deployment packages"
 	private void updateBundleNodes(RemoteBundle rBundle) throws IAgentException {
 		long id = rBundle.getBundleId();
@@ -555,7 +575,8 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		// remove bundle and empty category
 		Bundle bundle = findBundle(id);
 		bundleHash.remove(new Long(id));
-		if (bundle != null) {
+
+		if (bundle != null && FrameworkConnectorFactory.isBundlesCategoriesShown) {
 			Category category = (Category) bundle.getParent();
 			category.removeElement(bundle);
 			if (category.getSize() == 0) {
@@ -570,15 +591,19 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	private void removeBundle(long id) throws IAgentException {
 		// remove bundle and empty category
 		Bundle bundle = findBundle(id);
+		FrameWork fw = bundle.getFramework();
 		bundleHash.remove(new Long(id));
 		if (bundle != null) {
-			Category category = (Category) bundle.getParent();
-			category.removeElement(bundle);
-			if (category.getSize() == 0) {
-				categoryHash.remove(category.getName());
-				category.getParent().removeElement(category);
+			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
+				Category category = (Category) bundle.getParent();
+				category.removeElement(bundle);
+				if (category.getSize() == 0) {
+					categoryHash.remove(category.getName());
+					category.getParent().removeElement(category);
+				}
+			} else {
+				fw.getBundlesNode().removeElement(bundle);
 			}
-
 			// remove bundle from DP
 			bundle = findBundleInDP(bundle.getID());
 			if (bundle != null) {
@@ -666,6 +691,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 		if (!isConnected())
 			return;
+
 		final RemoteBundle rBundle = e.getBundle();
 		long id = rBundle.getBundleId();
 		final int type = e.getType();
@@ -673,11 +699,14 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			if (!bundleHash.containsKey(new Long(id)) && type != RemoteBundleEvent.UNINSTALLED) {
 				// add this bundle - apparently, we have missed the INSTALLED
 				// event
+				FrameWorkView.removeFilter();
 				FrameworkConnectorFactory.addBundle(rBundle, FrameWork.this);
+				FrameWorkView.addFilter();
 			} else if (type == RemoteBundleEvent.UPDATED) {
 				Bundle bundle = findBundle(id);
 				String category = rBundle.getHeader("Bundle-Category", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				if (!bundle.getParent().getName().equals(category)) {
+				if (!bundle.getParent().getName().equals(category)
+								&& FrameworkConnectorFactory.isBundlesCategoriesShown) {
 					udpateBundleCategory(rBundle);
 				}
 				bundle = findBundle(id);
@@ -702,6 +731,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			} else if (type == RemoteBundleEvent.STARTED) {
 				Bundle bundle = findBundle(rBundle.getBundleId());
 				Bundle dpBundle = findBundleInDP(rBundle.getBundleId());
+
 				bundle.setState(org.osgi.framework.Bundle.ACTIVE);
 				if (dpBundle != null)
 					dpBundle.setState(org.osgi.framework.Bundle.ACTIVE);
@@ -744,7 +774,10 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 									bundle.getState(),
 									bundle.getType(),
 									bundle.getCategory());
-								bCategory.addElement(usedInBundle);
+								if (FrameworkConnectorFactory.isBundlesCategoriesShown)
+									bCategory.addElement(usedInBundle);
+								else
+									bCategory.findFramework().getBundlesNode().addElement(usedInBundle);
 							}
 						}
 					}
@@ -774,6 +807,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		try {
 			RemoteDP remoteDP = e.getDeploymentPackage();
 			if (e.getType() == RemoteDPEvent.INSTALLED) {
+				FrameWorkView.removeFilter();
 				Model dpNodeRoot = getDPNode();
 				try {
 					// check if this install actually is update
@@ -789,6 +823,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					e1.printStackTrace();
 					BrowserErrorHandler.processError(e1, connector);
 				}
+				FrameWorkView.addFilter();
 			} else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
 				try {
 					if (remoteDP != null) {
@@ -798,9 +833,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 						if (dpNode != null) {
 
 							getDPNode().removeElement(dpNode);
-							if (getViewType() == SERVICES_VIEW) {
-								removeElement(getDPNode());
-							}
 						}
 					}
 				} catch (IAgentException e1) {
@@ -945,6 +977,8 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	}
 
 	public void refreshAction() {
+		FrameWorkView.removeFilter();
+		viewBeforeRefresh = getViewType();
 		refreshing = true;
 		DeviceConnector conn2 = connector;
 		disconnect();
@@ -954,6 +988,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			protected IStatus run(final IProgressMonitor monitor) {
 				FrameWork.this.monitor = monitor;
 				connectFramework();
+				FrameWorkView.addFilter();
 				refreshing = false;
 				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 			}
@@ -970,7 +1005,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	}
 
 	public void refreshBundleAction(final Bundle sourceBundle) {
-		final FrameWork framework = this;
 		Job job = new Job(Messages.refresh_bundles_info) {
 
 			protected IStatus run(IProgressMonitor monitor) {
@@ -1019,6 +1053,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 							BundlesCategory usedCategory = new BundlesCategory(oc, BundlesCategory.IN_USE);
 							oc.addElement(regCategory);
 							oc.addElement(usedCategory);
+
 							Bundle newBundle = new Bundle(sourceBundle.getName(),
 								regCategory,
 								sourceBundle.getRemoteBundle(),
@@ -1096,5 +1131,9 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 	public int getFrameWorkStartLevel() throws IAgentException {
 		return connector.getVMManager().getFrameworkStartLevel();
+	}
+
+	public boolean isRefreshing() {
+		return refreshing;
 	}
 }
