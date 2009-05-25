@@ -22,6 +22,7 @@ public class FindAction extends SelectionProviderAction {
 	public FindAction(ISelectionProvider provider, SearchPane searchPanel, String label) {
 		super(provider, label);
 		this.searchPanel = searchPanel;
+		this.setText(label + "@Ctrl+F");
 	}
 
 	// run method
