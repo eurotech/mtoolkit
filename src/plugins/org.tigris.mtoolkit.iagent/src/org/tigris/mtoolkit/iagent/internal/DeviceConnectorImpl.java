@@ -11,6 +11,8 @@
 package org.tigris.mtoolkit.iagent.internal;
 
 import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -191,10 +193,18 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	}
 
 	public Dictionary getProperties() {
+		if(propRegistry != null) {
+			Hashtable devCapabilities = propRegistry.getDeviceProperties();
+			Enumeration enumeration = devCapabilities.keys();
+			while(enumeration.hasMoreElements()) {
+				Object key = enumeration.nextElement();
+				connectionProperties.put(key, devCapabilities.get(key));
+			}
+		}
 		return connectionProperties;
 	}
 
-	public Map getDeviceProperties() {
+	public Hashtable getDeviceProperties() {
 		return propRegistry.getDeviceProperties();
 	}
 
