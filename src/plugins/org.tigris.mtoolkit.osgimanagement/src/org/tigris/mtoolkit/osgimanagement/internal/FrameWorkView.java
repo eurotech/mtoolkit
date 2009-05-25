@@ -52,14 +52,18 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.TreeAdapter;
 import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener;
@@ -90,6 +94,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SearchPane;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AddAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.BundlePropertiesAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.CommonPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ConnectAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DPPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DeInstallBundleAction;
@@ -107,6 +112,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Ser
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowBundleIDAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowBundleVersionAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowFrameworkConsole;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowServicePropertiesInTree;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StartAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StopAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.UpdateBundleAction;
@@ -135,7 +141,12 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	private static final String ADD_ACTION_IMAGE_PATH = "add_action.gif"; //$NON-NLS-1$
 	private static final String DP_GROUP_IMAGE_PATH = "dp_group.gif"; //$NON-NLS-1$
 	private static final String BUNDLES_GROUP_IMAGE_PATH = "bundles_group.gif"; //$NON-NLS-1$
+	private static final String SEARCH_IMAGE_PATH = "search_action.gif";
+	private static final String REFRESH_IMAGE_PATH = "refresh_action.gif";
+	private static final String CONSOLE_IMAGE_PATH = "console.gif";
 	private static final String FIND_COMMAND_ID = FindAction.class.getName();
+	private static final String REFRESH_COMMAND_ID = RefreshAction.class.getName();
+	private static final String PROPERTIES_COMMAND_ID = CommonPropertiesAction.class.getName();
 
 	private static AddAction addAction;
 	private static RemoveAction removeAction;
@@ -149,6 +160,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	private static StartAction startAction;
 	private static StopAction stopAction;
 	private static UpdateBundleAction updateBundleAction;
+	private static CommonPropertiesAction commonPropertiesAction;
+	private static ShowServicePropertiesInTree showServPropsInTreeAction;
 	private ServicePropertiesAction servicePropertiesAction;
 	private GotoServiceAction gotoServiceAction;
 	private ViewAction viewAction;
@@ -159,6 +172,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	private FindAction findAction;
 	private ShowFrameworkConsole showConsoleAction;
 	private RefreshAction refreshAction;
+	private static Text filterField;
 
 	public static TreeViewer tree;
 	private IWorkbenchPage activePage;
@@ -171,6 +185,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	private static HashMap activeInstances;
 	private MenuManager mgr;
 	private SearchPane searchPanel;
+	private static FilterJob filterJob;
 
 	// Get current shell
 	public static Shell getShell() {
@@ -216,9 +231,20 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		layout.marginWidth = 1;
 		parent.setLayout(layout);
 
+		filterField = new Text(parent, SWT.BORDER);
+		GridData filterGridData = new GridData(GridData.FILL_HORIZONTAL);
+		filterGridData.heightHint = 16;
+		filterField.setLayoutData(filterGridData);
+
+		filterField.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				addFilter();
+			}
+		});
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
 		searchPanel = new SearchPane(parent, SWT.NONE, tree);
+
 		tree.getTree().setLayoutData(gridDataTree);
 		tree.getTree().addKeyListener(this);
 
@@ -285,7 +311,13 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		addContributions();
 		createToolbarAndMenu();
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FRAMEWORKS_VIEW);
-		createCtrlFShortcut();
+		createShortcut(FIND_COMMAND_ID, findAction, "Ctrl+F");
+		createShortcut(REFRESH_COMMAND_ID, refreshAction, "F5");
+		createShortcut(PROPERTIES_COMMAND_ID, commonPropertiesAction, "Alt+Enter");
+	}
+
+	public static String getFilter() {
+		return filterField.getText();
 	}
 
 	private void createToolbarAndMenu() {
@@ -295,30 +327,11 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 				updateContextMenuStates();
 			}
 		});
-		mainMenu.add(connectAction);
-		mainMenu.add(disconnectAction);
+
+		mainMenu.add(showBundleIDAction);
+		mainMenu.add(showBundleVersionAction);
 		mainMenu.add(new Separator());
-
-		MenuManager bundlesMenu = new MenuManager(Messages.Toolbar_Bundles_Label);
-		bundlesMenu.add(startAction);
-		bundlesMenu.add(stopAction);
-		bundlesMenu.add(updateBundleAction);
-		bundlesMenu.add(deinstallBundleAction);
-		bundlesMenu.add(bundlePropertiesAction);
-		bundlesMenu.add(new Separator());
-		bundlesMenu.add(installBundleAction);
-		mainMenu.add(bundlesMenu);
-
-		MenuManager dpMenu = new MenuManager(Messages.Toolbar_DP_Label);
-		dpMenu.add(installDPAction);
-		dpMenu.add(deinstallDPAction);
-		dpMenu.add(dpPropertiesAction);
-		mainMenu.add(dpMenu);
-
-		mainMenu.add(new Separator());
-		mainMenu.add(addAction);
-		mainMenu.add(removeAction);
-		mainMenu.add(propertyAction);
+		mainMenu.add(showServPropsInTreeAction);
 
 		ToolBarManager toolBar = (ToolBarManager) getViewSite().getActionBars().getToolBarManager();
 		toolBar.add(connectAction);
@@ -354,11 +367,19 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		toolBar.add(new Separator());
 		toolBar.add(addAction);
 		toolBar.add(removeAction);
-		toolBar.add(propertyAction);
+		commonPropertiesAction.setToolTipText(Messages.property_action_label);
+		toolBar.add(commonPropertiesAction);
+		toolBar.add(new Separator());
+		toolBar.add(viewAction);
+		toolBar.add(showConsoleAction);
+
+		refreshAction.setToolTipText(Messages.refresh_bundle_action_label);
+		toolBar.add(refreshAction);
+
 		updateContextMenuStates();
 	}
 
-	private void createCtrlFShortcut() {
+	private void createShortcut(String commandName, final Action action, String shortcutCombination) {
 		try {
 			ICommandService commandService = (ICommandService) getSite().getService(ICommandService.class);
 			IHandlerService handlerService = (IHandlerService) getSite().getService(IHandlerService.class);
@@ -366,19 +387,19 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			IContextService contextService = (IContextService) getSite().getService(IContextService.class);
 
 			org.eclipse.core.commands.Category editCat = commandService.getCategory("org.eclipse.ui.category.edit"); //$NON-NLS-1$
-			Command scmd = commandService.getCommand(FIND_COMMAND_ID);
+			Command scmd = commandService.getCommand(commandName);
 			if (!scmd.isDefined()) {
 				scmd.define(Messages.find_action_label, Messages.find_action_run_string, editCat);
 			}
 
 			IHandler handler = new AbstractHandler() {
 				public Object execute(ExecutionEvent event) throws ExecutionException {
-					findAction.run();
+					action.run();
 					return null;
 				}
 			};
 
-			handlerService.activateHandler(FIND_COMMAND_ID, handler);
+			handlerService.activateHandler(commandName, handler);
 
 			// now set up the keybindings
 			String sampleContextId = "sampleViewContext"; //$NON-NLS-1$
@@ -395,7 +416,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 			ParameterizedCommand pscmd = new ParameterizedCommand(scmd, null);
 
-			KeySequence keySequence = KeySequence.getInstance("CTRL+F"); //$NON-NLS-1$
+			KeySequence keySequence = KeySequence.getInstance(shortcutCombination); //$NON-NLS-1$
 			Binding newKey = new KeyBinding(keySequence,
 				pscmd,
 				defaultSchemeId,
@@ -409,7 +430,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			boolean found = false;
 			for (int i = 0; i < bindings.length; i++) {
 				if (bindings[i].getParameterizedCommand() != null
-								&& bindings[i].getParameterizedCommand().getId().equals(FIND_COMMAND_ID)) {
+								&& bindings[i].getParameterizedCommand().getId().equals(commandName)) {
 					found = true;
 					break;
 				}
@@ -440,6 +461,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 	// Create custom contributions - tree popup menu
 	protected void addContributions() {
+
 		addAction = new AddAction(tree, Messages.add_action_label);
 		addAction.setImageDescriptor(ImageHolder.getImageDescriptor(ADD_ACTION_IMAGE_PATH));
 
@@ -476,23 +498,37 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		updateBundleAction = new UpdateBundleAction(tree, Messages.update_action_label);
 		updateBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(UPDATE_BUNDLE_IMAGE_PATH));
 
-		servicePropertiesAction = new ServicePropertiesAction(tree, Messages.service_properties_action_label); // icobgr
+		servicePropertiesAction = new ServicePropertiesAction(tree, Messages.property_action_label); // icobgr
 		gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
 		viewAction = new ViewAction(tree, Messages.services_view_action_label, tree);
+
 		showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label, tree);
 		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree);
 
-		dpPropertiesAction = new DPPropertiesAction(tree, Messages.show_dp_properties_action_label);
+		showServPropsInTreeAction = new ShowServicePropertiesInTree(tree, Messages.show_service_properties_in_tree);
+
+		dpPropertiesAction = new DPPropertiesAction(tree, Messages.property_action_label);
 		dpPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(DP_PROPERTIES_IMAGE_PATH));
 
-		bundlePropertiesAction = new BundlePropertiesAction(tree, Messages.show_bundle_properties_action_label);
+		bundlePropertiesAction = new BundlePropertiesAction(tree, Messages.property_action_label);
 		bundlePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLE_PROPERTIES_IMAGE_PATH));
 
+		commonPropertiesAction = new CommonPropertiesAction(tree, Messages.property_action_label);
+		commonPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
+		commonPropertiesAction.setAccelerator(SWT.ALT | SWT.TRAVERSE_RETURN);
+
 		findAction = new FindAction(tree, searchPanel, Messages.find_action_label);
+		findAction.setImageDescriptor(ImageHolder.getImageDescriptor(SEARCH_IMAGE_PATH));
+		findAction.setAccelerator(SWT.CTRL | 'F');
 		showConsoleAction = new ShowFrameworkConsole(tree, Messages.show_framework_console, tree);
+		showConsoleAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONSOLE_IMAGE_PATH));
+
 		refreshAction = new RefreshAction(tree,
 			Messages.refresh_framework_action_label,
-			Messages.refresh_bundle_action_label);
+			Messages.refresh_bundle_action_label,
+			tree);
+		refreshAction.setAccelerator(SWT.F5);
+		refreshAction.setImageDescriptor(ImageHolder.getImageDescriptor(REFRESH_IMAGE_PATH));
 
 		mgr = new MenuManager();
 		mgr.setRemoveAllWhenShown(true);
@@ -536,11 +572,10 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	// Fill context menu Actions when menu is about to show
 	protected void fillContextMenu(IMenuManager manager) {
 		tree.setSelection(tree.getSelection());
-
 		StructuredSelection selection = (StructuredSelection) tree.getSelection();
+		boolean homogen = true;
 		if (selection.size() > 0) {
 			Model element = (Model) selection.getFirstElement();
-			boolean homogen = true;
 			Class clazz = element.getClass();
 
 			Iterator iterator = selection.iterator();
@@ -567,9 +602,9 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 					manager.add(new Separator());
 					if (framework.isConnected()) {
 						manager.add(viewAction);
-						manager.add(new Separator());
+						manager.add(showServPropsInTreeAction);
 					}
-					manager.add(propertyAction);
+
 					manager.add(new Separator());
 				}
 				if (element instanceof TreeRoot) {
@@ -581,7 +616,6 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 					manager.add(stopAction);
 					manager.add(updateBundleAction);
 					manager.add(deinstallBundleAction);
-					manager.add(bundlePropertiesAction);
 					manager.add(refreshAction);
 					manager.add(new Separator());
 
@@ -590,10 +624,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 				}
 
 				if (element instanceof ObjectClass) {
-					if (element.getParent() instanceof FrameWork) {
-						manager.add(servicePropertiesAction);
-					} else {
-						manager.add(servicePropertiesAction);
+					if (!(element.getParent() instanceof FrameWork)) {
 						manager.add(gotoServiceAction);
 					}
 				}
@@ -607,7 +638,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 				}
 				if (element instanceof DeploymentPackage) {
 					manager.add(deinstallDPAction);
-					manager.add(dpPropertiesAction);
+					// manager.add(dpPropertiesAction);
 				}
 			}
 		} else {
@@ -616,6 +647,19 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(findAction);
 		manager.add(showConsoleAction);
+		if (selection.size() > 0 && homogen) {
+			manager.add(new Separator());
+			Model element = (Model) selection.getFirstElement();
+			if (element instanceof FrameWork)
+				manager.add(propertyAction);
+			if (element instanceof Bundle)
+				manager.add(bundlePropertiesAction);
+			if (element instanceof DeploymentPackage)
+				manager.add(dpPropertiesAction);
+			if (element instanceof ObjectClass)
+				manager.add(servicePropertiesAction);
+		}
+
 	}
 
 	// Save Tree Model
@@ -903,6 +947,33 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	}
 
 	public void keyReleased(KeyEvent e) {
+	}
+
+	public static void removeFilter() {
+		if (filterJob != null) {
+			Display display = Display.getDefault();
+			if (display != null && !display.isDisposed())
+				display.syncExec(new Runnable() {
+					public void run() {
+						filterJob.removeFilter();
+					}
+				});
+		}
+	}
+
+	public static void addFilter() {
+		Display display = Display.getDefault();
+		if (display != null && !display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+
+				public void run() {
+					if (filterJob == null)
+						filterJob = new FilterJob(tree);
+					filterJob.schedule(400);
+				}
+			});
+		}
+		// console
 	}
 
 }
