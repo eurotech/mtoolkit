@@ -79,6 +79,9 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		textIP = createText(2, connectPropertiesGroup);
 		textIP.setText(DEFAULT_IP);
 
+		connectButton = createCheckboxButton(Messages.connect_button_label, control);
+		connectButton.setEnabled(!fw.isConnected());
+
 		// Bottom buttons group
 		bottomButtonsHolder = new Composite(control, SWT.NONE);
 		bottomButtonsHolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -86,13 +89,9 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		bottomButtonsGrid.numColumns = 4;
 		bottomButtonsHolder.setLayout(bottomButtonsGrid);
 
-		connectButton = createButton(Messages.connect_button_label, bottomButtonsHolder);
 		okButton = createButton(Messages.ok_button_label, bottomButtonsHolder);
 		cancelButton = createButton(Messages.cancel_button_label, bottomButtonsHolder);
-
-		connectButton.setEnabled(!fw.isConnected());
-
-		getShell().setDefaultButton(fw.isConnected() ? okButton : connectButton);
+		getShell().setDefaultButton(okButton);
 
 		logic.sheetLoaded();
 
@@ -105,12 +104,27 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 	public void initValues(IMemento config) {
 		logic.setValue(textServer, FRAMEWORK_ID);
 		logic.setValue(textIP, FRAMEWORK_IP_ID);
+		if (logic.setValue(connectButton, CONNECT_TO_FRAMEWORK)) {
+			// connectButton.setVisible(false);
+			Composite parent = connectButton.getParent();
+			Control[] children = parent.getChildren();
+			for (int i = 0; i < children.length; i++) {
+				if (children[i].equals(connectButton)) {
+					children[i].dispose();
+					break;
+					// children[i] = null;
+				}
+			}
+			parent.pack();
+		}
 	}
 
 	// Save ui values to storage and update target element
 	public void saveValues(IMemento config) {
 		config.putString(FRAMEWORK_ID, textServer.getText());
 		config.putString(FRAMEWORK_IP_ID, textIP.getText());
+		if (!connectButton.isDisposed())
+			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
 	}
 
 	// Get currently entered server name
@@ -135,6 +149,18 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		resultLabel.setLayoutData(grid);
 
 		return resultLabel;
+	}
+
+	private Button createCheckboxButton(String label, Composite parent) {
+		Button resultButton = new Button(parent, SWT.CHECK);
+		GridData grid = new GridData(GridData.FILL_HORIZONTAL);
+
+		resultButton.setText(label);
+		resultButton.setLayoutData(grid);
+		resultButton.addSelectionListener(logic);
+		resultButton.setSelection(false);
+
+		return resultButton;
 	}
 
 	// Create Button
