@@ -23,6 +23,7 @@ public class DPPropertiesAction extends SelectionProviderAction {
 	public DPPropertiesAction(ISelectionProvider provider, String label) {
 		super(provider, label);
 		this.parentView = (TreeViewer) provider;
+		this.setText(label + "@Alt+Enter");
 	}
 
 	// run method
