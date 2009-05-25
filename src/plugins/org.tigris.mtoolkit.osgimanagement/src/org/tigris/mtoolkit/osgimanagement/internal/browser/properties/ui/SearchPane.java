@@ -52,6 +52,7 @@ public class SearchPane extends Composite implements SelectionListener, ModifyLi
 	private Composite closeButton;
 	private TreeViewer parentView;
 	private String text = ""; //$NON-NLS-1$
+	private String notFoundText = null;
 	private Color red;
 	private Color black;
 
@@ -153,6 +154,10 @@ public class SearchPane extends Composite implements SelectionListener, ModifyLi
 	protected void findItem() {
 		text = findText.getText();
 		if (text.equals(""))return; //$NON-NLS-1$
+		if (notFoundText != null && text.indexOf(notFoundText) != -1) {
+			return;
+		}
+
 		IStructuredSelection startSelection = (IStructuredSelection) parentView.getSelection();
 
 		Model startNode = (Model) startSelection.getFirstElement();
@@ -191,6 +196,7 @@ public class SearchPane extends Composite implements SelectionListener, ModifyLi
 			foundNode = findItem(node, text, startNode);
 		}
 
+		boolean itemFound = false;
 		if (foundNode == startNode) {
 			if (foundNode.getName().indexOf(text) == -1) {
 				findText.setForeground(red);
@@ -198,9 +204,15 @@ public class SearchPane extends Composite implements SelectionListener, ModifyLi
 		} else if (foundNode != null) {
 			parentView.setSelection(new StructuredSelection(foundNode));
 			findText.setForeground(black);
+			itemFound = true;
 		} else {
 			findText.setForeground(red);
 		}
+
+		if (!itemFound)
+			notFoundText = text;
+		else
+			notFoundText = null;
 	}
 
 	public Model findItem(Model parent, String searching, Model startNode) {
