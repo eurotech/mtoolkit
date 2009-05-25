@@ -68,7 +68,10 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 		if (capableProcessors == null || capableProcessors.size() == 0) {
 			return new IContributionItem[0];
 		}
-
+		installationItems = removeUnsupportedFromTarget(installationItems, capableProcessors);
+		if(installationItems.isEmpty())
+			return new IContributionItem[0];
+		
 		MenuManager menuManager = new MenuManager(Messages.install_to_menu_label); //$NON-NLS-1$
 
 		Iterator iterator = capableProcessors.iterator();
@@ -85,6 +88,31 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 		return new IContributionItem[] { menuManager };
 	}
 
+	private List removeUnsupportedFromTarget(List installationItems,List capableProcessors) {
+		Iterator iter = installationItems.iterator();
+		List temp = new ArrayList();
+		while(iter.hasNext()) {
+			InstallationItem item =(InstallationItem) iter.next(); 
+			String mimeType = item.getMimeType();
+			boolean supported = false;
+			for(int j = 0; j < capableProcessors.size();j++) {
+				InstallationItemProcessor processor = (InstallationItemProcessor) capableProcessors.get(j);
+				InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
+				for(int k = 0; k < targets.length;k++) {
+					if(targets[k].isMimeTypeSupported(mimeType)) { 
+						supported = true;
+						break;
+					}
+				}
+				if(supported) {
+					temp.add(item);
+					continue;
+				}
+			}
+		}
+		return temp;
+	}
+	
 	private void createActions(InstallationItemProcessor processor, List items, final MenuManager menuManager) {
 		InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
 
