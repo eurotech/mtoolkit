@@ -10,11 +10,16 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole;
@@ -24,11 +29,16 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.PMPServiceFactory;
+import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 
 public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private static final String DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
-
+	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
+		
+	private static final String SERVICE_STATE = "iagent.service.state";
+	public static final String CUSTOM_PROPERTY_EVENT = "iagent_property_event";
+	
 	private RemoteBundleAdminImpl bundleAdmin;
 	private RemoteDeploymentAdminImpl deploymentAdmin;
 	private RemoteServiceAdminImpl serviceAdmin;
@@ -41,7 +51,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private EventSynchronizer synchronizer;
 
 	private ServiceTracker deploymentAdminTrack;
-
+	private ServiceTracker eventAdminTracker;
+	
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
 		instance = this;
@@ -52,6 +63,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		deploymentAdminTrack = new ServiceTracker(context, DEPLOYMENT_ADMIN_CLASS, this);
 		deploymentAdminTrack.open(true);
 
+		eventAdminTracker = new ServiceTracker(context, EVENT_ADMIN_CLASS, this);
+		eventAdminTracker.open(true);
+		
 		serviceAdmin = new RemoteServiceAdminImpl();
 		serviceAdmin.register(context);
 
@@ -118,6 +132,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			deploymentAdminTrack = null;
 		}
 
+		if(eventAdminTracker != null) {
+			eventAdminTracker.close();
+			eventAdminTracker = null;
+		}
+		
 		if (serviceAdmin != null) {
 			serviceAdmin.unregister(context);
 			serviceAdmin = null;
@@ -127,22 +146,43 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	}
 
 	public Object addingService(ServiceReference arg0) {
-		if (deploymentAdminTrack.getService() == null) {
-			deploymentAdmin = new RemoteDeploymentAdminImpl();
-			DeploymentAdmin admin = (DeploymentAdmin) context.getService(arg0);
-			deploymentAdmin.register(context, admin);
-			return admin;
-		} else {
-			return null;
-		}
+		String[] classes =  (String[]) arg0.getProperty("objectClass");
+		for(int i = 0; i < classes.length;i++)
+			if(classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
+				sendEvent(RemoteDeploymentAdmin.class, true);
+				if (deploymentAdminTrack.getService() == null) {
+					deploymentAdmin = new RemoteDeploymentAdminImpl();
+					DeploymentAdmin admin = (DeploymentAdmin) context.getService(arg0);
+					deploymentAdmin.register(context, admin);
+					return admin;
+				} else {
+					return null;
+				}
+			} else if(classes[i].equals(EVENT_ADMIN_CLASS)) {
+				sendEvent(EventAdmin.class, true);
+				return new Object();
+			}
+		
+		return null;
 	}
 
 	public void modifiedService(ServiceReference arg0, Object arg1) {
+		
 	}
 
 	public void removedService(ServiceReference arg0, Object arg1) {
-		deploymentAdmin.unregister(context);
-		deploymentAdmin = null;
+		
+		String[] classes = (String[]) arg0.getProperty("objectClass");
+		for(int i = 0; i < classes.length;i++) {
+			if(classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
+				sendEvent(RemoteDeploymentAdmin.class, false);
+				deploymentAdmin.unregister(context);
+				deploymentAdmin = null;
+				break;
+			} else if(classes[i].equals(EVENT_ADMIN_CLASS)) {
+				sendEvent(EventAdmin.class, false);
+			}
+		}
 	}
 
 	public static EventSynchronizer getSynchronizer() {
@@ -152,4 +192,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private void initSynchronizer() {
 	}
 
+	private void sendEvent(Class objClass, boolean state) {
+		Dictionary pmpEventData = new Hashtable();
+		
+		pmpEventData.put(Constants.OBJECTCLASS, new String[]{objClass.getName()});
+		pmpEventData.put(SERVICE_STATE, new Boolean(state));
+		
+		synchronizer.enqueue(new EventData(pmpEventData, CUSTOM_PROPERTY_EVENT));
+	}
 }
