@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
@@ -41,6 +42,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.UIHelper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
@@ -49,6 +51,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceObject;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
@@ -81,6 +84,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 	public static boolean isAutoConnectEnabled = FrameworkPreferencesPage.autoConnectDefault;
 	public static boolean isAutoStartBundlesEnabled = FrameworkPreferencesPage.autoStartAfterInstall;
+	public static boolean isBundlesCategoriesShown = FrameworkPreferencesPage.showBundleCategories;
+
 	public static Hashtable connectJobs = new Hashtable();
 
 	public static void init() {
@@ -104,7 +109,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				monitor.beginTask(Messages.retrieve_bundles_info, rBundles.length);
 			}
 
-			Model bundleRoot = fw.getBundlesNode();
 			for (int i = 0; i < rBundles.length; i++) {
 				addBundle(rBundles[i], fw);
 				if (monitor != null) {
@@ -113,9 +117,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					}
 					monitor.worked(1);
 				}
-			}
-			if (fw.getViewType() == FrameWork.SERVICES_VIEW) {
-				fw.removeElement(bundleRoot);
 			}
 		}
 		if (monitor != null) {
@@ -232,13 +233,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					fw.servicesViewVector.addElement(hashService);
 
 					if (fw.getViewType() == FrameWork.SERVICES_VIEW) {
-						Model children[] = fw.getChildren();
-						for (int j = 0; j < children.length; j++) {
-							if (children[j].getName().equals(hashService.getName())) {
-								fw.removeElement(children[j]);
-								break;
-							}
-						}
 						fw.addElement(hashService);
 					}
 				}
@@ -259,7 +253,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				addServiceCategoriesNodes(usedInBundle);
 				Model categories[] = usedInBundle.getChildren();
 				ServicesCategory usedCategory = (ServicesCategory) categories[1];
-
 				createObjectClassNodes(usedCategory,
 					servObj.getObjectClass(),
 					new Long(servObj.getRemoteService().getServiceId()),
@@ -289,6 +282,36 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				nameID,
 				service);
 			parent.addElement(objClass);
+			if (objClass.findFramework().isShownServicePropertiss())
+				addServicePropertiesNodes(objClass);
+		}
+	}
+
+	public static void addServicePropertiesNodes(ObjectClass objClass) throws IAgentException {
+		RemoteService rService = objClass.getService();
+		Dictionary servProperties = rService.getProperties();
+		Enumeration keys = servProperties.keys();
+		while (keys.hasMoreElements()) {
+			String key = (String) keys.nextElement();
+			Object value = servProperties.get(key);
+			if (value instanceof String[]) {
+				String[] values = (String[]) value;
+				if (values.length == 1) {
+					ServiceProperty node = new ServiceProperty(key + ": " + values[0], objClass);
+					objClass.addElement(node);
+				} else {
+					for (int j = 0; j < values.length; j++) {
+						StringBuffer buff = new StringBuffer();
+						buff.append(key).append("[").append(String.valueOf(j + 1)).append("]");
+						String key2 = buff.toString();
+						ServiceProperty node = new ServiceProperty(key2 + ": " + values[j], objClass);
+						objClass.addElement(node);
+					}
+				}
+			} else {
+				ServiceProperty node = new ServiceProperty(key + ": " + value.toString(), objClass);
+				objClass.addElement(node);
+			}
 		}
 	}
 
@@ -296,30 +319,41 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		try {
 			if (framework.bundleHash.containsKey(new Long(rBundle.getBundleId())))
 				return;
+
 			Dictionary headers = rBundle.getHeaders(null);
-			String categoryName = (String) headers.get("Bundle-Category"); //$NON-NLS-1$
-			if (categoryName == null)
-				categoryName = Messages.unknown_category_label;
-			String bundleName = getBundleName(rBundle, headers);
-			Category category = null;
-			if (framework.categoryHash.containsKey(categoryName)) {
-				category = (Category) framework.categoryHash.get(categoryName);
+			Model bundleParentModel;
+			String categoryName = (String) headers.get("Bundle-Category");
+			if (isBundlesCategoriesShown) {
+				if (categoryName == null)
+					categoryName = Messages.unknown_category_label;
+				Category category = null;
+				if (framework.categoryHash.containsKey(categoryName)) {
+					category = (Category) framework.categoryHash.get(categoryName);
+				} else {
+					category = new Category(categoryName, framework.getBundlesNode());
+					framework.categoryHash.put(categoryName, category);
+					framework.getBundlesNode().addElement(category);
+				}
+				bundleParentModel = category;
 			} else {
-				category = new Category(categoryName, framework.getBundlesNode());
-				framework.categoryHash.put(categoryName, category);
-				framework.getBundlesNode().addElement(category);
+				bundleParentModel = framework.getBundlesNode();
 			}
-			Bundle bundle = new Bundle(bundleName, category, rBundle, rBundle.getState(), getRemoteBundleType(rBundle,
-				headers), categoryName);
+
+			String bundleName = getBundleName(rBundle, headers);
+			Bundle bundle = new Bundle(bundleName,
+				bundleParentModel,
+				rBundle,
+				rBundle.getState(),
+				getRemoteBundleType(rBundle, headers),
+				categoryName);
 			if (bundle.getState() == org.osgi.framework.Bundle.ACTIVE
 							|| bundle.getState() == org.osgi.framework.Bundle.STARTING) {
 				addServiceCategoriesNodes(bundle);
 			}
-			category.addElement(bundle);
+				bundleParentModel.addElement(bundle);
 			framework.bundleHash.put(new Long(bundle.getID()), bundle);
-			if (framework.getViewType() == FrameWork.SERVICES_VIEW) {
-				framework.removeElement(category.getParent());
-			}
+			
+
 		} catch (IllegalArgumentException e) {
 			// bundle was uninstalled
 		}
@@ -349,11 +383,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				monitor.beginTask(Messages.retrieve_dps_info, dps.length);
 			}
 			for (int i = 0; i < dps.length; i++) {
-				DeploymentPackage dpNode = new DeploymentPackage(dps[i], framework.getDPNode(), framework);
+				DeploymentPackage dpNode = new DeploymentPackage(dps[i], deplPackagesNode, framework);
 				dpHash.put(dps[i].getName(), dpNode);
-				if (framework.getViewType() != FrameWork.SERVICES_VIEW) {
-					deplPackagesNode.addElement(dpNode);
-				}
+				deplPackagesNode.addElement(dpNode);
 				if (monitor != null) {
 					if (monitor.isCanceled()) {
 						return;
@@ -361,6 +393,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					monitor.worked(1);
 				}
 			}
+
 			framework.setDPHash(dpHash);
 			if (monitor != null) {
 				monitor.done();
@@ -385,7 +418,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public static void updateViewType(FrameWork fw) {
-		fw.removeChildren();
+ 		fw.removeChildren();
 		if (fw.getViewType() == FrameWork.SERVICES_VIEW) {
 			for (int i = 0; i < fw.servicesViewVector.size(); i++) {
 				fw.addElement((Model) fw.servicesViewVector.elementAt(i));
@@ -394,16 +427,24 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		} else {
 			Model bundlesNode = fw.getBundlesNode();
 			Model dpNode = fw.getDPNode();
-
-			Enumeration keys = fw.categoryHash.keys();
-			while (keys.hasMoreElements()) {
-				bundlesNode.addElement((Model) fw.categoryHash.get(keys.nextElement()));
+			
+			Enumeration keys = null;
+			if(isBundlesCategoriesShown) { 
+				keys = fw.categoryHash.keys();
+				while(keys.hasMoreElements()) {
+					Model category = (Model)fw.categoryHash.get(keys.nextElement());
+					bundlesNode.addElement(category);
+					
+				}
 			}
-
+			
 			keys = fw.dpHash.keys();
 			while (keys.hasMoreElements()) {
 				dpNode.addElement((Model) fw.dpHash.get(keys.nextElement()));
 			}
+			
+			fw.addElement(bundlesNode);
+			fw.addElement(dpNode);
 		}
 	}
 
@@ -413,6 +454,19 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public static void stopBundle(final Bundle bundle) {
+		if (bundle.getID() == 0) {
+			MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(),
+				"Stop bundle",
+				null,
+				NLS.bind(Messages.stop_system_bundle, bundle.getName()),
+				MessageDialog.QUESTION,
+				new String[] { "Continue", "Cancel" },
+				0);
+			int statusCode = UIHelper.openWindow(dialog);
+			if (statusCode == 1)
+				return;
+		}
+
 		RemoteBundleOperation job = new StopBundleOperation(bundle);
 		job.schedule();
 	}
