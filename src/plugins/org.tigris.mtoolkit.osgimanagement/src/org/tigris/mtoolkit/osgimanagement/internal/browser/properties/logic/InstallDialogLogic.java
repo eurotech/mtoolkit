@@ -21,36 +21,36 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Install
 
 public class InstallDialogLogic implements SelectionListener, ConstantsDistributor, ModifyListener {
 
-  private InstallDialog target;
+	private InstallDialog target;
 
-  public InstallDialogLogic (InstallDialog obj) {
-    this.target = obj;
-  }
-  
-  public void widgetDefaultSelected(SelectionEvent event) {
-  }
+	public InstallDialogLogic(InstallDialog obj) {
+		this.target = obj;
+	}
 
-  public void widgetSelected(SelectionEvent event) {
-    if (event.getSource() instanceof Button) {
-      String buttonText = ((Button)event.getSource()).getText();
+	public void widgetDefaultSelected(SelectionEvent event) {
+	}
 
-      // Browse
-      if (buttonText.equals(Messages.browse_button_label)) {
-        target.startLocationChooser();
-      }
-      // OK
-      if (buttonText.equals(Messages.ok_button_label)) {
-        target.closeOK();
-        target.close();
-      }
-      // Cancel
-      if (buttonText.equals(Messages.cancel_button_label)) {
-        target.close();
-      }
-    }
-  }
+	public void widgetSelected(SelectionEvent event) {
+		if (event.getSource() instanceof Button) {
+			String buttonText = ((Button) event.getSource()).getText();
 
-  public void modifyText(ModifyEvent e) {
-    target.updateButtons();
-  }
+			// Browse
+			if (buttonText.equals(Messages.browse_button_label)) {
+				target.startLocationChooser();
+			}
+			// OK
+			if (buttonText.equals(Messages.ok_button_label)) {
+				target.closeOK();
+				target.close();
+			}
+			// Cancel
+			if (buttonText.equals(Messages.cancel_button_label)) {
+				target.close();
+			}
+		}
+	}
+
+	public void modifyText(ModifyEvent e) {
+		target.updateButtons();
+	}
 }
