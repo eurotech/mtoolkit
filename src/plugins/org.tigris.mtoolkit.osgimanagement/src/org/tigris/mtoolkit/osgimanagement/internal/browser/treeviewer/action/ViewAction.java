@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -18,6 +20,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
@@ -28,10 +31,15 @@ public class ViewAction extends SelectionProviderAction {
 	private String bundlesView = Messages.bundles_view_action_label;
 	private String servicesView = Messages.services_view_action_label;
 	private TreeViewer tree;
+	private List frameworks;
+	private int counter = 0;
+	private int count = 0;
 
 	public ViewAction(ISelectionProvider provider, String text, TreeViewer tree) {
 		super(provider, text);
 		this.tree = tree;
+		frameworks = new ArrayList();
+		this.setEnabled(false);
 	}
 
 	/*
@@ -40,21 +48,28 @@ public class ViewAction extends SelectionProviderAction {
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
+		FrameWorkView.removeFilter();
 		ISelection selection = getSelection();
-		Iterator iterator = getStructuredSelection().iterator();
-		int viewType = ((FrameWork) getStructuredSelection().getFirstElement()).getViewType();
-		while (iterator.hasNext()) {
-			FrameWork fw = (FrameWork) iterator.next();
-			setViewType(fw, viewType);
+		tree.getTree().setRedraw(false);
+		List tmp = new ArrayList();
+		tmp.addAll(frameworks);
+		count = tmp.size();
+		counter = 0;
+		int viewType = ((FrameWork) frameworks.get(0)).getViewType();
+
+		for (int i = 0; i < frameworks.size(); i++) {
+			setViewType((FrameWork) frameworks.get(i), viewType);
 		}
+		for (int i = 0; i < tmp.size(); i++)
+			expandTree((FrameWork) tmp.get(i), selection);
+
 		getSelectionProvider().setSelection(selection);
+		FrameWorkView.addFilter();
 	}
 
 	private void setViewType(final FrameWork fw, int viewType) {
-		tree.getTree().setRedraw(false);
 		Model parent = fw.getParent();
 		parent.removeElement(fw);
-		final ISelection selection = tree.getSelection();
 		try {
 			switch (viewType) {
 			case FrameWork.BUNDLES_VIEW: {
@@ -76,7 +91,10 @@ public class ViewAction extends SelectionProviderAction {
 			t.printStackTrace();
 		}
 		parent.addElement(fw);
+		fw.updateElement();
+	}
 
+	private void expandTree(final FrameWork fw, final ISelection selection) {
 		Display display = Display.getCurrent();
 		if (display == null)
 			display = Display.getDefault();
@@ -84,9 +102,11 @@ public class ViewAction extends SelectionProviderAction {
 			public void run() {
 				tree.expandToLevel(fw, 1);
 				tree.setSelection(selection, true);
+				counter++;
+				if (counter == count)
+					tree.getTree().setRedraw(true);
 			}
 		});
-		tree.getTree().setRedraw(true);
 	}
 
 	/*
@@ -105,33 +125,38 @@ public class ViewAction extends SelectionProviderAction {
 			setEnabled(false);
 			return;
 		}
-		boolean enabled = true;
 
-		Iterator iterator = selection.iterator();
-		while (iterator.hasNext()) {
-			Model model = (Model) iterator.next();
-			if (!(model instanceof FrameWork)) {
-				enabled = false;
-				break;
+		this.frameworks.clear();
+		Iterator iter = selection.iterator();
+		while (iter.hasNext()) {
+			Object element = iter.next();
+			FrameWork fw = null;
+			if (element instanceof FrameWork)
+				fw = (FrameWork) element;
+			else if (element instanceof Model)
+				fw = ((Model) element).findFramework();
+
+			if (fw != null && fw.isConnected() && !frameworks.contains(fw)) {
+				frameworks.add(fw);
 			}
-			FrameWork framework = (FrameWork) model;
-			if (!framework.isConnected() || framework.isConnecting()) {
-				enabled = false;
-				break;
-			}
+
 		}
-		this.setEnabled(enabled);
 
-		if (enabled) {
-			FrameWork fw = (FrameWork) selection.getFirstElement();
+		if (this.frameworks.isEmpty()) {
+			this.setEnabled(false);
+			return;
+		}
+		this.setEnabled(true);
+
+		for (int i = this.frameworks.size() - 1; i >= 0; i--) {
+			FrameWork fw = (FrameWork) this.frameworks.get(i);
 			switch (fw.getViewType()) {
-			case FrameWork.BUNDLES_VIEW: {
+			case FrameWork.BUNDLES_VIEW:
 				setText(servicesView);
 				break;
-			}
-			case FrameWork.SERVICES_VIEW: {
+			case FrameWork.SERVICES_VIEW:
 				setText(bundlesView);
-			}
+				break;
 			}
 		}
 	}
