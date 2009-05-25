@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.preferences;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.PreferencePage;
@@ -23,11 +27,13 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.osgi.service.prefs.Preferences;
 import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
 // TODO: Change this class to change only the preferences, the settings holder
 // should get the changes from the events
@@ -38,12 +44,14 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	private Button enableAutoConnectButton;
 	private Button enableInfoLogButton;
 	private Button enableAutoStartButton;
+	private Button enableBundleCategoriesButton;
 
 	// TODO: Move these defaults to PreferencesInitializer, which is more
 	// suitable for them
 	public static final boolean autoConnectDefault = true;
 	public static final boolean infoLogDefault = true;
 	public static final boolean autoStartAfterInstall = true;
+	public static final boolean showBundleCategories = true;
 
 	public Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -68,6 +76,10 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		enableAutoStartButton.setText(Messages.autostart_bundles_on_install);
 		enableAutoStartButton.setSelection(FrameworkConnectorFactory.isAutoStartBundlesEnabled);
 
+		enableBundleCategoriesButton = new Button(composite, SWT.CHECK);
+		enableBundleCategoriesButton.setText(Messages.show_bundle_categories);
+		enableBundleCategoriesButton.setSelection(FrameworkConnectorFactory.isBundlesCategoriesShown);
+
 		return composite;
 	}
 
@@ -83,6 +95,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		enableAutoConnectButton.setSelection(autoConnectDefault);
 		enableInfoLogButton.setSelection(infoLogDefault);
 		enableAutoStartButton.setSelection(autoStartAfterInstall);
+		enableBundleCategoriesButton.setSelection(showBundleCategories);
 	}
 
 	public boolean performOk() {
@@ -90,6 +103,25 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		FrameworkConnectorFactory.isAutoConnectEnabled = enableAutoConnectButton.getSelection();
 		FrameworkConnectorFactory.isAutoStartBundlesEnabled = enableAutoStartButton.getSelection();
 		BrowserErrorHandler.isInfoLogEnabled = enableInfoLogButton.getSelection();
+
+		boolean shouldUpdateFrameworks = false;
+		if (FrameworkConnectorFactory.isBundlesCategoriesShown != enableBundleCategoriesButton.getSelection())
+			shouldUpdateFrameworks = true;
+
+		FrameworkConnectorFactory.isBundlesCategoriesShown = enableBundleCategoriesButton.getSelection();
+
+		if (shouldUpdateFrameworks) {
+			HashMap existingFrameworks = FrameWorkView.getTreeRoot().getFrameWorkMap();
+			Collection frameworks = existingFrameworks.values();
+			Iterator iterator = frameworks.iterator();
+
+			while (iterator.hasNext()) {
+				Object framework = iterator.next();
+				if (((FrameWork) framework).isConnected())
+					((FrameWork) framework).refreshAction();
+			}
+		}
+
 		saveSettings();
 		return true;
 	}
@@ -112,6 +144,8 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 				FrameworkConnectorFactory.isAutoStartBundlesEnabled);
 			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_INFO_LOG,
 				BrowserErrorHandler.isInfoLogEnabled);
+			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY,
+				FrameworkConnectorFactory.isBundlesCategoriesShown);
 		}
 	}
 
@@ -119,6 +153,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		FrameworkConnectorFactory.isAutoConnectEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT);
 		FrameworkConnectorFactory.isAutoStartBundlesEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
 		BrowserErrorHandler.isInfoLogEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
+		FrameworkConnectorFactory.isBundlesCategoriesShown = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY);
 	}
 
 }
