@@ -1,6 +1,7 @@
 package org.tigris.mtoolkit.iagent.event;
 
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.iagent.IAgentException;
 
 /**
  * Clients interested in device properties change events must implement this
@@ -17,6 +18,7 @@ public interface RemoteDevicePropertyListener {
 	 * 
 	 * @param event
 	 *            an event object containing details
+	 * @throws IAgentException 
 	 */
-	public void devicePropertiesChanged(RemoteDevicePropertyEvent e);
+	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException;
 }
