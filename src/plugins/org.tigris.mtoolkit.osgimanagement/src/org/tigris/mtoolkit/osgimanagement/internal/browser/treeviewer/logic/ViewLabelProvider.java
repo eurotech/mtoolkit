@@ -10,9 +10,17 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
+import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
@@ -23,12 +31,13 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
-public class ViewLabelProvider extends LabelProvider implements ConstantsDistributor {
+public class ViewLabelProvider extends StyledCellLabelProvider implements ConstantsDistributor {
 
 	private static final String ROOT_ICON = "homefolder.gif"; //$NON-NLS-1$
 	private static final String DP_ICON = "dpackage.gif"; //$NON-NLS-1$
@@ -126,6 +135,10 @@ public class ViewLabelProvider extends LabelProvider implements ConstantsDistrib
 		if (element instanceof DeploymentPackage) {
 			return ImageHolder.getImage(ViewLabelProvider.DP_ICON);
 		}
+
+		if (element instanceof ServiceProperty) {
+			return null;
+		}
 		return null;
 	}
 
@@ -133,15 +146,14 @@ public class ViewLabelProvider extends LabelProvider implements ConstantsDistrib
 	public void dispose() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-	 */
-	public String getText(Object element) {
+	public void update(ViewerCell cell) {
+		Object element = cell.getElement();
+		String text;
+		List styles = new ArrayList();
+
 		if (element instanceof Bundle) {
 			Bundle bundle = (Bundle) element;
-			String text = bundle.getName();
+			text = bundle.getName();
 
 			if (bundle.isShowID()) {
 				text += " [" + String.valueOf(bundle.getID()) + "]";
@@ -154,9 +166,27 @@ public class ViewLabelProvider extends LabelProvider implements ConstantsDistrib
 						String.valueOf(bundle.getID())), false);
 				}
 			}
-			return text;
+			TextStyle style = new TextStyle();
+			styles.add(new StyleRange(0, text.length(), style.foreground, style.background));
+		} else if (element instanceof ServiceProperty) {
+			text = ((ServiceProperty) element).getLabel();
+			TextStyle style = new TextStyle();
+			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
+			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
+			styles.add(new StyleRange(text.indexOf(":") + 1, text.length(), style.foreground, style.background));
+		} else {
+			text = element.toString();
+			TextStyle style = new TextStyle();
+			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
+
 		}
-		return super.getText(element);
+		cell.setText(text);
+		cell.setStyleRanges((StyleRange[]) styles.toArray(new StyleRange[styles.size()]));
+		cell.setImage(getImage(element));
+
+		super.update(cell);
 	}
 
 }
