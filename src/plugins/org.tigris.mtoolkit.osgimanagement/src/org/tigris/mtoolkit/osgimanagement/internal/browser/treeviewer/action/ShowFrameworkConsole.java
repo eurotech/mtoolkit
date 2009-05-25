@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
+import java.util.Iterator;
+
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -56,12 +58,25 @@ public class ShowFrameworkConsole extends SelectionProviderAction {
 	}
 
 	public void updateState(IStructuredSelection selection) {
-		if (selection.size() != 1
-						|| !(selection.getFirstElement() instanceof Model)
-						|| ((Model) selection.getFirstElement()).findFramework().autoConnected) {
-			setEnabled(false);
-		} else {
-			setEnabled(true);
+		boolean enabled = true;
+		Iterator iter = selection.iterator();
+		FrameWork fw = null;
+		while (iter.hasNext()) {
+			Object element = iter.next();
+			if (element instanceof FrameWork) {
+				if (fw == null)
+					fw = (FrameWork) element;
+				else if (!fw.equals(element)) {
+					enabled = false;
+				}
+			} else if (element instanceof Model) {
+				if (fw == null)
+					fw = ((Model) element).findFramework();
+				else if (!fw.equals(((Model) element).findFramework()))
+					enabled = false;
+			}
 		}
+
+		this.setEnabled(enabled);
 	}
 }
