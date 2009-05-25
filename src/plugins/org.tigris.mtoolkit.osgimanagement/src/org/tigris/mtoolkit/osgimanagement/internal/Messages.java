@@ -102,6 +102,7 @@ public final class Messages extends NLS {
 	public static String browse_button_label;
 	public static String connect_button_label;
 	public static String enable_frameworks_autoconnect;
+	public static String show_bundle_categories;
 	public static String enable_info_log;
 	public static String autostart_bundles_on_install;
 	public static String connect_error_message;
@@ -170,6 +171,7 @@ public final class Messages extends NLS {
 	public static String refresh_bundles_info;
 	public static String connect_framework;
 	public static String install_to_framework;
+	public static String show_service_properties_in_tree;
 	public static String _1;
 	public static String _8401;
 	public static String _8404;
@@ -232,6 +234,8 @@ public final class Messages extends NLS {
 
 	public static String no_frameworks_connected_label;
 	public static String start_bundle_failure_title;
+
+	public static String stop_system_bundle;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
