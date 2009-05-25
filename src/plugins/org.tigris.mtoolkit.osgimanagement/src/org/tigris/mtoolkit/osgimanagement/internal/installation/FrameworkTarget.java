@@ -12,12 +12,14 @@ package org.tigris.mtoolkit.osgimanagement.internal.installation;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
+import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class FrameworkTarget implements InstallationTarget {
 	private FrameWork fw;
+	private static final String MIME_DP = "application/vnd.osgi.dp";
 
 	public FrameworkTarget(FrameWork fw) {
 		this.fw = fw;
@@ -40,5 +42,12 @@ public class FrameworkTarget implements InstallationTarget {
 
 	public FrameWork getFramework() {
 		return fw;
+	}
+
+	public boolean isMimeTypeSupported(String type) {
+		boolean supportDP = ((Boolean) fw.getConnector().getProperties().get(RemoteDeploymentAdmin.class.getName())).booleanValue();
+		if (!supportDP && type.equals(MIME_DP))
+			return false;
+		return true;
 	}
 }
