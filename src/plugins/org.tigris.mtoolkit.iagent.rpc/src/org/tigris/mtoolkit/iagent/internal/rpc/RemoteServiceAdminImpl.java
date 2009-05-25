@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.AllServiceListener;
@@ -26,19 +24,13 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventAdmin;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
-import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
-import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
-import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 
 public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllServiceListener {
 
 	private static final String EVENT_TYPE_KEY = "type";
-	private static final String SERVICE_STATE = "iagent.service.state";
-
 	private static final int SERVICE_REGISTERED = 1 << 0;
 	private static final int SERVICE_MODIFIED = 1 << 1;
 	private static final int SERVICE_UNREGISTERED = 1 << 2;
@@ -199,53 +191,24 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 	}
 
 	private Dictionary convertServiceEvent(ServiceEvent event) {
-		boolean mayNeedToSendEvent = false;
-		boolean state = false;
 		Dictionary props = new Hashtable();
 		switch (event.getType()) {
 		case ServiceEvent.REGISTERED:
-			mayNeedToSendEvent = true;
-			state = true;
 			props.put(EVENT_TYPE_KEY, new Integer(SERVICE_REGISTERED));
 			break;
 		case ServiceEvent.MODIFIED:
 			props.put(EVENT_TYPE_KEY, new Integer(SERVICE_MODIFIED));
 			break;
 		case ServiceEvent.UNREGISTERING:
-			mayNeedToSendEvent = true;
 			props.put(EVENT_TYPE_KEY, new Integer(SERVICE_UNREGISTERED));
 			break;
 		}
-
-		if (mayNeedToSendEvent)
-			sendDevicePropertyEvent(event, state);
 
 		props.put(Constants.SERVICE_ID, event.getServiceReference().getProperty(Constants.SERVICE_ID));
 		props.put(Constants.OBJECTCLASS, event.getServiceReference().getProperty(Constants.OBJECTCLASS));
 		return props;
 	}
 
-	private void sendDevicePropertyEvent(ServiceEvent event, boolean state) {
-		String[] objectClasses = (String[]) event.getServiceReference().getProperty(Constants.OBJECTCLASS);
-		List objectClassesList = Arrays.asList(objectClasses);
-		Dictionary pmpEventData = new Hashtable();
-		EventSynchronizer synchronizer = Activator.getSynchronizer();
-
-		if (objectClassesList.contains(EventAdmin.class.getName())
-						|| objectClassesList.contains(RemoteDeploymentAdmin.class.getName())
-						|| objectClassesList.contains(RemoteApplicationAdmin.class.getName())
-						|| objectClassesList.contains(RemoteConsole.class.getName())) {
-			pmpEventData.put(Constants.OBJECTCLASS, event.getServiceReference().getProperty(Constants.OBJECTCLASS));
-			pmpEventData.put(SERVICE_STATE, new Boolean(state));
-		}
-
-		if (synchronizer != null) {
-			if (!pmpEventData.isEmpty())
-				synchronizer.enqueue(new EventData(pmpEventData, CUSTOM_PROPERTY_EVENT));
-		} else {
-			log("[postRemoteEvent] Event synchronizer was disabled");
-		}
-	}
 
 	public long getBundle(long id) {
 		if (DebugUtils.DEBUG)
