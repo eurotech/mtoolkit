@@ -29,6 +29,7 @@ public class ServicePropertiesAction extends SelectionProviderAction {
 	 */
 	public ServicePropertiesAction(ISelectionProvider provider, String text) {
 		super(provider, text);
+		this.setText(text + "@Alt+Enter");
 	}
 
 	/*
