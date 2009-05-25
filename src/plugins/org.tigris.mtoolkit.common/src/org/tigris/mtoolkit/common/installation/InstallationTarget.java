@@ -38,4 +38,6 @@ public interface InstallationTarget {
 	 * @return the icon
 	 */
 	public ImageDescriptor getIcon();
+	
+	public boolean isMimeTypeSupported(String type);
 }
