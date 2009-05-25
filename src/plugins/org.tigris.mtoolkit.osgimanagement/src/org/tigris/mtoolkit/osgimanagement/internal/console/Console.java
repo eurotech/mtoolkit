@@ -53,6 +53,7 @@ public class Console extends Composite implements VerifyKeyListener, VerifyListe
 	private VerifyListener vlist;
 
 	private ConsolePopupMenu popupMenu;
+	private ConsoleToolbarMenu toolbar;
 
 	private IPreferenceStore pstore;
 	private StyledText styledText;
@@ -99,6 +100,7 @@ public class Console extends Composite implements VerifyKeyListener, VerifyListe
 		styledText.addMouseListener(this);
 		styledText.addMouseMoveListener(this);
 		popupMenu = new ConsolePopupMenu(this, aBars);
+		toolbar = new ConsoleToolbarMenu(this, aBars);
 		styledText.setMenu(popupMenu.getMenu());
 
 		pstore = FrameworkPlugin.getDefault().getPreferenceStore();
@@ -428,5 +430,9 @@ public class Console extends Composite implements VerifyKeyListener, VerifyListe
 
 	public StyledText getStyledText() {
 		return styledText;
+	}
+
+	public ConsoleToolbarMenu getToolBar() {
+		return toolbar;
 	}
 }
