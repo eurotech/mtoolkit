@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -54,19 +55,15 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 	public void widgetSelected(SelectionEvent event) {
 		if (event.getSource() instanceof Button) {
 			Button button = (Button) event.getSource();
-
-			// Connect
-			if (button == target.connectButton) {
-				if (isFrameworkInfoCorrect()) {
-					changeSettings();
-					FrameworkConnectorFactory.connectFrameWork(fw);
-					target.close();
-				}
-			}
 			// OK
 			if (button == target.okButton) {
 				if (isFrameworkInfoCorrect()) {
 					changeSettings();
+					if (target.connectButton != null
+									&& !target.connectButton.isDisposed()
+									&& target.connectButton.getSelection()) {
+						FrameworkConnectorFactory.connectFrameWork(fw);
+					}
 					target.close();
 				}
 			}
@@ -121,15 +118,22 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 	}
 
 	// Set value of specified widget
-	public boolean setValue(Text target, String key) {
-		String result = config.getString(key);
+	public boolean setValue(Control target, String key) {
+		if (target instanceof Text) {
+			String result = config.getString(key);
 
-		if (result != null) {
-			target.setText(result);
-			return true;
-		} else {
-			return false;
+			if (result != null) {
+				((Text) target).setText(result);
+				return true;
+			}
+		} else if (target instanceof Button) {
+			Boolean result = config.getBoolean(key);
+			if (result != null) {
+				((Button) target).setSelection(result.booleanValue());
+				return true;
+			}
 		}
+		return false;
 	}
 
 	// Check for duplicate
@@ -141,10 +145,8 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 			return false;
 		}
 		String ip = target.getNewIP().trim();
-		boolean connectButtonState = target.connectButton.isEnabled();
 		try {
 			// just check if address is correct
-			target.connectButton.setEnabled(false);
 			target.okButton.setEnabled(false);
 			InetAddress.getByName(ip);
 		} catch (Exception e) {
@@ -152,7 +154,6 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 			BrowserErrorHandler.showInfoDialog(Messages.incorrect_framework_ip_message);
 			return false;
 		} finally {
-			target.connectButton.setEnabled(connectButtonState);
 			target.okButton.setEnabled(true);
 		}
 
