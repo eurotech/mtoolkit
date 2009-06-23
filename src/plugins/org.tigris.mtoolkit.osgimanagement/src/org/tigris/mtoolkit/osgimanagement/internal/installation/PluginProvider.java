@@ -27,12 +27,11 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.pde.internal.core.natures.PDE;
+import org.tigris.mtoolkit.common.IPluginExporter;
+import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.PluginExporter;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.PluginExporter_34;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.PluginExporter_35;
 
 public class PluginProvider implements InstallationItemProvider {
 
@@ -74,15 +73,7 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			String name = descr.getSymbolicName();
 
-			PluginExporter exporter = null;
-			try {
-				if (PluginExporter_35.isCompatible())
-					exporter = new PluginExporter_35();
-				else if (PluginExporter_34.isCompatible())
-					exporter = new PluginExporter_34();
-			} catch (Throwable e) {
-				FrameworkPlugin.error("Failed to export workspace plugin", e);
-			}
+			IPluginExporter exporter = PluginExporter.getInstance();
 
 			if (exporter == null) {
 				monitor.done();
