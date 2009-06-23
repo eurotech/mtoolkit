@@ -76,7 +76,6 @@ public final class Messages extends NLS {
 	public static String install_confirm_title;
 	public static String package_analyze_title;
 
-	public static String plugin_exporter_not_compatible;
 	public static String name_column_label;
 
 	public static String new_framework_default_name;
