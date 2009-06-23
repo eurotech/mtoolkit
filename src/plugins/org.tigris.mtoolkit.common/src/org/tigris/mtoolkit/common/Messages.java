@@ -15,13 +15,14 @@ import org.eclipse.osgi.util.NLS;
 public class Messages {
 
 	private static final String BUNDLE_NAME = "org.tigris.mtoolkit.common.messages";
-	
+
 	public static String MessageDialog_NoDetails;
-	
+	public static String plugin_exporter_not_compatible;
+
 	static {
 		reloadMessages();
 	}
-	
+
 	public static void reloadMessages() {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
