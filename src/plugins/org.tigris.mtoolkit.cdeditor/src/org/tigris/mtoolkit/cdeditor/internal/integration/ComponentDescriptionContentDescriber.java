@@ -34,7 +34,7 @@ public class ComponentDescriptionContentDescriber implements ITextContentDescrib
 	private ITextContentDescriber describer = null;
 	
 	public ComponentDescriptionContentDescriber() {
-		String className = PluginUtilities.compareVersion("org.eclipse.core.contenttype", PluginUtilities.VERSION_3_5_0) ? "org.eclipse.core.runtime.content.XMLContentDescriber" : "org.eclipse.core.internal.content.XMLContentDescriber";
+		String className = PluginUtilities.compareVersion("org.eclipse.core.contenttype", PluginUtilities.VERSION_3_4_0) ? "org.eclipse.core.runtime.content.XMLContentDescriber" : "org.eclipse.core.internal.content.XMLContentDescriber";
 		try {
 			describer = (ITextContentDescriber) ReflectionUtils.newInstance(className, null, null);
 		} catch (InvocationException e) {
