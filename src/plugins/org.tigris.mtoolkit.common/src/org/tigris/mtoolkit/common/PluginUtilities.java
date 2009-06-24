@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.internal.Messages;
 
 public class PluginUtilities {
@@ -61,6 +62,9 @@ public class PluginUtilities {
 
 	public static final char[] INVALID_RESOURCE_CHARACTERS;
 	public static final String[] INVALID_RESOURCE_NAMES;
+	
+	public static final String VERSION_3_4_0 = "3.4.0";
+	public static final String VERSION_3_5_0 = "3.5.0";
 
 	static {
 		char[] chars = null;
@@ -738,6 +742,29 @@ public class PluginUtilities {
 			}
 			super.getShell().setSize(newSize);
 		}
+	}
+	
+	/**
+	 * Returns specified bundle version
+	 * 
+	 * @param bundleName  bundle symbolic name
+	 * @return  Version for specified bundle
+	 */
+	public static Version getBundleVersion(String bundleName) { 
+		return new Version((String) Platform.getBundle(bundleName).getHeaders().get("Bundle-Version")); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Returns true if bundle version is greater or equal to specified version
+	 * 
+	 * @param bundleName bundle symbolic name
+	 * @param version  version to check - like PluginUtilities.VERSION_3_5_0)
+	 * @return  true if bundle version is greater or equal to specified version
+	 */
+	public static boolean compareVersion(String bundleName, String version) {
+		Version bundleVersion = getBundleVersion(bundleName);
+		Version compatibleRange = new Version(version);
+		return compatibleRange.compareTo(bundleVersion) <= 0;
 	}
 
 }

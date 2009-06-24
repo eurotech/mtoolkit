@@ -54,9 +54,7 @@ public class PluginExporter_34 implements IPluginExporter {
 	}
 
 	public static boolean isCompatible() {
-		Version pdeCoreVersion = new Version((String) Platform.getBundle("org.eclipse.pde.ui").getHeaders().get("Bundle-Version")); //$NON-NLS-1$ //$NON-NLS-2$
-		Version compatibleRange = new Version("3.5.0"); //$NON-NLS-1$
-		return compatibleRange.compareTo(pdeCoreVersion) > 0;
+		return !PluginUtilities.compareVersion("org.eclipse.pde.ui", PluginUtilities.VERSION_3_5_0); //$NON-NLS-1$
 	}
 
 	public String getQualifier() {
