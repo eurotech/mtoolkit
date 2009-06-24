@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+ <extension-point
+         name="%OSGiExtensionPoint.name"
+         id="osgi"/>  
+  
+  <extension point="org.eclipse.ui.editors">
+    <editor
+         id="org.tigris.mtoolkit.dpeditor.editor.DPPEditor"         
+         name="Deployment Editor"
+         default="true"
+         icon="icons/dpp.gif"
+         extensions="dpp"
+         class="org.tigris.mtoolkit.dpeditor.editor.DPPEditor">
+    </editor>
+  </extension>
+  <extension point = "org.eclipse.ui.newWizards">
+     <category
+	     id="org.tigris.mtoolkit.osgi.category"
+	     name="%NewDPPWizard.category">
+    </category>
+    <wizard id = "org.tigris.mtoolkit.dpeditor.wizard.NewDPPWizard"
+       name = "%NewDPPWizard.name"
+	     class="org.tigris.mtoolkit.dpeditor.wizard.NewDPPWizard"
+	     category="org.tigris.mtoolkit.osgi.category"	     
+	     icon="icons/new_dpp.gif">
+    	    <description>%NewDPPWizard.desc</description>
+	     <selection class="org.eclipse.core.resources.IResource"/>
+    </wizard>
+  </extension>  
+  <extension
+     point="org.eclipse.ui.exportWizards">
+     <category
+	     id="org.tigris.mtoolkit.dpeditor.wizards.export"
+	     name="%ExportWizard.category">
+     </category>
+     
+     <wizard
+        id = "org.tigris.mtoolkit.dpeditor.wizard.BuildExportWizard"
+        name = "Deployment Package"
+        icon="icons/dp_export.gif"
+        category="org.tigris.mtoolkit.dpeditor.wizards.export"
+        class="org.tigris.mtoolkit.dpeditor.wizard.BuildExportWizard">
+        <description>Export Deployment Package</description>
+        <selection class="org.eclipse.core.resources.IResource"/>
+     </wizard>
+     <wizard
+        id = "org.tigris.mtoolkit.dpeditor.wizard.AntExportWizard"
+        name = "Ant Build Script"
+        icon="icons/ant_export.gif"
+        category="org.tigris.mtoolkit.dpeditor.wizards.export"
+        class="org.tigris.mtoolkit.dpeditor.wizard.AntExportWizard">
+        <description>Export Ant Build Script</description>
+        <selection class="org.eclipse.core.resources.IResource"/>
+     </wizard>
+   </extension>
+  <extension point="org.tigris.mtoolkit.common.preferencesPages">
+     <page class="org.tigris.mtoolkit.dpeditor.preferences.DPEditorPreferencesPage"
+           id="org.tigris.mtoolkit.dpeditor.preferences.DPEditorPreferencesPage"
+           index="10"
+           name="%DPPreferencesPage.name">
+     </page>
+  </extension> 
+   <extension 
+       point = "org.eclipse.ui.popupMenus">
+       <objectContribution 
+         id="org.tigris.mtoolkit.dpeditor.menu.quickBuild" 
+         objectClass="org.eclipse.core.resources.IFile" 
+         nameFilter="*.dpp"> 
+         <action
+            id="org.tigris.mtoolkit.dpeditor.action.quickBuild" 
+            label="%QuickBuild.Popup.quickbuild"
+            style="push"
+            menubarPath="additions" 
+            class="org.tigris.mtoolkit.dpeditor.actions.QuickBuildActionDelegate"
+            enablesFor="*" /> 
+       </objectContribution> 
+   </extension>
+</plugin>
