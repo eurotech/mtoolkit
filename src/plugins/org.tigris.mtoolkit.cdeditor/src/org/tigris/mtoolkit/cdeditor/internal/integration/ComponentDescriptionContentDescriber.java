@@ -16,8 +16,12 @@ import java.io.Reader;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.core.internal.content.XMLContentDescriber;
+import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.content.ITextContentDescriber;
 import org.eclipse.core.runtime.content.IContentDescription;
+import org.tigris.mtoolkit.common.PluginUtilities;
+import org.tigris.mtoolkit.common.ReflectionUtils;
+import org.tigris.mtoolkit.common.ReflectionUtils.InvocationException;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -25,8 +29,19 @@ import org.xml.sax.SAXException;
  * This class is intended to determine whether contents of provided file is 
  * valid Component Description.
  */
-public class ComponentDescriptionContentDescriber extends XMLContentDescriber {
+public class ComponentDescriptionContentDescriber implements ITextContentDescriber {
 
+	private ITextContentDescriber describer = null;
+	
+	public ComponentDescriptionContentDescriber() {
+		String className = PluginUtilities.compareVersion("org.eclipse.core.contenttype", PluginUtilities.VERSION_3_5_0) ? "org.eclipse.core.runtime.content.XMLContentDescriber" : "org.eclipse.core.internal.content.XMLContentDescriber";
+		try {
+			describer = (ITextContentDescriber) ReflectionUtils.newInstance(className, null, null);
+		} catch (InvocationException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private int checkComponentDescription(InputSource source) throws IOException {
 		ComponentDescriptionHandler handler = new ComponentDescriptionHandler();
 		try {
@@ -45,7 +60,7 @@ public class ComponentDescriptionContentDescriber extends XMLContentDescriber {
 	}
 	
 	public int describe(InputStream contents, IContentDescription description) throws IOException {
-		if (super.describe(contents, description) == INVALID) {
+		if (describer.describe(contents, description) == INVALID) {
 			return INVALID;
 		}
 		contents.reset();
@@ -53,10 +68,14 @@ public class ComponentDescriptionContentDescriber extends XMLContentDescriber {
 	}
 
 	public int describe(Reader contents, IContentDescription description) throws IOException {
-		if (super.describe(contents, description) == INVALID) {
+		if (describer.describe(contents, description) == INVALID) {
 			return INDETERMINATE;
 		}
 		contents.reset();
 		return checkComponentDescription(new InputSource(contents));
+	}
+
+	public QualifiedName[] getSupportedOptions() {
+		return describer.getSupportedOptions();
 	}
 }
