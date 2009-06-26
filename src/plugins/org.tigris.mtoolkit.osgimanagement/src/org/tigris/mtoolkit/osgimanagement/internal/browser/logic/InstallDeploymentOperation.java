@@ -12,12 +12,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.UIHelper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
@@ -78,15 +78,22 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 	}
 
 	private boolean askUserToUninstallRemotePackage(final String symbolicName) {
-		MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(),
-			"Uninstall Existing Deployment Package",
-			null,
-			NLS.bind("The deployment package {0} exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",
-				symbolicName),
-			MessageDialog.QUESTION,
-			new String[] { "Uninstall Remote Version", "Cancel" },
-			0);
-		return UIHelper.openWindow(dialog) == 0;
+		Display display = Display.getDefault();
+		final int[] result = new int[1];
+		display.syncExec(new Runnable() {
+			public void run() {
+				dialog = new MessageDialog(FrameWorkView.getShell(),
+						"Uninstall Existing Deployment Package",
+						null,
+						NLS.bind("The deployment package {0} exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",
+							symbolicName),
+						MessageDialog.QUESTION,
+						new String[] { "Uninstall Remote Version", "Cancel" },
+						0);
+				result[0] = dialog.open();
+			}
+		});
+		return result[0] == 0;
 	}
 
 	protected String getMessage(IStatus operationStatus) {

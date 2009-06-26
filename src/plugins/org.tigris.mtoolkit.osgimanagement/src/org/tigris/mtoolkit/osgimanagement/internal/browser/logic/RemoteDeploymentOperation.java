@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -12,6 +13,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPacka
 public abstract class RemoteDeploymentOperation extends Job {
 
 	private DeploymentPackage pack;
+	protected Dialog dialog;
 
 	public RemoteDeploymentOperation(String name, DeploymentPackage pack) {
 		super(name);

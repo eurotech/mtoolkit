@@ -5,13 +5,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.UIHelper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 
 public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
@@ -47,17 +47,24 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
 		return Status.OK_STATUS;
 	}
 
-	private boolean askUserToForceUninstallation(IStatus status) {
-		MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(),
-			"Force Deployment Package Uninstallation",
-			null,
-			NLS.bind("Deployment package {0} uninstallation failed: {1}",
-				getDeploymentPackage().toString(),
-				status.getMessage()),
-			MessageDialog.QUESTION,
-			new String[] { "Force Uninstallation", "Cancel" },
-			0);
-		return UIHelper.openWindow(dialog) == 0;
+	private boolean askUserToForceUninstallation(final IStatus status) {
+		Display display = Display.getDefault();
+		final int[] result = new int[1];
+		display.syncExec(new Runnable() {
+			public void run() {
+				dialog = new MessageDialog(FrameWorkView.getShell(),
+						"Force Deployment Package Uninstallation",
+						null,
+						NLS.bind("Deployment package {0} uninstallation failed: {1}",
+							getDeploymentPackage().toString(),
+							status.getMessage()),
+						MessageDialog.QUESTION,
+						new String[] { "Force Uninstallation", "Cancel" },
+						0);
+				result[0] = dialog.open();
+			}
+		});
+		return result[0] == 0;
 	}
 
 	protected String getMessage(IStatus operationStatus) {
