@@ -77,4 +77,13 @@
             enablesFor="*" /> 
        </objectContribution> 
    </extension>
+   <extension
+         point="org.tigris.mtoolkit.common.installationItemProviders">
+      <provider
+            class="org.tigris.mtoolkit.dpeditor.installation.DPPFileProvider"
+            extension="dpp"
+            id="org.tigris.mtoolkit.dpeditor.deploymentprovider"
+            type="application/vnd.osgi.dp">
+      </provider>
+   </extension>
 </plugin>
