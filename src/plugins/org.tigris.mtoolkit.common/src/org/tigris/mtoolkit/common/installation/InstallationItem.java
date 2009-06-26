@@ -54,4 +54,9 @@ public interface InstallationItem {
 	 * @return the item name
 	 */
 	public String getName();
+	
+	/**
+	 * Disposes this item and used resources
+	 */
+	public void dispose();
 }
