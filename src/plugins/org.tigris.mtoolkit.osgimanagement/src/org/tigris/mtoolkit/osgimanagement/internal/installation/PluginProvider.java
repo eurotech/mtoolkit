@@ -121,6 +121,9 @@ public class PluginProvider implements InstallationItemProvider {
 		public String getName() {
 			return file.getName();
 		}
+
+		public void dispose() {
+		}
 	}
 
 	public InstallationItem getInstallationItem(Object resource) {
