@@ -108,6 +108,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				} catch (IOException e) {
 				}
 			}
+			item.dispose();
 		}
 
 		monitor.done();
