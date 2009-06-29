@@ -436,6 +436,13 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					bundlesNode.addElement(category);
 					
 				}
+			} else {
+				keys = fw.bundleHash.keys();
+				while(keys.hasMoreElements()) {
+					Model bundle = (Model)fw.bundleHash.get(keys.nextElement());
+					bundlesNode.addElement(bundle);
+					
+				}
 			}
 			
 			keys = fw.dpHash.keys();
