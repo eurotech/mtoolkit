@@ -106,7 +106,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 				}
 				if (supported) {
 					temp.add(item);
-					continue;
+					break;
 				}
 			}
 		}
