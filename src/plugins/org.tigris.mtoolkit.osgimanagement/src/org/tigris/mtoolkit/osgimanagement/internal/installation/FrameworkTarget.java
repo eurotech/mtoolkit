@@ -45,7 +45,7 @@ public class FrameworkTarget implements InstallationTarget {
 	}
 
 	public boolean isMimeTypeSupported(String type) {
-		boolean supportDP = ((Boolean) fw.getConnector().getProperties().get(RemoteDeploymentAdmin.class.getName())).booleanValue();
+		boolean supportDP = fw.getConnector() != null && ((Boolean) fw.getConnector().getProperties().get(RemoteDeploymentAdmin.class.getName())).booleanValue();
 		if (!supportDP && type.equals(MIME_DP))
 			return false;
 		return true;
