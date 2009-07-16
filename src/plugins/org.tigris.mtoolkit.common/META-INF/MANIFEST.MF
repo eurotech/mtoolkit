@@ -17,6 +17,7 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.pde.ui;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Export-Package: org.tigris.mtoolkit.common,
+ org.tigris.mtoolkit.common.gui,
  org.tigris.mtoolkit.common.installation,
  org.tigris.mtoolkit.common.preferences
 Bundle-RequiredExecutionEnvironment: J2SE-1.4

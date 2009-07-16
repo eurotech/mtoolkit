@@ -12,9 +12,12 @@ package org.tigris.mtoolkit.common;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.tigris.mtoolkit.common.images.UIResources;
 
 public class UtilitiesPlugin extends AbstractUIPlugin {
 
@@ -60,6 +63,23 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 
 	public static void error(String message, Throwable t) {
 		getDefault().getLog().log(newStatus(IStatus.ERROR, message, t));
+	}
+
+	/**
+	 * Returns an image descriptor for the image file at the given plug-in
+	 * relative path
+	 * 
+	 * @param path
+	 *            the path
+	 * @return the image descriptor
+	 */
+	public static ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+
+	protected void initializeImageRegistry(ImageRegistry reg) {
+		super.initializeImageRegistry(reg);
+		UIResources.initializeImageRegistry(reg);
 	}
 
 }
