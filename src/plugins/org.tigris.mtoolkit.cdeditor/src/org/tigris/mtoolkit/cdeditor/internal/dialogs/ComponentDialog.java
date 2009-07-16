@@ -20,6 +20,7 @@ import org.tigris.mtoolkit.cdeditor.internal.model.IEclipseContext;
 import org.tigris.mtoolkit.cdeditor.internal.model.Validator;
 import org.tigris.mtoolkit.cdeditor.internal.model.impl.CDComponent;
 import org.tigris.mtoolkit.cdeditor.internal.widgets.CreateComponentGroup;
+import org.tigris.mtoolkit.common.gui.StatusLineDialog;
 
 /**
  * A ComponentDialog is dialog that allows maintaining Declarative Services 

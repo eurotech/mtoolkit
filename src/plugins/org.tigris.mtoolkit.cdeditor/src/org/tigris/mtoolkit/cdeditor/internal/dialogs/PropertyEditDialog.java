@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Text;
 import org.tigris.mtoolkit.cdeditor.internal.CDEditorPlugin;
 import org.tigris.mtoolkit.cdeditor.internal.model.ICDProperty;
 import org.tigris.mtoolkit.cdeditor.internal.model.Validator;
+import org.tigris.mtoolkit.common.gui.StatusLineDialog;
 
 
 /**

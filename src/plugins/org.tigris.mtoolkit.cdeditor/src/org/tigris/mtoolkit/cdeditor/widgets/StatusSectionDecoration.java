@@ -20,6 +20,7 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.Section;
 import org.tigris.mtoolkit.cdeditor.internal.widgets.UIResources;
+import org.tigris.mtoolkit.common.gui.StatusLine;
 
 /**
  * A wrapper class for Section widget, which adds an API for displaying

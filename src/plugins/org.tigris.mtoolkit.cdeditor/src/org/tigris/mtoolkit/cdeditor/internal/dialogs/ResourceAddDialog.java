@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Text;
 import org.tigris.mtoolkit.cdeditor.internal.model.ICDProperties;
 import org.tigris.mtoolkit.cdeditor.internal.model.IEclipseContext;
 import org.tigris.mtoolkit.cdeditor.internal.model.Validator;
+import org.tigris.mtoolkit.common.gui.StatusLineDialog;
 
 /**
  * The ResourceAddDialog allows selecting an external properties file for the
