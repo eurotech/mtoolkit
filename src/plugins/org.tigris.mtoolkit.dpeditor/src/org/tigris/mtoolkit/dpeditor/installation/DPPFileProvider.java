@@ -40,7 +40,6 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 
 		@Override
 		public void dispose() {
-			System.out.println("DPPFileProvider.DPPFileItem.dispose() "+delete);
 			if (delete) {
 				dpFile.delete();
 				try {
