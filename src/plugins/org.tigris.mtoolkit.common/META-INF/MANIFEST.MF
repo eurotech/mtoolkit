@@ -14,12 +14,17 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.ui,
  org.eclipse.swt,
  org.eclipse.pde.build;resolution:=optional,
- org.eclipse.pde.ui;resolution:=optional
+ org.eclipse.pde.ui;resolution:=optional,
+ org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,
+ not-yet-commons-ssl-0.3.10.jar
 Export-Package: org.tigris.mtoolkit.common,
  org.tigris.mtoolkit.common.gui,
+ org.tigris.mtoolkit.common.images,
  org.tigris.mtoolkit.common.installation,
- org.tigris.mtoolkit.common.preferences
+ org.tigris.mtoolkit.common.preferences,
+ org.tigris.mtoolkit.common.security
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Import-Package: org.eclipse.core.expressions,
  org.eclipse.core.resources,

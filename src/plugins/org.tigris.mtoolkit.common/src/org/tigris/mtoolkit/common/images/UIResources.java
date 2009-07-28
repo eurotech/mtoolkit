@@ -26,14 +26,17 @@ public class UIResources {
 	public static final String SMALL_ERROR_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_error_icon";
 	public static final String SMALL_WARNING_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_warning_icon";
 	public static final String SMALL_INFO_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_info_icon";
+	public static final String SSL_INTERACTION_WIZBAN_ICON = UtilitiesPlugin.PLUGIN_ID + "ssl_interaction_wizban_icon";
 
 	private static final String OBJECT_PATH = "/icons/obj16/";
+	private static final String WIZBAN_PATH = "/icons/wizban/";
 
 	// TODO: Change it so the path of the image serves as a key in the image registry
 	public static void initializeImageRegistry(ImageRegistry registry) {
 		registry.put(SMALL_ERROR_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "error_tsk.gif"));
 		registry.put(SMALL_WARNING_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "warn_tsk.gif"));
 		registry.put(SMALL_INFO_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "info_tsk.gif"));
+		registry.put(SSL_INTERACTION_WIZBAN_ICON, UtilitiesPlugin.getImageDescriptor(WIZBAN_PATH + "login_wiz.png"));
 	}
 
 	private static ImageRegistry getImageRegistry() {
