@@ -108,7 +108,7 @@ public class InteractiveConnectionHandler extends SSLSocketFactory implements Ho
 	}
 
 	private boolean isMprmHttpTransportThread() {
-		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+		StackTraceElement[] stackTrace = new Exception().getStackTrace();
 		for (int i = stackTrace.length - 1; i >= 0; i--) {
 			if (MPRM_HTTP_TRANSPORT_THREAD_ELEMENT.equals(stackTrace[i].getClassName())) {
 				return true;

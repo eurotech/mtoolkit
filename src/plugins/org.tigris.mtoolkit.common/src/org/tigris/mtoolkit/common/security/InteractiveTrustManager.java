@@ -56,7 +56,9 @@ public class InteractiveTrustManager implements X509TrustManager {
 			try {
 				keyStore = getDefaultKeyStore();
 			} catch (GeneralSecurityException e) {
-				throw new IllegalArgumentException("Key store wasn't specified and the default keystore failed to initialize", e);
+				IllegalArgumentException iae = new IllegalArgumentException("Key store wasn't specified and the default keystore failed to initialize");
+				iae.initCause(e);
+				throw iae;
 			}
 		}
 		this.keyStore = keyStore;

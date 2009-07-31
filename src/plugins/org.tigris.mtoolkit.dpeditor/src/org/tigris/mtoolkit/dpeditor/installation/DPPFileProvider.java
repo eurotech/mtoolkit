@@ -38,7 +38,6 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 			super(file, mimeType);
 		}
 
-		@Override
 		public void dispose() {
 			if (delete) {
 				dpFile.delete();
@@ -50,12 +49,10 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 			}
 		}
 
-		@Override
 		public InputStream getInputStream() throws IOException {
 			return new FileInputStream(dpFile);
 		}
 
-		@Override
 		public IStatus prepare(IProgressMonitor monitor) {
 			try {
 				DPPFile dppFile = new DPPFile(file.getLocation().toFile(), file.getProject().getLocation().toOSString());
@@ -72,7 +69,6 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 		
 	}
 
-	@Override
 	public InstallationItem getInstallationItem(Object resource) {
 		return new DPPFileItem(getFileFromGeneric(resource), mimeType);
 	}
