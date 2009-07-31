@@ -189,7 +189,11 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 	// Get current shell
 	public static Shell getShell() {
-		return getActiveInstance().getViewSite().getShell();
+		if (tree != null) {
+			return tree.getControl().getShell();
+		} else {
+			return Display.getDefault().getActiveShell();
+		}
 	}
 
 	// Get current active FrameWorkView
@@ -962,6 +966,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	}
 
 	public static void addFilter() {
+		if (tree == null) return;
 		Display display = Display.getDefault();
 		if (display != null && !display.isDisposed()) {
 			display.asyncExec(new Runnable() {
