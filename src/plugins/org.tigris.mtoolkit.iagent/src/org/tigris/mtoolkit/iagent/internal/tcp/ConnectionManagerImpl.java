@@ -15,16 +15,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.connection.AbstractConnection;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionEvent;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionListener;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
+import org.tigris.mtoolkit.iagent.internal.LightServiceRegistry;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
+import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
+import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 
 public class ConnectionManagerImpl implements ConnectionManager {
 	protected Dictionary conProperties;
+	protected MBSAConnectionImpl mbsaConnection;
 	protected PMPConnectionImpl pmpConnection;
 	private List listeners = new LinkedList();
+	private LightServiceRegistry connectionRegistry;
 
 	public ConnectionManagerImpl(Dictionary aConProperties) {
 		this.conProperties = aConProperties;
@@ -48,6 +51,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		// 2. saved reference will be used when firing the event
 		synchronized (this) {
 			switch (type) {
+			case MBSA_CONNECTION:
+		        if (mbsaConnection != null && !mbsaConnection.isConnected()) {
+		          staleConnection = mbsaConnection;
+		          mbsaConnection = null;
+		        }
+		        break;
 			case PMP_CONNECTION:
 				if (pmpConnection != null && !pmpConnection.isConnected()) {
 					staleConnection = pmpConnection;
@@ -71,6 +80,13 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		// already checked it in Step 1
 		synchronized (this) {
 			switch (type) {
+			case MBSA_CONNECTION:
+		        if (mbsaConnection == null) {
+		          mbsaConnection = createMBSAConnection();
+		          fireEvent = true;
+		        }
+		        connection = mbsaConnection;
+		        break;
 			case PMP_CONNECTION:
 				if (pmpConnection == null) {
 					pmpConnection = createPMPConnection();
@@ -88,6 +104,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		log("[createConnection] connection: " + connection);
 		return connection;
 	}
+	
+	private MBSAConnectionImpl createMBSAConnection() throws IAgentException {
+	    MBSAConnectionImpl connection = new MBSAConnectionImpl(conProperties, this);
+	    log("[createMBSAConnection] Created connection: " + connection);
+	    return connection;
+	  }
 
 	private PMPConnectionImpl createPMPConnection() throws IAgentException {
 		final PMPConnectionImpl connection = new PMPConnectionImpl(conProperties, this);
@@ -99,6 +121,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		log("[getActiveConnection] >>> type: " + type);
 		AbstractConnection connection = null;
 		switch (type) {
+		case MBSA_CONNECTION:
+		    if (mbsaConnection != null && mbsaConnection.isConnected())
+		        connection = mbsaConnection;
+		    break;
 		case PMP_CONNECTION:
 			if (pmpConnection != null && pmpConnection.isConnected())
 				connection = pmpConnection;
@@ -112,6 +138,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		log("[closeConnections] >>>");
 		// only call closeConnection() because it will result in
 		// connectionClosed()
+		AbstractConnection mbsaConnection = this.mbsaConnection; 
+	    if ( mbsaConnection != null ){
+	      mbsaConnection.closeConnection();
+	    }
 		AbstractConnection pmpConnection = this.pmpConnection;
 		if (pmpConnection != null) {
 			pmpConnection.closeConnection();
@@ -177,7 +207,11 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		synchronized (this) {
 			if (connection == null)
 				return;
-			if (pmpConnection == connection) {
+			if (mbsaConnection == connection) {
+		        log("[connectionClosed] Active MBSA connection match");
+		        mbsaConnection = null;
+		        sendEvent = true;
+			} else if (pmpConnection == connection) {
 				log("[connectionClosed] Active PMP connection match");
 				pmpConnection = null;
 				sendEvent = true;

@@ -13,7 +13,6 @@ package org.tigris.mtoolkit.iagent;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import org.tigris.mtoolkit.iagent.rpc.Error;
 
 /**
  * An exception class which is thrown when some error occur during operations

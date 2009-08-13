@@ -40,9 +40,9 @@ import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
+import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
-import org.tigris.mtoolkit.iagent.rpc.Error;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
 
@@ -639,5 +639,9 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			return slService.getStartLevel();
 		else
 			return -1;
+	}
+	
+	public String getSystemProperty(String name) {
+		return System.getProperty(name);
 	}
 }

@@ -93,7 +93,7 @@ public interface PMPConnection {
 	 * @exception IllegalArgumentException
 	 */
 
-	public void addEventListener(EventListener el, String[] eventTypes) throws IllegalArgumentException;
+	public void addEventListener(EventListener el, String[] eventTypes);
 
 	/**
 	 * Unregisters an EventListener
@@ -107,6 +107,6 @@ public interface PMPConnection {
 	 * 
 	 * @exception IllegalArgumentException
 	 */
-	public void removeEventListener(EventListener el, String[] eventTypes) throws IllegalArgumentException;
+	public void removeEventListener(EventListener el, String[] eventTypes);
 
 }

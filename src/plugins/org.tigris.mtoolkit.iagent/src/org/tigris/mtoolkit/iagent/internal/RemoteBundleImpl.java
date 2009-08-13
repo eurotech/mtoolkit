@@ -13,14 +13,15 @@ package org.tigris.mtoolkit.iagent.internal;
 import java.io.InputStream;
 import java.util.Dictionary;
 
+import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteService;
-import org.tigris.mtoolkit.iagent.internal.connection.PMPConnection;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.rpc.Error;
+import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class RemoteBundleImpl implements RemoteBundle {
 	private Long id;
@@ -32,9 +33,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	private boolean cachedSystemBundle = false;
 
 	public RemoteBundleImpl(DeploymentManagerImpl deploymentCommands, Long id) {
-		log("[Constructor] >>> Creating new RemoteBundle: manager: " + deploymentCommands + "; id: " + id);
-		this.commands = deploymentCommands;
-		this.id = id;
+		this(deploymentCommands, id, null);
 	}
 
 	public RemoteBundleImpl(DeploymentManagerImpl deploymentCommands, Long id, String location) {
@@ -114,9 +113,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	}
 
 	private RemoteObject getBundleAdmin() throws IAgentException {
-		PMPConnection connection = commands.getConnection();
-		RemoteObject remote = connection.getRemoteBundleAdmin();
-		return remote;
+		return commands.getBundleAdmin();
 	}
 
 	public int getState() throws IAgentException {

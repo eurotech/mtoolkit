@@ -12,14 +12,15 @@ package org.tigris.mtoolkit.iagent.internal;
 
 import java.util.Dictionary;
 
+import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.iagent.internal.connection.PMPConnection;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.rpc.Error;
+import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class RemoteDPImpl implements RemoteDP {
 
@@ -37,6 +38,8 @@ public class RemoteDPImpl implements RemoteDP {
 						+ symbolicName
 						+ "; version: "
 						+ version);
+		if (symbolicName == null || version == null)
+			throw new IllegalArgumentException("both symbolicName and version must be specified");
 		this.symbolicName = symbolicName;
 		this.version = version;
 		this.commands = commands;
@@ -48,6 +51,7 @@ public class RemoteDPImpl implements RemoteDP {
 		Long bid = (Long) Utils.callRemoteMethod(getDeploymentAdmin(),
 			Utils.GET_DP_BUNDLE_METHOD,
 			new Object[] { this.symbolicName, version, bsn });
+		// TODO: Rework this to work with Error objects instead of longs
 		if (bid.longValue() == -2) {
 			log("[getBundle] remote call result is: " + bid + " -> deployment package is stale");
 			stale = true;
@@ -165,9 +169,7 @@ public class RemoteDPImpl implements RemoteDP {
 	}
 
 	private RemoteObject getDeploymentAdmin() throws IAgentException {
-		PMPConnection connection = commands.getConnection();
-		RemoteObject remote = connection.getRemoteDeploymentAdmin();
-		return remote;
+		return commands.getDeploymentAdmin();
 	}
 
 	private final void log(String message) {

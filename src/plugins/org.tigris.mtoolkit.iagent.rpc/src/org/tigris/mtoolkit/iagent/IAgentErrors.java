@@ -72,6 +72,8 @@ public class IAgentErrors {
 
 	public static final int GENERAL_ERROR = -1;
 
+	public static final int UNSUPPORTED_OPERATION = -2;
+
 	/**
 	 * Code indicating that general error occured in VM Manager<br>
 	 * 
@@ -214,36 +216,6 @@ public class IAgentErrors {
 	public static final int ERR_INVALID_DATA_LENGTH = -4014;
 
 	/**
-	 * The DeploymentAdmin service is not available on the remote site.
-	 */
-	public static final int ERROR_DEPLOYMENT_ADMIN_NOT_ACTIVE = -5001;
-
-	/**
-	 * The ApplicationAdmin service is not available on the remote site.
-	 */
-	public static final int ERROR_APPLICATION_ADMIN_NOT_ACTIVE = -5002;
-
-	/**
-	 * The ApplicationAdmin interfaces are not available on the remote site.
-	 * Usually means that the remote OSGi framework doesn't support
-	 * ApplicationAdmin specification
-	 */
-	public static final int ERROR_APPLICATION_ADMIN_UNAVAILABLE = -5003;
-
-	/**
-	 * RemoteBundleAdmin service is not active. This usually means that the
-	 * Instrumentation Agent RPC part was deactivated for some reason.
-	 */
-	public static final int ERROR_REMOTE_BUNDLE_ADMIN_NOT_ACTIVE = -5004;
-
-	/**
-	 * RemoteServiceAdmin service is not active. This usually means that the
-	 * Instrumentation Agent RPC part was deactivated for some reason, or wasn't
-	 * available.
-	 */
-	public static final int ERROR_REMOTE_SERVICE_ADMIN_NOT_ACTIVE = -5005;
-
-	/**
 	 * Required connection cannot be established and the operation has failed.
 	 */
 	public static final int ERROR_CANNOT_CONNECT = -5006;
@@ -264,6 +236,10 @@ public class IAgentErrors {
 	 */
 	public static final int ERROR_INSTRUMENT_ERROR = -5009;
 
+	/**
+	 * Code indicating that a required remote service is not available.
+	 */
+	public static final int ERROR_REMOTE_ADMIN_NOT_AVAILABLE = -5010;
 	/**
 	 * Code error indicating that bundle exception was thrown on the remote
 	 * site.<br>

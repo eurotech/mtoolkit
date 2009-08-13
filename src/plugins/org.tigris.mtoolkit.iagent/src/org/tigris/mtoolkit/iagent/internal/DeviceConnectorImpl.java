@@ -12,10 +12,10 @@ package org.tigris.mtoolkit.iagent.internal;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.osgi.service.event.EventAdmin;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
@@ -26,24 +26,27 @@ import org.tigris.mtoolkit.iagent.ServiceManager;
 import org.tigris.mtoolkit.iagent.VMManager;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
-import org.tigris.mtoolkit.iagent.internal.connection.AbstractConnection;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionEvent;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionListener;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
-import org.tigris.mtoolkit.iagent.internal.connection.PMPConnection;
 import org.tigris.mtoolkit.iagent.internal.tcp.ConnectionManagerImpl;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
+import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
+import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
+import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
+import org.tigris.mtoolkit.iagent.spi.IAgentManager;
+import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 
 /**
  * 
  * DeviceConnector implementation
  * 
  */
-public class DeviceConnectorImpl extends DeviceConnector implements EventListener {
+public class DeviceConnectorImpl extends DeviceConnector implements EventListener, DeviceConnectorSpi {
+	private LightServiceRegistry serviceRegistry;
 	private VMManagerImpl runtimeCommands;
 	private DeploymentManagerImpl deploymentCommands;
 	private ServiceManagerImpl serviceManager;
@@ -53,11 +56,14 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	private Dictionary connectionProperties;
 
 	private List devicePropertyListeners = new LinkedList();
+	
 	private String DEVICE_PROPERTY_EVENT = "iagent_property_event";
-	private PropertiesRegestry propRegistry;
+	private PropertiesRegistry propRegistry;
 
 	private static final String EVENT_OBJECT_CLASS = "objectClass";
 	private static final String EVENT_STATE_KEY = "iagent.service.state";
+	
+	private HashMap managers;
 
 	/**
 	 * Creates new DeviceConnector with specified transport object
@@ -71,8 +77,14 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
 		this.connectionProperties = props;
 		connectionManager = new ConnectionManagerImpl(props);
-		log("[Constructor] Connect to device");
-		connect(ConnectionManager.PMP_CONNECTION);
+		Boolean connectImmeadiate = (Boolean) props.get("device-connection-immediate"); 
+	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
+	      log("[Constructor] Connect to device which support MBSA");
+	      connect(ConnectionManager.MBSA_CONNECTION);
+	    } else {  // connect directly to PMP
+	      log("[Constructor] Connect to device which doesn't support MBSA");
+	      connect(ConnectionManager.PMP_CONNECTION);
+	    }
 	}
 
 	private void monitorConnection(final int connectionType) {
@@ -95,7 +107,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	}
 
 	public void monitorDeviceProperties() throws IAgentException {
-		propRegistry = new PropertiesRegestry(serviceManager, this);
+		propRegistry = new PropertiesRegistry(serviceManager, this);
 		addRemoteDevicePropertyListener(propRegistry);
 	}
 
@@ -135,6 +147,8 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				serviceManager.removeListeners();
 			if (connectionManager != null)
 				((ConnectionManagerImpl) connectionManager).removeListeners();
+			if (managers != null)
+				managers = null;
 			log("[closeConnection] Closing underlying connections...");
 			connectionManager.closeConnections();
 			log("[closeConnection] DeviceConnector closed successfully");
@@ -174,7 +188,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		return isActive;
 	}
 
-	public ConnectionManager getConnectionManager() throws IAgentException {
+	public ConnectionManager getConnectionManager() {
 		return connectionManager;
 	}
 
@@ -193,19 +207,25 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	}
 
 	public Dictionary getProperties() {
+		Dictionary props = cloneDictionary(connectionProperties);
 		if(propRegistry != null) {
 			Hashtable devCapabilities = propRegistry.getDeviceProperties();
 			Enumeration enumeration = devCapabilities.keys();
 			while(enumeration.hasMoreElements()) {
 				Object key = enumeration.nextElement();
-				connectionProperties.put(key, devCapabilities.get(key));
+				props.put(key, devCapabilities.get(key));
 			}
 		}
-		return connectionProperties;
+		return props;
 	}
-
-	public Hashtable getDeviceProperties() {
-		return propRegistry.getDeviceProperties();
+	
+	private Dictionary cloneDictionary(Dictionary source) {
+		Dictionary dest = new Hashtable();
+		for (Enumeration en = source.keys(); en.hasMoreElements();) {
+			Object k = en.nextElement();
+			dest.put(k, source.get(k));
+		}
+		return dest;
 	}
 
 	private final void log(String message) {
@@ -243,7 +263,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		log("[addRemoteDevicePropertyListener] >>> listener: " + listener);
 		synchronized (devicePropertyListeners) {
 			if (!devicePropertyListeners.contains(listener)) {
-				PMPConnection connection = deploymentCommands.getConnection(false);
+				PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION, false);
 				if (connection != null) {
 					log("[addRemoteDevicePropertyListener] PMP connection is available, add event listener");
 					connection.addEventListener(this, new String[] { DEVICE_PROPERTY_EVENT });
@@ -253,6 +273,29 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				log("[addRemoteDevicePropertyListener] Listener already present");
 			}
 		}
+	}
+	
+	public AbstractConnection getConnection(int type, boolean create) throws IAgentException {
+		log("[getConnection] >>> create: " + create);
+		ConnectionManager connectionManager = getConnectionManager();
+		AbstractConnection connection = connectionManager.getActiveConnection(type);
+		if (connection == null && create) {
+			log("[getConnection] No active connection found. Create new connection (type=" + type + ")...");
+			if (!isActive()) {
+				log("[getConnection] Request for new connection arrived, but DeviceConnector is disconnected.");
+				throw new IAgentException("Associated DeviceConnector object is closed",
+					IAgentErrors.ERROR_DISCONNECTED);
+			}
+			connection = connectionManager.createConnection(ConnectionManager.PMP_CONNECTION);
+			log("[getConnection] Connection opened successfully: " + connection);
+		} else {
+			log("[getConnection] Active connection found: " + connection);
+		}
+		return connection;
+	}
+	
+	public AbstractConnection getConnection(int type) throws IAgentException {
+		return getConnection(type, true);
 	}
 
 	final static String[] propertyMap = { RemoteDeploymentAdmin.class.getName(),
@@ -289,7 +332,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				devicePropertyListeners.remove(listener);
 				if (devicePropertyListeners.size() == 0) {
 					log("[removeRemoteDevicePropertyListener] No more listeners in the list, try to remove PMP event listener");
-					PMPConnection connection = deploymentCommands.getConnection(false);
+					PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION, false);
 					if (connection != null) {
 						log("[removeRemoteDevicePropertyListener] PMP connection is available, remove event listener");
 						connection.removeEventListener(this, new String[] { DEVICE_PROPERTY_EVENT });
@@ -300,5 +343,33 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			}
 		}
 	}
+	
+	public DeviceConnector getDeviceConnector() {
+		return this;
+	}
+	
+	private LightServiceRegistry getServiceRegistry() {
+		if (serviceRegistry == null)
+			serviceRegistry = new LightServiceRegistry();
+		return serviceRegistry;
+	}
 
+	public Object getManager(String className) throws IAgentException {
+		synchronized (lock) {
+			if (!isActive) {
+				log("[getManager] Request for getting Manager [" + className + "] received, but DeviceConnector is closed");
+				throw new IAgentException("The connection is closed", IAgentErrors.ERROR_DISCONNECTED);
+			}
+			if (managers == null)
+				managers = new HashMap(4);
+			IAgentManager manager = (IAgentManager) managers.get(className);
+			if (manager == null) {
+				LightServiceRegistry registry = getServiceRegistry();
+				manager = (IAgentManager) registry.get(className);
+				manager.init(this);
+				managers.put(className, manager);
+			}
+			return manager;
+		}
+	}
 }

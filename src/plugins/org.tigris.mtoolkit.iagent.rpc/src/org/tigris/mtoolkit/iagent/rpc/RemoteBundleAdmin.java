@@ -13,6 +13,8 @@ package org.tigris.mtoolkit.iagent.rpc;
 import java.io.InputStream;
 import java.util.Dictionary;
 
+import org.tigris.mtoolkit.iagent.Error;
+
 public interface RemoteBundleAdmin {
 
 	long getBundleByLocation(String location);

@@ -28,8 +28,8 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
-import org.tigris.mtoolkit.iagent.rpc.Error;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 

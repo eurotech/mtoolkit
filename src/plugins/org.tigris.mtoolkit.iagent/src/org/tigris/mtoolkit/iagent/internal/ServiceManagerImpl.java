@@ -20,13 +20,14 @@ import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.ServiceManager;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionEvent;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionListener;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
-import org.tigris.mtoolkit.iagent.internal.connection.PMPConnection;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
+import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class ServiceManagerImpl implements ServiceManager, EventListener, ConnectionListener {
 

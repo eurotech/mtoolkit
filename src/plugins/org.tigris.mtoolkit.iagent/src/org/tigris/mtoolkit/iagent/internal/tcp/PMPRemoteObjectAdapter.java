@@ -12,11 +12,11 @@ package org.tigris.mtoolkit.iagent.internal.tcp;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.IAgentLog;
-import org.tigris.mtoolkit.iagent.internal.Utils;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 

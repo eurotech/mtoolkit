@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -27,14 +28,14 @@ import org.tigris.mtoolkit.iagent.event.RemoteBundleEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
 import org.tigris.mtoolkit.iagent.event.RemoteDPEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDPListener;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionEvent;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionListener;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
-import org.tigris.mtoolkit.iagent.internal.connection.PMPConnection;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.rpc.Error;
+import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
+import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class DeploymentManagerImpl implements DeploymentManager, EventListener, ConnectionListener {
 
@@ -142,14 +143,14 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		}
 	}
 
-	private RemoteObject getBundleAdmin() throws IAgentException {
-		PMPConnection connection = getConnection();
+	public RemoteObject getBundleAdmin() throws IAgentException {
+		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
 		RemoteObject bundleAdmin = connection.getRemoteBundleAdmin();
 		return bundleAdmin;
 	}
 
-	private RemoteObject getDeploymentAdmin() throws IAgentException {
-		PMPConnection connection = getConnection();
+	public RemoteObject getDeploymentAdmin() throws IAgentException {
+		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
 		RemoteObject bundleAdmin = connection.getRemoteDeploymentAdmin();
 		return bundleAdmin;
 	}
@@ -202,29 +203,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		return result;
 	}
 
-	PMPConnection getConnection() throws IAgentException {
-		return getConnection(true);
-	}
-
-	PMPConnection getConnection(boolean create) throws IAgentException {
-		log("[getConnection] >>> create: " + create);
-		ConnectionManager connectionManager = connector.getConnectionManager();
-		PMPConnection pmpConnection = (PMPConnection) connectionManager.getActiveConnection(ConnectionManager.PMP_CONNECTION);
-		if (pmpConnection == null && create) {
-			log("[getConnection] No active connection found. Create new PMP connection...");
-			if (!connector.isActive()) {
-				log("[getConnection] Request for new connection arrived, but DeviceConnector is disconnected.");
-				throw new IAgentException("Associated DeviceConnector object is closed",
-					IAgentErrors.ERROR_DISCONNECTED);
-			}
-			pmpConnection = (PMPConnection) connectionManager.createConnection(ConnectionManager.PMP_CONNECTION);
-			log("[getConnection] PMP connection opened successfully: " + pmpConnection);
-		} else {
-			log("[getConnection] Active connection found: " + pmpConnection);
-		}
-		return pmpConnection;
-	}
-
 	public RemoteBundle getBundle(long id) throws IAgentException {
 		log("[getBundle] >>> id: " + id);
 		RemoteBundle bundle = new RemoteBundleImpl(this, new Long(id));
@@ -249,14 +227,12 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		}
 		synchronized (bundleListeners) {
 			if (!bundleListeners.contains(listener)) {
-				PMPConnection connection = getConnection(false);
+				PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 				if (connection != null) {
 					log("[addRemoteBundleListener] PMP connection is available, add event listener");
 					connection.addEventListener(this, new String[] { SYNCH_BUNDLE_EVENT });
 				}
 				bundleListeners.add(listener);
-			} else {
-				log("[addRemoteBundleListener] Listener already present");
 			}
 		}
 	}
@@ -272,7 +248,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		}
 		synchronized (dpListeners) {
 			if (!dpListeners.contains(listener)) {
-				PMPConnection connection = getConnection(false);
+				PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 				if (connection != null)
 					log("[addRemoteDPListener] PMP connection is available, add event listener");
 				connection.addEventListener(this, new String[] { DEPLOYMENT_EVENT });
@@ -290,7 +266,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 				bundleListeners.remove(listener);
 				if (bundleListeners.size() == 0) {
 					log("[removeRemoteBundleListener] No more listeners in the list, try to remove PMP event listener");
-					PMPConnection connection = getConnection(false);
+					PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 					if (connection != null) {
 						log("[removeRemoteBundleListener] PMP connection is available, remove event listener");
 						connection.removeEventListener(this, new String[] { SYNCH_BUNDLE_EVENT });
@@ -309,7 +285,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 				dpListeners.remove(listener);
 				if (dpListeners.size() == 0) {
 					log("[removeRemoteDPListener] No more listeners in the list, try to remove PMP event listener");
-					PMPConnection connection = getConnection(false);
+					PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 					if (connection != null) {
 						log("[removeRemoteDPListener] PMP connection is available, remove event listener");
 						connection.removeEventListener(this, new String[] { DEPLOYMENT_EVENT });
@@ -446,7 +422,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			throw new IAgentException("getSystemBundlesIDs() must not return null array. There is a problem with the transport.",
 				IAgentErrors.ERROR_INTERNAL_ERROR);
 		}
-		PMPConnection connection = getConnection(false);
+		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 		if (connection != null) {
 			log("[getSystemBundlesIDs] PMP connection is available, add event listener");
 			connection.addEventListener(this, new String[] { SYSTEM_BUNDLE_EVENT });
@@ -459,7 +435,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		log("[removeListeners] >>> Removing all listeners...");
 		synchronized (dpListeners) {
 			dpListeners.clear();
-			PMPConnection connection = getConnection(false);
+			PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 			if (connection != null) {
 				log("[removeListeners] PMP connection is available, remove event listener for DP events...");
 				connection.removeEventListener(this, new String[] { DEPLOYMENT_EVENT });
@@ -468,7 +444,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		}
 		synchronized (bundleListeners) {
 			bundleListeners.clear();
-			PMPConnection connection = getConnection(false);
+			PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 			if (connection != null) {
 				log("[removeListeners] PMP connection is available, remove event listener for synchronous bundle events...");
 				connection.removeEventListener(this, new String[] { SYNCH_BUNDLE_EVENT });
@@ -476,7 +452,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			log("[removeListeners] bundle listeners removed");
 		}
 
-		PMPConnection connection = getConnection(false);
+		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 		if (connection != null) {
 			log("[removeListeners] PMP connection is available. remove evnet listener for system bundle events...");
 			connection.removeEventListener(this, new String[] { SYSTEM_BUNDLE_EVENT });
@@ -523,7 +499,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			// fallback to old method of retrieving the names
 			result = getSystemBundlesNamesFallback();
 		}
-		PMPConnection connection = getConnection(false);
+		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 		if (connection != null) {
 			log("[getSystemBundlesIDs] PMP connection is available, add event listener");
 			connection.addEventListener(this, new String[] { SYSTEM_BUNDLE_EVENT });

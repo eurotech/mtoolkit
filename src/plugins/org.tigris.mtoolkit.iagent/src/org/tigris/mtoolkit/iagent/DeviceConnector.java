@@ -296,5 +296,7 @@ public abstract class DeviceConnector {
 
 	public void cancelMonitoringDeviceProperties() throws IAgentException {
 	}
+	
+	public abstract Object getManager(String className) throws IAgentException;// {
 
 }

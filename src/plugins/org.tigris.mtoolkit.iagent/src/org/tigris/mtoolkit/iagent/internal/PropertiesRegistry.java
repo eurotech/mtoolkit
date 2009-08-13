@@ -12,7 +12,7 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 
-public class PropertiesRegestry implements RemoteDevicePropertyListener {
+public class PropertiesRegistry implements RemoteDevicePropertyListener {
 
 	private final static String[] propertyMap = { RemoteDeploymentAdmin.class.getName(),
 											EventAdmin.class.getName(),
@@ -23,7 +23,7 @@ public class PropertiesRegestry implements RemoteDevicePropertyListener {
 	private DeviceConnectorImpl connector = null;
 	private Hashtable connectionProperties = new Hashtable();
 
-	public PropertiesRegestry(ServiceManager serviceManager, DeviceConnectorImpl connector) {
+	public PropertiesRegistry(ServiceManager serviceManager, DeviceConnectorImpl connector) {
 		this.connector = connector;
 		this.serviceManager = serviceManager;
 		this.connectionProperties.clear();

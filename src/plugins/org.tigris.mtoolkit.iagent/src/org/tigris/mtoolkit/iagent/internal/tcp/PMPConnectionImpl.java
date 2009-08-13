@@ -10,41 +10,36 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.tcp;
 
+import java.util.Collection;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.Utils;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
-import org.tigris.mtoolkit.iagent.internal.connection.PMPConnection;
+import org.tigris.mtoolkit.iagent.internal.LightServiceRegistry;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.PMPServiceFactory;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
-import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
-import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
-import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.spi.PMPConnector;
+import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class PMPConnectionImpl implements PMPConnection, EventListener {
-
-	private static final String REMOTE_BUNDLE_ADMIN = RemoteBundleAdmin.class.getName();
-	private static final String REMOTE_DEPLOYMENT_ADMIN = RemoteDeploymentAdmin.class.getName();
-	private static final String REMOTE_CONSOLE = RemoteConsole.class.getName();
-	private static final String REMOTE_SERVICE_ADMIN = RemoteServiceAdmin.class.getName();
-
+	
 	private org.tigris.mtoolkit.iagent.pmp.PMPConnection pmpConnection;
-	private RemoteObject administration;
-	private PMPRemoteObjectAdapter remoteBundleAdmin;
-	private PMPRemoteObjectAdapter remoteDeploymentAdmin;
-	private RemoteObject remoteParserService;
-	private PMPRemoteObjectAdapter remoteServiceAdmin;
-
 	private ConnectionManagerImpl connManager;
 
+	private HashMap remoteObjects = new HashMap(5);
+	private RemoteObject administration;
+	private RemoteObject remoteParserService;
+
+	private LightServiceRegistry pmpRegistry;
 	private volatile boolean closed = false;
 
 	public PMPConnectionImpl(Dictionary conProperties, ConnectionManagerImpl connManager) throws IAgentException {
@@ -61,8 +56,16 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 			log("[Constructor] PMP connection spec: " + targetIP);
 			pmpConnection = pmpService.connect(targetIP);
 		} catch (PMPException e) {
-			log("[Constructor] Failed to create PMP connection", e);
-			throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e);
+			log("[Constructor] Failed to create PMP connection 1", e);
+			try {
+				log("[Constructor] PMP connection 2 spec: " + targetIP);
+				pmpConnection = createClosedConnection(targetIP);
+			} catch (PMPException e2) {
+				log("[Constructor] Failed to create PMP connection 2", e2);
+				throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e2);
+			}
+			if (pmpConnection == null)
+				throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e);
 		}
 		this.connManager = connManager;
 		pmpConnection.addEventListener(this,
@@ -100,26 +103,32 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 			}
 		}
 	}
+	
+	private org.tigris.mtoolkit.iagent.pmp.PMPConnection createClosedConnection(String targetIP) throws PMPException {
+		org.tigris.mtoolkit.iagent.pmp.PMPConnection connection = null;
+	    if (targetIP == null)
+	      throw new IllegalArgumentException("Connection properties hashtable does not contain device IP value with key DeviceConnector.KEY_DEVICE_IP!");
+	    PMPConnector connectionMngr = (PMPConnector) getManager("org.tigris.mtoolkit.iagent.spi.PMPConnector");
+	    if (connectionMngr != null) {
+	    	connection = connectionMngr.createPMPConnection(targetIP);
+	    }
+	    return connection;
+	}
 
 	private void resetRemoteReferences() {
 		log("[resetRemoteReferences] >>>");
 		Utils.clearCache();
-		if (remoteBundleAdmin != null) {
-			try {
-				remoteBundleAdmin.dispose();
-			} catch (PMPException e) {
-				log("[resetRemoteReferences] Failure during PMP connection cleanup", e);
+		if (remoteObjects != null) {
+			Collection objects = remoteObjects.values();
+			for (Iterator iterator = objects.iterator(); iterator.hasNext();) {
+				RemoteObject remoteObject = (RemoteObject) iterator.next();
+				try {
+					remoteObject.dispose();
+				} catch (PMPException e) {
+					log("[resetRemoteReferences] Failure during PMP connection cleanup", e);
+				}
 			}
-			remoteBundleAdmin = null;
-		}
-
-		if (remoteDeploymentAdmin != null) {
-			try {
-				remoteDeploymentAdmin.dispose();
-			} catch (PMPException e) {
-				log("[resetRemoteReferences] Failure during PMP connection cleanup", e);
-			}
-			remoteDeploymentAdmin = null;
+			remoteObjects.clear();
 		}
 
 		if (remoteParserService != null) {
@@ -129,15 +138,6 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 				log("[resetRemoteReferences] Failure during PMP connection cleanup", e);
 			}
 			remoteParserService = null;
-		}
-
-		if (remoteServiceAdmin != null) {
-			try {
-				remoteServiceAdmin.dispose();
-			} catch (PMPException e) {
-				log("[resetRemoteReferences] Failure during PMP connection cleanup", e);
-			}
-			remoteServiceAdmin = null;
 		}
 
 		if (administration != null) {
@@ -155,115 +155,11 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 	}
 
 	public RemoteObject getRemoteBundleAdmin() throws IAgentException {
-		log("[getRemoteBundleAdmin] >>>");
-		if (!isConnected()) {
-			log("[getRemoteBundleAdmin] The connecton has been closed!");
-			throw new IAgentException("The connecton has been closed!", IAgentErrors.ERROR_DISCONNECTED);
-		}
-		if (remoteBundleAdmin == null) {
-			try {
-				log("[getRemoteBundleAdmin] No remote bundle admin. Creating...");
-				remoteBundleAdmin = new PMPRemoteObjectAdapter(pmpConnection.getReference(REMOTE_BUNDLE_ADMIN, null)) {
-					public int verifyRemoteReference() throws IAgentException {
-						if (!pmpConnection.isConnected()) {
-							this.log("[verifyRemoteReference] The connection has been closed!");
-							throw new IAgentException("The connecton has been closed!", IAgentErrors.ERROR_DISCONNECTED);
-						}
-						try {
-							RemoteObject newRemoteObject = pmpConnection.getReference(REMOTE_BUNDLE_ADMIN, null);
-							Long l = (Long) Utils.callRemoteMethod(newRemoteObject,
-								Utils.GET_REMOTE_SERVICE_ID_METHOD,
-								null);
-							long newServiceID = l.longValue();
-							if (newServiceID == -1) {
-								this.log("[verifyRemoteReference] New reference service id is = -1. Nothing to do. Continuing.");
-								return PMPRemoteObjectAdapter.CONTINUE;
-							}
-							this.log("[verifyRemoteReference] initial: " + this.getInitialServiceID() + "; new: " + l);
-							if (newServiceID != this.getInitialServiceID()) {
-								this.delegate = newRemoteObject;
-								this.setInitialServiceID(newServiceID);
-								this.log("[verifyRemoteReference] Reference to remote service was refreshed. Retry remote method call...");
-								return PMPRemoteObjectAdapter.REPEAT;
-							}
-							newRemoteObject.dispose();
-							this.log("[verifyRemoteReference] Reference to remote service is looking fine. Continue");
-							return PMPRemoteObjectAdapter.CONTINUE;
-						} catch (PMPException e) {
-							remoteServiceAdmin = null;
-							this.log("[verifyRemoteReference] Reference to remote service cannot be got, service is not available. Fail fast.",
-								e);
-							throw new IAgentException("Unable to retrieve reference to remote administration service",
-								IAgentErrors.ERROR_REMOTE_BUNDLE_ADMIN_NOT_ACTIVE,
-								e);
-						}
-					}
-				};
-			} catch (PMPException e) {
-				this.log("[getRemoteBundleAdmin] Remote bundle admin isn't available", e);
-				throw new IAgentException("Unable to retrieve reference to remote administration service",
-					IAgentErrors.ERROR_REMOTE_BUNDLE_ADMIN_NOT_ACTIVE,
-					e);
-			}
-		}
-		return remoteBundleAdmin;
+		return getRemoteAdmin(REMOTE_BUNDLE_ADMIN_NAME);
 	}
-
+	
 	public RemoteObject getRemoteDeploymentAdmin() throws IAgentException {
-		log("[getRemoteDeploymentAdmin] >>>");
-		if (!isConnected()) {
-			log("[getRemoteDeploymentAdmin] The connecton has been closed!");
-			throw new IAgentException("The connecton has been closed!", IAgentErrors.ERROR_DISCONNECTED);
-		}
-		if (remoteDeploymentAdmin == null) {
-			try {
-				log("[getRemoteDeploymentAdmin] No RemoteDeploymentAdmin. Creating...");
-				remoteDeploymentAdmin = new PMPRemoteObjectAdapter(pmpConnection.getReference(REMOTE_DEPLOYMENT_ADMIN,
-					null)) {
-					public int verifyRemoteReference() throws IAgentException {
-						if (!pmpConnection.isConnected()) {
-							this.log("[verifyRemoteReference] The connection has been closed!");
-							throw new IAgentException("The connecton has been closed!", IAgentErrors.ERROR_DISCONNECTED);
-						}
-						try {
-							RemoteObject newRemoteObject = pmpConnection.getReference(REMOTE_DEPLOYMENT_ADMIN, null);
-							Long l = (Long) Utils.callRemoteMethod(newRemoteObject,
-								Utils.GET_REMOTE_SERVICE_ID_METHOD,
-								null);
-							long newServiceID = l.longValue();
-							if (newServiceID == -1) {
-								this.log("[verifyRemoteReference] New reference service id is = -1. Nothing to do. Continuing.");
-								return PMPRemoteObjectAdapter.CONTINUE;
-							}
-							this.log("[verifyRemoteReference] initial: " + this.getInitialServiceID() + "; new: " + l);
-							if (newServiceID != this.getInitialServiceID()) {
-								this.delegate = newRemoteObject;
-								this.setInitialServiceID(newServiceID);
-								this.log("[verifyRemoteReference] Reference to remote service was refreshed. Retry remote method call...");
-								return PMPRemoteObjectAdapter.REPEAT;
-							}
-							newRemoteObject.dispose();
-							this.log("[verifyRemoteReference] Reference to remote service is looking fine. Continue");
-							return PMPRemoteObjectAdapter.CONTINUE;
-						} catch (PMPException e) {
-							remoteDeploymentAdmin = null;
-							this.log("[verifyRemoteReference] Reference to remote service cannot be got, service is not available. Fail fast",
-								e);
-							IAgentException agentEx = new IAgentException("RemoteDeploymentAdmin is not available",
-								IAgentErrors.ERROR_DEPLOYMENT_ADMIN_NOT_ACTIVE,
-								e);
-							throw agentEx;
-						}
-					}
-				};
-			} catch (PMPException e) {
-				this.log("[getRemoteDeploymentAdmin] Remote deployment admin isn't available", e);
-				throw new IAgentException("Unable to retrieve reference to remote administration service",
-					IAgentErrors.ERROR_DEPLOYMENT_ADMIN_NOT_ACTIVE,
-					e);
-			}
-		}
-		return remoteDeploymentAdmin;
+		return getRemoteAdmin(REMOTE_DEPLOYMENT_ADMIN_NAME);
 	}
 
 	public RemoteObject getRemoteParserService() throws IAgentException {
@@ -275,7 +171,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 		if (remoteParserService == null) {
 			log("[getRemoteParserService] No RemoteParserService. Creating");
 			try {
-				remoteParserService = pmpConnection.getReference(REMOTE_CONSOLE, null);
+				remoteParserService = pmpConnection.getReference(REMOTE_CONSOLE_NAME, null);
 			} catch (PMPException e) {
 				log("[getRemoteParserService] RemoteParserGenerator service isn't available", e);
 				throw new IAgentException("Unable to retrieve reference to remote administration service",
@@ -318,22 +214,28 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 	}
 
 	public RemoteObject getRemoteServiceAdmin() throws IAgentException {
-		log("[getRemoteServiceAdmin] >>>");
+		return getRemoteAdmin(REMOTE_SERVICE_ADMIN_NAME);
+	}
+	
+	public RemoteObject getRemoteAdmin(String adminClassName) throws IAgentException {
+		log("[getRemoteAdmin]" + adminClassName + " >>>");
 		if (!isConnected()) {
-			log("[getRemoteServiceAdmin] The connecton has been closed!");
+			log("[getRemoteBundleAdmin] The connecton has been closed!");
 			throw new IAgentException("The connecton has been closed!", IAgentErrors.ERROR_DISCONNECTED);
 		}
-		if (remoteServiceAdmin == null) {
+		RemoteObject admin = (RemoteObject) remoteObjects.get(adminClassName);
+		if (admin == null) {
 			try {
-				log("[getRemoteServiceAdmin] No RemoteServiceAdmin. Creating...");
-				remoteServiceAdmin = new PMPRemoteObjectAdapter(pmpConnection.getReference(REMOTE_SERVICE_ADMIN, null)) {
+				log("[getRemoteAdmin] No remote admin [" + adminClassName + "]. Creating...");
+				final String adminClass = adminClassName;
+				admin = new PMPRemoteObjectAdapter(pmpConnection.getReference(adminClassName, null)) {
 					public int verifyRemoteReference() throws IAgentException {
 						if (!pmpConnection.isConnected()) {
 							this.log("[verifyRemoteReference] The connection has been closed!");
 							throw new IAgentException("The connecton has been closed!", IAgentErrors.ERROR_DISCONNECTED);
 						}
 						try {
-							RemoteObject newRemoteObject = pmpConnection.getReference(REMOTE_SERVICE_ADMIN, null);
+							RemoteObject newRemoteObject = pmpConnection.getReference(adminClass, null);
 							Long l = (Long) Utils.callRemoteMethod(newRemoteObject,
 								Utils.GET_REMOTE_SERVICE_ID_METHOD,
 								null);
@@ -353,23 +255,23 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 							this.log("[verifyRemoteReference] Reference to remote service is looking fine. Continue");
 							return PMPRemoteObjectAdapter.CONTINUE;
 						} catch (PMPException e) {
-							remoteServiceAdmin = null;
-							this.log("[verifyRemoteReference] Reference to remote service cannot be got, service is not available. Fail fast",
+//							admin = null;
+							this.log("[verifyRemoteReference] Reference to remote service cannot be got, service is not available. Fail fast.",
 								e);
 							throw new IAgentException("Unable to retrieve reference to remote administration service",
-								IAgentErrors.ERROR_REMOTE_SERVICE_ADMIN_NOT_ACTIVE,
-								e);
+									IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE, e);
 						}
 					}
 				};
+				if (admin != null)
+					remoteObjects.put(adminClassName, admin);
 			} catch (PMPException e) {
-				log("[getRemoteServiceAdmin] RemoteServiceAdmin isnt't available", e);
-				throw new IAgentException("Unable to retrieve reference to remote administration service",
-					IAgentErrors.ERROR_REMOTE_SERVICE_ADMIN_NOT_ACTIVE,
-					e);
+				this.log("[getRemoteAdmin] Remote admin [" + adminClassName + "] isn't available", e);
+				throw new IAgentException("Unable to retrieve reference to remote administration service [" + adminClassName + "]",
+						IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE, e);
 			}
 		}
-		return remoteServiceAdmin;
+		return admin;
 	}
 
 	public void event(Object ev, String evType) {
@@ -390,5 +292,16 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 
 	private final void log(String message, Throwable e) {
 		DebugUtils.log(this, message, e);
+	}
+	
+	private LightServiceRegistry getServiceRegistry() {
+		if (pmpRegistry == null)
+			pmpRegistry = new LightServiceRegistry();
+		return pmpRegistry;
+	}
+
+	public Object getManager(String className) {
+		LightServiceRegistry registry = getServiceRegistry();
+		return registry.get(className);
 	}
 }
