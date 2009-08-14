@@ -176,7 +176,7 @@ public class Utils {
 		}
 		for (int j = 0; j < signatures.length; j++) {
 			newSignatures[i + j] = signatures[j];
-			result[j] = j;
+			result[j] = i + j;
 		}
 		METHOD_SIGNATURES = newSignatures;
 		return result;
