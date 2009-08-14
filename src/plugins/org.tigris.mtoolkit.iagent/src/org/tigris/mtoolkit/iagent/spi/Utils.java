@@ -178,6 +178,7 @@ public class Utils {
 			newSignatures[i + j] = signatures[j];
 			result[j] = j;
 		}
+		METHOD_SIGNATURES = newSignatures;
 		return result;
 	}
 
