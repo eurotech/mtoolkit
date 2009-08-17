@@ -77,7 +77,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
 		this.connectionProperties = props;
 		connectionManager = new ConnectionManagerImpl(props);
-		Boolean connectImmeadiate = (Boolean) props.get("device-connection-immediate"); 
+		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
 	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
 	      log("[Constructor] Connect to device which support MBSA");
 	      connect(ConnectionManager.MBSA_CONNECTION);
