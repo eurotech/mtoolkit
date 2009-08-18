@@ -10,9 +10,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewContentProvider;
 
 public class FilterJob extends Job{
