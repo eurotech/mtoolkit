@@ -7,7 +7,13 @@ Bundle-ClassPath: .
 Bundle-Activator: org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.tigris.mtoolkit.osgimanagement.internal.installation
+Export-Package: org.tigris.mtoolkit.osgimanagement,
+ org.tigris.mtoolkit.osgimanagement.browser.model,
+ org.tigris.mtoolkit.osgimanagement.internal,
+ org.tigris.mtoolkit.osgimanagement.internal.browser.logic,
+ org.tigris.mtoolkit.osgimanagement.internal.browser.model,
+ org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui,
+ org.tigris.mtoolkit.osgimanagement.internal.installation
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.ide,
  org.eclipse.ui.views,
@@ -29,7 +35,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.expressions
 Bundle-ActivationPolicy: lazy
 Import-Package: org.tigris.mtoolkit.iagent,
- org.tigris.mtoolkit.iagent.internal.connection,
+ org.tigris.mtoolkit.iagent.spi,
  org.tigris.mtoolkit.common.installation
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 
