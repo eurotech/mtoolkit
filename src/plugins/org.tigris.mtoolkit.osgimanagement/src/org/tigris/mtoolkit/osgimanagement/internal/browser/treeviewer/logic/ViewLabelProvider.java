@@ -22,6 +22,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -33,8 +36,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork.ModelProviderElement;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class ViewLabelProvider extends StyledCellLabelProvider implements ConstantsDistributor {
@@ -128,7 +131,7 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		if (element instanceof SimpleNode) {
 			if (((SimpleNode) element).getName().equals(Messages.bundles_node_label)) {
 				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_NODE_ICON);
-			} else {
+			} else if (((SimpleNode) element).getName().equals(Messages.dpackages_node_label)) {
 				return ImageHolder.getImage(ViewLabelProvider.DP_NODE_ICON);
 			}
 		}
@@ -138,6 +141,16 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 
 		if (element instanceof ServiceProperty) {
 			return null;
+		}
+		if (element instanceof Model) {
+			List modelProviders = ((Model) element).findFramework().getModelProviders();
+			for (int i=0; i<modelProviders.size(); i++) {
+				ContentTypeModelProvider manager = ((ModelProviderElement)modelProviders.get(i)).getProvider();
+				Image image = manager.getImage((Model) element);
+				if (image != null) {
+					return image;
+				}
+			}
 		}
 		return null;
 	}
