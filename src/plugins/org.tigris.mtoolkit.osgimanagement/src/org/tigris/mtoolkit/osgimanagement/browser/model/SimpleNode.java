@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
+package org.tigris.mtoolkit.osgimanagement.browser.model;
 
 public class SimpleNode extends Model {
 

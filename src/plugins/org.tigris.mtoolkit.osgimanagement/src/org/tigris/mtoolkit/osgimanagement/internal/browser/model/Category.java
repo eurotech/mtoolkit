@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+
 public class Category extends Model {
 
 	public Category(String name, Model parent) {

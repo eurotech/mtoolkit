@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
+package org.tigris.mtoolkit.osgimanagement.browser.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +19,8 @@ import org.eclipse.ui.IActionFilter;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
 public abstract class Model implements Comparable, IActionFilter, ConstantsDistributor {
 

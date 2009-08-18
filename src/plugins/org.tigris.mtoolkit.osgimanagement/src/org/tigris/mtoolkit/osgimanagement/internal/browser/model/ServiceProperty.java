@@ -1,5 +1,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+
 public class ServiceProperty extends Model {
 
 	private String label;

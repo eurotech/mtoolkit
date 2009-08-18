@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 
 public class BundlesCategory extends Model {

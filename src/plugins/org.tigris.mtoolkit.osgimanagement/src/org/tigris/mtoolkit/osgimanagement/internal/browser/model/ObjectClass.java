@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import org.tigris.mtoolkit.iagent.RemoteService;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 public class ObjectClass extends Model {
 
