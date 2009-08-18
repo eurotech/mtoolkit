@@ -11,18 +11,21 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
 public class BrowserErrorHandler {
@@ -123,10 +126,10 @@ public class BrowserErrorHandler {
 						if (shell != null) {
 							if (!shell.isDisposed()) {
 								PluginUtilities.showErrorDialog(shell,
-									Messages.standard_error_title,
-									trueMessage,
-									reason,
-									t);
+										Messages.standard_error_title,
+										trueMessage,
+										reason,
+										t);
 							}
 							manageShell(shell);
 						}
@@ -184,9 +187,9 @@ public class BrowserErrorHandler {
 						if (shell != null) {
 							if (!shell.isDisposed()) {
 								PluginUtilities.showWarningDialog(shell,
-									Messages.standard_error_title,
-									trueMessage,
-									reason);
+										Messages.standard_error_title,
+										trueMessage,
+										reason);
 							}
 							manageShell(shell);
 						}
@@ -231,18 +234,43 @@ public class BrowserErrorHandler {
 
 	// Dump to eclipse system log
 	private static void dumpToLog(int severity, String text, Throwable t) {
-		FrameworkPlugin plugin = FrameworkPlugin.getDefault();
+		final FrameworkPlugin plugin = FrameworkPlugin.getDefault();
 		if (plugin == null)
 			return;
-		ILog log = plugin.getLog();
+		final ILog log = plugin.getLog();
 
 		if (text == null) {
 			text = ""; //$NON-NLS-1$
 		}
 
-		IStatus status = new Status(severity, plugin.getId(), IStatus.OK, text, t);
-		log.log(status);
+		final IStatus status = new Status(severity, plugin.getId(), IStatus.OK, text, t);
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				page = plugin.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				part = page != null ? page.getActivePart() : null;
+				log.addLogListener(new ILogListener() {
+					public void logging(IStatus status, String plugin) {
+						log.removeLogListener(this);
+						Display.getDefault().getActiveShell().setLayoutDeferred(true);
+						Display.getDefault().getActiveShell().setRedraw(false);
+						Display.getDefault().asyncExec(new Runnable() {
+							public void run() {
+								if (page != null) {
+									page.bringToTop(part);
+									Display.getDefault().getActiveShell().setLayoutDeferred(false);
+									Display.getDefault().getActiveShell().setRedraw(true);
+								}
+							}
+						});
+
+					}
+				});
+				log.log(status);
+			}
+		});
 	}
+	static IWorkbenchPage page;
+	static IWorkbenchPart part;
 
 	// Get active shell
 	public static Shell getShell() {
