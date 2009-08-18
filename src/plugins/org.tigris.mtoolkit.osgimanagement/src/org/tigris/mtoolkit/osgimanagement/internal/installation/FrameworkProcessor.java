@@ -92,13 +92,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 		try {
 			input = item.getInputStream();
-			if (item.getMimeType().equals(MIME_DP)) {
-				// TODO: Make methods, which are called from inside jobs to do
-				// the real job
-				FrameworkConnectorFactory.installDP(input, item.getName(), framework);
-			} else {
-				FrameworkConnectorFactory.installBundle(input, item.getName(), framework);
-			}
+			install(input, item, framework);
 		} catch (IOException e) {
 			return FrameworkPlugin.newStatus(IStatus.ERROR, "Remote content installation failed", e);
 		} finally {
@@ -116,5 +110,15 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			return Status.CANCEL_STATUS;
 		}
 		return Status.OK_STATUS;
+	}
+	
+	public void install(InputStream input, InstallationItem item, FrameWork framework) {
+		if (item.getMimeType().equals(MIME_DP)) {
+			// TODO: Make methods, which are called from inside jobs to do
+			// the real job
+			FrameworkConnectorFactory.installDP(input, item.getName(), framework);
+		} else {
+			FrameworkConnectorFactory.installBundle(input, item.getName(), framework);
+		}
 	}
 }
