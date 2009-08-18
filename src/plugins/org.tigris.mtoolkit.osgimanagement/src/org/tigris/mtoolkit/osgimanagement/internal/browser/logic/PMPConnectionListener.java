@@ -13,9 +13,9 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionEvent;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionListener;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
+import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
@@ -32,12 +32,7 @@ public class PMPConnectionListener implements ConnectionListener {
 		this.frameworkName = frameworkName;
 		this.connector = connector;
 		this.autoConnected = autoConnected;
-		try {
-			((DeviceConnectorImpl) connector).getConnectionManager().addConnectionListener(this);
-		} catch (IAgentException e) {
-			e.printStackTrace();
-			BrowserErrorHandler.processError(e, connector);
-		}
+		((DeviceConnectorImpl) connector).getConnectionManager().addConnectionListener(this);
 	}
 
 	public void connectionChanged(ConnectionEvent e) {
