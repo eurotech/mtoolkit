@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -28,7 +29,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHan
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 
 public class PropertySheetLogic implements SelectionListener, ConstantsDistributor {
