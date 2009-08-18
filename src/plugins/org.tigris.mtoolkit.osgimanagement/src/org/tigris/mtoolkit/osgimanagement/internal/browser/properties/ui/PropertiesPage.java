@@ -81,7 +81,7 @@ public class PropertiesPage extends PropertyPage {
 		}
 	}
 
-	protected Control createContents(Composite parent) {
+	public Control createContents(Composite parent) {
 		return createPage(parent);
 	}
 
