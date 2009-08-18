@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
@@ -28,10 +30,12 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.commands.contexts.Context;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -50,8 +54,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MenuEvent;
-import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.TreeAdapter;
@@ -59,7 +61,6 @@ import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -79,6 +80,10 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.ViewPart;
+import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
+import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ListUtil;
@@ -87,9 +92,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SearchPane;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AddAction;
@@ -157,6 +160,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	private static InstallDPAction installDPAction;
 	private static DeInstallBundleAction deinstallBundleAction;
 	private static DeInstallDPAction deinstallDPAction;
+	
 	private static StartAction startAction;
 	private static StopAction stopAction;
 	private static UpdateBundleAction updateBundleAction;
@@ -342,31 +346,27 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		toolBar.add(disconnectAction);
 		toolBar.add(new Separator());
 
-		ToolBarManager bundlesMenu2 = new ToolBarManager();
-		bundlesMenu2.add(startAction);
-		bundlesMenu2.add(stopAction);
-		bundlesMenu2.add(updateBundleAction);
-		bundlesMenu2.add(deinstallBundleAction);
-		bundlesMenu2.add(bundlePropertiesAction);
-		bundlesMenu2.add(new Separator());
-		bundlesMenu2.add(installBundleAction);
-
 		Action actions[] = new Action[] { startAction,
 			stopAction,
 			updateBundleAction,
 			deinstallBundleAction,
 			bundlePropertiesAction,
 			installBundleAction };
-		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(actions);
+		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(actions, tree);
 		bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 		bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
 		toolBar.add(bundlesTB);
 
 		actions = new Action[] { installDPAction, deinstallDPAction, dpPropertiesAction };
-		ToolbarIMenuCreator dpTB = new ToolbarIMenuCreator(actions);
+		ToolbarIMenuCreator dpTB = new ToolbarIMenuCreator(actions, tree);
 		dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
 		dpTB.setToolTipText(Messages.DPAction_ToolTip);
 		toolBar.add(dpTB);
+		
+		for (int i=0; i<actionProviders.size(); i++) {
+			ContentTypeActionsProvider provider = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
+			provider.fillToolBar(toolBar);
+		}
 
 		toolBar.add(new Separator());
 		toolBar.add(addAction);
@@ -534,6 +534,12 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		refreshAction.setAccelerator(SWT.F5);
 		refreshAction.setImageDescriptor(ImageHolder.getImageDescriptor(REFRESH_IMAGE_PATH));
 
+		obtainActionProviders();
+		for (int i=0; i<actionProviders.size(); i++) {
+			ContentTypeActionsProvider provider = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
+			provider.init(tree);
+		}
+		
 		mgr = new MenuManager();
 		mgr.setRemoveAllWhenShown(true);
 		mgr.addMenuListener(new IMenuListener() {
@@ -578,6 +584,14 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		tree.setSelection(tree.getSelection());
 		StructuredSelection selection = (StructuredSelection) tree.getSelection();
 		boolean homogen = true;
+		
+		manager.add(new Separator(ContentTypeActionsProvider.GROUP_UNSIGNED));
+		manager.add(new Separator(ContentTypeActionsProvider.GROUP_ACTIONS));
+		manager.add(new Separator(ContentTypeActionsProvider.GROUP_INSTALL));
+		manager.add(new Separator(ContentTypeActionsProvider.GROUP_OPTIONS));
+		manager.add(new Separator(ContentTypeActionsProvider.GROUP_DEFAULT));
+		manager.add(new Separator(ContentTypeActionsProvider.GROUP_PROPERTIES));
+
 		if (selection.size() > 0) {
 			Model element = (Model) selection.getFirstElement();
 			Class clazz = element.getClass();
@@ -594,76 +608,79 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			if (homogen) {
 				if (element instanceof FrameWork) {
 					FrameWork framework = (FrameWork) element;
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, connectAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, disconnectAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, removeAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
 
-					manager.add(connectAction);
-					manager.add(disconnectAction);
-					manager.add(removeAction);
-					manager.add(refreshAction);
-
-					manager.add(new Separator());
-					manager.add(installBundleAction);
-					manager.add(installDPAction);
-					manager.add(new Separator());
-					if (framework.isConnected()) {
-						manager.add(viewAction);
-						manager.add(showServPropsInTreeAction);
-					}
-
-					manager.add(new Separator());
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installBundleAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
 				}
 				if (element instanceof TreeRoot) {
-					manager.add(addAction);
-					manager.add(new Separator());
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addAction);
 				}
-				if (element instanceof Bundle) {
-					manager.add(startAction);
-					manager.add(stopAction);
-					manager.add(updateBundleAction);
-					manager.add(deinstallBundleAction);
-					manager.add(refreshAction);
-					manager.add(new Separator());
 
-					manager.add(showBundleIDAction);
-					manager.add(showBundleVersionAction);
+				if (element instanceof Bundle) {
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, startAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, stopAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, updateBundleAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, deinstallBundleAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
+
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showBundleIDAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showBundleVersionAction);
 				}
 
 				if (element instanceof ObjectClass) {
 					if (!(element.getParent() instanceof FrameWork)) {
-						manager.add(gotoServiceAction);
+						manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, gotoServiceAction);
 					}
 				}
 				if (element instanceof SimpleNode) {
 					if (element.getName().equals(Messages.bundles_node_label)) {
-						manager.add(installBundleAction);
+						manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installBundleAction);
 					}
 					if (element.getName().equals(Messages.dpackages_node_label)) {
-						manager.add(installDPAction);
+						manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
 					}
 				}
 				if (element instanceof DeploymentPackage) {
-					manager.add(deinstallDPAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, deinstallDPAction);
 					// manager.add(dpPropertiesAction);
 				}
 			}
+			
+
+			if (element instanceof FrameWork) {
+				if (((FrameWork)element).isConnected()) {
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, viewAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showServPropsInTreeAction);
+				}
+			}
+
 		} else {
-			manager.add(addAction);
+			manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addAction);
 		}
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		manager.add(findAction);
-		manager.add(showConsoleAction);
-		if (selection.size() > 0 && homogen) {
-			manager.add(new Separator());
-			Model element = (Model) selection.getFirstElement();
-			if (element instanceof FrameWork)
-				manager.add(propertyAction);
-			if (element instanceof Bundle)
-				manager.add(bundlePropertiesAction);
-			if (element instanceof DeploymentPackage)
-				manager.add(dpPropertiesAction);
-			if (element instanceof ObjectClass)
-				manager.add(servicePropertiesAction);
+		for (int i=0; i<actionProviders.size(); i++) {
+			ContentTypeActionsProvider provider = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
+			provider.menuAboutToShow(selection, manager);
 		}
 
+		// call menuAboutToShow
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		manager.appendToGroup(ContentTypeActionsProvider.GROUP_DEFAULT, findAction);
+		manager.appendToGroup(ContentTypeActionsProvider.GROUP_DEFAULT, showConsoleAction);
+		if (selection.size() > 0 && homogen) {
+			Model element = (Model) selection.getFirstElement();
+			if (element instanceof FrameWork)
+				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, propertyAction);
+			if (element instanceof Bundle)
+				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, bundlePropertiesAction);
+			if (element instanceof DeploymentPackage)
+				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, dpPropertiesAction);
+			if (element instanceof ObjectClass)
+				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, servicePropertiesAction);
+		}
 	}
 
 	// Save Tree Model
@@ -856,52 +873,52 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	public void partDeactivated(IWorkbenchPart part) {
 	}
 
-	public class ToolbarIMenuCreator extends Action implements IMenuCreator {
-
-		private Action actions[];
-
-		public ToolbarIMenuCreator(Action actions[]) {
-			this.actions = actions;
-			setMenuCreator(this);
-		}
-
-		public void dispose() {
-
-		}
-
-		public int getStyle() {
-			return IAction.AS_DROP_DOWN_MENU;
-		}
-
-		public void run() {
-		}
-
-		public Menu getMenu(Control parent) {
-			Menu newmenu = new Menu(parent);
-			newmenu.addMenuListener(new MenuListener() {
-				public void menuHidden(MenuEvent e) {
-				}
-
-				public void menuShown(MenuEvent e) {
-					updateContextMenuStates();
-				}
-			});
-			for (int i = 0; i < actions.length; i++) {
-				ActionContributionItem item = new ActionContributionItem(actions[i]);
-				item.fill(newmenu, -1);
-			}
-			return newmenu;
-		}
-
-		public Menu getMenu(Menu parent) {
-			Menu newmenu = new Menu(parent);
-			for (int i = 0; i < actions.length; i++) {
-				ActionContributionItem item = new ActionContributionItem(actions[i]);
-				item.fill(newmenu, -1);
-			}
-			return newmenu;
-		}
-	}
+//	public class ToolbarIMenuCreator extends Action implements IMenuCreator {
+//
+//		private Action actions[];
+//
+//		public ToolbarIMenuCreator(Action actions[]) {
+//			this.actions = actions;
+//			setMenuCreator(this);
+//		}
+//
+//		public void dispose() {
+//
+//		}
+//
+//		public int getStyle() {
+//			return IAction.AS_DROP_DOWN_MENU;
+//		}
+//
+//		public void run() {
+//		}
+//
+//		public Menu getMenu(Control parent) {
+//			Menu newmenu = new Menu(parent);
+//			newmenu.addMenuListener(new MenuListener() {
+//				public void menuHidden(MenuEvent e) {
+//				}
+//
+//				public void menuShown(MenuEvent e) {
+//					updateContextMenuStates();
+//				}
+//			});
+//			for (int i = 0; i < actions.length; i++) {
+//				ActionContributionItem item = new ActionContributionItem(actions[i]);
+//				item.fill(newmenu, -1);
+//			}
+//			return newmenu;
+//		}
+//
+//		public Menu getMenu(Menu parent) {
+//			Menu newmenu = new Menu(parent);
+//			for (int i = 0; i < actions.length; i++) {
+//				ActionContributionItem item = new ActionContributionItem(actions[i]);
+//				item.fill(newmenu, -1);
+//			}
+//			return newmenu;
+//		}
+//	}
 
 	public static FrameWork[] getFrameworks() {
 		if (treeRoot == null)
@@ -980,5 +997,76 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		}
 		// console
 	}
+	
+	private List actionProviders = new ArrayList();
+
+	private void obtainActionProviders() {
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.contentTypeExtensions");
+
+		obtainActionsProviderElements(extensionPoint.getConfigurationElements(), actionProviders);
+	}
+	
+	private void obtainActionsProviderElements(IConfigurationElement[] elements, List providers) {
+		for (int i = 0; i < elements.length; i++) {
+			if (!elements[i].getName().equals("actions")) {
+				continue;
+			}
+			String clazz = elements[i].getAttribute("class");
+			if (clazz == null) {
+				continue;
+			}
+
+			ActionsProviderElement providerElement = new ActionsProviderElement(elements[i]);
+			if (providers.contains(providerElement))
+				continue;
+
+			try {
+				Object provider = elements[i].createExecutableExtension("class");
+
+				if (provider instanceof ContentTypeActionsProvider) {
+					providerElement.setProvider(((ContentTypeActionsProvider) provider));
+					providers.add(providerElement);
+				}
+			} catch (CoreException e) {
+				// TODO Log error
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+
+	public class ActionsProviderElement {
+		private String extension;
+		private String clazz;
+		private ContentTypeActionsProvider provider;
+		private IConfigurationElement confElement;
+
+		public ActionsProviderElement(IConfigurationElement configurationElement) {
+			confElement = configurationElement;
+			extension = configurationElement.getAttribute("extension");
+			clazz = configurationElement.getAttribute("class");
+		}
+
+		public void setProvider(ContentTypeActionsProvider provider) {
+			this.provider = provider;
+		}
+
+		public IConfigurationElement getConfigurationElement() {
+			return confElement;
+		}
+
+		public ContentTypeActionsProvider getProvider() {
+			return provider;
+		}
+
+		public boolean equals(ActionsProviderElement otherElement) {
+			if (this.clazz.equals(otherElement.clazz) && this.extension.equals(otherElement.extension))
+				return true;
+			return false;
+		}
+	}
+
 
 }
