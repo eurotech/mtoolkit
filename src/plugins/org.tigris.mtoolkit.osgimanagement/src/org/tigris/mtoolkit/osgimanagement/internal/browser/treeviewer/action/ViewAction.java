@@ -20,13 +20,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-public class ViewAction extends SelectionProviderAction {
+public class ViewAction extends SelectionProviderAction implements IStateAction {
 
 	private String bundlesView = Messages.bundles_view_action_label;
 	private String servicesView = Messages.services_view_action_label;
@@ -70,6 +71,7 @@ public class ViewAction extends SelectionProviderAction {
 	private void setViewType(final FrameWork fw, int viewType) {
 		Model parent = fw.getParent();
 		parent.removeElement(fw);
+ 		fw.removeChildren();
 		try {
 			switch (viewType) {
 			case FrameWork.BUNDLES_VIEW: {

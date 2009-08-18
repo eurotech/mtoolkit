@@ -7,10 +7,11 @@ import java.util.List;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-public class ShowServicePropertiesInTree extends SelectionProviderAction {
+public class ShowServicePropertiesInTree extends SelectionProviderAction implements IStateAction {
 
 	private List frameworks = new ArrayList();
 
@@ -34,7 +35,7 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction {
 		updateState(selection);
 	}
 
-	private void updateState(IStructuredSelection selection) {
+	public void updateState(IStructuredSelection selection) {
 		if (selection.isEmpty()) {
 			this.setEnabled(false);
 			return;

@@ -16,12 +16,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.ServicePropertiesDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.ServicePropertiesPage;
 
-public class ServicePropertiesAction extends SelectionProviderAction {
+public class ServicePropertiesAction extends SelectionProviderAction implements IStateAction {
 
 	/**
 	 * @param provider

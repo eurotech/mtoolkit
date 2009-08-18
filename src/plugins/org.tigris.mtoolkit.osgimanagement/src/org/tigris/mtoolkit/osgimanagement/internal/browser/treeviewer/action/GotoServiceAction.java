@@ -16,13 +16,14 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.iagent.RemoteService;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 
-public class GotoServiceAction extends SelectionProviderAction {
+public class GotoServiceAction extends SelectionProviderAction implements IStateAction {
 
 	public GotoServiceAction(ISelectionProvider provider, String text) {
 		super(provider, text);
@@ -39,7 +40,7 @@ public class GotoServiceAction extends SelectionProviderAction {
 			RemoteService service = objectClass.getService();
 			String searchName = objectClass.getName();
 			if (((ServicesCategory) objectClass.getParent()).getKind() == ServicesCategory.IN_USE) {
-				Bundle bundle = objectClass.findFramework().findBundleForService(service.getServiceId());
+				Bundle bundle = ((FrameWork) objectClass.findFramework()).findBundleForService(service.getServiceId());
 				if (bundle == null)
 					return;
 				ServicesCategory category = (ServicesCategory) bundle.getChildren()[0];

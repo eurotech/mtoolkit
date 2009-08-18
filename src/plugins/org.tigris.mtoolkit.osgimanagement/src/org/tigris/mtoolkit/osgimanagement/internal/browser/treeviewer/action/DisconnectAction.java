@@ -15,10 +15,11 @@ import java.util.Iterator;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-public class DisconnectAction extends SelectionProviderAction {
+public class DisconnectAction extends SelectionProviderAction implements IStateAction {
 
 	public DisconnectAction(ISelectionProvider provider, String label) {
 		super(provider, label);

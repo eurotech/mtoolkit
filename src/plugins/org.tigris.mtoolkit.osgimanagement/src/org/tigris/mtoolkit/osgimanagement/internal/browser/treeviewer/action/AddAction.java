@@ -14,9 +14,10 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 
-public class AddAction extends SelectionProviderAction {
+public class AddAction extends SelectionProviderAction implements IStateAction {
 
 	private TreeViewer parentView;
 
@@ -34,5 +35,9 @@ public class AddAction extends SelectionProviderAction {
 	// override to react properly to selection change
 	public void selectionChanged(IStructuredSelection selection) {
 		this.setEnabled(true);
+	}
+
+	public void updateState(IStructuredSelection selection) {
+		setEnabled(true);
 	}
 }

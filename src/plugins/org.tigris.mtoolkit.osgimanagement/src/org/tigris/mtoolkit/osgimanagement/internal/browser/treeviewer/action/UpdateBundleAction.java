@@ -15,9 +15,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
-public class UpdateBundleAction extends SelectionProviderAction {
+public class UpdateBundleAction extends SelectionProviderAction implements IStateAction {
 
 	private TreeViewer parentView;
 

@@ -17,10 +17,11 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 
-public class DeInstallBundleAction extends SelectionProviderAction {
+public class DeInstallBundleAction extends SelectionProviderAction implements IStateAction {
 
 	public DeInstallBundleAction(ISelectionProvider provider, String label) {
 		super(provider, label);
