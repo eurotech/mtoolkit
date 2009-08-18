@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 public class ContentChangeEvent {
 	private Model actedUpon;
