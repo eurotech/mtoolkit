@@ -36,8 +36,9 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
-import org.tigris.mtoolkit.iagent.internal.connection.AbstractConnection;
-import org.tigris.mtoolkit.iagent.internal.connection.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -48,7 +49,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceObject;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty;
@@ -418,7 +418,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public static void updateViewType(FrameWork fw) {
- 		fw.removeChildren();
 		if (fw.getViewType() == FrameWork.SERVICES_VIEW) {
 			for (int i = 0; i < fw.servicesViewVector.size(); i++) {
 				fw.addElement((Model) fw.servicesViewVector.elementAt(i));
@@ -429,7 +428,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			Model dpNode = fw.getDPNode();
 			
 			Enumeration keys = null;
-			if(isBundlesCategoriesShown) { 
+			if(isBundlesCategoriesShown) {
 				keys = fw.categoryHash.keys();
 				while(keys.hasMoreElements()) {
 					Model category = (Model)fw.categoryHash.get(keys.nextElement());
@@ -449,7 +448,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			while (keys.hasMoreElements()) {
 				dpNode.addElement((Model) fw.dpHash.get(keys.nextElement()));
 			}
-			
+
 			fw.addElement(bundlesNode);
 			fw.addElement(dpNode);
 		}
