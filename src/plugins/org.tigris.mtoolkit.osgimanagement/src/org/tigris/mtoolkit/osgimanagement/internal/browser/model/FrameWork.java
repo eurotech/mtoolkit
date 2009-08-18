@@ -10,14 +10,21 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -36,6 +43,9 @@ import org.tigris.mtoolkit.iagent.event.RemoteDPEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDPListener;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
+import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
@@ -78,6 +88,8 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 	private PMPConnectionListener connectionListener;
 	private boolean connectedFlag;
+
+	private List modelProviders = new ArrayList();
 
 	public FrameWork(String name, Model parent, boolean autoConnected) {
 		super(name, parent);
@@ -213,7 +225,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 				servicesViewVector = new Vector();
 
 				dpHash = new Hashtable();
-
 				refreshViewers();
 
 				try {
@@ -257,7 +268,14 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					if (monitor != null && monitor.isCanceled())
 						return;
 					FrameworkConnectorFactory.addServicesNodes(this);
-
+					
+					
+					obtainModelProviders();
+					for (int i=0; i<modelProviders.size(); i++) {
+						ContentTypeModelProvider manager = ((ModelProviderElement)modelProviders.get(i)).getProvider();
+						Model node = manager.connect(this, connector);
+					}
+					
 				} catch (IAgentException e) {
 					BrowserErrorHandler.processError(e, connector);
 				} catch (IllegalStateException ise) {
@@ -309,6 +327,11 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			}
 		}
 
+		for (int i=0; i<modelProviders.size(); i++) {
+			((ModelProviderElement)modelProviders.get(i)).getProvider().disconnect();
+		}
+		modelProviders.clear();
+		
 		if (!disposing) {
 			display = Display.getCurrent();
 			if (display == null)
@@ -450,7 +473,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			return null;
 		return (DeploymentPackage) dpHash.get(name);
 	}
-
+	
 	public Vector getCategoriesKeys() {
 		if ((categoryHash == null) || (categoryHash.size() == 0)) {
 			return null;
@@ -514,8 +537,11 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		return viewType;
 	}
 
-	public void setViewType(int i) {
-		viewType = i;
+	public void setViewType(int type) {
+		viewType = type;
+		for (int i=0; i<modelProviders.size(); i++) {
+			((ModelProviderElement)modelProviders.get(i)).getProvider().switchView(type);
+		}
 	}
 
 	protected boolean isShowBundlesID() {
@@ -711,10 +737,10 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 				}
 				bundle = findBundle(id);
 				String newName = FrameworkConnectorFactory.getBundleName(rBundle, null);
-				bundle.name = newName;
+				bundle.setName(newName);
 				bundle = findBundleInDP(id);
 				if (bundle != null) {
-					bundle.name = newName;
+					bundle.setName(newName);
 				}
 				updateBundleNodes(rBundle);
 			} else if (type == RemoteBundleEvent.UNINSTALLED) {
@@ -1136,4 +1162,76 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	public boolean isRefreshing() {
 		return refreshing;
 	}
+	
+	public List getModelProviders() {
+		return modelProviders;
+	}
+	
+	private void obtainModelProviders() {
+		modelProviders.clear();
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.contentTypeExtensions");
+
+		obtainModelProviderElements(extensionPoint.getConfigurationElements(), modelProviders);
+	}
+
+	private void obtainModelProviderElements(IConfigurationElement[] elements, List providers) {
+		for (int i = 0; i < elements.length; i++) {
+			if (!elements[i].getName().equals("model")) {
+				continue;
+			}
+			String clazz = elements[i].getAttribute("class");
+			if (clazz == null) {
+				continue;
+			}
+
+			ModelProviderElement providerElement = new ModelProviderElement(elements[i]);
+			if (providers.contains(providerElement))
+				continue;
+
+			try {
+				Object provider = elements[i].createExecutableExtension("class");
+
+				if (provider instanceof ContentTypeModelProvider) {
+					providerElement.setProvider(((ContentTypeModelProvider) provider));
+					providers.add(providerElement);
+				}
+			} catch (CoreException e) {
+				// TODO Log error
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public class ModelProviderElement {
+		private String extension;
+		private String clazz;
+		private ContentTypeModelProvider provider;
+		private IConfigurationElement confElement;
+
+		public ModelProviderElement(IConfigurationElement configurationElement) {
+			confElement = configurationElement;
+			extension = configurationElement.getAttribute("extension");
+			clazz = configurationElement.getAttribute("class");
+		}
+
+		public void setProvider(ContentTypeModelProvider provider) {
+			this.provider = provider;
+		}
+
+		public IConfigurationElement getConfigurationElement() {
+			return confElement;
+		}
+
+		public ContentTypeModelProvider getProvider() {
+			return provider;
+		}
+
+		public boolean equals(ModelProviderElement otherElement) {
+			if (this.clazz.equals(otherElement.clazz) && this.extension.equals(otherElement.extension))
+				return true;
+			return false;
+		}
+	}
+
 }
