@@ -28,6 +28,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider.PluginItem;
 
 public class FrameworkProcessor implements InstallationItemProcessor {
 	private static FrameworkProcessor defaultinstance;
@@ -87,6 +88,14 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			}
 			if (!connectJob.getResult().isOK()) {
 				return connectJob.getResult();
+			}
+		}
+
+		if (item instanceof PluginItem) {
+			IStatus status = ((PluginItem)item).checkAdditionalBundles(framework);
+			if (status.getSeverity() == IStatus.CANCEL) {
+				monitor.setCanceled(true);
+				return status;
 			}
 		}
 

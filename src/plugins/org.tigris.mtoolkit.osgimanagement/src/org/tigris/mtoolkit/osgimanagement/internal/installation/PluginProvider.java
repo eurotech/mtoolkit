@@ -14,6 +14,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -27,11 +30,17 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.pde.internal.core.natures.PDE;
+import org.eclipse.swt.widgets.Display;
+import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
+import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
 public class PluginProvider implements InstallationItemProvider {
 
@@ -78,7 +87,7 @@ public class PluginProvider implements InstallationItemProvider {
 			if (exporter == null) {
 				monitor.done();
 				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not export plugin: "
-								+ project.getName());
+						+ project.getName());
 			}
 
 			if (version.endsWith("qualifier")) {
@@ -114,7 +123,7 @@ public class PluginProvider implements InstallationItemProvider {
 				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), t.getMessage(), t);
 			} else {
 				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not export plugin: "
-								+ project.getName());
+						+ project.getName());
 			}
 		}
 
@@ -123,6 +132,85 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 
 		public void dispose() {
+		}
+
+		/**
+		 * This method checks for required bundles for specified plugin missing
+		 * on target framework. A dialog with missing bundles is shown to user
+		 * to select and install necessary bundles.
+		 * 
+		 * @param framework
+		 *            - target framework
+		 * @return IStatus
+		 */
+		public IStatus checkAdditionalBundles(FrameWork framework) {
+			// first check if framework is connected and all bundles info is
+			// retrieved
+			while (!framework.isConnected() || framework.isConnecting()) {
+				try {
+					Thread.currentThread().sleep(50);
+				} catch (InterruptedException e) {
+				}
+			}
+
+			// find missing bundle dependencies
+			IPluginModelBase model = PluginRegistry.findModel(project);
+			BundleDescription descr = model.getBundleDescription();
+			BundleDescription[] required = descr.getResolvedRequires();
+			final Vector dependencies = new Vector();
+			for (int i = 0; i < required.length; i++) {
+				String symbName = required[i].getSymbolicName();
+				Version ver = required[i].getVersion();
+				Set ids = framework.getBundlesKeys();
+				Iterator iter = ids.iterator();
+				boolean found = false;
+				while (iter.hasNext()) {
+					Bundle bundle = (Bundle) framework.findBundle(iter.next());
+					try {
+						if (bundle.getName().equals(symbName) && bundle.getVersion().compareTo(ver.toString()) >= 0) {
+							found = true;
+							break;
+						}
+					} catch (IAgentException e) {
+						e.printStackTrace();
+					}
+				}
+				if (!found) {
+					dependencies.addElement(required[i]);
+				}
+			}
+
+			// ask user which dependencies to install
+			if (dependencies.size() > 0) {
+				final boolean result[] = new boolean[1];
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						DependenciesSelectionDialog dependenciesDialog = new DependenciesSelectionDialog(Display
+								.getDefault().getActiveShell(), dependencies);
+						dependenciesDialog.open();
+						if (dependenciesDialog.getReturnCode() == DependenciesSelectionDialog.OK) {
+							Object[] selected = dependenciesDialog.getSelected();
+							dependencies.removeAllElements();
+							for (int i = 0; i < selected.length; i++) {
+								dependencies.addElement(selected[i]);
+							}
+						} else {
+							result[0] = true;
+						}
+					}
+				});
+				if (result[0]) {
+					return Status.CANCEL_STATUS;
+				}
+
+				// install dependencies
+				for (int i = 0; i < dependencies.size(); i++) {
+					descr = (BundleDescription) dependencies.elementAt(i);
+					String location = descr.getLocation();
+					FrameworkConnectorFactory.installBundle(new File(location), framework);
+				}
+			}
+			return Status.OK_STATUS;
 		}
 	}
 
