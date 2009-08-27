@@ -61,7 +61,7 @@ public class LightServiceRegistry {
 	/**
 	 * Default name of the definition file, parsed by the registry.
 	 */
-	public static final String DEFAULT_REGISTRY_FILE = "META-INF/extenders.properties";
+	public static final String DEFAULT_REGISTRY_FILE = "extenders.properties";
 
 	private static class ExtenderHandle {
 
