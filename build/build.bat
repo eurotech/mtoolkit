@@ -7,7 +7,7 @@ set BUILDER=%~dp0
 
 set LAUNCHER_JAR=org.eclipse.equinox.launcher.jar
 
-if exist %BASEBUILDER%\plugins\%LAUNCHER_JAR% goto buildOK
+if exist %BASEBUILDER_DIR%\plugins\%LAUNCHER_JAR% goto buildOK
 
 :fetchBaseBuilder
 cvs -d%BASEBUILDER_CVSROOT% export -r %BASEBUILDER_TAG% -d %BASEBUILDER_DIR% %BASEBUILDER_MODULE%
