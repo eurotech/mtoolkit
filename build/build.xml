@@ -1,0 +1,5 @@
+<project default="buildAll">
+	<target name="buildAll" if="eclipse.pdebuild.scripts">
+		<ant antfile="build.xml" dir="${eclipse.pdebuild.scripts}"/>
+	</target>
+</project>

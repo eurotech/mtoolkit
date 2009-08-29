@@ -15,6 +15,9 @@
 	<!-- ===================================================================== -->
 	<!-- ===================================================================== -->
 	<target name="getBaseComponents" depends="checkLocalBase" unless="skipBase">
+		<fail message="Please extract Eclipse distribution to build against in 'target/' folder."/>
+		
+		<!-- below is the old code, which fetches the Eclipse distribution from specified location -->
 		<get src="${eclipseBaseURL}" dest="${buildDirectory}/../temp-base.zip" />
 		<unzip dest="${base}" overwrite="true" src="${buildDirectory}/../temp-base.zip" />
 	</target>

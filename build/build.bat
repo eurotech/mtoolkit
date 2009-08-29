@@ -1,10 +1,20 @@
-set BASEBUILDER=%~dp0\..\basebuilder
-set LAUNCHER_NAME=org.eclipse.equinox.launcher_1.0.200.v20090128-1500.jar
-set PDEBUILD_NAME=org.eclipse.pde.build_3.5.0.v20090129
-set TARGET=%~dp0\..\target
-set BUILDER=%~dp0
-for /f "tokens=*" %%i in ('%~dp0bin\date.exe -u +%%Y%%m%%d-%%H00') do set TIMESTAMP=%%i
+set BASEBUILDER_CVSROOT=:pserver:anonymous@dev.eclipse.org:/cvsroot/eclipse
+set BASEBUILDER_MODULE=org.eclipse.releng.basebuilder
+set BASEBUILDER_TAG=HEAD
+set BASEBUILDER_DIR=%~dp0\..\basebuilder
 
-java -jar %BASEBUILDER%\plugins\%LAUNCHER_NAME% -application org.eclipse.ant.core.antRunner -buildfile %BASEBUILDER%\plugins\%PDEBUILD_NAME%\scripts\build.xml -Dbuilder=%BUILDER% -Dtimestamp=%TIMESTAMP%
+set BUILDER=%~dp0
+
+set LAUNCHER_JAR=org.eclipse.equinox.launcher.jar
+
+if exist %BASEBUILDER%\plugins\%LAUNCHER_JAR% goto buildOK
+
+:fetchBaseBuilder
+cvs -d%BASEBUILDER_CVSROOT% export -r %BASEBUILDER_TAG% -d %BASEBUILDER_DIR% %BASEBUILDER_MODULE%
+
+:buildOK
+
+for /f "tokens=*" %%i in ('%~dp0bin\date.exe -u +%%Y%%m%%d-%%H00') do set TIMESTAMP=%%i
+java -jar %BASEBUILDER_DIR%\plugins\%LAUNCHER_JAR% -application org.eclipse.ant.core.antRunner -buildfile build.xml -Dbuilder=%BUILDER% -Dtimestamp=%TIMESTAMP%
 
 pause
