@@ -248,6 +248,12 @@ public class IAgentErrors {
 	public static final int ERROR_BUNDLE_UNKNOWN = -6000;
 
 	/**
+	 * Code error indicating that the requested operation was denied, because
+	 * the target bundle is system and protected.
+	 */
+	public static final int ERROR_BUNDLE_SYSTEM = -6901;
+  
+	/**
 	 * Code error indicating that the bundle has been uninstalled.
 	 */
 	public static final int ERROR_BUNDLE_UNINSTALLED = -6999;
