@@ -17,3 +17,4 @@ Bundle-RequiredExecutionEnvironment: CDC-1.1/Foundation-1.1,
 Require-Bundle: org.tigris.mtoolkit.iagent.rpc;bundle-version="[2.0.0,3.0.0)";visibility:=reexport
 Bundle-ClassPath: pmpc.jar,
  .
+Eclipse-ExtensibleAPI: true
