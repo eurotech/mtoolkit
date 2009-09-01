@@ -176,6 +176,10 @@
 				<include name="${p2.repository.folder}/**/*"/>
 			</fileset>
 		</copy>
+		<!-- move the build zip to the top level dist/ folder -->
+		<move todir="${distDirectory}">
+			<fileset dir="${distDirectory}/${buildLabel}" includes="*.zip"/>
+		</move>
 	</target>
 
 	<!-- ===================================================================== -->
