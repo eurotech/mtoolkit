@@ -15,6 +15,6 @@ cvs -d%BASEBUILDER_CVSROOT% export -r %BASEBUILDER_TAG% -d %BASEBUILDER_DIR% %BA
 :buildOK
 
 for /f "tokens=*" %%i in ('%~dp0bin\date.exe -u +%%Y%%m%%d-%%H00') do set TIMESTAMP=%%i
-java -jar %BASEBUILDER_DIR%\plugins\%LAUNCHER_JAR% -application org.eclipse.ant.core.antRunner -buildfile ~dp0build.xml -Dbuilder=%BUILDER% -Dtimestamp=%TIMESTAMP%
+java -jar %BASEBUILDER_DIR%\plugins\%LAUNCHER_JAR% -application org.eclipse.ant.core.antRunner -buildfile %~dp0\build.xml -Dbuilder=%BUILDER% -Dtimestamp=%TIMESTAMP% %BUILDER_ARGUMENTS%
 
 if not defined DONT_PAUSE pause
