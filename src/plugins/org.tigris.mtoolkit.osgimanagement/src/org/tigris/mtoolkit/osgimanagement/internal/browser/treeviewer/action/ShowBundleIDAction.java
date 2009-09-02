@@ -74,11 +74,13 @@ public class ShowBundleIDAction extends SelectionProviderAction implements IStat
 			return;
 		}
 		setEnabled(true);
-		Collection bundles = ((FrameWork) frameworks.get(0)).bundleHash.values();
-		Bundle firstBundle = (Bundle) bundles.iterator().next();
-		if (firstBundle.isShowID())
-			setChecked(true);
-		else
-			setChecked(false);
+		if (((FrameWork) frameworks.get(0)).bundleHash != null) { 
+			Collection bundles = ((FrameWork) frameworks.get(0)).bundleHash.values();
+			Bundle firstBundle = (Bundle) bundles.iterator().next();
+			if (firstBundle.isShowID())
+				setChecked(true);
+			else
+				setChecked(false);
+		}
 	}
 }

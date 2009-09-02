@@ -75,11 +75,13 @@ public class ShowBundleVersionAction extends SelectionProviderAction implements 
 		}
 		this.setEnabled(true);
 
-		Bundle bundle = (Bundle) ((FrameWork) frameworks.get(0)).bundleHash.values().iterator().next();
-		boolean versionShown = bundle.isShowVersion();
-		if (versionShown)
-			setChecked(true);
-		else
-			setChecked(false);
+		if (((FrameWork) frameworks.get(0)).bundleHash != null) {
+			Bundle bundle = (Bundle) ((FrameWork) frameworks.get(0)).bundleHash.values().iterator().next();
+			boolean versionShown = bundle.isShowVersion();
+			if (versionShown)
+				setChecked(true);
+			else
+				setChecked(false);
+		}
 	}
 }
