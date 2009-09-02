@@ -39,12 +39,9 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 			element.setParent(this);
 		}
 
-		if (element instanceof Bundle) {
-			if (elementList.add((Bundle) element)) {
-				fireElementAdded(element);
-			}
-		} else if (elementList.add(element))
+		if (elementList.add(element)) {
 			fireElementAdded(element);
+		}
 	}
 
 	private void setParent(Model parent) {
