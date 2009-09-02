@@ -141,9 +141,9 @@ public class PropertiesPage extends PropertyPage {
 		Vector dataVector = new Vector();
 		Enumeration keys = data.keys();
 		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
-			String value = (String) data.get(key);
-			PropertyObject object = new PropertyObject(key, value);
+			Object key = keys.nextElement();
+			Object value = data.get(key);
+			PropertyObject object = new PropertyObject(key.toString(), value.toString());
 			dataVector.addElement(object);
 		}
 		tableViewer.setInput(dataVector);
