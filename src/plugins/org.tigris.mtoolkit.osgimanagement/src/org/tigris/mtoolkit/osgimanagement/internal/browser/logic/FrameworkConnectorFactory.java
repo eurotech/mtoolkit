@@ -734,7 +734,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					fw.monitor.setCanceled(true);
 				}
 				// wait if connect operation is still active
-				synchronized (FrameworkConnectorFactory.getLockObject(fw.getConnector())) {
+				if (fw.getConnector() != null) {
+					synchronized (FrameworkConnectorFactory.getLockObject(fw.getConnector())) {
+					}
 				}
 				if (fw.getConnector() != null) {
 					AbstractConnection conn = ((DeviceConnectorImpl) fw.getConnector()).getConnectionManager().getActiveConnection(ConnectionManager.PMP_CONNECTION);
