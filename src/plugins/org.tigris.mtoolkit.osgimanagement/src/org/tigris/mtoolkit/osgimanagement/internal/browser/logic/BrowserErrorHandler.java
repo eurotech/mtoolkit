@@ -251,18 +251,19 @@ public class BrowserErrorHandler {
 				log.addLogListener(new ILogListener() {
 					public void logging(IStatus status, String plugin) {
 						log.removeLogListener(this);
-						Display.getDefault().getActiveShell().setLayoutDeferred(true);
-						Display.getDefault().getActiveShell().setRedraw(false);
-						Display.getDefault().asyncExec(new Runnable() {
-							public void run() {
-								if (page != null) {
-									page.bringToTop(part);
-									Display.getDefault().getActiveShell().setLayoutDeferred(false);
-									Display.getDefault().getActiveShell().setRedraw(true);
+						if (Display.getDefault().getActiveShell() != null) {
+							Display.getDefault().getActiveShell().setLayoutDeferred(true);
+							Display.getDefault().getActiveShell().setRedraw(false);
+							Display.getDefault().asyncExec(new Runnable() {
+								public void run() {
+									if (page != null) {
+										page.bringToTop(part);
+										Display.getDefault().getActiveShell().setLayoutDeferred(false);
+										Display.getDefault().getActiveShell().setRedraw(true);
+									}
 								}
-							}
-						});
-
+							});
+						}
 					}
 				});
 				log.log(status);
