@@ -127,5 +127,11 @@ public class MethodSignature {
 					+ parameters.length + " arguments are provided.");
 		return Utils.callRemoteMethod(obj, this, parameters);
 	}
+	
+	public boolean isDefined(RemoteObject obj) throws IAgentException {
+		if (obj == null)
+			throw new IllegalArgumentException("Remote object cannot be null");
+		return Utils.isRemoteMethodDefined(obj, this);
+	}
 
 }

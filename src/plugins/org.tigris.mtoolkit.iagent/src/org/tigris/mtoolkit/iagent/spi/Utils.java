@@ -244,7 +244,7 @@ public class Utils {
 		return isRemoteMethodDefined(remote, methodSignature);
 	}
 
-	private static boolean isRemoteMethodDefined(RemoteObject remote, MethodSignature methodSignature)
+	public static boolean isRemoteMethodDefined(RemoteObject remote, MethodSignature methodSignature)
 			throws IAgentException {
 		try {
 			return getRemoteMethod(remote, methodSignature) != null;
