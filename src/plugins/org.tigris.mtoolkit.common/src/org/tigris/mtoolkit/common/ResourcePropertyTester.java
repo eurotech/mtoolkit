@@ -17,7 +17,6 @@ import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 public class ResourcePropertyTester extends PropertyTester {
 
 	private IExtensionRegistry registry = null;
-	private List mimeTypes = null;
 	private InstallationItem installationItem;
 
 	public ResourcePropertyTester() {
@@ -42,6 +41,7 @@ public class ResourcePropertyTester extends PropertyTester {
 			if (!elements[i].getName().equals("processor")) {
 				continue;
 			}
+			List mimeTypes = new ArrayList();
 			try {
 				Object processor = elements[i].createExecutableExtension("class");
 				if (processor == null)
@@ -51,8 +51,6 @@ public class ResourcePropertyTester extends PropertyTester {
 				if (types == null)
 					continue;
 				for (int j = 0; j < types.length; j++) {
-					if (mimeTypes == null)
-						mimeTypes = new ArrayList();
 					if (!mimeTypes.contains(types[j]))
 						mimeTypes.add(types[j]);
 				}
