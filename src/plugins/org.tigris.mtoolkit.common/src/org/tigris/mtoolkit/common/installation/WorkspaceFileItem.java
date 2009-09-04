@@ -47,6 +47,10 @@ public class WorkspaceFileItem implements InstallationItem {
 	public String getName() {
 		return file.getName();
 	}
+	
+	public IFile getFile() {
+		return file;
+	}
 
 	public IStatus prepare(IProgressMonitor monitor) {
 		try {
