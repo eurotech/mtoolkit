@@ -38,6 +38,7 @@ public abstract class WorkspaceFileProvider implements InstallationItemProvider 
 
 	protected String extension;
 	protected String mimeType;
+	protected String name;
 
 	public abstract InstallationItem getInstallationItem(Object resource);
 
@@ -51,6 +52,11 @@ public abstract class WorkspaceFileProvider implements InstallationItemProvider 
 		if (mimeType == null)
 			throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
 				"Installation item provider must specify 'type' attribute",
+				null));
+		name = element.getAttribute("name");
+		if (name == null)
+			throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
+				"Installation item provider must specify 'name' attribute",
 				null));
 		// successful
 	}
