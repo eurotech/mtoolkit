@@ -36,7 +36,7 @@ public class UIResources {
 		registry.put(SMALL_ERROR_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "error_tsk.gif"));
 		registry.put(SMALL_WARNING_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "warn_tsk.gif"));
 		registry.put(SMALL_INFO_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "info_tsk.gif"));
-		registry.put(SSL_INTERACTION_WIZBAN_ICON, UtilitiesPlugin.getImageDescriptor(WIZBAN_PATH + "login_wiz.png"));
+		registry.put(SSL_INTERACTION_WIZBAN_ICON, UtilitiesPlugin.getImageDescriptor(WIZBAN_PATH + "ssl.dialog.wiz.warning.gif"));
 	}
 
 	private static ImageRegistry getImageRegistry() {
