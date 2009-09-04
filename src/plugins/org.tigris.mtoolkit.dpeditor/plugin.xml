@@ -83,6 +83,7 @@
             class="org.tigris.mtoolkit.dpeditor.installation.DPPFileProvider"
             extension="dpp"
             id="org.tigris.mtoolkit.dpeditor.deploymentprovider"
+            name="Deployment package project provider"
             type="application/vnd.osgi.dp">
       </provider>
    </extension>
