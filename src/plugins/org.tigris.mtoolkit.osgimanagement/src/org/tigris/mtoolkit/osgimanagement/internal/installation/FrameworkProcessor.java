@@ -13,13 +13,20 @@ package org.tigris.mtoolkit.osgimanagement.internal.installation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.dialogs.ListDialog;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -31,10 +38,13 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider.PluginItem;
 
 public class FrameworkProcessor implements InstallationItemProcessor {
+	
 	private static FrameworkProcessor defaultinstance;
 	private static final String MIME_JAR = "application/java-archive";
 	private static final String MIME_ZIP = "application/zip";
 	private static final String MIME_DP = "application/vnd.osgi.dp";
+
+	private static Vector additionalProcessors = new Vector();
 
 	public static FrameworkProcessor getDefault() {
 		if (defaultinstance == null) {
@@ -42,6 +52,14 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 
 		return defaultinstance;
+	}
+	
+	public static void addAdditionalProcessor(InstallationItemProcessor processor) {
+		additionalProcessors.addElement(processor);
+	}
+
+	public static void removeAdditionalProcessor(InstallationItemProcessor processor) {
+		additionalProcessors.removeElement(processor);
 	}
 
 	public InstallationTarget[] getInstallationTargets() {
@@ -62,10 +80,26 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	}
 
 	public String[] getSupportedMimeTypes() {
-		return new String[] { MIME_JAR, MIME_ZIP, MIME_DP };
+		Vector mimeTypes = new Vector();
+		mimeTypes.addElement(MIME_JAR);
+		mimeTypes.addElement(MIME_ZIP);
+		mimeTypes.addElement(MIME_DP);
+		for (int i=0; i<additionalProcessors.size(); i++) {
+			String additionalMT[] = ((InstallationItemProcessor)additionalProcessors.get(i)).getSupportedMimeTypes();
+			for (int j=0; j<additionalMT.length; j++) {
+				if (mimeTypes.indexOf(additionalMT[j]) == -1) {
+					mimeTypes.addElement(additionalMT[j]);
+				}
+			}	
+		}
+		String result[] = new String[mimeTypes.size()];
+		for (int i=0; i<result.length; i++) {
+			result[i] = (String) mimeTypes.elementAt(i);
+		}
+		return result;
 	}
 
-	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, IProgressMonitor monitor) {
+	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 		IStatus preparationStatus = item.prepare(subMonitor.newChild(50));
 
@@ -100,9 +134,54 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 
 		try {
+			String mimeType = item.getMimeType();
+			Vector processors = new Vector();
+			if (mimeType.equals(MIME_DP) || mimeType.equals(MIME_JAR) || mimeType.equals(MIME_ZIP)) {
+				processors.addElement(this);
+			}
+			for (int i=0; i<additionalProcessors.size(); i++) {
+				String procMimeTypes[] = ((InstallationItemProcessor)additionalProcessors.elementAt(i)).getSupportedMimeTypes();
+				for (int j=0; j<procMimeTypes.length; j++) {
+					if (mimeType.equals(procMimeTypes[j])) {
+						processors.addElement(additionalProcessors.elementAt(i));
+						break;
+					}
+				}
+			}
+			
+			final FrameworkProcessor processor[] = new FrameworkProcessor[] {(FrameworkProcessor) processors.elementAt(0)};
+			if (processors.size() > 1) {
+				final FrameworkProcessor prArr[] = new FrameworkProcessor[processors.size()];
+				for (int i=0; i<prArr.length; i++) {
+					FrameworkProcessor pr = (FrameworkProcessor) processors.elementAt(i);
+					prArr[i] = pr;
+				}
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						ListDialog dialog = new ListDialog(FrameWorkView.getShell());
+						
+						dialog.setTitle("Select processor");
+						dialog.setLabelProvider(new LabelProvider());
+						dialog.setMessage("Select installation processor");
+						dialog.setContentProvider(new ArrayContentProvider());
+						dialog.setInput(Arrays.asList(prArr));
+						dialog.setInitialSelections(new Object[]{prArr[0]});
+						
+						int result = dialog.open();
+						if (result == Window.CANCEL) {
+							monitor.setCanceled(true);
+						}
+						processor[0] = (FrameworkProcessor) dialog.getResult()[0];
+					}
+				});
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+			}
+			
 			input = item.getInputStream();
-			install(input, item, framework);
-		} catch (IOException e) {
+			processor[0].install(input, item, framework, monitor);
+		} catch (Exception e) {
 			return FrameworkPlugin.newStatus(IStatus.ERROR, "Remote content installation failed", e);
 		} finally {
 			if (input != null) {
@@ -121,7 +200,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return Status.OK_STATUS;
 	}
 	
-	public void install(InputStream input, InstallationItem item, FrameWork framework) {
+	public void install(InputStream input, InstallationItem item, FrameWork framework, IProgressMonitor monitor) throws Exception {
 		if (item.getMimeType().equals(MIME_DP)) {
 			// TODO: Make methods, which are called from inside jobs to do
 			// the real job
@@ -129,5 +208,13 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		} else {
 			FrameworkConnectorFactory.installBundle(input, item.getName(), framework);
 		}
+	}
+	
+	public String getName() {
+		return "Bundles processor";
+	}
+	
+	public String toString() {
+		return getName();
 	}
 }
