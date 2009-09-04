@@ -62,8 +62,6 @@ public class WorkspaceFileItem implements InstallationItem {
 	}
 
 	public void dispose() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

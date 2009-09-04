@@ -34,14 +34,16 @@ import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
  * </p>
  * 
  */
-public abstract class WorkspaceFileProvider implements InstallationItemProvider {
+public class WorkspaceFileProvider implements InstallationItemProvider {
 
 	protected String extension;
 	protected String mimeType;
 	protected String name;
 
-	public abstract InstallationItem getInstallationItem(Object resource);
-
+	public InstallationItem getInstallationItem(Object resource) {
+		return new WorkspaceFileItem(getFileFromGeneric(resource), mimeType);
+	}
+	
 	public void init(IConfigurationElement element) throws CoreException {
 		extension = element.getAttribute("extension");
 		if (extension == null)

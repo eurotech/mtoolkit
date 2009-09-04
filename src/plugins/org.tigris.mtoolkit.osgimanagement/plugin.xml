@@ -58,19 +58,19 @@
    <extension
          point="org.tigris.mtoolkit.common.installationItemProviders">
       <provider
-            class="org.tigris.mtoolkit.osgimanagement.internal.installation.WorkspaceFileProviderImpl"
+            class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
             id="org.tigris.mtoolkit.osgimanagement.deploymentprovider"
             extension="dp"
             type="application/vnd.osgi.dp">
       </provider>
       <provider
-            class="org.tigris.mtoolkit.osgimanagement.internal.installation.WorkspaceFileProviderImpl"
+            class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
             id="org.tigris.mtoolkit.osgimanagement.jarprovider"
             extension="jar"
             type="application/java-archive">
       </provider>
       <provider
-            class="org.tigris.mtoolkit.osgimanagement.internal.installation.WorkspaceFileProviderImpl"
+            class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
             id="org.tigris.mtoolkit.osgimanagement.jarprovider"
             extension="zip"
             type="application/zip">
