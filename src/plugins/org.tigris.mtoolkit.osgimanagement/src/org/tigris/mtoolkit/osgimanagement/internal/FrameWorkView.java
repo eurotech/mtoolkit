@@ -128,8 +128,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 	public static final String VIEW_ID = FrameworkPlugin.PLUGIN_ID + ".frameworkview";
 
-	private static final String BUNDLE_PROPERTIES_IMAGE_PATH = "bundle_properties.gif"; //$NON-NLS-1$
-	private static final String DP_PROPERTIES_IMAGE_PATH = "dp_properties.gif"; //$NON-NLS-1$
+	private static final String BUNDLE_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
+	private static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
 	private static final String UPDATE_BUNDLE_IMAGE_PATH = "update_bundle.gif"; //$NON-NLS-1$
 	private static final String STOP_BUNDLE_IMAGE_PATH = "stop_bundle.gif"; //$NON-NLS-1$
 	private static final String START_BUNDLE_IMAGE_PATH = "start_bundle.gif"; //$NON-NLS-1$
