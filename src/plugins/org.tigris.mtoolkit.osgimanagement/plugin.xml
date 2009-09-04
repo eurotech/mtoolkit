@@ -59,25 +59,29 @@
          point="org.tigris.mtoolkit.common.installationItemProviders">
       <provider
             class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
-            id="org.tigris.mtoolkit.osgimanagement.deploymentprovider"
             extension="dp"
+            id="org.tigris.mtoolkit.osgimanagement.deploymentprovider"
+            name="Deployment package provider"
             type="application/vnd.osgi.dp">
       </provider>
       <provider
             class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
-            id="org.tigris.mtoolkit.osgimanagement.jarprovider"
             extension="jar"
+            id="org.tigris.mtoolkit.osgimanagement.jarprovider"
+            name="Bundle provider"
             type="application/java-archive">
       </provider>
       <provider
             class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
-            id="org.tigris.mtoolkit.osgimanagement.jarprovider"
             extension="zip"
+            id="org.tigris.mtoolkit.osgimanagement.jarprovider"
+            name="Bundle provider"
             type="application/zip">
       </provider>
       <provider
             class="org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider"
-            id="org.tigris.mtoolkit.osgimanagement.pluginprovider">
+            id="org.tigris.mtoolkit.osgimanagement.pluginprovider"
+            name="Plugin project provider">
       </provider>
    </extension>
    <extension
