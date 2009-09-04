@@ -14,6 +14,7 @@ package org.tigris.mtoolkit.iagent.pmp;
  * Contains the methods for getting references to the services registered in the
  * remote Framework.
  */
+// TODO: Rename this class to PMPSession
 public interface PMPConnection {
 
 	public static final String FRAMEWORK_DISCONNECTED = "framework_disconnected_event";
