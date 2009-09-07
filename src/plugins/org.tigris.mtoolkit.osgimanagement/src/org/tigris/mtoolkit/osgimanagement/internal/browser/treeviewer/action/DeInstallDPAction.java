@@ -14,9 +14,13 @@ import java.util.Iterator;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 
 public class DeInstallDPAction extends SelectionProviderAction implements IStateAction {
@@ -27,6 +31,17 @@ public class DeInstallDPAction extends SelectionProviderAction implements IState
 
 	// run method
 	public void run() {
+		final int result[] = new int[1];
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				result[0] = PluginUtilities.showConfirmationDialog(FrameWorkView.getShell(), "Confirm uninstall",
+				"Are you sure you want to uninstall selected resource(s)");
+			}
+		});
+		if (result[0] != SWT.OK) {
+			return;
+		}
+
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
 			DeploymentPackage dp = (DeploymentPackage) iterator.next();

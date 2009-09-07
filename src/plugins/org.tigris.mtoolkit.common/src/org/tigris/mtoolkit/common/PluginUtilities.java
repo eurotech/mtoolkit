@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Version;
@@ -224,6 +225,13 @@ public class PluginUtilities {
 	public static void showDetailsErrorDialog(Shell parent, String title, String message, String details) {
 		DetailsErrorDialog err = new DetailsErrorDialog(parent, title, message, details);
 		err.open();
+	}
+	
+	public static int showConfirmationDialog(Shell shell, String title, String message) {
+		MessageBox mb = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
+		mb.setMessage(message);
+		mb.setText(title);
+		return mb.open();
 	}
 
 	private static void showDialog(Shell parent, String title, String message, String reason, Throwable e,
