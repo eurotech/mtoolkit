@@ -58,6 +58,12 @@ public class FilterJob extends Job{
 						visibleElements.addAll(Arrays.asList(contentProvider.getChildren(FrameWorkView.treeRoot)));
 						Object[] childNodes = contentProvider.getChildren(FrameWorkView.treeRoot);
 						expandedElements.addAll(Arrays.asList(childNodes));
+						Object[] exp = tree.getExpandedElements();
+						for (int i=0; i<exp.length; i++) {
+							if (visibleElements.indexOf(exp[i]) != -1) {
+								expandedElements.add(exp[i]);
+							}
+						}
 						tree.collapseAll();
 					} else {
 						for (int i = 0; i < treeItemsMatchingFilter.size(); i++) {
@@ -77,11 +83,11 @@ public class FilterJob extends Job{
 						visibleElements.addAll(parents);
 						visibleElements.addAll(childrenGlobal);
 						expandedElements.addAll(parents);
-					}
-					Object[] exp = tree.getExpandedElements();
-					for (int i=0; i<exp.length; i++) {
-						if (visibleElements.indexOf(exp[i]) != -1) {
-							expandedElements.add(exp[i]);
+						Object[] exp = tree.getExpandedElements();
+						for (int i=0; i<exp.length; i++) {
+							if (visibleElements.indexOf(exp[i]) != -1) {
+								expandedElements.add(exp[i]);
+							}
 						}
 					}
 					if (filter == null)
