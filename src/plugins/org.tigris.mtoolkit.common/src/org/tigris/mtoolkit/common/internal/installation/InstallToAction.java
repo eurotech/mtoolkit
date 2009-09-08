@@ -41,11 +41,12 @@ public class InstallToAction extends Action {
 				InstallationHistory.getDefault().promoteHistory(target, processor);
 				InstallationHistory.getDefault().saveHistory();
 
+				IStatus status = Status.OK_STATUS;
 				SubMonitor subMonitor = SubMonitor.convert(monitor, items.size());
 				Iterator iterator = items.iterator();
 				while (iterator.hasNext()) {
 					SubMonitor mon = subMonitor.newChild(1);
-					processor.processInstallationItem((InstallationItem) iterator.next(), target, mon);
+					status = processor.processInstallationItem((InstallationItem) iterator.next(), target, mon);
 					if (monitor.isCanceled()) {
 						break;
 					}
@@ -55,7 +56,7 @@ public class InstallToAction extends Action {
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
 				}
-				return Status.OK_STATUS;
+				return status;
 			}
 		};
 		job.schedule();

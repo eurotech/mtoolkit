@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.common;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -24,7 +23,6 @@ import org.eclipse.pde.internal.ui.PDEPlugin;
 import org.eclipse.pde.internal.ui.PDEPluginImages;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressConstants;
-import org.osgi.framework.Version;
 
 public class PluginExporter_35 implements IPluginExporter {
 
@@ -45,8 +43,9 @@ public class PluginExporter_35 implements IPluginExporter {
 
 			((Job) op).addJobChangeListener(new JobChangeAdapter() {
 				public void done(IJobChangeEvent event) {
+					boolean errors = false;
 					try {
-						boolean errors = ((Boolean) ReflectionUtils.invokeMethod(op, "hasAntErrors")).booleanValue(); //$NON-NLS-1$
+						errors = ((Boolean) ReflectionUtils.invokeMethod(op, "hasAntErrors")).booleanValue(); //$NON-NLS-1$
 						if (errors) {
 							Display display = Display.getCurrent();
 							if (display == null)
@@ -64,6 +63,12 @@ public class PluginExporter_35 implements IPluginExporter {
 						UtilitiesPlugin.error("Failed to get export plugins status", t); //$NON-NLS-1$
 					} finally {
 						result = event.getResult();
+						if (errors && result.isOK()) {
+							result = new Status(IStatus.ERROR,
+								PDEPlugin.getPluginId(),
+								NLS.bind("Errors occurred during the export operation. The ant tasks generated log files which can be found at {0}",
+									fInfo.destinationDirectory));
+						}
 					}
 				}
 			});
