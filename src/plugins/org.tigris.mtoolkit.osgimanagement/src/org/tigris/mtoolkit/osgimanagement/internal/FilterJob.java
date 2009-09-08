@@ -12,7 +12,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewContentProvider;
 
 public class FilterJob extends Job{
@@ -24,6 +27,16 @@ public class FilterJob extends Job{
 	public FilterJob(TreeViewer tree) {
 		super("FilterJob");
 		this.tree = tree;
+		((TreeRoot)tree.getInput()).addListener(new ContentChangeListener() {
+			public void elementRemoved(ContentChangeEvent event) {
+			}
+			public void elementChanged(ContentChangeEvent event) {
+				schedule(400);
+			}
+			public void elementAdded(ContentChangeEvent event) {
+				schedule(400);
+			}
+		});
 	}
 
 	protected IStatus run(IProgressMonitor monitor) {
@@ -31,9 +44,7 @@ public class FilterJob extends Job{
 		if (display != null && !display.isDisposed()) {
 			display.asyncExec(new Runnable() {
 				public void run() {
-					
 					ViewContentProvider contentProvider = (ViewContentProvider) tree.getContentProvider();
-					
 					treeItemsMatchingFilter.clear();
 					childrenGlobal.clear();
 					expandedElements.clear();
@@ -66,6 +77,12 @@ public class FilterJob extends Job{
 						visibleElements.addAll(parents);
 						visibleElements.addAll(childrenGlobal);
 						expandedElements.addAll(parents);
+					}
+					Object[] exp = tree.getExpandedElements();
+					for (int i=0; i<exp.length; i++) {
+						if (visibleElements.indexOf(exp[i]) != -1) {
+							expandedElements.add(exp[i]);
+						}
 					}
 					if (filter == null)
 						filter = new MyViewerFilter();
