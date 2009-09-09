@@ -20,13 +20,28 @@ public class ThreadPool {
 	private volatile boolean running = true;
 	private volatile int workers = 0;
 	private volatile int working = 0;
+	// holds the number of the threads, which are spawned
+	private volatile int spawned;
+
+	private final int options;
 
 	private List workUnits = new ArrayList();
 
 	private Object lock = new Object();
 
+	private int maxWorkers;
+
 	private static ThreadPool instance;
 	private static int clientsCount = 0;
+
+	public static final int OPTION_AGGRESSIVE = 0x00001;
+
+	public static final int OPTION_NONE = 0;
+
+	public ThreadPool(int maxWorkers, int options) {
+		this.maxWorkers = maxWorkers;
+		this.options = options;
+	}
 
 	public void stop() {
 		running = false;
@@ -37,7 +52,7 @@ public class ThreadPool {
 
 	public synchronized static ThreadPool getPool() {
 		if (instance == null)
-			instance = new ThreadPool();
+			instance = new ThreadPool(MAX_WORKERS, OPTION_NONE);
 		clientsCount++;
 		return instance;
 	}
@@ -54,6 +69,22 @@ public class ThreadPool {
 		}
 	}
 
+	public boolean isEmpty() {
+		return workUnits.isEmpty() && working == 0;
+	}
+
+	public void join() {
+		synchronized (lock) {
+			while ((!workUnits.isEmpty() || working != 0) && running) {
+				try {
+					lock.wait();
+				} catch (InterruptedException e) {
+					return;
+				}
+			}
+		}
+	}
+
 	public void enqueueWork(Runnable runnable) {
 		if (!running)
 			throw new IllegalStateException();
@@ -62,21 +93,25 @@ public class ThreadPool {
 		synchronized (lock) {
 			workUnits.add(runnable);
 			lock.notify();
-		}
-		if (workers == working && workers < MAX_WORKERS) {
-			// spawn new worker
-			new Worker();
+			boolean isAggressive = (options & OPTION_AGGRESSIVE) != 0;
+			if (workers == (isAggressive ? working + spawned : working) && workers < maxWorkers) {
+				// spawn new worker
+				spawned++;
+				new Worker();
+			}
 		}
 	}
 
 	private class Worker extends Thread {
+		private final int workerId;
+		private boolean initialized;
+
 		public Worker() {
 			super();
-			int workerId;
 			synchronized (lock) {
 				workerId = workers++;
 			}
-			setName("IAgent Worker #" + workerId);
+			setName("mToolkit Worker #" + workerId);
 			setDaemon(true);
 			start();
 		}
@@ -85,6 +120,10 @@ public class ThreadPool {
 			while (true) {
 				Runnable unit;
 				synchronized (lock) {
+					if (!initialized) {
+						initialized = true;
+						spawned--;
+					}
 					while (workUnits.isEmpty() && running) {
 						try {
 							lock.wait(1000);
@@ -107,6 +146,7 @@ public class ThreadPool {
 					e.printStackTrace();
 				} finally {
 					synchronized (lock) {
+						lock.notifyAll();
 						working--;
 					}
 				}
