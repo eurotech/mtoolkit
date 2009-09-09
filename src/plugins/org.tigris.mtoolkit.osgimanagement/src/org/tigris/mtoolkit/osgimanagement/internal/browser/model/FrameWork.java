@@ -333,19 +333,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		modelProviders.clear();
 		
 		if (!disposing) {
-			display = Display.getCurrent();
-			if (display == null)
-				display = Display.getDefault();
-
-			display.asyncExec(new Runnable() {
-				public void run() {
-					TreeViewer views[] = FrameWorkView.getTreeViewers();
-					if (views != null && views.length > 0) {
-						views[0].collapseToLevel(this, TreeViewer.ALL_LEVELS);
-					}
-					removeChildren();
-				}
-			});
+			removeChildren();
 		}
 		deplPackages = null;
 		bundles = null;
@@ -725,9 +713,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			if (!bundleHash.containsKey(new Long(id)) && type != RemoteBundleEvent.UNINSTALLED) {
 				// add this bundle - apparently, we have missed the INSTALLED
 				// event
-				FrameWorkView.removeFilter();
 				FrameworkConnectorFactory.addBundle(rBundle, FrameWork.this);
-				FrameWorkView.addFilter();
 			} else if (type == RemoteBundleEvent.UPDATED) {
 				Bundle bundle = findBundle(id);
 				String category = rBundle.getHeader("Bundle-Category", ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -833,7 +819,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		try {
 			RemoteDP remoteDP = e.getDeploymentPackage();
 			if (e.getType() == RemoteDPEvent.INSTALLED) {
-				FrameWorkView.removeFilter();
 				Model dpNodeRoot = getDPNode();
 				try {
 					// check if this install actually is update
@@ -846,10 +831,10 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					dpNodeRoot.addElement(dpNode);
 					dpHash.put(remoteDP.getName(), dpNode);
 				} catch (IAgentException e1) {
-					e1.printStackTrace();
-					BrowserErrorHandler.processError(e1, connector);
+					if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE) {
+						BrowserErrorHandler.processError(e1, connector);
+					}
 				}
-				FrameWorkView.addFilter();
 			} else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
 				try {
 					if (remoteDP != null) {
@@ -1003,7 +988,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	}
 
 	public void refreshAction() {
-		FrameWorkView.removeFilter();
 		viewBeforeRefresh = getViewType();
 		refreshing = true;
 		DeviceConnector conn2 = connector;
@@ -1014,7 +998,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			protected IStatus run(final IProgressMonitor monitor) {
 				FrameWork.this.monitor = monitor;
 				connectFramework();
-				FrameWorkView.addFilter();
 				refreshing = false;
 				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 			}
