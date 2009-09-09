@@ -49,7 +49,6 @@ public class ViewAction extends SelectionProviderAction implements IStateAction 
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
-		FrameWorkView.removeFilter();
 		ISelection selection = getSelection();
 		tree.getTree().setRedraw(false);
 		List tmp = new ArrayList();
@@ -65,7 +64,6 @@ public class ViewAction extends SelectionProviderAction implements IStateAction 
 			expandTree((FrameWork) tmp.get(i), selection);
 
 		getSelectionProvider().setSelection(selection);
-		FrameWorkView.addFilter();
 	}
 
 	private void setViewType(final FrameWork fw, int viewType) {
