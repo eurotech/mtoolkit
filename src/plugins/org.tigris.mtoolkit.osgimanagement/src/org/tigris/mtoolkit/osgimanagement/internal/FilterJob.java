@@ -9,6 +9,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
@@ -30,12 +32,23 @@ public class FilterJob extends Job{
 		this.tree = tree;
 		((TreeRoot)tree.getInput()).addListener(new ContentChangeListener() {
 			public void elementRemoved(ContentChangeEvent event) {
+				expandedElements.remove(event.getTarget());
+				clearExpandedElements();
 			}
 			public void elementChanged(ContentChangeEvent event) {
 				schedule(400);
 			}
 			public void elementAdded(ContentChangeEvent event) {
 				schedule(400);
+			}
+		});
+		tree.addTreeListener(new ITreeViewerListener() {
+			public void treeExpanded(TreeExpansionEvent event) {
+				expandedElements.add(event.getElement());
+			}
+			
+			public void treeCollapsed(TreeExpansionEvent event) {
+				expandedElements.remove(event.getElement());
 			}
 		});
 	}
@@ -49,7 +62,6 @@ public class FilterJob extends Job{
 						ViewContentProvider contentProvider = (ViewContentProvider) tree.getContentProvider();
 						treeItemsMatchingFilter.clear();
 						childrenGlobal.clear();
-						expandedElements.clear();
 
 						List parents = new ArrayList();
 						List visibleElements = new ArrayList();
@@ -75,12 +87,6 @@ public class FilterJob extends Job{
 							visibleElements.addAll(treeItemsMatchingFilter);
 							visibleElements.addAll(parents);
 							visibleElements.addAll(childrenGlobal);
-						}
-						Object[] expanded = tree.getExpandedElements();
-						for (int i=0; i<expanded.length; i++) {
-							if (visibleElements.indexOf(expanded[i]) != -1) {
-								expandedElements.add(expanded[i]);
-							}
 						}
 						ISelection selection = tree.getSelection();
 						tree.getTree().setRedraw(false);
@@ -136,6 +142,19 @@ public class FilterJob extends Job{
 			findAllMatchingItems(children, provider);
 		}
 	}
+	
+	private void clearExpandedElements() {
+		for (int i=expandedElements.size()-1; i>=0; i--) {
+			Model node = (Model) expandedElements.get(i);
+			while (node.getParent() != null && !(node.getParent() instanceof TreeRoot)) {
+				node = node.getParent();
+			}
+			if (node == null || node.getParent() == null) {
+				expandedElements.remove(i);
+			}
+		}
+	}
+
 
 	private List childrenGlobal = new ArrayList();
 

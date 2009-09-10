@@ -49,11 +49,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	}
 
 	public void removeElement(Model element) {
-		if (element instanceof Bundle) {
-			if (elementList.remove((Bundle) element)) {
-				fireElementRemoved((Bundle) element);
-			}
-		} else if (elementList.remove(element)) {
+		element.setParent(null);
+		if (elementList.remove(element)) {
 			fireElementRemoved(element);
 		}
 	}
