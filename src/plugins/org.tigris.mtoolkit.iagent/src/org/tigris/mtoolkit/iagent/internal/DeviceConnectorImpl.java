@@ -17,7 +17,6 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.osgi.service.event.EventAdmin;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -299,7 +298,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	}
 
 	final static String[] propertyMap = { RemoteDeploymentAdmin.class.getName(),
-		EventAdmin.class.getName(),
+		"org.osgi.service.event.EventAdmin",
 		RemoteApplicationAdmin.class.getName(),
 		RemoteConsole.class.getName() };
 
