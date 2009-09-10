@@ -29,6 +29,8 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.tigris.mtoolkit.iagent.Error;
+import org.tigris.mtoolkit.iagent.event.EventData;
+import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
@@ -54,12 +56,15 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 	private ServiceRegistration registration;
 	private ServiceRegistration eventHandleRegistration;
 	private ServiceTracker eventAdminTrack;
+	private ServiceTracker eventSynchTrack;
 	private BundleContext context;
 
 	private String dpSymbolicName;
 	private String dpVersion;
 
 	private DeploymentAdmin deploymentAdmin;
+
+
 
 	public void register(BundleContext bc, DeploymentAdmin admin) {
 		log("[register] Registering remote Deployment Admin...");
@@ -87,6 +92,10 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 			}
 		});
 		eventAdminTrack.open(true);
+		
+		eventSynchTrack = new ServiceTracker(bc, EventSynchronizer.class.getName(), null);
+		eventSynchTrack.open();
+		
 		log("[removedService] Remote Deployment Admin Registered.");
 	}
 
@@ -120,6 +129,11 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 		if (eventHandleRegistration != null) {
 			eventHandleRegistration.unregister();
 			eventHandleRegistration = null;
+		}
+		
+		if (eventSynchTrack != null) {
+			eventSynchTrack.close();
+			eventSynchTrack = null;
 		}
 
 		if (registration != null) {
@@ -357,7 +371,8 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 			try {
 				if (successful) {
 					Dictionary event;
-					EventSynchronizer synchronizer = Activator.getSynchronizer();
+					//EventSynchronizerImpl synchronizer = Activator.getSynchronizer();
+					EventSynchronizer synchronizer = (EventSynchronizer) eventSynchTrack.getService();
 					if (synchronizer != null) {
 						if (dpVersion != null) { // uninstall event
 							DebugUtils.log(this, "[handleComplete] Uninstall event completed for: "

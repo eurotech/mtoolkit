@@ -42,6 +42,8 @@ import org.osgi.service.startlevel.StartLevel;
 import org.osgi.util.tracker.ServiceTracker;
 import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
+import org.tigris.mtoolkit.iagent.event.EventData;
+import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
@@ -59,6 +61,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 
 	private ServiceTracker packageAdminTrack;
 	private ServiceTracker startLevelTrack;
+	private ServiceTracker eventSynchTrack;
 	private ServiceRegistration registration;
 	private BundleContext bc;
 
@@ -78,6 +81,9 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 
 		startLevelTrack = new ServiceTracker(bc, StartLevel.class.getName(), null);
 		startLevelTrack.open();
+		
+		eventSynchTrack = new ServiceTracker(bc, EventSynchronizer.class.getName(), null);
+		eventSynchTrack.open();
 
 		registration = bc.registerService(RemoteBundleAdmin.class.getName(), this, null);
 
@@ -101,6 +107,11 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		if (startLevelTrack != null) {
 			startLevelTrack.close();
 			startLevelTrack = null;
+		}
+		
+		if (eventSynchTrack != null) {
+			eventSynchTrack.close();
+			eventSynchTrack = null;
 		}
 
 		bc.removeBundleListener(this);
@@ -469,7 +480,8 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			return; // stop sending events when the iagent bundle is stopping,
 		// they're inspectation will lead to errors
 		log("[bundleChanged] Event type is BundleEvent." + event.getType());
-		EventSynchronizer synchronizer = Activator.getSynchronizer();
+			
+		EventSynchronizer synchronizer = (EventSynchronizer) eventSynchTrack.getService();
 		if (synchronizer != null) {
 			Dictionary convEvent = convertBundleEvent(event);
 			log("[bundleChanged] Sending event through existing pmpConnection. eventType: " + event.getType());

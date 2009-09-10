@@ -8,6 +8,7 @@ Bundle-Vendor: Tigris.org
 Bundle-Description: Instrumentation Agent Remote API.
 Bundle-Category: rpc
 Export-Package: org.tigris.mtoolkit.iagent;rpc=split;version="2.0.0";mandatory:=rpc,
+ org.tigris.mtoolkit.iagent.event;version="1.0.0",
  org.tigris.mtoolkit.iagent.internal.pmp;version="1.0.0";x-friends:="org.tigris.mtoolkit.iagent",
  org.tigris.mtoolkit.iagent.internal.utils;version="1.1.0";x-friends:="org.tigris.mtoolkit.iagent",
  org.tigris.mtoolkit.iagent.mbsa;version="1.0.0",

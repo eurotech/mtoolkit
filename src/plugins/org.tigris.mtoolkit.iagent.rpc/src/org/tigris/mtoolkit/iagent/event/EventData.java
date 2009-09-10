@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.internal.rpc;
+package org.tigris.mtoolkit.iagent.event;
 
 import java.util.Dictionary;
 

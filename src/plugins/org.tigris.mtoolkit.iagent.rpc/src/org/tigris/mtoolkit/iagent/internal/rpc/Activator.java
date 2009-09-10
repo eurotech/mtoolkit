@@ -22,6 +22,7 @@ import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.ProSystRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase;
@@ -48,7 +49,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private ServiceRegistration pmpServerReg;
 	private BundleContext context;
 	private static Activator instance;
-	private EventSynchronizer synchronizer;
+	private EventSynchronizerImpl synchronizer;
 
 	private ServiceTracker deploymentAdminTrack;
 	private ServiceTracker eventAdminTracker;
@@ -56,7 +57,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
 		instance = this;
-		synchronizer = new EventSynchronizer(context);
+		synchronizer = new EventSynchronizerImpl(context);
 		bundleAdmin = new RemoteBundleAdminImpl();
 		bundleAdmin.register(context);
 
@@ -119,8 +120,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 		pmpServiceReg.unregister();
 
-		if (synchronizer != null)
+		if (synchronizer != null) {
 			synchronizer.stopDispatching();
+			synchronizer.unregister(context);
+		}
 
 		if (bundleAdmin != null) {
 			bundleAdmin.unregister(context);
@@ -185,9 +188,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		}
 	}
 
-	public static EventSynchronizer getSynchronizer() {
-		return instance != null ? instance.synchronizer : null;
-	}
+//	public static EventSynchronizerImpl getSynchronizer() {
+//		return instance != null ? instance.synchronizer : null;
+//	}
 
 	private void initSynchronizer() {
 	}
