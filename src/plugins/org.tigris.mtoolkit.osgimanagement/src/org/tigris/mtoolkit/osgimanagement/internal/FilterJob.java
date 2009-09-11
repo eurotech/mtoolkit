@@ -52,6 +52,14 @@ public class FilterJob extends Job{
 			}
 		});
 	}
+	
+	public void setExpanded(Model node, boolean expanded) {
+		if (expanded) {
+			expandedElements.add(node);
+		} else {
+			expandedElements.remove(node);
+		}
+	}
 
 	protected IStatus run(IProgressMonitor monitor) {
 		Display display = Display.getDefault();

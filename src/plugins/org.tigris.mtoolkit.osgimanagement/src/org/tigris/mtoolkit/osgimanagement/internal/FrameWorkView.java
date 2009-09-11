@@ -46,10 +46,13 @@ import org.eclipse.jface.bindings.Scheme;
 import org.eclipse.jface.bindings.keys.KeyBinding;
 import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.ParseException;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -86,6 +89,7 @@ import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ListUtil;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
@@ -160,7 +164,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	private static InstallDPAction installDPAction;
 	private static DeInstallBundleAction deinstallBundleAction;
 	private static DeInstallDPAction deinstallDPAction;
-	
+
 	private static StartAction startAction;
 	private static StopAction stopAction;
 	private static UpdateBundleAction updateBundleAction;
@@ -204,7 +208,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	public static FrameWorkView getActiveInstance() {
 		FrameWorkView resultView = null;
 		try {
-			IWorkbenchPage activePage = FrameworkPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			IWorkbenchPage activePage = FrameworkPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow()
+					.getActivePage();
 			resultView = (FrameWorkView) activeInstances.get(new Integer(activePage.hashCode()));
 		} catch (NullPointerException e) {
 			// do nothing
@@ -255,6 +260,19 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 		tree.getTree().setLayoutData(gridDataTree);
 		tree.getTree().addKeyListener(this);
+		tree.addDoubleClickListener(new IDoubleClickListener() {
+
+			public void doubleClick(DoubleClickEvent event) {
+				Model node = (Model) ((TreeSelection) event.getSelection()).getFirstElement();
+				if (node instanceof FrameWork) {
+					FrameworkConnectorFactory.connectFrameWork((FrameWork) node);
+				} else {
+					boolean expand = !tree.getExpandedState(node);
+					tree.setExpandedState(node, expand);
+					filterJob.setExpanded(node, expand);
+				}
+			}
+		});
 
 		activePage = getSite().getPage();
 
@@ -346,12 +364,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		toolBar.add(disconnectAction);
 		toolBar.add(new Separator());
 
-		Action actions[] = new Action[] { startAction,
-			stopAction,
-			updateBundleAction,
-			deinstallBundleAction,
-			bundlePropertiesAction,
-			installBundleAction };
+		Action actions[] = new Action[] { startAction, stopAction, updateBundleAction, deinstallBundleAction,
+				bundlePropertiesAction, installBundleAction };
 		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(actions, tree);
 		bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 		bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
@@ -362,9 +376,9 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
 		dpTB.setToolTipText(Messages.DPAction_ToolTip);
 		toolBar.add(dpTB);
-		
-		for (int i=0; i<actionProviders.size(); i++) {
-			ContentTypeActionsProvider provider = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
+
+		for (int i = 0; i < actionProviders.size(); i++) {
+			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
 			provider.fillToolBar(toolBar);
 		}
 
@@ -421,20 +435,14 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			ParameterizedCommand pscmd = new ParameterizedCommand(scmd, null);
 
 			KeySequence keySequence = KeySequence.getInstance(shortcutCombination); //$NON-NLS-1$
-			Binding newKey = new KeyBinding(keySequence,
-				pscmd,
-				defaultSchemeId,
-				sampleContextId,
-				null,
-				null,
-				null,
-				Binding.USER);
+			Binding newKey = new KeyBinding(keySequence, pscmd, defaultSchemeId, sampleContextId, null, null, null,
+					Binding.USER);
 
 			Binding[] bindings = bindingService.getBindings();
 			boolean found = false;
 			for (int i = 0; i < bindings.length; i++) {
 				if (bindings[i].getParameterizedCommand() != null
-								&& bindings[i].getParameterizedCommand().getId().equals(commandName)) {
+						&& bindings[i].getParameterizedCommand().getId().equals(commandName)) {
 					found = true;
 					break;
 				}
@@ -527,19 +535,17 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		showConsoleAction = new ShowFrameworkConsole(tree, Messages.show_framework_console, tree);
 		showConsoleAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONSOLE_IMAGE_PATH));
 
-		refreshAction = new RefreshAction(tree,
-			Messages.refresh_framework_action_label,
-			Messages.refresh_bundle_action_label,
-			tree);
+		refreshAction = new RefreshAction(tree, Messages.refresh_framework_action_label,
+				Messages.refresh_bundle_action_label, tree);
 		refreshAction.setAccelerator(SWT.F5);
 		refreshAction.setImageDescriptor(ImageHolder.getImageDescriptor(REFRESH_IMAGE_PATH));
 
 		obtainActionProviders();
-		for (int i=0; i<actionProviders.size(); i++) {
-			ContentTypeActionsProvider provider = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
+		for (int i = 0; i < actionProviders.size(); i++) {
+			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
 			provider.init(tree);
 		}
-		
+
 		mgr = new MenuManager();
 		mgr.setRemoveAllWhenShown(true);
 		mgr.addMenuListener(new IMenuListener() {
@@ -584,7 +590,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		tree.setSelection(tree.getSelection());
 		StructuredSelection selection = (StructuredSelection) tree.getSelection();
 		boolean homogen = true;
-		
+
 		manager.add(new Separator(ContentTypeActionsProvider.GROUP_UNSIGNED));
 		manager.add(new Separator(ContentTypeActionsProvider.GROUP_ACTIONS));
 		manager.add(new Separator(ContentTypeActionsProvider.GROUP_INSTALL));
@@ -649,10 +655,9 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 					// manager.add(dpPropertiesAction);
 				}
 			}
-			
 
 			if (element instanceof FrameWork) {
-				if (((FrameWork)element).isConnected()) {
+				if (((FrameWork) element).isConnected()) {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, viewAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showServPropsInTreeAction);
 				}
@@ -661,8 +666,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		} else {
 			manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addAction);
 		}
-		for (int i=0; i<actionProviders.size(); i++) {
-			ContentTypeActionsProvider provider = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
+		for (int i = 0; i < actionProviders.size(); i++) {
+			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
 			provider.menuAboutToShow(selection, manager);
 		}
 
@@ -873,52 +878,52 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	public void partDeactivated(IWorkbenchPart part) {
 	}
 
-//	public class ToolbarIMenuCreator extends Action implements IMenuCreator {
-//
-//		private Action actions[];
-//
-//		public ToolbarIMenuCreator(Action actions[]) {
-//			this.actions = actions;
-//			setMenuCreator(this);
-//		}
-//
-//		public void dispose() {
-//
-//		}
-//
-//		public int getStyle() {
-//			return IAction.AS_DROP_DOWN_MENU;
-//		}
-//
-//		public void run() {
-//		}
-//
-//		public Menu getMenu(Control parent) {
-//			Menu newmenu = new Menu(parent);
-//			newmenu.addMenuListener(new MenuListener() {
-//				public void menuHidden(MenuEvent e) {
-//				}
-//
-//				public void menuShown(MenuEvent e) {
-//					updateContextMenuStates();
-//				}
-//			});
-//			for (int i = 0; i < actions.length; i++) {
-//				ActionContributionItem item = new ActionContributionItem(actions[i]);
-//				item.fill(newmenu, -1);
-//			}
-//			return newmenu;
-//		}
-//
-//		public Menu getMenu(Menu parent) {
-//			Menu newmenu = new Menu(parent);
-//			for (int i = 0; i < actions.length; i++) {
-//				ActionContributionItem item = new ActionContributionItem(actions[i]);
-//				item.fill(newmenu, -1);
-//			}
-//			return newmenu;
-//		}
-//	}
+	// public class ToolbarIMenuCreator extends Action implements IMenuCreator {
+	//
+	// private Action actions[];
+	//
+	// public ToolbarIMenuCreator(Action actions[]) {
+	// this.actions = actions;
+	// setMenuCreator(this);
+	// }
+	//
+	// public void dispose() {
+	//
+	// }
+	//
+	// public int getStyle() {
+	// return IAction.AS_DROP_DOWN_MENU;
+	// }
+	//
+	// public void run() {
+	// }
+	//
+	// public Menu getMenu(Control parent) {
+	// Menu newmenu = new Menu(parent);
+	// newmenu.addMenuListener(new MenuListener() {
+	// public void menuHidden(MenuEvent e) {
+	// }
+	//
+	// public void menuShown(MenuEvent e) {
+	// updateContextMenuStates();
+	// }
+	// });
+	// for (int i = 0; i < actions.length; i++) {
+	// ActionContributionItem item = new ActionContributionItem(actions[i]);
+	// item.fill(newmenu, -1);
+	// }
+	// return newmenu;
+	// }
+	//
+	// public Menu getMenu(Menu parent) {
+	// Menu newmenu = new Menu(parent);
+	// for (int i = 0; i < actions.length; i++) {
+	// ActionContributionItem item = new ActionContributionItem(actions[i]);
+	// item.fill(newmenu, -1);
+	// }
+	// return newmenu;
+	// }
+	// }
 
 	public static FrameWork[] getFrameworks() {
 		if (treeRoot == null)
@@ -983,7 +988,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	}
 
 	public static void addFilter() {
-		if (tree == null) return;
+		if (tree == null)
+			return;
 		Display display = Display.getDefault();
 		if (display != null && !display.isDisposed()) {
 			display.asyncExec(new Runnable() {
@@ -997,16 +1003,17 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		}
 		// console
 	}
-	
+
 	private List actionProviders = new ArrayList();
 
 	private void obtainActionProviders() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.contentTypeExtensions");
+		IExtensionPoint extensionPoint = registry
+				.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.contentTypeExtensions");
 
 		obtainActionsProviderElements(extensionPoint.getConfigurationElements(), actionProviders);
 	}
-	
+
 	private void obtainActionsProviderElements(IConfigurationElement[] elements, List providers) {
 		for (int i = 0; i < elements.length; i++) {
 			if (!elements[i].getName().equals("actions")) {
@@ -1034,8 +1041,6 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			}
 		}
 	}
-
-
 
 	public class ActionsProviderElement {
 		private String extension;
@@ -1067,6 +1072,5 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			return false;
 		}
 	}
-
 
 }
