@@ -103,7 +103,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		});
 		frameworkViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
-				handleFrameworkEdit();
+				close();
 			}
 		});
 		frameworkViewer.setContentProvider(new FrameworkContentProvider());
