@@ -59,25 +59,21 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 	}
 
 	public void updateState(IStructuredSelection selection) {
-		boolean enabled = true;
-		Iterator iter = selection.iterator();
+		boolean enabled = false;
 		FrameWork fw = null;
-		while (iter.hasNext()) {
-			Object element = iter.next();
-			if (element instanceof FrameWork) {
-				if (fw == null)
-					fw = (FrameWork) element;
-				else if (!fw.equals(element)) {
-					enabled = false;
-				}
-			} else if (element instanceof Model) {
-				if (fw == null)
-					fw = ((Model) element).findFramework();
-				else if (!fw.equals(((Model) element).findFramework()))
-					enabled = false;
+		for (Iterator it = selection.iterator(); it.hasNext();) {
+			Model element = (Model) it.next();
+			FrameWork next = element instanceof FrameWork ? (FrameWork) element : element.findFramework();
+			if (fw == null) {
+				// we found a framework, enable console
+				fw = next;
+				enabled = true;
+			} else if (!fw.equals(next)) {
+				// we have another framework, disable console button
+				enabled = false;
+				break;
 			}
 		}
-
 		this.setEnabled(enabled);
 	}
 }
