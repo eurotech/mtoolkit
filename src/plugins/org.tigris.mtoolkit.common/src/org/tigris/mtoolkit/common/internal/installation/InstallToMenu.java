@@ -28,7 +28,7 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionService;
@@ -256,7 +256,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 		if (selection == null) {
 			return null;
 		}
-		TreeSelection sel = (TreeSelection) selection;
+		IStructuredSelection sel = (IStructuredSelection) selection;
 		List resources = sel.toList();
 		List items = new ArrayList();
 
