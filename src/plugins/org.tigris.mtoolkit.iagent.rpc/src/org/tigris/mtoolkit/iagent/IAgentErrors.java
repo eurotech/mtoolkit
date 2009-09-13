@@ -73,7 +73,7 @@ public class IAgentErrors {
 	public static final int GENERAL_ERROR = -1;
 
 	public static final int UNSUPPORTED_OPERATION = -2;
-
+	
 	/**
 	 * Code indicating that general error occured in VM Manager<br>
 	 * 
@@ -136,84 +136,6 @@ public class IAgentErrors {
 	 * Dia exit.
 	 */
 	public static final int ERR_RUNTIME_DIA_EXIT = -3011;
-
-	/**
-	 * Error code indicating that general error occurred in File Manager<br>
-	 * 
-	 * Note: Range from -4000 to -4999 is reserved for error codes related to
-	 * File Manager
-	 */
-	public static final int ERR_FM_UNKNOWN = -4000;
-	/**
-	 * Invalid File name was specified.
-	 */
-	public static final int ERR_FM_INVALID_FILE_NAME = -4001;
-
-	/**
-	 * Memory Allocation Error in FileManager
-	 */
-	public static final int ERR_FM_FILE_MEMORY_ERROR = -4002;
-
-	/**
-	 * Failed to open a file.
-	 */
-	public static final int ERR_FM_OPEN_FILE = -4003;
-
-	/**
-	 * Attempt to perform I/O on a file that is not open.
-	 */
-	public static final int ERR_FM_FILE_IS_NOT_OPEN = -4004;
-
-	/**
-	 * Attempt to offset the file pointer at an invalid position.
-	 */
-	public static final int ERR_FM_INVALID_OFFSET = -4005;
-
-	/**
-	 * Attempt to use an invalid file handle.
-	 */
-	public static final int ERR_FM_BAD_FILEDESCRIPTOR = -4006;
-
-	/**
-	 * Attempt to delete a file failed.
-	 */
-	public static final int ERR_FM_FAILED_TO_DELETE_FILE = -4007;
-
-	/**
-	 * Attempt to use an invalid path.
-	 */
-	public static final int ERR_FM_INVALID_PATH = -4008;
-
-	/**
-	 * Attempt to use file name that is larger then the native MAX_PATH
-	 * constant.
-	 */
-	public static final int ERR_FM_NAME_TOO_LONG = -4009;
-
-	/**
-	 * Unknown error while performing file operations.
-	 */
-	public static final int ERR_FM_UNKNOWN_FILE_ERROR = -4010;
-
-	/**
-	 * Attempt to create an existing path.
-	 */
-	public static final int ERR_FM_PATH_EXISTS = -4011;
-
-	/**
-	 * File reading operation failed.
-	 */
-	public static final int ERR_FAILED_READ = -4012;
-
-	/**
-	 * Unsupported/Untested Operation.
-	 */
-	public static final int ERR_UNSUPPORTED_FILE_OPERATION = -4013;
-
-	/**
-	 * Invalid data length.
-	 */
-	public static final int ERR_INVALID_DATA_LENGTH = -4014;
 
 	/**
 	 * Required connection cannot be established and the operation has failed.
