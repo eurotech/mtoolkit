@@ -13,7 +13,6 @@ package org.tigris.mtoolkit.iagent;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -214,7 +213,7 @@ public abstract class DeviceConnector {
 	 *             Thrown when this {@link DeviceConnector}'s associated
 	 *             connection is already disconnected.
 	 */
-	public static void addDeviceConnectionListener(DeviceConnectionListener aListener) throws IAgentException {
+	public static void addDeviceConnectionListener(DeviceConnectionListener aListener) {
 		synchronized (listeners) {
 			if (!listeners.contains(aListener)) {
 				listeners.add(aListener);
