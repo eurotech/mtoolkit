@@ -109,7 +109,11 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		String message = Messages.get(String.valueOf(e.getErrorCode()).replace('-', '_'));
 		return newStatus(IStatus.ERROR, message, e);
 	}
-
+	
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
+	}
+	
 	public static InputStream getIAgentBundleAsStream() {
 		Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
 		Bundle selectedIAgent = null;
