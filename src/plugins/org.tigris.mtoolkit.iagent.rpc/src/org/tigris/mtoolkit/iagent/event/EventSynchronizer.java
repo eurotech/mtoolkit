@@ -19,7 +19,4 @@ public interface EventSynchronizer {
 	
 	public void enqueue(EventData eventData);
 
-	//??
-    public long getRemoteServiceID(); 
-
 }

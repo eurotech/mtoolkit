@@ -24,7 +24,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
@@ -62,7 +61,6 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 
 	private BundleContext bc;
 	private ServiceRegistration registration;
-	private ServiceTracker eventSynchTrack;
 
 	private Map services = new Hashtable();
 
@@ -82,8 +80,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			}
 		}
 		
-		eventSynchTrack = new ServiceTracker(bc, EventSynchronizer.class.getName(), null);
-		eventSynchTrack.open();
+		Activator.getSynchronizer().addEventSource(CUSTOM_SERVICE_EVENT);
 		
 		log("[register] Remote Service Admin Registered.");
 	}
@@ -107,11 +104,8 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			registration = null;
 		}
 		
-		if (eventSynchTrack != null) {
-			eventSynchTrack.close();
-			eventSynchTrack = null;
-		}
-
+		Activator.getSynchronizer().removeEventSource(CUSTOM_SERVICE_EVENT);
+		
 		this.bc = null;
 
 		log("[unregister] Unregistered.");
@@ -190,8 +184,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			return;
 		if (bc.getBundle().getState() == Bundle.STOPPING)
 			return;
-		//EventSynchronizerImpl synchronizer = Activator.getSynchronizer();
-		EventSynchronizer synchronizer = (EventSynchronizer) eventSynchTrack.getService();
+		EventSynchronizer synchronizer = Activator.getSynchronizer();
 		if (synchronizer != null) {
 			Dictionary convertedServiceEvent = convertServiceEvent(event);
 			log("[postRemoteEvent] Posting remote event: "

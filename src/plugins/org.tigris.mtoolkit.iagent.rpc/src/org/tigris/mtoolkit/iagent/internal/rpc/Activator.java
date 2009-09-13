@@ -23,6 +23,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.tigris.mtoolkit.iagent.event.EventData;
+import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.ProSystRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase;
@@ -58,6 +59,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		this.context = context;
 		instance = this;
 		synchronizer = new EventSynchronizerImpl(context);
+		
+		synchronizer.addEventSource(CUSTOM_PROPERTY_EVENT);
+		
 		bundleAdmin = new RemoteBundleAdminImpl();
 		bundleAdmin.register(context);
 
@@ -111,7 +115,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		instance = null;
 
 		unregisterConsole();
 
@@ -121,6 +124,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		pmpServiceReg.unregister();
 
 		if (synchronizer != null) {
+			synchronizer.removeEventSource(CUSTOM_PROPERTY_EVENT);
 			synchronizer.stopDispatching();
 			synchronizer.unregister(context);
 		}
@@ -145,6 +149,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			serviceAdmin = null;
 		}
 
+		instance = null;
 		this.context = null;
 	}
 
@@ -170,11 +175,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	}
 
 	public void modifiedService(ServiceReference arg0, Object arg1) {
-		
 	}
 
 	public void removedService(ServiceReference arg0, Object arg1) {
-		
 		String[] classes = (String[]) arg0.getProperty("objectClass");
 		for(int i = 0; i < classes.length;i++) {
 			if(classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
@@ -188,11 +191,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		}
 	}
 
-//	public static EventSynchronizerImpl getSynchronizer() {
-//		return instance != null ? instance.synchronizer : null;
-//	}
-
-	private void initSynchronizer() {
+	public static EventSynchronizer getSynchronizer() {
+		return instance != null ? instance.synchronizer : null;
 	}
 
 	private void sendEvent(Class objClass, boolean state) {
@@ -201,6 +201,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		pmpEventData.put(Constants.OBJECTCLASS, new String[]{objClass.getName()});
 		pmpEventData.put(SERVICE_STATE, new Boolean(state));
 		
-		synchronizer.enqueue(new EventData(pmpEventData, CUSTOM_PROPERTY_EVENT));
+		EventSynchronizer synchronizer = this.synchronizer;
+		if (synchronizer != null)
+			synchronizer.enqueue(new EventData(pmpEventData, CUSTOM_PROPERTY_EVENT));
 	}
 }

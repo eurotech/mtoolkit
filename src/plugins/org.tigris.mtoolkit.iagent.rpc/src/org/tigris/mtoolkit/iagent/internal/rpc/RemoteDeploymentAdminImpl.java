@@ -56,7 +56,6 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 	private ServiceRegistration registration;
 	private ServiceRegistration eventHandleRegistration;
 	private ServiceTracker eventAdminTrack;
-	private ServiceTracker eventSynchTrack;
 	private BundleContext context;
 
 	private String dpSymbolicName;
@@ -92,10 +91,9 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 			}
 		});
 		eventAdminTrack.open(true);
-		
-		eventSynchTrack = new ServiceTracker(bc, EventSynchronizer.class.getName(), null);
-		eventSynchTrack.open();
-		
+	
+		Activator.getSynchronizer().addEventSource(DEPLOYMENT_EVENT);
+	
 		log("[removedService] Remote Deployment Admin Registered.");
 	}
 
@@ -130,11 +128,8 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 			eventHandleRegistration.unregister();
 			eventHandleRegistration = null;
 		}
-		
-		if (eventSynchTrack != null) {
-			eventSynchTrack.close();
-			eventSynchTrack = null;
-		}
+
+		Activator.getSynchronizer().removeEventSource(DEPLOYMENT_EVENT);
 
 		if (registration != null) {
 			registration.unregister();
@@ -371,8 +366,7 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin,
 			try {
 				if (successful) {
 					Dictionary event;
-					//EventSynchronizerImpl synchronizer = Activator.getSynchronizer();
-					EventSynchronizer synchronizer = (EventSynchronizer) eventSynchTrack.getService();
+					EventSynchronizer synchronizer = Activator.getSynchronizer();
 					if (synchronizer != null) {
 						if (dpVersion != null) { // uninstall event
 							DebugUtils.log(this, "[handleComplete] Uninstall event completed for: "

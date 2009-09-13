@@ -61,7 +61,6 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 
 	private ServiceTracker packageAdminTrack;
 	private ServiceTracker startLevelTrack;
-	private ServiceTracker eventSynchTrack;
 	private ServiceRegistration registration;
 	private BundleContext bc;
 
@@ -82,9 +81,12 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		startLevelTrack = new ServiceTracker(bc, StartLevel.class.getName(), null);
 		startLevelTrack.open();
 		
-		eventSynchTrack = new ServiceTracker(bc, EventSynchronizer.class.getName(), null);
-		eventSynchTrack.open();
-
+		EventSynchronizer synchronizer = Activator.getSynchronizer();
+		if (synchronizer != null) {
+			synchronizer.addEventSource(RemoteBundleAdminImpl.SYNCH_BUNDLE_EVENTS);
+			synchronizer.addEventSource(RemoteBundleAdminImpl.SYSTEM_BUNDLE_EVENT);
+		}
+		
 		registration = bc.registerService(RemoteBundleAdmin.class.getName(), this, null);
 
 		bc.addBundleListener(this);
@@ -109,11 +111,9 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			startLevelTrack = null;
 		}
 		
-		if (eventSynchTrack != null) {
-			eventSynchTrack.close();
-			eventSynchTrack = null;
-		}
-
+		Activator.getSynchronizer().removeEventSource(SYSTEM_BUNDLE_EVENT);
+		Activator.getSynchronizer().removeEventSource(SYNCH_BUNDLE_EVENTS);
+		
 		bc.removeBundleListener(this);
 
 		this.bc = null;
@@ -481,7 +481,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		// they're inspectation will lead to errors
 		log("[bundleChanged] Event type is BundleEvent." + event.getType());
 			
-		EventSynchronizer synchronizer = (EventSynchronizer) eventSynchTrack.getService();
+		EventSynchronizer synchronizer = Activator.getSynchronizer();
 		if (synchronizer != null) {
 			Dictionary convEvent = convertBundleEvent(event);
 			log("[bundleChanged] Sending event through existing pmpConnection. eventType: " + event.getType());
