@@ -25,8 +25,8 @@ public class DeploymentPackage extends Model {
 	private FrameWork framework;
 	private RemoteDP dp;
 
-	public DeploymentPackage(RemoteDP dp, Model parent, FrameWork fw) throws IAgentException {
-		super(dp.getName(), parent);
+	public DeploymentPackage(RemoteDP dp, FrameWork fw) throws IAgentException {
+		super(dp.getName());
 		this.dp = dp;
 		this.framework = fw;
 		Dictionary bundles = dp.getBundles();
@@ -40,7 +40,6 @@ public class DeploymentPackage extends Model {
 					continue;
 				Dictionary headers = bundle.getHeaders(null);
 				Bundle bundleNode = new Bundle(name,
-					this,
 					bundle,
 					bundle.getState(),
 					FrameworkConnectorFactory.getRemoteBundleType(bundle, headers),
@@ -62,8 +61,7 @@ public class DeploymentPackage extends Model {
 					Model regServ[] = children[0].getChildren();
 					if (regServ != null) {
 						for (int i = 0; i < regServ.length; i++) {
-							ObjectClass oc = new ObjectClass(servNodes[0],
-								regServ[i].getName(),
+							ObjectClass oc = new ObjectClass(regServ[i].getName(),
 								new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
 								((ObjectClass) regServ[i]).getService());
 							servNodes[0].addElement(oc);
@@ -73,8 +71,7 @@ public class DeploymentPackage extends Model {
 					Model usedServ[] = children[1].getChildren();
 					if (usedServ != null) {
 						for (int i = 0; i < usedServ.length; i++) {
-							ObjectClass oc = new ObjectClass(servNodes[1],
-								usedServ[i].getName(),
+							ObjectClass oc = new ObjectClass(usedServ[i].getName(),
 								new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
 								((ObjectClass) usedServ[i]).getService());
 							servNodes[1].addElement(oc);

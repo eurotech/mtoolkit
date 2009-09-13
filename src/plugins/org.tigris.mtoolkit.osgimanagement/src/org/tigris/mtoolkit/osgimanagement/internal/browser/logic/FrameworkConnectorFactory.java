@@ -39,7 +39,6 @@ import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -53,6 +52,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceObject;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
+import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
 public class FrameworkConnectorFactory implements DeviceConnectionListener {
@@ -89,11 +89,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	public static Hashtable connectJobs = new Hashtable();
 
 	public static void init() {
-		try {
-			DeviceConnector.addDeviceConnectionListener(factory);
-		} catch (IAgentException e) {
-			BrowserErrorHandler.processError(e, true);
-		}
+		DeviceConnector.addDeviceConnectionListener(factory);
 	}
 
 	public static void deinit() {
@@ -192,17 +188,14 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					servObj.getRemoteService());
 
 				for (int i = 0; i < servObj.getObjectClass().length; i++) {
-					ObjectClass hashService = new ObjectClass(fw,
-						servObj.getObjectClass()[i] + " [Service " + servObj.getRemoteService().getServiceId() + "]",
+					ObjectClass hashService = new ObjectClass(servObj.getObjectClass()[i] + " [Service " + servObj.getRemoteService().getServiceId() + "]",
 						new Long(servObj.getRemoteService().getServiceId()),
 						servObj.getRemoteService());
-					BundlesCategory hashRegisteredCategory = new BundlesCategory(hashService,
-						BundlesCategory.REGISTERED);
-					BundlesCategory hashUsedCategory = new BundlesCategory(hashService, BundlesCategory.IN_USE);
+					BundlesCategory hashRegisteredCategory = new BundlesCategory(BundlesCategory.REGISTERED);
+					BundlesCategory hashUsedCategory = new BundlesCategory(BundlesCategory.IN_USE);
 					hashService.addElement(hashRegisteredCategory);
 					hashService.addElement(hashUsedCategory);
 					hashRegisteredCategory.addElement(new Bundle(bundle.getName(),
-						hashRegisteredCategory,
 						bundle.getRemoteBundle(),
 						bundle.getState(),
 						bundle.getType(),
@@ -216,7 +209,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 								throw new IllegalStateException("Bundle " + servObj.getUsedIn(fw)[k].getBundleId() + " is missing"); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 							hashUsedCategory.addElement(new Bundle(usedInBundleNode.getName(),
-								hashUsedCategory,
 								usedInBundleNode.getRemoteBundle(),
 								usedInBundleNode.getState(),
 								usedInBundleNode.getType(),
@@ -267,8 +259,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 						&& (bundle.getState() == org.osgi.framework.Bundle.ACTIVE
 										|| bundle.getState() == org.osgi.framework.Bundle.STARTING
 										|| bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.STARTING || bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.ACTIVE)) {
-			ServicesCategory registeredCategory = new ServicesCategory(bundle, ServicesCategory.REGISTERED);
-			ServicesCategory usedCategory = new ServicesCategory(bundle, ServicesCategory.IN_USE);
+			ServicesCategory registeredCategory = new ServicesCategory(ServicesCategory.REGISTERED);
+			ServicesCategory usedCategory = new ServicesCategory(ServicesCategory.IN_USE);
 			bundle.addElement(registeredCategory);
 			bundle.addElement(usedCategory);
 		}
@@ -277,8 +269,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	public static void createObjectClassNodes(Model parent, String objClasses[], Long nameID, RemoteService service)
 					throws IAgentException {
 		for (int i = 0; i < objClasses.length; i++) {
-			ObjectClass objClass = new ObjectClass(parent,
-				objClasses[i] + " [Service " + service.getServiceId() + "]",
+			ObjectClass objClass = new ObjectClass(objClasses[i] + " [Service " + service.getServiceId() + "]",
 				nameID,
 				service);
 			parent.addElement(objClass);
@@ -297,19 +288,19 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			if (value instanceof String[]) {
 				String[] values = (String[]) value;
 				if (values.length == 1) {
-					ServiceProperty node = new ServiceProperty(key + ": " + values[0], objClass);
+					ServiceProperty node = new ServiceProperty(key + ": " + values[0]);
 					objClass.addElement(node);
 				} else {
 					for (int j = 0; j < values.length; j++) {
 						StringBuffer buff = new StringBuffer();
 						buff.append(key).append("[").append(String.valueOf(j + 1)).append("]");
 						String key2 = buff.toString();
-						ServiceProperty node = new ServiceProperty(key2 + ": " + values[j], objClass);
+						ServiceProperty node = new ServiceProperty(key2 + ": " + values[j]);
 						objClass.addElement(node);
 					}
 				}
 			} else {
-				ServiceProperty node = new ServiceProperty(key + ": " + value.toString(), objClass);
+				ServiceProperty node = new ServiceProperty(key + ": " + value.toString());
 				objClass.addElement(node);
 			}
 		}
@@ -330,7 +321,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				if (framework.categoryHash.containsKey(categoryName)) {
 					category = (Category) framework.categoryHash.get(categoryName);
 				} else {
-					category = new Category(categoryName, framework.getBundlesNode());
+					category = new Category(categoryName);
 					framework.categoryHash.put(categoryName, category);
 					framework.getBundlesNode().addElement(category);
 				}
@@ -341,7 +332,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 			String bundleName = getBundleName(rBundle, headers);
 			Bundle bundle = new Bundle(bundleName,
-				bundleParentModel,
 				rBundle,
 				rBundle.getState(),
 				getRemoteBundleType(rBundle, headers),
@@ -383,7 +373,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				monitor.beginTask(Messages.retrieve_dps_info, dps.length);
 			}
 			for (int i = 0; i < dps.length; i++) {
-				DeploymentPackage dpNode = new DeploymentPackage(dps[i], deplPackagesNode, framework);
+				DeploymentPackage dpNode = new DeploymentPackage(dps[i], framework);
 				dpHash.put(dps[i].getName(), dpNode);
 				deplPackagesNode.addElement(dpNode);
 				if (monitor != null) {
@@ -636,7 +626,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		}
 
 		if (FrameWorkView.getTreeRoot() != null && fw == null) {
-			fw = new FrameWork(frameworkName, FrameWorkView.getTreeRoot(), true);
+			fw = new FrameWork(frameworkName, true);
 			fw.setName(frameworkName);
 			FrameWorkView.getTreeRoot().addElement(fw);
 			fw.setConnector(connector);
@@ -721,7 +711,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					}
 				}
 			}
-			disconnectConsole((String) connector.getProperties().get("framework-name")); //$NON-NLS-1$
+			disconnectConsole(fw); //$NON-NLS-1$
 		}
 	}
 
@@ -756,8 +746,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		}
 	}
 
-	public static void disconnectConsole(String frameworkName) {
-		ConsoleView.disconnectServer(frameworkName);
+	public static void disconnectConsole(FrameWork fw) {
+		ConsoleManager.disconnectConsole(fw);
 	}
 
 	public static FrameWork getFramework(String fwName) {

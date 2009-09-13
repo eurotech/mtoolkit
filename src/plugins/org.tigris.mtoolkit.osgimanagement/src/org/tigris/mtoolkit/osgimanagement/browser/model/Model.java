@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.browser.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -19,7 +20,6 @@ import org.eclipse.ui.IActionFilter;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
 public abstract class Model implements Comparable, IActionFilter, ConstantsDistributor {
@@ -27,21 +27,41 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	protected String name;
 	protected Model parent;
 	protected Set elementList;
+	protected boolean selected = false;
+	protected int selectedChilds = 0;
 
-	public Model(String name, Model parent) {
+	public Model(String name) {
 		this.name = name;
-		this.parent = parent;
 		elementList = new TreeSet();
 	}
 
 	public void addElement(Model element) {
-		if (!element.getParent().equals(this)) {
+		if (!this.equals(element.getParent())) {
 			element.setParent(this);
 		}
+		
+		filterRecursively(element);
 
 		if (elementList.add(element)) {
 			fireElementAdded(element);
 		}
+	}
+	
+	private void filterRecursively(Model element) {
+		element.filter();
+		Model[] children = element.getChildren();
+		if (children != null && children.length > 0)
+			for (int i = 0; i < children.length; i++) {
+				filterRecursively(children[i]);
+			}
+	}
+	
+	private void fireChildSelected(int delta) {
+		synchronized (this) {
+			selectedChilds += delta;
+		}
+		if (getParent() != null)
+			getParent().fireChildSelected(delta);
 	}
 
 	private void setParent(Model parent) {
@@ -51,6 +71,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	public void removeElement(Model element) {
 		element.setParent(null);
 		if (elementList.remove(element)) {
+			if (element.selected)
+				fireChildSelected(-1);
 			fireElementRemoved(element);
 		}
 	}
@@ -63,6 +85,26 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		elementList.toArray(resultArray);
 		return resultArray;
 	}
+	
+	public Model[] getSelectedChildrenRecursively() {
+		if (elementList == null) {
+			return new Model[0];
+		}
+		List children = new ArrayList(selectedChilds);
+		internalGetSelectedChildrenRecursively(children);
+		return (Model[]) children.toArray(new Model[children.size()]);
+	}
+	
+	protected void internalGetSelectedChildrenRecursively(List result) { 
+		if (elementList == null)
+			return;
+		for (Iterator it = elementList.iterator(); it.hasNext();) {
+			Model child = (Model) it.next();
+			if (child.selected)
+				result.add(child);
+			child.internalGetSelectedChildrenRecursively(result);
+		}
+	}
 
 	public int getSize() {
 		if (elementList == null) {
@@ -72,6 +114,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	}
 
 	protected ArrayList getListeners() {
+		if (parent == null)
+			return null;
 		return parent.getListeners();
 	}
 
@@ -158,7 +202,30 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		}
 		return false;
 	}
-
+	
+	public boolean isSelected() {
+		return selected || (selectedChilds > 0);
+	}
+	
+	protected boolean select(Model model) {
+		if (getParent() != null)
+			return getParent().select(model);
+		return false;
+	}
+	
+	public void filter() {
+		boolean selected = select(this);
+		int selectedDelta;
+		synchronized (this) {
+			if (selected == this.selected) {
+				return;
+			}
+			this.selected = selected;
+			selectedDelta = selected ? 1 : -1;
+		}
+		fireChildSelected(selectedDelta);
+	}
+	
 	public FrameWork findFramework() {
 		FrameWork fw = null;
 		Model model = this;

@@ -19,9 +19,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
@@ -34,7 +38,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -48,6 +56,7 @@ import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -70,11 +79,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
@@ -128,29 +134,29 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.View
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewLabelProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
-public class FrameWorkView extends ViewPart implements IPartListener, ConstantsDistributor, KeyListener {
+public class FrameWorkView extends ViewPart implements ConstantsDistributor, KeyListener {
 
 	public static final String VIEW_ID = FrameworkPlugin.PLUGIN_ID + ".frameworkview";
 
-	private static final String BUNDLE_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
-	private static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
-	private static final String UPDATE_BUNDLE_IMAGE_PATH = "update_bundle.gif"; //$NON-NLS-1$
-	private static final String STOP_BUNDLE_IMAGE_PATH = "stop_bundle.gif"; //$NON-NLS-1$
-	private static final String START_BUNDLE_IMAGE_PATH = "start_bundle.gif"; //$NON-NLS-1$
-	private static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif"; //$NON-NLS-1$
-	private static final String UNINSTALL_BUNDLE_IMAGE_PATH = "uninstall_bundle.gif"; //$NON-NLS-1$
-	private static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif"; //$NON-NLS-1$
-	private static final String INSTALL_BUNDLE_IMAGE_PATH = "install_bundle.gif"; //$NON-NLS-1$
-	private static final String DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif"; //$NON-NLS-1$
-	private static final String CONNECT_ACTION_IMAGE_PATH = "connect_action.gif"; //$NON-NLS-1$
-	private static final String PROPERTIES_ACTION_IMAGE_PATH = "properties_action.gif"; //$NON-NLS-1$
-	private static final String REMOVE_ACTION_ACTION_PATH = "remove_action.gif"; //$NON-NLS-1$
-	private static final String ADD_ACTION_IMAGE_PATH = "add_action.gif"; //$NON-NLS-1$
-	private static final String DP_GROUP_IMAGE_PATH = "dp_group.gif"; //$NON-NLS-1$
-	private static final String BUNDLES_GROUP_IMAGE_PATH = "bundles_group.gif"; //$NON-NLS-1$
-	private static final String SEARCH_IMAGE_PATH = "search_action.gif";
-	private static final String REFRESH_IMAGE_PATH = "refresh_action.gif";
-	private static final String CONSOLE_IMAGE_PATH = "console.gif";
+	public static final String BUNDLE_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
+	public static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
+	public static final String UPDATE_BUNDLE_IMAGE_PATH = "update_bundle.gif"; //$NON-NLS-1$
+	public static final String STOP_BUNDLE_IMAGE_PATH = "stop_bundle.gif"; //$NON-NLS-1$
+	public static final String START_BUNDLE_IMAGE_PATH = "start_bundle.gif"; //$NON-NLS-1$
+	public static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif"; //$NON-NLS-1$
+	public static final String UNINSTALL_BUNDLE_IMAGE_PATH = "uninstall_bundle.gif"; //$NON-NLS-1$
+	public static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif"; //$NON-NLS-1$
+	public static final String INSTALL_BUNDLE_IMAGE_PATH = "install_bundle.gif"; //$NON-NLS-1$
+	public static final String DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif"; //$NON-NLS-1$
+	public static final String CONNECT_ACTION_IMAGE_PATH = "connect_action.gif"; //$NON-NLS-1$
+	public static final String PROPERTIES_ACTION_IMAGE_PATH = "properties_action.gif"; //$NON-NLS-1$
+	public static final String REMOVE_ACTION_ACTION_PATH = "remove_action.gif"; //$NON-NLS-1$
+	public static final String ADD_ACTION_IMAGE_PATH = "add_action.gif"; //$NON-NLS-1$
+	public static final String DP_GROUP_IMAGE_PATH = "dp_group.gif"; //$NON-NLS-1$
+	public static final String BUNDLES_GROUP_IMAGE_PATH = "bundles_group.gif"; //$NON-NLS-1$
+	public static final String SEARCH_IMAGE_PATH = "search_action.gif";
+	public static final String REFRESH_IMAGE_PATH = "refresh_action.gif";
+	public static final String CONSOLE_IMAGE_PATH = "console.gif";
 	private static final String FIND_COMMAND_ID = FindAction.class.getName();
 	private static final String REFRESH_COMMAND_ID = RefreshAction.class.getName();
 	private static final String PROPERTIES_COMMAND_ID = CommonPropertiesAction.class.getName();
@@ -172,7 +178,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	private static ShowServicePropertiesInTree showServPropsInTreeAction;
 	private ServicePropertiesAction servicePropertiesAction;
 	private GotoServiceAction gotoServiceAction;
-	private ViewAction viewAction;
+	private ViewAction viewServicesAction;
+	private ViewAction viewBundlesAction;
 	private ShowBundleIDAction showBundleIDAction;
 	private ShowBundleVersionAction showBundleVersionAction;
 	private static DPPropertiesAction dpPropertiesAction;
@@ -187,13 +194,11 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 	public static TreeRoot treeRoot;
 
-	private boolean browserActive = false;
-	private boolean consoleActive = false;
-
 	private static HashMap activeInstances;
 	private MenuManager mgr;
 	private SearchPane searchPanel;
-	private static FilterJob filterJob;
+	
+	private FilterJob filterJob = new FilterJob();
 
 	// Get current shell
 	public static Shell getShell() {
@@ -251,7 +256,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 		filterField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				addFilter();
+				treeRoot.setFilter(filterField.getText());
+				filterJob.schedule(400);
 			}
 		});
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
@@ -269,7 +275,6 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 				} else {
 					boolean expand = !tree.getExpandedState(node);
 					tree.setExpandedState(node, expand);
-					filterJob.setExpanded(node, expand);
 				}
 			}
 		});
@@ -281,18 +286,9 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 		activeInstances.put(new Integer(activePage.hashCode()), this);
 
-		browserActive = true;
-		IViewReference[] references = activePage.getViewReferences();
-		for (int i = 0; i < references.length; i++) {
-			if ((references[i].getView(false)) instanceof ConsoleView) {
-				consoleActive = true;
-				updateConsole(true);
-			}
-		}
-		activePage.addPartListener(this);
-
 		tree.setContentProvider(new ViewContentProvider());
 		tree.setLabelProvider(new ViewLabelProvider());
+		tree.addFilter(new MyViewerFilter());
 		tree.setSorter(ListUtil.BUNDLE_SORTER);
 		tree.setInput(treeRoot);
 		getViewSite().setSelectionProvider(tree);
@@ -388,10 +384,11 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		commonPropertiesAction.setToolTipText(Messages.property_action_label);
 		toolBar.add(commonPropertiesAction);
 		toolBar.add(new Separator());
-		toolBar.add(viewAction);
+		toolBar.add(viewServicesAction);
+		toolBar.add(viewBundlesAction);
 		toolBar.add(showConsoleAction);
 
-		refreshAction.setToolTipText(Messages.refresh_bundle_action_label);
+		refreshAction.setToolTipText(Messages.refresh_action_label);
 		toolBar.add(refreshAction);
 
 		updateContextMenuStates();
@@ -510,12 +507,15 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		updateBundleAction = new UpdateBundleAction(tree, Messages.update_action_label);
 		updateBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(UPDATE_BUNDLE_IMAGE_PATH));
 
-		servicePropertiesAction = new ServicePropertiesAction(tree, Messages.property_action_label); // icobgr
+		servicePropertiesAction = new ServicePropertiesAction(tree, Messages.property_action_label);
 		gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
-		viewAction = new ViewAction(tree, Messages.services_view_action_label, tree);
+		viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameWork.SERVICES_VIEW);
+		viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ViewLabelProvider.SERVICES_CATEGORY_ICON));
+		viewBundlesAction = new ViewAction(tree, Messages.bundles_view_action_label, tree, FrameWork.BUNDLES_VIEW);
+		viewBundlesAction.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 
-		showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label, tree);
-		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree);
+		showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label, tree, getTreeRoot());
+		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree, getTreeRoot());
 
 		showServPropsInTreeAction = new ShowServicePropertiesInTree(tree, Messages.show_service_properties_in_tree);
 
@@ -535,8 +535,8 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 		showConsoleAction = new ShowFrameworkConsole(tree, Messages.show_framework_console, tree);
 		showConsoleAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONSOLE_IMAGE_PATH));
 
-		refreshAction = new RefreshAction(tree, Messages.refresh_framework_action_label,
-				Messages.refresh_bundle_action_label, tree);
+		refreshAction = new RefreshAction(tree, Messages.refresh_action_label,
+				Messages.refresh_action_label, tree);
 		refreshAction.setAccelerator(SWT.F5);
 		refreshAction.setImageDescriptor(ImageHolder.getImageDescriptor(REFRESH_IMAGE_PATH));
 
@@ -613,7 +613,6 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 
 			if (homogen) {
 				if (element instanceof FrameWork) {
-					FrameWork framework = (FrameWork) element;
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, connectAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, disconnectAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, removeAction);
@@ -655,14 +654,6 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 					// manager.add(dpPropertiesAction);
 				}
 			}
-
-			if (element instanceof FrameWork) {
-				if (((FrameWork) element).isConnected()) {
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, viewAction);
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showServPropsInTreeAction);
-				}
-			}
-
 		} else {
 			manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addAction);
 		}
@@ -737,7 +728,7 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			memento = XMLMemento.createWriteRoot(MEMENTO_ROOT_TYPE);
 		}
 
-		treeRoot = new TreeRoot(Messages.root_element_name, null);
+		treeRoot = new TreeRoot(Messages.root_element_name);
 
 		String elementName;
 		FrameWork element;
@@ -746,32 +737,9 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 			elementName = all[i].getString(FRAMEWORK_ID);
 			if (elementName == null)
 				continue;
-			element = new FrameWork(elementName, treeRoot, false);
+			element = new FrameWork(elementName, false);
 			element.setConfig(all[i]);
 			treeRoot.addElement(element);
-		}
-	}
-
-	// Update Console View
-	// direction ? add console : remove console
-	protected void updateConsole(boolean direction) {
-		if (treeRoot == null)
-			return;
-		Model[] children = treeRoot.getChildren();
-
-		FrameWork child;
-		String childName;
-		for (int i = 0; i < treeRoot.getSize(); i++) {
-			child = (FrameWork) children[i];
-			childName = child.getName();
-			if (direction) {
-				ConsoleView.addServerConsole(childName);
-				if (child.isConnected()) {
-					ConsoleView.connectServer(childName, child.getConnector());
-				}
-			} else {
-				ConsoleView.removeServerConsole(childName);
-			}
 		}
 	}
 
@@ -783,9 +751,6 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	public void dispose() {
 		super.dispose();
 		activeInstances.remove(new Integer(activePage.hashCode()));
-		activePage.removePartListener(this);
-		browserActive = false;
-		consoleActive = false;
 
 		// final dispose
 		if (activeInstances.size() < 1) {
@@ -805,125 +770,6 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	 */
 	public void setFocus() {
 	}
-
-	// Return console status
-	public static boolean getConsoleStatus() {
-		FrameWorkView view = getActiveInstance();
-		return (view == null) ? false : view.consoleActive;
-	}
-
-	// Return FrameWorkView status
-	public static boolean getBrowserStatus() {
-		FrameWorkView view = getActiveInstance();
-		return (view == null) ? false : view.browserActive;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IPartListener#partOpened(IWorkbenchPart)
-	 */
-	public void partOpened(IWorkbenchPart part) {
-		if (part instanceof ConsoleView) {
-			consoleActive = true;
-			if (browserActive) {
-				updateConsole(true);
-			}
-		}
-
-		if (part instanceof FrameWorkView) {
-			browserActive = true;
-			if (consoleActive) {
-				updateConsole(true);
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IPartListener#partClosed(IWorkbenchPart)
-	 */
-	public void partClosed(IWorkbenchPart part) {
-		if (part instanceof ConsoleView) {
-			consoleActive = false;
-		}
-
-		if (part instanceof FrameWorkView) {
-			browserActive = false;
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IPartListener#partActivated(IWorkbenchPart)
-	 */
-	public void partActivated(IWorkbenchPart part) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IPartListener#partBroughtToTop(IWorkbenchPart)
-	 */
-	public void partBroughtToTop(IWorkbenchPart part) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IPartListener#partDeactivated(IWorkbenchPart)
-	 */
-	public void partDeactivated(IWorkbenchPart part) {
-	}
-
-	// public class ToolbarIMenuCreator extends Action implements IMenuCreator {
-	//
-	// private Action actions[];
-	//
-	// public ToolbarIMenuCreator(Action actions[]) {
-	// this.actions = actions;
-	// setMenuCreator(this);
-	// }
-	//
-	// public void dispose() {
-	//
-	// }
-	//
-	// public int getStyle() {
-	// return IAction.AS_DROP_DOWN_MENU;
-	// }
-	//
-	// public void run() {
-	// }
-	//
-	// public Menu getMenu(Control parent) {
-	// Menu newmenu = new Menu(parent);
-	// newmenu.addMenuListener(new MenuListener() {
-	// public void menuHidden(MenuEvent e) {
-	// }
-	//
-	// public void menuShown(MenuEvent e) {
-	// updateContextMenuStates();
-	// }
-	// });
-	// for (int i = 0; i < actions.length; i++) {
-	// ActionContributionItem item = new ActionContributionItem(actions[i]);
-	// item.fill(newmenu, -1);
-	// }
-	// return newmenu;
-	// }
-	//
-	// public Menu getMenu(Menu parent) {
-	// Menu newmenu = new Menu(parent);
-	// for (int i = 0; i < actions.length; i++) {
-	// ActionContributionItem item = new ActionContributionItem(actions[i]);
-	// item.fill(newmenu, -1);
-	// }
-	// return newmenu;
-	// }
-	// }
 
 	public static FrameWork[] getFrameworks() {
 		if (treeRoot == null)
@@ -976,32 +822,11 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 	}
 
 	public static void removeFilter() {
-		if (filterJob != null) {
-			Display display = Display.getDefault();
-			if (display != null && !display.isDisposed())
-				display.syncExec(new Runnable() {
-					public void run() {
-						filterJob.removeFilter();
-					}
-				});
-		}
+	// TODO: Consider removing this method
 	}
 
 	public static void addFilter() {
-		if (tree == null)
-			return;
-		Display display = Display.getDefault();
-		if (display != null && !display.isDisposed()) {
-			display.asyncExec(new Runnable() {
-
-				public void run() {
-					if (filterJob == null)
-						filterJob = new FilterJob(tree);
-					filterJob.schedule(400);
-				}
-			});
-		}
-		// console
+	// TODO: Consider removing this method
 	}
 
 	private List actionProviders = new ArrayList();
@@ -1036,9 +861,72 @@ public class FrameWorkView extends ViewPart implements IPartListener, ConstantsD
 					providers.add(providerElement);
 				}
 			} catch (CoreException e) {
-				// TODO Log error
-				e.printStackTrace();
+				FrameworkPlugin.error("Exception while intializing action provider elements", e);
 			}
+		}
+	}
+
+	private class FilterJob extends Job implements ISelectionChangedListener {
+		private ISelection selection;
+		private Set savedExpandedElements;
+		private volatile boolean ignore = false;
+
+		private FilterJob() {
+			super("Filtering...");
+			setSystem(true);
+		}
+
+		protected IStatus run(IProgressMonitor monitor) {
+			filterRecursively(treeRoot);
+			tree.addSelectionChangedListener(this);
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					if (selection == null)
+						selection = tree.getSelection();
+					if (savedExpandedElements == null) {
+						savedExpandedElements = Collections.synchronizedSet(new HashSet());
+						Object[] expanded = tree.getExpandedElements();
+						savedExpandedElements.addAll(Arrays.asList(expanded));
+					}
+					ignore = true;
+					tree.getTree().setRedraw(false);
+					try {
+						tree.collapseAll();	// collapse the tree
+						treeRoot.updateElement();
+						if (treeRoot.getFilter() != "") {
+							// when filtering show only the filtered children
+							Model[] selectedNodes = treeRoot.getSelectedChildrenRecursively();
+							for (int i = 0; i < selectedNodes.length; i++) {
+								tree.expandToLevel(selectedNodes[i], 0); 
+							}
+						} else {
+							// the filter is removed, restore the saved state
+							tree.setExpandedElements(savedExpandedElements.toArray());
+							savedExpandedElements = null;
+						}
+						tree.setSelection(selection, true);
+					} finally {
+						tree.getTree().setRedraw(true);
+						ignore = false;
+					}
+				}
+			});
+			return Status.OK_STATUS;
+		}
+
+		private void filterRecursively(Model root) {
+			root.filter();
+			Model[] children = root.getChildren();
+			for (int i = 0; i < children.length; i++) {
+				filterRecursively(children[i]);
+			}
+		}
+		
+
+		public void selectionChanged(SelectionChangedEvent event) {
+			if (ignore)
+				return;
+			selection = event.getSelection();
 		}
 	}
 

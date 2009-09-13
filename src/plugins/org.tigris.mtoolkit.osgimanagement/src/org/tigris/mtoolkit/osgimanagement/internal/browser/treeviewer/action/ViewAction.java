@@ -10,37 +10,38 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
-import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
-public class ViewAction extends SelectionProviderAction implements IStateAction {
+public class ViewAction extends Action implements IStateAction, ISelectionChangedListener {
 
-	private String bundlesView = Messages.bundles_view_action_label;
-	private String servicesView = Messages.services_view_action_label;
 	private TreeViewer tree;
-	private List frameworks;
-	private int counter = 0;
-	private int count = 0;
+	private int viewType;
+	private ISelectionProvider provider;
 
-	public ViewAction(ISelectionProvider provider, String text, TreeViewer tree) {
-		super(provider, text);
+	public ViewAction(ISelectionProvider provider, String text, TreeViewer tree, int viewType) {
+		super(text, AS_RADIO_BUTTON);
 		this.tree = tree;
-		frameworks = new ArrayList();
-		this.setEnabled(false);
+		this.viewType = viewType;
+		setEnabled(false);
+		setChecked(false);
+		this.provider = provider;
+		provider.addSelectionChangedListener(this);
 	}
 
 	/*
@@ -49,115 +50,101 @@ public class ViewAction extends SelectionProviderAction implements IStateAction 
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
-		ISelection selection = getSelection();
-		tree.getTree().setRedraw(false);
-		List tmp = new ArrayList();
-		tmp.addAll(frameworks);
-		count = tmp.size();
-		counter = 0;
-		int viewType = ((FrameWork) frameworks.get(0)).getViewType();
-
-		for (int i = 0; i < frameworks.size(); i++) {
-			setViewType((FrameWork) frameworks.get(i), viewType);
+		if (!isChecked())
+			return;
+		IStructuredSelection selection = getSelection();
+		if (selection.isEmpty()) {
+			return;
 		}
-		for (int i = 0; i < tmp.size(); i++)
-			expandTree((FrameWork) tmp.get(i), selection);
-
-		getSelectionProvider().setSelection(selection);
+		tree.getTree().setRedraw(false);
+		try {
+			Set frameworks = new HashSet();
+			for (Iterator it = selection.iterator(); it.hasNext();) {
+				Object next = it.next();
+				if (next instanceof Model) {
+					frameworks.add(((Model) next).findFramework());
+				}
+			}
+			for (Iterator it = frameworks.iterator(); it.hasNext();) {
+				FrameWork fw = (FrameWork) it.next();
+				setViewType(fw, viewType);
+			}
+			for (Iterator it = frameworks.iterator(); it.hasNext();) {
+				FrameWork fw = (FrameWork) it.next();
+				tree.expandToLevel(fw, 1);
+			}
+		} finally {
+			tree.getTree().setRedraw(true);
+		}
+		provider.setSelection(selection);
 	}
 
-	private void setViewType(final FrameWork fw, int viewType) {
-		Model parent = fw.getParent();
-		parent.removeElement(fw);
+	private IStructuredSelection getSelection() {
+		ISelection selection = provider.getSelection();
+		if (selection instanceof IStructuredSelection)
+			return (IStructuredSelection) selection;
+		else
+			return new StructuredSelection();
+	}
+	
+	private void setViewType(final FrameWork fw, int newViewType) {
+		if (fw.getViewType() == newViewType)
+			return;
  		fw.removeChildren();
 		try {
-			switch (viewType) {
-			case FrameWork.BUNDLES_VIEW: {
-				tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
-				fw.setViewType(FrameWork.SERVICES_VIEW);
-				setText(bundlesView);
-				FrameworkConnectorFactory.updateViewType(fw);
-				break;
-			}
-			case FrameWork.SERVICES_VIEW: {
-				tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
-				fw.setViewType(FrameWork.BUNDLES_VIEW);
-				setText(servicesView);
-				FrameworkConnectorFactory.updateViewType(fw);
-				break;
-			}
-			}
+			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
+			fw.setViewType(newViewType);
+			FrameworkConnectorFactory.updateViewType(fw);
 		} catch (Throwable t) {
-			t.printStackTrace();
+			FrameworkPlugin.error("Exception while switching framework view type", t);
 		}
-		parent.addElement(fw);
 		fw.updateElement();
-	}
-
-	private void expandTree(final FrameWork fw, final ISelection selection) {
-		Display display = Display.getCurrent();
-		if (display == null)
-			display = Display.getDefault();
-		display.asyncExec(new Runnable() {
-			public void run() {
-				tree.expandToLevel(fw, 1);
-				tree.setSelection(selection, true);
-				counter++;
-				if (counter == count)
-					tree.getTree().setRedraw(true);
-			}
-		});
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse
-	 * .jface.viewers.IStructuredSelection)
-	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
 	}
 
 	public void updateState(IStructuredSelection selection) {
 		if (selection.size() == 0) {
 			setEnabled(false);
+			setChecked(false);
 			return;
 		}
 
-		this.frameworks.clear();
-		Iterator iter = selection.iterator();
-		while (iter.hasNext()) {
-			Object element = iter.next();
-			FrameWork fw = null;
-			if (element instanceof FrameWork)
-				fw = (FrameWork) element;
-			else if (element instanceof Model)
-				fw = ((Model) element).findFramework();
-
-			if (fw != null && fw.isConnected() && !frameworks.contains(fw)) {
-				frameworks.add(fw);
+		Set frameworks = new HashSet();
+		for (Iterator it = selection.iterator(); it.hasNext();) {
+			Object next = (Object) it.next();
+			if (next instanceof Model) {
+				FrameWork fw = ((Model) next).findFramework();
+				if (fw.isConnected())
+					frameworks.add(fw);
 			}
-
 		}
-
-		if (this.frameworks.isEmpty()) {
-			this.setEnabled(false);
+		if (frameworks.isEmpty()) {
+			setEnabled(false);
+			setChecked(false);
 			return;
 		}
-		this.setEnabled(true);
-
-		for (int i = this.frameworks.size() - 1; i >= 0; i--) {
-			FrameWork fw = (FrameWork) this.frameworks.get(i);
-			switch (fw.getViewType()) {
-			case FrameWork.BUNDLES_VIEW:
-				setText(servicesView);
-				break;
-			case FrameWork.SERVICES_VIEW:
-				setText(bundlesView);
+		
+		Iterator it = frameworks.iterator();
+		FrameWork fw = (FrameWork) it.next();
+		boolean checked = fw.getViewType() == viewType;
+		for (;it.hasNext();) {
+			fw = (FrameWork) it.next();
+			boolean nextChecked = fw.getViewType() == viewType;
+			if (nextChecked != checked) {
+				checked = true;
 				break;
 			}
+		}
+		setEnabled(true);
+		setChecked(checked);
+	}
+
+	public void selectionChanged(SelectionChangedEvent event) {
+		ISelection selection = event.getSelection();
+		if (selection instanceof IStructuredSelection) {
+			updateState((IStructuredSelection) selection);
+		} else {
+			setEnabled(false);
+			setChecked(false);
 		}
 	}
 }

@@ -61,8 +61,7 @@ public final class Messages extends NLS {
 	public static String find_action_run_string;
 	public static String in_frameworks_view;
 	public static String find_in_frameworks_view;
-	public static String refresh_framework_action_label;
-	public static String refresh_bundle_action_label;
+	public static String refresh_action_label;
 	public static String show_framework_console;
 	public static String framework_properties_title;
 	public static String service_properties_title;
@@ -169,7 +168,6 @@ public final class Messages extends NLS {
 	public static String refresh_framework_info;
 	public static String refresh_bundles_info;
 	public static String connect_framework;
-	public static String install_to_framework;
 	public static String show_service_properties_in_tree;
 	public static String _1;
 	public static String _8401;
@@ -231,7 +229,6 @@ public final class Messages extends NLS {
 
 	public static String value_column_label;
 
-	public static String no_frameworks_connected_label;
 	public static String start_bundle_failure_title;
 
 	public static String stop_system_bundle;

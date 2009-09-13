@@ -16,8 +16,8 @@ import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
-import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 
 public class PMPConnectionListener implements ConnectionListener {
 
@@ -48,7 +48,7 @@ public class PMPConnectionListener implements ConnectionListener {
 
 	public void disconnected() {
 		if (!autoConnected) {
-			FrameworkConnectorFactory.disconnectConsole(frameworkName);
+			FrameworkConnectorFactory.disconnectConsole(fw);
 		}
 
 		// if disconnect event received while connect thread is running
@@ -79,7 +79,7 @@ public class PMPConnectionListener implements ConnectionListener {
 					fw.connected(connector);
 				}
 				if (!autoConnected && fw.isConnected()) {
-					ConsoleView.connectServer(frameworkName, connector);
+					ConsoleManager.connectConsole(fw);
 				}
 			}
 		}.start();

@@ -1,22 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2009 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal;
-
-import java.util.List;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 public class MyViewerFilter extends ViewerFilter {
 
-	private List itemsToBeShown;
-
-	public void setInput(List visibleItems) {
-		if (this.itemsToBeShown != null)
-			this.itemsToBeShown.clear();
-		this.itemsToBeShown = visibleItems;
-	}
-
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		return itemsToBeShown.contains(element);
+		if (element instanceof Model)
+			return ((Model) element).isSelected();
+		return true;
 	}
 
 }

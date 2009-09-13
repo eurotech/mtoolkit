@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -47,9 +48,9 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 	private FrameWork fw;
 
 	// Constructor
-	public PropertySheet(TreeViewer parentView, FrameWork element, boolean firstTime) {
+	public PropertySheet(TreeViewer parentView, Model parent, FrameWork element, boolean firstTime) {
 		super(parentView.getControl().getShell());
-		logic = new PropertySheetLogic(parentView, element, firstTime, this);
+		logic = new PropertySheetLogic(parentView, parent, element, firstTime, this);
 		this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
 		fw = element;
 	}

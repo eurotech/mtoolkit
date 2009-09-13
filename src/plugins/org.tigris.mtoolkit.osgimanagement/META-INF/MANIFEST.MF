@@ -34,8 +34,9 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.pde.ui,
  org.eclipse.core.expressions
 Bundle-ActivationPolicy: lazy
-Import-Package: org.tigris.mtoolkit.iagent,
- org.tigris.mtoolkit.iagent.spi,
- org.tigris.mtoolkit.common.installation
+Import-Package: org.eclipse.jdt.internal.debug.ui.console,
+ org.tigris.mtoolkit.common.installation,
+ org.tigris.mtoolkit.iagent,
+ org.tigris.mtoolkit.iagent.spi
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 

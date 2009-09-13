@@ -42,24 +42,24 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class ViewLabelProvider extends StyledCellLabelProvider implements ConstantsDistributor {
 
-	private static final String ROOT_ICON = "homefolder.gif"; //$NON-NLS-1$
-	private static final String DP_ICON = "dpackage.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_EXTENSION_INSTALLED = "bundle_extension_installed.gif"; //$NON-NLS-1$
-	private static final String OBJECT_CLASS_ICON = "objectClass.gif"; //$NON-NLS-1$
-	private static final String SERVICES_CATEGORY_ICON = "services.gif"; //$NON-NLS-1$
-	private static final String CATEGORY_ICON = "category.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_FRAGMENT_INSTALLED = "bundle_fragment_installed.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_EXTENSION = "bundle_extension.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_FRAGMENT = "bundle_fragment.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_STOPPING = "bundle_stopping.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_STARTING = "bundle_starting.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_INSTALLED = "bundle_installed.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_UNINSTALLED = "bundle_uninstalled.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_UNKNOWN = "bundle_unk.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_RESOLVED = "bundle_resolved.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_ICON_ACTIVE = "bundle_active.gif"; //$NON-NLS-1$
-	private static final String DP_NODE_ICON = "dp_package.gif"; //$NON-NLS-1$
-	private static final String BUNDLE_NODE_ICON = "bundles_package.gif"; //$NON-NLS-1$
+	public static final String ROOT_ICON = "homefolder.gif"; //$NON-NLS-1$
+	public static final String DP_ICON = "dpackage.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_EXTENSION_INSTALLED = "bundle_extension_installed.gif"; //$NON-NLS-1$
+	public static final String OBJECT_CLASS_ICON = "objectClass.gif"; //$NON-NLS-1$
+	public static final String SERVICES_CATEGORY_ICON = "services.gif"; //$NON-NLS-1$
+	public static final String CATEGORY_ICON = "category.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_FRAGMENT_INSTALLED = "bundle_fragment_installed.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_EXTENSION = "bundle_extension.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_FRAGMENT = "bundle_fragment.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_STOPPING = "bundle_stopping.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_STARTING = "bundle_starting.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_INSTALLED = "bundle_installed.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_UNINSTALLED = "bundle_uninstalled.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_UNKNOWN = "bundle_unk.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_RESOLVED = "bundle_resolved.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_ICON_ACTIVE = "bundle_active.gif"; //$NON-NLS-1$
+	public static final String DP_NODE_ICON = "dp_package.gif"; //$NON-NLS-1$
+	public static final String BUNDLE_NODE_ICON = "bundles_package.gif"; //$NON-NLS-1$
 
 	// Override to return proper image for every element
 	public Image getImage(Object element) {

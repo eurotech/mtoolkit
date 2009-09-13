@@ -18,8 +18,8 @@ public class ObjectClass extends Model {
 	private Long nameID;
 	private RemoteService service;
 
-	public ObjectClass(Model parent, String name, Long nameID, RemoteService service) {
-		super(name, parent);
+	public ObjectClass(String name, Long nameID, RemoteService service) {
+		super(name);
 		this.nameID = nameID;
 		this.service = service;
 	}

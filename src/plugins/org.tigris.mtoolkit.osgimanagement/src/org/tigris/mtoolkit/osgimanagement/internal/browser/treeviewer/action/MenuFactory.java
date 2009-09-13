@@ -15,17 +15,12 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Shell;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.StoreConstants;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
@@ -35,13 +30,14 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.InstallDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
+import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 
 public class MenuFactory {
 
 	public static void addFrameworkAction(TreeRoot treeRoot, TreeViewer parentView) {
 		String frameworkName = generateName(treeRoot);
-		FrameWork newFrameWork = new FrameWork(frameworkName, treeRoot, false);
-		PropertySheet sheet = new PropertySheet(parentView, newFrameWork, true);
+		FrameWork newFrameWork = new FrameWork(frameworkName, false);
+		PropertySheet sheet = new PropertySheet(parentView, treeRoot, newFrameWork, true);
 		sheet.open();
 	}
 
@@ -127,26 +123,12 @@ public class MenuFactory {
 
 	public static void deinstallBundleAction(Bundle bundle) {
 		FrameworkConnectorFactory.deinstallBundle(bundle);
-
-		// Switch to console
-		if (FrameWorkView.getConsoleStatus()) {
-			IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-			if (store.getBoolean(StoreConstants.SWITCH_FOCUS_KEY)) {
-				ConsoleView.setActiveServer(bundle.findFramework().getName());
-			}
-		}
+		ConsoleManager.showConsole(bundle.findFramework());
 	}
 
 	public static void deinstallDPAction(DeploymentPackage dpNode) {
 		FrameworkConnectorFactory.deinstallDP(dpNode);
-
-		// Switch to console
-		if (FrameWorkView.getConsoleStatus()) {
-			IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-			if (store.getBoolean(StoreConstants.SWITCH_FOCUS_KEY)) {
-				ConsoleView.setActiveServer(dpNode.findFramework().getName());
-			}
-		}
+		ConsoleManager.showConsoleIfCreated(dpNode.findFramework());
 	}
 
 	public static void installBundleAction(FrameWork framework, TreeViewer parentView) {
@@ -158,14 +140,7 @@ public class MenuFactory {
 		}
 
 		FrameworkConnectorFactory.installBundle(new File(result), framework);
-
-		// Switch to console
-		if (FrameWorkView.getConsoleStatus()) {
-			IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-			if (store.getBoolean(StoreConstants.SWITCH_FOCUS_KEY)) {
-				ConsoleView.setActiveServer(framework.getName());
-			}
-		}
+		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
 	public static void installDPAction(FrameWork framework, TreeViewer parentView) {
@@ -177,18 +152,11 @@ public class MenuFactory {
 		}
 
 		FrameworkConnectorFactory.installDP(new File(result), framework);
-
-		// Switch to console
-		if (FrameWorkView.getConsoleStatus()) {
-			IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-			if (store.getBoolean(StoreConstants.SWITCH_FOCUS_KEY)) {
-				ConsoleView.setActiveServer(framework.getName());
-			}
-		}
+		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
 	public static void frameworkPropertiesAction(FrameWork framework, TreeViewer parentView) {
-		PropertySheet sheet = new PropertySheet(parentView, framework, false);
+		PropertySheet sheet = new PropertySheet(parentView, framework.getParent(), framework, false);
 		sheet.open();
 	}
 
@@ -198,32 +166,17 @@ public class MenuFactory {
 		}
 
 		framework.dispose();
-
-		if (FrameWorkView.getConsoleStatus()) {
-			ConsoleView.removeServerConsole(framework.getName());
-		}
+		ConsoleManager.disconnectConsole(framework);
 	}
 
 	public static void startBundleAction(Bundle bundle) {
 		FrameworkConnectorFactory.startBundle(bundle);
-		// Switch to console
-		if (FrameWorkView.getConsoleStatus()) {
-			IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-			if (store.getBoolean(StoreConstants.SWITCH_FOCUS_KEY)) {
-				ConsoleView.setActiveServer(bundle.findFramework().getName());
-			}
-		}
+		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void stopBundleAction(Bundle bundle) {
 		FrameworkConnectorFactory.stopBundle(bundle);
-		// Switch to console
-		if (FrameWorkView.getConsoleStatus()) {
-			IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-			if (store.getBoolean(StoreConstants.SWITCH_FOCUS_KEY)) {
-				ConsoleView.setActiveServer(bundle.findFramework().getName());
-			}
-		}
+		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void updateBundleAction(final Bundle bundle, TreeViewer parentView) {
@@ -234,14 +187,7 @@ public class MenuFactory {
 			return;
 		}
 		FrameworkConnectorFactory.updateBundle(result, bundle);
-
-		// Switch to console
-		if (FrameWorkView.getConsoleStatus()) {
-			IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-			if (store.getBoolean(StoreConstants.SWITCH_FOCUS_KEY)) {
-				ConsoleView.setActiveServer(bundle.findFramework().getName());
-			}
-		}
+		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void disconnectFrameworkAction(FrameWork fw) {

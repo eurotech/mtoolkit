@@ -22,8 +22,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -38,15 +36,15 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 	private FrameWork fw;
 	private TreeViewer parentView;
 	private boolean firstTime;
-	private String elementOldName;
+	private Model parent;
 
-	public PropertySheetLogic(TreeViewer parentView, FrameWork element, boolean firstTime, PropertySheet obj) {
+	public PropertySheetLogic(TreeViewer parentView, Model parent, FrameWork element, boolean firstTime, PropertySheet obj) {
 		this.parentView = parentView;
 		this.fw = element;
 		this.config = element.getConfig();
 		this.firstTime = firstTime;
 		this.target = obj;
-		this.elementOldName = element.getName();
+		this.parent = parent;
 	}
 
 	public void widgetDefaultSelected(SelectionEvent event) {
@@ -84,18 +82,12 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 
 	// Called when target options are changed
 	public void changeSettings() {
-		boolean consoleActive = FrameWorkView.getConsoleStatus();
-
 		target.saveValues(config);
 		fw.setName(config.getString(FRAMEWORK_ID));
 
 		if (firstTime) {
-			fw.getParent().addElement(fw);
-			if (consoleActive) {
-				ConsoleView.addServerConsole(fw.getName());
-			}
+			parent.addElement(fw);
 			firstTime = false;
-			elementOldName = fw.getName();
 		} else {
 			DeviceConnector connector = fw.getConnector();
 			if (connector != null) {
@@ -110,10 +102,6 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 			}
 			fw.updateElement();
 			parentView.setSelection(parentView.getSelection());
-			if (consoleActive) {
-				ConsoleView.renameServerConsole(elementOldName, fw.getName());
-			}
-			elementOldName = fw.getName();
 		}
 	}
 
@@ -157,7 +145,7 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 			target.okButton.setEnabled(true);
 		}
 
-		Model[] frameworks = fw.getParent().getChildren();
+		Model[] frameworks = parent.getChildren();
 		for (int i = 0; i < frameworks.length; i++) {
 			if (newName.equals(frameworks[i].getName()) && !frameworks[i].equals(fw)) {
 				BrowserErrorHandler.showInfoDialog(Messages.duplicate_framework_name_message);

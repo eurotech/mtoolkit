@@ -36,8 +36,8 @@ public class ServicesCategory extends Model {
 		return nodes[type];
 	}
 
-	public ServicesCategory(Model parent, int type) {
-		super(getTitle(type), parent);
+	public ServicesCategory(int type) {
+		super(getTitle(type));
 		this.type = type;
 	}
 

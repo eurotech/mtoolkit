@@ -15,14 +15,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 
 public class TreeRoot extends Model {
 
 	private ArrayList listeners;
+	private boolean showBundlesID = false;
+	private boolean showBundlesVersion = false;
+	private String filter = "";
 
-	public TreeRoot(String name, Model parent) {
-		super(name, parent);
+	public TreeRoot(String name) {
+		super(name);
 		listeners = new ArrayList();
 	}
 
@@ -35,9 +39,40 @@ public class TreeRoot extends Model {
 		}
 		return result;
 	}
+	
+	public void setFilter(String filter) {
+		if ("".equals(filter))
+			this.filter = "";
+		else
+			this.filter = filter.toLowerCase();
+	}
+	
+	public String getFilter() {
+		return filter;
+	}
+	
+	public int getSelectedChildren() {
+		return selectedChilds;
+	}
 
 	protected ArrayList getListeners() {
 		return listeners;
+	}
+	
+	public boolean isShowBundlesID() {
+		return showBundlesID;
+	}
+
+	public void setShowBundlesID(boolean b) {
+		showBundlesID = b;
+	}
+
+	public boolean isShowBundlesVersion() {
+		return showBundlesVersion;
+	}
+
+	public void setShowBundlesVersion(boolean b) {
+		showBundlesVersion = b;
 	}
 
 	public void addListener(ContentChangeListener newListener) {
@@ -49,4 +84,23 @@ public class TreeRoot extends Model {
 	public void removeListener(ContentChangeListener oldListener) {
 		listeners.remove(oldListener);
 	}
+
+	protected boolean select(Model model) {
+		if ("" == filter) {
+			return true;
+		}
+		if (model instanceof FrameWork) {
+			return false;
+		}
+		if (model instanceof SimpleNode) {
+			return false;
+		}
+		if (model.toString().toLowerCase().indexOf(filter) != -1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	
 }

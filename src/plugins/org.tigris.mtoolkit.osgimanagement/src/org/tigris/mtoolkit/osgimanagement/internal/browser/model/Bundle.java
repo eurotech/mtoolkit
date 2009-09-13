@@ -20,7 +20,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 public class Bundle extends Model {
 
 	private long id;
-	private FrameWork framework;
 	private boolean needsUpdate;
 	private int state;
 	private String version;
@@ -33,13 +32,12 @@ public class Bundle extends Model {
 	private final RemoteBundle rBundle;
 	private String category;
 
-	public Bundle(String name, Model parent, RemoteBundle rBundle, int state, int type, String category)
+	public Bundle(String name, RemoteBundle rBundle, int state, int type, String category)
 					throws IAgentException {
-		super(name, parent);
+		super(name);
 		Assert.isNotNull(rBundle);
 		this.rBundle = rBundle;
 		this.id = rBundle.getBundleId();
-		this.framework = parent.findFramework();
 		// state is not get from rBundle to avoid unnecessary remote method
 		// calls
 		this.state = state;
@@ -61,6 +59,9 @@ public class Bundle extends Model {
 		if (!(target instanceof org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle)) {
 			return false;
 		}
+		FrameWork framework = findFramework();
+		if (framework == null)
+			return false;
 		if (!framework.isConnected()) {
 			return false;
 		}
@@ -100,25 +101,18 @@ public class Bundle extends Model {
 	}
 
 	public boolean isShowID() {
-		return framework.isShowBundlesID();
-	}
-
-	public void setShowID(boolean show) {
-		framework.setShowBundlesID(show);
+		return findFramework() != null ? findFramework().isShowBundlesID() : false;
 	}
 
 	public boolean isShowVersion() {
-		return framework.isShowBundlesVersion();
-	}
-
-	public void setShowVersion(boolean show) {
-		framework.setShowBundlesVersion(show);
+		return findFramework() != null ? findFramework().isShowBundlesVersion() : false;
 	}
 
 	// this method will always ask the remote side, so it needs to throw
 	// exception
 	public void update() throws IAgentException {
-		if (framework.getConnector() != null) {
+		FrameWork framework = findFramework();
+		if (framework != null && framework.getConnector() != null) {
 			try {
 				refreshStateFromRemote();
 				RemoteBundle rBundle = getRemoteBundle();
@@ -132,10 +126,6 @@ public class Bundle extends Model {
 
 	public boolean isNeedUpdate() {
 		return needsUpdate;
-	}
-
-	public FrameWork getFramework() {
-		return framework;
 	}
 
 	public int getState() {

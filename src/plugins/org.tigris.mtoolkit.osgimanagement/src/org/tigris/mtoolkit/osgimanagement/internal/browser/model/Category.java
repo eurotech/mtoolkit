@@ -14,8 +14,8 @@ import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 public class Category extends Model {
 
-	public Category(String name, Model parent) {
-		super(name, parent);
+	public Category(String name) {
+		super(name);
 	}
 
 }

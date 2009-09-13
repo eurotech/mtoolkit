@@ -12,8 +12,8 @@ package org.tigris.mtoolkit.osgimanagement.browser.model;
 
 public class SimpleNode extends Model {
 
-	public SimpleNode(String name, Model parent) {
-		super(name, parent);
+	public SimpleNode(String name) {
+		super(name);
 	}
 
 }

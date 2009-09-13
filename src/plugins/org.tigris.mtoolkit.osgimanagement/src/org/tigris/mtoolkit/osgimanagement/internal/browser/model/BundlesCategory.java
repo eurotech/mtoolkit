@@ -36,8 +36,8 @@ public class BundlesCategory extends Model {
 		return nodes[type];
 	}
 
-	public BundlesCategory(Model parent, int type) {
-		super(getTitle(type), parent);
+	public BundlesCategory(int type) {
+		super(getTitle(type));
 		this.type = type;
 	}
 

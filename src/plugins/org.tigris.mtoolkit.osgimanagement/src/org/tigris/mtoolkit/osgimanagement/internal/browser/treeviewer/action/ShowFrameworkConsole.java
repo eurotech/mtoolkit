@@ -15,14 +15,11 @@ import java.util.Iterator;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.ConsoleView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 
 public class ShowFrameworkConsole extends SelectionProviderAction implements IStateAction {
 
@@ -35,22 +32,10 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 
 	public void run() {
 		IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
-		Model model = (Model) selection.getFirstElement();
-		final FrameWork fw = model.findFramework();
-
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("org.tigris.mtoolkit.osgimanagement.internal.consoleview"); //$NON-NLS-1$
-			Display display = Display.getCurrent();
-			if (display == null)
-				display = Display.getDefault();
-			display.asyncExec(new Runnable() {
-				public void run() {
-					ConsoleView.setActiveServer(fw.getName());
-				}
-			});
-		} catch (PartInitException e) {
-			e.printStackTrace();
-		}
+		if (selection.isEmpty())
+			return;	// don't execute for empty selection
+		final FrameWork fw = ((Model) selection.getFirstElement()).findFramework();
+		ConsoleManager.showConsole(fw);
 	}
 
 	// override to react properly to selection change
@@ -62,8 +47,7 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 		boolean enabled = false;
 		FrameWork fw = null;
 		for (Iterator it = selection.iterator(); it.hasNext();) {
-			Model element = (Model) it.next();
-			FrameWork next = element instanceof FrameWork ? (FrameWork) element : element.findFramework();
+			FrameWork next = ((Model) it.next()).findFramework();
 			if (fw == null) {
 				// we found a framework, enable console
 				fw = next;
@@ -74,6 +58,7 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 				break;
 			}
 		}
-		this.setEnabled(enabled);
+		// TODO: Disable the button when the framework is disconnected
+		setEnabled(enabled && fw.isConnected());
 	}
 }

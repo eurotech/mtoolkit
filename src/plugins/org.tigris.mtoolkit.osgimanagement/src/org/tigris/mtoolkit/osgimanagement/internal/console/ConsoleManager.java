@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 ProSyst Software GmbH and others.
+ * Copyright (c) 2009 ProSyst Software GmbH and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,65 +10,114 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.console;
 
-/**
- * This abstract class is responsible to the redirecting of the commands of the
- * Console.
- */
-public abstract class ConsoleManager implements ConsoleListener {
+import java.util.HashMap;
+import java.util.Map;
 
-	/**
-	 * An instance of the Console component.
-	 */
-	protected Console console;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IOConsole;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
-	/**
-	 * Creates new Console Manager object. Initializes the socket console.
-	 * 
-	 * @param console
-	 *            an instance of the remote console.
-	 */
-	public ConsoleManager(Console console) {
-		this.console = console;
-	}
+public class ConsoleManager {
 
-	/**
-	 * This method will be called when a command has been received. This method
-	 * should process the remote execution of the command.
-	 * 
-	 * @param command
-	 *            the command for executing.
-	 */
-	public abstract void execute(String command);
+	private static Map consoles = new HashMap();
+	private static Object CREATING_CONSOLE = new Object();
+	private static Object SHOW_CONSOLE = new Object();
+	private static Object DISCONNECT_CONSOLE = new Object();
 
-	public abstract void freeResources();
-
-	public abstract void freeResources(boolean stopLocal);
-
-	public void clear() {
-		console.setText(""); //$NON-NLS-1$
-	}
-
-	/**
-	 * Dumps the specified text in the console.
-	 * 
-	 * @param text
-	 *            the text which will be displayed in the console.
-	 */
-	public void dumpText(String text) {
-		if ((console != null) && !console.isDisposed()) {
-			console.insertReply(text);
+	public static void connectConsole(FrameWork fw) {
+		synchronized (consoles) {
+			if (consoles.get(fw) != null)
+				return;
+			if (!fw.isConnected()) {
+				FrameworkPlugin.error("Remote console cannot be connected to disconnected framework", new Throwable("<from here>"));
+				return;
+			}
+			consoles.put(fw, CREATING_CONSOLE);
 		}
-	}
-
-	public void appendText(String text) {
-		if ((console != null) && !console.isDisposed()) {
-			console.appendText(console.getLineDelimiter() + text);
+		RemoteConsole con = null;
+		boolean showConsole = false;
+		try {
+			con = createConsole(fw);
+		} finally {
+			synchronized (consoles) {
+				if (con == null) {
+					consoles.remove(fw);
+					return;	// failed to initialize
+				}
+				Object action = consoles.put(fw, con);
+				if (action == DISCONNECT_CONSOLE) {
+					disconnectConsole0(con);
+					consoles.remove(fw);
+					return;
+				}
+				if (action == SHOW_CONSOLE) {
+					showConsole = true;
+				} // else action == CREATING_CONSOLE
+				
+			}
 		}
+		IConsoleManager conMng = ConsolePlugin.getDefault().getConsoleManager();
+		conMng.addConsoles(new IConsole[] { con });
+		if (showConsole)
+			conMng.showConsoleView(con);
 	}
-
-	public void consoleTerminated() {
+	
+	public static void showConsole(FrameWork fw) {
+		Object obj;
+		synchronized (consoles) {
+			obj = (IOConsole) consoles.get(fw);
+			if (obj == CREATING_CONSOLE) {
+				consoles.put(fw, SHOW_CONSOLE);
+				return;
+			} else if (obj == SHOW_CONSOLE) {
+				return;
+			}
+		}
+		if (obj == null)
+			connectConsole(fw);
+		
+		showConsoleIfCreated(fw);
 	}
-
-	public void disconnected() {
+	
+	public static void showConsoleIfCreated(FrameWork fw) {
+		RemoteConsole con; 
+		synchronized (consoles) {
+			Object obj = consoles.get(fw);
+			if (obj == null || obj == DISCONNECT_CONSOLE)
+				return;
+			if (obj == CREATING_CONSOLE) {
+				consoles.put(fw, SHOW_CONSOLE);
+				return;
+			}
+			con = (RemoteConsole) obj;
+		}
+		ConsolePlugin.getDefault().getConsoleManager().showConsoleView(con);
 	}
+	
+	public static void disconnectConsole(FrameWork fw) {
+		RemoteConsole console;
+		synchronized (consoles) {
+			Object obj = consoles.get(fw);
+			if (obj == null || obj == DISCONNECT_CONSOLE)
+				return;
+			if (obj == CREATING_CONSOLE || obj == SHOW_CONSOLE) {
+				consoles.put(fw, DISCONNECT_CONSOLE);
+				return;
+			}
+			console = (RemoteConsole) consoles.remove(fw);
+		}
+		disconnectConsole0(console);
+	}
+	
+	private static void disconnectConsole0(RemoteConsole con) {
+	}
+	
+	private static RemoteConsole createConsole(FrameWork fw) {
+		RemoteConsole console = new RemoteConsole(fw);
+		return console;
+	}
+	
 }
