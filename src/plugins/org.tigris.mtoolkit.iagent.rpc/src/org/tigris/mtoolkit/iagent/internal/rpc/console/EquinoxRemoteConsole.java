@@ -106,7 +106,7 @@ public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Re
 	}
 
 	void printPrompt() {
-		print(System.getProperty("line.separator") + "osgi>");
+		print(System.getProperty("line.separator") + "osgi> ");
 	}
 
 	private Framework getEquinoxFramework(BundleContext context) {
