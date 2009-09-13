@@ -80,6 +80,8 @@ class RemoteObjectImpl implements RemoteObject {
 	}
 
 	protected void finalize() {
+		if (c == null)
+			return;
 		try {
 			c.dump("FINILIZE CALLED" + IOR);
 			dispose();
