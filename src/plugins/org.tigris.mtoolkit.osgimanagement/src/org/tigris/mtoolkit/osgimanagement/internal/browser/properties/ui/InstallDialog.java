@@ -164,11 +164,9 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 		}
 		String tmp = chooser.open();
 		if (tmp != null) {
-			if (!tmp.equals(FrameworkPlugin.fileDialogLastSelection) || textLocation.getText().trim().equals("")) { //$NON-NLS-1$
-				FrameworkPlugin.fileDialogLastSelection = tmp;
-				textLocation.setText(FrameworkPlugin.fileDialogLastSelection);
-				okButton.setFocus();
-			}
+			FrameworkPlugin.fileDialogLastSelection = tmp;
+			textLocation.setText(FrameworkPlugin.fileDialogLastSelection);
+			okButton.setFocus();
 		}
 		updateButtons();
 	}
