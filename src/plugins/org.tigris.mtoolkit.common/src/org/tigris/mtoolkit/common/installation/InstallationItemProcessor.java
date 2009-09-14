@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.common.installation;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
  * Installation item processors should implement this interface. One
@@ -26,6 +27,14 @@ public interface InstallationItemProcessor {
 	 * @return general target name
 	 */
 	public String getGeneralTargetName();
+
+	/**
+	 * Returns image descriptor of the general target for which this
+	 * processor installs items e.g. OSGi Framework connected image descriptor.
+	 * 
+	 * @return general target name
+	 */
+	public ImageDescriptor getGeneralTargetImageDescriptor();
 
 	/**
 	 * Returns array of supported MIME types which this processor can install.
@@ -60,4 +69,5 @@ public interface InstallationItemProcessor {
 	 * @return the status of installation
 	 */
 	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, IProgressMonitor monitor);
+	
 }

@@ -132,6 +132,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 				}
 			});
 		action.setId("Install_to_" + processor.hashCode() + "selection_dlg"); //$NON-NLS-1$
+		action.setImageDescriptor(processor.getGeneralTargetImageDescriptor());
 		// action.setImageDescriptor(ImageHolder.getImageDescriptor(ConstantsDistributor.INSTALL_TO_DLG_ICON));
 		menuManager.add(new ActionContributionItem(action));
 	}
