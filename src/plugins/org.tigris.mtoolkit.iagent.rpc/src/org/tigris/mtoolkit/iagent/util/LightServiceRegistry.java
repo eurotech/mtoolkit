@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.internal;
+package org.tigris.mtoolkit.iagent.util;
 
 import java.io.IOException;
 import java.net.URL;
@@ -128,6 +128,10 @@ public class LightServiceRegistry {
 	 */
 	public LightServiceRegistry(String filename) {
 		this(filename, LightServiceRegistry.class.getClassLoader());
+	}
+	
+	public LightServiceRegistry(ClassLoader loader) {
+		this(DEFAULT_REGISTRY_FILE, LightServiceRegistry.class.getClassLoader());
 	}
 
 	/**

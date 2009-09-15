@@ -38,6 +38,7 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 /**
  * 
@@ -349,7 +350,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	
 	private LightServiceRegistry getServiceRegistry() {
 		if (serviceRegistry == null)
-			serviceRegistry = new LightServiceRegistry();
+			serviceRegistry = new LightServiceRegistry(DeviceConnectorImpl.class.getClassLoader());
 		return serviceRegistry;
 	}
 
