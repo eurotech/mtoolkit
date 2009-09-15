@@ -46,7 +46,7 @@ public class PluginProvider implements InstallationItemProvider {
 
 	public class PluginItem implements InstallationItem {
 		private IProject project;
-		private File file;
+		public File file;
 
 		public PluginItem(IProject project) {
 			this.project = project;

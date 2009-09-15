@@ -31,7 +31,7 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 
 	public class DPPFileItem extends WorkspaceFileItem {
 
-		private File dpFile;
+		public File dpFile;
 		private boolean delete = false;
 
 		public DPPFileItem(IFile file, String mimeType) {
