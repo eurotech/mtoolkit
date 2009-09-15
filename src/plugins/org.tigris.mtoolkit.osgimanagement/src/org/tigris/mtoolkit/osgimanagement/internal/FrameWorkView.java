@@ -356,37 +356,42 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		mainMenu.add(showServPropsInTreeAction);
 
 		ToolBarManager toolBar = (ToolBarManager) getViewSite().getActionBars().getToolBarManager();
-		toolBar.add(connectAction);
-		toolBar.add(disconnectAction);
-		toolBar.add(new Separator());
+		toolBar.add(new Separator(ContentTypeActionsProvider.GROUP_CONNECT));
+		toolBar.add(new Separator(ContentTypeActionsProvider.GROUP_DEPLOYMENT));
+		toolBar.add(new Separator(ContentTypeActionsProvider.GROUP_UNSIGNED));
+		toolBar.add(new Separator(ContentTypeActionsProvider.GROUP_FRAMEWORK));
+		toolBar.add(new Separator(ContentTypeActionsProvider.GROUP_ACTIONS));
+
+		
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, connectAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, disconnectAction);
 
 		Action actions[] = new Action[] { startAction, stopAction, updateBundleAction, deinstallBundleAction,
 				bundlePropertiesAction, installBundleAction };
 		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(actions, tree);
 		bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 		bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
-		toolBar.add(bundlesTB);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, bundlesTB);
 
 		actions = new Action[] { installDPAction, deinstallDPAction, dpPropertiesAction };
 		ToolbarIMenuCreator dpTB = new ToolbarIMenuCreator(actions, tree);
 		dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
 		dpTB.setToolTipText(Messages.DPAction_ToolTip);
-		toolBar.add(dpTB);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, dpTB);
 
 		for (int i = 0; i < actionProviders.size(); i++) {
 			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
 			provider.fillToolBar(toolBar);
 		}
 
-		toolBar.add(new Separator());
-		toolBar.add(addAction);
-		toolBar.add(removeAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, addAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, removeAction);
 		commonPropertiesAction.setToolTipText(Messages.property_action_label);
-		toolBar.add(commonPropertiesAction);
-		toolBar.add(new Separator());
-		toolBar.add(viewServicesAction);
-		toolBar.add(viewBundlesAction);
-		toolBar.add(showConsoleAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, commonPropertiesAction);
+
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewServicesAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewBundlesAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, showConsoleAction);
 
 		refreshAction.setToolTipText(Messages.refresh_action_label);
 		toolBar.add(refreshAction);
