@@ -131,7 +131,7 @@ public class LightServiceRegistry {
 	}
 	
 	public LightServiceRegistry(ClassLoader loader) {
-		this(DEFAULT_REGISTRY_FILE, LightServiceRegistry.class.getClassLoader());
+		this(DEFAULT_REGISTRY_FILE, loader);
 	}
 
 	/**
