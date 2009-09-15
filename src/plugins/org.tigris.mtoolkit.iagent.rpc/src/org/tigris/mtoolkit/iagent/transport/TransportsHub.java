@@ -2,10 +2,14 @@ package org.tigris.mtoolkit.iagent.transport;
 
 import java.util.List;
 
-public interface TransportsHub {
+public class TransportsHub {
 
-	Transport openTransport(String type, String id);
+	public static Transport openTransport(String type, String id) {
+		throw new UnsupportedOperationException();
+	}
 	
-	List/*<TransportType>*/ listTypes();
+	public static List/*<TransportType>*/ listTypes() {
+		throw new UnsupportedOperationException();
+	}
 	
 }
