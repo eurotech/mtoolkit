@@ -13,7 +13,8 @@ Export-Package: org.tigris.mtoolkit.iagent;rpc=split;version="2.0.0";mandatory:=
  org.tigris.mtoolkit.iagent.internal.utils;version="1.1.0";x-friends:="org.tigris.mtoolkit.iagent",
  org.tigris.mtoolkit.iagent.mbsa;version="1.0.0",
  org.tigris.mtoolkit.iagent.pmp;version="1.0.0",
- org.tigris.mtoolkit.iagent.rpc;version="2.0.0";x-friends:="org.tigris.mtoolkit.iagent"
+ org.tigris.mtoolkit.iagent.rpc;version="2.0.0";x-friends:="org.tigris.mtoolkit.iagent",
+ org.tigris.mtoolkit.iagent.transport;version="1.0.0"
 Import-Package: org.eclipse.core.runtime.adaptor;resolution:=optional,
  org.eclipse.osgi.framework.console;resolution:=optional,
  org.eclipse.osgi.framework.internal.core;resolution:=optional,

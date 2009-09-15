@@ -19,6 +19,7 @@ import java.util.Map;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.IAgentLog;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.transport.Transport;
 
 /**
  * This class represents connection to a remote OSGi framework. It is associated
@@ -107,7 +108,15 @@ public abstract class DeviceConnector {
 		throw new IAgentException("No available factory for connection type: " + aConnetionType,
 			IAgentErrors.ERROR_INTERNAL_ERROR);
 	}
-
+	
+	public final static DeviceConnector connect(Transport transport, Dictionary aConProps) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+	
+	public final static DeviceConnector connect(String transportType, String id, Dictionary aConProps) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+	
 	/**
 	 * When called this method opens server connection with the specified type
 	 * and properties and blocks until client connection from remote OSGi
