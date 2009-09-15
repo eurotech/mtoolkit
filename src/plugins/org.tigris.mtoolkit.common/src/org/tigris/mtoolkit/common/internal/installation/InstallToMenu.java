@@ -257,6 +257,8 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 		if (selection == null) {
 			return null;
 		}
+		if (!(selection instanceof IStructuredSelection))
+			return null;
 		IStructuredSelection sel = (IStructuredSelection) selection;
 		List resources = sel.toList();
 		List items = new ArrayList();
