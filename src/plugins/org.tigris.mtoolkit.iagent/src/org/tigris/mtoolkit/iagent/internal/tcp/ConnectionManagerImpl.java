@@ -27,7 +27,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	protected MBSAConnectionImpl mbsaConnection;
 	protected PMPConnectionImpl pmpConnection;
 	private List listeners = new LinkedList();
-	private LightServiceRegistry connectionRegistry;
 
 	public ConnectionManagerImpl(Dictionary aConProperties) {
 		this.conProperties = aConProperties;

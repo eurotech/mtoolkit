@@ -296,7 +296,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 	
 	private LightServiceRegistry getServiceRegistry() {
 		if (pmpRegistry == null)
-			pmpRegistry = new LightServiceRegistry();
+			pmpRegistry = new LightServiceRegistry(PMPConnectionImpl.class.getClassLoader());
 		return pmpRegistry;
 	}
 
