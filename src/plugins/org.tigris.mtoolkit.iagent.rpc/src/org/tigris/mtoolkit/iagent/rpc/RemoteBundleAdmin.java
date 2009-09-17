@@ -182,4 +182,6 @@ public interface RemoteBundleAdmin {
 	public int getBundleStartLevel(long id);
 
 	public int getFrameworkStartLevel();
+	
+	public String getSystemProperty(String property);
 }
