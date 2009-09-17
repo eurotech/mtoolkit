@@ -635,7 +635,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		BrowserErrorHandler.debug("FrameworkPlugin: " + connector.getProperties().get("framework-name") + " was connected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		// already started connection job for this framework
-		if (connectJobs.containsKey(frameworkName))
+		if (connectJobs.containsKey(connector))
 			return;
 
 		if (autoConnected) {
@@ -683,7 +683,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 			}
 		};
-		connectJobs.put(frameworkName, job);
+		connectJobs.put(connector, job);
 		job.schedule();
 	}
 

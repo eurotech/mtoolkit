@@ -178,7 +178,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	public void connected(final DeviceConnector connector) {
 		this.connector = connector;
 		this.connectedFlag = true;
-		Job joconnectJob = (Job) FrameworkConnectorFactory.connectJobs.get(connector.getProperties().get("framework-name")); //$NON-NLS-1$
+		Job joconnectJob = (Job) FrameworkConnectorFactory.connectJobs.get(connector);
 		if (joconnectJob != null) {
 			joconnectJob.setName(Messages.retrieve_framework_info);
 			try {
@@ -207,7 +207,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			job.join();
 		} catch (InterruptedException e) {
 		}
-		FrameworkConnectorFactory.connectJobs.remove(connector.getProperties().get("framework-name")); //$NON-NLS-1$
+		FrameworkConnectorFactory.connectJobs.remove(connector);
 	}
 
 	private void connectFramework() {
