@@ -106,7 +106,11 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			}
 
 			for (int i = 0; i < rBundles.length; i++) {
-				addBundle(rBundles[i], fw);
+				try {
+					addBundle(rBundles[i], fw);
+				} catch (IAgentException e) {
+					BrowserErrorHandler.processError(e, fw.getConnector());
+				}
 				if (monitor != null) {
 					if (monitor.isCanceled()) {
 						return;
@@ -715,7 +719,21 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		}
 	}
 
-	public static void disconnectFramework(FrameWork fw) {
+	public static void disconnectFramework(final FrameWork fw) {
+		Job disconnectJob = new Job("Disconnect device") {
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					disconnectFramework0(fw);
+					return Status.OK_STATUS;
+				} catch (Throwable t) {
+					return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, t.getMessage(), t);
+				}
+			}
+		};
+		disconnectJob.schedule();
+	}
+	
+	private static void disconnectFramework0(FrameWork fw) {
 		try {
 			if (fw.autoConnected) {
 				fw.disconnect();
