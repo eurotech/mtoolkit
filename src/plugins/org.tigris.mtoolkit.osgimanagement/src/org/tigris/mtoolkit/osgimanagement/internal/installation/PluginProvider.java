@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -212,6 +213,15 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			return Status.OK_STATUS;
 		}
+		
+		public Object getAdapter(Class adapter) {
+			if (adapter.equals(IResource.class)) {
+				return project;
+			} else {
+				return null;
+			}
+		}
+
 	}
 
 	public InstallationItem getInstallationItem(Object resource) {

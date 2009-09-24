@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.common.installation;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
@@ -22,7 +23,7 @@ import org.eclipse.core.runtime.IStatus;
  * {@link InstallationItemProvider} and can be used from
  * {@link InstallationItemProcessor}
  */
-public interface InstallationItem {
+public interface InstallationItem extends IAdaptable {
 	/**
 	 * Prepares the item for installation if it is not yet prepared. Otherwise
 	 * does nothing.

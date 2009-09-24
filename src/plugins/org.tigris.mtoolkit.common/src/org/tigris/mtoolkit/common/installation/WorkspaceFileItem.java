@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -62,6 +63,14 @@ public class WorkspaceFileItem implements InstallationItem {
 	}
 
 	public void dispose() {
+	}
+
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(IResource.class)) {
+			return file;
+		} else {
+			return null;
+		}
 	}
 
 }
