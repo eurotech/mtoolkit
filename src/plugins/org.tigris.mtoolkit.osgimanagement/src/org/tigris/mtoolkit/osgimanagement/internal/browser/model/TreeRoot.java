@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 
 public class TreeRoot extends Model {
@@ -92,10 +91,11 @@ public class TreeRoot extends Model {
 		if (model instanceof FrameWork) {
 			return false;
 		}
-		if (model instanceof SimpleNode) {
+		if (model instanceof ServicesCategory || model instanceof BundlesCategory) {
 			return false;
 		}
-		if (model.toString().toLowerCase().indexOf(filter) != -1) {
+		String text = model.toString();
+		if (text.indexOf(filter) != -1 || text.toLowerCase().indexOf(filter) != -1) {
 			return true;
 		} else {
 			return false;

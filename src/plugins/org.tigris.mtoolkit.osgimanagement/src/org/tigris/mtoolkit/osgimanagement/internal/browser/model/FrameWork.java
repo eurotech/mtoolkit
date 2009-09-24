@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
@@ -47,6 +48,7 @@ import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
@@ -212,8 +214,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 	private void connectFramework() {
 		try {
-			FrameWorkView.removeFilter();
-
 			connecting = true;
 			if (connector != null) {
 				bundleHash = new Hashtable();
@@ -222,7 +222,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 				servicesViewVector = new Vector();
 
 				dpHash = new Hashtable();
-				refreshViewers();
 
 				try {
 					if (monitor != null && monitor.isCanceled())
@@ -232,7 +231,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					connector.getServiceManager().addRemoteServiceListener(this);
 					connector.monitorDeviceProperties();
 				} catch (IAgentException e) {
-					e.printStackTrace();
 					BrowserErrorHandler.processError(e, connector);
 				}
 
@@ -254,9 +252,9 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					try {
 						FrameworkConnectorFactory.addDP(this, monitor);
 					} catch (IAgentException e) {
-						// if deployment admin was not found show only warning
-						if (e.getErrorCode() == -5001) {
-							BrowserErrorHandler.processWarning(e, null, true);
+						// if deployment admin was not found log only warning
+						if (e.getErrorCode() == IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
+							FrameworkPlugin.log(FrameworkPlugin.newStatus(IStatus.WARNING, NLS.bind("Remote framework {0} doesn't support deployment packages", this.getName()), e));
 						} else {
 							BrowserErrorHandler.processError(e, connector);
 						}
@@ -279,10 +277,10 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					// connection was closed
 				}
 			}
+			refreshViewers();
 			updateContextMenuStates();
-			FrameWorkView.addFilter();
 		} catch (Throwable t) {
-			t.printStackTrace();
+			FrameworkPlugin.error("Unexpected exception occurred while connecting to remote framework", t);
 		} finally {
 			connecting = false;
 		}
@@ -319,7 +317,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					connector.cancelMonitoringDeviceProperties();
 				}
 			} catch (IAgentException e) {
-				e.printStackTrace();
 				BrowserErrorHandler.processError(e, connector);
 			}
 		}

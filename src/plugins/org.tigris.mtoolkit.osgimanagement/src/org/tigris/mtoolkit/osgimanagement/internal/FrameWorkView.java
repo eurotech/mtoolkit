@@ -19,13 +19,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
@@ -64,6 +60,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -199,6 +196,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	private SearchPane searchPanel;
 	
 	private FilterJob filterJob = new FilterJob();
+	private MyViewerFilter filter = new MyViewerFilter();;
 
 	// Get current shell
 	public static Shell getShell() {
@@ -249,15 +247,15 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		layout.marginWidth = 1;
 		parent.setLayout(layout);
 
-		filterField = new Text(parent, SWT.BORDER);
+		filterField = new Text(parent, SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
 		GridData filterGridData = new GridData(GridData.FILL_HORIZONTAL);
-		filterGridData.heightHint = 16;
 		filterField.setLayoutData(filterGridData);
 
 		filterField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				treeRoot.setFilter(filterField.getText());
-				filterJob.schedule(400);
+				filterJob.cancel();
+				filterJob.schedule(300);
 			}
 		});
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
@@ -288,7 +286,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 
 		tree.setContentProvider(new ViewContentProvider());
 		tree.setLabelProvider(new ViewLabelProvider());
-		tree.addFilter(new MyViewerFilter());
+		tree.addFilter(filter);
 		tree.setSorter(ListUtil.BUNDLE_SORTER);
 		tree.setInput(treeRoot);
 		getViewSite().setSelectionProvider(tree);
@@ -826,14 +824,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	public void keyReleased(KeyEvent e) {
 	}
 
-	public static void removeFilter() {
-	// TODO: Consider removing this method
-	}
-
-	public static void addFilter() {
-	// TODO: Consider removing this method
-	}
-
 	private List actionProviders = new ArrayList();
 
 	private void obtainActionProviders() {
@@ -872,51 +862,111 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	}
 
 	private class FilterJob extends Job implements ISelectionChangedListener {
+		private static final int MAX_ITEMS_TO_AUTOEXPAND = 200;
 		private ISelection selection;
-		private Set savedExpandedElements;
-		private volatile boolean ignore = false;
+		// keeps the expanded elements before applying the filter
+		private Object[] savedExpansionState;
+		// keeps the elements, which have revealed on the previous filter run
+		private Model[] lastRunRevealedElements;
+		private int lastRunSelectedElementsCount;
+		private volatile boolean ignoreSelectionEvents = false;
 
 		private FilterJob() {
 			super("Filtering...");
 			setSystem(true);
 		}
 
-		protected IStatus run(IProgressMonitor monitor) {
-			filterRecursively(treeRoot);
+		// TODO: Add a status line explaining how much elements are there and how much are filtered
+		// TODO: Add a text when there are no elements in the filter
+		// TODO: Add a text in the filter to explain the purpose of the text line
+		protected IStatus run(final IProgressMonitor monitor) {
 			tree.addSelectionChangedListener(this);
+			filterRecursively(treeRoot);
+			if (monitor.isCanceled())
+				return Status.CANCEL_STATUS;
+			final Model[] allSelectedElements = treeRoot.getSelectedChildrenRecursively();
+			final Model[] unrevealedElements = new Model[allSelectedElements.length];
+			System.arraycopy(allSelectedElements, 0, unrevealedElements, 0, allSelectedElements.length);
+			if (monitor.isCanceled())
+				return Status.CANCEL_STATUS;
+			int lastRunIdx = 0;
+			if (lastRunRevealedElements != null) {
+				for (int i = 0; i < unrevealedElements.length; i++) {
+					if (lastRunIdx < lastRunRevealedElements.length && lastRunRevealedElements[lastRunIdx] == unrevealedElements[i]) {
+						// remove elements which have already been expanded
+						unrevealedElements[i] = null;
+						lastRunIdx++;
+					}
+				}
+			}
+			if (monitor.isCanceled())
+				return Status.CANCEL_STATUS;
+			System.out.println("Filtered: lastRun: " + lastRunSelectedElementsCount + "; now: " + treeRoot.getSelectedChildren() + "(" + allSelectedElements.length + "); revealed: " + lastRunIdx);
+			this.lastRunSelectedElementsCount = treeRoot.getSelectedChildren();
+			final int lastRunRevealedCount = lastRunIdx;
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
-					if (selection == null)
-						selection = tree.getSelection();
-					if (savedExpandedElements == null) {
-						savedExpandedElements = Collections.synchronizedSet(new HashSet());
-						Object[] expanded = tree.getExpandedElements();
-						savedExpandedElements.addAll(Arrays.asList(expanded));
-					}
-					ignore = true;
-					tree.getTree().setRedraw(false);
-					try {
-						tree.collapseAll();	// collapse the tree
-						treeRoot.updateElement();
-						if (treeRoot.getFilter() != "") {
-							// when filtering show only the filtered children
-							Model[] selectedNodes = treeRoot.getSelectedChildrenRecursively();
-							for (int i = 0; i < selectedNodes.length; i++) {
-								tree.expandToLevel(selectedNodes[i], 0); 
-							}
-						} else {
-							// the filter is removed, restore the saved state
-							tree.setExpandedElements(savedExpandedElements.toArray());
-							savedExpandedElements = null;
+					BusyIndicator.showWhile(null, new Runnable() {
+						public void run() {
+							refreshTree(allSelectedElements, unrevealedElements, lastRunRevealedCount);
 						}
-						tree.setSelection(selection, true);
-					} finally {
-						tree.getTree().setRedraw(true);
-						ignore = false;
-					}
+					});
 				}
 			});
 			return Status.OK_STATUS;
+		}
+		
+		private void refreshTree(Model[] allSelectedElements, Model[] unrevealedElements, int alreadyRevealedElementsCount) {
+			if (selection == null)
+				selection = tree.getSelection();
+			int itemsToReveal = lastRunRevealedElements != null ? (allSelectedElements.length - alreadyRevealedElementsCount) : allSelectedElements.length;
+			boolean autoExpand = itemsToReveal < MAX_ITEMS_TO_AUTOEXPAND;
+			System.out.println("all: " + allSelectedElements.length + "; previous: " + (lastRunRevealedElements != null) + "; expanded: " + alreadyRevealedElementsCount + "; items: " + itemsToReveal + "; auto: " + autoExpand);
+			if (savedExpansionState == null) {
+				savedExpansionState = tree.getExpandedElements();
+			}
+			ignoreSelectionEvents = true;
+			tree.getTree().setRedraw(false);
+			try {
+				boolean refreshed = false;
+				if (treeRoot.getFilter() != "") {
+					tree.refresh();
+					refreshed = true;
+					if (lastRunRevealedElements == null || alreadyRevealedElementsCount == 0) {
+						// we need to expand everything
+						if (autoExpand) {
+							lastRunRevealedElements = allSelectedElements;
+							tree.expandAll();
+							return;
+						}
+					} else if (autoExpand) {
+						for (int i = 0; i < unrevealedElements.length; i++) {
+							if (unrevealedElements[i] != null) {
+								if (!unrevealedElements[i].containSelectedChilds()) {
+									// expand the element if it doesn't contain selected children
+									// otherwise we will duplicate the work, which we will do for the children
+									tree.expandToLevel(unrevealedElements[i], 0);
+								}
+							}
+						}
+						lastRunRevealedElements = allSelectedElements;
+						return;
+					} // else restore original state, too much work otherwise
+				}
+				// in the default case restore the tree state
+				// collapse the tree, because the refresh is much faster
+				tree.collapseAll();
+				if (!refreshed)
+					tree.refresh();
+				tree.setExpandedElements(savedExpansionState);
+				savedExpansionState = null;
+				lastRunRevealedElements = null;
+			} finally {
+				// TODO: Change this to not set the selection on elements which are out of the filter
+				tree.setSelection(selection, true);
+				tree.getTree().setRedraw(true);
+				ignoreSelectionEvents = false;
+			}
 		}
 
 		private void filterRecursively(Model root) {
@@ -926,10 +976,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 				filterRecursively(children[i]);
 			}
 		}
-		
 
 		public void selectionChanged(SelectionChangedEvent event) {
-			if (ignore)
+			if (ignoreSelectionEvents)
 				return;
 			selection = event.getSelection();
 		}

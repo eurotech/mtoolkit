@@ -36,9 +36,17 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	}
 
 	public void addElement(Model element) {
-		if (!this.equals(element.getParent())) {
-			element.setParent(this);
+		if (element.getParent() != null)
+			throw new IllegalArgumentException("Cannot change the parent of model object without removing it from the old one");
+		if (elementList.contains(element)) {
+			System.out.println("WARNING: Tried to add a model object twice to the same parent: " + this + "; child: " + element);
+			return;
 		}
+		
+		if (element.selectedChilds != 0)
+		fireChildSelected(element.selectedChilds);
+		
+		element.setParent(this);
 		
 		filterRecursively(element);
 
@@ -71,8 +79,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	public void removeElement(Model element) {
 		element.setParent(null);
 		if (elementList.remove(element)) {
-			if (element.selected)
-				fireChildSelected(-1);
+			fireChildSelected(-element.selectedChilds);
 			fireElementRemoved(element);
 		}
 	}
@@ -203,8 +210,12 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		return false;
 	}
 	
-	public boolean isSelected() {
+	public boolean isVisible() {
 		return selected || (selectedChilds > 0);
+	}
+	
+	public boolean containSelectedChilds() {
+		return selectedChilds - (selected ? 1 : 0) > 0;
 	}
 	
 	protected boolean select(Model model) {

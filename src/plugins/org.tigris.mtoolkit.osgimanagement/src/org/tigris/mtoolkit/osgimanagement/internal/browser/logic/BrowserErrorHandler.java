@@ -243,35 +243,9 @@ public class BrowserErrorHandler {
 			text = ""; //$NON-NLS-1$
 		}
 
-		final IStatus status = new Status(severity, plugin.getId(), IStatus.OK, text, t);
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				page = plugin.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				part = page != null ? page.getActivePart() : null;
-				log.addLogListener(new ILogListener() {
-					public void logging(IStatus status, String plugin) {
-						log.removeLogListener(this);
-						if (Display.getDefault().getActiveShell() != null) {
-							Display.getDefault().getActiveShell().setLayoutDeferred(true);
-							Display.getDefault().getActiveShell().setRedraw(false);
-							Display.getDefault().asyncExec(new Runnable() {
-								public void run() {
-									if (page != null) {
-										page.bringToTop(part);
-										Display.getDefault().getActiveShell().setLayoutDeferred(false);
-										Display.getDefault().getActiveShell().setRedraw(true);
-									}
-								}
-							});
-						}
-					}
-				});
-				log.log(status);
-			}
-		});
+		final IStatus status = new Status(severity, plugin.getId(), 0, text, t);
+		log.log(status);
 	}
-	static IWorkbenchPage page;
-	static IWorkbenchPart part;
 
 	// Get active shell
 	public static Shell getShell() {

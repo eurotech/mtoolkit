@@ -17,8 +17,10 @@ import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 public class MyViewerFilter extends ViewerFilter {
 
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (element instanceof Model)
-			return ((Model) element).isSelected();
+		if (element instanceof Model) {
+			boolean selected = ((Model) element).isVisible();
+			return selected;
+		}
 		return true;
 	}
 
