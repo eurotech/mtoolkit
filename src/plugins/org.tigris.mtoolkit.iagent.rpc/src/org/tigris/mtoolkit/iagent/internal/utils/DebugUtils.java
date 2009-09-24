@@ -41,7 +41,7 @@ public class DebugUtils {
 	 */
 	private static void debug(String msg, Throwable t) {
 		if (DEBUG) {
-			System.out.println("[IAgent.DEBUG]" + msg);
+			System.out.println("[IA|DEBUG]" + msg);
 			if (t != null) {
 				t.printStackTrace(System.out);
 			}
@@ -164,4 +164,8 @@ public class DebugUtils {
 		else
 			return fullClassName;
 	}
+	
+	public static String toString(Exception e) {
+		return e.toString();
+	}	  
 }

@@ -144,4 +144,8 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 		if (DebugUtils.DEBUG)
 			DebugUtils.log(this, message, t);
 	}
+
+	public boolean isClosed() {
+		return closed;
+	}
 }

@@ -17,6 +17,8 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnection;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnectionCallBack;
+import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 
 /**
  * Implementation of Transport interface over TCP protocol 
@@ -39,6 +41,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   protected volatile boolean isClosed = false;
 
   protected Socket deviceSocket;
+  protected TransportConnection connection;
   protected OutputStream os;
   protected InputStream is;
 
@@ -72,6 +75,14 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
     } else {
       throw new IllegalArgumentException("Connection properties hashtable does not contain device IP value with key DeviceConnector.KEY_DEVICE_IP!");
     }    
+  }
+
+  public MBSAConnectionImpl(Transport transport, Dictionary conProperties, ConnectionManagerImpl connManager) throws IAgentException {
+    isClient = true;
+    this.port = 7365;
+    headerBuffer = new ByteArrayOutputStream(15);
+    connect(transport);
+    this.connManager = connManager;
   }
 
   public void closeConnection() throws IAgentException {
@@ -267,6 +278,32 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         lastCmdTime = System.currentTimeMillis();              
         pingThread.start();
       }
+    }
+  }
+
+  /**
+   * Connect to the device using specified params with which this class is created
+   * 
+   * @throws IAgentException
+   */
+  protected void connect(Transport transport) throws IAgentException {
+    try {
+  	  log("[MBSAConnectionImpl][connect] >>> " + transport);
+      connection = transport.createConnection(port);
+      os = connection.getOutputStream();
+      is = connection.getInputStream();
+	  // create ping thread
+      if (pingThread == null || !pingThread.isAlive()) {
+        pingThread = new Thread(this, "[MBSAConnectionImpl][ping]");
+        log("[MBSAConnectionImpl][connect] Starting ping thread: " + pingThread);
+        // reset last cmd send time before start thread
+        lastCmdTime = System.currentTimeMillis();              
+        pingThread.start();
+      }
+    } catch (UnknownHostException e) {
+      throw new IAgentException("Exception trying to establish connection!", IAgentErrors.ERROR_CANNOT_CONNECT, e);
+    } catch (IOException e) {
+      throw new IAgentException("Exception trying to establish connection!", IAgentErrors.ERROR_CANNOT_CONNECT, e);
     }
   }
 

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.IAgentLog;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.transport.TransportsHub;
 
 /**
  * This class represents connection to a remote OSGi framework. It is associated
@@ -109,14 +111,35 @@ public abstract class DeviceConnector {
 			IAgentErrors.ERROR_INTERNAL_ERROR);
 	}
 	
-	public final static DeviceConnector connect(Transport transport, Dictionary aConProps) {
-		throw new UnsupportedOperationException("Not implemented");
+	public final static DeviceConnector connect(Transport transport, Dictionary aConProps) throws IAgentException {
+		// TODO: get proper connectionType for this transport
+		int aConnetionType = 0;
+		if (factories != null) {
+			DebugUtils.log(DeviceConnector.class, "[openClientConnection] aConnetionType: " + aConnetionType);
+			DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(aConnetionType));
+			DebugUtils.log(DeviceConnector.class, "[openClientConnection] factory: " + factory);
+			if (factory != null) {
+				DeviceConnector connector = factory.createClientConnection(transport, aConProps);
+				fireConnectionEvent(CONNECTED, connector);
+				return connector;
+			}
+		}
+		throw new IAgentException("No available factory for connection type: " + aConnetionType,
+			IAgentErrors.ERROR_INTERNAL_ERROR);
 	}
-	
-	public final static DeviceConnector connect(String transportType, String id, Dictionary aConProps) {
-		throw new UnsupportedOperationException("Not implemented");
+
+	public final static DeviceConnector connect(String transportType, String id, Dictionary aConProps) throws IAgentException {
+		try {
+			Transport transport = TransportsHub.openTransport(transportType, id);
+			if (transport == null) {
+				throw new IAgentException("Unable to find compatible transport provider.", IAgentErrors.ERROR_CANNOT_CONNECT);
+			}
+			return connect(transport, aConProps);
+		} catch (IOException e) {
+			throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
+		}
 	}
-	
+
 	/**
 	 * When called this method opens server connection with the specified type
 	 * and properties and blocks until client connection from remote OSGi

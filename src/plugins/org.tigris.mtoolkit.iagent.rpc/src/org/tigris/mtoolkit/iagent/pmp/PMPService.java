@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.pmp;
 
+import org.tigris.mtoolkit.iagent.transport.Transport;
+
 /**
  * Interface of the PMP Service
  */
@@ -30,6 +32,6 @@ public interface PMPService extends PMPPeer {
 	 *                occured.
 	 */
 
-	public PMPConnection connect(String uri) throws PMPException;
+	public PMPConnection connect(Transport transport) throws PMPException;
 
 }

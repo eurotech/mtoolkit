@@ -15,6 +15,7 @@ import java.net.Socket;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
+import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 	protected boolean running = false;
@@ -63,6 +64,27 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 			return con;
 		} catch (Exception exc) {
 			error("Error creating connection for " + uri, exc);
+			if (exc instanceof PMPException)
+				throw (PMPException) exc;
+			throw new PMPException(exc.getMessage(), exc);
+		}
+	}
+
+	public PMPConnection connect(Transport transport) throws PMPException {
+		if (!running) {
+			throw new PMPException("Stopping pmpservice");
+		}
+		try {
+			info("Creating new connection for " + transport);
+			PMPSessionThread st = null;
+			st = new PMPSessionThread(this, transport.createConnection(1450), createSessionId());
+
+			Connection con = st.getConnection();
+			con.connect();
+			addElement(st);
+			return con;
+		} catch (Exception exc) {
+			error("Error creating connection for " + transport, exc);
 			if (exc instanceof PMPException)
 				throw (PMPException) exc;
 			throw new PMPException(exc.getMessage(), exc);

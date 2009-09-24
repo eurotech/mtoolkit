@@ -4,4 +4,6 @@ public interface MBSAServer {
 
 	public void close();
 	
+	public boolean isClosed();
+	
 }

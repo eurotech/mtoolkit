@@ -173,7 +173,7 @@ public class Main {
 	private static DeviceConnector connectVM(String ip) throws IAgentException {
 		Hashtable props = new Hashtable();
 		props.put("framework-connection-ip", ip);
-		return DeviceConnector.openClientConnection(0, props);
+		return DeviceConnector.connect("socket", ip, props);
 	}
 
 	private static void usage() {

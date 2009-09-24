@@ -12,6 +12,8 @@ package org.tigris.mtoolkit.iagent;
 
 import java.util.Dictionary;
 
+import org.tigris.mtoolkit.iagent.transport.Transport;
+
 /**
  * Provides factory mechanism for {@link DeviceConnector}s. Each factory
  * provides {@link DeviceConnector}s for specified connection type.
@@ -39,6 +41,20 @@ public interface DeviceConnectorFactory {
 	 * @see DeviceConnector#openClientConnection(int, Dictionary)
 	 */
 	public DeviceConnector createClientConnection(Dictionary aConProps) throws IAgentException;
+
+	/**
+	 * Creates {@link DeviceConnector} working over specified client connection
+	 * to specified remote OSGi framework
+	 * 
+	 * @param aConProps
+	 *            the connection properties (host, port, etc.)
+	 * @return {@link DeviceConnector} connected to specified remote OSGi
+	 *         framework
+	 * @throws IAgentException
+	 *             thrown if connection could not be established
+	 * @see DeviceConnector#openClientConnection(int, Dictionary)
+	 */
+	public DeviceConnector createClientConnection(Transport Transport, Dictionary aConProps) throws IAgentException;
 
 	/**
 	 * Opens specified server connection and blocks until connection from remote

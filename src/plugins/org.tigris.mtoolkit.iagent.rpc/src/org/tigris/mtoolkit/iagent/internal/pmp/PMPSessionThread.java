@@ -18,7 +18,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadPool;
+import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 
 public class PMPSessionThread extends Thread {
 
@@ -30,6 +32,7 @@ public class PMPSessionThread extends Thread {
 
 	private Connection connection;
 	private Socket socket;
+	private TransportConnection transportConnection;
 
 	/**
 	 * Indicates that the initial handshake has been passed successfully
@@ -126,6 +129,8 @@ public class PMPSessionThread extends Thread {
 	private static final String ERRMSG4 = "No Such Event Type ";
 	private static final String DSCMSG1 = "Normal Disconnect Received";
 	private static final String DSCMSG2 = "Error Disconnect Received: ";
+	
+	private final boolean VERBOSE_DEBUG = Boolean.getBoolean("iagent.debug.verbose");
 
 	protected ThreadPool pool;
 
@@ -137,6 +142,24 @@ public class PMPSessionThread extends Thread {
 
 		os = new PMPOutputStream(socket.getOutputStream(), this);
 		is = new PMPInputStream(socket.getInputStream(), this);
+		running = true;
+
+		connection = new Connection(is, os, this);
+		objects = new Hashtable();
+		this.peer = peer;
+		this.pool = peer.pool;
+		maxS = peer.maxStringLength;
+		maxA = peer.maxArrayLength;
+		start();
+	}
+
+	public PMPSessionThread(PMPPeerImpl peer, TransportConnection tc, String sessionID) throws IOException {
+		super("PMP " + peer.getRole() + " Thread [" + tc + "]"); //$NON-NLS-1$
+		this.transportConnection = tc;
+		this.sessionID = sessionID;
+
+		os = new PMPOutputStream(tc.getOutputStream(), this);
+		is = new PMPInputStream(tc.getInputStream(), this);
 		running = true;
 
 		connection = new Connection(is, os, this);
@@ -292,7 +315,7 @@ public class PMPSessionThread extends Thread {
 		this.interrupt();
 		connection.disconnected(errMsg);
 		peer.removeElement(this);
-		debug("Disconnecting Client " + url);
+		debug("Disconnecting Client " + ((url != null) ? url : transportConnection.toString()));
 
 		peer.fireConnectionEvent(false, this);
 		if (toAnswer && connected) {
@@ -314,7 +337,12 @@ public class PMPSessionThread extends Thread {
 		}
 		if (toAnswer) {
 			try {
-				socket.close();
+				// old connection method compatibility
+				if (socket != null) {
+					socket.close();
+				} else {
+					transportConnection.close();
+				}
 			} catch (Exception exc) {
 			}
 		}
@@ -737,15 +765,16 @@ public class PMPSessionThread extends Thread {
 	}
 
 	protected void debug(String msg) {
-		// TODO: Add logging
+		if (VERBOSE_DEBUG)
+			DebugUtils.log(this, msg);
 	}
 
 	protected void error(String msg, Throwable exc) {
-		// TODO: Add logging
+		DebugUtils.log(this, msg, exc);
 	}
 
 	protected void info(String msg) {
-		// TODO: Add logging
+		DebugUtils.log(this, msg);
 	}
 
 	String uri;

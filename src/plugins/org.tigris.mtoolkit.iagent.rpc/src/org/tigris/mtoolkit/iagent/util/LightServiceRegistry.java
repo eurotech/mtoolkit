@@ -13,12 +13,14 @@ package org.tigris.mtoolkit.iagent.util;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Map.Entry;
 
 /**
@@ -229,10 +231,32 @@ public class LightServiceRegistry {
 			List result = new ArrayList(1);
 			ExtenderHandle handle = (ExtenderHandle) registry.get(name);
 			while (handle != null) {
-				result.add(handle.get());
+				Object extender = handle.get();
+				if (extender != null)
+					result.add(extender);
 				handle = handle.next;
 			}
 			return (Object[]) result.toArray(new Object[result.size()]);
+		}
+	}
+
+	/**
+	 * Queries the registry for all service names.
+	 * 
+	 * @return an array containing all service names. An empty array will be returned, if no 
+	 * services are defined.
+	 */
+	public String[] getAllServiceNames() {
+		synchronized (registry) {
+			Set names = registry.keySet();
+			return (String[]) names.toArray(new String[names.size()]);
+		}
+	}
+	
+	public Object[] getAllServices() {
+		synchronized (registry) {
+			Collection services = registry.values();
+			return services.toArray();
 		}
 	}
 

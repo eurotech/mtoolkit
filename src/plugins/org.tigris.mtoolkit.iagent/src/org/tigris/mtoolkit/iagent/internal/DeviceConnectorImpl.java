@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -38,6 +39,8 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.transport.TransportsHub;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 /**
@@ -71,12 +74,48 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	 * @param aConManager
 	 * @throws IAgentException
 	 */
+	// TODO: remove this method. It is remained for backward compatibility.
 	public DeviceConnectorImpl(Dictionary props) throws IAgentException {
 		log("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
 		if (props == null)
 			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
 		this.connectionProperties = props;
-		connectionManager = new ConnectionManagerImpl(props);
+
+		String targetIP = (String) props.get(DeviceConnector.KEY_DEVICE_IP);
+		if (targetIP == null)
+			throw new IllegalArgumentException("Connection properties hashtable does not contain device IP value with key DeviceConnector.KEY_DEVICE_IP!");
+		Transport transport;
+		try {
+			transport = TransportsHub.openTransport("socket", targetIP);
+		} catch (IOException e) {
+			throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
+		}
+		if (transport == null) {
+			throw new IAgentException("Unable to find compatible transport provider.", IAgentErrors.ERROR_CANNOT_CONNECT);
+		}
+		connectionManager = new ConnectionManagerImpl(transport, props);
+		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
+	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
+	      log("[Constructor] Connect to device which support MBSA");
+	      connect(ConnectionManager.MBSA_CONNECTION);
+	    } else {  // connect directly to PMP
+	      log("[Constructor] Connect to device which doesn't support MBSA");
+	      connect(ConnectionManager.PMP_CONNECTION);
+	    }
+	}
+
+	/**
+	 * Creates new DeviceConnector with specified transport object
+	 * 
+	 * @param aConManager
+	 * @throws IAgentException
+	 */
+	public DeviceConnectorImpl(Transport transport, Dictionary props) throws IAgentException {
+		log("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
+		if (props == null)
+			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
+		this.connectionProperties = props;
+		connectionManager = new ConnectionManagerImpl(transport, props);
 		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
 	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
 	      log("[Constructor] Connect to device which support MBSA");

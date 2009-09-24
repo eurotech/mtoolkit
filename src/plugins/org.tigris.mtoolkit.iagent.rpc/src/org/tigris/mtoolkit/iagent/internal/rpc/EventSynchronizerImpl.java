@@ -52,14 +52,15 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 				server.addEventSource(evType);
 			}
 		}
-		addEventSource(RemoteDeploymentAdminImpl.DEPLOYMENT_EVENT);
 	}
 
 	public void addEventSource(String eventType) {
 		log("[addEventSource] >>> eventType: " + eventType);
 		synchronized (eventTypes) {
-			if (!eventTypes.contains(eventType))
-				eventTypes.add(eventType);
+			if (eventTypes.contains(eventType))
+				return;
+			
+			eventTypes.add(eventType);
 			if (server != null)
 				server.addEventSource(eventType);
 		}

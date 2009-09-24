@@ -47,6 +47,7 @@ import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
+import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
 public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, SynchronousBundleListener {
 
@@ -61,11 +62,14 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 
 	private ServiceTracker packageAdminTrack;
 	private ServiceTracker startLevelTrack;
+	private ServiceTracker delegatesTrack;
 	private ServiceRegistration registration;
 	private BundleContext bc;
-
+	
 	private Set loadedSymbolicNames;
 	private Bundle systemBundle;
+	
+	private BundleManagerDelegate defaultDelegate;
 
 	public Class[] remoteInterfaces() {
 		return new Class[] { RemoteBundleAdmin.class };
@@ -74,12 +78,17 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	public void register(BundleContext bc) {
 		log("[register] Registering remote Bundle Admin...");
 		this.bc = bc;
-
+		
+		this.defaultDelegate = new DefaultBundleManagerDelegate(bc);
+		
 		packageAdminTrack = new ServiceTracker(bc, PackageAdmin.class.getName(), null);
 		packageAdminTrack.open();
 
 		startLevelTrack = new ServiceTracker(bc, StartLevel.class.getName(), null);
 		startLevelTrack.open();
+		
+		delegatesTrack = new ServiceTracker(bc, BundleManagerDelegate.class.getName(), null);
+		delegatesTrack.open();
 		
 		EventSynchronizer synchronizer = Activator.getSynchronizer();
 		if (synchronizer != null) {
@@ -294,24 +303,24 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	public Object installBundle(String location, InputStream is) {
 		if (DebugUtils.DEBUG)
 			log("[installBundle] location: " + location + "; inputStream: " + is);
-		Bundle bundle;
-		try {
-			bundle = bc.installBundle(location, is);
-		} catch (BundleException e) {
-			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to install bundle: " + e.getMessage());
-			log("[installBundle] Unable to install bundle", error);
-			return error;
+		Object result = getDelegate().installBundle(location, is);
+		if (result instanceof Error) {
+			log("[installBundle] Unable to install bundle", (Error)result);
+			return result;
 		}
-
-		try {
-			is.close();
-		} catch (Exception exc) {
-			// ignore
-		}
+		
+		Bundle bundle = (Bundle) result;
 		Long bundleId = new Long(bundle.getBundleId());
 		if (DebugUtils.DEBUG)
 			log("[installBundle] Bundle installed successfully. Id: " + bundleId);
 		return bundleId;
+	}
+	
+	private BundleManagerDelegate getDelegate() {
+		BundleManagerDelegate delegate = (BundleManagerDelegate) delegatesTrack.getService();
+		if (delegate != null)
+			return delegate;
+		return defaultDelegate;
 	}
 
 	public Object uninstallBundle(long id) {
@@ -319,16 +328,13 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			log("[uninstallBundle] id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle != null) {
-			try {
-				bundle.uninstall();
-				log("[uninstallBundle] Bundle uninstalled");
-				return null;
-			} catch (BundleException e) {
-				Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to uninstall bundle: "
-								+ e.getMessage());
-				log("[uninstallBundle] Unable to uninstall bundle", error);
-				return error;
+			Object result = getDelegate().uninstallBundle(bundle);
+			if (result instanceof Error) {
+				log("[uninstallBundle] Unable to uninstall bundle", (Error) result);
+				return result;
 			}
+			log("[uninstallBundle] Bundle uninstalled");
+			return result;
 		} else {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
 			log("[uninstallBundle] Unable to uninstall bundle", error);
@@ -357,20 +363,14 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
 			log("[updateBundle] No such bundle", error);
 			return error;
-		} else
-			try {
-				bundle.update(is);
+		} else {
+			Object result = getDelegate().updateBundle(bundle, is);
+			if (result instanceof Error)
+				log("[updateBundle] Unable to update bundle", (Error) result);
+			else
 				log("[updateBundle] Bundle updated successfully");
-				return null;
-			} catch (BundleException e) {
-				Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to update bundle: " + e.getMessage());
-				log("[updateBundle] Unable to update bundle", error);
-				return error;
-			} catch (IllegalStateException e) {
-				Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
-				log("[updateBundle] No such bundle", error);
-				return error;
-			}
+			return result;
+		}
 	}
 
 	public Dictionary[] getRegisteredServices(long id) {

@@ -28,6 +28,8 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.spi.PMPConnector;
 import org.tigris.mtoolkit.iagent.spi.Utils;
+import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.transport.TransportsHub;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public class PMPConnectionImpl implements PMPConnection, EventListener {
@@ -42,27 +44,26 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 	private LightServiceRegistry pmpRegistry;
 	private volatile boolean closed = false;
 
-	public PMPConnectionImpl(Dictionary conProperties, ConnectionManagerImpl connManager) throws IAgentException {
+	public PMPConnectionImpl(Transport transport, Dictionary conProperties, ConnectionManagerImpl connManager) throws IAgentException {
 		log("[Constructor] >>> Create PMP Connection: props: "
 						+ DebugUtils.convertForDebug(conProperties)
 						+ "; manager: "
 						+ connManager);
-		String targetIP = (String) conProperties.get(DeviceConnector.KEY_DEVICE_IP);
-		if (targetIP == null)
-			throw new IllegalArgumentException("Connection properties hashtable does not contain device IP value with key DeviceConnector.KEY_DEVICE_IP!");
-
 		PMPService pmpService = PMPServiceFactory.getDefault();
 		try {
-			log("[Constructor] PMP connection spec: " + targetIP);
-			pmpConnection = pmpService.connect(targetIP);
+			log("[Constructor] Transport: " + transport);
+			pmpConnection = pmpService.connect(transport);
 		} catch (PMPException e) {
 			log("[Constructor] Failed to create PMP connection 1", e);
-			try {
-				log("[Constructor] PMP connection 2 spec: " + targetIP);
-				pmpConnection = createClosedConnection(targetIP);
-			} catch (PMPException e2) {
-				log("[Constructor] Failed to create PMP connection 2", e2);
-				throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e2);
+			if ("socket".equals(transport.getType().getTypeId())) {
+				// if we are using old socket protocol, try to create
+				// backward compatible connection
+				try {
+					pmpConnection = createClosedConnection(transport.getId());
+				} catch (PMPException e2) {
+					log("[Constructor] Failed to create PMP connection 2", e2);
+					throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e2);
+				}
 			}
 			if (pmpConnection == null)
 				throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e);

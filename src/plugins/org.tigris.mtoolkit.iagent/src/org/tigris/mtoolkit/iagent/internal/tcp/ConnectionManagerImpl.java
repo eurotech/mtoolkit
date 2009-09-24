@@ -20,15 +20,17 @@ import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
-import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
+import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public class ConnectionManagerImpl implements ConnectionManager {
 	protected Dictionary conProperties;
 	protected MBSAConnectionImpl mbsaConnection;
 	protected PMPConnectionImpl pmpConnection;
+	protected Transport transport;
 	private List listeners = new LinkedList();
 
-	public ConnectionManagerImpl(Dictionary aConProperties) {
+	public ConnectionManagerImpl(Transport transport, Dictionary aConProperties) {
+		this.transport = transport;
 		this.conProperties = aConProperties;
 	}
 
@@ -81,14 +83,14 @@ public class ConnectionManagerImpl implements ConnectionManager {
 			switch (type) {
 			case MBSA_CONNECTION:
 		        if (mbsaConnection == null) {
-		          mbsaConnection = createMBSAConnection();
+		          mbsaConnection = createMBSAConnection(transport);
 		          fireEvent = true;
 		        }
 		        connection = mbsaConnection;
 		        break;
 			case PMP_CONNECTION:
 				if (pmpConnection == null) {
-					pmpConnection = createPMPConnection();
+					pmpConnection = createPMPConnection(transport);
 					fireEvent = true;
 				}
 				connection = pmpConnection;
@@ -103,15 +105,15 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		log("[createConnection] connection: " + connection);
 		return connection;
 	}
-	
-	private MBSAConnectionImpl createMBSAConnection() throws IAgentException {
-	    MBSAConnectionImpl connection = new MBSAConnectionImpl(conProperties, this);
-	    log("[createMBSAConnection] Created connection: " + connection);
-	    return connection;
-	  }
 
-	private PMPConnectionImpl createPMPConnection() throws IAgentException {
-		final PMPConnectionImpl connection = new PMPConnectionImpl(conProperties, this);
+	private MBSAConnectionImpl createMBSAConnection(Transport transport) throws IAgentException {
+		MBSAConnectionImpl connection = new MBSAConnectionImpl(transport, conProperties, this);
+		log("[createMBSAConnection] Created connection: " + connection);
+		return connection;
+	}
+
+	private PMPConnectionImpl createPMPConnection(Transport transport) throws IAgentException {
+		final PMPConnectionImpl connection = new PMPConnectionImpl(transport, conProperties, this);
 		log("[createPMPConnection] Created connection: " + connection);
 		return connection;
 	}

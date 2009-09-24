@@ -16,6 +16,7 @@ import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.DeviceConnectorFactory;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
+import org.tigris.mtoolkit.iagent.transport.Transport;
 
 /**
  * Device connection factory providing DeviceConnectors working over TCP
@@ -26,6 +27,10 @@ public class DeviceConnectionFactoryImpl implements DeviceConnectorFactory {
 
 	public DeviceConnector createClientConnection(Dictionary aConProps) throws IAgentException {
 		return new DeviceConnectorImpl(aConProps);
+	}
+	
+	public DeviceConnector createClientConnection(Transport transport, Dictionary aConProps) throws IAgentException {
+		return new DeviceConnectorImpl(transport, aConProps);
 	}
 
 	public DeviceConnector createServerConnection(Dictionary aConProps) throws IAgentException {

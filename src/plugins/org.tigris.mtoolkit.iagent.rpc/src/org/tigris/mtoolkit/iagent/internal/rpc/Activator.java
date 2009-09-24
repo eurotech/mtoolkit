@@ -24,6 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
+import org.tigris.mtoolkit.iagent.internal.VMCommander;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.ProSystRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase;
@@ -51,6 +52,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 	private BundleContext context;
 	private static Activator instance;
 	private EventSynchronizerImpl synchronizer;
+	private VMCommander vmCommander;
 
 	private ServiceTracker deploymentAdminTrack;
 	private ServiceTracker eventAdminTracker;
@@ -74,15 +76,20 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		serviceAdmin = new RemoteServiceAdminImpl();
 		serviceAdmin.register(context);
 
-		registerConsole(context);
+		// TODO: Launch vmcommander when we have FrameworkStarted event
+		boolean registerVMController = !"false".equals(System.getProperty("iagent.controller"));
+		if (registerVMController)
+			vmCommander = new VMCommander(context);
 
+		registerConsole(context);
+		
 		pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
 		pmpServer = PMPServerFactory.createServer(context, 1450, null);
 		pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, null);
 		synchronizer.setPMPServer(pmpServer);
 		synchronizer.start();
 	}
-
+	
 	private void registerConsole(BundleContext context) {
 		// trying Equinox console
 		try {
@@ -122,7 +129,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		pmpServer.close();
 
 		pmpServiceReg.unregister();
-
+		
 		if (synchronizer != null) {
 			synchronizer.removeEventSource(CUSTOM_PROPERTY_EVENT);
 			synchronizer.stopDispatching();
@@ -148,45 +155,66 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			serviceAdmin.unregister(context);
 			serviceAdmin = null;
 		}
+		
+		if (vmCommander != null)
+			vmCommander.close();
 
 		instance = null;
 		this.context = null;
 	}
-
+	
+	private boolean registerDeploymentAdmin(DeploymentAdmin admin) {
+		if (deploymentAdmin == null) {
+			deploymentAdmin = new RemoteDeploymentAdminImpl();
+			deploymentAdmin.register(context, admin);
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private boolean unregisterDeploymentAdmin(DeploymentAdmin admin) {
+		if (deploymentAdmin != null && deploymentAdmin.getDeploymentAdmin() == admin) {
+			deploymentAdmin.unregister(context);
+			deploymentAdmin = null;
+			return true;
+		}
+		return false;
+	}
+	
+	// TODO: Rework dependency support
 	public Object addingService(ServiceReference arg0) {
 		String[] classes =  (String[]) arg0.getProperty("objectClass");
 		for(int i = 0; i < classes.length;i++)
 			if(classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
-				sendEvent(RemoteDeploymentAdmin.class, true);
-				if (deploymentAdminTrack.getService() == null) {
-					deploymentAdmin = new RemoteDeploymentAdminImpl();
-					DeploymentAdmin admin = (DeploymentAdmin) context.getService(arg0);
-					deploymentAdmin.register(context, admin);
-					return admin;
-				} else {
-					return null;
-				}
+				DeploymentAdmin admin = (DeploymentAdmin) context.getService(arg0);
+				if (registerDeploymentAdmin(admin))
+					sendEvent(RemoteDeploymentAdmin.class, true);
+				return admin;
 			} else if(classes[i].equals(EVENT_ADMIN_CLASS)) {
 				sendEvent(EventAdmin.class, true);
 				return new Object();
 			}
-		
 		return null;
 	}
-
+	
 	public void modifiedService(ServiceReference arg0, Object arg1) {
 	}
 
-	public void removedService(ServiceReference arg0, Object arg1) {
-		String[] classes = (String[]) arg0.getProperty("objectClass");
+	public void removedService(ServiceReference ref, Object obj) {
+		String[] classes = (String[]) ref.getProperty("objectClass");
 		for(int i = 0; i < classes.length;i++) {
 			if(classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
-				sendEvent(RemoteDeploymentAdmin.class, false);
-				deploymentAdmin.unregister(context);
-				deploymentAdmin = null;
-				break;
+				if (unregisterDeploymentAdmin((DeploymentAdmin) obj)) {
+					DeploymentAdmin admin = (DeploymentAdmin) deploymentAdminTrack.getService();
+					if (admin != null)
+						registerDeploymentAdmin(admin);
+					else
+						sendEvent(RemoteDeploymentAdmin.class, false);
+				}
 			} else if(classes[i].equals(EVENT_ADMIN_CLASS)) {
-				sendEvent(EventAdmin.class, false);
+				if (eventAdminTracker.getService() == null)
+					sendEvent(EventAdmin.class, false);
 			}
 		}
 	}
