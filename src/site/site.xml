@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <description name="mToolkit Update Site">
-   		name="mToolkit"
+	  mToolkit Update Site
    </description>
    <feature url="features/org.tigris.mtoolkit_3.0.0.qualifier.jar" id="org.tigris.mtoolkit" version="3.0.0.qualifier">
       <category name="mtoolkit"/>
