@@ -143,12 +143,15 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 			return null;
 		}
 		if (element instanceof Model) {
-			List modelProviders = ((Model) element).findFramework().getModelProviders();
-			for (int i=0; i<modelProviders.size(); i++) {
-				ContentTypeModelProvider manager = ((ModelProviderElement)modelProviders.get(i)).getProvider();
-				Image image = manager.getImage((Model) element);
-				if (image != null) {
-					return image;
+			FrameWork fw = ((Model) element).findFramework();
+			if (fw != null) {
+				List modelProviders = fw.getModelProviders();
+				for (int i=0; i<modelProviders.size(); i++) {
+					ContentTypeModelProvider manager = ((ModelProviderElement)modelProviders.get(i)).getProvider();
+					Image image = manager.getImage((Model) element);
+					if (image != null) {
+						return image;
+					}
 				}
 			}
 		}

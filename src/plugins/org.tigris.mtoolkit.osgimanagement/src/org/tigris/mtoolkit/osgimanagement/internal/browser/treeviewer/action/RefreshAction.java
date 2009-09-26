@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
@@ -73,7 +74,9 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 			}
 			if (model instanceof FrameWork) {
 				FrameWork framework = (FrameWork) model;
-				if (!framework.isConnected()) {
+				if (!framework.isConnected() 
+					|| framework.isRefreshing()
+					|| FrameworkConnectorFactory.connectJobs.get(framework.getConnector()) != null) {
 					enabled = false;
 					break;
 				}
