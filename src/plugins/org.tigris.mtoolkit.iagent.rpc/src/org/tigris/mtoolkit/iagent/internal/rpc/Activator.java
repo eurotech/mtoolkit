@@ -38,11 +38,12 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private static final String DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
 	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
-		
+
 	private static final String SERVICE_STATE = "iagent.service.state";
 	public static final String CUSTOM_PROPERTY_EVENT = "iagent_property_event";
-	
+
 	private RemoteBundleAdminImpl bundleAdmin;
+	private RemoteApplicationAdminImpl applicationAdmin;
 	private RemoteDeploymentAdminImpl deploymentAdmin;
 	private RemoteServiceAdminImpl serviceAdmin;
 	private RemoteConsoleServiceBase console;
@@ -56,23 +57,26 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private ServiceTracker deploymentAdminTrack;
 	private ServiceTracker eventAdminTracker;
-	
+
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
 		instance = this;
 		synchronizer = new EventSynchronizerImpl(context);
-		
+
 		synchronizer.addEventSource(CUSTOM_PROPERTY_EVENT);
-		
+
 		bundleAdmin = new RemoteBundleAdminImpl();
 		bundleAdmin.register(context);
+
+		applicationAdmin = new RemoteApplicationAdminImpl();
+		applicationAdmin.register(context);
 
 		deploymentAdminTrack = new ServiceTracker(context, DEPLOYMENT_ADMIN_CLASS, this);
 		deploymentAdminTrack.open(true);
 
 		eventAdminTracker = new ServiceTracker(context, EVENT_ADMIN_CLASS, this);
 		eventAdminTracker.open(true);
-		
+
 		serviceAdmin = new RemoteServiceAdminImpl();
 		serviceAdmin.register(context);
 
@@ -82,14 +86,14 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			vmCommander = new VMCommander(context);
 
 		registerConsole(context);
-		
+
 		pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
 		pmpServer = PMPServerFactory.createServer(context, 1450, null);
 		pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, null);
 		synchronizer.setPMPServer(pmpServer);
 		synchronizer.start();
 	}
-	
+
 	private void registerConsole(BundleContext context) {
 		// trying Equinox console
 		try {
@@ -129,7 +133,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		pmpServer.close();
 
 		pmpServiceReg.unregister();
-		
+
 		if (synchronizer != null) {
 			synchronizer.removeEventSource(CUSTOM_PROPERTY_EVENT);
 			synchronizer.stopDispatching();
@@ -141,28 +145,33 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			bundleAdmin = null;
 		}
 
+		if (applicationAdmin != null) {
+			applicationAdmin.unregister(context);
+			applicationAdmin = null;
+		}
+
 		if (deploymentAdminTrack != null) {
 			deploymentAdminTrack.close();
 			deploymentAdminTrack = null;
 		}
 
-		if(eventAdminTracker != null) {
+		if (eventAdminTracker != null) {
 			eventAdminTracker.close();
 			eventAdminTracker = null;
 		}
-		
+
 		if (serviceAdmin != null) {
 			serviceAdmin.unregister(context);
 			serviceAdmin = null;
 		}
-		
+
 		if (vmCommander != null)
 			vmCommander.close();
 
 		instance = null;
 		this.context = null;
 	}
-	
+
 	private boolean registerDeploymentAdmin(DeploymentAdmin admin) {
 		if (deploymentAdmin == null) {
 			deploymentAdmin = new RemoteDeploymentAdminImpl();
@@ -172,7 +181,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			return false;
 		}
 	}
-	
+
 	private boolean unregisterDeploymentAdmin(DeploymentAdmin admin) {
 		if (deploymentAdmin != null && deploymentAdmin.getDeploymentAdmin() == admin) {
 			deploymentAdmin.unregister(context);
@@ -181,30 +190,30 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		}
 		return false;
 	}
-	
+
 	// TODO: Rework dependency support
 	public Object addingService(ServiceReference arg0) {
-		String[] classes =  (String[]) arg0.getProperty("objectClass");
-		for(int i = 0; i < classes.length;i++)
-			if(classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
+		String[] classes = (String[]) arg0.getProperty("objectClass");
+		for (int i = 0; i < classes.length; i++)
+			if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
 				DeploymentAdmin admin = (DeploymentAdmin) context.getService(arg0);
 				if (registerDeploymentAdmin(admin))
 					sendEvent(RemoteDeploymentAdmin.class, true);
 				return admin;
-			} else if(classes[i].equals(EVENT_ADMIN_CLASS)) {
+			} else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
 				sendEvent(EventAdmin.class, true);
 				return new Object();
 			}
 		return null;
 	}
-	
+
 	public void modifiedService(ServiceReference arg0, Object arg1) {
 	}
 
 	public void removedService(ServiceReference ref, Object obj) {
 		String[] classes = (String[]) ref.getProperty("objectClass");
-		for(int i = 0; i < classes.length;i++) {
-			if(classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
+		for (int i = 0; i < classes.length; i++) {
+			if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
 				if (unregisterDeploymentAdmin((DeploymentAdmin) obj)) {
 					DeploymentAdmin admin = (DeploymentAdmin) deploymentAdminTrack.getService();
 					if (admin != null)
@@ -212,7 +221,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 					else
 						sendEvent(RemoteDeploymentAdmin.class, false);
 				}
-			} else if(classes[i].equals(EVENT_ADMIN_CLASS)) {
+			} else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
 				if (eventAdminTracker.getService() == null)
 					sendEvent(EventAdmin.class, false);
 			}
@@ -225,10 +234,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private void sendEvent(Class objClass, boolean state) {
 		Dictionary pmpEventData = new Hashtable();
-		
-		pmpEventData.put(Constants.OBJECTCLASS, new String[]{objClass.getName()});
+
+		pmpEventData.put(Constants.OBJECTCLASS, new String[] { objClass.getName() });
 		pmpEventData.put(SERVICE_STATE, new Boolean(state));
-		
+
 		EventSynchronizer synchronizer = this.synchronizer;
 		if (synchronizer != null)
 			synchronizer.enqueue(new EventData(pmpEventData, CUSTOM_PROPERTY_EVENT));
