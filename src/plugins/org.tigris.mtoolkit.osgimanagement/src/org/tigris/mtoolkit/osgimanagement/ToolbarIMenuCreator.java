@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.osgimanagement;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,11 +24,20 @@ import org.eclipse.swt.widgets.Menu;
 
 public class ToolbarIMenuCreator extends Action implements IMenuCreator {
 
-	private Action actions[];
 	private TreeViewer tree;
+	private ContributionItem[] items;
 
-	public ToolbarIMenuCreator(Action actions[], TreeViewer tree) {
-		this.actions = actions;
+	public ToolbarIMenuCreator(IAction actions[], TreeViewer tree) {
+		items = new ActionContributionItem[actions.length];
+		for (int i=0; i<actions.length; i++) {
+			items[i] = new ActionContributionItem(actions[i]);
+		}
+		this.tree = tree;
+		setMenuCreator(this);
+	}
+
+	public ToolbarIMenuCreator(ContributionItem items[], TreeViewer tree) {
+		this.items = items;
 		this.tree = tree;
 		setMenuCreator(this);
 	}
@@ -52,25 +62,29 @@ public class ToolbarIMenuCreator extends Action implements IMenuCreator {
 
 			public void menuShown(MenuEvent e) {
 				IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
-				for (int i=0; i<actions.length; i++) {
-					if (actions[i] instanceof IStateAction) {
-						((IStateAction)actions[i]).updateState(selection);
+				for (int i=0; i<items.length; i++) {
+					if (items[i] instanceof ActionContributionItem &&
+							((ActionContributionItem)items[i]).getAction() instanceof IStateAction) {
+						((IStateAction)((ActionContributionItem)items[i]).getAction()).updateState(selection);
 					}
 				}
 			}
 		});
-		for (int i = 0; i < actions.length; i++) {
-			ActionContributionItem item = new ActionContributionItem(actions[i]);
-			item.fill(newmenu, -1);
+		for (int i = 0; i < items.length; i++) {
+			if (items[i] instanceof ActionContributionItem) {
+				ActionContributionItem item = new ActionContributionItem(((ActionContributionItem)items[i]).getAction());
+				item.fill(newmenu, -1);
+			} else {
+				items[i].fill(newmenu, -1);
+			}
 		}
 		return newmenu;
 	}
 
 	public Menu getMenu(Menu parent) {
 		Menu newmenu = new Menu(parent);
-		for (int i = 0; i < actions.length; i++) {
-			ActionContributionItem item = new ActionContributionItem(actions[i]);
-			item.fill(newmenu, -1);
+		for (int i = 0; i < items.length; i++) {
+			items[i].fill(newmenu, -1);
 		}
 		return newmenu;
 	}

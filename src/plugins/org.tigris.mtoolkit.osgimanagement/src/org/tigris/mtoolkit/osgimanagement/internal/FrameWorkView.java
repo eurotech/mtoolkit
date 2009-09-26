@@ -40,6 +40,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -167,7 +169,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	private static InstallDPAction installDPAction;
 	private static DeInstallBundleAction deinstallBundleAction;
 	private static DeInstallDPAction deinstallDPAction;
-
+	
 	private static StartAction startAction;
 	private static StopAction stopAction;
 	private static UpdateBundleAction updateBundleAction;
@@ -364,14 +366,20 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, connectAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, disconnectAction);
 
-		Action actions[] = new Action[] { startAction, stopAction, updateBundleAction, deinstallBundleAction,
-				bundlePropertiesAction, installBundleAction };
-		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(actions, tree);
+		ContributionItem items[] = new ContributionItem[] {
+				new ActionContributionItem(startAction), 
+				new ActionContributionItem(stopAction), 
+				new ActionContributionItem(updateBundleAction), 
+				new ActionContributionItem(deinstallBundleAction),
+				new ActionContributionItem(bundlePropertiesAction),
+				new Separator(), 
+				new ActionContributionItem(installBundleAction) };
+		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(items, tree);
 		bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 		bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, bundlesTB);
 
-		actions = new Action[] { installDPAction, deinstallDPAction, dpPropertiesAction };
+		Action[] actions = new Action[] { installDPAction, deinstallDPAction, dpPropertiesAction };
 		ToolbarIMenuCreator dpTB = new ToolbarIMenuCreator(actions, tree);
 		dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
 		dpTB.setToolTipText(Messages.DPAction_ToolTip);
