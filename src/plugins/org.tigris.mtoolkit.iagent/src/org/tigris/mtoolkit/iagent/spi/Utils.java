@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
+import java.util.Map;
+
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.tcp.PMPRemoteObjectAdapter;
@@ -96,7 +98,14 @@ public class Utils {
 			// methods for getting the bundle and framework start levels
 			new MethodSignature("getBundleStartLevel", new String[] { "long" }, true),
 			new MethodSignature("getFrameworkStartLevel", NO_ARGS, true),
-			new MethodSignature("getSystemProperty", new String[] { STRING_TYPE }, true), };
+			new MethodSignature("getSystemProperty", new String[] { STRING_TYPE }, true), 
+
+			// methods of RemoteApplicationAdmin
+			new MethodSignature("getApplications", NO_ARGS, true),
+		    new MethodSignature("start", new String[] { STRING_TYPE, Map.class.getName() }, true),
+		    new MethodSignature("stop", new String[] { STRING_TYPE }, true),
+		    new MethodSignature("getState", new String[] { STRING_TYPE }, true),
+	};
 
 	public static final int INSTALL_BUNDLE_METHOD = 0;
 	public static final int GET_BUNDLE_STATE_METHOD = 1;
@@ -155,7 +164,13 @@ public class Utils {
 	public static final int GET_FW_START_LEVEL = 44;
 
 	public static final int GET_SYSTEM_PROPERTY = 45;
-	public static final int LAST = 45;
+
+	public static final int LIST_APPLICATIONS_METHOD = 46;
+	public static final int START_APPLICATION_METHOD = 47;
+	public static final int STOP_APPLICATION_METHOD = 48;
+	public static final int GET_STATE_APPLICATION_METHOD = 49;
+
+	public static final int LAST = 49;
 
 	static {
 		if (METHOD_SIGNATURES.length != LAST + 1) {
