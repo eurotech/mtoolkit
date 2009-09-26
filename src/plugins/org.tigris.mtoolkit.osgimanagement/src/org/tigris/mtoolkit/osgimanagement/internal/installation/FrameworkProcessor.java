@@ -173,8 +173,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 						int result = dialog.open();
 						if (result == Window.CANCEL) {
 							monitor.setCanceled(true);
+						} else {
+							processor[0] = (FrameworkProcessor) dialog.getResult()[0];
 						}
-						processor[0] = (FrameworkProcessor) dialog.getResult()[0];
 					}
 				});
 				if (monitor.isCanceled()) {
