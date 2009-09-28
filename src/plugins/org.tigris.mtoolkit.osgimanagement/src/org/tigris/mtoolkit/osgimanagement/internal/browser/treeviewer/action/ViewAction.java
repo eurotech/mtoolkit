@@ -113,7 +113,7 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 			Object next = (Object) it.next();
 			if (next instanceof Model) {
 				FrameWork fw = ((Model) next).findFramework();
-				if (fw.isConnected())
+				if (fw != null && fw.isConnected())
 					frameworks.add(fw);
 			}
 		}

@@ -47,12 +47,13 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 			Object selElement = iter.next();
 			if (selElement instanceof Model) {
 				FrameWork fw = ((Model) selElement).findFramework();
-				if (!frameworks.contains(fw))
-					;
-				frameworks.add(fw);
+				if (fw != null && !frameworks.contains(fw)) {
+					frameworks.add(fw);
+				}
 			} else if (selElement instanceof FrameWork)
-				if (!frameworks.contains(selElement))
+				if (!frameworks.contains(selElement)) {
 					frameworks.add(selElement);
+				}
 		}
 
 		if (frameworks.isEmpty()) {
