@@ -102,7 +102,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return result;
 	}
 
-	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, final IProgressMonitor monitor) {
+	public IStatus processInstallationItem(final InstallationItem item, InstallationTarget target, final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 		IStatus preparationStatus = item.prepare(subMonitor.newChild(50));
 
@@ -165,7 +165,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 						
 						dialog.setTitle("Select processor");
 						dialog.setLabelProvider(new LabelProvider());
-						dialog.setMessage("Select installation processor");
+						dialog.setMessage("Select installation processor for "+item.getName());
 						dialog.setContentProvider(new ArrayContentProvider());
 						dialog.setInput(Arrays.asList(prArr));
 						dialog.setInitialSelections(new Object[]{prArr[0]});
