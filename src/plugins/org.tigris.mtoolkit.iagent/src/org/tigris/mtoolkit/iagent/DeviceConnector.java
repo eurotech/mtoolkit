@@ -51,6 +51,10 @@ public abstract class DeviceConnector {
 	 * properties table must be a String object.
 	 */
 	public static final String KEY_DEVICE_IP = "framework-connection-ip";
+	
+	public static final String TRANSPORT_TYPE = "transport-type";
+	
+	public static final String TRANSPORT_ID = "transport-id";
 
 	/**
 	 * Internal constant indicating that a device connector was disconnected.
@@ -286,6 +290,7 @@ public abstract class DeviceConnector {
 				}
 			} catch (Throwable e) {
 				DebugUtils.log(DeviceConnector.class, "Failed to deliver disconnection event to " + listener, e);
+				e.printStackTrace();//didi
 			}
 		}
 	}
@@ -328,6 +333,6 @@ public abstract class DeviceConnector {
 	public void cancelMonitoringDeviceProperties() throws IAgentException {
 	}
 	
-	public abstract Object getManager(String className) throws IAgentException;// {
+	public abstract Object getManager(String className) throws IAgentException;
 
 }

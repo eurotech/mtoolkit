@@ -87,6 +87,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		Transport transport;
 		try {
 			transport = TransportsHub.openTransport("socket", targetIP);
+			setTransportProps(transport);
 		} catch (IOException e) {
 			throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
 		}
@@ -115,6 +116,8 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		if (props == null)
 			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
 		this.connectionProperties = props;
+		setTransportProps(transport);
+		
 		connectionManager = new ConnectionManagerImpl(transport, props);
 		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
 	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
@@ -410,5 +413,10 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			}
 			return manager;
 		}
+	}
+	
+	private void setTransportProps(Transport transport) {
+		connectionProperties.put(TRANSPORT_TYPE, transport.getType().getTypeId());
+		connectionProperties.put(TRANSPORT_ID, transport.getId());
 	}
 }
