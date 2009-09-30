@@ -611,14 +611,16 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			}
 
 			int index = 1;
-			String frameWorkName = Messages.new_framework_default_name
-							+ ' '
-							+ connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
+			Object ip = connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
+			String frameWorkName = Messages.new_framework_default_name;
+			String suffix = " ";
+			if (ip != null) { 
+				suffix += ip;
+			}
 			if (frameWorkMap.containsKey(frameWorkName)) {
 				do {
 					frameWorkName = Messages.new_framework_default_name
-									+ ' '
-									+ connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP)
+									+ suffix
 									+ "("
 									+ index
 									+ ")";
