@@ -69,6 +69,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.TreeAdapter;
 import org.eclipse.swt.events.TreeEvent;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -245,13 +246,21 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	 */
 	public void createPartControl(Composite parent) {
 		GridLayout layout = new GridLayout();
-		layout.marginHeight = 1;
-		layout.marginWidth = 1;
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		layout.verticalSpacing = 0;
 		parent.setLayout(layout);
 
-		filterField = new Text(parent, SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
-		GridData filterGridData = new GridData(GridData.FILL_HORIZONTAL);
-		filterField.setLayoutData(filterGridData);
+		Composite filterPanel = new Composite(parent, SWT.NONE);
+		// TODO: Handle changes in the system color scheme
+		filterPanel.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		filterPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		FillLayout filterLayout = new FillLayout();
+		filterLayout.marginHeight = 2;
+		filterLayout.marginWidth = 2;
+		filterPanel.setLayout(filterLayout);
+		
+		filterField = new Text(filterPanel, SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
 
 		filterField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
