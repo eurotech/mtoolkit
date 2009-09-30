@@ -47,7 +47,7 @@ public class MenuFactory {
 		int index = 1;
 		String frameWorkName;
 		do {
-			frameWorkName = Messages.new_framework_default_name + '_' + index;
+			frameWorkName = Messages.new_framework_default_name + " (" + index+")";
 			index++;
 		} while (frameWorkMap.containsKey(frameWorkName));
 
