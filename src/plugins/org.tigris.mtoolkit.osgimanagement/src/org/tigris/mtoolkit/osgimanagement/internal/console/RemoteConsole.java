@@ -16,6 +16,7 @@ import java.util.Date;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
@@ -102,7 +103,11 @@ public class RemoteConsole extends IOConsole {
 	
 	public void disconnect() {
 		DeviceConnector.removeDeviceConnectionListener(listener);
-		setName(computeName());
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				setName(computeName());
+			}
+		});
 		if (reader != null)
 			reader.dispose();
 		if (output != null) {
