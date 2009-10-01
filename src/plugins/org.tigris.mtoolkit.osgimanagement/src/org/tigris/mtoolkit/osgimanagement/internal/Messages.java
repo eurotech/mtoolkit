@@ -107,7 +107,7 @@ public final class Messages extends NLS {
 	public static String pmp_connect_error_message;
 	public static String duplicate_framework_name_message;
 	public static String incorrect_framework_name_message;
-	public static String incorrect_framework_ip_message;
+	public static String incorrect_framework_properties_message;
 	public static String duplicate_bundle_confirm_message;
 	public static String duplicate_dp_confirm_message;
 	public static String file_not_exists;

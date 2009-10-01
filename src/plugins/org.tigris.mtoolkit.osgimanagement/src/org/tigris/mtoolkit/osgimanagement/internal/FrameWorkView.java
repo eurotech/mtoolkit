@@ -754,7 +754,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		FrameWork element;
 		IMemento[] all = memento.getChildren(MEMENTO_TYPE);
 		for (int i = 0; i < all.length; i++) {
-			elementName = all[i].getString(FRAMEWORK_ID);
+			elementName = all[i].getString(FRAMEWORK_NAME);
 			if (elementName == null)
 				continue;
 			element = new FrameWork(elementName, false);

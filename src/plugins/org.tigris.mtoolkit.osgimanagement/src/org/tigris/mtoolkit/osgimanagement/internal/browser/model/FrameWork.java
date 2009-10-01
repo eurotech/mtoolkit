@@ -95,7 +95,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		super(name);
 		this.autoConnected = autoConnected;
 		configs = XMLMemento.createWriteRoot(MEMENTO_TYPE);
-		configs.putString(FRAMEWORK_ID, name);
+		configs.putString(FRAMEWORK_NAME, name);
 	}
 
 	public Model getBundlesNode() {

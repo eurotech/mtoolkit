@@ -76,14 +76,14 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 	public void sheetLoaded() {
 		target.initValues(config);
 		if (fw.isConnected() && fw.autoConnected) {
-			target.setIPEditable(false);
+			target.setEditable(false);
 		}
 	}
 
 	// Called when target options are changed
 	public void changeSettings() {
 		target.saveValues(config);
-		fw.setName(config.getString(FRAMEWORK_ID));
+		fw.setName(config.getString(FRAMEWORK_NAME));
 
 		if (firstTime) {
 			parent.addElement(fw);
@@ -92,13 +92,13 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 			DeviceConnector connector = fw.getConnector();
 			if (connector != null) {
 				connector.getProperties().put("framework-name", fw.getName()); //$NON-NLS-1$
-				String prevIP = (String) connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
-				connector.getProperties().put("framework-connection-ip", target.getNewIP()); //$NON-NLS-1$
-				if (fw.isConnected() && !target.getNewIP().equals(prevIP)) {
-					MessageDialog.openInformation(target.getShell(),
-						Messages.framework_ip_changed_title,
-						Messages.framework_ip_changed_message);
-				}
+//				String prevIP = (String) connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
+//				connector.getProperties().put("framework-connection-ip", target.getNewIP()); //$NON-NLS-1$
+//				if (fw.isConnected() && !target.getNewIP().equals(prevIP)) {
+//					MessageDialog.openInformation(target.getShell(),
+//						Messages.framework_ip_changed_title,
+//						Messages.framework_ip_changed_message);
+//				}
 			}
 			fw.updateElement();
 			parentView.setSelection(parentView.getSelection());
@@ -126,32 +126,29 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 
 	// Check for duplicate
 	private boolean isFrameworkInfoCorrect() {
-		String newName = target.getNewName().trim();
-		if (newName.equals("")) { //$NON-NLS-1$
-
-			BrowserErrorHandler.showInfoDialog(Messages.incorrect_framework_name_message);
-			return false;
-		}
-		String ip = target.getNewIP().trim();
 		try {
-			// just check if address is correct
 			target.okButton.setEnabled(false);
-			InetAddress.getByName(ip);
-		} catch (Exception e) {
-			e.printStackTrace();
-			BrowserErrorHandler.showInfoDialog(Messages.incorrect_framework_ip_message);
-			return false;
+			String newName = target.getNewName().trim();
+			if (newName.equals("")) { //$NON-NLS-1$
+				BrowserErrorHandler.showInfoDialog(Messages.incorrect_framework_name_message);
+				return false;
+			}
+
+			Model[] frameworks = parent.getChildren();
+			for (int i = 0; i < frameworks.length; i++) {
+				if (newName.equals(frameworks[i].getName()) && !frameworks[i].equals(fw)) {
+					BrowserErrorHandler.showInfoDialog(Messages.duplicate_framework_name_message);
+					return false;
+				}
+			}
+
+			boolean result = target.validate();
+			if (!result) {
+				BrowserErrorHandler.showInfoDialog(Messages.incorrect_framework_properties_message);
+			}
+			return result;
 		} finally {
 			target.okButton.setEnabled(true);
 		}
-
-		Model[] frameworks = parent.getChildren();
-		for (int i = 0; i < frameworks.length; i++) {
-			if (newName.equals(frameworks[i].getName()) && !frameworks[i].equals(fw)) {
-				BrowserErrorHandler.showInfoDialog(Messages.duplicate_framework_name_message);
-				return false;
-			}
-		}
-		return true;
 	}
 }

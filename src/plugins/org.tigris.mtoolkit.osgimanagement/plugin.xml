@@ -2,6 +2,7 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension-point id="contentTypeExtensions" name="Content Type Extensions" schema="schema/contentTypeExtensions.exsd"/>
+   <extension-point id="osgiDeviceTypes" name="osgiDeviceTypes" schema="schema/osgiDeviceTypes.exsd"/>
 
    <extension point="org.eclipse.ui.views">
       <category
@@ -130,6 +131,14 @@
                   value="osgiManagementConsole">
             </test></enablement>
       </consolePageParticipant>
-   </extension>   
+   </extension>
+   <extension
+         point="org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes">
+      <osgiDeviceTypeProvider
+            class="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SocketTypeProvider"
+            id="plainSocket"
+            name="Plain Socket">
+      </osgiDeviceTypeProvider>
+   </extension>
 
 </plugin>

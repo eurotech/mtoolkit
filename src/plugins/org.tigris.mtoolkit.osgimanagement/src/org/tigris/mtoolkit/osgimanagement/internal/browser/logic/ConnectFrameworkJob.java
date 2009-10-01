@@ -19,6 +19,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,6 +38,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet.DeviceTypeProviderElement;
 
 public class ConnectFrameworkJob extends Job {
 	private static List connectingFrameworks = new ArrayList();
@@ -83,13 +86,38 @@ public class ConnectFrameworkJob extends Job {
 				FrameworkConnectorFactory.createPMPConnection(connector, fw, fw.getName(), fw.autoConnected);
 			} else {
 				IMemento config = fw.getConfig();
-				Dictionary aConnProps = new Hashtable();
-				aConnProps.put(DeviceConnector.KEY_DEVICE_IP, config.getString(ConstantsDistributor.FRAMEWORK_IP_ID));
-				aConnProps.put("framework-name", fw.getName()); //$NON-NLS-1$
-				aConnProps.put("framework-connection-immediate", new Boolean(false)); //$NON-NLS-1$
-				connector = DeviceConnector.openClientConnection(DeviceConnector.TYPE_TCP, aConnProps);
-				fw.setConnector(connector);
-				FrameworkConnectorFactory.createPMPConnection(connector, fw, fw.getName(), false);
+				String id = null;
+				String transportType = null;
+				Dictionary aConnProps = null;
+				
+				String providerID = config.getString(ConstantsDistributor.TRANSPORT_PROVIDER_ID);
+				List providers = PropertySheet.obtainDeviceTypeProviders();
+				for (int i=0; i<providers.size(); i++) {
+					DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);
+					if (providerID.equals(provider.getTypeId())) {
+						try {
+							transportType = provider.getProvider().getTransportType();
+							aConnProps = provider.getProvider().load(config);
+							id = (String) aConnProps.get(ConstantsDistributor.FRAMEWORK_ID);
+						} catch (CoreException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						break;
+					}
+				}
+
+				if (transportType != null && id != null) {
+					if (aConnProps == null) {
+						aConnProps = new Hashtable();
+					}
+					aConnProps.put("framework-name", fw.getName()); //$NON-NLS-1$
+					connector = DeviceConnector.connect(transportType, id, aConnProps);
+					fw.setConnector(connector);
+					FrameworkConnectorFactory.createPMPConnection(connector, fw, fw.getName(), false);
+				} else {
+//					TODO: show proper error msg
+				}
 			}
 		} catch (IAgentException e) {
 			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT)
