@@ -694,8 +694,14 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public void disconnected(DeviceConnector connector) {
+		FrameWork fw = null;
 		String fwName = (String) connector.getProperties().get("framework-name"); //$NON-NLS-1$
-		FrameWork fw = FrameWorkView.findFramework(fwName);
+		if (fwName != null) {
+			fw = FrameWorkView.findFramework(fwName);
+		} else {
+			fw = FrameWorkView.findFramework(connector);
+		}
+		
 		if (fw == null /* || !fw.isConnected() */)
 			return;
 

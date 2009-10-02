@@ -89,6 +89,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.ViewPart;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
@@ -806,6 +807,19 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		Model fws[] = treeRoot.getChildren();
 		for (int i = 0; i < fws.length; i++) {
 			if (fws[i].getName().equals(fwName)) {
+				return (FrameWork) fws[i];
+			}
+		}
+		return null;
+	}
+	
+	public static FrameWork findFramework(DeviceConnector connector) {
+		if (connector == null) return null;
+		if (treeRoot == null)
+			return null;
+		Model fws[] = treeRoot.getChildren();
+		for (int i = 0; i < fws.length; i++) {
+			if (((FrameWork)fws[i]).getConnector() == connector) {
 				return (FrameWork) fws[i];
 			}
 		}
