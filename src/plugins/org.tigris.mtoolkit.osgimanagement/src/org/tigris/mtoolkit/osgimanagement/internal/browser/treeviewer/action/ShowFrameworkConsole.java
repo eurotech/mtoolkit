@@ -59,6 +59,6 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 			}
 		}
 		// TODO: Disable the button when the framework is disconnected
-		setEnabled(enabled && fw != null && fw.isConnected());
+		setEnabled(enabled && fw != null && fw.isConnected() && !fw.autoConnected);
 	}
 }
