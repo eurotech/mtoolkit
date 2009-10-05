@@ -189,6 +189,7 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 	}
 
 	public void init(DeviceConnectorSpi connector) {
+		this.connectorSpi = connector;
 	}
 
 	public void startApplication(String applicationID, Map properties) throws IAgentException {
