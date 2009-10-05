@@ -172,7 +172,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	
 	private Object launchFromDescriptor(Object descriptor, Map properties) {
 		try {
-			invokeMethod1(descriptor, "launch", properties);
+			invokeMethod1(descriptor, "launch", Map.class, properties);
 			return null;
 		} catch (Exception e) {
 			if (e instanceof ApplicationException) {
@@ -279,18 +279,18 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	}
 
 	private Object invokeMethod0(Object obj, String method) throws Exception {
-		return invokeMethodn(obj, method, null);
+		return invokeMethodn(obj, method, null, null);
 	}
 	
-	private Object invokeMethod1(Object obj, String method, Object param) throws Exception {
-		return invokeMethodn(obj, method, new Object[] { param });
+	private Object invokeMethod1(Object obj, String method, Class paramType, Object param) throws Exception {
+		return invokeMethodn(obj, method, new Class[] { paramType }, new Object[] { param });
 	}
 	
-	private Object invokeMethodn(Object obj, String method, Object[] param) throws Exception {
+	private Object invokeMethodn(Object obj, String method, Class[] paramTypes, Object[] param) throws Exception {
 		Class clazz = obj.getClass();
 		try {
-			Method m = clazz.getMethod(method, null);
-			return (String) m.invoke(obj, null);
+			Method m = clazz.getMethod(method, paramTypes);
+			return m.invoke(obj, param);
 		} catch (InvocationTargetException e) {
 			if (e.getTargetException() instanceof Exception)
 				throw (Exception) e.getTargetException();
