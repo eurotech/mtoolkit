@@ -650,6 +650,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, startAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, stopAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, updateBundleAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, installBundleAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, deinstallBundleAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
 
