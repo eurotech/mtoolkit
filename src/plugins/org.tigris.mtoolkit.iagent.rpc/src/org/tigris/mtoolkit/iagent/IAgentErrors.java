@@ -199,6 +199,11 @@ public class IAgentErrors {
 	public static final int ERROR_APPLICATION_TOO_MANY_APPLICATIONS = -7902;
 
 	/**
+	 * Code error indicating that the application has been uninstalled.
+	 */
+	public static final int ERROR_APPLICATION_UNINSTALLED = -7903;
+
+	/**
 	 * Code error indicating that deployment exception was thrown on the remote
 	 * site.<br>
 	 * 

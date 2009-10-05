@@ -34,7 +34,7 @@ public interface RemoteApplicationAdmin {
 	 * 
 	 * @throws Exception
 	 */
-	public void start(String applicationID, Map properties) throws Exception;
+	public Object start(String applicationID, Map properties) throws Exception;
 
 	/**
 	 * Stop the application which identifier match the parameter -
@@ -43,7 +43,7 @@ public interface RemoteApplicationAdmin {
 	 * @param applicationID
 	 *            - the ID of the application that is going to be stopped
 	 */
-	public void stop(String applicationID);
+	public Object stop(String applicationID);
 
 	/**
 	 * Returns the state of the application which ID match the parameter.
@@ -52,7 +52,9 @@ public interface RemoteApplicationAdmin {
 	 *            - the ID of application from which state we are interested in
 	 * @return - the state as string.
 	 */
-	public String getState(String ApplicationId);
+	public String getState(String applicationId);
+	
+	public Object getProperties(String applicationId);
 
 	public long getRemoteServiceID();
 

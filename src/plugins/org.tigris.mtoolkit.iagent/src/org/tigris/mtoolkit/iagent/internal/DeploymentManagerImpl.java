@@ -46,11 +46,9 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 	private static final String DEPLOYMENT_EVENT = "d_event";
 	private static final String SYNCH_BUNDLE_EVENT = "synch_bundle_event";
 	private static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
-	private static final String SYNCH_APPLICATION_EVENT = "synch_application_event";
 	private static final String EVENT_TYPE_KEY = "type";
 	private static final String EVENT_DEPLOYMENT_PACKAGE_KEY = "deployment.package";
 	private static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
-	private static final String EVENT_APPLICATION_ID_KEY = "application_id";
 
 	private DeviceConnectorImpl connector;
 
@@ -58,7 +56,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 	private String[] systemBundlesNames = null;
 
 	private List bundleListeners = new LinkedList();
-	private List applicationListeners = new LinkedList();
 	private List dpListeners = new LinkedList();
 
 	private boolean addedConnectionListener;
@@ -153,12 +150,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		return bundleAdmin;
 	}
 
-	private RemoteObject getApplicationAdmin() throws IAgentException {
-		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
-		RemoteObject applicationAdmin = connection.getRemoteApplicationAdmin();
-		return applicationAdmin;
-	}
-
 	public RemoteObject getDeploymentAdmin() throws IAgentException {
 		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
 		RemoteObject bundleAdmin = connection.getRemoteDeploymentAdmin();
@@ -196,24 +187,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			bundles[i] = new RemoteBundleImpl(this, new Long(bids[i]));
 		}
 		return bundles;
-	}
-
-	public RemoteApplication[] listApplications() throws IAgentException {
-		log("[listApplications] >>>");
-		String[] applicationIDs = (String[]) Utils.callRemoteMethod(getApplicationAdmin(),
-				Utils.LIST_APPLICATIONS_METHOD, new Object[0]);
-		if (applicationIDs == null) {
-			log("[listApplications] listApplications() must not return null array. There is a problem with the transport.");
-			throw new IAgentException(
-					"listApplications() must not return null array. There is a problem with the transport.",
-					IAgentErrors.GENERAL_ERROR);
-		}
-		RemoteApplication[] applications = new RemoteApplication[applicationIDs.length];
-		log("[listApplications] Returned applications list: " + DebugUtils.convertForDebug(applicationIDs));
-		for (int i = 0; i < applicationIDs.length; i++) {
-			applications[i] = new RemoteApplicationImpl(this, applicationIDs[i]);
-		}
-		return applications;
 	}
 
 	public RemoteDP[] listDeploymentPackages() throws IAgentException {
@@ -266,30 +239,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		}
 	}
 
-	public void addRemoteApplicationListener(RemoteApplicationListener listener) throws IAgentException {
-		log("[addRemoteApplicaionListener] >>> listener: " + listener);
-		synchronized (this) {
-			if (!addedConnectionListener) {
-				connector.getConnectionManager().addConnectionListener(this);
-				addedConnectionListener = true;
-				log("[addRemoteBundleListener] Connection listener added");
-			}
-		}
-		synchronized (applicationListeners) {
-			if (!applicationListeners.contains(listener)) {
-				PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION,
-						false);
-				if (connection != null) {
-					log("[addRemoteApplicationListener] PMP connection is available, add event listener");
-					connection.addEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
-				}
-				applicationListeners.add(listener);
-			} else {
-				log("[addRemoteApplicationListener] Listener already present");
-			}
-		}
-	}
-
 	public void addRemoteDPListener(RemoteDPListener listener) throws IAgentException {
 		log("[addRemoteDPListener] >>> listener: " + listener);
 		synchronized (this) {
@@ -329,26 +278,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 				}
 			} else {
 				log("[removeRemoteBundleListener] Listener not found in the list");
-			}
-		}
-	}
-
-	public void removeRemoteApplicationListener(RemoteApplicationListener listener) throws IAgentException {
-		log("[removeApplicationListener] >>> listener: " + listener);
-		synchronized (applicationListeners) {
-			if (applicationListeners.contains(listener)) {
-				applicationListeners.remove(listener);
-				if (applicationListeners.size() == 0) {
-					log("[removeRemoteApplicationListener] No more listeners in the list, try to remove PMP event listener");
-					PMPConnection connection = (PMPConnection) connector.getConnection(
-							ConnectionManager.PMP_CONNECTION, false);
-					if (connection != null) {
-						log("[removeRemoteApplicationListener] PMP connection is available, remove event listener");
-						connection.removeEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
-					}
-				}
-			} else {
-				log("[removeRemoteApplicationListener] Listener not found in the list");
 			}
 		}
 	}
@@ -398,31 +327,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		}
 	}
 
-	private void fireApplicationEvent(String applicationID, int type) {
-		log("[fireApplicationEvent] >>> applicationId: " + applicationID + "; type: " + type);
-		RemoteApplicationListener[] listeners;
-		synchronized (applicationListeners) {
-			if (applicationListeners.size() != 0) {
-				listeners = (RemoteApplicationListener[]) applicationListeners
-						.toArray(new RemoteApplicationListener[applicationListeners.size()]);
-			} else {
-				return;
-			}
-		}
-		RemoteApplication application = new RemoteApplicationImpl(this, applicationID);
-		RemoteApplicationEvent event = new RemoteApplicationEvent(application, type);
-		log("[fireApplicationEvent] " + listeners.length + " listeners found.");
-		for (int i = 0; i < listeners.length; i++) {
-			RemoteApplicationListener listener = listeners[i];
-			try {
-				log("[fireApplicationEvent] deliver event: " + event + " to listener: " + listener);
-				listener.applicationChanged(event);
-			} catch (Throwable e) {
-				log("[fireApplicationEvent] Failed to deliver event to " + listener, e);
-			}
-		}
-	}
-
 	private void fireDeploymentEvent(String symbolicName, String version, int type) {
 		log("[fireDeploymentEvent] >>> symbolicName: " + symbolicName + "; version: " + version + "; type: " + type);
 		RemoteDPListener[] listeners;
@@ -463,14 +367,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 				fireBundleEvent(bid.longValue(), type);
 			} else if (SYSTEM_BUNDLE_EVENT.equals(eventType)) {
 				clearSystemBundlesList();
-			} else if (SYNCH_APPLICATION_EVENT.equals(eventType)) {
-				Dictionary eventProps = (Dictionary) event;
-				if (eventProps == null) {
-					return;
-				}
-				int type = ((Integer) eventProps.get(EVENT_TYPE_KEY)).intValue();
-				String applicationId = (String) eventProps.get(EVENT_APPLICATION_ID_KEY);
-				fireApplicationEvent(applicationId, type);
 			}
 		} catch (Throwable e) {
 			IAgentLog.error("[DeploymentManagerImpl][event] Failed to process PMP event: " + event + "; type: "
@@ -492,7 +388,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			systemBundlesNames = null;
 			synchronized (dpListeners) {
 				synchronized (bundleListeners) {
-					synchronized (applicationListeners) {
 						PMPConnection connection = (PMPConnection) event.getConnection();
 						if (dpListeners.size() > 0) {
 							log("[connectionChanged] Restoring deployment package listeners...");
@@ -516,18 +411,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 												e);
 							}
 						}
-						if (applicationListeners.size() > 0) {
-							log("[connectionChanged] Restoring application listeners...");
-							try {
-								connection.addEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
-							} catch (IAgentException e) {
-								IAgentLog
-										.error(
-												"[DeploymentManagerImpl][connectionChanged] Failed to add event listener to PMP connection",
-												e);
-							}
-						}
-					}
 				}
 			}
 		}
@@ -574,16 +457,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			}
 			log("[removeListeners] bundle listeners removed");
 		}
-		synchronized (applicationListeners) {
-			applicationListeners.clear();
-			PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
-			if (connection != null) {
-				log("[removeListeners] PMP connection is available, remove event listener for synchronous application events...");
-				connection.removeEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
-			}
-			log("[removeListeners] application listeners removed");
-		}
-
 		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
 		if (connection != null) {
 			log("[removeListeners] PMP connection is available. remove evnet listener for system bundle events...");
@@ -653,21 +526,5 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		return (String[]) names.toArray(new String[names.size()]);
 	}
 
-	public void startApplication(String applicationID, Map properties) throws IAgentException {
-		if (applicationID == null)
-			throw new IAgentException("The application ID could not be null", IAgentErrors.ERROR_APPLICATION_UNKNOWN);
-		Utils.callRemoteMethod(getApplicationAdmin(), Utils.START_APPLICATION_METHOD, new Object[] { applicationID,
-				properties });
-	}
 
-	public void stopApplication(String applicationID) throws IAgentException {
-		Utils.callRemoteMethod(getApplicationAdmin(), Utils.STOP_APPLICATION_METHOD, new Object[] { applicationID });
-	}
-
-	public String getApplicationState(String applicationID) throws IAgentException {
-		String result = "UNDEFINED";
-		result = (String) Utils.callRemoteMethod(getApplicationAdmin(), Utils.GET_STATE_APPLICATION_METHOD,
-				new Object[] { applicationID });
-		return result;
-	}
 }

@@ -30,6 +30,10 @@ public class MethodSignature {
 		this(name, getClassNames(classes));
 	}
 	
+	public MethodSignature(String name, Class parameterType) {
+		this(name, getClassNames(new Class[] { parameterType }));
+	}
+	
 	private static String[] getClassNames(Class[] classes) {
 		if (classes == null)
 			return null;

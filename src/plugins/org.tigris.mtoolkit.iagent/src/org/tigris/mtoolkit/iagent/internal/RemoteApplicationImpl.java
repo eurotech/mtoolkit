@@ -17,20 +17,20 @@ import org.tigris.mtoolkit.iagent.RemoteApplication;
 
 public class RemoteApplicationImpl implements RemoteApplication {
 
-	private DeploymentManagerImpl dManager = null;
+	private ApplicationManagerImpl appManager = null;
 	private String applicationID = null;
 
-	public RemoteApplicationImpl(DeploymentManagerImpl deploymentManager, String applicationID) {
+	public RemoteApplicationImpl(ApplicationManagerImpl applicationManager, String applicationID) {
 		this.applicationID = applicationID;
-		this.dManager = deploymentManager;
+		this.appManager = applicationManager;
 	}
 
 	public void start(Map properties) throws IAgentException {
-		dManager.startApplication(applicationID, properties);
+		appManager.startApplication(applicationID, properties);
 	}
 
 	public void stop() throws IAgentException {
-		dManager.stopApplication(applicationID);
+		appManager.stopApplication(applicationID);
 	}
 
 	public String getApplicationId() throws IAgentException {
@@ -38,7 +38,11 @@ public class RemoteApplicationImpl implements RemoteApplication {
 	}
 
 	public String getState() throws IAgentException {
-		return dManager.getApplicationState(applicationID);
+		return appManager.getApplicationState(applicationID);
+	}
+	
+	public Map getProperties() throws IAgentException {
+		return appManager.getApplicationProperties(applicationID);
 	}
 
 }

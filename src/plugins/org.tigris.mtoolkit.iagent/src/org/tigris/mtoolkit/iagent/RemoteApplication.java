@@ -19,17 +19,15 @@ import java.util.Map;
  */
 public interface RemoteApplication {
 
-	/**
-	 * The application state is running. This is the initial state of a started
-	 * application.
-	 */
 	public final static String STATE_RUNNING = "RUNNING";
 
-	/**
-	 * The application is being stopped. This is the state of the
-	 * application during the execution of the stop() method.
-	 */
 	public final static String STATE_STOPPING = "STOPPING";
+	
+	public final static String STATE_INSTALLED = "INSTALLED";
+
+	public final static String STATE_UNINSTALLED = "UNINSTALLED";
+
+	public final static String STATE_MIXED = "MIXED";
 
 	/**
 	 * Starts the application.
@@ -54,11 +52,18 @@ public interface RemoteApplication {
 	public String getApplicationId() throws IAgentException;
 
 	/**
-	 * Returns the current state of the application: It can be STOPPING or
-	 * RUNNING.
+	 * Returns the current state of the application.
 	 * 
 	 * @return a String representation of application state.
 	 */
 	public String getState() throws IAgentException;
+
+	/**
+	 * Returns the properties of the ApplicationDescriptor.
+	 * 
+	 * @return
+	 * @throws IAgentException
+	 */
+	public Map getProperties() throws IAgentException;
 
 }

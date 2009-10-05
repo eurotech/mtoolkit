@@ -99,12 +99,6 @@ public class Utils {
 			new MethodSignature("getBundleStartLevel", new String[] { "long" }, true),
 			new MethodSignature("getFrameworkStartLevel", NO_ARGS, true),
 			new MethodSignature("getSystemProperty", new String[] { STRING_TYPE }, true), 
-
-			// methods of RemoteApplicationAdmin
-			new MethodSignature("getApplications", NO_ARGS, true),
-		    new MethodSignature("start", new String[] { STRING_TYPE, Map.class.getName() }, true),
-		    new MethodSignature("stop", new String[] { STRING_TYPE }, true),
-		    new MethodSignature("getState", new String[] { STRING_TYPE }, true),
 	};
 
 	public static final int INSTALL_BUNDLE_METHOD = 0;

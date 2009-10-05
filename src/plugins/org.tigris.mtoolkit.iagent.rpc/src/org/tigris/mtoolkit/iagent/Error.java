@@ -52,6 +52,10 @@ public class Error implements Externalizable {
 		this(code, message, null);
 	}
 
+	public Error(int code) {
+		this(code, null, null);
+	}
+
 	public Error() {
 	}
 
