@@ -159,12 +159,7 @@ public class Utils {
 
 	public static final int GET_SYSTEM_PROPERTY = 45;
 
-	public static final int LIST_APPLICATIONS_METHOD = 46;
-	public static final int START_APPLICATION_METHOD = 47;
-	public static final int STOP_APPLICATION_METHOD = 48;
-	public static final int GET_STATE_APPLICATION_METHOD = 49;
-
-	public static final int LAST = 49;
+	public static final int LAST = 45;
 
 	static {
 		if (METHOD_SIGNATURES.length != LAST + 1) {
