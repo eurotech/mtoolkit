@@ -112,6 +112,8 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 
 	public String[] getApplications() {
 		ServiceReference[] refs = applicationTracker.getServiceReferences();
+		if (refs == null)
+			return new String[0];
 		log("[getApplications] " + refs.length + " applications available.");
 		String[] ids = new String[refs.length];
 		for (int i = 0; i < refs.length; i++) {
@@ -155,6 +157,8 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 
 	public Object stop(String applicationID) {
 		Object[] handles = handlesTracker.getServices();
+		if (handles == null)
+			return null;
 		for (int i = 0; i < handles.length; i++) {
 			String id = getApplicationIdFromHandle(handles[i]);
 			if (id != null && id.equals(applicationID)) {
@@ -197,6 +201,8 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	
 	private ServiceReference findDescriptorReference(String applicationId) {
 		ServiceReference[] refs = applicationTracker.getServiceReferences();
+		if (refs == null)
+			return null;
 		for (int i = 0; i < refs.length; i++) {
 			String id = getApplicationIdFromReference(refs[i]);
 			if (applicationId.equals(id))
@@ -230,6 +236,8 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	
 	private Object[] findHandles(String applicationId) {
 		Object[] handles = handlesTracker.getServices();
+		if (handles == null)
+			return new Object[0];
 		List filtered = new ArrayList(handles.length);
 		for (int i = 0; i < handles.length; i++) {
 			String id = getApplicationIdFromHandle(handles[i]);
