@@ -161,9 +161,9 @@ public class MenuFactory {
 	}
 
 	public static void removeFrameworkAction(FrameWork framework) {
-		if (framework.isConnected()) {
-			framework.disconnect();
-		}
+//		if (framework.isConnected()) {
+//			framework.disconnect();
+//		}
 
 		framework.dispose();
 		ConsoleManager.disconnectConsole(framework);
