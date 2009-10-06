@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Certificate Manager Plug-in
+Bundle-SymbolicName: org.tigris.mtoolkit.certmanager;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: .
+Bundle-Activator: org.tigris.mtoolkit.certmanager.internal.CertManagerPlugin
+Bundle-Vendor: Tigris.org
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.tigris.mtoolkit.common
+Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.equinox.security.storage
+Export-Package: org.tigris.mtoolkit.certmanager
+Service-Component: OSGI-INF/components.xml
