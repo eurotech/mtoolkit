@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.iagent.internal.rpc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -48,13 +49,13 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	private static final int APP_UNINSTALLED = 1 << 4;
 	private static final int APP_STARTED = 1 << 2;
 	private static final int APP_STOPPED = 1 << 3;
-	
+
 	private static final String UNINSTALLED_STATE = "UNINSTALLED";
 	private static final String INSTALLED_STATE = "INSTALLED";
 	private static final String MIXED_STATE = "MIXED";
 	private static final String ERROR_STATE = "ERROR";
 	private static final String UNKNOWN_STATE = "UNKNOWN";
-	
+
 	private ServiceRegistration registration;
 	private BundleContext bc;
 	private ServiceTracker applicationTracker;
@@ -169,26 +170,29 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		}
 		return null;
 	}
-	
+
 	private Object launchFromDescriptor(Object descriptor, Map properties) {
 		try {
 			invokeMethod1(descriptor, "launch", Map.class, properties);
 			return null;
 		} catch (Exception e) {
 			if (e instanceof ApplicationException) {
-				return new Error(ExceptionCodeHelper.fromApplicationExceptionCode(((ApplicationException) e).getErrorCode()), "Application start failed: " + DebugUtils.toString(e));
+				return new Error(ExceptionCodeHelper.fromApplicationExceptionCode(((ApplicationException) e)
+						.getErrorCode()), "Application start failed: " + DebugUtils.toString(e));
 			} else {
-				return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application start failed: " + DebugUtils.toString(e));
+				return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application start failed: "
+						+ DebugUtils.toString(e));
 			}
 		}
 	}
-	
+
 	private Object destroyHandle(Object handle) {
 		try {
 			invokeMethod0(handle, "destroy");
 			return null;
 		} catch (Exception e) {
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application stop failed: " + DebugUtils.toString(e));
+			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application stop failed: "
+					+ DebugUtils.toString(e));
 		}
 	}
 
@@ -198,7 +202,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			return applicationTracker.getService(ref);
 		return null;
 	}
-	
+
 	private ServiceReference findDescriptorReference(String applicationId) {
 		ServiceReference[] refs = applicationTracker.getServiceReferences();
 		if (refs == null)
@@ -224,16 +228,16 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			return MIXED_STATE;
 		return UNKNOWN_STATE;
 	}
-	
+
 	private String getHandleState(Object handle) {
 		try {
 			return (String) invokeMethod0(handle, "getState");
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log("Failed to get application state: " + DebugUtils.toString(e), e);
 			return ERROR_STATE;
 		}
 	}
-	
+
 	private Object[] findHandles(String applicationId) {
 		Object[] handles = handlesTracker.getServices();
 		if (handles == null)
@@ -258,7 +262,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	private String getApplicationIdFromReference(ServiceReference ref) {
 		return (String) ref.getProperty(Constants.SERVICE_PID);
 	}
-	
+
 	private String getApplicationIdFromHandle(Object obj) {
 		try {
 			Object descriptor = invokeMethod0(obj, "getApplicationDescriptor");
@@ -281,11 +285,11 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	private Object invokeMethod0(Object obj, String method) throws Exception {
 		return invokeMethodn(obj, method, null, null);
 	}
-	
+
 	private Object invokeMethod1(Object obj, String method, Class paramType, Object param) throws Exception {
 		return invokeMethodn(obj, method, new Class[] { paramType }, new Object[] { param });
 	}
-	
+
 	private Object invokeMethodn(Object obj, String method, Class[] paramTypes, Object[] param) throws Exception {
 		Class clazz = obj.getClass();
 		try {
@@ -297,7 +301,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			throw e;
 		}
 	}
-	
+
 	private boolean testObjectClass(Object value, String className) {
 		if (value instanceof String[]) {
 			String[] classes = (String[]) value;
@@ -326,7 +330,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		}
 		return service;
 	}
-	
+
 	public void modifiedService(ServiceReference reference, Object service) {
 		// do nothing
 	}
@@ -359,9 +363,29 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		for (int i = 0; i < keys.length; i++) {
 			Object value = ref.getProperty(keys[i]);
 			if (value != null)
-				props.put(keys[i], ref.getProperty(keys[i]));
+				props.put(keys[i], convertObject(ref.getProperty(keys[i])));
 		}
 		return props;
 	}
-	
+
+	private Object convertObject(Object obj) {
+		if (obj instanceof URL) {
+			/*
+			 * XXX: Special cases for URLs, because we cannot guarantee that the
+			 * remote side has the same scheme handlers. The other option would
+			 * be to limit the transferable types, but the possible types are a
+			 * lot, so we do it only for the types we have problems with.
+			 */
+			return obj.toString();
+		} else if (obj instanceof URL[]) {
+			URL[] urls = (URL[]) obj;
+			String[] result = new String[urls.length];
+			for (int i = 0; i < result.length; i++)
+				result[i] = urls[i].toString();
+			return result;
+		} else {
+			return obj;
+		}
+	}
+
 }
