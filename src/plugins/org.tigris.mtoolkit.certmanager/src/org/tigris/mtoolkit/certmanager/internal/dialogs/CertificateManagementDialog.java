@@ -172,12 +172,12 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 	}
 
 	private boolean verifyData() {
-		if (txtAlias.getText().trim().isEmpty()) {
+		if (txtAlias.getText().trim().length() == 0) {
 			setMessage(Messages.dlgCertMan_verifyAliasEmpty, IMessageProvider.ERROR);
 			return false;
 		}
 		String location = txtLocation.getText().trim();
-		if (location.isEmpty()) {
+		if (location.length() == 0) {
 			setMessage(Messages.dlgCertMan_verifyLocationEmpty, IMessageProvider.ERROR);
 			return false;
 		}
