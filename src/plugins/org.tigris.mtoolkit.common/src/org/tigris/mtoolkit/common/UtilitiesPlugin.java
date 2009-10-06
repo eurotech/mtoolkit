@@ -17,69 +17,85 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.common.images.UIResources;
 
 public class UtilitiesPlugin extends AbstractUIPlugin {
 
-	public static final String PLUGIN_ID = "org.tigris.mtoolkit.common"; //$NON-NLS-1$
+  public static final String     PLUGIN_ID = "org.tigris.mtoolkit.common"; //$NON-NLS-1$
 
-	private static UtilitiesPlugin inst;
+  private static UtilitiesPlugin inst;
 
-	/**
-	 * Creates the Utilities plugin and caches its default instance
-	 * 
-	 * @param descriptor
-	 *            the plugin descriptor which the receiver is made from
-	 */
-	public UtilitiesPlugin() {
-		super();
-		if (inst == null)
-			inst = this;
-	}
+  private BundleContext          bundleContext;
 
-	public String getId() {
-		return PLUGIN_ID;
-	}
+  /**
+   * Creates the Utilities plugin and caches its default instance
+   * 
+   * @param descriptor
+   *            the plugin descriptor which the receiver is made from
+   */
+  public UtilitiesPlugin() {
+    super();
+    if (inst == null)
+      inst = this;
+  }
 
-	/**
-	 * Gets the plugin singleton.
-	 * 
-	 * @return the default UtilitiesPlugin instance
-	 */
-	public static UtilitiesPlugin getDefault() {
-		return inst;
-	}
+  public void start(BundleContext context) throws Exception {
+    super.start(context);
+    bundleContext = context;
+  }
 
-	public IWorkbenchPage getActivePage() {
-		IWorkbenchWindow window = getWorkbench().getActiveWorkbenchWindow();
-		if (window == null)
-			return null;
-		return getWorkbench().getActiveWorkbenchWindow().getActivePage();
-	}
+  public void stop(BundleContext context) throws Exception {
+    super.stop(context);
+  }
 
-	public static IStatus newStatus(int severity, String message, Throwable t) {
-		return new Status(severity, PLUGIN_ID, message, t);
-	}
+  public BundleContext getBundleContext() {
+    return bundleContext;
+  }
 
-	public static void error(String message, Throwable t) {
-		getDefault().getLog().log(newStatus(IStatus.ERROR, message, t));
-	}
+  public String getId() {
+    return PLUGIN_ID;
+  }
 
-	/**
-	 * Returns an image descriptor for the image file at the given plug-in
-	 * relative path
-	 * 
-	 * @param path
-	 *            the path
-	 * @return the image descriptor
-	 */
-	public static ImageDescriptor getImageDescriptor(String path) {
-		return imageDescriptorFromPlugin(PLUGIN_ID, path);
-	}
+  /**
+   * Gets the plugin singleton.
+   * 
+   * @return the default UtilitiesPlugin instance
+   */
+  public static UtilitiesPlugin getDefault() {
+    return inst;
+  }
 
-	protected void initializeImageRegistry(ImageRegistry reg) {
-		super.initializeImageRegistry(reg);
-		UIResources.initializeImageRegistry(reg);
-	}
+  public IWorkbenchPage getActivePage() {
+    IWorkbenchWindow window = getWorkbench().getActiveWorkbenchWindow();
+    if (window == null)
+      return null;
+    return getWorkbench().getActiveWorkbenchWindow().getActivePage();
+  }
+
+  public static IStatus newStatus(int severity, String message, Throwable t) {
+    return new Status(severity, PLUGIN_ID, message, t);
+  }
+
+  public static void error(String message, Throwable t) {
+    getDefault().getLog().log(newStatus(IStatus.ERROR, message, t));
+  }
+
+  /**
+   * Returns an image descriptor for the image file at the given plug-in
+   * relative path
+   * 
+   * @param path
+   *            the path
+   * @return the image descriptor
+   */
+  public static ImageDescriptor getImageDescriptor(String path) {
+    return imageDescriptorFromPlugin(PLUGIN_ID, path);
+  }
+
+  protected void initializeImageRegistry(ImageRegistry reg) {
+    super.initializeImageRegistry(reg);
+    UIResources.initializeImageRegistry(reg);
+  }
 
 }

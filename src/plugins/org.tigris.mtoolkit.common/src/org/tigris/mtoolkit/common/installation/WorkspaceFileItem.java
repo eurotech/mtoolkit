@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -21,56 +24,67 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 
 public class WorkspaceFileItem implements InstallationItem {
 
-	protected IFile file;
-	protected String mimeType;
+  protected IFile  file;
+  protected String mimeType;
+  protected File   signedFile;
 
-	public WorkspaceFileItem(IFile file, String mimeType) {
-		this.file = file;
-		this.mimeType = mimeType;
-	}
+  public WorkspaceFileItem(IFile file, String mimeType) {
+    this.file = file;
+    this.mimeType = mimeType;
+  }
 
-	public InputStream getInputStream() throws IOException {
-		try {
-			return file.getContents();
-		} catch (CoreException e) {
-			UtilitiesPlugin.error(NLS.bind("Failed to retrieve contents of file: {0}", file.getFullPath()), e);
-			return null;
-		}
-	}
+  public InputStream getInputStream() throws IOException {
+    try {
+      if (signedFile != null) {
+        return new FileInputStream(signedFile);
+      }
+      return file.getContents();
+    } catch (CoreException e) {
+      UtilitiesPlugin.error(NLS.bind("Failed to retrieve contents of file: {0}", file.getFullPath()), e);
+      return null;
+    }
+  }
 
-	public String getMimeType() {
-		return mimeType;
-	}
+  public String getMimeType() {
+    return mimeType;
+  }
 
-	public String getName() {
-		return file.getName();
-	}
-	
-	public IFile getFile() {
-		return file;
-	}
+  public String getName() {
+    return file.getName();
+  }
 
-	public IStatus prepare(IProgressMonitor monitor) {
-		try {
-			file.refreshLocal(IFile.DEPTH_ZERO, monitor);
-		} catch (CoreException e) {
-			return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", e);
-		}
-		return Status.OK_STATUS;
-	}
+  public IFile getFile() {
+    return file;
+  }
 
-	public void dispose() {
-	}
+  public IStatus prepare(IProgressMonitor monitor, Map properties) {
+    try {
+      file.refreshLocal(IFile.DEPTH_ZERO, monitor);
+      signedFile = CertUtils.signJar(file.getLocation().toFile(), monitor, properties);
+    } catch (CoreException e) {
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", e);
+    } catch (IOException ioe) {
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", ioe);
+    }
+    return Status.OK_STATUS;
+  }
 
-	public Object getAdapter(Class adapter) {
-		if (adapter.equals(IResource.class)) {
-			return file;
-		} else {
-			return null;
-		}
-	}
+  public void dispose() {
+    if (signedFile != null) {
+      signedFile.delete();
+      signedFile = null;
+    }
+  }
 
+  public Object getAdapter(Class adapter) {
+    if (adapter.equals(IResource.class)) {
+      return file;
+    } else {
+      return null;
+    }
+  }
 }

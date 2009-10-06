@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.common.installation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,9 +31,12 @@ public interface InstallationItem extends IAdaptable {
 	 * 
 	 * @param monitor
 	 *            the progress monitor for displaying current progress
+	 * @param properties
+	 *            contains additional properties which affect item preparation
+	 *            (such as signing etc.)
 	 * @return status, describing the result of prepare operation
 	 */
-	public IStatus prepare(IProgressMonitor monitor);
+	public IStatus prepare(IProgressMonitor monitor, Map properties);
 
 	/**
 	 * Returns open {@link InputStream} which provides the installation data.

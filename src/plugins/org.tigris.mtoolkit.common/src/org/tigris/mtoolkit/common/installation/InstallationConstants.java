@@ -8,24 +8,16 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.common;
+package org.tigris.mtoolkit.common.installation;
 
-import org.eclipse.osgi.util.NLS;
+public final class InstallationConstants {
 
-public class Messages {
+  // Signing contents
+  public static final String CERT_ALIAS = "certificate-alias"; //$NON-NLS-1$
+  public static final String CERT_STORE_LOCATION = "certificate-store-location"; //$NON-NLS-1$
+  public static final String CERT_STORE_TYPE = "certificate-store-type"; //$NON-NLS-1$
+  public static final String CERT_STORE_PASS = "certificate-store-pass"; //$NON-NLS-1$
 
-	private static final String BUNDLE_NAME = "org.tigris.mtoolkit.common.messages";
-
-	public static String MessageDialog_NoDetails;
-	public static String PasswordDialog_lblPassword;
-	public static String plugin_exporter_not_compatible;
-
-	static {
-		reloadMessages();
-	}
-
-	public static void reloadMessages() {
-		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
-	}
-
+  private InstallationConstants() {
+  }
 }

@@ -20,6 +20,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  not-yet-commons-ssl-0.3.10.jar
 Export-Package: org.tigris.mtoolkit.common,
+ org.tigris.mtoolkit.common.certificates,
  org.tigris.mtoolkit.common.gui,
  org.tigris.mtoolkit.common.images,
  org.tigris.mtoolkit.common.installation,
