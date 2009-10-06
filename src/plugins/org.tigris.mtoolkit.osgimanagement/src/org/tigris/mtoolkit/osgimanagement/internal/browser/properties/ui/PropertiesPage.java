@@ -12,6 +12,8 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -148,4 +150,18 @@ public class PropertiesPage extends PropertyPage {
 		}
 		tableViewer.setInput(dataVector);
 	}
+
+	public void setData(Map data) {
+		Vector dataVector = new Vector();
+		Iterator keys = data.keySet().iterator();
+		while (keys.hasNext()) {
+			Object key = keys.next();
+			Object value = data.get(key);
+			PropertyObject object = new PropertyObject(key.toString(), value.toString());
+			dataVector.addElement(object);
+		}
+		tableViewer.setInput(dataVector);
+	}
+
+	
 }
