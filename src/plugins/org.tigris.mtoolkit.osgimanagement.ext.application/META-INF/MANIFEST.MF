@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundleName
+Bundle-SymbolicName: org.tigris.mtoolkit.osgimanagement.ext.application;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.tigris.mtoolkit.osgimanagement.application.Activator
+Bundle-Vendor: %providerName
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.tigris.mtoolkit.common,
+ org.tigris.mtoolkit.iagent,
+ org.tigris.mtoolkit.osgimanagement
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

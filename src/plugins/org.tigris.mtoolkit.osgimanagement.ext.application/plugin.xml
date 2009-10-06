@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.tigris.mtoolkit.osgimanagement.contentTypeExtensions">
+      <actions
+            class="org.tigris.mtoolkit.osgimanagement.application.ApplicationActionsProvider">
+      </actions>
+      <model
+            class="org.tigris.mtoolkit.osgimanagement.application.ApplicationModelProvider"></model>
+   </extension>
+
+</plugin>
