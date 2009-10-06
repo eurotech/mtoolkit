@@ -157,7 +157,9 @@ public class CertUtils {
     try {
       ps = Runtime.getRuntime().exec((String[]) list.toArray(new String[list.size()]));
     } catch (IOException ioe) {
-      throw new IOException("Cannot sign provided content.", ioe);
+      IOException e = new IOException("Cannot sign provided content.");
+      e.initCause(ioe);
+      throw e;
     }
     OutputReader outputReader = new OutputReader(ps.getInputStream(), "[Jar Signer] Output Reader");
     outputReader.start();
@@ -242,7 +244,7 @@ public class CertUtils {
       if (alias == null || location == null || type == null) {
         throw new IOException("Not enough information is specified for signing content.");
       }
-      if (pass == null || pass.isEmpty()) {
+      if (pass == null || pass.length() == 0) {
         final Display display = PlatformUI.getWorkbench().getDisplay();
         final String result[] = new String[1];
         display.syncExec(new Runnable() {
