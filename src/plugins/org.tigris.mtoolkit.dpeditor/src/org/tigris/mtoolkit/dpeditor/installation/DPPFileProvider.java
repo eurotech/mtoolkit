@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileProvider;
@@ -53,20 +55,24 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 			return new FileInputStream(dpFile);
 		}
 
-		public IStatus prepare(IProgressMonitor monitor) {
+		public IStatus prepare(IProgressMonitor monitor, Map properties) {
 			try {
 				DPPFile dppFile = new DPPFile(file.getLocation().toFile(), file.getProject().getLocation().toOSString());
-				dpFile = new File(dppFile.getBuildInfo().getBuildLocation()+"/"+ dppFile.getBuildInfo().getDpFileName());
+				dpFile = new File(dppFile.getBuildInfo().getBuildLocation() + "/"
+						+ dppFile.getBuildInfo().getDpFileName());
 				delete = !dpFile.exists();
 				DPPUtil.generateDeploymentPackage(dppFile, monitor, file.getProject(), DPPUtil.TYPE_QUICK_BUILD_DPP);
+				// signing file if properties contain signing info
+				File signedFile = CertUtils.signJar(dpFile, monitor, properties);
+				if (signedFile != null) {
+					dpFile = signedFile;
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
 
 			return Status.OK_STATUS;
 		}
-		
 	}
 
 	public InstallationItem getInstallationItem(Object resource) {
