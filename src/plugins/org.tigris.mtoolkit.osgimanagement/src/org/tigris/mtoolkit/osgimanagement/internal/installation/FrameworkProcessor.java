@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -28,6 +31,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ListDialog;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
+import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -41,7 +46,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider.PluginItem;
 
 public class FrameworkProcessor implements InstallationItemProcessor {
-	
+
 	private static FrameworkProcessor defaultinstance;
 	private static final String MIME_JAR = "application/java-archive";
 	private static final String MIME_ZIP = "application/zip";
@@ -56,7 +61,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 		return defaultinstance;
 	}
-	
+
 	public static void addAdditionalProcessor(InstallationItemProcessor processor) {
 		additionalProcessors.addElement(processor);
 	}
@@ -87,31 +92,42 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		mimeTypes.addElement(MIME_JAR);
 		mimeTypes.addElement(MIME_ZIP);
 		mimeTypes.addElement(MIME_DP);
-		for (int i=0; i<additionalProcessors.size(); i++) {
-			String additionalMT[] = ((InstallationItemProcessor)additionalProcessors.get(i)).getSupportedMimeTypes();
-			for (int j=0; j<additionalMT.length; j++) {
+		for (int i = 0; i < additionalProcessors.size(); i++) {
+			String additionalMT[] = ((InstallationItemProcessor) additionalProcessors.get(i)).getSupportedMimeTypes();
+			for (int j = 0; j < additionalMT.length; j++) {
 				if (mimeTypes.indexOf(additionalMT[j]) == -1) {
 					mimeTypes.addElement(additionalMT[j]);
 				}
-			}	
+			}
 		}
 		String result[] = new String[mimeTypes.size()];
-		for (int i=0; i<result.length; i++) {
+		for (int i = 0; i < result.length; i++) {
 			result[i] = (String) mimeTypes.elementAt(i);
 		}
 		return result;
 	}
 
-	public IStatus processInstallationItem(final InstallationItem item, InstallationTarget target, final IProgressMonitor monitor) {
+	public IStatus processInstallationItem(final InstallationItem item, InstallationTarget target,
+			final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-		IStatus preparationStatus = item.prepare(subMonitor.newChild(50));
+
+		FrameWork framework = ((FrameworkTarget) target).getFramework();
+
+		Map preparationProps = new Hashtable();
+		List certUids = FrameWork.getSignCertificateUids(framework.getConfig());
+		Iterator signIterator = certUids.iterator();
+		int certId = 0;
+		while (signIterator.hasNext()) {
+			ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
+			if (cert != null) {
+				CertUtils.pushCertificate(preparationProps, cert, certId++);
+			}
+		}
+		IStatus preparationStatus = item.prepare(subMonitor.newChild(50), preparationProps);
 
 		if (preparationStatus.getSeverity() == IStatus.ERROR || preparationStatus.getSeverity() == IStatus.CANCEL) {
 			return preparationStatus;
 		}
-
-		InputStream input = null;
-		FrameWork framework = ((FrameworkTarget) target).getFramework();
 
 		// TODO: Connecting to framework should report the connection progress
 		// to the current monitor
@@ -129,47 +145,50 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 
 		if (item instanceof PluginItem) {
-			IStatus status = ((PluginItem)item).checkAdditionalBundles(framework);
+			IStatus status = ((PluginItem) item).checkAdditionalBundles(framework);
 			if (status.getSeverity() == IStatus.CANCEL) {
 				monitor.setCanceled(true);
 				return status;
 			}
 		}
 
+		InputStream input = null;
 		try {
 			String mimeType = item.getMimeType();
 			Vector processors = new Vector();
 			if (mimeType.equals(MIME_DP) || mimeType.equals(MIME_JAR) || mimeType.equals(MIME_ZIP)) {
 				processors.addElement(this);
 			}
-			for (int i=0; i<additionalProcessors.size(); i++) {
-				String procMimeTypes[] = ((InstallationItemProcessor)additionalProcessors.elementAt(i)).getSupportedMimeTypes();
-				for (int j=0; j<procMimeTypes.length; j++) {
+			for (int i = 0; i < additionalProcessors.size(); i++) {
+				String procMimeTypes[] = ((InstallationItemProcessor) additionalProcessors.elementAt(i))
+						.getSupportedMimeTypes();
+				for (int j = 0; j < procMimeTypes.length; j++) {
 					if (mimeType.equals(procMimeTypes[j])) {
 						processors.addElement(additionalProcessors.elementAt(i));
 						break;
 					}
 				}
 			}
-			
-			final FrameworkProcessor processor[] = new FrameworkProcessor[] {(FrameworkProcessor) processors.elementAt(0)};
+
+			final FrameworkProcessor processor[] = new FrameworkProcessor[] { (FrameworkProcessor) processors
+					.elementAt(0) };
 			if (processors.size() > 1) {
 				final FrameworkProcessor prArr[] = new FrameworkProcessor[processors.size()];
-				for (int i=0; i<prArr.length; i++) {
+				for (int i = 0; i < prArr.length; i++) {
 					FrameworkProcessor pr = (FrameworkProcessor) processors.elementAt(i);
 					prArr[i] = pr;
 				}
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						ListDialog dialog = new ListDialog(FrameWorkView.getShell());
-						
+
 						dialog.setTitle("Select processor");
 						dialog.setLabelProvider(new LabelProvider());
-						dialog.setMessage("Select installation processor for "+item.getName());
+						dialog.setMessage("Select installation processor for " + item.getName());
 						dialog.setContentProvider(new ArrayContentProvider());
 						dialog.setInput(Arrays.asList(prArr));
-						dialog.setInitialSelections(new Object[]{prArr[0]});
-						
+						dialog.setInitialSelections(new Object[] { prArr[0] });
+
 						int result = dialog.open();
 						if (result == Window.CANCEL) {
 							monitor.setCanceled(true);
@@ -182,7 +201,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 					return Status.CANCEL_STATUS;
 				}
 			}
-			
+
 			input = item.getInputStream();
 			processor[0].install(input, item, framework, monitor);
 		} catch (Exception e) {
@@ -203,8 +222,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 		return Status.OK_STATUS;
 	}
-	
-	public void install(InputStream input, InstallationItem item, FrameWork framework, IProgressMonitor monitor) throws Exception {
+
+	public void install(InputStream input, InstallationItem item, FrameWork framework, IProgressMonitor monitor)
+			throws Exception {
 		if (item.getMimeType().equals(MIME_DP)) {
 			// TODO: Make methods, which are called from inside jobs to do
 			// the real job
@@ -213,11 +233,11 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			FrameworkConnectorFactory.installBundle(input, item.getName(), framework);
 		}
 	}
-	
+
 	public String getName() {
 		return "Bundles processor";
 	}
-	
+
 	public String toString() {
 		return getName();
 	}

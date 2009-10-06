@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -1205,4 +1206,32 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		}
 	}
 
+	public static List getSignCertificateUids(IMemento config) {
+		String keys[] = config.getAttributeKeys();
+		List result = new ArrayList();
+		for (int i = 0; i < keys.length; i++) {
+			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
+				String uid = config.getString(keys[i]);
+				if (uid != null && uid.trim().length() > 0) {
+					result.add(uid.trim());
+				}
+			}
+		}
+		return result;
+	}
+
+	public static void setSignCertificateUids(IMemento config, List uids) {
+		String keys[] = config.getAttributeKeys();
+		for (int i = 0; i < keys.length; i++) {
+			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
+				config.putString(keys[i], ""); //$NON-NLS-1$
+			}
+		}
+		Iterator iterator = uids.iterator();
+		int num = 0;
+		while (iterator.hasNext()) {
+			config.putString(FRAMEWORK_SIGN_CERTIFICATE_ID + num, (String) iterator.next());
+			num++;
+		}
+	}
 }

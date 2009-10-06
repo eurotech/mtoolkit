@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.logic;
 
-import java.net.InetAddress;
-
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -38,7 +35,8 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 	private boolean firstTime;
 	private Model parent;
 
-	public PropertySheetLogic(TreeViewer parentView, Model parent, FrameWork element, boolean firstTime, PropertySheet obj) {
+	public PropertySheetLogic(TreeViewer parentView, Model parent, FrameWork element, boolean firstTime,
+			PropertySheet obj) {
 		this.parentView = parentView;
 		this.fw = element;
 		this.config = element.getConfig();
@@ -57,17 +55,16 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 			if (button == target.okButton) {
 				if (isFrameworkInfoCorrect()) {
 					changeSettings();
-					if (target.connectButton != null
-									&& !target.connectButton.isDisposed()
-									&& target.connectButton.getSelection()) {
+					if (target.connectButton != null && !target.connectButton.isDisposed()
+							&& target.connectButton.getSelection()) {
 						FrameworkConnectorFactory.connectFrameWork(fw);
 					}
 					target.close();
 				}
-			}
-			// Cancel
-			if (button == target.cancelButton) {
+			} else if (button == target.cancelButton) {
 				target.close();
+			} else if (button == target.chkSignContent) {
+				target.tblCertificates.setEnabled(button.getSelection());
 			}
 		}
 	}
@@ -92,13 +89,14 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 			DeviceConnector connector = fw.getConnector();
 			if (connector != null) {
 				connector.getProperties().put("framework-name", fw.getName()); //$NON-NLS-1$
-//				String prevIP = (String) connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
-//				connector.getProperties().put("framework-connection-ip", target.getNewIP()); //$NON-NLS-1$
-//				if (fw.isConnected() && !target.getNewIP().equals(prevIP)) {
-//					MessageDialog.openInformation(target.getShell(),
-//						Messages.framework_ip_changed_title,
-//						Messages.framework_ip_changed_message);
-//				}
+				// String prevIP = (String)
+				// connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
+				//				connector.getProperties().put("framework-connection-ip", target.getNewIP()); //$NON-NLS-1$
+				// if (fw.isConnected() && !target.getNewIP().equals(prevIP)) {
+				// MessageDialog.openInformation(target.getShell(),
+				// Messages.framework_ip_changed_title,
+				// Messages.framework_ip_changed_message);
+				// }
 			}
 			fw.updateElement();
 			parentView.setSelection(parentView.getSelection());

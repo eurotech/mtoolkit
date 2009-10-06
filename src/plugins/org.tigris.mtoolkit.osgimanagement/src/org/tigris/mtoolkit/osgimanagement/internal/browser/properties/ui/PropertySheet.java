@@ -38,10 +38,16 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
+import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -57,9 +63,13 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 	private Text textServer;
 
+	public Button chkSignContent;
+
 	public Button connectButton;
 	public Button okButton;
 	public Button cancelButton;
+
+	public Table tblCertificates;
 
 	private Composite bottomButtonsHolder;
 	private FrameWork fw;
@@ -100,7 +110,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		deviceGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		textServer = createText(1, deviceGroup);
-		
+
 		createDeviceTypeCombo(mainContent);
 		obtainDeviceTypeProviders();
 
@@ -109,15 +119,40 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		connectPropertiesGroup.setText(Messages.connect_properties_group_label);
 		connectPropertiesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
 		connectPropertiesGroup.setLayout(new GridLayout());
-		
+
 		pageBook = new PageBook(connectPropertiesGroup, SWT.NONE);
 		pageBook.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
-		
 		deviceTypeCombo.select(0);
 		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(0);
 		showDeviceTypePanel(selectedProvider);
 
+		// Signing content group
+		Group signContentGroup = new Group(mainContent, SWT.NONE);
+		signContentGroup.setText(Messages.sign_content_group_label);
+		signContentGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		signContentGroup.setLayout(new GridLayout());
+		chkSignContent = createCheckboxButton(Messages.sign_content_button_label, signContentGroup);
+		Label lblCertificates = new Label(signContentGroup, SWT.NONE);
+		lblCertificates.setText(Messages.cert_table_caption_label);
+		lblCertificates.setLayoutData(new GridData());
+
+		// Certificates table
+		int style = SWT.SINGLE | SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
+		tblCertificates = new Table(signContentGroup, style);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.heightHint = 50;
+		tblCertificates.setLayoutData(gridData);
+		tblCertificates.setLinesVisible(true);
+		tblCertificates.setHeaderVisible(true);
+		TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
+		column.setText(Messages.cert_table_col_alias_label);
+		column.setWidth(100);
+		column = new TableColumn(tblCertificates, SWT.LEFT);
+		column.setText(Messages.cert_table_col_location_label);
+		column.setWidth(160);
+
+		// Autoconnect checkbox
 		connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
 		connectButton.setEnabled(!fw.isConnected());
 
@@ -125,7 +160,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		bottomButtonsHolder = new Composite(mainContent, SWT.NONE);
 		bottomButtonsHolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout bottomButtonsGrid = new GridLayout();
-		bottomButtonsGrid.numColumns = 4;
+		bottomButtonsGrid.numColumns = 2;
 		bottomButtonsHolder.setLayout(bottomButtonsGrid);
 
 		okButton = createButton(Messages.ok_button_label, bottomButtonsHolder);
@@ -138,7 +173,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 		return mainContent;
 	}
-	
+
 	private void createDeviceTypeCombo(Composite parent) {
 		Group typeGroup = new Group(parent, SWT.NONE);
 		typeGroup.setText("Connection Type:");
@@ -147,7 +182,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		layout.marginWidth = 5;
 		typeGroup.setLayout(layout);
 		typeGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
+
 		deviceTypeCombo = new Combo(typeGroup, SWT.READ_ONLY);
 		deviceTypeCombo.addSelectionListener(this);
 
@@ -156,7 +191,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 			DeviceTypeProviderElement element = (DeviceTypeProviderElement) it.next();
 			deviceTypeCombo.add(element.getDeviceTypeName());
 		}
-		
+
 		if (selectedProvider != null)
 			selectType(selectedProvider);
 	}
@@ -199,6 +234,25 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 			}
 			parent.pack();
 		}
+
+		// Certificates table
+		ICertificateDescriptor certificates[] = CertUtils.getCertificates();
+		boolean foundCert = false;
+		if (certificates != null) {
+			List signUids = FrameWork.getSignCertificateUids(config);
+			for (int i = 0; i < certificates.length; i++) {
+				TableItem item = new TableItem(tblCertificates, SWT.NONE);
+				item.setText(0, certificates[i].getAlias());
+				item.setText(1, certificates[i].getStoreLocation());
+				item.setData(certificates[i].getUid());
+				if (signUids.contains(certificates[i].getUid())) {
+					item.setChecked(true);
+					foundCert = true;
+				}
+			}
+		}
+		tblCertificates.setEnabled(foundCert);
+		chkSignContent.setSelection(foundCert);
 	}
 
 	// Save ui values to storage and update target element
@@ -210,9 +264,22 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-		
+
 		if (!connectButton.isDisposed())
 			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
+
+		// Signing content
+		List signUids = new ArrayList();
+		if (chkSignContent.getSelection()) {
+			TableItem items[] = tblCertificates.getItems();
+			for (int i = 0; i < items.length; i++) {
+				if (items[i].getChecked()) {
+					signUids.add(items[i].getData());
+				}
+			}
+		}
+		FrameWork.setSignCertificateUids(config, signUids);
+
 		fw.setConfig(config);
 	}
 
@@ -268,11 +335,12 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 	public void controlResized(ControlEvent e) {
 		bottomButtonsHolder.layout();
 	}
-	
+
 	public static List obtainDeviceTypeProviders() {
 		if (deviceTypesProviders == null) {
 			IExtensionRegistry registry = Platform.getExtensionRegistry();
-			IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes");
+			IExtensionPoint extensionPoint = registry
+					.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes");
 
 			deviceTypesProviders = obtainProviders(extensionPoint.getConfigurationElements());
 		}
@@ -284,7 +352,9 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement element = elements[i];
 			if (!element.getName().equals("osgiDeviceTypeProvider")) {
-				FrameworkPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, FrameworkPlugin.PLUGIN_ID, NLS.bind("Unrecognized element in extension point: {0}", element.getName(), null)));
+				FrameworkPlugin.getDefault().getLog().log(
+						new Status(IStatus.WARNING, FrameworkPlugin.PLUGIN_ID, NLS.bind(
+								"Unrecognized element in extension point: {0}", element.getName(), null)));
 				continue;
 			}
 			try {
@@ -297,7 +367,6 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		return providers;
 	}
 
-	
 	public static class DeviceTypeProviderElement {
 		private String typeId;
 		private String deviceTypeName;
@@ -308,17 +377,21 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		private Control panel;
 
 		public DeviceTypeProviderElement(IConfigurationElement configurationElement) throws CoreException {
-			// TODO: Change to not throw exception, but rather display a an error panel
+			// TODO: Change to not throw exception, but rather display a an
+			// error panel
 			confElement = configurationElement;
 			typeId = configurationElement.getAttribute("id");
 			if (typeId == null)
-				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Device type provider must specify 'id' attribute", null));
+				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+						"Device type provider must specify 'id' attribute", null));
 			deviceTypeName = configurationElement.getAttribute("name");
 			if (deviceTypeName == null)
-				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Device type provider must specify 'name' attribute", null));
+				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+						"Device type provider must specify 'name' attribute", null));
 			clazz = configurationElement.getAttribute("class");
 			if (clazz == null)
-				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Device type provider must specify 'class' attribute", null));
+				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+						"Device type provider must specify 'class' attribute", null));
 		}
 
 		public String getTypeId() {
@@ -327,13 +400,14 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 		public synchronized DeviceTypeProvider getProvider() throws CoreException {
 			if (initFailure != null)
-				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Device type provider failed to initialize", initFailure));
+				throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+						"Device type provider failed to initialize", initFailure));
 			if (provider == null) {
 				try {
 					provider = (DeviceTypeProvider) confElement.createExecutableExtension("class");
 				} catch (Throwable t) {
-					initFailure = new CoreException(
-							new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Failed to initialize device type provider", t));
+					initFailure = new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+							"Failed to initialize device type provider", t));
 					throw initFailure;
 				}
 			}
@@ -345,14 +419,14 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		}
 
 		public Control createPanel(Composite parent) {
-				try {
-					panel = getProvider().createPanel(parent);
-					if (panel != null)
-						panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-				} catch (CoreException e) {
-					// TODO: Display the error directly in the UI
-					FrameworkPlugin.error("Unable to create device type panel", e);
-				}
+			try {
+				panel = getProvider().createPanel(parent);
+				if (panel != null)
+					panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			} catch (CoreException e) {
+				// TODO: Display the error directly in the UI
+				FrameworkPlugin.error("Unable to create device type panel", e);
+			}
 			return panel;
 		}
 
@@ -361,10 +435,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		}
 	}
 
-
 	public void widgetDefaultSelected(SelectionEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void widgetSelected(SelectionEvent e) {
@@ -388,5 +459,4 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 			e.printStackTrace();
 		}
 	}
-
 }

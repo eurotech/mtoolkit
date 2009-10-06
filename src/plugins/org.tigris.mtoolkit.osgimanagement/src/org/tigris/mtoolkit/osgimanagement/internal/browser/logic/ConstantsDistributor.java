@@ -22,6 +22,7 @@ public interface ConstantsDistributor {
 	static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
 	static final String TRANSPORT_PROVIDER_ID = "transport_type_key"; //$NON-NLS-1$
 	
+	static final String FRAMEWORK_SIGN_CERTIFICATE_ID = "framework_sign_certificate_uid"; //$NON-NLS-1$
 	static final String CONNECT_TO_FRAMEWORK = "framework_connect_key";
 
 	static final String MEMENTO_TYPE = "browser_model"; //$NON-NLS-1$

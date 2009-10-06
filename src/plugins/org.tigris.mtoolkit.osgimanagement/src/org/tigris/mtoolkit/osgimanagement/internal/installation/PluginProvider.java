@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -61,7 +63,7 @@ public class PluginProvider implements InstallationItemProvider {
 			return new FileInputStream(file);
 		}
 
-		public IStatus prepare(IProgressMonitor monitor) {
+		public IStatus prepare(IProgressMonitor monitor, Map properties) {
 			monitor.beginTask("Exporting project: " + project.getName(), 1);
 
 			FeatureExportInfo exportInfo = new FeatureExportInfo();
@@ -114,6 +116,18 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			file = new File(path);
 			if (exporter.getResult().isOK() && file.exists()) {
+				File signedFile = null;
+				try {
+					// signing file if properties contain signing info
+					signedFile = CertUtils.signJar(file, monitor, properties);
+				} catch (IOException ioe) {
+					monitor.done();
+					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugin: "
+							+ project.getName(), ioe);
+				}
+				if (signedFile != null) {
+					file = signedFile;
+				}
 				monitor.done();
 				return Status.OK_STATUS;
 			}
@@ -213,7 +227,7 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			return Status.OK_STATUS;
 		}
-		
+
 		public Object getAdapter(Class adapter) {
 			if (adapter.equals(IResource.class)) {
 				return project;
