@@ -45,22 +45,30 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 	}
 
 	public void run() {
-		while (running || !closed) {
-			try {
-				MBSARequest request = readRequest(input);
-				MBSAResponse rsp = handleRequest(request);
-				if (!running)
-					// check that we are still running
-					// request handling might be long operation
-					break;
-				if (rsp != null)
-					sendRsp(rsp, output);
-				// else the handler is currently handling the request, it will
-				// send the response when ready
-			} catch (IOException e) {
-				close();
+		try {
+			while (running || !closed) {
+				try {
+					MBSARequest request = readRequest(input);
+					MBSAResponse rsp = handleRequest(request);
+					if (!running)
+						// check that we are still running
+						// request handling might be long operation
+						break;
+					if (rsp != null)
+						sendRsp(rsp, output);
+					// else the handler is currently handling the request, it will
+					// send the response when ready
+				} catch (IOException e) {
+					close();
+				}
 			}
+		} finally {
+			fireDisconnected();
 		}
+	}
+	
+	private void fireDisconnected() {
+		handler.disconnected(this);
 	}
 
 	private MBSAResponse handleRequest(MBSARequest request) throws IOException {
@@ -123,8 +131,12 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 	}
 
 	public void close() {
+		synchronized (this) {
+			if (closed)
+				return;
+			closed = true;
+		}
 		running = false;
-		closed = true;
 		try {
 			input.close();
 		} catch (IOException e) {
