@@ -63,8 +63,6 @@ public class PropertySheetLogic implements SelectionListener, ConstantsDistribut
 				}
 			} else if (button == target.cancelButton) {
 				target.close();
-			} else if (button == target.chkSignContent) {
-				target.tblCertificates.setEnabled(button.getSelection());
 			}
 		}
 	}

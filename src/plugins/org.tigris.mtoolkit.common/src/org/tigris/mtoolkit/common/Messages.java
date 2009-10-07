@@ -19,6 +19,11 @@ public class Messages {
 	public static String MessageDialog_NoDetails;
 	public static String PasswordDialog_lblPassword;
 	public static String plugin_exporter_not_compatible;
+	public static String CertificatesPanel_signContentGroup;
+	public static String CertificatesPanel_chkSignContent;
+	public static String CertificatesPanel_lblCertificates;
+	public static String CertificatesPanel_tblCertColAlias;
+	public static String CertificatesPanel_tblCertColLocation;
 
 	static {
 		reloadMessages();

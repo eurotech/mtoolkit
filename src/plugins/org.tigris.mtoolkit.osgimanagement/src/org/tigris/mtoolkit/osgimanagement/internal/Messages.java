@@ -82,10 +82,6 @@ public final class Messages extends NLS {
 	public static String connect_properties_group_label;
 	public static String framework_name_label;
 	public static String framework_ip_label;
-	public static String sign_content_group_label;
-	public static String cert_table_caption_label;
-	public static String cert_table_col_alias_label;
-	public static String cert_table_col_location_label;
 
 	public static String install_label;
 	public static String update_label;
@@ -103,7 +99,6 @@ public final class Messages extends NLS {
 	public static String cancel_button_label;
 	public static String apply_button_label;
 	public static String browse_button_label;
-	public static String sign_content_button_label;
 	public static String connect_button_label;
 	public static String enable_frameworks_autoconnect;
 	public static String show_bundle_categories;

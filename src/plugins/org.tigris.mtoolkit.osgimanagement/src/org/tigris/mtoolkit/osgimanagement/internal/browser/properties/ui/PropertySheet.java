@@ -38,16 +38,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
-import org.tigris.mtoolkit.common.certificates.CertUtils;
-import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
+import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -63,13 +58,11 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 	private Text textServer;
 
-	public Button chkSignContent;
-
 	public Button connectButton;
 	public Button okButton;
 	public Button cancelButton;
 
-	public Table tblCertificates;
+	private CertificatesPanel certificatesPanel;
 
 	private Composite bottomButtonsHolder;
 	private FrameWork fw;
@@ -127,30 +120,8 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(0);
 		showDeviceTypePanel(selectedProvider);
 
-		// Signing content group
-		Group signContentGroup = new Group(mainContent, SWT.NONE);
-		signContentGroup.setText(Messages.sign_content_group_label);
-		signContentGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
-		signContentGroup.setLayout(new GridLayout());
-		chkSignContent = createCheckboxButton(Messages.sign_content_button_label, signContentGroup);
-		Label lblCertificates = new Label(signContentGroup, SWT.NONE);
-		lblCertificates.setText(Messages.cert_table_caption_label);
-		lblCertificates.setLayoutData(new GridData());
-
-		// Certificates table
-		int style = SWT.SINGLE | SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
-		tblCertificates = new Table(signContentGroup, style);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.heightHint = 50;
-		tblCertificates.setLayoutData(gridData);
-		tblCertificates.setLinesVisible(true);
-		tblCertificates.setHeaderVisible(true);
-		TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
-		column.setText(Messages.cert_table_col_alias_label);
-		column.setWidth(100);
-		column = new TableColumn(tblCertificates, SWT.LEFT);
-		column.setText(Messages.cert_table_col_location_label);
-		column.setWidth(160);
+		// Signing Certificates
+		certificatesPanel = new CertificatesPanel(mainContent, 2, 1);
 
 		// Autoconnect checkbox
 		connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
@@ -235,24 +206,8 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 			parent.pack();
 		}
 
-		// Certificates table
-		ICertificateDescriptor certificates[] = CertUtils.getCertificates();
-		boolean foundCert = false;
-		if (certificates != null) {
-			List signUids = FrameWork.getSignCertificateUids(config);
-			for (int i = 0; i < certificates.length; i++) {
-				TableItem item = new TableItem(tblCertificates, SWT.NONE);
-				item.setText(0, certificates[i].getAlias());
-				item.setText(1, certificates[i].getStoreLocation());
-				item.setData(certificates[i].getUid());
-				if (signUids.contains(certificates[i].getUid())) {
-					item.setChecked(true);
-					foundCert = true;
-				}
-			}
-		}
-		tblCertificates.setEnabled(foundCert);
-		chkSignContent.setSelection(foundCert);
+		// Signing Certificates
+		certificatesPanel.initialize(FrameWork.getSignCertificateUids(config));
 	}
 
 	// Save ui values to storage and update target element
@@ -268,17 +223,8 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		if (!connectButton.isDisposed())
 			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
 
-		// Signing content
-		List signUids = new ArrayList();
-		if (chkSignContent.getSelection()) {
-			TableItem items[] = tblCertificates.getItems();
-			for (int i = 0; i < items.length; i++) {
-				if (items[i].getChecked()) {
-					signUids.add(items[i].getData());
-				}
-			}
-		}
-		FrameWork.setSignCertificateUids(config, signUids);
+		// Signing Certificates
+		FrameWork.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
 
 		fw.setConfig(config);
 	}
