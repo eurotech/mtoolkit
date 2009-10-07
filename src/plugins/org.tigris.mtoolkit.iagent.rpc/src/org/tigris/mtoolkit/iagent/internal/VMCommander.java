@@ -36,9 +36,11 @@ public class VMCommander {
 	private MBSAServer vmServer;
 	private BundleContext bc;
 	private UDPListener udpListener;
+	private boolean shutdownOnDisconnect;
 
-	public VMCommander(BundleContext bc) {
+	public VMCommander(BundleContext bc, boolean shutdownOnDisconnect) {
 		this.bc = bc;
+		this.shutdownOnDisconnect = shutdownOnDisconnect;
 		startUDPListener();
 		startServer();
 	}
@@ -58,12 +60,19 @@ public class VMCommander {
 		} catch (MBSAException e) {
 			// There is no active controller at the moment.
 			// UDP notification shall be sent if controller is activated.
-			log("[startServer] cannot connect to controller.", null);
+			log("[startServer] cannot connect to controller.", e);
+			if (shutdownOnDisconnect && e.getCode() == MBSAException.CODE_CANNOT_CONNECT) {
+				log("[startServer] Shutting down because no connection with the controller can be established.", null);
+				stopVM();
+			}
 		}
 	}
 
 	private synchronized void stopServer() {
 		if (vmServer != null) {
+			// disable shutdown disconnect
+			// the framework is either shutting down or we have stopped the bundle
+			shutdownOnDisconnect = false;
 			vmServer.close();
 			vmServer = null;
 		}
@@ -148,5 +157,11 @@ public class VMCommander {
 			}
 			return response;
 		}
+
+		public void disconnected(MBSAServer server) {
+			log("[disconnected] MBSA Server got disconnected, shutdown the framework", null);
+			stopVM();
+		}
+		
 	}
 }

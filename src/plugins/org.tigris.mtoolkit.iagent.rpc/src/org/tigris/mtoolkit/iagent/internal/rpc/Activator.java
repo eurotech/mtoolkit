@@ -13,9 +13,12 @@ package org.tigris.mtoolkit.iagent.internal.rpc;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -34,7 +37,7 @@ import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.PMPServiceFactory;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 
-public class Activator implements BundleActivator, ServiceTrackerCustomizer {
+public class Activator implements BundleActivator, ServiceTrackerCustomizer, FrameworkListener {
 
 	private static final String DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
 	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
@@ -80,10 +83,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		serviceAdmin = new RemoteServiceAdminImpl();
 		serviceAdmin.register(context);
 
-		// TODO: Launch vmcommander when we have FrameworkStarted event
 		boolean registerVMController = !"false".equals(System.getProperty("iagent.controller"));
 		if (registerVMController)
-			vmCommander = new VMCommander(context);
+			registerControllerSupport(context);
 
 		registerConsole(context);
 
@@ -92,6 +94,23 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, null);
 		synchronizer.setPMPServer(pmpServer);
 		synchronizer.start();
+	}
+
+	private void registerControllerSupport(BundleContext context) {
+		Bundle sysBundle = context.getBundle(0);
+		switch(sysBundle.getState()) {
+		case Bundle.ACTIVE:
+			startController(context);
+			break;
+		case Bundle.STARTING:
+			context.addFrameworkListener(this);
+			break;
+		}
+	}
+
+	private void startController(BundleContext context) {
+		boolean shutdownOnDisconnect = Boolean.getBoolean("iagent.shutdownOnDisconnect");
+		vmCommander = new VMCommander(context, shutdownOnDisconnect);
 	}
 
 	private void registerConsole(BundleContext context) {
@@ -165,8 +184,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 			serviceAdmin = null;
 		}
 
-		if (vmCommander != null)
+		if (vmCommander != null) {
+			context.removeFrameworkListener(this);
 			vmCommander.close();
+		}
 
 		instance = null;
 		this.context = null;
@@ -241,5 +262,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer {
 		EventSynchronizer synchronizer = this.synchronizer;
 		if (synchronizer != null)
 			synchronizer.enqueue(new EventData(pmpEventData, CUSTOM_PROPERTY_EVENT));
+	}
+
+	
+	public void frameworkEvent(FrameworkEvent event) {
+		if (event.getType() == FrameworkEvent.STARTED)
+			startController(context);
 	}
 }
