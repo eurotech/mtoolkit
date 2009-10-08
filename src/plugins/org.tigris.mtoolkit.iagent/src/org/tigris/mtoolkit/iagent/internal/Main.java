@@ -120,7 +120,7 @@ public class Main {
 			for (int i = 0; i < bundles.length; i++) {
 				System.out.println(bundles[i].getBundleId() + "\t" + getState(bundles[i].getState()) + "\t" + bundles[i].getSymbolicName() + " [" + bundles[i].getVersion() + "]" + (bundles[i].isSystemBundle() ? "[system]" : ""));
 			}
-			String[] systemSymbolicNames = mng.getSystemBundlesNames();
+			String[] systemSymbolicNames = connector.getVMManager().getSystemBundlesNames();
 			System.out.println("System bundles' symbolic names:");
 			if (systemSymbolicNames.length != 0)
 				for (int i = 0; i < systemSymbolicNames.length; i++) {

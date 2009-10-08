@@ -92,9 +92,6 @@ public class Utils {
 			new MethodSignature("getAgentData", NO_ARGS, true),
 			new MethodSignature("getSystemBundlesIDs", NO_ARGS, true),
 
-			// method for getting raw system bundle names
-			new MethodSignature("getSystemBundlesNames", NO_ARGS, true),
-
 			// methods for getting the bundle and framework start levels
 			new MethodSignature("getBundleStartLevel", new String[] { "long" }, true),
 			new MethodSignature("getFrameworkStartLevel", NO_ARGS, true),
@@ -152,14 +149,12 @@ public class Utils {
 	public static final int GET_AGENT_DATA_METHOD = 40;
 	public static final int GET_SYSTEM_BUNDLES_IDS_METHOD = 41;
 
-	public static final int GET_SYSTEM_BUNDLE_NAMES = 42;
+	public static final int GET_BUNDLE_START_LEVEL_METHOD = 42;
+	public static final int GET_FW_START_LEVEL = 43;
 
-	public static final int GET_BUNDLE_START_LEVEL_METHOD = 43;
-	public static final int GET_FW_START_LEVEL = 44;
+	public static final int GET_SYSTEM_PROPERTY = 44;
 
-	public static final int GET_SYSTEM_PROPERTY = 45;
-
-	public static final int LAST = 45;
+	public static final int LAST = 44;
 
 	static {
 		if (METHOD_SIGNATURES.length != LAST + 1) {

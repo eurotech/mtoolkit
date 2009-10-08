@@ -11,23 +11,18 @@
 package org.tigris.mtoolkit.iagent.internal;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.iagent.event.RemoteApplicationEvent;
-import org.tigris.mtoolkit.iagent.event.RemoteApplicationListener;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
 import org.tigris.mtoolkit.iagent.event.RemoteDPEvent;
@@ -53,7 +48,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 	private DeviceConnectorImpl connector;
 
 	private long[] systemBundlesIDs = null;
-	private String[] systemBundlesNames = null;
 
 	private List bundleListeners = new LinkedList();
 	private List dpListeners = new LinkedList();
@@ -385,7 +379,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			log("[connectionChanged] New PMP connection created, restore event listeners");
 			systemBundlesIDs = null; // reset system bundle ids - we don't know
 			// whether it was VM restart or PMP connection closed
-			systemBundlesNames = null;
 			synchronized (dpListeners) {
 				synchronized (bundleListeners) {
 						PMPConnection connection = (PMPConnection) event.getConnection();
@@ -477,7 +470,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 
 	public void clearSystemBundlesList() {
 		systemBundlesIDs = null;
-		systemBundlesNames = null;
 	}
 
 	private final void log(String message) {
@@ -487,44 +479,4 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 	private final void log(String message, Throwable e) {
 		DebugUtils.log(this, message, e);
 	}
-
-	public String[] getSystemBundlesNames() throws IAgentException {
-		if (systemBundlesNames != null) {
-			return systemBundlesNames;
-		}
-		String[] result = null;
-		if (Utils.isRemoteMethodDefined(getBundleAdmin(), Utils.GET_SYSTEM_BUNDLE_NAMES)) {
-			result = (String[]) Utils.callRemoteMethod(getBundleAdmin(), Utils.GET_SYSTEM_BUNDLE_NAMES, new Object[0]);
-			if (result == null) {
-				log("[getSystemBundlesNames] getSystemBundlesNames() must not return null array. There is a problem with the transport.");
-				throw new IAgentException(
-						"getSystemBundlesNames() must not return null array. There is a problem with the transport.",
-						IAgentErrors.ERROR_INTERNAL_ERROR);
-			}
-		} else {
-			// fallback to old method of retrieving the names
-			result = getSystemBundlesNamesFallback();
-		}
-		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
-		if (connection != null) {
-			log("[getSystemBundlesIDs] PMP connection is available, add event listener");
-			connection.addEventListener(this, new String[] { SYSTEM_BUNDLE_EVENT });
-		}
-		systemBundlesNames = result;
-		return result;
-	}
-
-	private String[] getSystemBundlesNamesFallback() throws IAgentException {
-		long[] idArray = getSystemBundlesIDs();
-
-		List names = new ArrayList(idArray.length);
-		for (int i = 0; i < idArray.length; i++) {
-			RemoteBundle bundle = getBundle(idArray[i]);
-			if (bundle != null)
-				names.add(bundle.getSymbolicName());
-		}
-		return (String[]) names.toArray(new String[names.size()]);
-	}
-
-
 }

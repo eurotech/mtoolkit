@@ -157,13 +157,4 @@ public interface DeploymentManager {
 	 *             if the remote OSGi framework is already disconnected
 	 */
 	public void removeRemoteDPListener(RemoteDPListener listener) throws IAgentException;
-
-	/**
-	 * Returns string array with names of all System bundles.
-	 * 
-	 * @return A string array with symbolic names of all system bundles.
-	 * 
-	 * @throws IAgentException
-	 */
-	public String[] getSystemBundlesNames() throws IAgentException;
 }

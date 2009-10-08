@@ -48,4 +48,9 @@ public interface IAgentCommands {
    */
   public static final int IAGENT_CMD_GETPLATFORMPROPERTIES = 0x0002000C;
 
+  /**
+   * InstAgent command to return system bundles names.
+   */
+  public static final int IAGENT_CMD_GET_SYSTEM_BUNDLES = 0x0002000D;
+
 }
