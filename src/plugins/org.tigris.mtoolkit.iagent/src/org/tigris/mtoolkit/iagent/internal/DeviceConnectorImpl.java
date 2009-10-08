@@ -176,7 +176,6 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 
 	public void closeConnection() throws IAgentException {
 		log("[closeConnection] >>> Closing DeviceConnector...");
-		System.out.println(">>>>>>>>>here DISCONNECT");
 		synchronized (lock) {
 			if (!isActive) {
 				log("[closeConnection] Already closed.");
