@@ -329,35 +329,48 @@ public class VMManagerImpl implements VMManager {
 
 	public String[] getSystemBundlesNames() throws IAgentException {
 		log("[getSystemBundlesNames] >>>");
-		MBSAConnection connection = getMBSAConnection();
-		if (!connection.isConnected()) {
-			log("[getSystemBundlesNames] Device is disconnected!");
-			throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-		}
-		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GET_SYSTEM_BUNDLES, null);
-		int rspStatus = tCallBack.getRspStatus();
-		if (rspStatus >= 0) {
-			byte rspData[] = tCallBack.getRspData();
-			if (rspData != null) {
-				ByteArrayInputStream bis = null;
-				try {
-					bis = new ByteArrayInputStream(rspData);
-					String[] names = DataFormater.readStringArray(bis);
-					log("[getSystemBundlesNames] Raw bundle names list: " + DebugUtils.convertForDebug(names));
-					return names;
-				} catch (IOException e) {
-					log("[getSystemBundlesNames] Error formatting response data!", e);
-					throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
-				} finally {
-					DataFormater.closeInputStream(bis);
+		try {
+			MBSAConnection connection = getMBSAConnection();
+			if (!connection.isConnected()) {
+				log("[getSystemBundlesNames] Device is disconnected!");
+				throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
+			}
+			MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GET_SYSTEM_BUNDLES, null);
+			int rspStatus = tCallBack.getRspStatus();
+			if (rspStatus >= 0) {
+				byte rspData[] = tCallBack.getRspData();
+				if (rspData != null) {
+					ByteArrayInputStream bis = null;
+					try {
+						bis = new ByteArrayInputStream(rspData);
+						String[] names = DataFormater.readStringArray(bis);
+						log("[getSystemBundlesNames] Raw bundle names list: " + DebugUtils.convertForDebug(names));
+						return names;
+					} catch (IOException e) {
+						log("[getSystemBundlesNames] Error formatting response data!", e);
+						throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
+					} finally {
+						DataFormater.closeInputStream(bis);
+					}
+				} else {
+					log("[getSystemBundlesNames] no bundles available");
+					return new String[0];
 				}
 			} else {
-				log("[getSystemBundlesNames] no bundles available");
-				return new String[0];
+				log("[getSystemBundlesNames] Command failure: " + rspStatus);
+				// try fallback mechanism
+				return fallbackGetSystemBundlesNames();
 			}
-		} else {
-			log("[getSystemBundlesNames] Command failure: " + rspStatus);
-			throw new IAgentException("Failed to get system bundle names: " + rspStatus, rspStatus);
+		} catch(IAgentException e) {
+			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT) {
+				return fallbackGetSystemBundlesNames();
+			} else {
+				throw e;
+			}
 		}
+	}
+	
+	private String[] fallbackGetSystemBundlesNames() throws IAgentException {
+		return ((DeploymentManagerImpl) connector.getDeploymentManager()).getSystemBundlesNames();
 	}
 }
