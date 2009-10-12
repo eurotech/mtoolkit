@@ -990,6 +990,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 				synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
 					viewBeforeRefresh = getViewType();
 					refreshing = true;
+					updateContextMenuStates();
 					DeviceConnector conn2 = connector;
 					disconnect();
 					connector = conn2;

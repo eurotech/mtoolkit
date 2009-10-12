@@ -44,7 +44,9 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 			Model node = (Model) iterator.next();
 			if (node instanceof FrameWork) {
 				FrameWork framework = (FrameWork) node;
-				framework.refreshAction();
+				if (framework.isConnected() && !framework.isRefreshing()) {
+					framework.refreshAction();
+				}
 			} else if (node instanceof Bundle) {
 				Bundle bundle = (Bundle) node;
 				MenuFactory.refreshBundleAction(bundle);

@@ -190,7 +190,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	private static BundlePropertiesAction bundlePropertiesAction;
 	private FindAction findAction;
 	private ShowFrameworkConsole showConsoleAction;
-	private RefreshAction refreshAction;
+	private static RefreshAction refreshAction;
 	private static Text filterField;
 
 	public static TreeViewer tree;
@@ -607,6 +607,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 
 		connectAction.updateState(selection);
 		disconnectAction.updateState(selection);
+		refreshAction.updateState(selection);
 
 		startAction.updateState(selection);
 		stopAction.updateState(selection);
