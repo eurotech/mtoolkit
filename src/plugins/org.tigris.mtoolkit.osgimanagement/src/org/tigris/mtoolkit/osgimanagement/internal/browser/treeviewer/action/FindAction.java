@@ -12,22 +12,23 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SearchPane;
 
 public class FindAction extends SelectionProviderAction {
 
-	private SearchPane searchPanel;
+	private Text filterText;
 
-	public FindAction(ISelectionProvider provider, SearchPane searchPanel, String label) {
+	public FindAction(ISelectionProvider provider, Text filterText, String label) {
 		super(provider, label);
-		this.searchPanel = searchPanel;
+		this.filterText = filterText;
 		this.setText(label + "@Ctrl+F");
 	}
 
 	// run method
 	public void run() {
-		searchPanel.show();
+		filterText.forceFocus();
+		filterText.selectAll();
 	}
 
 	// override to react properly to selection change
