@@ -252,9 +252,10 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			if (!dpListeners.contains(listener)) {
 				PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION,
 						false);
-				if (connection != null)
+				if (connection != null) {
 					log("[addRemoteDPListener] PMP connection is available, add event listener");
-				connection.addEventListener(this, new String[] { DEPLOYMENT_EVENT });
+					connection.addEventListener(this, new String[] { DEPLOYMENT_EVENT });
+				}
 				dpListeners.add(listener);
 			} else {
 				log("[addRemoteDPListener] Listener already present");
