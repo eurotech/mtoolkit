@@ -53,7 +53,7 @@ public class ListUtil {
 			if (object instanceof Bundle)
 				return ((Model) object).getName();
 			if (object instanceof ObjectClass)
-				return ((ObjectClass) object).getNameID();
+				return ((ObjectClass) object).getName();
 			return null;
 		}
 
