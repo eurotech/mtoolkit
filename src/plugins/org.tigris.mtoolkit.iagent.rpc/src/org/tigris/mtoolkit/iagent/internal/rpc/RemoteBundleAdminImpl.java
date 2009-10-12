@@ -610,6 +610,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 					if (systemBundleURL == null) {
 						log("No system bundles list found.");
 						loadedSymbolicNames = new HashSet(0);
+						return loadedSymbolicNames;
 					} else {
 						reader = new BufferedReader(new InputStreamReader(systemBundleURL.openStream()));
 					}
