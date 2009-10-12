@@ -45,7 +45,9 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		applicationsNode = new ApplicationPackage("Application");
 		this.connector = connector;
 		this.parent = parent;
-		parent.addElement(applicationsNode);
+		if (parent.findFramework().getViewType() == FrameWork.BUNDLES_VIEW) { 
+			parent.addElement(applicationsNode);
+		}
 		try {
 			manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
 			addApplications();
