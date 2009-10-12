@@ -329,7 +329,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				throw new IAgentException("Associated DeviceConnector object is closed",
 					IAgentErrors.ERROR_DISCONNECTED);
 			}
-			connection = connectionManager.createConnection(ConnectionManager.PMP_CONNECTION);
+			connection = connectionManager.createConnection(type);
 			log("[getConnection] Connection opened successfully: " + connection);
 		} else {
 			log("[getConnection] Active connection found: " + connection);
