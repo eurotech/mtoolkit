@@ -277,7 +277,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				nameID,
 				service);
 			parent.addElement(objClass);
-			if (objClass.findFramework().isShownServicePropertiss())
+			FrameWork fw = objClass.findFramework();
+			if (fw != null &&  fw.isShownServicePropertiss())
 				addServicePropertiesNodes(objClass);
 		}
 	}
