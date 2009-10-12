@@ -63,10 +63,13 @@ import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TreeAdapter;
 import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.layout.FillLayout;
@@ -104,8 +107,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SearchPane;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AddAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.BundlePropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.CommonPropertiesAction;
@@ -197,10 +200,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 
 	private static HashMap activeInstances;
 	private MenuManager mgr;
-	private SearchPane searchPanel;
 	
 	private FilterJob filterJob = new FilterJob();
 	private MyViewerFilter filter = new MyViewerFilter();;
+	private static String notFoundText = null;
 
 	// Get current shell
 	public static Shell getShell() {
@@ -270,10 +273,15 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 				filterJob.schedule(300);
 			}
 		});
+		filterField.addSelectionListener(new SelectionAdapter() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				tree.getTree().forceFocus();
+				findItem(filterField.getText().trim(), tree);
+			}
+		});
+		
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
-		searchPanel = new SearchPane(parent, SWT.NONE, tree);
-
 		tree.getTree().setLayoutData(gridDataTree);
 		tree.getTree().addKeyListener(this);
 		tree.addDoubleClickListener(new IDoubleClickListener() {
@@ -288,7 +296,18 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 				}
 			}
 		});
-
+		
+		tree.getTree().addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				boolean doSearch = e.character == Character.LINE_SEPARATOR && !filterField.getText().trim().equals("");
+				e.doit = !doSearch;
+				if (doSearch) {
+					findItem(filterField.getText().trim(), tree);
+				}
+				
+			}
+		});
+		
 		activePage = getSite().getPage();
 
 		if (activeInstances == null)
@@ -550,7 +569,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		commonPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
 		commonPropertiesAction.setAccelerator(SWT.ALT | SWT.TRAVERSE_RETURN);
 
-		findAction = new FindAction(tree, searchPanel, Messages.find_action_label);
+		findAction = new FindAction(tree, filterField, Messages.find_action_label);
 		findAction.setImageDescriptor(ImageHolder.getImageDescriptor(SEARCH_IMAGE_PATH));
 		findAction.setAccelerator(SWT.CTRL | 'F');
 		showConsoleAction = new ShowFrameworkConsole(tree, Messages.show_framework_console, tree);
@@ -839,6 +858,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 				Model model = (Model) iterator.next();
 				if (!(model instanceof FrameWork)) {
 					return;
+				} else if (((FrameWork)model).autoConnected) {
+					return;
 				}
 			}
 			iterator = selection.iterator();
@@ -1015,6 +1036,93 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 			selection = event.getSelection();
 		}
 	}
+	
+	private static void findItem(String text, TreeViewer parentView) {
+		if (text.equals(""))return; //$NON-NLS-1$
+		if (notFoundText != null && text.indexOf(notFoundText) != -1) {
+			return;
+		}
+
+		IStructuredSelection startSelection = (IStructuredSelection) parentView.getSelection();
+
+		Model startNode = (Model) startSelection.getFirstElement();
+		if (startNode == null) {
+			Model children[] = FrameWorkView.treeRoot.getChildren();
+			if (children == null || children.length == 0)
+				return;
+			startNode = children[0];
+		}
+
+		Model foundNode = null;
+		Model node = startNode;
+
+		if ((foundNode = findItem(node, text, startNode)) == null) {
+			Model parent = node.getParent();
+			while (parent != null) {
+				int startIndex = parent.indexOf(node) + 1;
+				for (int i = startIndex; i < parent.getSize(); i++) {
+					node = parent.getChildren()[i];
+					if (isTextFound(node.getName(), text)) {
+						foundNode = node;
+						break;
+					}
+					foundNode = findItem(node, text, startNode);
+					if (foundNode != null)
+						break;
+				}
+				if (foundNode != null)
+					break;
+				node = parent;
+				parent = parent.getParent();
+			}
+		}
+		if (foundNode == null && startNode != FrameWorkView.treeRoot.getChildren()[0]) {
+			node = FrameWorkView.treeRoot;
+			foundNode = findItem(node, text, startNode);
+		}
+
+		boolean itemFound = false;
+		if (foundNode == startNode) {
+//			if (foundNode.getName().indexOf(text) == -1) {
+//				findText.setForeground(red);
+//			}
+		} else if (foundNode != null) {
+			parentView.setSelection(new StructuredSelection(foundNode));
+//			findText.setForeground(black);
+			itemFound = true;
+		} else {
+//			findText.setForeground(red);
+		}
+
+		if (!itemFound)
+			notFoundText = text;
+		else
+			notFoundText = null;
+	}
+
+	private static Model findItem(Model parent, String searching, Model startNode) {
+		Model children[] = parent.getChildren();
+		for (int i = 0; i < children.length; i++) {
+			Model child = children[i];
+			if (child == startNode) {
+				return child;
+			}
+			String text = child.getName();
+			if (isTextFound(text, searching)) {
+				return child;
+			}
+			Model grandChild = findItem(child, searching, startNode);
+			if (grandChild != null) {
+				return grandChild;
+			}
+		}
+		return null;
+	}
+
+	private static boolean isTextFound(String text, String searchFor) {
+		return (text.indexOf(searchFor) != -1 && !text.equals(ServicesCategory.nodes[0]) && !text.equals(ServicesCategory.nodes[1]));
+	}
+
 
 	public class ActionsProviderElement {
 		private String extension;
