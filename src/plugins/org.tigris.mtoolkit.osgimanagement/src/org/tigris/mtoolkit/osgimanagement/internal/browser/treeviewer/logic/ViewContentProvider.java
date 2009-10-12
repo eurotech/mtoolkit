@@ -78,7 +78,9 @@ public class ViewContentProvider implements ITreeContentProvider, ContentChangeL
 				display = Display.getDefault();
 			display.asyncExec(new Runnable() {
 				public void run() {
-					viewer.add(event.getTarget().getParent(), event.getTarget());
+					if (event.getTarget().getParent() != null) {
+						viewer.add(event.getTarget().getParent(), event.getTarget());
+					}
 				}
 			});
 		}
