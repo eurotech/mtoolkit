@@ -163,6 +163,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	public static final String CONSOLE_IMAGE_PATH = "console.gif";
 	private static final String FIND_COMMAND_ID = FindAction.class.getName();
 	private static final String REFRESH_COMMAND_ID = RefreshAction.class.getName();
+	private static final String REMOVE_COMMAND_ID = RefreshAction.class.getName();
+	
 	private static final String PROPERTIES_COMMAND_ID = CommonPropertiesAction.class.getName();
 
 	private static AddAction addAction;
@@ -365,6 +367,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		createShortcut(FIND_COMMAND_ID, findAction, "Ctrl+F");
 		createShortcut(REFRESH_COMMAND_ID, refreshAction, "F5");
 		createShortcut(PROPERTIES_COMMAND_ID, commonPropertiesAction, "Alt+Enter");
+		createShortcut(REMOVE_COMMAND_ID, removeAction, "DEL");
+
 	}
 
 	public static String getFilter() {
@@ -516,6 +520,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 
 		removeAction = new RemoveAction(tree, Messages.remove_action_label);
 		removeAction.setImageDescriptor(ImageHolder.getImageDescriptor(REMOVE_ACTION_ACTION_PATH));
+		removeAction.setAccelerator(SWT.DEL);
 
 		propertyAction = new PropertyAction(tree, Messages.property_action_label);
 		propertyAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
@@ -849,28 +854,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 
 	public void keyPressed(KeyEvent e) {
 		if (e.keyCode == SWT.DEL) {
-			IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
-			if (selection.size() == 0) {
-				return;
-			}
-
-			Iterator iterator = selection.iterator();
-			while (iterator.hasNext()) {
-				Model model = (Model) iterator.next();
-				if (!(model instanceof FrameWork)) {
-					return;
-				} else if (((FrameWork)model).autoConnected) {
-					return;
-				}
-			}
-			iterator = selection.iterator();
-			while (iterator.hasNext()) {
-				FrameWork fw = (FrameWork) iterator.next();
-				if (fw.isConnected()) {
-					MenuFactory.disconnectFrameworkAction(fw);
-				}
-				MenuFactory.removeFrameworkAction(fw);
-				// tree.setSelection(tree.getSelection());
+			removeAction.updateState((IStructuredSelection) tree.getSelection());
+			if (removeAction.isEnabled()) {
+				removeAction.run();
 			}
 		}
 	}

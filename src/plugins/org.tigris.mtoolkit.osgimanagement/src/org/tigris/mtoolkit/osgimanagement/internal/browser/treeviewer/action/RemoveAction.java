@@ -12,11 +12,13 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.util.Iterator;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
 public class RemoveAction extends SelectionProviderAction implements IStateAction {
@@ -27,13 +29,16 @@ public class RemoveAction extends SelectionProviderAction implements IStateActio
 
 	// run method
 	public void run() {
-		Iterator iterator = getStructuredSelection().iterator();
-		while (iterator.hasNext()) {
-			FrameWork framework = (FrameWork) iterator.next();
-			if (framework.isConnected()) {
-				MenuFactory.disconnectFrameworkAction(framework);
+		boolean confirm = MessageDialog.openQuestion(FrameWorkView.getShell(), "Remove Framework", "Remove selected framework(s)?");
+		if (confirm) {
+			Iterator iterator = getStructuredSelection().iterator();
+			while (iterator.hasNext()) {
+				FrameWork framework = (FrameWork) iterator.next();
+				if (framework.isConnected()) {
+					MenuFactory.disconnectFrameworkAction(framework);
+				}
+				MenuFactory.removeFrameworkAction(framework);
 			}
-			MenuFactory.removeFrameworkAction(framework);
 		}
 	}
 
