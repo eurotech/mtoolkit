@@ -59,9 +59,11 @@ public class ConsoleReader implements Runnable {
 					manager.executeFrameworkCommand(line);
 				}
 			} catch (IOException e) {
-				FrameworkPlugin.error("Exception while reading user input", e);
+				if (running)
+					FrameworkPlugin.error("Exception while reading user input", e);
 			} catch (IAgentException e) {
-				FrameworkPlugin.error("Failed to execute remote command", e);
+				if (running)
+					FrameworkPlugin.error("Failed to execute remote command", e);
 			}
 		}
 	}
