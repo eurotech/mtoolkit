@@ -139,7 +139,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 									+ connectionType
 									+ " was disconnected. Close DeviceConnector...");
 					try {
-						if (!isActive)
+						if (isActive)
 							closeConnection();
 					} catch (IAgentException e) {
 						IAgentLog.error("[DeviceConnectorImpl][Constructor] Failed to cleanup after disconnection", e);
