@@ -292,10 +292,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 				Model node = (Model) ((TreeSelection) event.getSelection()).getFirstElement();
 				if (node instanceof FrameWork) {
 					FrameworkConnectorFactory.connectFrameWork((FrameWork) node);
-				} else {
-					boolean expand = !tree.getExpandedState(node);
-					tree.setExpandedState(node, expand);
-				}
+				}					
+				boolean expand = !tree.getExpandedState(node);
+				tree.setExpandedState(node, expand);
 			}
 		});
 		
