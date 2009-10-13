@@ -14,6 +14,7 @@ import org.eclipse.debug.internal.ui.DebugPluginImages;
 import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.Action;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
@@ -23,8 +24,10 @@ public class RemoveAllConsoleAction extends Action implements IConsoleListener {
 	private static RemoveAllConsoleAction instance;
 	
 	public static RemoveAllConsoleAction getSingleton() {
-		if (instance == null)
+		if (instance == null) {
 			instance = new RemoveAllConsoleAction();
+			ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(instance);
+		}
 		return instance;
 	}
 	
@@ -69,7 +72,11 @@ public class RemoveAllConsoleAction extends Action implements IConsoleListener {
 	public void consolesRemoved(IConsole[] consoles) {
 		for (int i = 0; i < consoles.length; i++) {
 			if (consoles[i] instanceof RemoteConsole) {
-				updateState();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						updateState();
+					}
+				});
 				break;
 			}
 		}
