@@ -93,7 +93,7 @@ public abstract class FormSection implements IPropertyChangeListener {
 				height += vspacing;
 			}
 			if (hHint == SWT.DEFAULT && descriptionPainted && descriptionLabel != null) {
-				Point dsize = descriptionLabel.computeSize(cwidth, SWT.DEFAULT, flush);
+				Point dsize = descriptionLabel.computeSize(cwidth == 0 ? SWT.DEFAULT : cwidth, SWT.DEFAULT, flush);
 				height += dsize.y;
 				height += vspacing;
 			}
