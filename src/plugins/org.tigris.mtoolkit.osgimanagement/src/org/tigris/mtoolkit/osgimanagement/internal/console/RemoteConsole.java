@@ -72,7 +72,7 @@ public class RemoteConsole extends IOConsole {
 	private String computeName() {
 		boolean connected = connector != null && connector.isActive();
 		String fwName = fw.getName();
-		String timeStamp = DateFormat.getInstance().format(timestamp);
+		String timeStamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp);
 		return (connected ? "" : "<disconnected> ") + fwName + " [Remote Framework] (" + timeStamp + ")";
 	}
 
