@@ -290,8 +290,12 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			}
 			this.monitor = null;
 			if (!refreshing) {
+				Object name = connector.getProperties().get("framework-name");
+				if (name == null) {
+					name = this.name;
+				}
 				BrowserErrorHandler.processInfo(
-						connector.getProperties().get("framework-name") + " successfully " + "connected", false); //$NON-NLS-1$
+						name + " successfully " + "connected", false); //$NON-NLS-1$
 			}
 		}
 	}
