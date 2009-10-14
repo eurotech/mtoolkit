@@ -388,8 +388,11 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		if (e.getSource() == deviceTypeCombo) {
 			int selectedIdx = deviceTypeCombo.getSelectionIndex();
 			if (selectedIdx != -1) {
-				selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(selectedIdx);
-				showDeviceTypePanel(selectedProvider);
+				DeviceTypeProviderElement newProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(selectedIdx);
+				if (newProvider != selectedProvider) {
+					selectedProvider = newProvider;
+					showDeviceTypePanel(selectedProvider);
+				}
 			}
 		}
 	}
