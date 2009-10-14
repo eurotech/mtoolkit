@@ -184,14 +184,14 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	private static ShowServicePropertiesInTree showServPropsInTreeAction;
 	private ServicePropertiesAction servicePropertiesAction;
 	private GotoServiceAction gotoServiceAction;
-	private ViewAction viewServicesAction;
-	private ViewAction viewBundlesAction;
+	private static ViewAction viewServicesAction;
+	private static ViewAction viewBundlesAction;
 	private ShowBundleIDAction showBundleIDAction;
 	private ShowBundleVersionAction showBundleVersionAction;
 	private static DPPropertiesAction dpPropertiesAction;
 	private static BundlePropertiesAction bundlePropertiesAction;
 	private FindAction findAction;
-	private ShowFrameworkConsole showConsoleAction;
+	private static ShowFrameworkConsole showConsoleAction;
 	private static RefreshAction refreshAction;
 	private static Text filterField;
 
@@ -629,6 +629,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		addAction.setEnabled(true);
 		removeAction.updateState(selection);
 		propertyAction.updateState(selection);
+		
+		viewBundlesAction.updateState(selection);
+		viewServicesAction.updateState(selection);
+		showConsoleAction.updateState(selection);
 	}
 
 	// Fill context menu Actions when menu is about to show
