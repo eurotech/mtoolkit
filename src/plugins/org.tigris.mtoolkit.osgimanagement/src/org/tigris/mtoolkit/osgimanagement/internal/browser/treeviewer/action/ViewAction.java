@@ -90,6 +90,10 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 	private void setViewType(final FrameWork fw, int newViewType) {
 		if (fw.getViewType() == newViewType)
 			return;
+ 		if (fw.getViewType() == FrameWork.BUNDLES_VIEW) {
+ 			fw.getBundlesNode().removeChildren();
+ 			fw.getDPNode().removeChildren();
+ 		}
  		fw.removeChildren();
 		try {
 			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
