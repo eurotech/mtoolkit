@@ -444,8 +444,12 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				dpNode.addElement((Model) fw.dpHash.get(keys.nextElement()));
 			}
 
-			fw.addElement(bundlesNode);
-			fw.addElement(dpNode);
+			if (fw.indexOf(bundlesNode) == -1) {
+				fw.addElement(bundlesNode);
+			}
+			if (fw.indexOf(dpNode) == -1) {
+				fw.addElement(dpNode);
+			}
 		}
 	}
 
