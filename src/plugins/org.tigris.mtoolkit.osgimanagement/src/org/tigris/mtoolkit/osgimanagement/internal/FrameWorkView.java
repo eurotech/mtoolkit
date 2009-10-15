@@ -142,8 +142,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 
 	public static final String VIEW_ID = FrameworkPlugin.PLUGIN_ID + ".frameworkview";
 
-	public static final String BUNDLE_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
-	public static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
+	public static final String PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
 	public static final String UPDATE_BUNDLE_IMAGE_PATH = "update_bundle.gif"; //$NON-NLS-1$
 	public static final String STOP_BUNDLE_IMAGE_PATH = "stop_bundle.gif"; //$NON-NLS-1$
 	public static final String START_BUNDLE_IMAGE_PATH = "start_bundle.gif"; //$NON-NLS-1$
@@ -553,6 +552,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		updateBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(UPDATE_BUNDLE_IMAGE_PATH));
 
 		servicePropertiesAction = new ServicePropertiesAction(tree, Messages.property_action_label);
+		servicePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
+		
 		gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
 		viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameWork.SERVICES_VIEW);
 		viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ViewLabelProvider.SERVICES_CATEGORY_ICON));
@@ -565,10 +566,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		showServPropsInTreeAction = new ShowServicePropertiesInTree(tree, Messages.show_service_properties_in_tree);
 
 		dpPropertiesAction = new DPPropertiesAction(tree, Messages.property_action_label);
-		dpPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(DP_PROPERTIES_IMAGE_PATH));
+		dpPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
 
 		bundlePropertiesAction = new BundlePropertiesAction(tree, Messages.property_action_label);
-		bundlePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLE_PROPERTIES_IMAGE_PATH));
+		bundlePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
 
 		commonPropertiesAction = new CommonPropertiesAction(tree, Messages.property_action_label);
 		commonPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
