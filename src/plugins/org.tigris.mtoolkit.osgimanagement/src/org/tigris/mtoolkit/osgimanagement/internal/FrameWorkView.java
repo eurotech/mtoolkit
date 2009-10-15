@@ -138,7 +138,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.View
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewLabelProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
-public class FrameWorkView extends ViewPart implements ConstantsDistributor, KeyListener {
+public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 	public static final String VIEW_ID = FrameworkPlugin.PLUGIN_ID + ".frameworkview";
 
@@ -162,7 +162,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 	public static final String CONSOLE_IMAGE_PATH = "console.gif";
 	private static final String FIND_COMMAND_ID = FindAction.class.getName();
 	private static final String REFRESH_COMMAND_ID = RefreshAction.class.getName();
-	private static final String REMOVE_COMMAND_ID = RefreshAction.class.getName();
+	private static final String REMOVE_COMMAND_ID = RemoveAction.class.getName();
 	
 	private static final String PROPERTIES_COMMAND_ID = CommonPropertiesAction.class.getName();
 
@@ -285,13 +285,24 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
 		tree.getTree().setLayoutData(gridDataTree);
-		tree.getTree().addKeyListener(this);
+		tree.getTree().addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				super.keyPressed(e);
+				if (e.keyCode == SWT.DEL) {
+					removeAction.updateState((IStructuredSelection) tree.getSelection());
+					if (removeAction.isEnabled()) {
+						removeAction.run();
+					}
+				}
+			}
+		});
 		tree.addDoubleClickListener(new IDoubleClickListener() {
-
 			public void doubleClick(DoubleClickEvent event) {
 				Model node = (Model) ((TreeSelection) event.getSelection()).getFirstElement();
 				if (node instanceof FrameWork) {
-					FrameworkConnectorFactory.connectFrameWork((FrameWork) node);
+					if (!((FrameWork) node).isConnected()) {
+						FrameworkConnectorFactory.connectFrameWork((FrameWork) node);
+					}
 				}					
 				boolean expand = !tree.getExpandedState(node);
 				tree.setExpandedState(node, expand);
@@ -301,11 +312,11 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 		tree.getTree().addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				boolean doSearch = e.character == Character.LINE_SEPARATOR && !filterField.getText().trim().equals("");
-				e.doit = !doSearch;
 				if (doSearch) {
+					e.doit = false;
 					findItem(filterField.getText().trim(), tree);
 				}
-				
+				super.keyPressed(e);
 			}
 		});
 		
@@ -855,18 +866,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor, Key
 			}
 		}
 		return null;
-	}
-
-	public void keyPressed(KeyEvent e) {
-		if (e.keyCode == SWT.DEL) {
-			removeAction.updateState((IStructuredSelection) tree.getSelection());
-			if (removeAction.isEnabled()) {
-				removeAction.run();
-			}
-		}
-	}
-
-	public void keyReleased(KeyEvent e) {
 	}
 
 	private List actionProviders = new ArrayList();
