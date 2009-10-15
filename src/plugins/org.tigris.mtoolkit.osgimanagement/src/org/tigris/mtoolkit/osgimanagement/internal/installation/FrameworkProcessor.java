@@ -156,8 +156,12 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			return preparationStatus;
 		}
 
+		if (framework.getConnector() == null) {
+			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to "+framework);
+		}
+			
 		if (item instanceof PluginItem) {
-			IStatus status = ((PluginItem) item).checkAdditionalBundles(framework);
+			IStatus status = ((PluginItem) item).checkAdditionalBundles(framework, monitor);
 			if (status.getSeverity() == IStatus.CANCEL) {
 				monitor.setCanceled(true);
 				return status;

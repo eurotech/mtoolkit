@@ -175,16 +175,20 @@ public class PluginProvider implements InstallationItemProvider {
 		 *            - target framework
 		 * @return IStatus
 		 */
-		public IStatus checkAdditionalBundles(FrameWork framework) {
+		public IStatus checkAdditionalBundles(FrameWork framework, IProgressMonitor monitor) {
 			// first check if framework is connected and all bundles info is
 			// retrieved
-			while (!framework.isConnected() || framework.isConnecting()) {
+			while ((!framework.isConnected() || framework.isConnecting()) && !monitor.isCanceled()) {
 				try {
 					Thread.currentThread().sleep(50);
 				} catch (InterruptedException e) {
 				}
 			}
 
+			if (monitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			}
+			
 			// find missing bundle dependencies
 			IPluginModelBase model = PluginRegistry.findModel(project);
 			BundleDescription descr = model.getBundleDescription();
