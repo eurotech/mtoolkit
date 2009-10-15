@@ -173,7 +173,7 @@ public class ConnectFrameworkJob extends Job {
 						// X
 						saveDialog.setFileName("iagent.rpc.jar");
 						String path = saveDialog.open();
-
+						if (path == null) return;
 						output = new FileOutputStream(path);
 
 						int bytesRead = 0;
