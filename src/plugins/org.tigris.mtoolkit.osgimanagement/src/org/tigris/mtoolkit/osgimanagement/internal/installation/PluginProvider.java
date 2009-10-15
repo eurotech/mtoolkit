@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
+import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
@@ -116,17 +117,29 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			file = new File(path);
 			if (exporter.getResult().isOK() && file.exists()) {
-				File signedFile = null;
 				try {
-					// signing file if properties contain signing info
-					signedFile = CertUtils.signJar(file, monitor, properties);
+					if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))) {
+						File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/" + file.getName());
+						convertedFile.getParentFile().mkdirs();
+						AndroidUtils.convertToDex(file, convertedFile, monitor);
+						file.delete();
+						file = convertedFile;
+					}
+
+					File signedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/signed/" + file.getName());
+					signedFile.getParentFile().mkdirs();
+					if (signedFile.exists()) {
+						signedFile.delete();
+					}
+					CertUtils.signJar(file, signedFile, monitor, properties);
+					if (signedFile.exists()) {
+						file.delete();
+						file = signedFile;
+					}
 				} catch (IOException ioe) {
 					monitor.done();
-					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugin: "
+					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not prepare plugin: "
 							+ project.getName(), ioe);
-				}
-				if (signedFile != null) {
-					file = signedFile;
 				}
 				monitor.done();
 				return Status.OK_STATUS;
@@ -147,6 +160,10 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 
 		public void dispose() {
+			if (file != null) {
+				file.delete();
+				file = null;
+		    }
 		}
 
 		/**

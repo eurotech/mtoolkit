@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.common.certificates;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +24,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.util.tracker.ServiceTracker;
+import org.tigris.mtoolkit.common.ProcessOutputReader;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.gui.PasswordDialog;
 import org.tigris.mtoolkit.common.installation.InstallationConstants;
@@ -161,7 +161,7 @@ public class CertUtils {
       e.initCause(ioe);
       throw e;
     }
-    OutputReader outputReader = new OutputReader(ps.getInputStream(), "[Jar Signer] Output Reader");
+    ProcessOutputReader outputReader = new ProcessOutputReader(ps.getInputStream(), "[Jar Signer] Output Reader");
     outputReader.start();
 
     int retries = 150;
@@ -198,7 +198,7 @@ public class CertUtils {
         throw new IOException("Cannot sign provided content. Operation timed out.");
       } else {
         throw new IOException("Cannot sign provided content. Jarsigner return code: " + result
-            + ". Jarsigner output: " + outputReader.output);
+            + ". Jarsigner output: " + outputReader.getOutput());
       }
     }
   }
@@ -216,26 +216,27 @@ public class CertUtils {
 
   /**
    * Convenient method for signing jar file with information provided in passed properties. 
-   * If no signing information is contained in passed properties null is returned.
+   * If no signing information is provided then this function does nothing.
    * Multiple signing is allowed. If no password is provided for given certificate, 
    * a dialog for entering password is displayed.
    * @param file the file to be signed.
+   * @param signedFile the output file.
    * @param monitor the progress monitor.
    * @param properties
-   * @return the new signed file or null if no signing information is 
-   * contained in passed properties.
    * @throws IOException in case of signing error
    */
-  public static File signJar(File file, IProgressMonitor monitor, Map properties) throws IOException {
+  public static void signJar(File file, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
     if (properties == null) {
-      return null;
+      return;
     }
     int count = getCertificatesCount(properties);
     if (count <= 0) {
-      return null;
+      return;
+    }
+    if (signedFile == null) {
+    	signedFile = file;
     }
 
-    String signedFilePath = UtilitiesPlugin.getDefault().getStateLocation() + "/" + file.getName();
     for (int i = 0; i < count; i++) {
       String alias = getCertificateAlias(properties, i);
       final String location = getCertificateStoreLocation(properties, i);
@@ -258,46 +259,15 @@ public class CertUtils {
           }
         });
         if (result[0] == null) {
-          return null;
+          return;
         }
         pass = result[0];
       }
       if (i == 0) {
-        CertUtils.signJar(file.getAbsolutePath(), signedFilePath, monitor, alias, location, type, pass);
+        CertUtils.signJar(file.getAbsolutePath(), signedFile.getAbsolutePath(), monitor, alias, location, type, pass);
       } else {
-        CertUtils.signJar(signedFilePath, null, monitor, alias, location, type, pass);
+        CertUtils.signJar(signedFile.getAbsolutePath(), null, monitor, alias, location, type, pass);
       }
     }
-    return new File(signedFilePath);
   }
-
-  private static class OutputReader extends Thread {
-    private volatile boolean stopReader = false;
-    private InputStream      inputStream;
-    private StringBuffer     output     = new StringBuffer();
-
-    public OutputReader(InputStream inputStream, String name) {
-      super(name);
-      this.inputStream = inputStream;
-    }
-
-    public void run() {
-      try {
-        byte[] buf = new byte[4096];
-        int len = inputStream.available();
-        while (len != -1 && !stopReader) {
-          len = inputStream.read(buf);
-          if (len > 0) {
-            output.append(new String(buf, 0, len));
-          }
-          len = inputStream.available();
-        }
-      } catch (IOException io) {
-      }
-    }
-
-    private void stopReader() {
-      stopReader = true;
-    }
-  };
 }

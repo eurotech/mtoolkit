@@ -22,10 +22,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileProvider;
+import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.util.DPPFile;
 
@@ -62,13 +64,28 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 						+ dppFile.getBuildInfo().getDpFileName());
 				delete = !dpFile.exists();
 				DPPUtil.generateDeploymentPackage(dppFile, monitor, file.getProject(), DPPUtil.TYPE_QUICK_BUILD_DPP);
-				// signing file if properties contain signing info
-				File signedFile = CertUtils.signJar(dpFile, monitor, properties);
-				if (signedFile != null) {
+
+				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))) {
+					File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + file.getName());
+					convertedFile.getParentFile().mkdirs();
+					AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
+					dpFile.delete();
+					dpFile = convertedFile;
+				}
+
+				// sign file if properties contain signing info
+				File signedFile = new File(DPActivator.getDefault().getStateLocation() + "/signed/" + file.getName());
+				signedFile.getParentFile().mkdirs();
+				if (signedFile.exists()) {
+					signedFile.delete();
+				}
+				CertUtils.signJar(dpFile, signedFile, monitor, properties);
+				if (signedFile.exists()) {
+					dpFile.delete();
 					dpFile = signedFile;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				return new Status(Status.ERROR, DPActivator.PLUGIN_ID, "Failed to prepare file for installation", e);
 			}
 
 			return Status.OK_STATUS;

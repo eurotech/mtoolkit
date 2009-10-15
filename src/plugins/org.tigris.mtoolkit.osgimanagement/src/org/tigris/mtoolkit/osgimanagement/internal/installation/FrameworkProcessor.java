@@ -36,6 +36,7 @@ import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
+import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
@@ -113,22 +114,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 		FrameWork framework = ((FrameworkTarget) target).getFramework();
 
-		Map preparationProps = new Hashtable();
-		List certUids = FrameWork.getSignCertificateUids(framework.getConfig());
-		Iterator signIterator = certUids.iterator();
-		int certId = 0;
-		while (signIterator.hasNext()) {
-			ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
-			if (cert != null) {
-				CertUtils.pushCertificate(preparationProps, cert, certId++);
-			}
-		}
-		IStatus preparationStatus = item.prepare(subMonitor.newChild(50), preparationProps);
-
-		if (preparationStatus.getSeverity() == IStatus.ERROR || preparationStatus.getSeverity() == IStatus.CANCEL) {
-			return preparationStatus;
-		}
-
 		// TODO: Connecting to framework should report the connection progress
 		// to the current monitor
 		if (!framework.isConnected()) {
@@ -142,6 +127,33 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			if (!connectJob.getResult().isOK()) {
 				return connectJob.getResult();
 			}
+		}
+
+		Map preparationProps = new Hashtable();
+
+		// Signing properties
+		List certUids = FrameWork.getSignCertificateUids(framework.getConfig());
+		Iterator signIterator = certUids.iterator();
+		int certId = 0;
+		while (signIterator.hasNext()) {
+			ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
+			if (cert != null) {
+				CertUtils.pushCertificate(preparationProps, cert, certId++);
+			}
+		}
+
+		// Platform properties
+		try {
+			Map platformProps = framework.getConnector().getVMManager().getPlatformProperties();
+			preparationProps.putAll(platformProps);
+		} catch (IAgentException iae) {
+			// Cannot get platform properties - continuing.
+		}
+
+		IStatus preparationStatus = item.prepare(subMonitor.newChild(50), preparationProps);
+
+		if (preparationStatus.getSeverity() == IStatus.ERROR || preparationStatus.getSeverity() == IStatus.CANCEL) {
+			return preparationStatus;
 		}
 
 		if (item instanceof PluginItem) {

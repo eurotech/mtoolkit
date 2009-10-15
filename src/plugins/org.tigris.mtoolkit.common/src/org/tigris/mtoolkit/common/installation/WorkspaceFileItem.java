@@ -23,14 +23,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
+import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 
 public class WorkspaceFileItem implements InstallationItem {
 
-  protected IFile  file;
+  protected IFile file;
   protected String mimeType;
-  protected File   signedFile;
+  protected File preparedFile;
 
   public WorkspaceFileItem(IFile file, String mimeType) {
     this.file = file;
@@ -39,8 +41,8 @@ public class WorkspaceFileItem implements InstallationItem {
 
   public InputStream getInputStream() throws IOException {
     try {
-      if (signedFile != null) {
-        return new FileInputStream(signedFile);
+      if (preparedFile != null) {
+        return new FileInputStream(preparedFile);
       }
       return file.getContents();
     } catch (CoreException e) {
@@ -64,7 +66,32 @@ public class WorkspaceFileItem implements InstallationItem {
   public IStatus prepare(IProgressMonitor monitor, Map properties) {
     try {
       file.refreshLocal(IFile.DEPTH_ZERO, monitor);
-      signedFile = CertUtils.signJar(file.getLocation().toFile(), monitor, properties);
+
+      File inputFile = file.getLocation().toFile();
+
+      if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))) {
+        File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + inputFile.getName());
+        convertedFile.getParentFile().mkdirs();
+        if (FileUtils.getFileExtension(inputFile).equals("dp")) {
+          AndroidUtils.convertDpToDex(inputFile, convertedFile, monitor);
+        } else {
+          AndroidUtils.convertToDex(inputFile, convertedFile, monitor);
+        }
+        preparedFile = convertedFile;
+      }
+
+      File signedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/signed/" + inputFile.getName());
+      signedFile.getParentFile().mkdirs();
+      if (signedFile.exists()) {
+        signedFile.delete();
+      }
+      CertUtils.signJar(preparedFile != null ? preparedFile : inputFile, signedFile, monitor, properties);
+      if (signedFile.exists()) {
+        if (preparedFile != null) {
+          preparedFile.delete();
+        }
+        preparedFile = signedFile;
+      }
     } catch (CoreException e) {
       return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", e);
     } catch (IOException ioe) {
@@ -74,9 +101,9 @@ public class WorkspaceFileItem implements InstallationItem {
   }
 
   public void dispose() {
-    if (signedFile != null) {
-      signedFile.delete();
-      signedFile = null;
+    if (preparedFile != null) {
+      preparedFile.delete();
+      preparedFile = null;
     }
   }
 
