@@ -164,9 +164,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	
 	private static final String PROPERTIES_COMMAND_ID = CommonPropertiesAction.class.getName();
 
-	private static AddAction addAction;
-	private static RemoveAction removeAction;
-	private static PropertyAction propertyAction;
+	private static AddAction addFrameworkAction;
+	private static RemoveAction removeFrameworkAction;
+	private static PropertyAction frameworkPropertiesAction;
 	private static ConnectAction connectAction;
 	private static DisconnectAction disconnectAction;
 	private static InstallBundleAction installBundleAction;
@@ -287,9 +287,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			public void keyPressed(KeyEvent e) {
 				super.keyPressed(e);
 				if (e.keyCode == SWT.DEL) {
-					removeAction.updateState((IStructuredSelection) tree.getSelection());
-					if (removeAction.isEnabled()) {
-						removeAction.run();
+					removeFrameworkAction.updateState((IStructuredSelection) tree.getSelection());
+					if (removeFrameworkAction.isEnabled()) {
+						removeFrameworkAction.run();
 					}
 				}
 			}
@@ -375,7 +375,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		createShortcut(FIND_COMMAND_ID, findAction, "Ctrl+F");
 		createShortcut(REFRESH_COMMAND_ID, refreshAction, "F5");
 		createShortcut(PROPERTIES_COMMAND_ID, commonPropertiesAction, "Alt+Enter");
-		createShortcut(REMOVE_COMMAND_ID, removeAction, "DEL");
+		createShortcut(REMOVE_COMMAND_ID, removeFrameworkAction, "DEL");
 
 	}
 
@@ -431,10 +431,11 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			provider.fillToolBar(toolBar);
 		}
 
-		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, addAction);
-		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, removeAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, addFrameworkAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, removeFrameworkAction);
 		commonPropertiesAction.setToolTipText(Messages.property_action_label);
-		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, commonPropertiesAction);
+//		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, commonPropertiesAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, frameworkPropertiesAction);
 
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewServicesAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewBundlesAction);
@@ -523,15 +524,15 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	// Create custom contributions - tree popup menu
 	protected void addContributions() {
 
-		addAction = new AddAction(tree, Messages.add_action_label);
-		addAction.setImageDescriptor(ImageHolder.getImageDescriptor(ADD_ACTION_IMAGE_PATH));
+		addFrameworkAction = new AddAction(tree, Messages.add_action_label);
+		addFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(ADD_ACTION_IMAGE_PATH));
 
-		removeAction = new RemoveAction(tree, Messages.remove_action_label);
-		removeAction.setImageDescriptor(ImageHolder.getImageDescriptor(REMOVE_ACTION_ACTION_PATH));
-		removeAction.setAccelerator(SWT.DEL);
+		removeFrameworkAction = new RemoveAction(tree, Messages.remove_action_label);
+		removeFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(REMOVE_ACTION_ACTION_PATH));
+		removeFrameworkAction.setAccelerator(SWT.DEL);
 
-		propertyAction = new PropertyAction(tree, Messages.property_action_label);
-		propertyAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
+		frameworkPropertiesAction = new PropertyAction(tree, Messages.property_action_label);
+		frameworkPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
 
 		connectAction = new ConnectAction(tree, Messages.connect_action_label);
 		connectAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONNECT_ACTION_IMAGE_PATH));
@@ -581,7 +582,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		bundlePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
 
 		commonPropertiesAction = new CommonPropertiesAction(tree, Messages.property_action_label);
-		commonPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
+		commonPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
 		commonPropertiesAction.setAccelerator(SWT.ALT | SWT.TRAVERSE_RETURN);
 
 		findAction = new FindAction(tree, filterField, Messages.find_action_label);
@@ -636,9 +637,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		deinstallDPAction.updateState(selection);
 		dpPropertiesAction.updateState(selection);
 
-		addAction.setEnabled(true);
-		removeAction.updateState(selection);
-		propertyAction.updateState(selection);
+		addFrameworkAction.setEnabled(true);
+		removeFrameworkAction.updateState(selection);
+		frameworkPropertiesAction.updateState(selection);
 		
 		viewBundlesAction.updateState(selection);
 		viewServicesAction.updateState(selection);
@@ -675,14 +676,14 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				if (element instanceof FrameWork) {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, connectAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, disconnectAction);
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, removeAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, removeFrameworkAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
 
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installBundleAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
 				}
 				if (element instanceof TreeRoot) {
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addFrameworkAction);
 				}
 
 				if (element instanceof Bundle) {
@@ -720,7 +721,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				}
 			}
 		} else {
-			manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addAction);
+			manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addFrameworkAction);
 		}
 		for (int i = 0; i < actionProviders.size(); i++) {
 			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
@@ -734,7 +735,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		if (selection.size() > 0 && homogen) {
 			Model element = (Model) selection.getFirstElement();
 			if (element instanceof FrameWork)
-				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, propertyAction);
+				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, frameworkPropertiesAction);
 			if (element instanceof Bundle)
 				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, bundlePropertiesAction);
 			if (element instanceof DeploymentPackage)
