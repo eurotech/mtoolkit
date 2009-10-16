@@ -16,6 +16,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -33,6 +34,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
+import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -1234,5 +1237,25 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			config.putString(FRAMEWORK_SIGN_CERTIFICATE_ID + num, (String) iterator.next());
 			num++;
 		}
+	}
+
+	/**
+	 * Returns map, containing information for certificates which shall be 
+	 * used for signing the content, installed to this framework. If no signing
+	 * is required, then empty Map is returned.
+	 * @return the map with certificate properties
+	 */
+	public Map getSigningProperties() {
+		Map properties = new Hashtable();
+		List certUids = getSignCertificateUids(getConfig());
+		Iterator signIterator = certUids.iterator();
+		int certId = 0;
+		while (signIterator.hasNext()) {
+			ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
+			if (cert != null) {
+				CertUtils.pushCertificate(properties, cert, certId++);
+			}
+		}
+		return properties;
 	}
 }
