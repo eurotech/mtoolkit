@@ -89,7 +89,9 @@ public class RemoteConsole extends IOConsole {
 	
 	private void redirectOutput(IOConsoleOutputStream output) {
 		try {
-			connector.getVMManager().redirectFrameworkOutput(output);
+			if (connector != null) {
+				connector.getVMManager().redirectFrameworkOutput(output);
+			}
 		} catch (IAgentException e) {
 			try {
 				IStatus status = FrameworkPlugin.handleIAgentException(e);

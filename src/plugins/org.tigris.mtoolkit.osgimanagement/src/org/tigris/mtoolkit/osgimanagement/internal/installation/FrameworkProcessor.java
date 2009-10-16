@@ -36,6 +36,7 @@ import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -144,7 +145,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 		// Platform properties
 		try {
-			Map platformProps = framework.getConnector().getVMManager().getPlatformProperties();
+			DeviceConnector connector = framework.getConnector();
+			if (connector == null) return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection lost", null);
+			Map platformProps = connector.getVMManager().getPlatformProperties();
 			preparationProps.putAll(platformProps);
 		} catch (IAgentException iae) {
 			// Cannot get platform properties - continuing.

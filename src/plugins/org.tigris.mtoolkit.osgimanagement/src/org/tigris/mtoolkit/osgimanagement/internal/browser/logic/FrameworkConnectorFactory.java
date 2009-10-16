@@ -98,7 +98,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 	public static void addBundles(FrameWork fw, boolean initServices, IProgressMonitor monitor) throws IAgentException {
 		RemoteBundle rBundles[] = null;
-		rBundles = fw.getConnector().getDeploymentManager().listBundles();
+		DeviceConnector connector = fw.getConnector();
+		if (connector == null) return;
+		rBundles = connector.getDeploymentManager().listBundles();
 
 		if (rBundles != null) {
 			if (monitor != null) {
@@ -370,7 +372,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	public static void addDP(FrameWork framework, IProgressMonitor monitor) throws IAgentException {
 		Model deplPackagesNode = framework.getDPNode();
 		RemoteDP dps[] = null;
-		dps = framework.getConnector().getDeploymentManager().listDeploymentPackages();
+		DeviceConnector connector = framework.getConnector();
+		if (connector == null) return;
+		dps = connector.getDeploymentManager().listDeploymentPackages();
 
 		Hashtable dpHash = new Hashtable();
 		if (dps != null) {
@@ -554,8 +558,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public static RemoteBundle getRemoteBundle(String bundleLocation, FrameWork framework) throws IAgentException {
-
-		RemoteBundle bundles[] = framework.getConnector().getDeploymentManager().listBundles();
+		DeviceConnector connector = framework.getConnector();
+		if (connector == null) return null;
+		RemoteBundle bundles[] = connector.getDeploymentManager().listBundles();
 		RemoteBundle bundle = null;
 
 		for (int i = 0; i < bundles.length; i++) {

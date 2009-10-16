@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
@@ -47,7 +48,9 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 			if (version == null)
 				return FrameworkPlugin.newStatus(IStatus.ERROR, NLS.bind("Source file {0} doesn't have valid manifest",
 					sourceFile), null);
-			RemoteDP remoteDP = framework.getConnector().getDeploymentManager().getDeploymentPackage(symbolicName);
+			DeviceConnector connector = framework.getConnector();
+			if (connector == null) return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection lost", null);
+			RemoteDP remoteDP = connector.getDeploymentManager().getDeploymentPackage(symbolicName);
 			if (remoteDP != null) {
 				// deployment package already exists, if it has the same version
 				// we need to remove and install again after user confirmation

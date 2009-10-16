@@ -78,6 +78,7 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 				FrameWork framework = (FrameWork) model;
 				if (!framework.isConnected() 
 					|| framework.isRefreshing()
+					|| framework.getConnector() == null
 					|| FrameworkConnectorFactory.connectJobs.get(framework.getConnector()) != null) {
 					enabled = false;
 					break;

@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -34,7 +35,9 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			int work = (int) bundle.length();
 			monitor.beginTask(getName(), work);
 			input = new ProgressInputStream(new FileInputStream(bundle), monitor);
-			rBundle = framework.getConnector().getDeploymentManager().installBundle("remote:" + bundle.getName(), input);
+			DeviceConnector connector = framework.getConnector();
+			if (connector == null) return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection lost", null);
+			rBundle = connector.getDeploymentManager().installBundle("remote:" + bundle.getName(), input);
 
 			Set bundleIds = framework.getBundlesKeys();
 
