@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,22 +20,16 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
-import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
-import org.tigris.mtoolkit.common.android.AndroidUtils;
-import org.tigris.mtoolkit.common.certificates.CertUtils;
 
-public class WorkspaceFileItem implements InstallationItem {
+public class WorkspaceFileItem extends BaseFileItem {
 
   protected IFile file;
-  protected String mimeType;
-  protected File preparedFile;
 
   public WorkspaceFileItem(IFile file, String mimeType) {
+    super(file.getLocation().toFile(), mimeType);
     this.file = file;
-    this.mimeType = mimeType;
   }
 
   public InputStream getInputStream() throws IOException {
@@ -51,14 +44,6 @@ public class WorkspaceFileItem implements InstallationItem {
     }
   }
 
-  public String getMimeType() {
-    return mimeType;
-  }
-
-  public String getName() {
-    return file.getName();
-  }
-
   public IFile getFile() {
     return file;
   }
@@ -66,44 +51,10 @@ public class WorkspaceFileItem implements InstallationItem {
   public IStatus prepare(IProgressMonitor monitor, Map properties) {
     try {
       file.refreshLocal(IFile.DEPTH_ZERO, monitor);
-
-      File inputFile = file.getLocation().toFile();
-
-      if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))) {
-        File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + inputFile.getName());
-        convertedFile.getParentFile().mkdirs();
-        if (FileUtils.getFileExtension(inputFile).equals("dp")) {
-          AndroidUtils.convertDpToDex(inputFile, convertedFile, monitor);
-        } else {
-          AndroidUtils.convertToDex(inputFile, convertedFile, monitor);
-        }
-        preparedFile = convertedFile;
-      }
-
-      File signedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/signed/" + inputFile.getName());
-      signedFile.getParentFile().mkdirs();
-      if (signedFile.exists()) {
-        signedFile.delete();
-      }
-      CertUtils.signJar(preparedFile != null ? preparedFile : inputFile, signedFile, monitor, properties);
-      if (signedFile.exists()) {
-        if (preparedFile != null) {
-          preparedFile.delete();
-        }
-        preparedFile = signedFile;
-      }
+      baseFile = file.getLocation().toFile();
+      return super.prepare(monitor, properties);
     } catch (CoreException e) {
       return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", e);
-    } catch (IOException ioe) {
-      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", ioe);
-    }
-    return Status.OK_STATUS;
-  }
-
-  public void dispose() {
-    if (preparedFile != null) {
-      preparedFile.delete();
-      preparedFile = null;
     }
   }
 
@@ -111,7 +62,7 @@ public class WorkspaceFileItem implements InstallationItem {
     if (adapter.equals(IResource.class)) {
       return file;
     } else {
-      return null;
+      return super.getAdapter(adapter);
     }
   }
 }

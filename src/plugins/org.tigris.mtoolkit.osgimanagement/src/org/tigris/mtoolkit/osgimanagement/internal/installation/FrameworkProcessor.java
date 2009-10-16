@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -31,8 +30,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ListDialog;
-import org.tigris.mtoolkit.common.certificates.CertUtils;
-import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -55,6 +52,8 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	private static final String MIME_DP = "application/vnd.osgi.dp";
 
 	private static Vector additionalProcessors = new Vector();
+	
+	private boolean useAdditionalProcessors = true;
 
 	public static FrameworkProcessor getDefault() {
 		if (defaultinstance == null) {
@@ -94,7 +93,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		mimeTypes.addElement(MIME_JAR);
 		mimeTypes.addElement(MIME_ZIP);
 		mimeTypes.addElement(MIME_DP);
-		for (int i = 0; i < additionalProcessors.size(); i++) {
+		for (int i = 0; useAdditionalProcessors && i < additionalProcessors.size(); i++) {
 			String additionalMT[] = ((InstallationItemProcessor) additionalProcessors.get(i)).getSupportedMimeTypes();
 			for (int j = 0; j < additionalMT.length; j++) {
 				if (mimeTypes.indexOf(additionalMT[j]) == -1) {
@@ -133,15 +132,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		Map preparationProps = new Hashtable();
 
 		// Signing properties
-		List certUids = FrameWork.getSignCertificateUids(framework.getConfig());
-		Iterator signIterator = certUids.iterator();
-		int certId = 0;
-		while (signIterator.hasNext()) {
-			ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
-			if (cert != null) {
-				CertUtils.pushCertificate(preparationProps, cert, certId++);
-			}
-		}
+		preparationProps.putAll(framework.getSigningProperties());
 
 		// Platform properties
 		try {
@@ -178,7 +169,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			if (mimeType.equals(MIME_DP) || mimeType.equals(MIME_JAR) || mimeType.equals(MIME_ZIP)) {
 				processors.addElement(this);
 			}
-			for (int i = 0; i < additionalProcessors.size(); i++) {
+			for (int i = 0; useAdditionalProcessors && i < additionalProcessors.size(); i++) {
 				String procMimeTypes[] = ((InstallationItemProcessor) additionalProcessors.elementAt(i))
 						.getSupportedMimeTypes();
 				for (int j = 0; j < procMimeTypes.length; j++) {
@@ -263,5 +254,13 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 	public ImageDescriptor getGeneralTargetImageDescriptor() {
 		return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
+	}
+
+	public boolean getUseAdditionalProcessors() {
+		return useAdditionalProcessors;
+	}
+
+	public void setUseAdditionalProcessors(boolean enable) {
+		this.useAdditionalProcessors = enable;
 	}
 }

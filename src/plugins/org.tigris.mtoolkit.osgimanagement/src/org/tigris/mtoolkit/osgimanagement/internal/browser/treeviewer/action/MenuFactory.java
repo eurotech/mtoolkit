@@ -15,8 +15,14 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Shell;
+import org.tigris.mtoolkit.common.installation.BaseFileItem;
+import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
@@ -31,8 +37,12 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Install
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
+import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor;
+import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkTarget;
 
 public class MenuFactory {
+	private static final String MIME_JAR = "application/java-archive"; //$NON-NLS-1$
+	private static final String MIME_DP = "application/vnd.osgi.dp"; //$NON-NLS-1$
 
 	public static void addFrameworkAction(TreeRoot treeRoot, TreeViewer parentView) {
 		String frameworkName = generateName(treeRoot);
@@ -131,7 +141,7 @@ public class MenuFactory {
 		ConsoleManager.showConsoleIfCreated(dpNode.findFramework());
 	}
 
-	public static void installBundleAction(FrameWork framework, TreeViewer parentView) {
+	public static void installBundleAction(final FrameWork framework, TreeViewer parentView) {
 		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.INSTALL_BUNDLE_TYPE);
 		installDialog.open();
 		final String result = installDialog.getResult();
@@ -139,11 +149,25 @@ public class MenuFactory {
 			return;
 		}
 
-		FrameworkConnectorFactory.installBundle(new File(result), framework);
+		Job job = new Job("Installing to " + framework.getName()) {
+			public IStatus run(IProgressMonitor monitor) {
+				InstallationItem item = new BaseFileItem(new File(result), MIME_JAR);
+				FrameworkProcessor processor = new FrameworkProcessor();
+				processor.setUseAdditionalProcessors(false);
+				IStatus status = processor.processInstallationItem(item, new FrameworkTarget(framework), monitor);
+				monitor.done();
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				return status;
+			}
+		};
+		job.schedule();
+
 		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
-	public static void installDPAction(FrameWork framework, TreeViewer parentView) {
+	public static void installDPAction(final FrameWork framework, TreeViewer parentView) {
 		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.INSTALL_DP_TYPE);
 		installDialog.open();
 		final String result = installDialog.getResult();
@@ -151,7 +175,21 @@ public class MenuFactory {
 			return;
 		}
 
-		FrameworkConnectorFactory.installDP(new File(result), framework);
+		Job job = new Job("Installing to " + framework.getName()) {
+			public IStatus run(IProgressMonitor monitor) {
+				InstallationItem item = new BaseFileItem(new File(result), MIME_DP);
+				FrameworkProcessor processor = new FrameworkProcessor();
+				processor.setUseAdditionalProcessors(false);
+				IStatus status = processor.processInstallationItem(item, new FrameworkTarget(framework), monitor);
+				monitor.done();
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				return status;
+			}
+		};
+		job.schedule();
+
 		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
