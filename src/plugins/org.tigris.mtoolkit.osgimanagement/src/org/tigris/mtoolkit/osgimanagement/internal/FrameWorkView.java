@@ -65,7 +65,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -121,7 +120,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Fin
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.GotoServiceAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallDPAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.MenuFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.PropertyAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RefreshAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RemoveAction;
@@ -697,6 +695,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showBundleIDAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showBundleVersionAction);
+				}
+				
+				if (element instanceof Category) {
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, installBundleAction);
 				}
 
 				if (element instanceof ObjectClass) {
