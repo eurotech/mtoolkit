@@ -60,7 +60,7 @@ public class BrowserErrorHandler {
 
 	public static void processError(Throwable t, Model unknown) {
 		if (unknown instanceof Model) {
-			processError(t, findConnector((Model) unknown));
+			processError(t, findConnector((Model) unknown), unknown.findFramework().userDisconnect);
 		}
 	}
 
@@ -73,8 +73,10 @@ public class BrowserErrorHandler {
 	}
 
 	// Process given exception with no reason given
-	public static void processError(Throwable t, DeviceConnector connector) {
-		processError(t, connector, Messages.no_reason_message);
+	public static void processError(Throwable t, DeviceConnector connector, boolean user) {
+		if (!user) {
+			processError(t, connector, Messages.no_reason_message);
+		}
 	}
 
 	public static void processError(Throwable t, DeviceConnector connector, String reason) {
@@ -100,11 +102,11 @@ public class BrowserErrorHandler {
 	public static void processError(final Throwable t, String info, boolean display) {
 
 		// Subsitute missing exception message
-		final String reason;
+		final String reason[] = new String[1];
 		if (t.getMessage() == null) {
-			reason = Messages.no_exception_message;
+			reason[0] = Messages.no_exception_message;
 		} else {
-			reason = t.getMessage();
+			reason[0] = t.getMessage();
 		}
 
 		if (display) {
@@ -128,7 +130,7 @@ public class BrowserErrorHandler {
 								PluginUtilities.showErrorDialog(shell,
 										Messages.standard_error_title,
 										trueMessage,
-										reason,
+										reason[0],
 										t);
 							}
 							manageShell(shell);
@@ -141,9 +143,9 @@ public class BrowserErrorHandler {
 		}
 
 		if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
-			dumpToLog(IStatus.ERROR, reason, ((IAgentException) t).getCauseException());
+			dumpToLog(IStatus.ERROR, reason[0], ((IAgentException) t).getCauseException());
 		} else {
-			dumpToLog(IStatus.ERROR, reason, t);
+			dumpToLog(IStatus.ERROR, reason[0], t);
 		}
 	}
 

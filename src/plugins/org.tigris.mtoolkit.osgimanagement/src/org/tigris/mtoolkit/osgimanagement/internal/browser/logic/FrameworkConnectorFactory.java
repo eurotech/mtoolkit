@@ -31,6 +31,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
@@ -111,7 +112,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				try {
 					addBundle(rBundles[i], fw);
 				} catch (IAgentException e) {
-					BrowserErrorHandler.processError(e, fw.getConnector());
+					if (!fw.userDisconnect && e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+						BrowserErrorHandler.processError(e, fw.getConnector(), fw.userDisconnect);
+					}
 				}
 				if (monitor != null) {
 					if (monitor.isCanceled()) {
@@ -136,14 +139,20 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 								|| (bundle.getState() != org.osgi.framework.Bundle.ACTIVE && bundle.getState() != org.osgi.framework.Bundle.STARTING))
 					continue;
 
-				RemoteService rServices[] = rBundles[i].getRegisteredServices();
-				for (int j = 0; j < rServices.length; j++) {
-					fw.servicesVector.addElement(new ServiceObject(rServices[j], rBundles[i]));
-				}
-				rServices = rBundles[i].getServicesInUse();
-				if (rServices != null) {
+				try {
+					RemoteService rServices[] = rBundles[i].getRegisteredServices();
 					for (int j = 0; j < rServices.length; j++) {
-						ServiceObject.addUsedInBundle(rServices[j], rBundles[i], fw);
+						fw.servicesVector.addElement(new ServiceObject(rServices[j], rBundles[i]));
+					}
+					rServices = rBundles[i].getServicesInUse();
+					if (rServices != null) {
+						for (int j = 0; j < rServices.length; j++) {
+							ServiceObject.addUsedInBundle(rServices[j], rBundles[i], fw);
+						}
+					}
+				} catch (IAgentException e) {
+					if (e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+						throw e;
 					}
 				}
 
@@ -753,6 +762,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	
 	private static void disconnectFramework0(FrameWork fw) {
 		try {
+			fw.userDisconnect = true;
 			if (fw.autoConnected) {
 				fw.disconnect();
 			} else {

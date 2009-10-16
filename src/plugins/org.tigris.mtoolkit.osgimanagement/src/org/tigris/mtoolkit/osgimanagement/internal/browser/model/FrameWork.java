@@ -34,6 +34,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
+import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -92,6 +93,9 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 	private PMPConnectionListener connectionListener;
 	private boolean connectedFlag;
+	
+	// flag indicates user has forced disconnect action
+	public boolean userDisconnect = false;
 
 	private List modelProviders = new ArrayList();
 
@@ -174,6 +178,9 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 
 	public void setConnector(DeviceConnector connector) {
 		this.connector = connector;
+		if (connector == null) {
+			connectedFlag = false;
+		}
 	}
 
 	public void setMonitor(IProgressMonitor monitor) {
@@ -218,6 +225,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
 			try {
 				connecting = true;
+				userDisconnect = false;
 				if (connector != null) {
 					bundleHash = new Hashtable();
 					categoryHash = new Hashtable();
@@ -229,12 +237,15 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					try {
 						if (monitor != null && monitor.isCanceled())
 							return;
-						connector.getDeploymentManager().addRemoteBundleListener(this);
-						connector.getDeploymentManager().addRemoteDPListener(this);
+						DeploymentManager deploymentManager = connector.getDeploymentManager();
+						if (deploymentManager != null) {
+							deploymentManager.addRemoteBundleListener(this);
+							deploymentManager.addRemoteDPListener(this);
+						}
 						connector.getServiceManager().addRemoteServiceListener(this);
 						connector.monitorDeviceProperties();
 					} catch (IAgentException e) {
-						BrowserErrorHandler.processError(e, connector);
+						BrowserErrorHandler.processError(e, connector, userDisconnect);
 					}
 
 					if (refreshing) {
@@ -263,7 +274,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 												"Remote framework {0} doesn't support deployment packages", this
 														.getName()), e));
 							} else {
-								BrowserErrorHandler.processError(e, connector);
+								BrowserErrorHandler.processError(e, connector, userDisconnect);
 							}
 						}
 
@@ -279,7 +290,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 						}
 
 					} catch (IAgentException e) {
-						BrowserErrorHandler.processError(e, connector);
+						BrowserErrorHandler.processError(e, connector, userDisconnect);
 					} catch (IllegalStateException ise) {
 						// connection was closed
 					}
@@ -327,7 +338,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 						connector.cancelMonitoringDeviceProperties();
 					}
 				} catch (IAgentException e) {
-					BrowserErrorHandler.processError(e, connector);
+					BrowserErrorHandler.processError(e, connector, userDisconnect);
 				}
 			}
 
@@ -800,7 +811,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			// ignore bundle installed exceptions, we will receive uninstalled
 			// event shortly
 			if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
-				BrowserErrorHandler.processError(ex, connector);
+				BrowserErrorHandler.processError(ex, connector, userDisconnect);
 			}
 		}
 		updateContextMenuStates();
@@ -828,8 +839,9 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					dpNodeRoot.addElement(dpNode);
 					dpHash.put(remoteDP.getName(), dpNode);
 				} catch (IAgentException e1) {
-					if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE) {
-						BrowserErrorHandler.processError(e1, connector);
+					if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE &&
+							e1.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
+						BrowserErrorHandler.processError(e1, connector, userDisconnect);
 					}
 				}
 			} else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
@@ -845,7 +857,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					}
 				} catch (IAgentException e1) {
 					e1.printStackTrace();
-					BrowserErrorHandler.processError(e1, connector);
+					BrowserErrorHandler.processError(e1, connector, userDisconnect);
 				}
 			}
 
@@ -856,7 +868,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			BrowserErrorHandler.debug(ex);
 		} catch (Throwable t) {
 			t.printStackTrace();
-			BrowserErrorHandler.processError(t, connector);
+			BrowserErrorHandler.processError(t, connector, userDisconnect);
 		}
 		updateContextMenuStates();
 	}
@@ -963,13 +975,13 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			}
 			updateElement();
 		} catch (IAgentException e1) {
-			BrowserErrorHandler.processError(e1, connector);
+			BrowserErrorHandler.processError(e1, connector, userDisconnect);
 		} catch (IllegalStateException ex) {
 			// ignore illegal states, they are usually due to working with stale
 			// data
 			BrowserErrorHandler.debug(ex);
 		} catch (Throwable t) {
-			BrowserErrorHandler.processError(t, connector);
+			BrowserErrorHandler.processError(t, connector, userDisconnect);
 		}
 	}
 
