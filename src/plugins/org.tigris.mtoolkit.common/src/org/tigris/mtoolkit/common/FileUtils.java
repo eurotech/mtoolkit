@@ -32,29 +32,34 @@ public class FileUtils {
    */
   public static void extractZip(File zipFile, File destinationDir) throws IOException {
     ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile));
-    ZipEntry zipEntry = zis.getNextEntry();
-    destinationDir.mkdirs();
+    try {
+      ZipEntry zipEntry = zis.getNextEntry();
+      destinationDir.mkdirs();
 
-    while (zipEntry != null) {
-      String entryName = zipEntry.getName();
-      File file = new File(destinationDir.getAbsolutePath() + "/" + entryName);
-      if (zipEntry.isDirectory()) {
-        file.mkdirs();
-      } else {
-        file.getParentFile().mkdirs();
-        FileOutputStream outputStream = new FileOutputStream(file);
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = zis.read(buf)) > 0) {
-          outputStream.write(buf, 0, len);
+      while (zipEntry != null) {
+        String entryName = zipEntry.getName();
+        File file = new File(destinationDir.getAbsolutePath() + "/" + entryName);
+        if (zipEntry.isDirectory()) {
+          file.mkdirs();
+        } else {
+          file.getParentFile().mkdirs();
+          byte[] buf = new byte[1024];
+          FileOutputStream outputStream = new FileOutputStream(file);
+          try {
+            int len;
+            while ((len = zis.read(buf)) > 0) {
+              outputStream.write(buf, 0, len);
+            }
+          } finally {
+            outputStream.close();
+          }
         }
-        outputStream.close();
+        zis.closeEntry();
+        zipEntry = zis.getNextEntry();
       }
-      zis.closeEntry();
-      zipEntry = zis.getNextEntry();
+    } finally {
+      zis.close();
     }
-
-    zis.close();
   }
 
   /**
@@ -68,8 +73,11 @@ public class FileUtils {
    */
   public static void makeZip(File src, File zipFile) throws IOException {
     ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
-    addToZip(src, src.isDirectory() ? "" : src.getName(), zos);
-    zos.close();
+    try {
+      addToZip(src, src.isDirectory() ? "" : src.getName(), zos);
+    } finally {
+      zos.close();
+    }
   }
 
   private static void addToZip(File file, String name, ZipOutputStream zos) throws IOException {
@@ -83,14 +91,17 @@ public class FileUtils {
       }
     } else {
       FileInputStream in = new FileInputStream(file);
-      zos.putNextEntry(new ZipEntry(name));
-      byte[] buf = new byte[1024];
-      int len;
-      while ((len = in.read(buf)) > 0) {
-        zos.write(buf, 0, len);
+      try {
+        zos.putNextEntry(new ZipEntry(name));
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+          zos.write(buf, 0, len);
+        }
+        zos.closeEntry();
+      } finally {
+        in.close();
       }
-      zos.closeEntry();
-      in.close();
     }
   }
 
@@ -117,6 +128,7 @@ public class FileUtils {
 
   /**
    * Returns file extension in lower case.
+   * 
    * @param file
    * @return
    */
