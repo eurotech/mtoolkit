@@ -153,7 +153,11 @@ public class RemoteConsole extends IOConsole {
 
 		public void elementChanged(ContentChangeEvent event) {
 			if (event.getTarget() == fw) {
-				setName(computeName());
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						setName(computeName());
+					}
+				});
 			}
 		}
 
