@@ -88,7 +88,6 @@ public class ResourceProcessorsPreferencesPage extends PreferencePage implements
 		resProcessorComp.setLayout(resProcessorLayout);
 		resProcessorComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		resProcessorText = new Text(resProcessorComp, SWT.BORDER);
-		String property = System.getProperty("dpeditor.jarsigner"); //$NON-NLS-1$
 		resProcessorText.addModifyListener(this);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER);
 		gd.grabExcessHorizontalSpace = true;
@@ -106,7 +105,7 @@ public class ResourceProcessorsPreferencesPage extends PreferencePage implements
 		listComp.setLayout(listLayout);
 		listComp.setLayoutData(new GridData(GridData.FILL_BOTH));
 		resList = new List(listComp, SWT.BORDER);
-		property = System.getProperty("dpeditor.resourceprcessors"); //$NON-NLS-1$
+		String property = System.getProperty("dpeditor.resourceprcessors"); //$NON-NLS-1$
 		if (property != null && !property.equals("")) {
 			String[] items = getItemsFromProperty(property);
 			resList.setItems(items);

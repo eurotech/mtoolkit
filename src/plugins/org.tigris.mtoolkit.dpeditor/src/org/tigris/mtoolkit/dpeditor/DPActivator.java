@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.dpeditor;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -73,12 +72,6 @@ public class DPActivator extends AbstractUIPlugin {
 
 		DPActivator dpActivator = DPActivator.getDefault();
 		if (dpActivator != null) {
-			String jarsigner = getPreferenceStore().getString("dpeditor.jarsigner");
-			if (jarsigner.equals("")) {
-				setLocationJavaHome();
-			} else {
-				System.setProperty("dpeditor.jarsigner", jarsigner);
-			}
 			acceptAutomaticallyChanges = getPreferenceStore().getBoolean("dpeditor.accept");
 			System.setProperty("dpeditor.accept", (new Boolean(acceptAutomaticallyChanges)).toString());
 			String resourceProcessors = getPreferenceStore().getString("dpeditor.resourceprcessors");
@@ -96,14 +89,10 @@ public class DPActivator extends AbstractUIPlugin {
 	}
 
 	private void saveDPProperties() {
-		String signer = "dpeditor.jarsigner";
 		String accept = "dpeditor.accept";
 		String proc = "dpeditor.resourceprcessors";
 		IPreferenceStore ips = getPreferenceStore();
 
-		if (System.getProperty(signer) != null) {
-			ips.setValue(signer, System.getProperty(signer));
-		}
 		if (System.getProperty(accept) != null) {
 			ips.setValue(accept, System.getProperty(accept));
 		} else {
@@ -111,26 +100,6 @@ public class DPActivator extends AbstractUIPlugin {
 		}
 		ips.setValue(proc, System.getProperty(proc));
 
-	}
-
-	/**
-	 * Sets dpeditor.jarsigner property depends on the java.home property
-	 */
-	public static void setLocationJavaHome() {
-		String property = System.getProperty("java.home"); //$NON-NLS-1$
-		if (property != null && !property.equals("")) { //$NON-NLS-1$
-			File javaHome = new File(property);
-			String jarSignerRelativePath = "bin" + File.separator + "jarsigner.exe";
-			File signerFile = new File(javaHome, jarSignerRelativePath);
-			if (!signerFile.exists()) {
-				File tryParentFolderFile = new File(javaHome.getParentFile(), jarSignerRelativePath);
-				if (tryParentFolderFile.exists())
-					signerFile = tryParentFolderFile;
-			}
-			if (signerFile.exists()) {
-				System.setProperty("dpeditor.jarsigner", signerFile.getAbsolutePath()); //$NON-NLS-1$
-			}
-		}
 	}
 
 	/**

@@ -21,6 +21,7 @@ public class Messages extends NLS {
 	public static String certs_btnAdd;
 	public static String certs_btnEdit;
 	public static String certs_btnRemove;
+	public static String certs_lblJarsignerLocation;
 
 	public static String dlgCertMan_titleAdd;
 	public static String dlgCertMan_titleEdit;

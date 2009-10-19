@@ -21,6 +21,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 
 /**
@@ -245,13 +246,14 @@ public class DeploymentPackageGenerator {
 	}
 
 	private boolean signJar(String jarName, String signedJar, CertificateInfo ci) {
-		String jarSigner = System.getProperty("dpeditor.jarsigner");
+		String jarSigner = CertUtils.getJarsignerLocation();
 		if (jarSigner == null) {
-			jarSigner = System.getProperty("java.home") + File.separator + "bin" + File.separator + "jarsigner";
+			error = "The location of jarsigner tool was not correctly specified in Preferences.";
+			return false;
 		}
 		File f = new File(jarSigner);
 		if (!f.exists()) {
-			error = "The jarsigner tool was not found in the specified path.\nPlease set the correct path in Deployment Package Editor preferences page.\nThe package was successfully created but was not signed.";
+			error = "The jarsigner tool was not found in the specified path.\nPlease set the correct path in Preferences.\nThe package was successfully created but was not signed.";
 			return false;
 		}
 		Vector v = new Vector();

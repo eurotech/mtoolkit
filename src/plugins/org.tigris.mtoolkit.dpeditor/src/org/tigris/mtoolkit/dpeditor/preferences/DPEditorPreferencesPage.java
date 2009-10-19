@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.dpeditor.preferences;
 
-import java.io.File;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -26,17 +25,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
 import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
-
-import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
 
 /**
  * Preferences page that allows of the user to choose jar signer location
@@ -44,10 +39,6 @@ import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
 public class DPEditorPreferencesPage extends PreferencePage implements
 		IWorkbenchPreferencePage, SelectionListener, IMToolkitPreferencePage {
 
-	/** Location of jar signer text field */
-	private Text locationText;
-	/** Browse button which open file chooser */
-	private Button browseButton;
 	/** Check box button which automatically accept changes in bundles */
 	private Button acceptCheckBoxButton;
 
@@ -78,7 +69,6 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 	protected Control createPageControl(Composite parent) {
 		GridData gd;
 		String property;
-		Label label;
 		GridLayout layout;
 
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -102,26 +92,6 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 		}
 		boolean selected = new Boolean(property).booleanValue();
 		acceptCheckBoxButton.setSelection(selected);
-
-		label = new Label(composite, SWT.NONE);
-		label.setText(ResourceManager.getString("DPPreferencesPage.jar_signer_label")); //$NON-NLS-1$
-		gd = new GridData();
-		label.setLayoutData(gd);
-
-		locationText = new Text(composite, SWT.BORDER);
-		property = System.getProperty("dpeditor.jarsigner"); //$NON-NLS-1$
-		if (property != null && !property.equals("")) {
-			locationText.setText(property);
-		}
-		gd = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER);
-		locationText.setLayoutData(gd);
-
-		browseButton = new Button(composite, SWT.NONE | SWT.PUSH);
-		browseButton.setText(ResourceManager.getString("DPPEditor.Browse_Button")); //$NON-NLS-1$
-		browseButton.addSelectionListener(this);
-		gd = new GridData();
-		gd.verticalAlignment = GridData.VERTICAL_ALIGN_CENTER;
-		browseButton.setLayoutData(gd);
 
 		Group rpGroup = new Group(composite, SWT.SHADOW_ETCHED_OUT);
 		rpGroup.setText(ResourceManager.getString("DPPreferencesPage.resources.name"));
@@ -171,28 +141,6 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 		return composite;
 	}
 
-	/**
-	 * Sets java.home property into the resource processor text field
-	 */
-	private void setLocationJavaHome() {
-		String property = System.getProperty("java.home"); //$NON-NLS-1$
-		if (property != null && !property.equals("")) { //$NON-NLS-1$
-			File javaHome = new File(property);
-			String jarSignerRelativePath = "bin" + File.separator + "jarsigner.exe";
-			File signerFile = new File(javaHome, jarSignerRelativePath);
-			if (!signerFile.exists()) {
-				File tryParentFolderFile = new File(javaHome.getParentFile(), jarSignerRelativePath);
-				if (tryParentFolderFile.exists())
-					signerFile = tryParentFolderFile;
-			}
-			if (signerFile.exists()) {
-				locationText.setText(signerFile.getAbsolutePath()); //$NON-NLS-1$
-			}
-		} else {
-			locationText.setText("");
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -212,9 +160,7 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 	 */
 	public void widgetSelected(SelectionEvent e) {
 		Object obj = e.getSource();
-		if (obj == browseButton) {
-			browseAction();
-		} else if (obj == addButton) {
+		if (obj == addButton) {
 			addAction();
 		} else if (obj == removeButton) {
 			removeAction();
@@ -275,24 +221,6 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 		}
 	}
 
-	/**
-	 * Opens file chooser dialog, allow to choose only .exe files and put chosen
-	 * file in the jar signer location text field.
-	 */
-	private void browseAction() {
-		String selectedFile = null;
-		String path = locationText.getText();
-		FileDialog dialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
-		dialog.setFilterPath(path);
-
-		selectedFile = dialog.open();
-
-		if (selectedFile != null) {
-			locationText.setText(selectedFile);
-			browseButton.setFocus();
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -316,7 +244,6 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 
 	public void performDefaults() {
 		super.performDefaults();
-		setLocationJavaHome();
 		System.setProperty("dpeditor.accept", "false");
 		acceptCheckBoxButton.setSelection(false);
 		resList.removeAll();
@@ -331,8 +258,6 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 
 	public boolean performOk() {
 		boolean isOk = true;
-		String loc = locationText.getText();
-		System.setProperty("dpeditor.jarsigner", loc);
 		System.setProperty("dpeditor.accept", "" + acceptCheckBoxButton.getSelection());
 
 		String loc2 = createResourceProperty();

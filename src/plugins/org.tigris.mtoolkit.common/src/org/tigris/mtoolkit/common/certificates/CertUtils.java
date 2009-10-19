@@ -19,10 +19,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.util.tracker.ServiceTracker;
 import org.tigris.mtoolkit.common.ProcessOutputReader;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
@@ -135,9 +137,9 @@ public class CertUtils {
    */
   public static void signJar(String jarName, String signedJar, IProgressMonitor monitor, String alias,
       String storeLocation, String storeType, String storePass) throws IOException {
-    String jarSigner = System.getProperty("dpeditor.jarsigner");
+    String jarSigner = getJarsignerLocation();
     if (jarSigner == null) {
-      jarSigner = System.getProperty("java.home") + File.separator + "bin" + File.separator + "jarsigner";
+      throw new IOException("The location of jarsigner tool was not correctly specified in Preferences.");
     }
     File f = new File(jarSigner);
     if (!f.exists()) {
@@ -269,5 +271,32 @@ public class CertUtils {
         CertUtils.signJar(signedFile.getAbsolutePath(), null, monitor, alias, location, type, pass);
       }
     }
+  }
+
+  /**
+   * Returns location of jarsigner tool or null if the location
+   * cannot be determined.
+   * @return the jarsigner location
+   */
+  public static String getJarsignerLocation() {
+    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(), "org.tigris.mtoolkit.certmanager");
+    String location = preferenceStore.getString("jarsigner.location");
+    if (location == null || location.length() == 0) {
+      String javaHome = System.getProperty("java.home");
+      if (javaHome != null) {
+        String relativePath = "bin" + File.separator + "jarsigner.exe";
+        File signerFile = new File(javaHome, relativePath);
+        if (signerFile.exists()) {
+          location = signerFile.getAbsolutePath();
+        } else {
+          File parentPath = new File(javaHome).getParentFile();
+          signerFile = new File(parentPath, relativePath);
+          if (signerFile.exists()) {
+            location = signerFile.getAbsolutePath();
+          }
+        }
+      }
+    }
+    return location;
   }
 }

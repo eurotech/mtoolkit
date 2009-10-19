@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.certmanager.internal.preferences;
 import java.util.Iterator;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -26,12 +27,17 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.certmanager.internal.CertManagerPlugin;
 import org.tigris.mtoolkit.certmanager.internal.Messages;
 import org.tigris.mtoolkit.certmanager.internal.dialogs.CertificateManagementDialog;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
@@ -43,6 +49,10 @@ public class CertPreferencesPage extends PreferencePage implements
 	private Button btnAdd;
 	private Button btnEdit;
 	private Button btnRemove;
+	private Button btnBrowse;
+	private Text txtJarsignerLocation;
+
+	private static final String ATTR_JARSIGNER_LOCATION = "jarsigner.location"; //$NON-NLS-1$
 
 	public Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -99,6 +109,28 @@ public class CertPreferencesPage extends PreferencePage implements
 			}
 		});
 
+		Label label = new Label(composite, SWT.NONE);
+		gridData = new GridData();
+		gridData.horizontalSpan = 2;
+		label.setLayoutData(gridData);
+		label.setText(Messages.certs_lblJarsignerLocation);
+
+		txtJarsignerLocation = new Text(composite, SWT.BORDER);
+		String location = getJarsignerLocation();
+		if (location != null) {
+			txtJarsignerLocation.setText(location);
+		}
+		txtJarsignerLocation.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		btnBrowse = new Button(composite, SWT.PUSH);
+		btnBrowse.setText(Messages.browseLabel);
+		btnBrowse.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				browseLocation();
+			}
+		});
+		btnBrowse.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+
 		updateButtonsState();
 
 		return composite;
@@ -117,11 +149,16 @@ public class CertPreferencesPage extends PreferencePage implements
 
 	public void performDefaults() {
 		super.performDefaults();
+
 		CertStorage.getDefault().performDefaults();
+
+		txtJarsignerLocation.setText(""); //$NON-NLS-1$
+		saveJarsignerLocation(""); //$NON-NLS-1$
 	}
 
 	public boolean performOk() {
 		CertStorage.getDefault().save();
+		saveJarsignerLocation(txtJarsignerLocation.getText());
 		return true;
 	}
 
@@ -168,6 +205,20 @@ public class CertPreferencesPage extends PreferencePage implements
 		}
 	}
 
+	private void browseLocation() {
+		String selectedFile = null;
+		String path = txtJarsignerLocation.getText();
+		FileDialog dialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
+		dialog.setFilterPath(path);
+
+		selectedFile = dialog.open();
+
+		if (selectedFile != null) {
+			txtJarsignerLocation.setText(selectedFile);
+			btnBrowse.setFocus();
+		}
+	}
+
 	private void updateButtonsState() {
 		IStructuredSelection selection = (IStructuredSelection) certificatesViewer.getSelection();
 		switch (selection.size()) {
@@ -184,5 +235,26 @@ public class CertPreferencesPage extends PreferencePage implements
 			btnRemove.setEnabled(true);
 			return;
 		}
+	}
+
+	private String getJarsignerLocation() {
+		CertManagerPlugin plugin = CertManagerPlugin.getDefault();
+		if (plugin == null) {
+			return ""; //$NON-NLS-1$
+		}
+		IPreferenceStore store = plugin.getPreferenceStore();
+
+		String location = store.getString(ATTR_JARSIGNER_LOCATION);
+		return location;
+	}
+
+	private void saveJarsignerLocation(String location) {
+		CertManagerPlugin plugin = CertManagerPlugin.getDefault();
+		if (plugin == null) {
+			return;
+		}
+		IPreferenceStore store = plugin.getPreferenceStore();
+
+		store.setValue(ATTR_JARSIGNER_LOCATION, location);
 	}
 }
