@@ -51,14 +51,22 @@ public class FileUtils {
               outputStream.write(buf, 0, len);
             }
           } finally {
-            outputStream.close();
+            try {
+              outputStream.close();
+            } catch (IOException e) {
+              // nothing to do
+            }
           }
         }
         zis.closeEntry();
         zipEntry = zis.getNextEntry();
       }
     } finally {
-      zis.close();
+      try {
+        zis.close();
+      } catch (IOException e) {
+        // nothing to do
+      }
     }
   }
 
@@ -76,7 +84,11 @@ public class FileUtils {
     try {
       addToZip(src, src.isDirectory() ? "" : src.getName(), zos);
     } finally {
-      zos.close();
+      try {
+        zos.close();
+      } catch (IOException e) {
+        // nothing to do
+      }
     }
   }
 
@@ -100,7 +112,11 @@ public class FileUtils {
         }
         zos.closeEntry();
       } finally {
-        in.close();
+        try {
+          in.close();
+        } catch (IOException e) {
+          // nothing to do
+        }
       }
     }
   }
