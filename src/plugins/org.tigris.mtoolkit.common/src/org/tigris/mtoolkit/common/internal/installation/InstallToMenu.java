@@ -97,9 +97,9 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 			boolean supported = false;
 			for (int j = 0; j < capableProcessors.size(); j++) {
 				InstallationItemProcessor processor = (InstallationItemProcessor) capableProcessors.get(j);
-				InstallationTarget[] targets = processor.getInstallationTargets();
-				for (int k = 0; k < targets.length; k++) {
-					if (targets[k].isMimeTypeSupported(mimeType)) {
+				String[] procMimeTypes = processor.getSupportedMimeTypes();
+				for (int k = 0; k < procMimeTypes.length; k++) {
+					if (procMimeTypes[k].equals(mimeType)) {
 						supported = true;
 						break;
 					}
