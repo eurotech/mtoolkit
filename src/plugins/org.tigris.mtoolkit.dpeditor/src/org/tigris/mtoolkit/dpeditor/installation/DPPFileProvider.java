@@ -43,6 +43,7 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 		}
 
 		public void dispose() {
+			super.dispose();
 			if (delete) {
 				dpFile.delete();
 				try {
@@ -69,8 +70,7 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 					File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + file.getName());
 					convertedFile.getParentFile().mkdirs();
 					AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
-					dpFile.delete();
-					dpFile = convertedFile;
+					preparedFile = convertedFile;
 				}
 
 				// sign file if properties contain signing info
@@ -79,10 +79,12 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 				if (signedFile.exists()) {
 					signedFile.delete();
 				}
-				CertUtils.signJar(dpFile, signedFile, monitor, properties);
+				CertUtils.signJar(preparedFile != null ? preparedFile : dpFile, signedFile, monitor, properties);
 				if (signedFile.exists()) {
-					dpFile.delete();
-					dpFile = signedFile;
+					if (preparedFile != null) {
+						preparedFile.delete();
+					}
+					preparedFile = signedFile;
 				}
 			} catch (Exception e) {
 				return new Status(Status.ERROR, DPActivator.PLUGIN_ID, "Failed to prepare file for installation", e);
