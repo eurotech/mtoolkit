@@ -88,8 +88,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		if (elementList == null) {
 			return new Model[0];
 		}
-		Model[] resultArray = new Model[elementList.size()];
-		elementList.toArray(resultArray);
+		Model[] resultArray = new Model[0];
+		resultArray = (Model[]) elementList.toArray(resultArray);
 		return resultArray;
 	}
 	

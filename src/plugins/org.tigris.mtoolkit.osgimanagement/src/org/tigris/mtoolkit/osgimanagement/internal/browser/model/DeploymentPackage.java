@@ -54,17 +54,17 @@ public class DeploymentPackage extends Model {
 				}
 				Model children[] = bundleNodeInBundles.getChildren();
 				if (children != null && children.length > 0) {
-					FrameworkConnectorFactory.addServiceCategoriesNodes(bundleNode);
-					Model servNodes[] = bundleNode.getChildren();
-					if (servNodes.length == 0)
+					Model[] categories = FrameworkConnectorFactory.addServiceCategoriesNodes(bundleNode);
+					if (categories == null) {
 						continue;
+					}
 					Model regServ[] = children[0].getChildren();
 					if (regServ != null) {
 						for (int i = 0; i < regServ.length; i++) {
 							ObjectClass oc = new ObjectClass(regServ[i].getName(),
 								new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
 								((ObjectClass) regServ[i]).getService());
-							servNodes[0].addElement(oc);
+							categories[0].addElement(oc);
 						}
 					}
 
@@ -74,7 +74,7 @@ public class DeploymentPackage extends Model {
 							ObjectClass oc = new ObjectClass(usedServ[i].getName(),
 								new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
 								((ObjectClass) usedServ[i]).getService());
-							servNodes[1].addElement(oc);
+							categories[1].addElement(oc);
 						}
 					}
 				}

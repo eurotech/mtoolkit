@@ -764,12 +764,13 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 					dpBundle.setState(org.osgi.framework.Bundle.ACTIVE);
 
 				RemoteService usedServ[] = bundle.getRemoteBundle().getServicesInUse();
-				FrameworkConnectorFactory.addServiceCategoriesNodes(bundle);
+				Model[] bCategories = FrameworkConnectorFactory.addServiceCategoriesNodes(bundle);
+				Model[] dpCategories = null;
 				if (dpBundle != null)
-					FrameworkConnectorFactory.addServiceCategoriesNodes(dpBundle);
+					dpCategories = FrameworkConnectorFactory.addServiceCategoriesNodes(dpBundle);
 
-				Model bundleCategory = bundle.getChildren()[1];
-				Model dpBundleCategory = dpBundle == null ? null : dpBundle.getChildren()[1];
+				Model bundleCategory = bCategories[1];
+				Model dpBundleCategory = dpBundle == null ? null : dpCategories[1];
 
 				for (int i = 0; i < usedServ.length; i++) {
 					FrameworkConnectorFactory.createObjectClassNodes(bundleCategory, usedServ[i].getObjectClass(),
@@ -1117,12 +1118,11 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	private void updateBundleServices(Bundle bundle, RemoteService regServ[], RemoteService usedServ[])
 			throws IAgentException {
 		bundle.removeChildren();
-		FrameworkConnectorFactory.addServiceCategoriesNodes(bundle);
-		Model children[] = bundle.getChildren();
-		if (children.length == 0)
+		Model[] categories = FrameworkConnectorFactory.addServiceCategoriesNodes(bundle);
+		if (categories == null)
 			return;
-		Model regServCategory = children[0];
-		Model usedServCategory = children[1];
+		Model regServCategory = categories[0];
+		Model usedServCategory = categories[1];
 
 		for (int i = 0; i < regServ.length; i++) {
 			String objClass[] = regServ[i].getObjectClass();

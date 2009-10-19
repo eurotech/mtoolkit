@@ -192,10 +192,10 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 						|| bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.ACTIVE
 						|| bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.STARTING) {
 			try {
-				addServiceCategoriesNodes(bundle);
-				Model categories[] = bundle.getChildren();
-				if (categories.length == 0)
+				Model categories[] = addServiceCategoriesNodes(bundle);
+				if (categories == null) {
 					return;
+				}
 				ServicesCategory registeredCategory = (ServicesCategory) categories[0];
 				createObjectClassNodes(registeredCategory,
 					servObj.getObjectClass(),
@@ -257,8 +257,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				if (usedInBundle == null) {
 					continue;
 				}
-				addServiceCategoriesNodes(usedInBundle);
-				Model categories[] = usedInBundle.getChildren();
+				Model categories[] = addServiceCategoriesNodes(usedInBundle);
 				ServicesCategory usedCategory = (ServicesCategory) categories[1];
 				createObjectClassNodes(usedCategory,
 					servObj.getObjectClass(),
@@ -268,7 +267,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		}
 	}
 
-	public static void addServiceCategoriesNodes(Bundle bundle) throws IAgentException {
+	public static Model[] addServiceCategoriesNodes(Bundle bundle) throws IAgentException {
+		Model categories[] = null;
 		if (bundle.getType() == 0
 						&& (bundle.getChildren() == null || bundle.getChildren().length == 0)
 						&& (bundle.getState() == org.osgi.framework.Bundle.ACTIVE
@@ -278,7 +278,12 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			ServicesCategory usedCategory = new ServicesCategory(ServicesCategory.IN_USE);
 			bundle.addElement(registeredCategory);
 			bundle.addElement(usedCategory);
+			categories = new Model[] {registeredCategory, usedCategory};
+		} else if (bundle.getType() == 0 &&
+				bundle.getChildren() != null && bundle.getChildren().length == 2) {
+				categories = bundle.getChildren();
 		}
+		return categories;
 	}
 
 	public static void createObjectClassNodes(Model parent, String objClasses[], Long nameID, RemoteService service)
