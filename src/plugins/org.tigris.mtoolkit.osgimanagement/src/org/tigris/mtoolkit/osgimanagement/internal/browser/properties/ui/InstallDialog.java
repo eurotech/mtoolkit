@@ -46,8 +46,14 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 	public static final int INSTALL_BUNDLE_TYPE = 1;
 	public static final int UPDATE_BUNDLE_TYPE = 2;
 	public static final int INSTALL_DP_TYPE = 3;
+	public static final int UNKNOWN_TYPE = -1;
 
 	private int type = 0;
+
+	private String label = null;
+	private String title = null;
+	private String filter = null;
+	private String filterLabel = null;
 
 	private static final String JAR_FILTER = "*.jar"; //$NON-NLS-1$
 	private static final String DP_FILTER = "*.dp"; //$NON-NLS-1$
@@ -60,11 +66,48 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 	private static final String UPDATE_BUNDLE_LABEL = Messages.update_label;
 	private static final String INSTALL_DP_LABEL = Messages.install_dp_label;
 
+	public InstallDialog(TreeViewer parentView, String title, String label, String filter, String filterLabel) {
+		this(parentView, UNKNOWN_TYPE);
+		this.title = title;
+		this.label = label;
+		this.filter = filter;
+		this.filterLabel = filterLabel;
+		init();
+	}
+
 	public InstallDialog(TreeViewer parentView, int type) {
 		super(parentView.getControl().getShell());
+		this.type = type;
+		init();
+	}
+	
+	private void init() {
 		logic = new InstallDialogLogic(this);
 		this.setShellStyle(SWT.RESIZE | SWT.TITLE | SWT.CLOSE | SWT.APPLICATION_MODAL);
-		this.type = type;
+		
+		switch (type) {
+		case INSTALL_BUNDLE_TYPE: {
+			label = INSTALL_BUNDLE_LABEL;
+			title = INSTALL_BUNDLE_TITLE;
+			filter = JAR_FILTER;
+			filterLabel = Messages.bundle_filter_label;
+			break;
+		}
+		case UPDATE_BUNDLE_TYPE: {
+			label = UPDATE_BUNDLE_LABEL;
+			title = UPDATE_BUNDLE_TITLE;
+			filter = JAR_FILTER;
+			filterLabel = Messages.bundle_filter_label;
+			break;
+		}
+		case INSTALL_DP_TYPE: {
+			label = INSTALL_DP_LABEL;
+			title = INSTALL_DP_TITLE;
+			filter = DP_FILTER;
+			filterLabel = Messages.deployment_package_filter_label;
+			break;
+		}
+		}
 	}
 
 	protected Control createContents(Composite parent) {
@@ -80,23 +123,8 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 		grid.horizontalSpan = 2;
 		labelLocation.setLayoutData(grid);
 
-		switch (type) {
-		case INSTALL_BUNDLE_TYPE: {
-			labelLocation.setText(INSTALL_BUNDLE_LABEL);
-			parent.getShell().setText(INSTALL_BUNDLE_TITLE);
-			break;
-		}
-		case UPDATE_BUNDLE_TYPE: {
-			labelLocation.setText(UPDATE_BUNDLE_LABEL);
-			parent.getShell().setText(UPDATE_BUNDLE_TITLE);
-			break;
-		}
-		case INSTALL_DP_TYPE: {
-			labelLocation.setText(INSTALL_DP_LABEL);
-			parent.getShell().setText(INSTALL_DP_TITLE);
-			break;
-		}
-		}
+		labelLocation.setText(label);
+		parent.getShell().setText(title);
 		textLocation = new Text(parent, SWT.SINGLE | SWT.BORDER);
 
 		browseButton = new Button(parent, SWT.PUSH);
@@ -141,12 +169,10 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 
 	private FileDialog getLocationChooser() {
 		locationChooser = new FileDialog(getShell(), SWT.OPEN | SWT.SINGLE);
-		String[] filter = { (type == INSTALL_BUNDLE_TYPE || type == UPDATE_BUNDLE_TYPE) ? JAR_FILTER : DP_FILTER, "*.*" }; //$NON-NLS-1$
-		String[] names = { (type == INSTALL_BUNDLE_TYPE || type == UPDATE_BUNDLE_TYPE)	? Messages.bundle_filter_label
-																						: Messages.deployment_package_filter_label,
-			Messages.all_files_filter_label };
-		locationChooser.setFilterExtensions(filter);
-		locationChooser.setFilterNames(names);
+		String[] filterArr = { filter, "*.*" }; //$NON-NLS-1$
+		String[] namesArr = { filterLabel, Messages.all_files_filter_label };
+		locationChooser.setFilterExtensions(filterArr);
+		locationChooser.setFilterNames(namesArr);
 		return locationChooser;
 	}
 
