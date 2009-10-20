@@ -609,6 +609,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public void connected(final DeviceConnector connector) {
+		if (connector.getProperties().get("framework-connection-temporary") != null)
+			// the connection is only temporary and will be closed shortly
+			return;
 		String frameworkName = (String) connector.getProperties().get("framework-name"); //$NON-NLS-1$
 		boolean autoConnected = true;
 		FrameWork fw = null;
