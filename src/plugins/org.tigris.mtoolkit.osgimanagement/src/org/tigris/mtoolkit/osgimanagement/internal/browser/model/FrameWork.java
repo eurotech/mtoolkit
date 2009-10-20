@@ -206,6 +206,7 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 				FrameWork.this.monitor = monitor;
 				try {
 					synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+						// TODO: check https://devzone.prosyst.bg/jira/browse/TOOLKIT-148
 						connectFramework();
 						if (monitor.isCanceled()) {
 							FrameworkConnectorFactory.disconnectFramework(FrameWork.this);
@@ -315,6 +316,9 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 	}
 
 	public void disconnect() {
+		if (connector == null) {
+			return;
+		}
 		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
 			if (!connectedFlag)
 				return;
