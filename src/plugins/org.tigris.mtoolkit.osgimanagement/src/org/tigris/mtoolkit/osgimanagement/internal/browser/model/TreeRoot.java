@@ -55,7 +55,10 @@ public class TreeRoot extends Model {
 	}
 
 	protected ArrayList getListeners() {
-		return listeners;
+		synchronized (listeners) {
+			ArrayList result = new ArrayList(listeners);
+			return result;
+		}
 	}
 	
 	public boolean isShowBundlesID() {
@@ -75,13 +78,17 @@ public class TreeRoot extends Model {
 	}
 
 	public void addListener(ContentChangeListener newListener) {
-		if (!listeners.contains(newListener)) {
-			listeners.add(newListener);
+		synchronized (listeners) {
+			if (!listeners.contains(newListener)) {
+				listeners.add(newListener);
+			}
 		}
 	}
 
 	public void removeListener(ContentChangeListener oldListener) {
-		listeners.remove(oldListener);
+		synchronized (listeners) {
+			listeners.remove(oldListener);
+		}
 	}
 
 	protected boolean select(Model model) {
