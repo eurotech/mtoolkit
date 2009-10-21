@@ -173,7 +173,8 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		int selected = frameworkViewer.getTable().getSelectionIndex();
 
 		btnEdit.setEnabled(selected != -1);
-		btnRem.setEnabled(selected != -1);
+		btnRem.setEnabled(selected != -1 &&
+				!((FrameWork)frameworkViewer.getTable().getSelection()[0].getData()).autoConnected);
 
 		Button btnOK = getButton(IDialogConstants.OK_ID);
 		if (btnOK != null) {
@@ -190,10 +191,12 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		Object element = selection.getFirstElement();
 		if (element instanceof FrameWork) {
 			FrameWork framework = (FrameWork) element;
-			if (framework.isConnected()) {
-				MenuFactory.disconnectFrameworkAction(framework);
+			if (!framework.autoConnected) {
+				if (framework.isConnected()) {
+					MenuFactory.disconnectFrameworkAction(framework);
+				}
+				MenuFactory.removeFrameworkAction(framework);
 			}
-			MenuFactory.removeFrameworkAction(framework);
 		}
 	}
 
