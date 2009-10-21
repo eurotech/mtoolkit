@@ -131,7 +131,15 @@ public class PluginProvider implements InstallationItemProvider {
 					if (signedFile.exists()) {
 						signedFile.delete();
 					}
-					CertUtils.signJar(file, signedFile, monitor, properties);
+					try {
+						CertUtils.signJar(file, signedFile, monitor, properties);
+					} catch (IOException ioe) {
+						if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
+							signedFile.delete();
+						} else {
+							throw ioe;
+						}
+					}
 					if (signedFile.exists()) {
 						file.delete();
 						file = signedFile;

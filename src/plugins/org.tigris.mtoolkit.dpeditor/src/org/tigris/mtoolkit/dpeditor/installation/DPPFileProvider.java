@@ -79,7 +79,16 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 				if (signedFile.exists()) {
 					signedFile.delete();
 				}
-				CertUtils.signJar(preparedFile != null ? preparedFile : dpFile, signedFile, monitor, properties);
+				try {
+					CertUtils.signJar(preparedFile != null ? preparedFile : dpFile, signedFile, monitor, properties);
+				} catch (IOException ioe) {
+					if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
+						signedFile.delete();
+					} else {
+						throw ioe;
+					}
+				}
+
 				if (signedFile.exists()) {
 					if (preparedFile != null) {
 						preparedFile.delete();

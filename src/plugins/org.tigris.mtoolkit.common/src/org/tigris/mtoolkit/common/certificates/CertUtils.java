@@ -21,6 +21,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -304,5 +305,29 @@ public class CertUtils {
       }
     }
     return location;
+  }
+
+  /**
+   * Opens "Continue without signing" dialog. Returns true if user selects Yes.
+   * @param error error to be displayed
+   * @return
+   */
+  public static boolean continueWithoutSigning(final String error) {
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    final Boolean result[] = new Boolean[1];
+    display.syncExec(new Runnable() {
+      public void run() {
+        Shell shell = display.getActiveShell();
+        String nl = System.getProperty("line.separator");
+        MessageDialog dialog = new MessageDialog(shell, "Warning", null, 
+                "The signing operation failed. Reason:" + nl + error + nl + 
+                "Continue without signing?",
+                MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
+        if (dialog.open() == Dialog.OK) {
+          result[0] = new Boolean(true);
+        }
+      }
+    });
+    return result[0] != null;
   }
 }
