@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -39,9 +40,11 @@ public class ApplicationPropertiesAction extends SelectionProviderAction impleme
 
 		try {
 			Map headers = application.getRemoteApplication().getProperties();
-			
 			Shell shell = parentView.getTree().getShell();
-			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, false);
+			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, "Application Properties") {
+				protected void attachHelp(Composite container) {
+				}
+			};
 
 			propertiesDialog.open();
 			propertiesDialog.getMainControl().setData(headers);

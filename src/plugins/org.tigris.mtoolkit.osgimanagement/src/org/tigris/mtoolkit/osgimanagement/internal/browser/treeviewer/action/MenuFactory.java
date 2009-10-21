@@ -20,12 +20,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
@@ -68,7 +71,13 @@ public class MenuFactory {
 		try {
 			RemoteBundle rBundle = bundle.getRemoteBundle();
 			Shell shell = parentView.getTree().getShell();
-			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, true);
+			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
+				protected void attachHelp(Composite container) {
+					PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+							IHelpContextIds.PROPERTY_BUNDLE);
+				}
+				
+			};
 			Dictionary headers = rBundle.getHeaders(null);
 			propertiesDialog.open();
 			propertiesDialog.getMainControl().setData(headers);
@@ -84,7 +93,11 @@ public class MenuFactory {
 			RemoteDP rdp = dp.getRemoteDP();
 
 			Shell shell = parentView.getTree().getShell();
-			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, false);
+			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.dp_properties_title) {
+				protected void attachHelp(Composite container) {
+					PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
+							IHelpContextIds.PROPERTY_PACKAGE);				}
+			};
 			Dictionary headers = new Hashtable();
 			headers.put("DeploymentPackage-SymbolicName", rdp.getHeader("DeploymentPackage-SymbolicName")); //$NON-NLS-1$ //$NON-NLS-2$
 			headers.put("DeploymentPackage-Version", rdp.getHeader("DeploymentPackage-Version")); //$NON-NLS-1$ //$NON-NLS-2$

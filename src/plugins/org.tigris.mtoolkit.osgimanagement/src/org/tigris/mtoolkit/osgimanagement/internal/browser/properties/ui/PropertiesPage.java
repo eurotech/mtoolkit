@@ -37,6 +37,7 @@ public class PropertiesPage extends PropertyPage {
 
 	protected TableViewer tableViewer;
 	protected Group propertiesGroup;
+	private String groupName = Messages.headers_label;
 
 	public class TableContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object parent) {
@@ -136,19 +137,37 @@ public class PropertiesPage extends PropertyPage {
 	}
 
 	protected String getGroupName() {
-		return Messages.headers_label;
+		return groupName;
 	}
 
 	public void setData(Dictionary data) {
 		Vector dataVector = new Vector();
 		Enumeration keys = data.keys();
 		while (keys.hasMoreElements()) {
-			Object key = keys.nextElement();
+			String key = (String) keys.nextElement();
 			Object value = data.get(key);
-			PropertyObject object = new PropertyObject(key.toString(), value.toString());
-			dataVector.addElement(object);
+			if (value instanceof String[]) {
+				String[] values = (String[]) value;
+				if (values.length == 1) {
+					PropertyObject object = new PropertyObject(key, values[0]);
+					dataVector.addElement(object);
+				} else {
+					for (int j = 0; j < values.length; j++) {
+						StringBuffer buff = new StringBuffer();
+						buff.append(key).append("[").append(String.valueOf(j + 1)).append("]");
+						String key2 = buff.toString();
+						PropertyObject object = new PropertyObject(key2, values[j]);
+						dataVector.addElement(object);
+					}
+				}
+			} else {
+				PropertyObject object = new PropertyObject(key, value.toString());
+				dataVector.addElement(object);
+			}
+			
 		}
 		tableViewer.setInput(dataVector);
+		
 	}
 
 	public void setData(Map data) {
@@ -157,10 +176,31 @@ public class PropertiesPage extends PropertyPage {
 		while (keys.hasNext()) {
 			Object key = keys.next();
 			Object value = data.get(key);
-			PropertyObject object = new PropertyObject(key.toString(), value.toString());
-			dataVector.addElement(object);
+			if (value instanceof String[]) {
+				String[] values = (String[]) value;
+				if (values.length == 1) {
+					PropertyObject object = new PropertyObject(key.toString(), values[0]);
+					dataVector.addElement(object);
+				} else {
+					for (int j = 0; j < values.length; j++) {
+						StringBuffer buff = new StringBuffer();
+						buff.append(key).append("[").append(String.valueOf(j + 1)).append("]");
+						String key2 = buff.toString();
+						PropertyObject object = new PropertyObject(key2, values[j]);
+						dataVector.addElement(object);
+					}
+				}
+			} else {
+				PropertyObject object = new PropertyObject(key.toString(), value.toString());
+				dataVector.addElement(object);
+			}
 		}
 		tableViewer.setInput(dataVector);
+	}
+
+	public void setGroupName(String tableTitle) {
+		groupName = tableTitle;
+		
 	}
 
 	

@@ -24,22 +24,26 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 
-public class PropertiesDialog extends Window implements ConstantsDistributor, SelectionListener {
+public abstract class PropertiesDialog extends Window implements ConstantsDistributor, SelectionListener {
 
 	private PropertiesPage mainControl;
 	private Button closeBtn;
 	private FontMetrics fontMetrics;
-	private boolean bundlePropsDialog = true;
-
-	public PropertiesDialog(Shell shell, boolean bundleProps) {
+	private String title;
+	private String tableTitle;
+	
+	public PropertiesDialog(Shell shell, String title) {
+		this(shell, title, null);
+	}
+	
+	public PropertiesDialog(Shell shell, String title, String tableTitle) {
 		super(shell);
 		this.setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL | SWT.RESIZE);
-		this.bundlePropsDialog = bundleProps;
+		this.title = title;
+		this.tableTitle = tableTitle;
 	}
 
 	public Control createContents(Composite parent) {
@@ -84,20 +88,15 @@ public class PropertiesDialog extends Window implements ConstantsDistributor, Se
 
 	protected PropertiesPage createMainControl(Composite container) {
 		PropertiesPage page = new PropertiesPage();
-		if (bundlePropsDialog) {
-			page.setTitle(Messages.bundle_properties_title);
-		} else {
-			page.setTitle(Messages.dp_properties_title);
+		page.setTitle(title);
+		if (tableTitle != null) {
+			page.setGroupName(tableTitle);
 		}
 		page.createContents(container);
-
 		return page;
 	}
 
-	protected void attachHelp(Composite container) {
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
-			bundlePropsDialog ? IHelpContextIds.PROPERTY_BUNDLE : IHelpContextIds.PROPERTY_PACKAGE);
-	}
+	protected abstract void attachHelp(Composite container);
 
 	/*
 	 * (non-Javadoc)

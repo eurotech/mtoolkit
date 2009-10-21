@@ -12,15 +12,19 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
+import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.ServicePropertiesDialog;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.ServicePropertiesPage;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesPage;
 
 public class ServicePropertiesAction extends SelectionProviderAction implements IStateAction {
 
@@ -43,13 +47,22 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
 		RemoteService service = null;
 		ObjectClass object = (ObjectClass) getStructuredSelection().getFirstElement();
 		service = object.getService();
+		String tableHeader = null;
+		try {
+			tableHeader = "Service " + service.getServiceId();
+		} catch (IAgentException e1) {
+		}		
 		if (service != null) {
-			ServicePropertiesDialog dialog = new ServicePropertiesDialog(display.getActiveShell());
+			PropertiesDialog dialog = new PropertiesDialog(display.getActiveShell(), Messages.service_properties_title, tableHeader) {
+				protected void attachHelp(Composite container) {
+					PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_SERVICE);
+				}
+				
+			};
 			dialog.open();
 			try {
-				ServicePropertiesPage mainControl = (ServicePropertiesPage) dialog.getMainControl();
-				mainControl.setServiceName("Service " + service.getServiceId()); //$NON-NLS-1$
-				mainControl.setData(service);
+				PropertiesPage mainControl = (PropertiesPage) dialog.getMainControl();
+				mainControl.setData(service.getProperties());
 			} catch (IAgentException e) {
 				BrowserErrorHandler.processError(e, true);
 				e.printStackTrace();
