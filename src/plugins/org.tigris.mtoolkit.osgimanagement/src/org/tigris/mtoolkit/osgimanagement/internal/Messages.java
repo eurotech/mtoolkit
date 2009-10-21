@@ -19,19 +19,6 @@ public final class Messages extends NLS {
 
 	private static final String BUNDLE_NAME = "org.tigris.mtoolkit.osgimanagement.internal.osgimanagement";//$NON-NLS-1$
 
-	public static String Not_Connected;
-	public static String Connected_To;
-	public static String edit_action_N;
-	public static String edit_action_mark_N;
-	public static String edit_action_cut_N;
-	public static String edit_action_copy_N;
-	public static String edit_action_paste_N;
-	public static String edit_action_delete_N;
-	public static String clear_action_N;
-	public static String file_action_saveas_N;
-	public static String file_action_print_N;
-	public static String ConsoleM_N;
-	public static String ViewM_NoFrameworksMI_N;
 	public static String add_action_label;
 
 	public static String all_files_filter_label;
