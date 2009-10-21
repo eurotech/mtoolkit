@@ -282,18 +282,24 @@ public class CertUtils {
     ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(), "org.tigris.mtoolkit.certmanager");
     String location = preferenceStore.getString("jarsigner.location");
     if (location == null || location.length() == 0) {
-      String javaHome = System.getProperty("java.home");
-      if (javaHome != null) {
-        String relativePath = "bin" + File.separator + "jarsigner.exe";
-        File signerFile = new File(javaHome, relativePath);
+      location = getDefaultJarsignerLocation();
+    }
+    return location;
+  }
+
+  public static String getDefaultJarsignerLocation() {
+    String location = "";
+    String javaHome = System.getProperty("java.home");
+    if (javaHome != null) {
+      String relativePath = "bin" + File.separator + "jarsigner.exe";
+      File signerFile = new File(javaHome, relativePath);
+      if (signerFile.exists()) {
+        location = signerFile.getAbsolutePath();
+      } else {
+        File parentPath = new File(javaHome).getParentFile();
+        signerFile = new File(parentPath, relativePath);
         if (signerFile.exists()) {
           location = signerFile.getAbsolutePath();
-        } else {
-          File parentPath = new File(javaHome).getParentFile();
-          signerFile = new File(parentPath, relativePath);
-          if (signerFile.exists()) {
-            location = signerFile.getAbsolutePath();
-          }
         }
       }
     }

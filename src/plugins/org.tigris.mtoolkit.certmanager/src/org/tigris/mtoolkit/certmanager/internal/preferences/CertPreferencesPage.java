@@ -40,6 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.certmanager.internal.CertManagerPlugin;
 import org.tigris.mtoolkit.certmanager.internal.Messages;
 import org.tigris.mtoolkit.certmanager.internal.dialogs.CertificateManagementDialog;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
 
@@ -152,8 +153,9 @@ public class CertPreferencesPage extends PreferencePage implements
 
 		CertStorage.getDefault().performDefaults();
 
-		txtJarsignerLocation.setText(""); //$NON-NLS-1$
-		saveJarsignerLocation(""); //$NON-NLS-1$
+		String defLocation = CertUtils.getDefaultJarsignerLocation();
+		txtJarsignerLocation.setText(defLocation);
+		saveJarsignerLocation(defLocation);
 	}
 
 	public boolean performOk() {
@@ -240,11 +242,14 @@ public class CertPreferencesPage extends PreferencePage implements
 	private String getJarsignerLocation() {
 		CertManagerPlugin plugin = CertManagerPlugin.getDefault();
 		if (plugin == null) {
-			return ""; //$NON-NLS-1$
+			return CertUtils.getDefaultJarsignerLocation();
 		}
 		IPreferenceStore store = plugin.getPreferenceStore();
 
 		String location = store.getString(ATTR_JARSIGNER_LOCATION);
+		if (location.length() == 0) {
+			location = CertUtils.getDefaultJarsignerLocation();
+		}
 		return location;
 	}
 
