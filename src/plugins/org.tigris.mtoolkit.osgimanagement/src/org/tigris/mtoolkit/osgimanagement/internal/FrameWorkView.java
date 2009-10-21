@@ -289,6 +289,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				if (e.keyCode == SWT.DEL) {
 					removeFrameworkAction.updateState((IStructuredSelection) tree.getSelection());
 					if (removeFrameworkAction.isEnabled()) {
+						e.doit = false;
 						removeFrameworkAction.run();
 					}
 				}
