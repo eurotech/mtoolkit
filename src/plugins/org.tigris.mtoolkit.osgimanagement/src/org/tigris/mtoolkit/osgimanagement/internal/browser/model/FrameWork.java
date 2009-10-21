@@ -1131,16 +1131,33 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 		for (int i = 0; i < regServ.length; i++) {
 			String objClass[] = regServ[i].getObjectClass();
 			for (int j = 0; j < objClass.length; j++) {
-				regServCategory.addElement(new ObjectClass(
+				ObjectClass oc = new ObjectClass(
 						objClass[j] + " [Service " + regServ[i].getServiceId() + "]", new Long(regServ[i]
-								.getServiceId()), regServ[i]));
+						                                               								.getServiceId()), regServ[i]);
+				regServCategory.addElement(oc);
+				if (isShownServicePropertiss()) {
+					try {
+						FrameworkConnectorFactory.addServicePropertiesNodes(oc);
+					} catch (IAgentException e) {
+						e.printStackTrace();
+					}
+				}
+
 			}
 		}
 		for (int i = 0; i < usedServ.length; i++) {
 			String objClass[] = usedServ[i].getObjectClass();
 			for (int j = 0; j < objClass.length; j++) {
-				usedServCategory.addElement(new ObjectClass(objClass[j] + " [Service " + usedServ[i].getServiceId()
-						+ "]", new Long(usedServ[i].getServiceId()), usedServ[i]));
+				ObjectClass oc = new ObjectClass(objClass[j] + " [Service " + usedServ[i].getServiceId()
+						+ "]", new Long(usedServ[i].getServiceId()), usedServ[i]);
+				usedServCategory.addElement(oc);
+				if (isShownServicePropertiss()) {
+					try {
+						FrameworkConnectorFactory.addServicePropertiesNodes(oc);
+					} catch (IAgentException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 

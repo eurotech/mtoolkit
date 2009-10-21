@@ -65,6 +65,13 @@ public class DeploymentPackage extends Model {
 								new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
 								((ObjectClass) regServ[i]).getService());
 							categories[0].addElement(oc);
+							if (fw != null &&  fw.isShownServicePropertiss()) {
+								try {
+									FrameworkConnectorFactory.addServicePropertiesNodes(oc);
+								} catch (IAgentException e) {
+									e.printStackTrace();
+								}
+							}
 						}
 					}
 
@@ -75,6 +82,13 @@ public class DeploymentPackage extends Model {
 								new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
 								((ObjectClass) usedServ[i]).getService());
 							categories[1].addElement(oc);
+							if (fw != null &&  fw.isShownServicePropertiss()) {
+								try {
+									FrameworkConnectorFactory.addServicePropertiesNodes(oc);
+								} catch (IAgentException e) {
+									e.printStackTrace();
+								}
+							}
 						}
 					}
 				}
