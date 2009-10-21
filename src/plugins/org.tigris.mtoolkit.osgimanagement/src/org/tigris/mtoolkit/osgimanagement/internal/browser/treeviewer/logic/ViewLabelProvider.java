@@ -191,6 +191,8 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
 			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 			styles.add(new StyleRange(text.indexOf(":") + 1, text.length(), style.foreground, style.background));
+		} else if (element instanceof FrameWork) {
+			text = element.toString();
 		} else {
 			text = element.toString();
 			TextStyle style = new TextStyle();

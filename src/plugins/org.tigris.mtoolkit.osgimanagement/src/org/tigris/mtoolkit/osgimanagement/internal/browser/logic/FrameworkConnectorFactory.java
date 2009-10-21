@@ -609,10 +609,11 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public void connected(final DeviceConnector connector) {
-		if (connector.getProperties().get("framework-connection-temporary") != null)
+		Dictionary connProps = connector.getProperties();
+		if (connProps.get("framework-connection-temporary") != null)
 			// the connection is only temporary and will be closed shortly
 			return;
-		String frameworkName = (String) connector.getProperties().get("framework-name"); //$NON-NLS-1$
+		String frameworkName = (String) connProps.get("framework-name"); //$NON-NLS-1$
 		boolean autoConnected = true;
 		FrameWork fw = null;
 		FrameWork fws[] = FrameWorkView.getFrameworks();
@@ -638,15 +639,17 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			}
 
 			int index = 1;
-			Object ip = connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
-			String frameWorkName = Messages.new_framework_default_name;
+			Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
+			String defaultFWName = Messages.new_framework_default_name+
+			" ["+connProps.get(DeviceConnector.TRANSPORT_TYPE)+":"+connProps.get(DeviceConnector.TRANSPORT_ID)+"]";
+			String frameWorkName = defaultFWName;
 			String suffix = " ";
 			if (ip != null) { 
 				suffix += ip;
 			}
 			if (frameWorkMap.containsKey(frameWorkName)) {
 				do {
-					frameWorkName = Messages.new_framework_default_name
+					frameWorkName = defaultFWName
 									+ suffix
 									+ "("
 									+ index
@@ -655,7 +658,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				} while (frameWorkMap.containsKey(frameWorkName));
 			}
 			frameworkName = frameWorkName;
-			connector.getProperties().put("framework-name", frameworkName); //$NON-NLS-1$
+			connProps.put("framework-name", frameworkName); //$NON-NLS-1$
 		}
 
 		if (FrameWorkView.getTreeRoot() != null && fw == null) {
@@ -665,7 +668,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			fw.setConnector(connector);
 		}
 
-		BrowserErrorHandler.debug("FrameworkPlugin: " + connector.getProperties().get("framework-name") + " was connected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		BrowserErrorHandler.debug("FrameworkPlugin: " + connProps.get("framework-name") + " was connected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		// already started connection job for this framework
 		if (connectJobs.containsKey(connector))
