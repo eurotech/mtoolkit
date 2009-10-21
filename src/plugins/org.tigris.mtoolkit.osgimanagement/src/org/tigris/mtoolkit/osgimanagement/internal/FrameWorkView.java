@@ -462,7 +462,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 			IHandler handler = new AbstractHandler() {
 				public Object execute(ExecutionEvent event) throws ExecutionException {
-					action.run();
+					if (action.isEnabled()) {
+						action.run();
+					}
 					return null;
 				}
 			};
