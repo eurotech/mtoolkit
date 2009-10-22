@@ -4,6 +4,7 @@ Bundle-Name: %bundleName
 Bundle-SymbolicName: org.tigris.mtoolkit.osgimanagement.ext.application;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.tigris.mtoolkit.osgimanagement.application.Activator
+Bundle-Localization: plugin
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
