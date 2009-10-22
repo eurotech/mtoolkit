@@ -16,8 +16,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -351,21 +353,34 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	}
 
 	public Object getProperties(String applicationId) {
-		ServiceReference ref = findDescriptorReference(applicationId);
-		if (ref == null)
+		Object descriptor = findApplicationDescriptor(applicationId);
+		if (descriptor == null) {
 			return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application has been uninstalled");
-		return getReferenceProperties(ref);
+		}
+		try {
+			Object result = invokeMethod1(descriptor, "getProperties", String.class, null);
+			if (result instanceof Map) {
+				return convertProperties((Map) result);
+			}
+		} catch (Exception e) {
+			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Cannot get properties: "
+					+ DebugUtils.toString(e));
+		}
+		return new Hashtable();
 	}
 
-	private Map getReferenceProperties(ServiceReference ref) {
-		Map props = new Hashtable();
-		String[] keys = ref.getPropertyKeys();
-		for (int i = 0; i < keys.length; i++) {
-			Object value = ref.getProperty(keys[i]);
-			if (value != null)
-				props.put(keys[i], convertObject(ref.getProperty(keys[i])));
+	private Map convertProperties(Map props) {
+		Map result = new Hashtable();
+		Set keys = props.keySet();
+		Iterator iterator = keys.iterator();
+		while (iterator.hasNext()) {
+			Object key = iterator.next();
+			Object value = props.get(key);
+			if (value != null) {
+				result.put(key, convertObject(value));
+			}
 		}
-		return props;
+		return result;
 	}
 
 	private Object convertObject(Object obj) {
