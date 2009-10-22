@@ -194,14 +194,18 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 
 	public void startApplication(String applicationID, Map properties) throws IAgentException {
 		Object result = START.call(getApplicationAdmin(), new Object[] { applicationID, properties });
-		if (result instanceof Error)
-			throw new IAgentException("Failed to start application", ((Error)result).getCode());
+		if (result instanceof Error) {
+			Error err = (Error) result;
+			throw new IAgentException("Failed to start application" + (err.getMessage() != null ? ": " + err.getMessage() : ""), err.getCode());
+		}
 	}
 
 	public void stopApplication(String applicationID) throws IAgentException {
 		Object result = STOP.call(getApplicationAdmin(), applicationID);
-		if (result instanceof Error)
-			throw new IAgentException("Failed to start application", ((Error)result).getCode());
+		if (result instanceof Error) {
+			Error err = (Error) result;
+			throw new IAgentException("Failed to stop application" + (err.getMessage() != null ? ": " + err.getMessage() : ""), err.getCode());
+		}
 	}
 
 	public String getApplicationState(String applicationID) throws IAgentException {

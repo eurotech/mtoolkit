@@ -153,7 +153,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	public Object start(String applicationID, Map properties) {
 		Object descriptor = findApplicationDescriptor(applicationID);
 		if (descriptor == null)
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED);
+			return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application with ID \"" + applicationID + "\" is not installed.");
 		Object result = launchFromDescriptor(descriptor, properties);
 		return result;
 	}
