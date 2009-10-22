@@ -43,7 +43,7 @@ class PMPInputStream extends InputStream {
 	private static final String ERRMSG1 = "Protocol Error";
 	private static final String ERRMSG2 = "Message ID Mismatch ";
 
-	static int stream_timeout = 10000;
+	static int stream_timeout = 0; // default: no timeout, wait forever
 
 	static {
 		String stimeout = System.getProperty("iagent.pmp.stream_timeout"); //$NON-NLS-1$

@@ -76,7 +76,7 @@ class PMPAnswer {
 					}
 				} catch (Exception ignore) {
 				}
-				if (!received && (System.currentTimeMillis() - time) > timeout)
+				if (!received && (timeout > 0 && (System.currentTimeMillis() - time) > timeout))
 					break;
 			}
 		}

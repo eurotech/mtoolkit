@@ -56,6 +56,8 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 			info("Creating new connection for " + uri);
 			PMPSessionThread st = null;
 			Socket socket = new Socket(uri, 1450);
+			// read timeout of 1 sec
+			socket.setSoTimeout(1000);
 			st = new PMPSessionThread(this, socket, createSessionId(), uri);
 
 			Connection con = st.getConnection();

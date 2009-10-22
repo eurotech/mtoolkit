@@ -21,10 +21,12 @@ import org.tigris.mtoolkit.iagent.transport.TransportType;
 
 public class SocketTransport implements Transport {
 
+	private static final int PMP_PORT = 1450;
+
 	private String host;
 	private SocketTransportType type;
 	private List connections = new ArrayList();
-	private volatile boolean closed; 
+	private volatile boolean closed;
 
 	public SocketTransport(SocketTransportType type, String host) {
 		this.host = host;
@@ -34,7 +36,12 @@ public class SocketTransport implements Transport {
 	public TransportConnection createConnection(int port) throws IOException {
 		if (closed)
 			throw new IOException("Transport is closed");
-		SocketTransportConnection connection = new SocketTransportConnection(host, port);
+		int timeout = 0; // by default, no timeout
+		// if we have PMP connection, we need a timeout
+		// because PMP have own ping mechanism
+		if (port == PMP_PORT)
+			timeout = 1000;
+		SocketTransportConnection connection = new SocketTransportConnection(host, port, timeout);
 		if (connection == null) {
 			synchronized (connections) {
 				connections.add(connection);

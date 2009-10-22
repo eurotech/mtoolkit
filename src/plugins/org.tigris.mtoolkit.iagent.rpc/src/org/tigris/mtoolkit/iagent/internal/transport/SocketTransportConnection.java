@@ -23,10 +23,12 @@ public class SocketTransportConnection implements TransportConnection {
 	private Socket socket;
 	private volatile boolean closed;
 
-	public SocketTransportConnection(String host, int port) throws IOException {
+	public SocketTransportConnection(String host, int port, int timeout) throws IOException {
 		this.host = host;
 		this.port = port;
 		socket = new Socket(host, port);
+		if (timeout > 0)
+			socket.setSoTimeout(timeout);
 	}
 
 	public void close() {
