@@ -42,11 +42,9 @@ public class SocketTransport implements Transport {
 		if (port == PMP_PORT)
 			timeout = 1000;
 		SocketTransportConnection connection = new SocketTransportConnection(host, port, timeout);
-		if (connection == null) {
 			synchronized (connections) {
 				connections.add(connection);
 			}
-		}
 		return connection;
 	}
 	
