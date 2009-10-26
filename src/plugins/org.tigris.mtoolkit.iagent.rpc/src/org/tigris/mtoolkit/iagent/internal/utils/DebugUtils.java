@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.utils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
@@ -166,6 +170,41 @@ public class DebugUtils {
 	}
 	
 	public static String toString(Exception e) {
-		return e.toString();
+		StringBuffer err = new StringBuffer();
+		err.append(e.toString());
+		try {
+			Method cause = e.getClass().getMethod("getCause", new Class[0]);
+			if (cause != null) {
+				Object ex = cause.invoke(e, new Object[0]);
+				err.append(lineSeparator).append("Caused by: ").append(ex.toString());
+			}
+		} catch (IllegalAccessException ex) {
+		} catch (InvocationTargetException ex) {
+		} catch (NoSuchMethodException ex) {
+		}
+		return err.toString();
+	}	
+	
+	
+	private static final String lineSeparator = System.getProperty("line.separator");
+	
+	public static String getStackTrace(Exception e) {
+		StringBuffer err = new StringBuffer();
+		StringWriter sw = new StringWriter();
+		e.printStackTrace(new PrintWriter(sw));
+		err.append(sw.toString());
+		try {
+			Method cause = e.getClass().getMethod("getCause", new Class[0]);
+			if (cause != null) {
+				Object ex = cause.invoke(e, new Object[0]);
+				if (ex != null) {
+					err.append(lineSeparator).append(getStackTrace((Exception) ex));
+				}
+			}
+		} catch (IllegalAccessException ex) {
+		} catch (InvocationTargetException ex) {
+		} catch (NoSuchMethodException ex) {
+		}
+		return err.toString();
 	}	  
 }
