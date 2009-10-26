@@ -26,6 +26,7 @@ public class IAgentException extends Exception {
 	private static final long serialVersionUID = 3593878826474004840L;
 	private int errorCode;
 	private Throwable causeException;
+	private String details;
 
 	/**
 	 * Creates new {@link IAgentException} object with specified message.
@@ -40,6 +41,7 @@ public class IAgentException extends Exception {
 	public IAgentException(Error error) {
 		super(error.getMessage());
 		this.errorCode = error.getCode();
+		this.details = error.getDetails();
 	}
 
 	public IAgentException(String aMessage, int errorCode, Throwable aCause) {
@@ -73,6 +75,9 @@ public class IAgentException extends Exception {
 			s.println("Nested exception:");
 			causeException.printStackTrace(s);
 		}
+		if (details != null) {
+			s.println(details);
+		}
 	}
 
 	public void printStackTrace(PrintWriter s) {
@@ -80,6 +85,9 @@ public class IAgentException extends Exception {
 		if (causeException != null) {
 			s.println("Nested exception:");
 			causeException.printStackTrace(s);
+		}
+		if (details != null) {
+			s.println(details);
 		}
 	}
 
