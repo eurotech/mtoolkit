@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="androidSupport">
+
+  <property file="android.properties"/>
+  <target name="convertToDx" if="androidSupport">
+    <android.dx srcdir="${target.folder}" destfile="${target.folder}/classes.dex" sdk="${android.sdk.location}"/>
+  </target>
+
+  <target name="removeClasses" if="androidSupport" unless="keepJavaClasses">
+    <delete dir="${target.folder}" includes="**/*.class">
+    </delete>
+  </target>
+
+  <target name="post.compile.@dot">
+    <antcall target="convertToDx">
+    </antcall>
+    <antcall target="removeClasses">
+    </antcall>
+  </target>
+
+</project>
