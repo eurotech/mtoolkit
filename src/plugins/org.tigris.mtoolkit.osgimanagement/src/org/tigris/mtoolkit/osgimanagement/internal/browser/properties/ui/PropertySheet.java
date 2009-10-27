@@ -67,7 +67,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 	private Composite bottomButtonsHolder;
 	private FrameWork fw;
 
-	private static List deviceTypesProviders;
+	private List deviceTypesProviders;
 
 	private Combo deviceTypeCombo;
 
@@ -104,8 +104,9 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 		textServer = createText(1, deviceGroup);
 
+		deviceTypesProviders = obtainDeviceTypeProviders();
+		
 		createDeviceTypeCombo(mainContent);
-		obtainDeviceTypeProviders();
 
 		// Connect properties group
 		Group connectPropertiesGroup = new Group(mainContent, SWT.NONE);
@@ -157,7 +158,6 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		deviceTypeCombo = new Combo(typeGroup, SWT.READ_ONLY);
 		deviceTypeCombo.addSelectionListener(this);
 
-		obtainDeviceTypeProviders();
 		for (Iterator it = deviceTypesProviders.iterator(); it.hasNext();) {
 			DeviceTypeProviderElement element = (DeviceTypeProviderElement) it.next();
 			deviceTypeCombo.add(element.getDeviceTypeName());
@@ -186,7 +186,18 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 	// Initialize ui values from storage
 	public void initValues(IMemento config) {
+		String providerId = config.getString(TRANSPORT_PROVIDER_ID);
+		if (providerId != null) {
+			for (Iterator it = deviceTypesProviders.iterator(); it.hasNext();) {
+				DeviceTypeProviderElement provider = (DeviceTypeProviderElement) it.next();
+				if (providerId.equals(provider.getTypeId())) {
+					selectedProvider = provider;
+					break;
+				}
+			}
+		}
 		logic.setValue(textServer, FRAMEWORK_NAME);
+		selectType(selectedProvider);
 		try {
 			selectedProvider.getProvider().setProperties(config);
 		} catch (CoreException e) {
@@ -283,14 +294,11 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 	}
 
 	public static List obtainDeviceTypeProviders() {
-		if (deviceTypesProviders == null) {
 			IExtensionRegistry registry = Platform.getExtensionRegistry();
 			IExtensionPoint extensionPoint = registry
 					.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes");
 
-			deviceTypesProviders = obtainProviders(extensionPoint.getConfigurationElements());
-		}
-		return deviceTypesProviders;
+		return obtainProviders(extensionPoint.getConfigurationElements());
 	}
 
 	private static List obtainProviders(IConfigurationElement[] elements) {

@@ -28,7 +28,6 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 			idString = "127.0.0.1";
 		}
 		idText.setText(idString);
-//		aConProps.put("framework-connection-immediate", new Boolean(false)); //$NON-NLS-1$
 	}
 
 	public Control createPanel(Composite parent) {

@@ -14,8 +14,6 @@ public interface DeviceTypeProvider {
 
 	public boolean validate();
 	
-	public String getTransportID();
-	
 	public Dictionary load(IMemento config);
 
 	public void save(IMemento config);

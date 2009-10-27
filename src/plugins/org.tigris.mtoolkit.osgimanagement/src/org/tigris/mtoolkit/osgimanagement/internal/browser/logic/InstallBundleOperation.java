@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,9 +42,9 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			DeviceConnector connector = framework.getConnector();
 			if (connector == null)
 				return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection lost", null);
+			Set bundleIds = new HashSet();
+			bundleIds.addAll(framework.getBundlesKeys());
 			rBundle = connector.getDeploymentManager().installBundle("remote:" + bundle.getName(), input);
-
-			Set bundleIds = framework.getBundlesKeys();
 
 			// bundle already exists, in which case, we need to update it
 			if (bundleIds.contains(new Long(rBundle.getBundleId()))) {
