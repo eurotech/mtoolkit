@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.osgi.framework.Bundle;
@@ -57,6 +59,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	public static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
 
 	private static final String PROP_SYSTEM_BUNDLES_LIST = "iagent.system.bundles.list";
+	private static final String PROP_SYSTEM_BUNDLES = "iagent.system.bundles";
 	private static final String SYSTEM_BUNDLES_FILE_NAME = "system_bundles.txt";
 	private static final String SYSTEM_BUNDLES_RESOURCE_NAME = "/" + SYSTEM_BUNDLES_FILE_NAME;
 
@@ -607,13 +610,25 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				}
 				if (reader == null) { // file not found, load default
 					URL systemBundleURL = bc.getBundle().getResource(SYSTEM_BUNDLES_RESOURCE_NAME);
-					if (systemBundleURL == null) {
-						log("No system bundles list found.");
-						loadedSymbolicNames = new HashSet(0);
-						return loadedSymbolicNames;
-					} else {
+					if (systemBundleURL != null) {
 						reader = new BufferedReader(new InputStreamReader(systemBundleURL.openStream()));
 					}
+				}
+				if (reader == null) {
+					if (System.getProperty(PROP_SYSTEM_BUNDLES) != null) {
+						String sysBundles = System.getProperty(PROP_SYSTEM_BUNDLES);
+						System.out.println("IAgent: sysBundles = " + sysBundles);
+						StringTokenizer token = new StringTokenizer(sysBundles, ",");
+						Set bundleNames = new HashSet();
+						while (token.hasMoreElements()) {
+							String sysBundle = (String) token.nextElement();
+							bundleNames.add(sysBundle);
+						}
+						this.loadedSymbolicNames = bundleNames;
+						return loadedSymbolicNames;
+					}
+					this.loadedSymbolicNames = Collections.EMPTY_SET;
+					return loadedSymbolicNames;
 				}
 				Set symbolicNames = new HashSet();
 				String line;
@@ -623,7 +638,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				this.loadedSymbolicNames = symbolicNames;
 			} catch (IOException e) {
 				log("Failed to load system buindles list from the bundle resources", e);
-				loadedSymbolicNames = new HashSet(0);
+				loadedSymbolicNames = Collections.EMPTY_SET;
 			} finally {
 				if (reader != null) {
 					try {
