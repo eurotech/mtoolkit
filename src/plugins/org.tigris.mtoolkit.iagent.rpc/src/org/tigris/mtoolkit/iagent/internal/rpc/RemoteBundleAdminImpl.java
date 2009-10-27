@@ -617,7 +617,6 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				if (reader == null) {
 					if (System.getProperty(PROP_SYSTEM_BUNDLES) != null) {
 						String sysBundles = System.getProperty(PROP_SYSTEM_BUNDLES);
-						System.out.println("IAgent: sysBundles = " + sysBundles);
 						StringTokenizer token = new StringTokenizer(sysBundles, ",");
 						Set bundleNames = new HashSet();
 						while (token.hasMoreElements()) {
