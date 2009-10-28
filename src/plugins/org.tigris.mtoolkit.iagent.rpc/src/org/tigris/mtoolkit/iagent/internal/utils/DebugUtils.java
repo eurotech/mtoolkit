@@ -176,7 +176,9 @@ public class DebugUtils {
 			Method cause = e.getClass().getMethod("getCause", new Class[0]);
 			if (cause != null) {
 				Object ex = cause.invoke(e, new Object[0]);
-				err.append(lineSeparator).append("Caused by: ").append(ex.toString());
+				if (ex != null) {
+					err.append(lineSeparator).append("Caused by: ").append(ex.toString());
+				}
 			}
 		} catch (IllegalAccessException ex) {
 		} catch (InvocationTargetException ex) {
