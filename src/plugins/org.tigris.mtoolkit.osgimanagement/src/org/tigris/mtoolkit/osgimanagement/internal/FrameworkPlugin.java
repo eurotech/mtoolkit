@@ -107,6 +107,7 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 
 	public static IStatus handleIAgentException(IAgentException e) {
 		String message = Messages.get(String.valueOf(e.getErrorCode()).replace('-', '_'));
+		if (message == null) message = e.getMessage();
 		return newStatus(IStatus.ERROR, message, e);
 	}
 	
