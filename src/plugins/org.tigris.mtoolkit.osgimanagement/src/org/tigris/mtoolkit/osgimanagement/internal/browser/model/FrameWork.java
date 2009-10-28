@@ -29,14 +29,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.XMLMemento;
-import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
+import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -206,13 +209,32 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 				FrameWork.this.monitor = monitor;
 				try {
 					synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
-						// TODO: check https://devzone.prosyst.bg/jira/browse/TOOLKIT-148
-						connectFramework();
+						if (!connector.getVMManager().isVMInstrumented(false)) {
+							if (shouldInstallIAgent()) {
+								try {
+									FrameWork.this.monitor = null;
+									connector.getVMManager().instrumentVM();
+									FrameWork.this.monitor = monitor;
+								} catch (IAgentException iae) {
+									return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Unable to instrument VM.", iae);
+								}
+							} else {
+								if (!autoConnected) {
+									connector.closeConnection();
+								}
+								return Status.OK_STATUS;
+							}
+						}
+						if (FrameWork.this.connector != null && FrameWork.this.connector.isActive()) {
+							connectFramework();
+						}
 						if (monitor.isCanceled()) {
 							FrameworkConnectorFactory.disconnectFramework(FrameWork.this);
 							FrameworkConnectorFactory.disconnectConsole(FrameWork.this);
 						}
 					}
+				} catch (IAgentException iae) {
+					return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Unable to retrieve instrumented status.", iae);
 				} finally {
 					FrameworkConnectorFactory.connectJobs.remove(connector);
 				}
@@ -220,6 +242,20 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 			}
 		};
 		job.schedule();
+	}
+
+	private boolean shouldInstallIAgent() {
+		final Display display = PlatformUI.getWorkbench().getDisplay();
+		final Boolean result[] = new Boolean[1];
+		display.syncExec(new Runnable() {
+			public void run() {
+				Shell shell = display.getActiveShell();
+				boolean install = MessageDialog.openQuestion(shell, Messages.framework_not_instrumented,
+						Messages.framework_not_instrumented_msg);
+				result[0] = new Boolean(install);
+			}
+		});
+		return result[0] != null && result[0].booleanValue();
 	}
 
 	private void connectFramework() {

@@ -86,6 +86,10 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   }
 
   public void closeConnection() throws IAgentException {
+    closeConnection(true);
+  }
+
+  public void closeConnection(boolean aSendEvent) throws IAgentException {
     log("[closeConnection] start");
     boolean sendEvent = false;
     try {
@@ -93,7 +97,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         if ( isClosed )
           return;
         isClosed = true;
-        sendEvent = true;
+        sendEvent = aSendEvent;
         if ( os != null ) {
           try {
             os.close();

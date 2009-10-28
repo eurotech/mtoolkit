@@ -73,7 +73,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		// fire an event for the disconnection
 		if (staleConnection != null) {
 			staleConnection.closeConnection();
-			fireConnectionEvent(ConnectionEvent.DISCONNECTED, staleConnection);
 		}
 		// Step 2: check whether there is an active connection. Create if
 		// necessary.

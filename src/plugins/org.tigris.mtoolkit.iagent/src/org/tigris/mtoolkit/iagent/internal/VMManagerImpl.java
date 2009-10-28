@@ -20,6 +20,7 @@ import java.util.Map;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.VMManager;
+import org.tigris.mtoolkit.iagent.instrumentation.Instrument;
 import org.tigris.mtoolkit.iagent.internal.tcp.DataFormater;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
@@ -28,6 +29,7 @@ import org.tigris.mtoolkit.iagent.spi.MBSAConnection;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnectionCallBack;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.spi.Utils;
+import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 
 /**
@@ -39,6 +41,8 @@ public class VMManagerImpl implements VMManager {
 	private DeviceConnectorImpl connector;
 
 	private RemoteObject lastKnownRemoteConsole;
+
+	private LightServiceRegistry extensionsRegistry;
 
 	/**
 	 * Creates new runtime commands with specified transport
@@ -116,15 +120,45 @@ public class VMManagerImpl implements VMManager {
 	private PMPConnection getPMPConnection() throws IAgentException {
 		return (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
 	}
-	
+
 	public void instrumentVM() throws IAgentException {
-		throw new IAgentException("Opperation is not supported!", IAgentErrors.UNSUPPORTED_OPERATION);
+		Object[] extensions = getExtensionsRegistry().getAll(Instrument.class.getName());
+		for (int i = 0; i < extensions.length; i++) {
+			if (extensions[i] instanceof Instrument) {
+				if (!((Instrument) extensions[i]).instrumentVM(connector)) {
+					throw new IAgentException("VM cannot be instrumented.", IAgentErrors.ERROR_INSTRUMENT_ERROR);
+				}
+			}
+		}
 	}
-	
+
 	public boolean isVMInstrumented(boolean refresh) throws IAgentException {
-		throw new IAgentException("Opperation is not supported!", IAgentErrors.UNSUPPORTED_OPERATION);
+		PMPConnection connection = null;
+		try {
+			connection = getPMPConnection();
+			connection.getRemoteBundleAdmin();
+			connection.getRemoteServiceAdmin();
+		} catch (Exception e) {
+			return false;
+		}
+		Object[] extensions = getExtensionsRegistry().getAll(Instrument.class.getName());
+		for (int i = 0; i < extensions.length; i++) {
+			if (extensions[i] instanceof Instrument) {
+				if (!((Instrument) extensions[i]).isVMInstrumented(connector)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
-	
+
+	private LightServiceRegistry getExtensionsRegistry() {
+		if (extensionsRegistry == null) {
+			extensionsRegistry = new LightServiceRegistry(VMManagerImpl.class.getClassLoader());
+		}
+		return extensionsRegistry;
+	}
+
 	public String[] listRawArgs() throws IAgentException {
 		log("[listRawArgs] >>>");
 		MBSAConnection connection = getMBSAConnection();

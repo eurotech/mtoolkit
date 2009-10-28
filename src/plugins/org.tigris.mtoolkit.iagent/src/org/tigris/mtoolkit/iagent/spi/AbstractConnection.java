@@ -29,6 +29,18 @@ public interface AbstractConnection {
 	public void closeConnection() throws IAgentException;
 
 	/**
+	 * Closes this connection.<br>
+	 * 
+	 * Implementors: This method should flag the connection as closed and do the
+	 * closing itself only once. Method 
+	 * {@link ConnectionManagerImpl#connectionClosed(AbstractConnection)} is called
+	 * depending on aSendEvent.
+	 * 
+	 * @throws IAgentException
+	 */
+	public void closeConnection(boolean aSendEvent) throws IAgentException;
+
+	/**
 	 * Returns true if this connection is still usable.
 	 * 
 	 * @return

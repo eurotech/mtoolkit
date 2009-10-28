@@ -152,6 +152,9 @@ public final class Messages extends NLS {
 	public static String get_iagent_button_label;
 	public static String save_as_dialog_title;
 
+	public static String framework_not_instrumented;
+	public static String framework_not_instrumented_msg;
+
 	public static String unknown_category_label;
 	public static String refresh_framework_info;
 	public static String refresh_bundles_info;

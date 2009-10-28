@@ -33,7 +33,10 @@ public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 			throw new IllegalArgumentException();
 		this.delegate = remote;
 		try {
-			Long l = (Long) Utils.callRemoteMethod(this.delegate, Utils.GET_REMOTE_SERVICE_ID_METHOD, null);
+			Long l = new Long(-1);
+			if (Utils.isRemoteMethodDefined(this.delegate, Utils.GET_REMOTE_SERVICE_ID_METHOD)) {
+				l = (Long) Utils.callRemoteMethod(this.delegate, Utils.GET_REMOTE_SERVICE_ID_METHOD, null);
+			}
 			this.initialServiceId = l.longValue();
 			log("[Constructor] initialServiceId: " + l);
 		} catch (IAgentException e) {

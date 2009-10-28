@@ -76,6 +76,10 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 	}
 
 	public void closeConnection() throws IAgentException {
+		closeConnection(true);
+	}
+
+	public void closeConnection(boolean aSendEvent) throws IAgentException {
 		log("[closeConnection] >>>");
 		synchronized (this) {
 			if (closed) {
@@ -93,7 +97,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 					new String[] { org.tigris.mtoolkit.iagent.pmp.PMPConnection.FRAMEWORK_DISCONNECTED });
 			pmpConnection.disconnect("Integration Agent request");
 		} finally {
-			if (connManager != null) {
+			if (connManager != null && aSendEvent) {
 				try {
 					connManager.connectionClosed(this);
 				} catch (Throwable e) {
@@ -240,8 +244,10 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 						}
 						try {
 							RemoteObject newRemoteObject = pmpConnection.getReference(adminClass, null);
-							Long l = (Long) Utils.callRemoteMethod(newRemoteObject, Utils.GET_REMOTE_SERVICE_ID_METHOD,
-									null);
+							Long l = new Long(-1);
+							if (Utils.isRemoteMethodDefined(newRemoteObject, Utils.GET_REMOTE_SERVICE_ID_METHOD)) {
+								l = (Long) Utils.callRemoteMethod(newRemoteObject, Utils.GET_REMOTE_SERVICE_ID_METHOD, null);
+							}
 							long newServiceID = l.longValue();
 							if (newServiceID == -1) {
 								this
