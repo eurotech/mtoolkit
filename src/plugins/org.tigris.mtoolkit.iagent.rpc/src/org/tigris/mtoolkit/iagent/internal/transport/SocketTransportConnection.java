@@ -55,7 +55,7 @@ public class SocketTransportConnection implements TransportConnection {
 	public boolean isClosed() {
 		if (closed)
 			return true;
-		return isSocketClosed(socket);;
+		return isSocketClosed(socket);
 	}
 	
 	private static boolean isSocketClosed(Socket socket) {
