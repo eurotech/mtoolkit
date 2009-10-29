@@ -33,4 +33,4 @@ DynamicImport-Package: org.osgi.service.event,
  org.osgi.service.application
 Bundle-RequiredExecutionEnvironment: OSGi/Minimum-1.1,
  CDC-1.1/Foundation-1.1
-
+Eclipse-ExtensibleAPI: true
