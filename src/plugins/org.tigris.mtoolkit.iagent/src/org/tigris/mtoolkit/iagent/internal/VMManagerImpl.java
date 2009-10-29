@@ -311,7 +311,7 @@ public class VMManagerImpl implements VMManager {
 			log("[getPlatformProperties] Device is disconnected!");
 			throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
 		}
-		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GETPLATFORMPROPERTIES, null);
+		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GETPLATFORMPROPERTIES, null, false);
 		int rspStatus = tCallBack.getRspStatus();
 		if (rspStatus >= 0) {
 			byte rspData[] = tCallBack.getRspData();
@@ -369,7 +369,7 @@ public class VMManagerImpl implements VMManager {
 				log("[getSystemBundlesNames] Device is disconnected!");
 				throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
 			}
-			MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GET_SYSTEM_BUNDLES, null);
+			MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GET_SYSTEM_BUNDLES, null, false);
 			int rspStatus = tCallBack.getRspStatus();
 			if (rspStatus >= 0) {
 				byte rspData[] = tCallBack.getRspData();
@@ -396,7 +396,7 @@ public class VMManagerImpl implements VMManager {
 				return fallbackGetSystemBundlesNames();
 			}
 		} catch(IAgentException e) {
-			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT) {
+			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT || e.getErrorCode() == IAgentErrors.ERROR_INTERNAL_ERROR) {
 				return fallbackGetSystemBundlesNames();
 			} else {
 				throw e;

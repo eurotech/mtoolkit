@@ -138,8 +138,12 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
     }
     log("[closeConnection] finish");
   }
-
+  
   public MBSAConnectionCallBack sendData(int aCmd, byte[] aData) throws IAgentException {
+	  return sendData(aCmd, aData, true);
+  }
+
+  public MBSAConnectionCallBack sendData(int aCmd, byte[] aData, boolean disconnectOnFailure) throws IAgentException {
     log("[sendData] aData: " + aData + " aData.length" + ( aData != null ? aData.length : 0));
     OutputStream l_os = null;
     InputStream l_is = null;
@@ -184,7 +188,8 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
           log("[sendData] data skipped (it is null)");
         }
       } catch (IOException e) {
-        closeConnection();
+    	  if (disconnectOnFailure || connection.isClosed())
+    		  closeConnection();
         throw new IAgentException(e.getMessage(), IAgentErrors.ERROR_INTERNAL_ERROR, e);
       }
       
@@ -217,7 +222,8 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
           throw new IAgentException("Protocol error: the send message id is different from the received one!", IAgentErrors.ERROR_INTERNAL_ERROR);
         }
       } catch (IOException e) {
-        closeConnection();
+    	  if (disconnectOnFailure || connection.isClosed())
+    		  closeConnection();
         throw new IAgentException(e.getMessage(), IAgentErrors.ERROR_INTERNAL_ERROR, e);
       }
     } finally {

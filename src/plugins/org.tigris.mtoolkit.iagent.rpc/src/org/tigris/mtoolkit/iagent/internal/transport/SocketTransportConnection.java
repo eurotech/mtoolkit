@@ -13,6 +13,8 @@ package org.tigris.mtoolkit.iagent.internal.transport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
 
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
@@ -22,6 +24,8 @@ public class SocketTransportConnection implements TransportConnection {
 	private int port;
 	private Socket socket;
 	private volatile boolean closed;
+	private static Method socketIsClosed;
+	private static boolean preJava14EE = false;
 
 	public SocketTransportConnection(String host, int port, int timeout) throws IOException {
 		this.host = host;
@@ -49,10 +53,31 @@ public class SocketTransportConnection implements TransportConnection {
 	}
 
 	public boolean isClosed() {
-		// TODO
-		//return socket.isClosed();
 		if (closed)
 			return true;
+		return isSocketClosed(socket);;
+	}
+	
+	private static boolean isSocketClosed(Socket socket) {
+		if (preJava14EE)
+			return false;
+		if (socketIsClosed == null) {
+			try {
+				socketIsClosed = Socket.class.getMethod("isClosed", null);
+			} catch (Throwable e) {
+				preJava14EE = true;
+			}
+			if (preJava14EE)
+				return false;
+		}
+		try {
+			Boolean bool = (Boolean) socketIsClosed.invoke(socket, null);
+			return bool != null ? bool.booleanValue() : false;
+		} catch (IllegalAccessException e) {
+			// ignore
+		} catch (InvocationTargetException e) {
+			// ignore
+		}
 		return false;
 	}
 

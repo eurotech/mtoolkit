@@ -19,6 +19,8 @@ public interface MBSAConnection extends AbstractConnection {
    */
   public MBSAConnectionCallBack sendData(int aCmd, byte[] aData) throws IAgentException;
   
+  public MBSAConnectionCallBack sendData(int aCmd, byte[] aData, boolean disconnectOnFailure) throws IAgentException;
+  
   /**
    * Returns the maximum size of the data which could be sent over this transport
    * @return
