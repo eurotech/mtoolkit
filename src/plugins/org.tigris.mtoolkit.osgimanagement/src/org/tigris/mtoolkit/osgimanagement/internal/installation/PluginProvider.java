@@ -95,8 +95,8 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 
 			if (version.endsWith("qualifier")) {
-				exportInfo.qualifier = exporter.getQualifier();
-				version = version.replaceAll("qualifier", exportInfo.qualifier);
+				exportInfo.qualifier = "qualifier";//exporter.getQualifier();
+//				version = version.replaceAll("qualifier", exportInfo.qualifier);
 			}
 
 			exportInfo.items = new Object[] { model };
