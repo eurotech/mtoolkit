@@ -53,7 +53,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Version;
-import org.tigris.mtoolkit.common.internal.Messages;
 
 public class PluginUtilities {
 

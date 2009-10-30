@@ -37,12 +37,12 @@ import org.eclipse.ui.menus.IWorkbenchContribution;
 import org.eclipse.ui.services.IServiceLocator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.installation.TargetSelectionDialog;
-import org.tigris.mtoolkit.common.internal.Messages;
 
 public class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
 	private List itemProviders = new ArrayList();
