@@ -125,11 +125,13 @@ public class VMManagerImpl implements VMManager {
 		Object[] extensions = getExtensionsRegistry().getAll(Instrument.class.getName());
 		for (int i = 0; i < extensions.length; i++) {
 			if (extensions[i] instanceof Instrument) {
-				if (!((Instrument) extensions[i]).instrumentVM(connector)) {
-					throw new IAgentException("VM cannot be instrumented.", IAgentErrors.ERROR_INSTRUMENT_ERROR);
+				if (((Instrument) extensions[i]).instrumentVM(connector)) {
+					// properly instrumented, stop now
+					return;
 				}
 			}
 		}
+		throw new IAgentException("Failed to instrument remote framework", IAgentErrors.ERROR_INSTRUMENT_ERROR);
 	}
 
 	public boolean isVMInstrumented(boolean refresh) throws IAgentException {
