@@ -14,7 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -143,5 +146,33 @@ public class AndroidUtils {
 
   private static String getAndroidVersion() {
     return "android-1.5"; // TODO read from preferences?
+  }
+
+  /**
+   * Checks if file is in android dex format.
+   * @param file
+   * @return
+   */
+  public static boolean isConvertedToDex(File file) {
+    ZipFile zipFile = null;
+    try {
+      zipFile = new ZipFile(file);
+      Enumeration zipEntries = zipFile.entries();
+      while (zipEntries.hasMoreElements()) {
+        if ("classes.dex".equalsIgnoreCase(((ZipEntry) zipEntries.nextElement()).getName())) {
+          return true;
+        }
+      }
+    } catch (IOException ex) {
+      return false;
+    } finally {
+      if (zipFile != null) {
+        try {
+          zipFile.close();
+        } catch (IOException e) {
+        }
+      }
+    }
+    return false;
   }
 }
