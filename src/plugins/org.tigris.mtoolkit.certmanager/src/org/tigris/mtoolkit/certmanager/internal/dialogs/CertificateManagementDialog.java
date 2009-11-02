@@ -194,8 +194,10 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 	private void browseLocation() {
 		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 		fd.setText(Messages.dlgCertMan_browseDlgCaption);
-		String[] filterExt = { "*.keystore", "*.*" }; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] filterExt = { "*.keystore;*.jks;*.cacerts", "*.*" }; //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setFilterExtensions(filterExt);
+		String[] filterNames = { "Keystore files (*.keystore; *.jks; *.cacerts)", "All files (*.*)" }; //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(filterNames);
 		String location = fd.open();
 		if (location != null) {
 			txtLocation.setText(location);
