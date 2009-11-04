@@ -11,17 +11,25 @@
 package org.tigris.mtoolkit.common.android;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.osgi.framework.Constants;
 import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.ProcessOutputReader;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
@@ -120,20 +128,84 @@ public class AndroidUtils {
   public static void convertDpToDex(File dpFile, File outputFile, IProgressMonitor monitor) throws IOException {
     File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.extracted");
     FileUtils.deleteDir(tmpDir);
-    FileUtils.extractZip(dpFile, tmpDir);
-    processDpToDexDir(tmpDir, monitor);
-    FileUtils.makeZip(tmpDir, outputFile);
-  }
+    File dexDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.dex");
+    FileUtils.deleteDir(dexDir);
 
-  private static void processDpToDexDir(File dir, IProgressMonitor monitor) throws IOException {
-    File[] children = dir.listFiles();
-    for (int i = 0; i < children.length; i++) {
-      if (children[i].isDirectory()) {
-        processDpToDexDir(children[i], monitor);
-      } else {
-        String ext = FileUtils.getFileExtension(children[i]);
-        if (ext.equals("zip") || ext.equals("jar")) {
-          AndroidUtils.convertToDex(children[i], children[i], monitor);
+    JarInputStream jis = null;
+    JarOutputStream jos = null;
+    try {
+      jis = new JarInputStream(new FileInputStream(dpFile));
+      Manifest manifest = jis.getManifest();
+      if (manifest == null) {
+        throw new IOException("DP file has no manifest.");
+      }
+      jos = new JarOutputStream(new FileOutputStream(outputFile), manifest);
+
+      byte[] buf = new byte[1024];
+      int len;
+      JarEntry jarEntry;
+      while ((jarEntry = jis.getNextJarEntry()) != null) {
+        JarEntry newEntry = new JarEntry(jarEntry.getName());
+        newEntry.setTime(jarEntry.getTime());
+        newEntry.setExtra(jarEntry.getExtra());
+        newEntry.setComment(jarEntry.getComment());
+        jos.putNextEntry(newEntry);
+
+        Attributes attributes = jarEntry.getAttributes();
+        if (attributes != null && attributes.getValue(Constants.BUNDLE_SYMBOLICNAME) != null) {
+          // this entry is bundle - convert it to dex format
+          String entryName = jarEntry.getName();
+          File file = new File(tmpDir.getAbsolutePath() + "/" + entryName);
+          file.getParentFile().mkdirs();
+          FileOutputStream outputStream = new FileOutputStream(file);
+          try {
+            while ((len = jis.read(buf)) > 0) {
+              outputStream.write(buf, 0, len);
+            }
+          } finally {
+            try {
+              outputStream.close();
+            } catch (IOException e) {
+            }
+          }
+          File dexFile = file;
+          if (!isConvertedToDex(file)) {
+            dexFile = new File(dexDir.getAbsolutePath() + "/" + entryName);
+            dexFile.getParentFile().mkdirs();
+            convertToDex(file, dexFile, monitor);
+          }
+
+          FileInputStream dexIn = new FileInputStream(dexFile);
+          try {
+            while ((len = dexIn.read(buf)) > 0) {
+              jos.write(buf, 0, len);
+            }
+          } finally {
+            try {
+              dexIn.close();
+            } catch (IOException e) {
+            }
+          }
+        } else {
+          // entry is not a bundle - put it unchanged
+          while ((len = jis.read(buf)) > 0) {
+            jos.write(buf, 0, len);
+          }
+        }
+        jis.closeEntry();
+        jos.closeEntry();
+      }
+    } finally {
+      if (jis != null) {
+        try {
+          jis.close();
+        } catch (IOException e) {
+        }
+      }
+      if (jos != null) {
+        try {
+          jos.close();
+        } catch (IOException e) {
         }
       }
     }
