@@ -360,13 +360,29 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		try {
 			Object result = invokeMethod1(descriptor, "getProperties", String.class, null);
 			if (result instanceof Map) {
-				return convertProperties((Map) result);
+				Map map = convertProperties((Map) result);
+				ServiceReference sr = findDescriptorReference(applicationId);
+				if (sr != null) {
+					map.putAll(getReferenceProperties(sr));
+				}
+				return map;
 			}
 		} catch (Exception e) {
 			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Cannot get properties: "
 					+ DebugUtils.toString(e));
 		}
 		return new Hashtable();
+	}
+
+	private Map getReferenceProperties(ServiceReference ref) {
+		Map props = new Hashtable();
+		String[] keys = ref.getPropertyKeys();
+		for (int i = 0; i < keys.length; i++) {
+			Object value = ref.getProperty(keys[i]);
+			if (value != null)
+				props.put(keys[i], convertObject(ref.getProperty(keys[i])));
+		}
+		return props;
 	}
 
 	private Map convertProperties(Map props) {
