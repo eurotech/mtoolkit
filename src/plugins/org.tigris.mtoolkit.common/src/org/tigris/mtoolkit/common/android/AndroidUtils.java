@@ -154,6 +154,7 @@ public class AndroidUtils {
         Attributes attributes = jarEntry.getAttributes();
         if (attributes != null && attributes.getValue(Constants.BUNDLE_SYMBOLICNAME) != null) {
           // this entry is bundle - convert it to dex format
+          // TODO: No need to use the jarEntry.getName() as a name for the temporary file
           String entryName = jarEntry.getName();
           File file = new File(tmpDir.getAbsolutePath() + "/" + entryName);
           file.getParentFile().mkdirs();
@@ -229,6 +230,7 @@ public class AndroidUtils {
     ZipFile zipFile = null;
     try {
       zipFile = new ZipFile(file);
+      // TODO: ZipFile.getEntry() can be used directly for this functionality
       Enumeration zipEntries = zipFile.entries();
       while (zipEntries.hasMoreElements()) {
         if ("classes.dex".equalsIgnoreCase(((ZipEntry) zipEntries.nextElement()).getName())) {
