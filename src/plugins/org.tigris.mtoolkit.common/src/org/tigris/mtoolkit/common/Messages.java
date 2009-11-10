@@ -24,6 +24,7 @@ public class Messages {
 	public static String CertificatesPanel_lblCertificates;
 	public static String CertificatesPanel_tblCertColAlias;
 	public static String CertificatesPanel_tblCertColLocation;
+	public static String CertificatesPanel_lblNoCertificates;
 	public static String install_to_menu_label;
 
 	static {
