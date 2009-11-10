@@ -47,8 +47,10 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
 public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, SynchronousBundleListener {
@@ -103,6 +105,11 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 
 		bc.addBundleListener(this);
 
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.BUNDLE_SUPPORT, new Boolean(true));
+		}
+
 		log("[register] Remote Bundle Admin Registered.");
 	}
 
@@ -127,6 +134,11 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		Activator.getSynchronizer().removeEventSource(SYNCH_BUNDLE_EVENTS);
 		
 		bc.removeBundleListener(this);
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.BUNDLE_SUPPORT, new Boolean(false));
+		}
 
 		this.bc = null;
 		log("[unregister] Remote Bundle Admin unregistered.");

@@ -5,58 +5,39 @@ package org.tigris.mtoolkit.iagent.event;
  */
 public class RemoteDevicePropertyEvent extends RemoteEvent {
 
-	/**
-	 * Constant indicating that a RemoteDeploymentAdmin service has been
-	 * changed: registered or unregistered
-	 */
-	public final static int DP_ADMIN_CHANGED = 0;
+	private static final int PROPERTY_CHANGED_TYPE = 0;
 
-	/**
-	 * Constant indicating the RemoteEventAdmin service state has been changed:
-	 * registered or unregistered
-	 */
-	public final static int EVENT_ADMIN_CHANGED = 1;
+	public String property;
+	public Object value;
 
-	/**
-	 * Constant indicating that RemoteApplicationAdmin service has been changed:
-	 * registered or unregistered
-	 * 
-	 */
-	public static final int APP_ADMIN_CHANGED = 2;
+	public RemoteDevicePropertyEvent(String property, Object value) {
+		this(PROPERTY_CHANGED_TYPE, property, value);
+	}
 
-	/**
-	 * Constant indicating that a remote console event is received: console is
-	 * supported or not supported any more.
-	 */
-	public final static int CONSOLE_SUPPORTED = 3;
-
-	public boolean eventState = false;
-
-	public RemoteDevicePropertyEvent(int type, boolean state) {
+	public RemoteDevicePropertyEvent(int type, String property, Object value) {
 		super(type);
-		this.eventState = state;
+		this.property = property;
+		this.value = value;
 	}
 
 	public String toString() {
-		return "Remote property change event[type=" + convertType(getType()) + " is supported: " + eventState + "]";
+		return "Remote property event[type=" + convertType(getType()) + " property: " + property + " value: " + value + "]";
 	}
 
 	private String convertType(int type) {
 		switch (type) {
-		case DP_ADMIN_CHANGED:
-			return "DeploymentAdmin";
-		case APP_ADMIN_CHANGED:
-			return "AplicationAdmin";
-		case CONSOLE_SUPPORTED:
-			return "console";
-		case EVENT_ADMIN_CHANGED:
-			return "EventAdmin";
+		case PROPERTY_CHANGED_TYPE:
+			return "PROPERTY_CHANGED";
 		default:
 			return "UNKNOWN(" + type + ")";
 		}
 	}
 
-	public boolean getEventState() {
-		return eventState;
+	public Object getProperty() {
+		return property;
+	}
+
+	public Object getValue() {
+		return value;
 	}
 }

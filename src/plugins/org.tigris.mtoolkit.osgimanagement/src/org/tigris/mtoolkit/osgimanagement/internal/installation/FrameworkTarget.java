@@ -12,7 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.internal.installation;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
-import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
@@ -45,7 +45,11 @@ public class FrameworkTarget implements InstallationTarget {
 	}
 
 	public boolean isMimeTypeSupported(String type) {
-		boolean supportDP = fw.getConnector() != null && ((Boolean) fw.getConnector().getProperties().get(RemoteDeploymentAdmin.class.getName())).booleanValue();
+		boolean supportDP = false;
+		if (fw.getConnector() != null) {
+			Object prop = fw.getConnector().getProperties().get(Capabilities.DEPLOYMENT_SUPPORT);
+			supportDP = (prop instanceof Boolean) && ((Boolean) prop).booleanValue();
+		}
 		if (!supportDP && type.equals(MIME_DP))
 			return false;
 		return true;

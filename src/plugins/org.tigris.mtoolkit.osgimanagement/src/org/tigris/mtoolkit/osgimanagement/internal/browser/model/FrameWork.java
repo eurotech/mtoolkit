@@ -280,7 +280,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 							deploymentManager.addRemoteDPListener(this);
 						}
 						connector.getServiceManager().addRemoteServiceListener(this);
-						connector.monitorDeviceProperties();
 					} catch (IAgentException e) {
 						BrowserErrorHandler.processError(e, connector, userDisconnect);
 					}
@@ -375,7 +374,6 @@ public class FrameWork extends Model implements RemoteBundleListener, RemoteDPLi
 						connector.getDeploymentManager().removeRemoteBundleListener(this);
 						connector.getDeploymentManager().removeRemoteDPListener(this);
 						connector.getServiceManager().removeRemoteServiceListener(this);
-						connector.cancelMonitoringDeviceProperties();
 					}
 				} catch (IAgentException e) {
 					BrowserErrorHandler.processError(e, connector, userDisconnect);

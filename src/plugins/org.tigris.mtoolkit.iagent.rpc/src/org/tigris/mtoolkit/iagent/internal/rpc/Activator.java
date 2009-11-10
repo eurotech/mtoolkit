@@ -10,22 +10,16 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
-import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.VMCommander;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole;
@@ -35,15 +29,13 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.PMPServiceFactory;
-import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 
 public class Activator implements BundleActivator, ServiceTrackerCustomizer, FrameworkListener {
 
 	private static final String DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
 	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
-
-	private static final String SERVICE_STATE = "iagent.service.state";
-	public static final String CUSTOM_PROPERTY_EVENT = "iagent_property_event";
 
 	private RemoteBundleAdminImpl bundleAdmin;
 	private RemoteApplicationAdminImpl applicationAdmin;
@@ -57,6 +49,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	private static Activator instance;
 	private EventSynchronizerImpl synchronizer;
 	private VMCommander vmCommander;
+	private RemoteCapabilitiesManagerImpl capabilitiesManager;
 
 	private ServiceTracker deploymentAdminTrack;
 	private ServiceTracker eventAdminTracker;
@@ -66,7 +59,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		instance = this;
 		synchronizer = new EventSynchronizerImpl(context);
 
-		synchronizer.addEventSource(CUSTOM_PROPERTY_EVENT);
+		capabilitiesManager = new RemoteCapabilitiesManagerImpl();
+		capabilitiesManager.register(context);
 
 		bundleAdmin = new RemoteBundleAdminImpl();
 		bundleAdmin.register(context);
@@ -154,7 +148,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		pmpServiceReg.unregister();
 
 		if (synchronizer != null) {
-			synchronizer.removeEventSource(CUSTOM_PROPERTY_EVENT);
 			synchronizer.stopDispatching();
 			synchronizer.unregister(context);
 		}
@@ -189,6 +182,11 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			vmCommander.close();
 		}
 
+		if (capabilitiesManager != null) {
+			capabilitiesManager.unregister(context);
+			capabilitiesManager = null;
+		}
+
 		instance = null;
 		this.context = null;
 	}
@@ -218,11 +216,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		for (int i = 0; i < classes.length; i++)
 			if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
 				DeploymentAdmin admin = (DeploymentAdmin) context.getService(arg0);
-				if (registerDeploymentAdmin(admin))
-					sendEvent(RemoteDeploymentAdmin.class, true);
+				registerDeploymentAdmin(admin);
 				return admin;
 			} else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
-				sendEvent(EventAdmin.class, true);
+				setCapability(Capabilities.EVENT_SUPPORT, true);
 				return new Object();
 			}
 		return null;
@@ -239,12 +236,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 					DeploymentAdmin admin = (DeploymentAdmin) deploymentAdminTrack.getService();
 					if (admin != null)
 						registerDeploymentAdmin(admin);
-					else
-						sendEvent(RemoteDeploymentAdmin.class, false);
 				}
 			} else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
 				if (eventAdminTracker.getService() == null)
-					sendEvent(EventAdmin.class, false);
+					setCapability(Capabilities.EVENT_SUPPORT, false);
 			}
 		}
 	}
@@ -253,18 +248,16 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		return instance != null ? instance.synchronizer : null;
 	}
 
-	private void sendEvent(Class objClass, boolean state) {
-		Dictionary pmpEventData = new Hashtable();
-
-		pmpEventData.put(Constants.OBJECTCLASS, new String[] { objClass.getName() });
-		pmpEventData.put(SERVICE_STATE, new Boolean(state));
-
-		EventSynchronizer synchronizer = this.synchronizer;
-		if (synchronizer != null)
-			synchronizer.enqueue(new EventData(pmpEventData, CUSTOM_PROPERTY_EVENT));
+	public static RemoteCapabilitiesManager getCapabilitiesManager() {
+		return instance != null ? instance.capabilitiesManager : null;
 	}
 
-	
+	private void setCapability(String capability, boolean value) {
+		if (capabilitiesManager != null) {
+			capabilitiesManager.setCapability(capability, new Boolean(value));
+		}
+	}
+
 	public void frameworkEvent(FrameworkEvent event) {
 		if (event.getType() == FrameworkEvent.STARTED)
 			startController(context);

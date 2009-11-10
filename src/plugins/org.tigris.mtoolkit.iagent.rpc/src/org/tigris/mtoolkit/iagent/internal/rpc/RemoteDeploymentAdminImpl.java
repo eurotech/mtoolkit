@@ -26,7 +26,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
@@ -75,7 +77,12 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		eventAdminTrack.open(true);
 
 		registration = context.registerService(RemoteDeploymentAdmin.class.getName(), this, null);
-	
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.DEPLOYMENT_SUPPORT, new Boolean(true));
+		}
+
 		log("[removedService] Remote Deployment Admin Registered.");
 	}
 
@@ -90,6 +97,11 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		if (registration != null) {
 			registration.unregister();
 			registration = null;
+		}
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.DEPLOYMENT_SUPPORT, new Boolean(false));
 		}
 
 		this.context = null;

@@ -20,12 +20,15 @@ import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.internal.pmp.InvocationThread;
+import org.tigris.mtoolkit.iagent.internal.rpc.Activator;
 import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 
 public abstract class RemoteConsoleServiceBase implements RemoteConsole {
@@ -49,11 +52,21 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 
 	public void register(BundleContext context) {
 		registration = context.registerService(RemoteConsole.class.getName(), this, null);
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(true));
+		}
 	}
 
 	public void unregister() {
 		registration.unregister();
 		restoreSystemOutputs();
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(false));
+		}
 	}
 
 	public void registerOutput(RemoteObject remoteObject) throws PMPException {

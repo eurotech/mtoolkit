@@ -27,7 +27,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 
 public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllServiceListener {
@@ -81,7 +83,12 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 		}
 		
 		Activator.getSynchronizer().addEventSource(CUSTOM_SERVICE_EVENT);
-		
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(true));
+		}
+
 		log("[register] Remote Service Admin Registered.");
 	}
 
@@ -103,7 +110,12 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			registration.unregister();
 			registration = null;
 		}
-		
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(false));
+		}
+
 		Activator.getSynchronizer().removeEventSource(CUSTOM_SERVICE_EVENT);
 		
 		this.bc = null;

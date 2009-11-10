@@ -15,8 +15,10 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -29,15 +31,15 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.tcp.ConnectionManagerImpl;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
-import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
-import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
-import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
+import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.iagent.spi.IAgentManager;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportsHub;
@@ -59,12 +61,11 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	private Dictionary connectionProperties;
 
 	private List devicePropertyListeners = new LinkedList();
-	
-	private String DEVICE_PROPERTY_EVENT = "iagent_property_event";
-	private PropertiesRegistry propRegistry;
 
-	private static final String EVENT_OBJECT_CLASS = "objectClass";
-	private static final String EVENT_STATE_KEY = "iagent.service.state";
+	private String DEVICE_PROPERTY_EVENT = "iagent_property_event";
+
+	private static final String EVENT_CAPABILITY_NAME = "capability.name";
+	private static final String EVENT_CAPABILITY_VALUE = "capability.value";
 	
 	private HashMap managers;
 
@@ -147,15 +148,6 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				}
 			}
 		});
-	}
-
-	public void monitorDeviceProperties() throws IAgentException {
-		propRegistry = new PropertiesRegistry(serviceManager, this);
-		addRemoteDevicePropertyListener(propRegistry);
-	}
-
-	public void cancelMonitoringDeviceProperties() throws IAgentException {
-		removeRemoteDevicePropertyListener(propRegistry);
 	}
 
 	private void connect(int connectionType) throws IAgentException {
@@ -251,12 +243,21 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 
 	public Dictionary getProperties() {
 		Dictionary props = cloneDictionary(connectionProperties);
-		if(propRegistry != null) {
-			Hashtable devCapabilities = propRegistry.getDeviceProperties();
-			Enumeration enumeration = devCapabilities.keys();
-			while(enumeration.hasMoreElements()) {
-				Object key = enumeration.nextElement();
-				props.put(key, devCapabilities.get(key));
+		if (isActive) {
+			try {
+				PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION);
+				RemoteObject service = connection.getRemoteAdmin(RemoteCapabilitiesProvider.class.getName());
+				if (service != null) {
+					MethodSignature getCapabilities = new MethodSignature("getCapabilities"); //$NON-NLS-1$
+					Map devCapabilities = (Map) getCapabilities.call(service);
+					Iterator iterator = devCapabilities.keySet().iterator();
+					while (iterator.hasNext()) {
+						String property = (String) iterator.next();
+						props.put(property, devCapabilities.get(property));
+					}
+				}
+			} catch (Exception e) {
+				IAgentLog.error("[DeviceConnectorImpl][getProperties] Failed to get Remote Capabilities", e);
 			}
 		}
 		return props;
@@ -279,8 +280,8 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		DebugUtils.log(this, message, e);
 	}
 
-	void fireDevicePropertyEvent(int type, boolean state) {
-		log("[fireDevicePropertyEvent] >>> type: " + type);
+	void fireDevicePropertyEvent(String property, Object value) {
+		log("[fireDevicePropertyEvent] >>> property: " + property);
 		RemoteDevicePropertyListener[] listeners;
 		synchronized (devicePropertyListeners) {
 			if (devicePropertyListeners.size() != 0) {
@@ -289,7 +290,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				return;
 			}
 		}
-		RemoteDevicePropertyEvent event = new RemoteDevicePropertyEvent(type, state);
+		RemoteDevicePropertyEvent event = new RemoteDevicePropertyEvent(property, value);
 		log("[fireRemoteDevicePropertyEvent] " + listeners.length + " listeners found.");
 		for (int i = 0; i < listeners.length; i++) {
 			RemoteDevicePropertyListener listener = listeners[i];
@@ -341,24 +342,14 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		return getConnection(type, true);
 	}
 
-	final static String[] propertyMap = { RemoteDeploymentAdmin.class.getName(),
-		"org.osgi.service.event.EventAdmin",
-		RemoteApplicationAdmin.class.getName(),
-		RemoteConsole.class.getName() };
-
 	public void event(Object event, String evType) {
 		try {
 			log("[event] >>> event: " + event + "; type: " + evType);
 			if (DEVICE_PROPERTY_EVENT.equals(evType)) {
 				Dictionary eventProps = (Dictionary) event;
-				String[] eventObjectClasses = (String[]) eventProps.get(EVENT_OBJECT_CLASS);
-				boolean state = ((Boolean) eventProps.get(EVENT_STATE_KEY)).booleanValue();
-				for (int i = 0; i < propertyMap.length; i++) {
-					if (propertyMap[i].equals(eventObjectClasses[0])) {
-						fireDevicePropertyEvent(i, state);
-						break;
-					}
-				}
+				String capabilityName = (String) eventProps.get(EVENT_CAPABILITY_NAME);
+				Object capabilityValue = eventProps.get(EVENT_CAPABILITY_VALUE);
+				fireDevicePropertyEvent(capabilityName, capabilityValue);
 			}
 		} catch (Throwable e) {
 			IAgentLog.error("[DeploymentManagerImpl][event] Failed to process PMP event: "

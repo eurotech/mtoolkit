@@ -34,8 +34,10 @@ import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 
 public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmin, ServiceTrackerCustomizer {
 
@@ -85,6 +87,11 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		}
 
 		registration = bc.registerService(RemoteApplicationAdmin.class.getName(), this, null);
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(true));
+		}
 	}
 
 	public void unregister(BundleContext bc) {
@@ -102,6 +109,11 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			handlesTracker = null;
 		}
 		Activator.getSynchronizer().removeEventSource(SYNCH_APPLICATION_EVENT);
+
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(false));
+		}
 
 		this.bc = null;
 	}

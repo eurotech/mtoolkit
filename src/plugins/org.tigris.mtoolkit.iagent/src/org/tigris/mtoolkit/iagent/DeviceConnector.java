@@ -326,12 +326,6 @@ public abstract class DeviceConnector {
 	 * @throws IAgentException
 	 */
 	public abstract void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException;
-
-	public void monitorDeviceProperties() throws IAgentException {
-	}
-
-	public void cancelMonitoringDeviceProperties() throws IAgentException {
-	}
 	
 	public abstract Object getManager(String className) throws IAgentException;
 
