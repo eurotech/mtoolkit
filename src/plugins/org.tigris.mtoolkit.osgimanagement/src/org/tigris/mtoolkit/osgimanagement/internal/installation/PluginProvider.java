@@ -33,6 +33,7 @@ import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.pde.internal.core.natures.PDE;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
@@ -66,6 +67,17 @@ public class PluginProvider implements InstallationItemProvider {
 
 		public IStatus prepare(IProgressMonitor monitor, Map properties) {
 			monitor.beginTask("Exporting project: " + project.getName(), 1);
+
+			final boolean[] saveResult = new boolean[1];
+			saveResult[0] = true;
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					saveResult[0] = PlatformUI.getWorkbench().saveAllEditors(true);
+				}
+			});
+			if (!saveResult[0]) {
+				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Could not prepare plugin. Saving of modified files was cancelled.");
+			}
 
 			FeatureExportInfo exportInfo = new FeatureExportInfo();
 			exportInfo.toDirectory = true;
