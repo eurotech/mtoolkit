@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class DisconnectAction extends SelectionProviderAction implements IStateAction {
 
@@ -28,8 +28,8 @@ public class DisconnectAction extends SelectionProviderAction implements IStateA
 	public void run() {
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
-			FrameWork framework = (FrameWork) iterator.next();
-			MenuFactory.disconnectFrameworkAction(framework);
+			FrameworkImpl framework = (FrameworkImpl) iterator.next();
+			ActionsManager.disconnectFrameworkAction(framework);
 		}
 		getSelectionProvider().setSelection(getSelection());
 	}
@@ -49,11 +49,11 @@ public class DisconnectAction extends SelectionProviderAction implements IStateA
 		Iterator iterator = selection.iterator();
 		while (iterator.hasNext()) {
 			Model model = (Model) iterator.next();
-			if (!(model instanceof FrameWork)) {
+			if (!(model instanceof FrameworkImpl)) {
 				enabled = false;
 				break;
 			}
-			FrameWork framework = (FrameWork) model;
+			FrameworkImpl framework = (FrameworkImpl) model;
 			if (!framework.isConnected()) {
 				enabled = false;
 				break;

@@ -24,17 +24,17 @@ import org.eclipse.ui.part.IPageBookViewPage;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class RemoteConsole extends IOConsole {
 
 	private DeviceConnector connector;
-	private FrameWork fw;
+	private Framework fw;
 	private ConsoleReader reader;
 	private Listener listener = new Listener();
 	private Date timestamp;
@@ -42,7 +42,7 @@ public class RemoteConsole extends IOConsole {
 	
 	public static final String P_DISCONNECTED = "org.tigris.mtoolkit.osgimanagement.console.disconnected";
 	
-	public RemoteConsole(FrameWork fw) {
+	public RemoteConsole(Framework fw) {
 		super("", "osgiManagementConsole", ImageHolder.getImageDescriptor("frameworks.gif"), true);
 		this.fw = fw;
 		this.connector = fw.getConnector();

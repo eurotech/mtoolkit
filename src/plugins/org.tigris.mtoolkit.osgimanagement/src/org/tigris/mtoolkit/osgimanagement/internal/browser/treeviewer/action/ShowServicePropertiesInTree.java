@@ -9,7 +9,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class ShowServicePropertiesInTree extends SelectionProviderAction implements IStateAction {
 
@@ -20,13 +20,13 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 	}
 
 	public void run() {
-		boolean newState = !((FrameWork) frameworks.get(0)).isShownServicePropertiss();
+		boolean newState = !((FrameworkImpl) frameworks.get(0)).isShownServicePropertiss();
 		for (int i = 0; i < frameworks.size(); i++) {
-			((FrameWork) frameworks.get(i)).setShowServicePropertiesInTree(newState);
+			((FrameworkImpl) frameworks.get(i)).setShowServicePropertiesInTree(newState);
 		}
 
 		for (int i = 0; i < frameworks.size(); i++)
-			((FrameWork) frameworks.get(i)).refreshAction();
+			((FrameworkImpl) frameworks.get(i)).refreshAction();
 
 		// FrameWorkView.getActiveInstance().addFilter();
 	}
@@ -46,11 +46,11 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 		while (iter.hasNext()) {
 			Object selElement = iter.next();
 			if (selElement instanceof Model) {
-				FrameWork fw = ((Model) selElement).findFramework();
+				FrameworkImpl fw = (FrameworkImpl) ((Model) selElement).findFramework();
 				if (fw != null && !frameworks.contains(fw)) {
 					frameworks.add(fw);
 				}
-			} else if (selElement instanceof FrameWork)
+			} else if (selElement instanceof FrameworkImpl)
 				if (!frameworks.contains(selElement)) {
 					frameworks.add(selElement);
 				}
@@ -63,7 +63,7 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 
 		this.setEnabled(true);
 
-		boolean show = ((FrameWork) frameworks.get(0)).isShownServicePropertiss();
+		boolean show = ((FrameworkImpl) frameworks.get(0)).isShownServicePropertiss();
 		if (show)
 			setChecked(true);
 		else

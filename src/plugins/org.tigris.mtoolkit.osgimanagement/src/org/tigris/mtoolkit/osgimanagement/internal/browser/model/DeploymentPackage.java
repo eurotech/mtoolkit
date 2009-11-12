@@ -18,14 +18,13 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 
 public class DeploymentPackage extends Model {
 
-	private FrameWork framework;
+	private FrameworkImpl framework;
 	private RemoteDP dp;
 
-	public DeploymentPackage(RemoteDP dp, FrameWork fw) throws IAgentException {
+	public DeploymentPackage(RemoteDP dp, FrameworkImpl fw) throws IAgentException {
 		super(dp.getName());
 		this.dp = dp;
 		this.framework = fw;
@@ -42,10 +41,10 @@ public class DeploymentPackage extends Model {
 				Bundle bundleNode = new Bundle(name,
 					bundle,
 					bundle.getState(),
-					FrameworkConnectorFactory.getRemoteBundleType(bundle, headers),
+					fw.getRemoteBundleType(bundle, headers),
 					(String) headers.get("Bundle-Category")); //$NON-NLS-1$
 				addElement(bundleNode);
-				Bundle bundleNodeInBundles = (Bundle) fw.bundleHash.get(new Long(bundle.getBundleId()));
+				Bundle bundleNodeInBundles = (Bundle) fw.findBundle(bundle.getBundleId());
 				if (bundleNodeInBundles == null) {
 					// log an error only if we are in debug mode, otherwise we
 					// are not interested in it:)
@@ -54,20 +53,21 @@ public class DeploymentPackage extends Model {
 				}
 				Model children[] = bundleNodeInBundles.getChildren();
 				if (children != null && children.length > 0) {
-					Model[] categories = FrameworkConnectorFactory.addServiceCategoriesNodes(bundleNode);
-					if (categories == null) {
-						continue;
-					}
+//					Model[] categories = FrameworkConnectorFactory.addServiceCategoriesNodes(bundleNode);
+//					if (categories == null) {
+//						continue;
+//					}
 					Model regServ[] = children[0].getChildren();
 					if (regServ != null) {
+						Model servCategory = fw.getServiceCategoryNode(bundleNodeInBundles, ServicesCategory.REGISTERED_SERVICES, true);
 						for (int i = 0; i < regServ.length; i++) {
 							ObjectClass oc = new ObjectClass(regServ[i].getName(),
 								new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
 								((ObjectClass) regServ[i]).getService());
-							categories[0].addElement(oc);
+							servCategory.addElement(oc);
 							if (fw != null &&  fw.isShownServicePropertiss()) {
 								try {
-									FrameworkConnectorFactory.addServicePropertiesNodes(oc);
+									fw.addServicePropertiesNodes(oc);
 								} catch (IAgentException e) {
 									e.printStackTrace();
 								}
@@ -77,14 +77,15 @@ public class DeploymentPackage extends Model {
 
 					Model usedServ[] = children[1].getChildren();
 					if (usedServ != null) {
+						Model servCategory = fw.getServiceCategoryNode(bundleNodeInBundles, ServicesCategory.USED_SERVICES, true);
 						for (int i = 0; i < usedServ.length; i++) {
 							ObjectClass oc = new ObjectClass(usedServ[i].getName(),
 								new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
 								((ObjectClass) usedServ[i]).getService());
-							categories[1].addElement(oc);
+							servCategory.addElement(oc);
 							if (fw != null &&  fw.isShownServicePropertiss()) {
 								try {
-									FrameworkConnectorFactory.addServicePropertiesNodes(oc);
+									fw.addServicePropertiesNodes(oc);
 								} catch (IAgentException e) {
 									e.printStackTrace();
 								}
@@ -92,7 +93,7 @@ public class DeploymentPackage extends Model {
 						}
 					}
 				}
-				if (framework.getViewType() == FrameWork.SERVICES_VIEW) {
+				if (framework.getViewType() == FrameworkImpl.SERVICES_VIEW) {
 					framework.removeElement(bundleNode.getParent().getParent());
 				}
 			} catch (IllegalStateException e) {

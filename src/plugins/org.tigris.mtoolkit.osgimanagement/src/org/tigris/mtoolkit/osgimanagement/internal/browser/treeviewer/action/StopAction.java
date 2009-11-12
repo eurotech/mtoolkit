@@ -32,7 +32,7 @@ public class StopAction extends SelectionProviderAction implements IStateAction 
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
 			Bundle bundle = (Bundle) iterator.next();
-			MenuFactory.stopBundleAction(bundle);
+			ActionsManager.stopBundleAction(bundle);
 		}
 		getSelectionProvider().setSelection(selection);
 	}

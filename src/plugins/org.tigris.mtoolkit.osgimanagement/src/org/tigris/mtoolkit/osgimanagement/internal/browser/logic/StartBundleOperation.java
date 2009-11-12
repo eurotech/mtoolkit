@@ -12,9 +12,11 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class StartBundleOperation extends RemoteBundleOperation {
-	StartBundleOperation(Bundle bundle) {
+	
+	public StartBundleOperation(Bundle bundle) {
 		super(Messages.start_bundle, bundle);
 	}
 
@@ -25,7 +27,7 @@ public class StartBundleOperation extends RemoteBundleOperation {
 			// the bundle failed to start, most probably because its
 			// start level is too high
 			int bundleStartLevel = rBundle.getBundleStartLevel();
-			int fwStartLevel = getBundle().findFramework().getFrameWorkStartLevel();
+			int fwStartLevel = ((FrameworkImpl) getBundle().findFramework()).getFrameWorkStartLevel();
 			if (fwStartLevel < bundleStartLevel)
 				return FrameworkPlugin.newStatus(IStatus.WARNING, Messages.bundle_start_failure, null);
 		}

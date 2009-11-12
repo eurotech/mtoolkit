@@ -20,7 +20,7 @@ import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class RefreshAction extends SelectionProviderAction implements IStateAction {
 
@@ -42,14 +42,14 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 		tree.getTree().setRedraw(false);
 		while (iterator.hasNext()) {
 			Model node = (Model) iterator.next();
-			if (node instanceof FrameWork) {
-				FrameWork framework = (FrameWork) node;
+			if (node instanceof FrameworkImpl) {
+				FrameworkImpl framework = (FrameworkImpl) node;
 				if (framework.isConnected() && !framework.isRefreshing()) {
 					framework.refreshAction();
 				}
 			} else if (node instanceof Bundle) {
 				Bundle bundle = (Bundle) node;
-				MenuFactory.refreshBundleAction(bundle);
+				ActionsManager.refreshBundleAction(bundle);
 			}
 		}
 		tree.getTree().setRedraw(true);
@@ -70,16 +70,16 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 		boolean isAFrameworkSelected = false;
 		while (iterator.hasNext()) {
 			Model model = (Model) iterator.next();
-			if (!(model instanceof FrameWork || model instanceof Bundle)) {
+			if (!(model instanceof FrameworkImpl || model instanceof Bundle)) {
 				enabled = false;
 				break;
 			}
-			if (model instanceof FrameWork) {
-				FrameWork framework = (FrameWork) model;
+			if (model instanceof FrameworkImpl) {
+				FrameworkImpl framework = (FrameworkImpl) model;
 				if (!framework.isConnected() 
 					|| framework.isRefreshing()
 					|| framework.getConnector() == null
-					|| FrameworkConnectorFactory.connectJobs.get(framework.getConnector()) != null) {
+					/*|| FrameworkConnectorFactory.connectJobs.get(framework.getConnector()) != null*/) {
 					enabled = false;
 					break;
 				}
@@ -91,7 +91,7 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 
 		}
 		if (enabled) {
-			if (selection.getFirstElement() instanceof FrameWork) {
+			if (selection.getFirstElement() instanceof FrameworkImpl) {
 				setText(label1 + "@F5");
 			} else {
 				setText(label2 + "@F5");

@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 
 public class ShowFrameworkConsole extends SelectionProviderAction implements IStateAction {
@@ -34,7 +34,7 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 		IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
 		if (selection.isEmpty())
 			return;	// don't execute for empty selection
-		final FrameWork fw = ((Model) selection.getFirstElement()).findFramework();
+		final FrameworkImpl fw = (FrameworkImpl) ((Model) selection.getFirstElement()).findFramework();
 		ConsoleManager.showConsole(fw);
 	}
 
@@ -45,9 +45,9 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 
 	public void updateState(IStructuredSelection selection) {
 		boolean enabled = false;
-		FrameWork fw = null;
+		FrameworkImpl fw = null;
 		for (Iterator it = selection.iterator(); it.hasNext();) {
-			FrameWork next = ((Model) it.next()).findFramework();
+			FrameworkImpl next = (FrameworkImpl) ((Model) it.next()).findFramework();
 			if (fw == null) {
 				// we found a framework, enable console
 				fw = next;

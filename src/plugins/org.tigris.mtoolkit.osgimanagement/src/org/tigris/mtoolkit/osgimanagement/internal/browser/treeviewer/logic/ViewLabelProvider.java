@@ -25,6 +25,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework.ModelProviderElement;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -32,12 +33,11 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork.ModelProviderElement;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class ViewLabelProvider extends StyledCellLabelProvider implements ConstantsDistributor {
@@ -63,8 +63,8 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 
 	// Override to return proper image for every element
 	public Image getImage(Object element) {
-		if (element instanceof FrameWork) {
-			FrameWork framework = (FrameWork) element;
+		if (element instanceof FrameworkImpl) {
+			FrameworkImpl framework = (FrameworkImpl) element;
 			if (framework.isConnected()) {
 				return ImageHolder.getImage(SERVER_ICON_CONNECTED);
 			} else {
@@ -143,7 +143,7 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 			return null;
 		}
 		if (element instanceof Model) {
-			FrameWork fw = ((Model) element).findFramework();
+			FrameworkImpl fw = (FrameworkImpl) ((Model) element).findFramework();
 			if (fw != null) {
 				List modelProviders = fw.getModelProviders();
 				for (int i=0; i<modelProviders.size(); i++) {
@@ -191,7 +191,7 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
 			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 			styles.add(new StyleRange(text.indexOf(":") + 1, text.length(), style.foreground, style.background));
-		} else if (element instanceof FrameWork) {
+		} else if (element instanceof FrameworkImpl) {
 			text = element.toString();
 		} else {
 			text = element.toString();

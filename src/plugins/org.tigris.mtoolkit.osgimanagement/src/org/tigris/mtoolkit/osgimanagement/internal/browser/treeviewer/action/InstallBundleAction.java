@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class InstallBundleAction extends SelectionProviderAction implements IStateAction {
 
@@ -32,8 +32,8 @@ public class InstallBundleAction extends SelectionProviderAction implements ISta
 	// run method
 	public void run() {
 		Model node = (Model) getStructuredSelection().getFirstElement();
-		FrameWork framework = node.findFramework();
-		MenuFactory.installBundleAction(framework, parentView);
+		FrameworkImpl framework = (FrameworkImpl) node.findFramework();
+		ActionsManager.installBundleAction(framework, parentView);
 		getSelectionProvider().setSelection(getSelection());
 	}
 
@@ -47,7 +47,7 @@ public class InstallBundleAction extends SelectionProviderAction implements ISta
 			setEnabled(false);
 			return;
 		}
-		FrameWork fw = ((Model) selection.getFirstElement()).findFramework();
+		FrameworkImpl fw = (FrameworkImpl) ((Model) selection.getFirstElement()).findFramework();
 		boolean enabled = true;
 		if (fw == null || !fw.isConnected()) {
 			enabled = false;

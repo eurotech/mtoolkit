@@ -19,7 +19,7 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class ConnectAction extends SelectionProviderAction implements IStateAction {
 
@@ -32,8 +32,8 @@ public class ConnectAction extends SelectionProviderAction implements IStateActi
 		ISelection selection = getSelection();
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
-			FrameWork framework = (FrameWork) iterator.next();
-			MenuFactory.connectFrameworkAction(framework);
+			FrameworkImpl framework = (FrameworkImpl) iterator.next();
+			ActionsManager.connectFrameworkAction(framework);
 			// needed to update workbench menu and toolbar status
 		}
 		getSelectionProvider().setSelection(selection);
@@ -54,11 +54,11 @@ public class ConnectAction extends SelectionProviderAction implements IStateActi
 		Iterator iterator = selection.iterator();
 		while (iterator.hasNext()) {
 			Model model = (Model) iterator.next();
-			if (!(model instanceof FrameWork)) {
+			if (!(model instanceof FrameworkImpl)) {
 				enabled = false;
 				break;
 			}
-			FrameWork framework = (FrameWork) model;
+			FrameworkImpl framework = (FrameworkImpl) model;
 			if (framework.isConnected() || framework.isConnecting() || ConnectFrameworkJob.isConnecting(framework)) {
 				enabled = false;
 				break;

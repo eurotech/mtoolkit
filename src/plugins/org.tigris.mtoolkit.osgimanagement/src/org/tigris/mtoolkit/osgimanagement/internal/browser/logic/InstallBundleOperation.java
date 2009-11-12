@@ -34,13 +34,13 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class InstallBundleOperation extends RemoteBundleOperation {
 	private final File bundle;
-	private final FrameWork framework;
+	private final FrameworkImpl framework;
 
-	InstallBundleOperation(File bundle, FrameWork framework) {
+	public InstallBundleOperation(File bundle, FrameworkImpl framework) {
 		super(Messages.install_bundle, null);
 		this.bundle = bundle;
 		this.framework = framework;

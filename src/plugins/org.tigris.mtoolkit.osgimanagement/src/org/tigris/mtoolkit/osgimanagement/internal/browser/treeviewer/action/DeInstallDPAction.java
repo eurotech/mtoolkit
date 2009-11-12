@@ -45,7 +45,7 @@ public class DeInstallDPAction extends SelectionProviderAction implements IState
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
 			DeploymentPackage dp = (DeploymentPackage) iterator.next();
-			MenuFactory.deinstallDPAction(dp);
+			ActionsManager.deinstallDPAction(dp);
 		}
 		getSelectionProvider().setSelection(getSelection());
 	}

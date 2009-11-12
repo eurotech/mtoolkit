@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class PropertyAction extends SelectionProviderAction implements IStateAction {
 
@@ -29,8 +29,8 @@ public class PropertyAction extends SelectionProviderAction implements IStateAct
 
 	// run method
 	public void run() {
-		FrameWork framework = (FrameWork) getStructuredSelection().getFirstElement();
-		MenuFactory.frameworkPropertiesAction(framework, parentView);
+		FrameworkImpl framework = (FrameworkImpl) getStructuredSelection().getFirstElement();
+		ActionsManager.frameworkPropertiesAction(framework, parentView);
 		getSelectionProvider().setSelection(getSelection());
 	}
 
@@ -40,7 +40,7 @@ public class PropertyAction extends SelectionProviderAction implements IStateAct
 	}
 
 	public void updateState(IStructuredSelection selection) {
-		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof FrameWork) {
+		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof FrameworkImpl) {
 			this.setEnabled(true);
 		} else {
 			this.setEnabled(false);

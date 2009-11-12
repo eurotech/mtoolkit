@@ -22,10 +22,11 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
 public class BrowserErrorHandler {
@@ -60,13 +61,13 @@ public class BrowserErrorHandler {
 
 	public static void processError(Throwable t, Model unknown) {
 		if (unknown instanceof Model) {
-			processError(t, findConnector((Model) unknown), unknown.findFramework().userDisconnect);
+			processError(t, findConnector((Model) unknown), ((FrameworkImpl)unknown.findFramework()).userDisconnect);
 		}
 	}
 
 	private static DeviceConnector findConnector(Model node) {
 		DeviceConnector connector = null;
-		FrameWork fw = node.findFramework();
+		Framework fw = node.findFramework();
 		if (fw != null)
 			connector = fw.getConnector();
 		return connector;

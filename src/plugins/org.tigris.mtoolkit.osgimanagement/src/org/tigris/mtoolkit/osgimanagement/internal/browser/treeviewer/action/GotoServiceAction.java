@@ -19,7 +19,7 @@ import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 
@@ -39,8 +39,8 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 			ObjectClass objectClass = (ObjectClass) getStructuredSelection().getFirstElement();
 			RemoteService service = objectClass.getService();
 			String searchName = objectClass.getName();
-			if (((ServicesCategory) objectClass.getParent()).getKind() == ServicesCategory.IN_USE) {
-				Bundle bundle = ((FrameWork) objectClass.findFramework()).findBundleForService(service.getServiceId());
+			if (((ServicesCategory) objectClass.getParent()).getType() == ServicesCategory.USED_SERVICES) {
+				Bundle bundle = ((FrameworkImpl) objectClass.findFramework()).findBundleForService(service.getServiceId());
 				if (bundle == null)
 					return;
 				ServicesCategory category = (ServicesCategory) bundle.getChildren()[0];
@@ -80,10 +80,10 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 	public void updateState(IStructuredSelection selection) {
 		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof ObjectClass) {
 			ObjectClass oClass = (ObjectClass) getStructuredSelection().getFirstElement();
-			if ((oClass.getParent() instanceof FrameWork))
+			if ((oClass.getParent() instanceof FrameworkImpl))
 				return;
 			ServicesCategory category = (ServicesCategory) oClass.getParent();
-			if (category.getKind() == ServicesCategory.REGISTERED) {
+			if (category.getType() == ServicesCategory.REGISTERED_SERVICES) {
 				this.setEnabled(false);
 			} else {
 				this.setEnabled(true);

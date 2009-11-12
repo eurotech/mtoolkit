@@ -13,7 +13,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
 public class UninstallBundleOperation extends RemoteBundleOperation {
-	UninstallBundleOperation(Bundle bundle) {
+	public UninstallBundleOperation(Bundle bundle) {
 		super(Messages.uninstall_bundle, bundle);
 	}
 

@@ -33,7 +33,7 @@ public class TreeRoot extends Model {
 		Iterator iter = elementList.iterator();
 		HashMap result = new HashMap(getSize());
 		while (iter.hasNext()) {
-			FrameWork element = (FrameWork) iter.next();
+			FrameworkImpl element = (FrameworkImpl) iter.next();
 			result.put(element.getName(), element);
 		}
 		return result;
@@ -95,7 +95,7 @@ public class TreeRoot extends Model {
 		if ("" == filter) {
 			return true;
 		}
-		if (model instanceof FrameWork) {
+		if (model instanceof FrameworkImpl) {
 			return false;
 		}
 		if (model instanceof ServicesCategory || model instanceof BundlesCategory) {

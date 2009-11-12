@@ -104,7 +104,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
@@ -298,9 +298,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		tree.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				Model node = (Model) ((TreeSelection) event.getSelection()).getFirstElement();
-				if (node instanceof FrameWork) {
-					if (!((FrameWork) node).isConnected()) {
-						FrameworkConnectorFactory.connectFrameWork((FrameWork) node);
+				if (node instanceof FrameworkImpl) {
+					if (!((FrameworkImpl) node).isConnected()) {
+						FrameworkConnectorFactory.connectFrameWork((FrameworkImpl) node);
 					}
 				}					
 				boolean expand = !tree.getExpandedState(node);
@@ -516,9 +516,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	// Disposes all Frameworks
 	public void clearAll() {
 		Model[] children = treeRoot.getChildren();
-		FrameWork child;
+		FrameworkImpl child;
 		for (int i = 0; i < treeRoot.getSize(); i++) {
-			child = (FrameWork) children[i];
+			child = (FrameworkImpl) children[i];
 			child.dispose();
 			treeRoot.removeElement(child);
 		}
@@ -568,9 +568,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		servicePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
 		
 		gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
-		viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameWork.SERVICES_VIEW);
+		viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameworkImpl.SERVICES_VIEW);
 		viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ViewLabelProvider.SERVICES_CATEGORY_ICON));
-		viewBundlesAction = new ViewAction(tree, Messages.bundles_view_action_label, tree, FrameWork.BUNDLES_VIEW);
+		viewBundlesAction = new ViewAction(tree, Messages.bundles_view_action_label, tree, FrameworkImpl.BUNDLES_VIEW);
 		viewBundlesAction.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 
 		showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label, tree, getTreeRoot());
@@ -676,7 +676,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			}
 
 			if (homogen) {
-				if (element instanceof FrameWork) {
+				if (element instanceof FrameworkImpl) {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, connectAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, disconnectAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, removeFrameworkAction);
@@ -706,7 +706,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				}
 
 				if (element instanceof ObjectClass) {
-					if (!(element.getParent() instanceof FrameWork)) {
+					if (!(element.getParent() instanceof FrameworkImpl)) {
 						manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, gotoServiceAction);
 					}
 				}
@@ -737,7 +737,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		manager.appendToGroup(ContentTypeActionsProvider.GROUP_DEFAULT, showConsoleAction);
 		if (selection.size() > 0 && homogen) {
 			Model element = (Model) selection.getFirstElement();
-			if (element instanceof FrameWork)
+			if (element instanceof FrameworkImpl)
 				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, frameworkPropertiesAction);
 			if (element instanceof Bundle)
 				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, bundlePropertiesAction);
@@ -755,8 +755,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		IMemento child;
 		Model[] children = treeRoot.getChildren();
 		for (int i = 0; i < treeRoot.getSize(); i++) {
-			if (!((FrameWork) children[i]).autoConnected) {
-				IMemento config = ((FrameWork) children[i]).getConfig();
+			if (!((FrameworkImpl) children[i]).autoConnected) {
+				IMemento config = ((FrameworkImpl) children[i]).getConfig();
 				if (config != null) {
 					child = rootConfig.createChild(MEMENTO_TYPE);
 					child.putMemento(config);
@@ -800,13 +800,13 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		treeRoot = new TreeRoot(Messages.root_element_name);
 
 		String elementName;
-		FrameWork element;
+		FrameworkImpl element;
 		IMemento[] all = memento.getChildren(MEMENTO_TYPE);
 		for (int i = 0; i < all.length; i++) {
 			elementName = all[i].getString(FRAMEWORK_NAME);
 			if (elementName == null)
 				continue;
-			element = new FrameWork(elementName, false);
+			element = new FrameworkImpl(elementName, false);
 			element.setConfig(all[i]);
 			treeRoot.addElement(element);
 		}
@@ -840,35 +840,35 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public void setFocus() {
 	}
 
-	public static FrameWork[] getFrameworks() {
+	public static FrameworkImpl[] getFrameworks() {
 		if (treeRoot == null)
 			return null;
 		Model fwsM[] = treeRoot.getChildren();
-		FrameWork fws[] = new FrameWork[fwsM.length];
+		FrameworkImpl fws[] = new FrameworkImpl[fwsM.length];
 		System.arraycopy(fwsM, 0, fws, 0, fws.length);
 		return fws;
 	}
 
-	public static FrameWork findFramework(String fwName) {
+	public static FrameworkImpl findFramework(String fwName) {
 		if (treeRoot == null)
 			return null;
 		Model fws[] = treeRoot.getChildren();
 		for (int i = 0; i < fws.length; i++) {
 			if (fws[i].getName().equals(fwName)) {
-				return (FrameWork) fws[i];
+				return (FrameworkImpl) fws[i];
 			}
 		}
 		return null;
 	}
 	
-	public static FrameWork findFramework(DeviceConnector connector) {
+	public static FrameworkImpl findFramework(DeviceConnector connector) {
 		if (connector == null) return null;
 		if (treeRoot == null)
 			return null;
 		Model fws[] = treeRoot.getChildren();
 		for (int i = 0; i < fws.length; i++) {
-			if (((FrameWork)fws[i]).getConnector() == connector) {
-				return (FrameWork) fws[i];
+			if (((FrameworkImpl)fws[i]).getConnector() == connector) {
+				return (FrameworkImpl) fws[i];
 			}
 		}
 		return null;

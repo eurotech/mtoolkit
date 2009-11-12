@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -19,22 +22,37 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
+import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
+import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.UIHelper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StartBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StopBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UninstallBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UninstallDeploymentOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UpdateBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.InstallDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
@@ -43,13 +61,13 @@ import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkTarget;
 
-public class MenuFactory {
+public class ActionsManager {
 	private static final String MIME_JAR = "application/java-archive"; //$NON-NLS-1$
 	private static final String MIME_DP = "application/vnd.osgi.dp"; //$NON-NLS-1$
 
 	public static void addFrameworkAction(TreeRoot treeRoot, TreeViewer parentView) {
 		String frameworkName = generateName(treeRoot);
-		FrameWork newFrameWork = new FrameWork(frameworkName, false);
+		FrameworkImpl newFrameWork = new FrameworkImpl(frameworkName, false);
 		PropertySheet sheet = new PropertySheet(parentView, treeRoot, newFrameWork, true);
 		sheet.open();
 	}
@@ -99,42 +117,57 @@ public class MenuFactory {
 							IHelpContextIds.PROPERTY_PACKAGE);				}
 			};
 			Dictionary headers = new Hashtable();
-			headers.put("DeploymentPackage-SymbolicName", rdp.getHeader("DeploymentPackage-SymbolicName")); //$NON-NLS-1$ //$NON-NLS-2$
-			headers.put("DeploymentPackage-Version", rdp.getHeader("DeploymentPackage-Version")); //$NON-NLS-1$ //$NON-NLS-2$
-
-			String header = "DeploymentPackage-FixPack"; //$NON-NLS-1$
+			
+			String header = "ManifestFile";
 			String value = rdp.getHeader(header);
-			if (value != null)
-				headers.put(header, value);
-
-			header = "DeploymentPackage-Copyright";value = rdp.getHeader(header); //$NON-NLS-1$
-			if (value != null)
-				headers.put(header, value);
-
-			header = "DeploymentPackage-ContactAddress";value = rdp.getHeader(header); //$NON-NLS-1$
-			if (value != null)
-				headers.put(header, value);
-
-			header = "DeploymentPackage-Description";value = rdp.getHeader(header); //$NON-NLS-1$
-			if (value != null)
-				headers.put(header, value);
-
-			header = "DeploymentPackage-DocURL";value = rdp.getHeader(header); //$NON-NLS-1$
-			if (value != null)
-				headers.put(header, value);
-
-			header = "DeploymentPackage-Vendor";value = rdp.getHeader(header); //$NON-NLS-1$
-			if (value != null)
-				headers.put(header, value);
-
-			header = "DeploymentPackage-License";value = rdp.getHeader(header); //$NON-NLS-1$
-			if (value != null)
-				headers.put(header, value);
-
-			header = "DeploymentPackage-Icon";value = rdp.getHeader(header); //$NON-NLS-1$
-			if (value != null)
-				headers.put(header, value);
-
+			if (value != null) {
+				BufferedReader br = new BufferedReader(new StringReader(value));
+				String line = null;
+				try {
+					while ((line = br.readLine()) != null) {
+						headers.put(line.substring(0, line.indexOf(':')), line.substring(line.indexOf(':')+1));
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				headers.put("DeploymentPackage-SymbolicName", rdp.getHeader("DeploymentPackage-SymbolicName")); //$NON-NLS-1$ //$NON-NLS-2$
+				headers.put("DeploymentPackage-Version", rdp.getHeader("DeploymentPackage-Version")); //$NON-NLS-1$ //$NON-NLS-2$
+	
+				header = "DeploymentPackage-FixPack"; //$NON-NLS-1$
+				value = rdp.getHeader(header);
+				if (value != null)
+					headers.put(header, value);
+	
+				header = "DeploymentPackage-Copyright";value = rdp.getHeader(header); //$NON-NLS-1$
+				if (value != null)
+					headers.put(header, value);
+	
+				header = "DeploymentPackage-ContactAddress";value = rdp.getHeader(header); //$NON-NLS-1$
+				if (value != null)
+					headers.put(header, value);
+	
+				header = "DeploymentPackage-Description";value = rdp.getHeader(header); //$NON-NLS-1$
+				if (value != null)
+					headers.put(header, value);
+	
+				header = "DeploymentPackage-DocURL";value = rdp.getHeader(header); //$NON-NLS-1$
+				if (value != null)
+					headers.put(header, value);
+	
+				header = "DeploymentPackage-Vendor";value = rdp.getHeader(header); //$NON-NLS-1$
+				if (value != null)
+					headers.put(header, value);
+	
+				header = "DeploymentPackage-License";value = rdp.getHeader(header); //$NON-NLS-1$
+				if (value != null)
+					headers.put(header, value);
+	
+				header = "DeploymentPackage-Icon";value = rdp.getHeader(header); //$NON-NLS-1$
+				if (value != null)
+					headers.put(header, value);
+			}
+			
 			propertiesDialog.open();
 			propertiesDialog.getMainControl().setData(headers);
 
@@ -145,16 +178,18 @@ public class MenuFactory {
 	}
 
 	public static void deinstallBundleAction(Bundle bundle) {
-		FrameworkConnectorFactory.deinstallBundle(bundle);
+		RemoteBundleOperation job = new UninstallBundleOperation(bundle);
+		job.schedule();
 		ConsoleManager.showConsole(bundle.findFramework());
 	}
 
 	public static void deinstallDPAction(DeploymentPackage dpNode) {
-		FrameworkConnectorFactory.deinstallDP(dpNode);
+		UninstallDeploymentOperation job = new UninstallDeploymentOperation(dpNode);
+		job.schedule();
 		ConsoleManager.showConsoleIfCreated(dpNode.findFramework());
 	}
 
-	public static void installBundleAction(final FrameWork framework, TreeViewer parentView) {
+	public static void installBundleAction(final FrameworkImpl framework, TreeViewer parentView) {
 		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.INSTALL_BUNDLE_TYPE);
 		installDialog.open();
 		final String result = installDialog.getResult();
@@ -180,7 +215,7 @@ public class MenuFactory {
 		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
-	public static void installDPAction(final FrameWork framework, TreeViewer parentView) {
+	public static void installDPAction(final FrameworkImpl framework, TreeViewer parentView) {
 		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.INSTALL_DP_TYPE);
 		installDialog.open();
 		final String result = installDialog.getResult();
@@ -206,12 +241,12 @@ public class MenuFactory {
 		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
-	public static void frameworkPropertiesAction(FrameWork framework, TreeViewer parentView) {
+	public static void frameworkPropertiesAction(FrameworkImpl framework, TreeViewer parentView) {
 		PropertySheet sheet = new PropertySheet(parentView, framework.getParent(), framework, false);
 		sheet.open();
 	}
 
-	public static void removeFrameworkAction(FrameWork framework) {
+	public static void removeFrameworkAction(FrameworkImpl framework) {
 //		if (framework.isConnected()) {
 //			framework.disconnect();
 //		}
@@ -221,40 +256,112 @@ public class MenuFactory {
 	}
 
 	public static void startBundleAction(Bundle bundle) {
-		FrameworkConnectorFactory.startBundle(bundle);
+		RemoteBundleOperation job = new StartBundleOperation(bundle);
+		job.schedule();
 		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void stopBundleAction(Bundle bundle) {
-		FrameworkConnectorFactory.stopBundle(bundle);
+		if (bundle.getID() == 0) {
+			MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(),
+					"Stop bundle",
+					null,
+					NLS.bind(Messages.stop_system_bundle, bundle.getName()),
+					MessageDialog.QUESTION,
+					new String[] { "Continue", "Cancel" },
+					0);
+			int statusCode = UIHelper.openWindow(dialog);
+			if (statusCode == 1)
+				return;
+		}
+
+		RemoteBundleOperation job = new StopBundleOperation(bundle);
+		job.schedule();
 		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void updateBundleAction(final Bundle bundle, TreeViewer parentView) {
 		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.UPDATE_BUNDLE_TYPE);
 		installDialog.open();
-		final String result = installDialog.getResult();
-		if ((installDialog.getReturnCode() > 0) || (result == null) || result.trim().equals("")) { //$NON-NLS-1$
+		final String bundleFileName = installDialog.getResult();
+		if ((installDialog.getReturnCode() > 0) || (bundleFileName == null) || bundleFileName.trim().equals("")) { //$NON-NLS-1$
 			return;
 		}
-		FrameworkConnectorFactory.updateBundle(result, bundle);
+		RemoteBundleOperation job = new UpdateBundleOperation(bundle, new File(bundleFileName));
+		job.schedule();
 		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
-	public static void disconnectFrameworkAction(FrameWork fw) {
-		FrameworkConnectorFactory.disconnectFramework(fw);
+	public static void disconnectFrameworkAction(final FrameworkImpl fw) {
+		Job disconnectJob = new Job("Disconnect device") {
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					disconnectFramework0(fw);
+					return Status.OK_STATUS;
+				} catch (Throwable t) {
+					return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, t.getMessage(), t);
+				}
+			}
+		};
+		disconnectJob.schedule();
+		disconnectConsole(fw);
+	}
+	
+	public static void disconnectConsole(FrameworkImpl fw) {
+		ConsoleManager.disconnectConsole(fw);
 	}
 
-	public static void connectFrameworkAction(FrameWork framework) {
+
+	private static void disconnectFramework0(FrameworkImpl fw) {
+		try {
+			fw.userDisconnect = true;
+			if (fw.autoConnected) {
+				fw.disconnect();
+			} else {
+//				if (fw.monitor != null) {
+//					fw.monitor.setCanceled(true);
+//				}
+				// wait if connect operation is still active
+				DeviceConnector connector;
+				if ((connector = fw.getConnector()) != null) {
+					// framework connects synchronously, while holding a lock
+					// wait until the lock is released to know when the connect op has finished
+					synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+					}
+				}
+				// if the connection fails, connector will be null, so we need to recheck the condition
+				if (fw.getConnector() != null) {
+					// connection is alive, disconnect
+					AbstractConnection conn = ((DeviceConnectorImpl) fw.getConnector()).getConnectionManager().getActiveConnection(ConnectionManager.PMP_CONNECTION);
+					if (conn != null) {
+						conn.closeConnection();
+					}
+				}
+			}
+		} catch (IAgentException e) {
+			BrowserErrorHandler.processError(e, true);
+			e.printStackTrace();
+		}
+	}
+
+
+	public static void connectFrameworkAction(FrameworkImpl framework) {
 		FrameworkConnectorFactory.connectFrameWork(framework);
 	}
 
-	public static void refreshFrameworkAction(FrameWork fw) {
+	public static void refreshFrameworkAction(FrameworkImpl fw) {
 		fw.refreshAction();
 	}
 
 	public static void refreshBundleAction(Bundle bundle) {
-		bundle.findFramework().refreshBundleAction(bundle);
+		((FrameworkImpl) bundle.findFramework()).refreshBundleAction(bundle);
 	}
+
+	public static void setViewTypeAction(FrameworkImpl fw, int viewType) {
+		if (fw.getViewType() != viewType) {
+			fw.setViewType(viewType);
+		}
+	}
+
 
 }

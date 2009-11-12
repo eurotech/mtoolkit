@@ -28,7 +28,7 @@ public class AddAction extends SelectionProviderAction implements IStateAction {
 
 	// run method
 	public void run() {
-		MenuFactory.addFrameworkAction(FrameWorkView.getTreeRoot(), parentView);
+		ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot(), parentView);
 		getSelectionProvider().setSelection(getSelection());
 	}
 

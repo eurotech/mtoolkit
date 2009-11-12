@@ -32,7 +32,7 @@ public class StartAction extends SelectionProviderAction implements IStateAction
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
 			Bundle bundle = (Bundle) iterator.next();
-			MenuFactory.startBundleAction(bundle);
+			ActionsManager.startBundleAction(bundle);
 		}
 		getSelectionProvider().setSelection(selection);
 	}

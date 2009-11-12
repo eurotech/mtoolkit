@@ -20,14 +20,14 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 
 	private File sourceFile;
-	private FrameWork framework;
+	private FrameworkImpl framework;
 
-	public InstallDeploymentOperation(File dpFile, FrameWork framework) {
+	public InstallDeploymentOperation(File dpFile, FrameworkImpl framework) {
 		super(Messages.install_dp, null);
 		this.sourceFile = dpFile;
 		this.framework = framework;

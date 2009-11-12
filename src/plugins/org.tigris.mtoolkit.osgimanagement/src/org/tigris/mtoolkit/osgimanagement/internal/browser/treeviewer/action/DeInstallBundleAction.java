@@ -48,7 +48,7 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
 			Bundle bundle = (Bundle) iterator.next();
-			MenuFactory.deinstallBundleAction(bundle);
+			ActionsManager.deinstallBundleAction(bundle);
 		}
 		getSelectionProvider().setSelection(selection);
 	}

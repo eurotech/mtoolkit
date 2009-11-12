@@ -23,19 +23,19 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 
 public class PropertySheetLogic implements SelectionListener, ConstantsDistributor {
 
 	private PropertySheet target;
 	private IMemento config;
-	private FrameWork fw;
+	private FrameworkImpl fw;
 	private TreeViewer parentView;
 	private boolean firstTime;
 	private Model parent;
 
-	public PropertySheetLogic(TreeViewer parentView, Model parent, FrameWork element, boolean firstTime,
+	public PropertySheetLogic(TreeViewer parentView, Model parent, FrameworkImpl element, boolean firstTime,
 			PropertySheet obj) {
 		this.parentView = parentView;
 		this.fw = element;

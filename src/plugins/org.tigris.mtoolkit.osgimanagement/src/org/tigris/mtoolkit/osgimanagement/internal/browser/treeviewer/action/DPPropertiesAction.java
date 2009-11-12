@@ -30,7 +30,7 @@ public class DPPropertiesAction extends SelectionProviderAction implements IStat
 	// run method
 	public void run() {
 		DeploymentPackage dp = (DeploymentPackage) getStructuredSelection().getFirstElement();
-		MenuFactory.dpPropertiesAction(dp, parentView);
+		ActionsManager.dpPropertiesAction(dp, parentView);
 		// needed to update workbench menu and toolbar status
 		getSelectionProvider().setSelection(getSelection());
 	}

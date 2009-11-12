@@ -37,16 +37,16 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet.DeviceTypeProviderElement;
 
 public class ConnectFrameworkJob extends Job {
 	private static List connectingFrameworks = new ArrayList();
 
-	private FrameWork fw;
+	private FrameworkImpl fw;
 
-	public ConnectFrameworkJob(FrameWork framework) {
+	public ConnectFrameworkJob(FrameworkImpl framework) {
 		super(NLS.bind(Messages.connect_framework, framework.getName()));
 		this.fw = framework;
 	}
@@ -136,7 +136,7 @@ public class ConnectFrameworkJob extends Job {
 		return Status.OK_STATUS;
 	}
 
-	public static boolean isConnecting(FrameWork fw) {
+	public static boolean isConnecting(FrameworkImpl fw) {
 		synchronized (connectingFrameworks) {
 			return connectingFrameworks.contains(fw);
 		}

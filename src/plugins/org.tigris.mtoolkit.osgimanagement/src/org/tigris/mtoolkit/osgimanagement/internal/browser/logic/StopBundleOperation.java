@@ -12,7 +12,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
 public class StopBundleOperation extends RemoteBundleOperation {
-	StopBundleOperation(Bundle bundle) {
+	public StopBundleOperation(Bundle bundle) {
 		super(Messages.stop_bundle, bundle);
 	}
 

@@ -30,7 +30,7 @@ public class BundlePropertiesAction extends SelectionProviderAction implements I
 	// run method
 	public void run() {
 		Bundle bundle = (Bundle) getStructuredSelection().getFirstElement();
-		MenuFactory.bundlePropertiesAction(bundle, parentView);
+		ActionsManager.bundlePropertiesAction(bundle, parentView);
 		// needed to update workbench menu and toolbar status
 		getSelectionProvider().setSelection(getSelection());
 	}

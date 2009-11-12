@@ -17,8 +17,8 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
 public class ConsoleManager {
 
@@ -27,7 +27,7 @@ public class ConsoleManager {
 	private static Object SHOW_CONSOLE = new Object();
 	private static Object DISCONNECT_CONSOLE = new Object();
 
-	public static void connectConsole(FrameWork fw) {
+	public static void connectConsole(Framework fw) {
 		synchronized (consoles) {
 			if (consoles.get(fw) != null)
 				return;
@@ -65,7 +65,7 @@ public class ConsoleManager {
 			conMng.showConsoleView(con);
 	}
 	
-	public static void showConsole(FrameWork fw) {
+	public static void showConsole(Framework fw) {
 		Object obj;
 		synchronized (consoles) {
 			obj = (IOConsole) consoles.get(fw);
@@ -82,7 +82,7 @@ public class ConsoleManager {
 		showConsoleIfCreated(fw);
 	}
 	
-	public static void showConsoleIfCreated(FrameWork fw) {
+	public static void showConsoleIfCreated(Framework fw) {
 		RemoteConsole con; 
 		synchronized (consoles) {
 			Object obj = consoles.get(fw);
@@ -97,7 +97,7 @@ public class ConsoleManager {
 		ConsolePlugin.getDefault().getConsoleManager().showConsoleView(con);
 	}
 	
-	public static void disconnectConsole(FrameWork fw) {
+	public static void disconnectConsole(Framework fw) {
 		RemoteConsole console;
 		synchronized (consoles) {
 			Object obj = consoles.get(fw);
@@ -115,7 +115,7 @@ public class ConsoleManager {
 	private static void disconnectConsole0(RemoteConsole con) {
 	}
 	
-	private static RemoteConsole createConsole(FrameWork fw) {
+	private static RemoteConsole createConsole(Framework fw) {
 		RemoteConsole console = new RemoteConsole(fw);
 		return console;
 	}

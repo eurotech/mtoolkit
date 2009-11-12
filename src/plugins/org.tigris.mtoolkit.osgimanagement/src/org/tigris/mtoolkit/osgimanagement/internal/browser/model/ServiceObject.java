@@ -35,7 +35,7 @@ public class ServiceObject {
 		return rBundle;
 	}
 
-	public RemoteBundle[] getUsedIn(FrameWork fw) throws IAgentException {
+	public RemoteBundle[] getUsedIn(FrameworkImpl fw) throws IAgentException {
 		if (!usedInInit) {
 			Hashtable usedInHash = (Hashtable) usedInHashFWs.get(fw);
 			// if still connecting
@@ -50,7 +50,7 @@ public class ServiceObject {
 		return usedIn;
 	}
 
-	public static void addUsedInBundle(RemoteService rService, RemoteBundle rBundle, FrameWork fw)
+	public static void addUsedInBundle(RemoteService rService, RemoteBundle rBundle, FrameworkImpl fw)
 					throws IAgentException {
 		Hashtable usedInHash = (Hashtable) usedInHashFWs.get(fw);
 		if (usedInHash == null) {

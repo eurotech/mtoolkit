@@ -17,8 +17,8 @@ public class ServicesCategory extends Model {
 
 	private int type;
 	public static String[] nodes;
-	public static int REGISTERED = 0;
-	public static int IN_USE = 1;
+	public static int REGISTERED_SERVICES = 0;
+	public static int USED_SERVICES = 1;
 
 	static {
 		nodes = new String[2];
@@ -41,7 +41,7 @@ public class ServicesCategory extends Model {
 		this.type = type;
 	}
 
-	public int getKind() {
+	public int getType() {
 		return type;
 	}
 }

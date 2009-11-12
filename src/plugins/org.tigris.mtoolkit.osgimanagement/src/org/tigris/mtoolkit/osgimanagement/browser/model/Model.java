@@ -20,7 +20,7 @@ import org.eclipse.ui.IActionFilter;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public abstract class Model implements Comparable, IActionFilter, ConstantsDistributor {
 
@@ -193,6 +193,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 			return;
 		Model[] elements = getChildren();
 		for (int i = 0; i < elements.length; i++) {
+			elements[i].removeChildren();
 			removeElement(elements[i]);
 		}
 	}
@@ -237,14 +238,14 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		fireChildSelected(selectedDelta);
 	}
 	
-	public FrameWork findFramework() {
-		FrameWork fw = null;
+	public Framework findFramework() {
+		Framework fw = null;
 		Model model = this;
-		while (model != null && !(model instanceof FrameWork)) {
+		while (model != null && !(model instanceof Framework)) {
 			model = model.getParent();
 		}
 		if (model != null) {
-			fw = (FrameWork) model;
+			fw = (Framework) model;
 		}
 
 		return fw;

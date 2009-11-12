@@ -33,7 +33,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 // TODO: Change this class to change only the preferences, the settings holder
 // should get the changes from the events
@@ -117,8 +117,8 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 
 			while (iterator.hasNext()) {
 				Object framework = iterator.next();
-				if (((FrameWork) framework).isConnected())
-					((FrameWork) framework).refreshAction();
+				if (((FrameworkImpl) framework).isConnected())
+					((FrameworkImpl) framework).refreshAction();
 			}
 		}
 

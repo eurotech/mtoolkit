@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.installation;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -19,28 +21,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ListDialog;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallDeploymentOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider.PluginItem;
 
@@ -72,7 +81,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	}
 
 	public InstallationTarget[] getInstallationTargets() {
-		FrameWork[] fws = FrameWorkView.getFrameworks();
+		FrameworkImpl[] fws = FrameWorkView.getFrameworks();
 		if (fws == null || fws.length == 0) {
 			return new InstallationTarget[0];
 		}
@@ -112,7 +121,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-		FrameWork framework = ((FrameworkTarget) target).getFramework();
+		FrameworkImpl framework = ((FrameworkTarget) target).getFramework();
 
 		// TODO: Connecting to framework should report the connection progress
 		// to the current monitor
@@ -233,17 +242,65 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return Status.OK_STATUS;
 	}
 
-	public void install(InputStream input, InstallationItem item, FrameWork framework, IProgressMonitor monitor)
+	public void install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
 			throws Exception {
 		if (item.getMimeType().equals(MIME_DP)) {
 			// TODO: Make methods, which are called from inside jobs to do
 			// the real job
-			FrameworkConnectorFactory.installDP(input, item.getName(), framework);
+			installDP(input, item.getName(), (FrameworkImpl) framework);
 		} else {
-			FrameworkConnectorFactory.installBundle(input, item.getName(), framework);
+			installBundle(input, item.getName(), (FrameworkImpl) framework);
 		}
 	}
 
+	private void installBundle(InputStream input, String name, FrameworkImpl framework) {
+		try {
+			final File bundle = saveFile(input, name);
+			Job installBundleJob = new InstallBundleOperation(bundle, framework);
+			installBundleJob.addJobChangeListener(new DeleteWhenDoneListener(bundle));
+			installBundleJob.schedule();
+		} catch (IOException e) {
+			StatusManager.getManager().handle(FrameworkPlugin.newStatus(IStatus.ERROR, "Unable to install bundle", e),
+				StatusManager.SHOW | StatusManager.LOG);
+		}
+	}
+
+	private void installDP(InputStream stream, String name, FrameworkImpl framework) {
+		try {
+			final File packageFile = saveFile(stream, name);
+			InstallDeploymentOperation job = new InstallDeploymentOperation(packageFile, framework);
+			job.schedule();
+			job.addJobChangeListener(new DeleteWhenDoneListener(packageFile));
+		} catch (IOException e) {
+			StatusManager.getManager().handle(FrameworkPlugin.newStatus(IStatus.ERROR,
+				"Unable to install deployment package",
+				e),
+				StatusManager.SHOW | StatusManager.LOG);
+		}
+	}
+
+	private File saveFile(InputStream input, String name) throws IOException {
+		// TODO: Make saving stream to file done in a job
+		IPath statePath = Platform.getStateLocation(FrameworkPlugin.getDefault().getBundle());
+		File file = new File(statePath.toFile(), name);
+		// make the directory hierarchy
+		if (!file.getParentFile().exists() && !file.getParentFile().mkdirs())
+			throw new IOException("Failed to create bundle state folder");
+		FileOutputStream stream = new FileOutputStream(file);
+		try {
+			byte[] buf = new byte[8192];
+			int read;
+			while ((read = input.read(buf)) != -1) {
+				stream.write(buf, 0, read);
+			}
+		} finally {
+			stream.close();
+		}
+		return file;
+	}
+
+
+	
 	public String getName() {
 		return "Bundles processor";
 	}
@@ -263,4 +320,18 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	public void setUseAdditionalProcessors(boolean enable) {
 		this.useAdditionalProcessors = enable;
 	}
+	
+	private static class DeleteWhenDoneListener extends JobChangeAdapter {
+		private final File packageFile;
+
+		private DeleteWhenDoneListener(File packageFile) {
+			this.packageFile = packageFile;
+		}
+
+		public void done(IJobChangeEvent event) {
+			packageFile.delete();
+		}
+	}
+
+
 }

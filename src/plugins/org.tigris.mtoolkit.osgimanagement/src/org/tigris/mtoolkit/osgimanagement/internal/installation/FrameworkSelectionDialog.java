@@ -47,9 +47,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.MenuFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class FrameworkSelectionDialog extends TargetSelectionDialog {
@@ -162,8 +162,8 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 	public boolean close() {
 		IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
 		Object element = selection.getFirstElement();
-		if (element instanceof FrameWork) {
-			selected = new FrameworkTarget((FrameWork) element);
+		if (element instanceof FrameworkImpl) {
+			selected = new FrameworkTarget((FrameworkImpl) element);
 		}
 
 		return super.close();
@@ -174,7 +174,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 
 		btnEdit.setEnabled(selected != -1);
 		btnRem.setEnabled(selected != -1 &&
-				!((FrameWork)frameworkViewer.getTable().getSelection()[0].getData()).autoConnected);
+				!((FrameworkImpl)frameworkViewer.getTable().getSelection()[0].getData()).autoConnected);
 
 		Button btnOK = getButton(IDialogConstants.OK_ID);
 		if (btnOK != null) {
@@ -183,19 +183,19 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 	}
 
 	private void handleFrameworkAdd() {
-		MenuFactory.addFrameworkAction(FrameWorkView.getTreeRoot(), FrameWorkView.tree);
+		ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot(), FrameWorkView.tree);
 	}
 
 	private void handleFrameworkRemove() {
 		IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
 		Object element = selection.getFirstElement();
-		if (element instanceof FrameWork) {
-			FrameWork framework = (FrameWork) element;
+		if (element instanceof FrameworkImpl) {
+			FrameworkImpl framework = (FrameworkImpl) element;
 			if (!framework.autoConnected) {
 				if (framework.isConnected()) {
-					MenuFactory.disconnectFrameworkAction(framework);
+					ActionsManager.disconnectFrameworkAction(framework);
 				}
-				MenuFactory.removeFrameworkAction(framework);
+				ActionsManager.removeFrameworkAction(framework);
 			}
 		}
 	}
@@ -203,9 +203,9 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 	private void handleFrameworkEdit() {
 		IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
 		Object element = selection.getFirstElement();
-		if (element instanceof FrameWork) {
-			FrameWork framework = (FrameWork) element;
-			MenuFactory.frameworkPropertiesAction(framework, FrameWorkView.tree);
+		if (element instanceof FrameworkImpl) {
+			FrameworkImpl framework = (FrameworkImpl) element;
+			ActionsManager.frameworkPropertiesAction(framework, FrameWorkView.tree);
 		}
 	}
 
@@ -218,7 +218,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 				Object[] elements = treeRoot.getChildren();
 				List frameworks = new ArrayList();
 				for (int i = 0; i < elements.length; i++) {
-					if (elements[i] instanceof FrameWork) {
+					if (elements[i] instanceof FrameworkImpl) {
 						frameworks.add(elements[i]);
 					}
 				}
@@ -245,7 +245,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		}
 
 		public void elementAdded(final ContentChangeEvent event) {
-			if (viewer instanceof TableViewer && event.getTarget() instanceof FrameWork) {
+			if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
 				shell.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 						((TableViewer) viewer).add(event.getTarget());
@@ -255,7 +255,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		}
 
 		public void elementChanged(final ContentChangeEvent event) {
-			if (viewer instanceof TableViewer && event.getTarget() instanceof FrameWork) {
+			if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
 				shell.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 						((TableViewer) viewer).update(event.getTarget(), null);
@@ -265,7 +265,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		}
 
 		public void elementRemoved(final ContentChangeEvent event) {
-			if (viewer instanceof TableViewer && event.getTarget() instanceof FrameWork) {
+			if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
 				shell.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 						((TableViewer) viewer).remove(event.getTarget());
@@ -280,8 +280,8 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 
 	protected class FrameworkLabelProvider extends LabelProvider {
 		public Image getImage(Object element) {
-			if (element instanceof FrameWork) {
-				FrameWork framework = (FrameWork) element;
+			if (element instanceof FrameworkImpl) {
+				FrameworkImpl framework = (FrameworkImpl) element;
 				if (framework.isConnected()) {
 					return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_CONNECTED);
 				} else {
@@ -292,8 +292,8 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		}
 
 		public String getText(Object element) {
-			if (element instanceof FrameWork) {
-				FrameWork framework = (FrameWork) element;
+			if (element instanceof FrameworkImpl) {
+				FrameworkImpl framework = (FrameworkImpl) element;
 				return framework.getName();
 			}
 			return super.getText(element);

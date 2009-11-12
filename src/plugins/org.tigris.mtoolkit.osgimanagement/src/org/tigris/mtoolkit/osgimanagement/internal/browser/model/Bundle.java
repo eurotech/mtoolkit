@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Assert;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 
@@ -59,7 +60,7 @@ public class Bundle extends Model {
 		if (!(target instanceof org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle)) {
 			return false;
 		}
-		FrameWork framework = findFramework();
+		FrameworkImpl framework = (FrameworkImpl) findFramework();
 		if (framework == null)
 			return false;
 		if (!framework.isConnected()) {
@@ -101,17 +102,17 @@ public class Bundle extends Model {
 	}
 
 	public boolean isShowID() {
-		return findFramework() != null ? findFramework().isShowBundlesID() : false;
+		return findFramework() != null ? ((FrameworkImpl) findFramework()).isShowBundlesID() : false;
 	}
 
 	public boolean isShowVersion() {
-		return findFramework() != null ? findFramework().isShowBundlesVersion() : false;
+		return findFramework() != null ? ((FrameworkImpl) findFramework()).isShowBundlesVersion() : false;
 	}
 
 	// this method will always ask the remote side, so it needs to throw
 	// exception
 	public void update() throws IAgentException {
-		FrameWork framework = findFramework();
+		Framework framework = findFramework();
 		if (framework != null && framework.getConnector() != null) {
 			try {
 				refreshStateFromRemote();

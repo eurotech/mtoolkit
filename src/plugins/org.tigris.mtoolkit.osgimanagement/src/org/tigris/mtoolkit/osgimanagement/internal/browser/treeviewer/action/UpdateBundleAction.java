@@ -30,7 +30,7 @@ public class UpdateBundleAction extends SelectionProviderAction implements IStat
 	public void run() {
 		IStructuredSelection selection = getStructuredSelection();
 		Bundle bundle = (Bundle) selection.getFirstElement();
-		MenuFactory.updateBundleAction(bundle, parentView);
+		ActionsManager.updateBundleAction(bundle, parentView);
 		getSelectionProvider().setSelection(selection);
 	}
 

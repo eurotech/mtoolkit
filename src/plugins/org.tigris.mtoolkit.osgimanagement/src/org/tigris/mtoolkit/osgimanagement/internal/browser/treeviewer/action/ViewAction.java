@@ -26,7 +26,7 @@ import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class ViewAction extends Action implements IStateAction, ISelectionChangedListener {
 
@@ -66,11 +66,11 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 				}
 			}
 			for (Iterator it = frameworks.iterator(); it.hasNext();) {
-				FrameWork fw = (FrameWork) it.next();
+				FrameworkImpl fw = (FrameworkImpl) it.next();
 				setViewType(fw, viewType);
 			}
 			for (Iterator it = frameworks.iterator(); it.hasNext();) {
-				FrameWork fw = (FrameWork) it.next();
+				FrameworkImpl fw = (FrameworkImpl) it.next();
 				tree.expandToLevel(fw, 1);
 			}
 		} finally {
@@ -87,22 +87,31 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 			return new StructuredSelection();
 	}
 	
-	private void setViewType(final FrameWork fw, int newViewType) {
+	private void setViewType(final FrameworkImpl fw, int newViewType) {
 		if (fw.getViewType() == newViewType)
 			return;
- 		if (fw.getViewType() == FrameWork.BUNDLES_VIEW) {
- 			fw.getBundlesNode().removeChildren();
- 			fw.getDPNode().removeChildren();
- 		}
- 		fw.removeChildren();
+// 		if (fw.getViewType() == FrameworkImpl.BUNDLES_VIEW) {
+// 			fw.getBundlesNode().removeChildren();
+// 			fw.getDPNode().removeChildren();
+// 		}
+// 		fw.removeChildren();
+//		try {
+//			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
+//			fw.setViewType(newViewType);
+//			ActionsManager.setViewTypeAction(fw, newViewType);
+//		} catch (Throwable t) {
+//			FrameworkPlugin.error("Exception while switching framework view type", t);
+//		}
+//		fw.updateElement();
 		try {
 			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
 			fw.setViewType(newViewType);
-			FrameworkConnectorFactory.updateViewType(fw);
+			tree.expandToLevel(fw, 1);
 		} catch (Throwable t) {
 			FrameworkPlugin.error("Exception while switching framework view type", t);
 		}
-		fw.updateElement();
+		
+		
 	}
 
 	public void updateState(IStructuredSelection selection) {
@@ -116,7 +125,7 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 		for (Iterator it = selection.iterator(); it.hasNext();) {
 			Object next = (Object) it.next();
 			if (next instanceof Model) {
-				FrameWork fw = ((Model) next).findFramework();
+				FrameworkImpl fw = (FrameworkImpl) ((Model) next).findFramework();
 				if (fw != null && fw.isConnected())
 					frameworks.add(fw);
 			}
@@ -128,10 +137,10 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 		}
 		
 		Iterator it = frameworks.iterator();
-		FrameWork fw = (FrameWork) it.next();
+		FrameworkImpl fw = (FrameworkImpl) it.next();
 		boolean checked = fw.getViewType() == viewType;
 		for (;it.hasNext();) {
-			fw = (FrameWork) it.next();
+			fw = (FrameworkImpl) it.next();
 			boolean nextChecked = fw.getViewType() == viewType;
 			if (nextChecked != checked) {
 				checked = true;

@@ -14,14 +14,14 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class FrameworkTarget implements InstallationTarget {
-	private FrameWork fw;
+	private FrameworkImpl fw;
 	private static final String MIME_DP = "application/vnd.osgi.dp";
 
-	public FrameworkTarget(FrameWork fw) {
+	public FrameworkTarget(FrameworkImpl fw) {
 		this.fw = fw;
 	}
 
@@ -40,7 +40,7 @@ public class FrameworkTarget implements InstallationTarget {
 		return "framework_" + fw.getName().hashCode();
 	}
 
-	public FrameWork getFramework() {
+	public FrameworkImpl getFramework() {
 		return fw;
 	}
 

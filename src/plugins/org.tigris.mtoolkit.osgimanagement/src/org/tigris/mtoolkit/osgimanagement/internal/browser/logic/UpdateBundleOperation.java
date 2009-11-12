@@ -21,7 +21,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 public class UpdateBundleOperation extends RemoteBundleOperation {
 	private final File bundleFile;
 
-	UpdateBundleOperation(Bundle bundle, File bundleFile) {
+	public UpdateBundleOperation(Bundle bundle, File bundleFile) {
 		super(Messages.update_bundle, bundle);
 		this.bundleFile = bundleFile;
 	}

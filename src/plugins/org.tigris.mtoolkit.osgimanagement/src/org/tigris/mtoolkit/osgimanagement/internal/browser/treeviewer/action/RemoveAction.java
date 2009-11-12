@@ -19,7 +19,7 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class RemoveAction extends SelectionProviderAction implements IStateAction {
 
@@ -33,11 +33,11 @@ public class RemoveAction extends SelectionProviderAction implements IStateActio
 		if (confirm) {
 			Iterator iterator = getStructuredSelection().iterator();
 			while (iterator.hasNext()) {
-				FrameWork framework = (FrameWork) iterator.next();
+				FrameworkImpl framework = (FrameworkImpl) iterator.next();
 				if (framework.isConnected()) {
-					MenuFactory.disconnectFrameworkAction(framework);
+					ActionsManager.disconnectFrameworkAction(framework);
 				}
-				MenuFactory.removeFrameworkAction(framework);
+				ActionsManager.removeFrameworkAction(framework);
 			}
 		}
 	}
@@ -57,11 +57,11 @@ public class RemoveAction extends SelectionProviderAction implements IStateActio
 		Iterator iterator = selection.iterator();
 		while (iterator.hasNext()) {
 			Model model = (Model) iterator.next();
-			if (!(model instanceof FrameWork)) {
+			if (!(model instanceof FrameworkImpl)) {
 				enabled = false;
 				break;
 			}
-			FrameWork framework = (FrameWork) model;
+			FrameworkImpl framework = (FrameworkImpl) model;
 			if (framework.autoConnected) {
 				enabled = false;
 				break;

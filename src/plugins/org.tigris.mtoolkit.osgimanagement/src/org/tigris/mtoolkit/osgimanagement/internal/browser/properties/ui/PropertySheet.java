@@ -49,7 +49,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.logic.PropertySheetLogic;
 
 public class PropertySheet extends Window implements ControlListener, ConstantsDistributor, SelectionListener {
@@ -65,7 +65,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 	private CertificatesPanel certificatesPanel;
 
 	private Composite bottomButtonsHolder;
-	private FrameWork fw;
+	private FrameworkImpl fw;
 
 	private List deviceTypesProviders;
 
@@ -78,7 +78,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 	private Composite mainContent;
 
 	// Constructor
-	public PropertySheet(TreeViewer parentView, Model parent, FrameWork element, boolean firstTime) {
+	public PropertySheet(TreeViewer parentView, Model parent, FrameworkImpl element, boolean firstTime) {
 		super(parentView.getControl().getShell());
 		logic = new PropertySheetLogic(parentView, parent, element, firstTime, this);
 		this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
@@ -218,7 +218,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		}
 
 		// Signing Certificates
-		certificatesPanel.initialize(FrameWork.getSignCertificateUids(config));
+		certificatesPanel.initialize(FrameworkImpl.getSignCertificateUids(config));
 	}
 
 	// Save ui values to storage and update target element
@@ -235,7 +235,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
 
 		// Signing Certificates
-		FrameWork.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
+		FrameworkImpl.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
 
 		fw.setConfig(config);
 	}
