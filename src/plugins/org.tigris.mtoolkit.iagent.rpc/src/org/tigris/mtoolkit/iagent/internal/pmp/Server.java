@@ -197,16 +197,17 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 			return null;
 		for (int i = 0; i < refs.length; i++) {
 			service = context.getService(refs[i]);
-			interfaces = ((Remote) service).remoteInterfaces();
-			if (service instanceof Remote && PMPServiceImpl.checkInstance(interfaces, service.getClass())) {
-				sRef = refs[i];
-				break;
-			} else {
-				context.ungetService(refs[i]);
-				debug(service + " is not instance of " + Remote.class.getName() + " or one of its remote interfaces");
-				service = null;
-				interfaces = null;
+			if (service instanceof Remote) {
+				interfaces = ((Remote) service).remoteInterfaces();
+				if (PMPServiceImpl.checkInstance(interfaces, service.getClass())) {
+					sRef = refs[i];
+					break;
+				}
 			}
+			context.ungetService(refs[i]);
+			debug(service + " is not instance of " + Remote.class.getName() + " or one of its remote interfaces");
+			service = null;
+			interfaces = null;
 		}
 		if (service != null)
 			return new ObjectInfo(service, interfaces, sRef);
