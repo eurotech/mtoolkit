@@ -22,8 +22,8 @@ import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.application.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameWork;
 
 
 public class ApplicationModelProvider implements ContentTypeModelProvider, RemoteApplicationListener {
@@ -45,7 +45,7 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		applicationsNode = new ApplicationPackage("Application");
 		this.connector = connector;
 		this.parent = parent;
-		if (parent.findFramework().getViewType() == FrameWork.BUNDLES_VIEW) { 
+		if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) { 
 			parent.addElement(applicationsNode);
 		}
 		try {
@@ -98,10 +98,10 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 
 	public Model switchView(int viewType) {
 		Model node = null;
-		if (viewType == FrameWork.BUNDLES_VIEW) {
+		if (viewType == Framework.BUNDLES_VIEW) {
 			parent.addElement(applicationsNode);
 			node = applicationsNode;
-		} else if (viewType == FrameWork.SERVICES_VIEW) {
+		} else if (viewType == Framework.SERVICES_VIEW) {
 			parent.removeElement(applicationsNode);
 		}
 		return node;
