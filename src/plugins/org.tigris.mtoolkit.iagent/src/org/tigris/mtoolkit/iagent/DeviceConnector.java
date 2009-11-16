@@ -102,9 +102,9 @@ public abstract class DeviceConnector {
 	public final static DeviceConnector openClientConnection(int aConnetionType, Dictionary aConProps)
 					throws IAgentException {
 		if (factories != null) {
-			DebugUtils.log(DeviceConnector.class, "[openClientConnection] aConnetionType: " + aConnetionType);
+			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] aConnetionType: " + aConnetionType);
 			DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(aConnetionType));
-			DebugUtils.log(DeviceConnector.class, "[openClientConnection] factory: " + factory);
+			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] factory: " + factory);
 			if (factory != null) {
 				DeviceConnector connector = factory.createClientConnection(aConProps);
 				fireConnectionEvent(CONNECTED, connector);
@@ -119,9 +119,9 @@ public abstract class DeviceConnector {
 		// TODO: get proper connectionType for this transport
 		int aConnetionType = 0;
 		if (factories != null) {
-			DebugUtils.log(DeviceConnector.class, "[openClientConnection] aConnetionType: " + aConnetionType);
+			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] aConnetionType: " + aConnetionType);
 			DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(aConnetionType));
-			DebugUtils.log(DeviceConnector.class, "[openClientConnection] factory: " + factory);
+			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] factory: " + factory);
 			if (factory != null) {
 				DeviceConnector connector = factory.createClientConnection(transport, aConProps);
 				fireConnectionEvent(CONNECTED, connector);
@@ -289,8 +289,7 @@ public abstract class DeviceConnector {
 					break;
 				}
 			} catch (Throwable e) {
-				DebugUtils.log(DeviceConnector.class, "Failed to deliver disconnection event to " + listener, e);
-				e.printStackTrace();//didi
+				DebugUtils.error(DeviceConnector.class, "Failed to deliver disconnection event to " + listener, e);
 			}
 		}
 	}

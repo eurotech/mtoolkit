@@ -28,7 +28,7 @@ public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 	protected long initialServiceId = -1;
 
 	public PMPRemoteObjectAdapter(RemoteObject remote) {
-		log("[Constructor] >>> Constructing: remote: " + remote);
+		debug("[Constructor] >>> Constructing: remote: " + remote);
 		if (remote == null)
 			throw new IllegalArgumentException();
 		this.delegate = remote;
@@ -38,7 +38,7 @@ public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 				l = (Long) Utils.callRemoteMethod(this.delegate, Utils.GET_REMOTE_SERVICE_ID_METHOD, null);
 			}
 			this.initialServiceId = l.longValue();
-			log("[Constructor] initialServiceId: " + l);
+			debug("[Constructor] initialServiceId: " + l);
 		} catch (IAgentException e) {
 			IAgentLog.error("[PMPRemoteObjectAdapter][Constructor] Cant initialize service id.", e);
 		}
@@ -66,12 +66,7 @@ public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 		this.initialServiceId = newServiceID;
 	}
 
-	protected final void log(String message) {
-		log(message, null);
+	protected final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
-
-	protected final void log(String message, Throwable e) {
-		DebugUtils.log(this, message, e);
-	}
-
 }

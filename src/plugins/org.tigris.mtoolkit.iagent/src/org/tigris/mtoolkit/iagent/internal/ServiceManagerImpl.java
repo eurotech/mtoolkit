@@ -51,13 +51,13 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 	}
 
 	public RemoteService[] getAllRemoteServices(String clazz, String filter) throws IAgentException {
-		log("[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
+		debug("[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
 		if (filter != null) {
 			String filterCheck = (String) Utils.callRemoteMethod(getServiceAdmin(getConnection()),
 				Utils.CHECK_FILTER_METHOD,
 				new Object[] { filter });
 			if (filterCheck != null) { // invalid filter syntax
-				log("[getAllRemoteServices] Filter check failed: " + filterCheck);
+				info("[getAllRemoteServices] Filter check failed: " + filterCheck);
 				throw new IllegalArgumentException("Invalid Filter Syntax: " + filterCheck);
 			}
 		}
@@ -65,7 +65,7 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 			Utils.GET_ALL_REMOTE_SERVICES_METHOD,
 			new Object[] { clazz, filter });
 		if (servicesProps == null) {
-			log("[getAllRemoteServices] Internal error: it seems that filter check either returned invalid result or we interpreted it wrong");
+			info("[getAllRemoteServices] Internal error: it seems that filter check either returned invalid result or we interpreted it wrong");
 			throw new IAgentException("Internal error: invalid filter syntax exception",
 				IAgentErrors.ERROR_INTERNAL_ERROR);
 		}
@@ -73,12 +73,12 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 		for (int i = 0; i < servicesProps.length; i++) {
 			services[i] = new RemoteServiceImpl(this, servicesProps[i]);
 		}
-		log("[getAllRemoteServices] result: " + DebugUtils.convertForDebug(services));
+		debug("[getAllRemoteServices] result: " + DebugUtils.convertForDebug(services));
 		return services;
 	}
 
 	public void addRemoteServiceListener(RemoteServiceListener listener) throws IAgentException {
-		log("[addRemoteServiceListener] >>> listener: " + listener);
+		debug("[addRemoteServiceListener] >>> listener: " + listener);
 		synchronized (this) {
 			if (!addedConnectionListener) {
 				connector.getConnectionManager().addConnectionListener(this);
@@ -90,29 +90,29 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 				serviceListeners.add(listener);
 				PMPConnection connection = getConnection(false);
 				if (connection != null) {
-					log("[addRemoteServiceListener] PMP connection available, adding event listener");
+					debug("[addRemoteServiceListener] PMP connection available, adding event listener");
 					connection.addEventListener(this, new String[] { CUSTOM_SERVICE_EVENT });
 				}
 			} else {
-				log("[addRemoteServiceListener] listener already contained in the list");
+				debug("[addRemoteServiceListener] listener already contained in the list");
 			}
 		}
 	}
 
 	public void removeRemoteServiceListener(RemoteServiceListener listener) throws IAgentException {
-		log("[removeRemoteServiceListener] >>> listener: " + listener);
+		debug("[removeRemoteServiceListener] >>> listener: " + listener);
 		synchronized (serviceListeners) {
 			if (serviceListeners.contains(listener)) {
 				serviceListeners.remove(listener);
 				if (serviceListeners.size() == 0) {
 					PMPConnection connection = getConnection(false);
 					if (connection != null) {
-						log("[removeRemoteServiceListener] PMP connection is available, removing event listener");
+						debug("[removeRemoteServiceListener] PMP connection is available, removing event listener");
 						connection.removeEventListener(this, new String[] { CUSTOM_SERVICE_EVENT });
 					}
 				}
 			} else {
-				log("[removeRemoteServiceListener] listener not found");
+				debug("[removeRemoteServiceListener] listener not found");
 			}
 		}
 	}
@@ -122,26 +122,26 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 	}
 
 	PMPConnection getConnection(boolean create) throws IAgentException {
-		log("[getConnection] >>> create: " + create);
+		debug("[getConnection] >>> create: " + create);
 		ConnectionManager connectionManager = connector.getConnectionManager();
 		PMPConnection pmpConnection = (PMPConnection) connectionManager.getActiveConnection(ConnectionManager.PMP_CONNECTION);
 		if (pmpConnection == null && create) {
-			log("[getConnection] No active connection found. Create new PMP connection...");
+			debug("[getConnection] No active connection found. Create new PMP connection...");
 			if (!connector.isActive()) {
-				log("[getConnection] Request for new connection arrived, but DeviceConnector is disconnected.");
+				info("[getConnection] Request for new connection arrived, but DeviceConnector is disconnected.");
 				throw new IAgentException("Associated DeviceConnector object is closed",
 					IAgentErrors.ERROR_DISCONNECTED);
 			}
 			pmpConnection = (PMPConnection) connectionManager.createConnection(ConnectionManager.PMP_CONNECTION);
-			log("[getConnection] PMP connection opened successfully: " + pmpConnection);
+			debug("[getConnection] PMP connection opened successfully: " + pmpConnection);
 		} else {
-			log("[getConnection] Active connection found: " + pmpConnection);
+			debug("[getConnection] Active connection found: " + pmpConnection);
 		}
 		return pmpConnection;
 	}
 
 	public void event(Object event, String eventType) {
-		log("[event] >>> event: " + event + "; eventType: " + eventType);
+		debug("[event] >>> event: " + event + "; eventType: " + eventType);
 		if (eventType.equals(CUSTOM_SERVICE_EVENT)) {
 			try {
 				Dictionary props = (Dictionary) event;
@@ -157,7 +157,7 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 	}
 
 	private void fireServiceEvent(Dictionary serviceProps, int type) {
-		log("[fireServiceEvent] >>> serviceProps: " + DebugUtils.convertForDebug(serviceProps) + "; type=" + type);
+		debug("[fireServiceEvent] >>> serviceProps: " + DebugUtils.convertForDebug(serviceProps) + "; type=" + type);
 		RemoteServiceListener[] listeners;
 		synchronized (serviceListeners) {
 			if (serviceListeners.size() != 0) {
@@ -168,14 +168,14 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 		}
 		RemoteService service = new RemoteServiceImpl(this, serviceProps);
 		RemoteServiceEvent event = new RemoteServiceEvent(service, type);
-		log("[fireServiceEvent] listener count: " + listeners.length + "; event=" + event);
+		debug("[fireServiceEvent] listener count: " + listeners.length + "; event=" + event);
 		for (int i = 0; i < listeners.length; i++) {
 			RemoteServiceListener listener = listeners[i];
 			try {
-				log("[fireServiceEvent] deliver event to listener: " + listener);
+				debug("[fireServiceEvent] deliver event to listener: " + listener);
 				listener.serviceChanged(event);
 			} catch (Throwable e) {
-				log("[fireServiceEvent] Failed to deliver event to " + listener, e);
+				error("[fireServiceEvent] Failed to deliver event to " + listener, e);
 			}
 		}
 	}
@@ -190,38 +190,41 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 			synchronized (serviceListeners) {
 				if (serviceListeners != null && serviceListeners.size() > 0) {
 					try {
-						log("[connectionChanged] PMP connection created, add event listener");
+						debug("[connectionChanged] PMP connection created, add event listener");
 						((PMPConnection) event.getConnection()).addEventListener(this,
 							new String[] { CUSTOM_SERVICE_EVENT });
 					} catch (IAgentException e) {
-						log("[connectionChanged] Failed to add event listener to PMP connection", e);
+						error("[connectionChanged] Failed to add event listener to PMP connection", e);
 					}
 				} else {
-					log("[connectionChanged] PMP connection created, but no need to add event listener");
+					debug("[connectionChanged] PMP connection created, but no need to add event listener");
 				}
 			}
 		}
 	}
 
 	public void removeListeners() throws IAgentException {
-		log("[removeListeners] >>>");
+		debug("[removeListeners] >>>");
 		synchronized (serviceListeners) {
 			serviceListeners.clear();
 			PMPConnection connection = getConnection(false);
 			if (connection != null) {
-				log("[removeListeners] PMP connection available, remove event listener");
+				debug("[removeListeners] PMP connection available, remove event listener");
 				connection.removeEventListener(this, new String[] { CUSTOM_SERVICE_EVENT });
 			}
 		}
-		log("[removeListeners] Listener successfully removed");
+		debug("[removeListeners] Listener successfully removed");
 	}
 
-	private final void log(String message) {
-		log(message, null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
-	private final void log(String message, Throwable e) {
-		DebugUtils.log(this, message, e);
+	private final void info(String message) {
+		DebugUtils.info(this, message);
 	}
 
+	private final void error(String message, Throwable t) {
+		DebugUtils.error(this, message, t);
+	}
 }

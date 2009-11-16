@@ -25,6 +25,7 @@ import org.tigris.mtoolkit.iagent.internal.VMCommander;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.ProSystRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase;
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
@@ -57,6 +58,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	public void start(BundleContext context) throws Exception {
 		this.context = context;
 		instance = this;
+		DebugUtils.initialize(context);
+
 		synchronizer = new EventSynchronizerImpl(context);
 
 		capabilitiesManager = new RemoteCapabilitiesManagerImpl();

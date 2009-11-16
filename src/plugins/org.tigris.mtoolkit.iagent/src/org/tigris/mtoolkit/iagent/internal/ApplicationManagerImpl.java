@@ -47,12 +47,12 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 	}
 
 	public void addRemoteApplicationListener(RemoteApplicationListener listener) throws IAgentException {
-		log("[addRemoteApplicaionListener] >>> listener: " + listener);
+		debug("[addRemoteApplicaionListener] >>> listener: " + listener);
 		synchronized (this) {
 			if (!addedConnectionListener) {
 				connectorSpi.getConnectionManager().addConnectionListener(this);
 				addedConnectionListener = true;
-				log("[addRemoteBundleListener] Connection listener added");
+				debug("[addRemoteBundleListener] Connection listener added");
 			}
 		}
 		synchronized (applicationListeners) {
@@ -60,27 +60,26 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 				PMPConnection connection = (PMPConnection) connectorSpi.getConnectionManager().getActiveConnection(
 						ConnectionManager.PMP_CONNECTION);
 				if (connection != null) {
-					log("[addRemoteApplicationListener] PMP connection is available, add event listener");
+					debug("[addRemoteApplicationListener] PMP connection is available, add event listener");
 					connection.addEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
 				}
 				applicationListeners.add(listener);
 			} else {
-				log("[addRemoteApplicationListener] Listener already present");
+				debug("[addRemoteApplicationListener] Listener already present");
 			}
 		}
 	}
 
 	public RemoteApplication[] listApplications() throws IAgentException {
-		log("[listApplications] >>>");
+		debug("[listApplications] >>>");
 		String[] applicationIDs = (String[]) GET_APPLICATIONS.call(getApplicationAdmin());
 		if (applicationIDs == null) {
-			log("[listApplications] listApplications() must not return null array. There is a problem with the transport.");
-			throw new IAgentException(
-					"listApplications() must not return null array. There is a problem with the transport.",
-					IAgentErrors.GENERAL_ERROR);
+			String msg = "listApplications() must not return null array. There is a problem with the transport.";
+			error("[listApplications] " + msg);
+			throw new IAgentException(msg, IAgentErrors.GENERAL_ERROR);
 		}
 		RemoteApplication[] applications = new RemoteApplication[applicationIDs.length];
-		log("[listApplications] Returned applications list: " + DebugUtils.convertForDebug(applicationIDs));
+		debug("[listApplications] Returned applications list: " + DebugUtils.convertForDebug(applicationIDs));
 		for (int i = 0; i < applicationIDs.length; i++) {
 			applications[i] = new RemoteApplicationImpl(this, applicationIDs[i]);
 		}
@@ -88,27 +87,27 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 	}
 
 	public void removeRemoteApplicationListener(RemoteApplicationListener listener) throws IAgentException {
-		log("[removeApplicationListener] >>> listener: " + listener);
+		debug("[removeApplicationListener] >>> listener: " + listener);
 		synchronized (applicationListeners) {
 			if (applicationListeners.contains(listener)) {
 				applicationListeners.remove(listener);
 				if (applicationListeners.size() == 0) {
-					log("[removeRemoteApplicationListener] No more listeners in the list, try to remove PMP event listener");
+					debug("[removeRemoteApplicationListener] No more listeners in the list, try to remove PMP event listener");
 					PMPConnection connection = (PMPConnection) connectorSpi.getConnectionManager().getActiveConnection(
 							ConnectionManager.PMP_CONNECTION);
 					if (connection != null) {
-						log("[removeRemoteApplicationListener] PMP connection is available, remove event listener");
+						debug("[removeRemoteApplicationListener] PMP connection is available, remove event listener");
 						connection.removeEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
 					}
 				}
 			} else {
-				log("[removeRemoteApplicationListener] Listener not found in the list");
+				debug("[removeRemoteApplicationListener] Listener not found in the list");
 			}
 		}
 	}
 
 	private void fireApplicationEvent(String applicationID, int type) {
-		log("[fireApplicationEvent] >>> applicationId: " + applicationID + "; type: " + type);
+		debug("[fireApplicationEvent] >>> applicationId: " + applicationID + "; type: " + type);
 		RemoteApplicationListener[] listeners;
 		synchronized (applicationListeners) {
 			if (applicationListeners.size() != 0) {
@@ -120,21 +119,21 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 		}
 		RemoteApplication application = new RemoteApplicationImpl(this, applicationID);
 		RemoteApplicationEvent event = new RemoteApplicationEvent(application, type);
-		log("[fireApplicationEvent] " + listeners.length + " listeners found.");
+		debug("[fireApplicationEvent] " + listeners.length + " listeners found.");
 		for (int i = 0; i < listeners.length; i++) {
 			RemoteApplicationListener listener = listeners[i];
 			try {
-				log("[fireApplicationEvent] deliver event: " + event + " to listener: " + listener);
+				debug("[fireApplicationEvent] deliver event: " + event + " to listener: " + listener);
 				listener.applicationChanged(event);
 			} catch (Throwable e) {
-				log("[fireApplicationEvent] Failed to deliver event to " + listener, e);
+				error("[fireApplicationEvent] Failed to deliver event to " + listener, e);
 			}
 		}
 	}
 
 	public void event(Object event, String eventType) {
 		try {
-			log("[event] >>> event: " + event + "; type: " + eventType);
+			debug("[event] >>> event: " + event + "; type: " + eventType);
 			if (SYNCH_APPLICATION_EVENT.equals(eventType)) {
 				Dictionary eventProps = (Dictionary) event;
 				if (eventProps == null)
@@ -144,27 +143,24 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 				fireApplicationEvent(applicationId, type);
 			}
 		} catch (Throwable e) {
-			IAgentLog.error("[DeploymentManagerImpl][event] Failed to process PMP event: " + event + "; type: "
-					+ eventType);
+			error("[event] Failed to process PMP event: " + event + "; type: "
+					+ eventType, e);
 		}
 	}
 
 	public void connectionChanged(ConnectionEvent event) {
-		log("[connectionChanged] >>> event: " + event);
+		debug("[connectionChanged] >>> event: " + event);
 		if (event.getType() == ConnectionEvent.CONNECTED
 				&& event.getConnection().getType() == ConnectionManager.PMP_CONNECTION) {
-			log("[connectionChanged] New PMP connection created, restore event listeners");
+			debug("[connectionChanged] New PMP connection created, restore event listeners");
 			synchronized (applicationListeners) {
 				PMPConnection connection = (PMPConnection) event.getConnection();
 				if (applicationListeners.size() > 0) {
-					log("[connectionChanged] Restoring application listeners...");
+					debug("[connectionChanged] Restoring application listeners...");
 					try {
 						connection.addEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
 					} catch (IAgentException e) {
-						IAgentLog
-								.error(
-										"[DeploymentManagerImpl][connectionChanged] Failed to add event listener to PMP connection",
-										e);
+						error("[connectionChanged] Failed to add event listener to PMP connection", e);
 					}
 				}
 			}
@@ -178,13 +174,13 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 				PMPConnection connection = (PMPConnection) connectorSpi.getConnectionManager().getActiveConnection(
 						ConnectionManager.PMP_CONNECTION);
 				if (connection != null) {
-					log("[removeListeners] PMP connection is available, remove event listener for synchronous application events...");
+					debug("[removeListeners] PMP connection is available, remove event listener for synchronous application events...");
 					connection.removeEventListener(this, new String[] { SYNCH_APPLICATION_EVENT });
 				}
-				log("[removeListeners] application listeners removed");
+				debug("[removeListeners] application listeners removed");
 			}
 		} catch (IAgentException e) {
-			log("[dispose] Exception while disposing application manager", e);
+			error("[dispose] Exception while disposing application manager", e);
 		}
 	}
 
@@ -220,13 +216,15 @@ public class ApplicationManagerImpl implements ApplicationManager, IAgentManager
 		return (Map) result;
 	}
 
-	private final void log(String message) {
-		log(message, null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
-	private final void log(String message, Throwable e) {
-		if (DebugUtils.DEBUG)
-			DebugUtils.log(this, message, e);
+	private final void error(String message) {
+		DebugUtils.error(this, message);
 	}
 
+	private final void error(String message, Throwable e) {
+		DebugUtils.error(this, message, e);
+	}
 }

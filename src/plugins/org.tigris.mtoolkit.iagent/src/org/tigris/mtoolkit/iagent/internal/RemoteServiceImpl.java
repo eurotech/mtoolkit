@@ -38,14 +38,14 @@ public class RemoteServiceImpl implements RemoteService {
 		this.manager = manager;
 		this.serviceId = (Long) props.get(SERVICE_ID);
 		this.objectClass = (String[]) props.get(OBJECTCLASS);
-		log("[Constructor] >>> Create new RemoteService: service.id="
+		debug("[Constructor] >>> Create new RemoteService: service.id="
 						+ serviceId
 						+ "; objectClass=["
 						+ DebugUtils.convertForDebug(objectClass)
 						+ "]");
 		try {
 			this.initialPmpConnection = manager.getConnection(false);
-			log("[Constructor] initial connection: " + initialPmpConnection);
+			debug("[Constructor] initial connection: " + initialPmpConnection);
 		} catch (IAgentException e) {
 			// unreachable
 		}
@@ -54,22 +54,22 @@ public class RemoteServiceImpl implements RemoteService {
 	public RemoteBundle getBundle() throws IAgentException {
 		checkState();
 		if (registeredBundle == null) {
-			log("[getBundle] Querying for registered bundle...");
+			debug("[getBundle] Querying for registered bundle...");
 			Long bid = (Long) Utils.callRemoteMethod(getServiceAdmin(),
 				Utils.GET_BUNDLE_METHOD,
 				new Object[] { serviceId });
 			if (bid.longValue() == -1) {
 				stale = true;
-				log("[getBundle] service reference is stale");
+				debug("[getBundle] service reference is stale");
 				return null;
 			} else {
 				registeredBundle = new RemoteBundleImpl(getDeploymentManager(), bid);
 			}
 		} else if (isStale()) {
-			log("[getBundle] service reference is stale");
+			debug("[getBundle] service reference is stale");
 			return null;
 		}
-		log("[getBundle] Registered bundle: " + registeredBundle.getBundleId());
+		debug("[getBundle] Registered bundle: " + registeredBundle.getBundleId());
 		return registeredBundle;
 	}
 
@@ -83,12 +83,11 @@ public class RemoteServiceImpl implements RemoteService {
 
 	private void checkState() throws IAgentException {
 		if (stale) {
-			log("[checkState] Service reference is stale");
+			debug("[checkState] Service reference is stale");
 			throw new IAgentException("The service was unregistered", IAgentErrors.ERROR_SERVICE_UNREGISTERED);
 		}
 		if (!(initialPmpConnection == manager.getConnection())) {
-			if (DebugUtils.DEBUG)
-				log("[checkState] RemoteService object references other connection: " + manager.getConnection());
+			info("[checkState] RemoteService object references other connection: " + manager.getConnection());
 			throw new IAgentException("RemoteService is not synchronized with the device",
 				IAgentErrors.ERROR_SERVICE_UNREGISTERED);
 		}
@@ -99,17 +98,17 @@ public class RemoteServiceImpl implements RemoteService {
 	}
 
 	public Dictionary getProperties() throws IAgentException {
-		log("[getProperties] >>>");
+		debug("[getProperties] >>>");
 		checkState();
 		Dictionary properties = (Dictionary) Utils.callRemoteMethod(getServiceAdmin(),
 			Utils.GET_PROPERTIES_METHOD,
 			new Object[] { serviceId });
 		if (properties == null) {
-			log("[getProperties] service reference is stale");
+			debug("[getProperties] service reference is stale");
 			stale = true;
 			checkState();
 		}
-		log("[getProperties] props: " + DebugUtils.convertForDebug(properties));
+		debug("[getProperties] props: " + DebugUtils.convertForDebug(properties));
 		return properties;
 	}
 
@@ -118,17 +117,17 @@ public class RemoteServiceImpl implements RemoteService {
 	}
 
 	public RemoteBundle[] getUsingBundles() throws IAgentException {
-		log("[getUsingBundles] >>>");
+		debug("[getUsingBundles] >>>");
 		checkState();
 		long[] bids = (long[]) Utils.callRemoteMethod(getServiceAdmin(),
 			Utils.GET_USING_BUNDLES_METHOD,
 			new Object[] { serviceId });
 		if (bids == null) {
-			log("[getUsingBundles] service reference is stale");
+			debug("[getUsingBundles] service reference is stale");
 			stale = true;
 			return new RemoteBundle[0];
 		}
-		log("[getUsingBundles] Using bundles: " + DebugUtils.convertForDebug(bids));
+		debug("[getUsingBundles] Using bundles: " + DebugUtils.convertForDebug(bids));
 		RemoteBundle[] bundles = new RemoteBundle[bids.length];
 		DeploymentManagerImpl deploymentManager = getDeploymentManager();
 		for (int i = 0; i < bids.length; i++) {
@@ -138,19 +137,19 @@ public class RemoteServiceImpl implements RemoteService {
 	}
 
 	public boolean isStale() throws IAgentException {
-		log("[isStale] >>>");
+		debug("[isStale] >>>");
 		if (!(initialPmpConnection == manager.getConnection())) {
-			log("[isStale] service reference was created with different connection: " + manager.getConnection());
+			info("[isStale] service reference was created with different connection: " + manager.getConnection());
 			return false;
 		}
 		if (!stale) {
-			log("[isStale] Quering remote status...");
+			debug("[isStale] Quering remote status...");
 			Boolean isStale = (Boolean) Utils.callRemoteMethod(getServiceAdmin(),
 				Utils.IS_SERVICE_STALE_METHOD,
 				new Object[] { serviceId });
 			stale = isStale.booleanValue();
 		}
-		log("[isStale] result: " + stale);
+		debug("[isStale] result: " + stale);
 		return stale;
 	}
 
@@ -165,8 +164,11 @@ public class RemoteServiceImpl implements RemoteService {
 						+ "]";
 	}
 
-	private final void log(String message) {
-		DebugUtils.log(this.toString(), message);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
+	private final void info(String message) {
+		DebugUtils.info(this, message);
+	}
 }

@@ -60,9 +60,9 @@ public class VMCommander {
 		} catch (MBSAException e) {
 			// There is no active controller at the moment.
 			// UDP notification shall be sent if controller is activated.
-			log("[startServer] cannot connect to controller.", e);
+			info("[startServer] cannot connect to controller.", e);
 			if (shutdownOnDisconnect && e.getCode() == MBSAException.CODE_CANNOT_CONNECT) {
-				log("[startServer] Shutting down because no connection with the controller can be established.", null);
+				info("[startServer] Shutting down because no connection with the controller can be established.");
 				stopVM();
 			}
 		}
@@ -85,18 +85,30 @@ public class VMCommander {
 	}
 
 	private boolean stopVM() {
-		log("[stopVM] stopVM command received.", null);
+		debug("[stopVM] stopVM command received.");
 		try {
 			bc.getBundle(0).stop();
 		} catch (Exception e) {
-			log("[stopVM] Cannot stop VM.", e);
+			error("[stopVM] Cannot stop VM.", e);
 			return false;
 		}
 		return true;
 	}
 
-	private final void log(String message, Throwable e) {
-		DebugUtils.log(this, message, e);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
+	}
+
+	private final void info(String message) {
+		DebugUtils.info(this, message);
+	}
+
+	private final void info(String message, Throwable t) {
+		DebugUtils.info(this, message, t);
+	}
+
+	private final void error(String message, Throwable t) {
+		DebugUtils.error(this, message, t);
 	}
 
 	private class UDPListener extends Thread {
@@ -123,7 +135,7 @@ public class VMCommander {
 			try {
 				socket = new DatagramSocket(UDP_LISTENER_PORT);
 			} catch (SocketException se) {
-				log("[startUDPListener] Cannot open socket for UDP notifications.", se);
+				error("[startUDPListener] Cannot open socket for UDP notifications.", se);
 				return;
 			}
 			while (listenerRunning) {
@@ -132,7 +144,7 @@ public class VMCommander {
 					if (Arrays.equals(buffer, UDP_NOTIFICATION)) {
 						startServer();
 					} else {
-						log("[UDPListener] Unknown UDP notification received.", null);
+						info("[UDPListener] Unknown UDP notification received.");
 					}
 				} catch (IOException e) {
 					// possible timeout, nothing to receive
@@ -159,7 +171,7 @@ public class VMCommander {
 		}
 
 		public void disconnected(MBSAServer server) {
-			log("[disconnected] MBSA Server got disconnected, shutdown the framework", null);
+			debug("[disconnected] MBSA Server got disconnected, shutdown the framework");
 			stopVM();
 		}
 		

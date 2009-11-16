@@ -30,7 +30,6 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
-import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
 
 public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin {
@@ -63,7 +62,7 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 	}
 
 	public void register(BundleContext bc, DeploymentAdmin admin) {
-		log("[register] Registering remote Deployment Admin...");
+		debug("[register] Registering remote Deployment Admin...");
 
 		this.context = bc;
 		this.deploymentAdmin = admin;
@@ -83,11 +82,11 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 			capMan.setCapability(Capabilities.DEPLOYMENT_SUPPORT, new Boolean(true));
 		}
 
-		log("[removedService] Remote Deployment Admin Registered.");
+		debug("[removedService] Remote Deployment Admin Registered.");
 	}
 
 	public void unregister(BundleContext bc) {
-		log("[unregister] Unregistering...");
+		debug("[unregister] Unregistering...");
 		
 		if (eventAdminTrack != null) {
 			eventAdminTrack.close();
@@ -105,7 +104,7 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		}
 
 		this.context = null;
-		log("[unregister] Unregistered.");
+		debug("[unregister] Unregistered.");
 	}
 	
 	public DeploymentAdmin getDeploymentAdmin() {
@@ -127,7 +126,7 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 	}
 
 	public Dictionary listDeploymentPackages() {
-		log("[listDeploymentPackages] >>>");
+		debug("[listDeploymentPackages] >>>");
 		DeploymentAdmin admin = internalGetDeploymentAdmin();
 
 		DeploymentPackage[] packages = admin.listDeploymentPackages();
@@ -138,28 +137,28 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 			DeploymentPackage dp = packages[i];
 			result.put(dp.getName(), dp.getVersion().toString());
 		}
-		log("[listDeploymentPackages] Deployment packages: " + DebugUtils.convertForDebug(result));
+		debug("[listDeploymentPackages] Deployment packages: " + DebugUtils.convertForDebug(result));
 		return result;
 	}
 
 	public Object getDeploymentPackageHeader(String name, String version, String headerName) {
-		log("[getDeploymentPackageHeader] >> dpName: " + name + "; version: " + version + "; headerName: " + headerName);
+		debug("[getDeploymentPackageHeader] >> dpName: " + name + "; version: " + version + "; headerName: " + headerName);
 		DeploymentPackage dp = internalGetDeploymentPackage(name, version);
 		if (dp == null) {
 			Error error = new Error(Error.DEPLOYMENT_UNINSTALLED_CODE, null);
-			log("[getDeploymentPackageHeader] No such deployment package", error);
+			info("[getDeploymentPackageHeader] No such deployment package: " + error);
 			return error;
 		}
 		Object deploymentPackageHeader = dp.getHeader(headerName);
-		log("[getDeploymentPackageHeader] Header value: " + deploymentPackageHeader);
+		debug("[getDeploymentPackageHeader] Header value: " + deploymentPackageHeader);
 		return deploymentPackageHeader;
 	}
 
 	public Dictionary getDeploymentPackageBundles(String name, String version) {
-		log("[getDeploymentPackageBundles] >>> dpName: " + name + "; version: " + version);
+		debug("[getDeploymentPackageBundles] >>> dpName: " + name + "; version: " + version);
 		DeploymentPackage dp = internalGetDeploymentPackage(name, version);
 		if (dp == null) {
-			log("[getDeploymentPackageBundles] No such deployment package");
+			info("[getDeploymentPackageBundles] No such deployment package");
 			return null;
 		}
 		BundleInfo[] bundleInfos = dp.getBundleInfos();
@@ -169,13 +168,13 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 			BundleInfo bundleInfo = bundleInfos[i];
 			result.put(bundleInfo.getSymbolicName(), bundleInfo.getVersion().toString());
 		}
-		log("[getDeploymentPackageBundles] bundles: " + DebugUtils.convertForDebug(result));
+		debug("[getDeploymentPackageBundles] bundles: " + DebugUtils.convertForDebug(result));
 		return result;
 	}
 
 	// returns bid or -1 if the bundle is missing
 	public long getDeploymentPackageBundle(String dpName, String version, String symbolicName) {
-		log("[getDeploymentPackageBundle] >>> dpName: "
+		debug("[getDeploymentPackageBundle] >>> dpName: "
 						+ dpName
 						+ "; version: "
 						+ version
@@ -183,53 +182,51 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 						+ symbolicName);
 		DeploymentPackage dp = internalGetDeploymentPackage(dpName, version);
 		if (dp == null) {
-			log("[getDeploymentPackageBundle] No such deployment package");
+			info("[getDeploymentPackageBundle] No such deployment package");
 			return -2; // indicate stale deployment package
 		}
 		Bundle bundle = dp.getBundle(symbolicName);
 		if (bundle != null) {
 			long bundleID = bundle.getBundleId();
-			log("[getDeploymentPackageBundle] bundle id: " + bundleID);
+			debug("[getDeploymentPackageBundle] bundle id: " + bundleID);
 			return bundleID;
 		} else {
-			log("[getDeploymentPackageBundle] No such bundle");
+			info("[getDeploymentPackageBundle] No such bundle");
 			return -1; // the bundle is missing
 		}
 	}
 
 	public Object uninstallDeploymentPackage(String dpName, String version, boolean force) {
-		log("[uninstallDeploymentPackage] >>> dpName: " + dpName + "; version: " + version + "; force: " + force);
+		debug("[uninstallDeploymentPackage] >>> dpName: " + dpName + "; version: " + version + "; force: " + force);
 		DeploymentPackage dp = internalGetDeploymentPackage(dpName, version);
 		if (dp == null) {
 			Error error = new Error(Error.DEPLOYMENT_UNINSTALLED_CODE, null);
-			log("[uninstallDeploymentPackage] No such deployment package", error);
+			info("[uninstallDeploymentPackage] No such deployment package: " + error);
 			return error;
 		}
 		
 		Object result = getDelegate().uninstallDeploymentPackage(dp, force);
-	    if (DebugUtils.DEBUG)
-	        if (Boolean.TRUE.equals(result)) {
-	          // uninstall successful
-	          log("[uninstallDeploymentPackage] DP uninstalled");
-	        } else if (Boolean.FALSE.equals(result)) {
-	          // uninstall unsuccessful
-	          log("[uninstallDeploymentPackage] DP uninstalled unsuccessful");
-	        } else if (result instanceof Error) {
-	          log("[uninstallDeploymentPackage] Unable to uninstall dp",
-	              (Error) result);
-	        }
+        if (Boolean.TRUE.equals(result)) {
+          // uninstall successful
+          debug("[uninstallDeploymentPackage] DP uninstalled");
+        } else if (Boolean.FALSE.equals(result)) {
+          // uninstall unsuccessful
+          info("[uninstallDeploymentPackage] DP uninstalled unsuccessful");
+        } else if (result instanceof Error) {
+          info("[uninstallDeploymentPackage] Unable to uninstall dp: " + result);
+        }
 	    return result;
 	}
 
 	public boolean isDeploymentPackageStale(String dpName, String version) {
-		log("[isDeploymentPackageStale] >>> dpName: " + dpName + "; version: " + version);
+		debug("[isDeploymentPackageStale] >>> dpName: " + dpName + "; version: " + version);
 		DeploymentAdmin admin = internalGetDeploymentAdmin();
 		DeploymentPackage dp = admin.getDeploymentPackage(dpName);
 		if (dp != null && dp.getVersion().toString().equals(version)) {
-			log("[isDeploymentPackageStale] DP is not stale");
+			debug("[isDeploymentPackageStale] DP is not stale");
 			return false;
 		} else {
-			log("[isDeploymentPackageStale] DP is stale");
+			debug("[isDeploymentPackageStale] DP is stale");
 			return true;
 		}
 	}
@@ -245,15 +242,15 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 	}
 
 	public String getDeploymentPackageVersion(String dpName) {
-		log("[getDeploymentPackageVersion] >>> dpName: " + dpName);
+		debug("[getDeploymentPackageVersion] >>> dpName: " + dpName);
 		DeploymentAdmin admin = internalGetDeploymentAdmin();
 		DeploymentPackage dp = admin.getDeploymentPackage(dpName);
 		if (dp != null) {
 			String dpVersion = dp.getVersion().toString();
-			log("[getDeploymentPackageVersion] version: " + dpVersion);
+			debug("[getDeploymentPackageVersion] version: " + dpVersion);
 			return dpVersion;
 		} else {
-			log("[getDeploymentPackageVersion] No deployment package with this symbolic name found");
+			info("[getDeploymentPackageVersion] No deployment package with this symbolic name found");
 			return null;
 		}
 	}
@@ -261,23 +258,23 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 	private DeploymentAdmin internalGetDeploymentAdmin() {
 		DeploymentAdmin admin = deploymentAdmin;
 		if (admin == null) {
-			log("[internalGetDeploymentAdmin] DeploymentAdmin has been unregistered.");
+			info("[internalGetDeploymentAdmin] DeploymentAdmin has been unregistered.");
 			throw new IllegalStateException("DeploymentAdmin is not available");
 		}
 		return admin;
 	}
 
 	public Object installDeploymentPackage(InputStream in) {
-		log("[installDeploymentPackage] >>> in: " + in);
+		debug("[installDeploymentPackage] >>> in: " + in);
 		Object result = getDelegate().installDeploymentPackage(in);
 		if (result instanceof Error) {
-			log("[installDeploymentPackage] Unable to install DeploymentPackage: " + result);
+			info("[installDeploymentPackage] Unable to install DeploymentPackage: " + result);
 			return result;
 		}
 		DeploymentPackage dp = (DeploymentPackage) result;
 		String name = dp.getName();
 		String version = dp.getVersion().toString();
-		log("[installDeploymentPackage] deployment package installation successful: " + name + "_" + version);
+		debug("[installDeploymentPackage] deployment package installation successful: " + name + "_" + version);
 		return new String[] { name, version };
 	}
 	
@@ -290,14 +287,6 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 
 	public Class[] remoteInterfaces() {
 		return new Class[] { RemoteDeploymentAdmin.class };
-	}
-
-	private static final void log(String message) {
-		log(message, (Throwable) null);
-	}
-
-	private static final void log(String message, Throwable e) {
-		DebugUtils.log(RemoteDeploymentAdminImpl.class, message, e);
 	}
 
 	// XXX: Extract this method in common base class
@@ -316,9 +305,11 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		}
 	}
 
-	private static final void log(String message, Error error) {
-		if (DebugUtils.DEBUG)
-			log(message + (error != null ? " [" + error + "]" : ""), (Throwable) null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
+	private final void info(String message) {
+		DebugUtils.info(this, message);
+	}
 }

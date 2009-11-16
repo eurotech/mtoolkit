@@ -77,7 +77,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	 */
 	// TODO: remove this method. It is remained for backward compatibility.
 	public DeviceConnectorImpl(Dictionary props) throws IAgentException {
-		log("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
+		debug("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
 		if (props == null)
 			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
 		this.connectionProperties = props;
@@ -98,10 +98,10 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		connectionManager = new ConnectionManagerImpl(transport, props);
 		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
 	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
-	      log("[Constructor] Connect to device which support MBSA");
+	      debug("[Constructor] Connect to device which support MBSA");
 	      connect(ConnectionManager.MBSA_CONNECTION);
 	    } else {  // connect directly to PMP
-	      log("[Constructor] Connect to device which doesn't support MBSA");
+	      debug("[Constructor] Connect to device which doesn't support MBSA");
 	      connect(ConnectionManager.PMP_CONNECTION);
 	    }
 	}
@@ -113,7 +113,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	 * @throws IAgentException
 	 */
 	public DeviceConnectorImpl(Transport transport, Dictionary props) throws IAgentException {
-		log("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
+		debug("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
 		if (props == null)
 			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
 		this.connectionProperties = props;
@@ -122,21 +122,21 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		connectionManager = new ConnectionManagerImpl(transport, props);
 		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
 	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
-	      log("[Constructor] Connect to device which support MBSA");
+	      debug("[Constructor] Connect to device which support MBSA");
 	      connect(ConnectionManager.MBSA_CONNECTION);
 	    } else {  // connect directly to PMP
-	      log("[Constructor] Connect to device which doesn't support MBSA");
+	      debug("[Constructor] Connect to device which doesn't support MBSA");
 	      connect(ConnectionManager.PMP_CONNECTION);
 	    }
 	}
 
 	private void monitorConnection(final int connectionType) {
-		log("[monitorConnection] >>> connectionType: " + connectionType);
+		debug("[monitorConnection] >>> connectionType: " + connectionType);
 		connectionManager.addConnectionListener(new ConnectionListener() {
 			public void connectionChanged(ConnectionEvent event) {
 				if (event.getType() == ConnectionEvent.DISCONNECTED
 								&& event.getConnection().getType() == connectionType) {
-					log("[Constructor] connection of type: "
+					debug("[Constructor] connection of type: "
 									+ connectionType
 									+ " was disconnected. Close DeviceConnector...");
 					try {
@@ -151,26 +151,26 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	}
 
 	private void connect(int connectionType) throws IAgentException {
-		log("[connect] >>> connectionType: " + connectionType);
+		debug("[connect] >>> connectionType: " + connectionType);
 		// start monitoring the connection before connecting
 		monitorConnection(connectionType);
 		AbstractConnection connection = connectionManager.getActiveConnection(connectionType);
 		if (connection == null) {
-			log("[connect] No active connection with type: " + connectionType + ". Create new...");
+			debug("[connect] No active connection with type: " + connectionType + ". Create new...");
 			connection = connectionManager.createConnection(connectionType);
 			if (connection == null) {
-				log("[connect] Failed to create connection of type: " + connectionType);
+				info("[connect] Failed to create connection of type: " + connectionType);
 				throw new IAgentException("Unable to create connection", IAgentErrors.ERROR_CANNOT_CONNECT);
 			}
 		}
-		log("[connect] connection: " + connection);
+		debug("[connect] connection: " + connection);
 	}
 
 	public void closeConnection() throws IAgentException {
-		log("[closeConnection] >>> Closing DeviceConnector...");
+		debug("[closeConnection] >>> Closing DeviceConnector...");
 		synchronized (lock) {
 			if (!isActive) {
-				log("[closeConnection] Already closed.");
+				debug("[closeConnection] Already closed.");
 				return;
 			}
 			isActive = false;
@@ -184,9 +184,9 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				((ConnectionManagerImpl) connectionManager).removeListeners();
 			if (managers != null)
 				managers = null;
-			log("[closeConnection] Closing underlying connections...");
+			debug("[closeConnection] Closing underlying connections...");
 			connectionManager.closeConnections();
-			log("[closeConnection] DeviceConnector closed successfully");
+			debug("[closeConnection] DeviceConnector closed successfully");
 		} catch (Throwable t) {
 			IAgentLog.error("[DeviceConnectorImpl][closeConnection] Failed to close underlying connections", t);
 		}
@@ -196,7 +196,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	public VMManager getVMManager() throws IAgentException {
 		synchronized (lock) {
 			if (!isActive) {
-				log("[getVMManager] Request for VMManager received, but DeviceConnector is closed");
+				info("[getVMManager] Request for VMManager received, but DeviceConnector is closed");
 				throw new IAgentException("The connection is closed", IAgentErrors.ERROR_DISCONNECTED);
 			}
 			if (runtimeCommands == null) {
@@ -209,7 +209,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	public DeploymentManager getDeploymentManager() throws IAgentException {
 		synchronized (lock) {
 			if (!isActive) {
-				log("[getDeploymentManager] Request for DeploymentManager received, but DeviceConnector is closed");
+				info("[getDeploymentManager] Request for DeploymentManager received, but DeviceConnector is closed");
 				throw new IAgentException("The connection is closed", IAgentErrors.ERROR_DISCONNECTED);
 			}
 			if (deploymentCommands == null) {
@@ -230,7 +230,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	public ServiceManager getServiceManager() throws IAgentException {
 		synchronized (lock) {
 			if (!isActive) {
-				log("[getServiceManager] Request for ServiceManager received, but DeviceConnector is closed");
+				info("[getServiceManager] Request for ServiceManager received, but DeviceConnector is closed");
 				throw new IAgentException("Connection to target device has been closed.",
 					IAgentErrors.ERROR_DISCONNECTED);
 			}
@@ -272,16 +272,20 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		return dest;
 	}
 
-	private final void log(String message) {
-		log(message, null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
-	private final void log(String message, Throwable e) {
-		DebugUtils.log(this, message, e);
+	private final void info(String message) {
+		DebugUtils.info(this, message);
+	}
+
+	private final void error(String message, Throwable e) {
+		DebugUtils.error(this, message, e);
 	}
 
 	void fireDevicePropertyEvent(String property, Object value) {
-		log("[fireDevicePropertyEvent] >>> property: " + property);
+		debug("[fireDevicePropertyEvent] >>> property: " + property);
 		RemoteDevicePropertyListener[] listeners;
 		synchronized (devicePropertyListeners) {
 			if (devicePropertyListeners.size() != 0) {
@@ -291,49 +295,49 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			}
 		}
 		RemoteDevicePropertyEvent event = new RemoteDevicePropertyEvent(property, value);
-		log("[fireRemoteDevicePropertyEvent] " + listeners.length + " listeners found.");
+		debug("[fireRemoteDevicePropertyEvent] " + listeners.length + " listeners found.");
 		for (int i = 0; i < listeners.length; i++) {
 			RemoteDevicePropertyListener listener = listeners[i];
 			try {
-				log("[fireRemoteDevicePropertyEvent] deliver event: " + event + " to listener: " + listener);
+				debug("[fireRemoteDevicePropertyEvent] deliver event: " + event + " to listener: " + listener);
 				listener.devicePropertiesChanged(event);
 			} catch (Throwable e) {
-				log("[fireRemoteDevicePropertyEvent] Failed to deliver event to " + listener, e);
+				error("[fireRemoteDevicePropertyEvent] Failed to deliver event to " + listener, e);
 			}
 		}
 	}
 
 	public void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
-		log("[addRemoteDevicePropertyListener] >>> listener: " + listener);
+		debug("[addRemoteDevicePropertyListener] >>> listener: " + listener);
 		synchronized (devicePropertyListeners) {
 			if (!devicePropertyListeners.contains(listener)) {
 				PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION, false);
 				if (connection != null) {
-					log("[addRemoteDevicePropertyListener] PMP connection is available, add event listener");
+					debug("[addRemoteDevicePropertyListener] PMP connection is available, add event listener");
 					connection.addEventListener(this, new String[] { DEVICE_PROPERTY_EVENT });
 				}
 				devicePropertyListeners.add(listener);
 			} else {
-				log("[addRemoteDevicePropertyListener] Listener already present");
+				debug("[addRemoteDevicePropertyListener] Listener already present");
 			}
 		}
 	}
 	
 	public AbstractConnection getConnection(int type, boolean create) throws IAgentException {
-		log("[getConnection] >>> create: " + create);
+		debug("[getConnection] >>> create: " + create);
 		ConnectionManager connectionManager = getConnectionManager();
 		AbstractConnection connection = connectionManager.getActiveConnection(type);
 		if (connection == null && create) {
-			log("[getConnection] No active connection found. Create new connection (type=" + type + ")...");
+			debug("[getConnection] No active connection found. Create new connection (type=" + type + ")...");
 			if (!isActive()) {
-				log("[getConnection] Request for new connection arrived, but DeviceConnector is disconnected.");
+				info("[getConnection] Request for new connection arrived, but DeviceConnector is disconnected.");
 				throw new IAgentException("Associated DeviceConnector object is closed",
 					IAgentErrors.ERROR_DISCONNECTED);
 			}
 			connection = connectionManager.createConnection(type);
-			log("[getConnection] Connection opened successfully: " + connection);
+			debug("[getConnection] Connection opened successfully: " + connection);
 		} else {
-			log("[getConnection] Active connection found: " + connection);
+			debug("[getConnection] Active connection found: " + connection);
 		}
 		return connection;
 	}
@@ -344,7 +348,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 
 	public void event(Object event, String evType) {
 		try {
-			log("[event] >>> event: " + event + "; type: " + evType);
+			debug("[event] >>> event: " + event + "; type: " + evType);
 			if (DEVICE_PROPERTY_EVENT.equals(evType)) {
 				Dictionary eventProps = (Dictionary) event;
 				String capabilityName = (String) eventProps.get(EVENT_CAPABILITY_NAME);
@@ -360,20 +364,20 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	}
 
 	public void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
-		log("[removeRemoteDevicePropertyListener] >>> listener: " + listener);
+		debug("[removeRemoteDevicePropertyListener] >>> listener: " + listener);
 		synchronized (devicePropertyListeners) {
 			if (devicePropertyListeners.contains(listener)) {
 				devicePropertyListeners.remove(listener);
 				if (devicePropertyListeners.size() == 0) {
-					log("[removeRemoteDevicePropertyListener] No more listeners in the list, try to remove PMP event listener");
+					debug("[removeRemoteDevicePropertyListener] No more listeners in the list, try to remove PMP event listener");
 					PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION, false);
 					if (connection != null) {
-						log("[removeRemoteDevicePropertyListener] PMP connection is available, remove event listener");
+						debug("[removeRemoteDevicePropertyListener] PMP connection is available, remove event listener");
 						connection.removeEventListener(this, new String[] { DEVICE_PROPERTY_EVENT });
 					}
 				}
 			} else {
-				log("[removeRemoteDevicePropertyListener] Listener not found in the list");
+				debug("[removeRemoteDevicePropertyListener] Listener not found in the list");
 			}
 		}
 	}
@@ -391,7 +395,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	public Object getManager(String className) throws IAgentException {
 		synchronized (lock) {
 			if (!isActive) {
-				log("[getManager] Request for getting Manager [" + className + "] received, but DeviceConnector is closed");
+				info("[getManager] Request for getting Manager [" + className + "] received, but DeviceConnector is closed");
 				throw new IAgentException("The connection is closed", IAgentErrors.ERROR_DISCONNECTED);
 			}
 			if (managers == null)

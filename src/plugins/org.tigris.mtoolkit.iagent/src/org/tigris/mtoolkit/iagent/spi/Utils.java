@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
-import java.util.Map;
-
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.tcp.PMPRemoteObjectAdapter;
@@ -158,8 +156,7 @@ public class Utils {
 
 	static {
 		if (METHOD_SIGNATURES.length != LAST + 1) {
-			System.out
-					.println("ERROR: There is a mismatch between the method constants and the array holding the method descriptions: [expected: "
+			error("ERROR: There is a mismatch between the method constants and the array holding the method descriptions: [expected: "
 							+ METHOD_SIGNATURES.length + ", actual: " + (LAST + 1) + "]");
 		}
 	}
@@ -194,8 +191,7 @@ public class Utils {
 	 */
 	public static Object callRemoteMethod(RemoteObject remote, int method, Object[] parameters) throws IAgentException {
 		MethodSignature methodSignature = METHOD_SIGNATURES[method];
-		if (DebugUtils.DEBUG)
-			log("[callRemoteMethod] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
+		debug("[callRemoteMethod] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
 		return callRemoteMethod(remote, methodSignature, parameters);
 	}
 
@@ -215,22 +211,22 @@ public class Utils {
 		try {
 			return callRemoteMethod0(remote, parameters, methodSignature);
 		} catch (PMPException e) {
-			log("[callRemoteMethod] Method invocation failed", e);
+			info("[callRemoteMethod] Method invocation failed", e);
 			if (remote instanceof PMPRemoteObjectAdapter) {
 				int verificationResult = ((PMPRemoteObjectAdapter) remote).verifyRemoteReference();
 				if (verificationResult == PMPRemoteObjectAdapter.REPEAT) {
-					log("[callRemoteMethod] Remote reference verification says REPEAT");
+					debug("[callRemoteMethod] Remote reference verification says REPEAT");
 					clearCache(remote);
 					try {
 						return callRemoteMethod0(remote, parameters, methodSignature);
 					} catch (PMPException e1) {
-						log("[callRemoteMethod] Method invocation failed", e);
+						info("[callRemoteMethod] Method invocation failed", e);
 						throw new IAgentException("Unable to call method: " + methodSignature.name,
 								IAgentErrors.ERROR_INTERNAL_ERROR, e1);
 					}
 				}
 			}
-			log("[callRemoteMethod] Method invocation failed", e);
+			info("[callRemoteMethod] Method invocation failed", e);
 			throw new IAgentException("Unable to call method: " + methodSignature.name,
 					IAgentErrors.ERROR_INTERNAL_ERROR, e);
 		}
@@ -238,8 +234,7 @@ public class Utils {
 
 	public static boolean isRemoteMethodDefined(RemoteObject remote, int method) throws IAgentException {
 		MethodSignature methodSignature = METHOD_SIGNATURES[method];
-		if (DebugUtils.DEBUG)
-			log("[isRemoteDefined] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
+		debug("[isRemoteDefined] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
 		return isRemoteMethodDefined(remote, methodSignature);
 	}
 
@@ -251,12 +246,12 @@ public class Utils {
 			if (remote instanceof PMPRemoteObjectAdapter) {
 				int verificationResult = ((PMPRemoteObjectAdapter) remote).verifyRemoteReference();
 				if (verificationResult == PMPRemoteObjectAdapter.REPEAT) {
-					log("[isRemoteMethodDefined] Remote reference verification says REPEAT");
+					debug("[isRemoteMethodDefined] Remote reference verification says REPEAT");
 					clearCache(remote);
 					try {
 						return getRemoteMethod(remote, methodSignature) != null;
 					} catch (PMPException e1) {
-						log("[isRemoteMethodDefined] Failed to get method again", e1);
+						info("[isRemoteMethodDefined] Failed to get method again", e1);
 						return false;
 					}
 				}
@@ -277,7 +272,7 @@ public class Utils {
 			throw new IAgentException("Method " + methodSignature + " is not defined.",
 					IAgentErrors.ERROR_INTERNAL_ERROR);
 		Object result = method.invoke(parameters, methodSignature.shouldSerialize);
-		log("[invokeCachedMethod] remote method invocation result: " + result);
+		debug("[invokeCachedMethod] remote method invocation result: " + result);
 		return result;
 	}
 
@@ -285,7 +280,7 @@ public class Utils {
 			throws PMPException {
 		synchronized (methodSignature) {
 			if (methodSignature.cachedMethod == null || methodSignature.cachedObject != remote) {
-				log("[invokeCachedMethod] Method wasn't found in the cache. Quering remote site...");
+				debug("[invokeCachedMethod] Method wasn't found in the cache. Quering remote site...");
 				// we don't want to left behind incosistence cache, if the
 				// getMethod fails
 				methodSignature.cachedMethod = null;
@@ -297,14 +292,14 @@ public class Utils {
 	}
 
 	public static void clearCache() {
-		log("[clearCache] >>>");
+		debug("[clearCache] >>>");
 		for (int i = 0; i < METHOD_SIGNATURES.length; i++) {
 			METHOD_SIGNATURES[i].cachedMethod = null;
 		}
 	}
 
 	public static void clearCache(RemoteObject object) {
-		log("[clearCache] >>> RemoteObject:" + object);
+		debug("[clearCache] >>> RemoteObject:" + object);
 		for (int i = 0; i < METHOD_SIGNATURES.length; i++) {
 			if (METHOD_SIGNATURES[i].cachedObject == object) {
 				METHOD_SIGNATURES[i].cachedMethod = null;
@@ -313,11 +308,15 @@ public class Utils {
 		}
 	}
 
-	private static final void log(String message) {
-		log(message, null);
+	private static final void debug(String message) {
+		DebugUtils.debug(Utils.class, message);
 	}
 
-	private static final void log(String message, Throwable e) {
-		DebugUtils.log(Utils.class, message, e);
+	private static final void info(String message, Throwable t) {
+		DebugUtils.info(Utils.class, message, t);
+	}
+
+	private static final void error(String message) {
+		DebugUtils.error(Utils.class, message);
 	}
 }

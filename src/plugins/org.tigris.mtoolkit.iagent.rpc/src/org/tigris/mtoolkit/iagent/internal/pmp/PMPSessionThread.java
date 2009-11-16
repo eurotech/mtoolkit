@@ -130,8 +130,6 @@ public class PMPSessionThread extends Thread {
 	private static final String DSCMSG1 = "Normal Disconnect Received";
 	private static final String DSCMSG2 = "Error Disconnect Received: ";
 	
-	private final boolean VERBOSE_DEBUG = Boolean.getBoolean("iagent.debug.verbose");
-
 	protected ThreadPool pool;
 
 	public PMPSessionThread(PMPPeerImpl peer, Socket socket, String sessionID, String host) throws IOException {
@@ -208,7 +206,7 @@ public class PMPSessionThread extends Thread {
 						String errMsg = PMPData.readString(is, maxS);
 						if (errMsg == null || errMsg.length() == 0) {
 							// normal disconnect
-							info(DSCMSG1);
+							debug(DSCMSG1);
 						} else {
 							// error disconnect
 							info(DSCMSG2 + errMsg);
@@ -764,17 +762,16 @@ public class PMPSessionThread extends Thread {
 
 	}
 
-	protected void debug(String msg) {
-		if (VERBOSE_DEBUG)
-			DebugUtils.log(this, msg);
+	protected final void debug(String msg) {
+		DebugUtils.debug(this, msg);
 	}
 
-	protected void error(String msg, Throwable exc) {
-		DebugUtils.log(this, msg, exc);
+	protected final void error(String msg, Throwable exc) {
+		DebugUtils.error(this, msg, exc);
 	}
 
-	protected void info(String msg) {
-		DebugUtils.log(this, msg);
+	protected final void info(String msg) {
+		DebugUtils.info(this, msg);
 	}
 
 	String uri;

@@ -55,7 +55,7 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 	}
 
 	public void addEventSource(String eventType) {
-		log("[addEventSource] >>> eventType: " + eventType);
+		debug("[addEventSource] >>> eventType: " + eventType);
 		synchronized (eventTypes) {
 			if (eventTypes.contains(eventType))
 				return;
@@ -67,7 +67,7 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 	}
 
 	public void removeEventSource(String eventType) {
-		log("[removeEventSource] >>> eventType: " + eventType);
+		debug("[removeEventSource] >>> eventType: " + eventType);
 		synchronized (eventTypes) {
 			if (server != null)
 				server.removeEventSource(eventType);
@@ -88,7 +88,7 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 			synchronized (this) {
 				try {
 					while (eventQueue.isEmpty() && running) {
-						log("[run] event queue is empty >> thread will wait");
+						debug("[run] event queue is empty >> thread will wait");
 						wait();
 					}
 				} catch (InterruptedException e) {
@@ -101,15 +101,15 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 			}
 			Object convEvent = eventData.getConvertedEvent();
 			String eventType = eventData.getEventType();
-			log("[run] sending event: " + eventData);
+			debug("[run] sending event: " + eventData);
 			server.event(convEvent, eventType);
 		}
 	}
 
 	public void enqueue(EventData eventData) {
-		log("[enqueue] >>> eventData: " + eventData);
+		debug("[enqueue] >>> eventData: " + eventData);
 		if (!running) {
-			log("[enqueue] Not running anymore. Skipping...");
+			debug("[enqueue] Not running anymore. Skipping...");
 			return;
 		}
 		synchronized (this) {
@@ -127,7 +127,7 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 	}
 
 	public void unregister(BundleContext bc) {
-		log("[unregister] Unregistering EventSynchronizer...");
+		debug("[unregister] Unregistering EventSynchronizer...");
 
 		for (int i = 0; i < eventTypes.size(); i++) {
 			server.removeEventSource((String) eventTypes.get(i));
@@ -138,14 +138,10 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 			registration = null;
 		}
 		this.bc = null;
-		log("[unregister] EventSynchronizer unregistered.");
+		debug("[unregister] EventSynchronizer unregistered.");
 	}
 
-	private static final void log(String message) {
-		log(message, null);
-	}
-
-	private static final void log(String message, Throwable e) {
-		DebugUtils.log(EventSynchronizerImpl.class, message, e);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 }

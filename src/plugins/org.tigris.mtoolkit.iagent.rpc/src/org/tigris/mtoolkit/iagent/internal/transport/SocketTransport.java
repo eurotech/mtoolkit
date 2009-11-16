@@ -62,7 +62,7 @@ public class SocketTransport implements Transport {
 			try {
 				establishedConnections[i].close();
 			} catch (Throwable e) {
-				DebugUtils.log(SocketTransport.class, "Failed to correctly close an connection: " + establishedConnections[i], e);
+				DebugUtils.error(SocketTransport.class, "Failed to correctly close an connection: " + establishedConnections[i], e);
 			}
 		}
 	}

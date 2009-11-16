@@ -10,50 +10,256 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.utils;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import org.eclipse.osgi.framework.log.FrameworkLog;
+import org.eclipse.osgi.framework.log.FrameworkLogEntry;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.log.LogService;
+
 public class DebugUtils {
 
-	public static final boolean DEBUG = Boolean.getBoolean("iagent.debug");
+	public static final int INFO = 0;
+	public static final int ERROR = 1;
+	public static final int DEBUG = 2;
 
-	public static final void log(Object module, String message) {
-		log(module, message, null);
+	private static final String PROP_DEBUG_ENABLED = "iagent.debug"; //$NON-NLS-1$
+	private static final String PROP_LOG_FILE = "iagent.log.file"; //$NON-NLS-1$
+	private static final String NL = System.getProperty("line.separator"); //$NON-NLS-1$
+
+	public static final boolean DEBUG_ENABLED = Boolean.getBoolean(PROP_DEBUG_ENABLED);
+
+	private static Object fwLog;
+	private static LogService logService;
+	private static File logFile;
+	private static boolean initialized = false;
+	private static Object lock = new Object();
+
+
+	public static final void info(Object module, String message) {
+		log(module, INFO, message);
 	}
 
-	public static final void log(Object module, String message, Throwable e) {
-		if (!DEBUG)
-			return;
-		String id;
-		if (!(module instanceof String)) {
-			id = getIndentityString(module);
-		} else {
-			id = (String) module;
-		}
-		debug("[" + id + "]" + message, e);
+	public static final void info(Object module, String message, Throwable t) {
+		log(module, INFO, message, t);
+	}
+
+	public static final void debug(Object module, String message) {
+		log(module, DEBUG, message);
+	}
+
+	public static final void debug(Object module, String message, Throwable t) {
+		log(module, DEBUG, message, t);
+	}
+
+	public static final void error(Object module, String message) {
+		log(module, ERROR, message);
+	}
+
+	public static final void error(Object module, String message, Throwable t) {
+		log(module, ERROR, message, t);
 	}
 
 	/**
-	 * Print specified message and throwable to system out.
+	 * Initializes logging support. If not called only file logging or console
+	 * logging will be available.
 	 * 
-	 * @param msg
-	 * @param t
+	 * @param context
+	 *            the bundle context. If null log service won't be used for
+	 *            logging.
 	 */
-	private static void debug(String msg, Throwable t) {
-		if (DEBUG) {
-			System.out.println("[IA|DEBUG]" + msg);
-			if (t != null) {
-				t.printStackTrace(System.out);
+	public static void initialize(BundleContext context) {
+		if (initialized) {
+			return;
+		}
+		initialized = true;
+
+		// First - try file logging
+		String logFileName = System.getProperty(PROP_LOG_FILE);
+		if (logFileName != null) {
+			logFile = new File(logFileName);
+			return;
+		}
+
+		// Second - try org.eclipse.osgi.framework.log.FrameworkLog
+		fwLog = getFrameworkLog(context);
+		if (fwLog != null) {
+			return;
+		}
+
+		// Third - try org.osgi.service.log.LogService
+		if (context != null) {
+			ServiceReference ref = context.getServiceReference(LogService.class.getName());
+			if (ref != null) {
+				logService = (LogService) context.getService(ref);
+				if (logService != null) {
+					return;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Logs message with given severity. Equivalent to log(module, severity,
+	 * message, null)
+	 * 
+	 * @param module
+	 *            can be String, Class, null or any Object
+	 * @param severity
+	 * @param message
+	 */
+	public static final void log(Object module, int severity, String message) {
+		log(module, severity, message, null);
+	}
+
+	/**
+	 * Logs message with given severity.
+	 * 
+	 * @param module
+	 *            can be String, Class, null or any Object
+	 * @param severity
+	 * @param message
+	 * @param e
+	 *            exception, can be null
+	 */
+	public static final void log(Object module, int severity, String message, Throwable e) {
+		if (severity == DEBUG && !DEBUG_ENABLED) {
+			return;
+		}
+		if (!initialized) {
+			initialize(null);
+		}
+		String logMessage = "[IAgent][" + getIdentityString(module) + "] " + message;
+
+		if (fwLog != null) {
+			logToEclipseFw(fwLog, severity, logMessage, e);
+		} else if (logService != null) {
+			logService.log(getLogServiceSeverity(severity), logMessage, e);
+		} else if (logFile != null) {
+			logToFile(logFile, severity, logMessage, e);
+		} else {
+			logToConsole(severity, logMessage, e);
+		}
+	}
+
+	private static int getLogServiceSeverity(int severity) {
+		switch (severity) {
+		case INFO:
+			return LogService.LOG_INFO;
+		case ERROR:
+			return LogService.LOG_ERROR;
+		case DEBUG:
+			return LogService.LOG_DEBUG;
+		default:
+			return LogService.LOG_ERROR;
+		}
+	}
+
+	private static int getFrameworkSeverity(int severity) {
+		switch (severity) {
+		case INFO:
+			return FrameworkLogEntry.INFO;
+		case ERROR:
+			return FrameworkLogEntry.ERROR;
+		case DEBUG:
+			return FrameworkLogEntry.INFO;
+		default:
+			return FrameworkLogEntry.ERROR;
+		}
+	}
+
+	private static String getSeverityString(int severity) {
+		switch (severity) {
+		case INFO:
+			return "[I]";
+		case ERROR:
+			return "[E]";
+		case DEBUG:
+			return "[D]";
+		default:
+			return "[E]";
+		}
+	}
+
+	private static String getDateTime() {
+		return new Date().toString();
+	}
+
+	private static Object getFrameworkLog(BundleContext context) {
+		String fwClass = null;
+		try {
+			// check we are on eclipse
+			fwClass = FrameworkLog.class.getName();
+		} catch (Throwable t) {
+			return null;
+		}
+
+		if (context != null) {
+			ServiceReference ref = context.getServiceReference(fwClass);
+			if (ref != null) {
+				return context.getService(ref);
+			}
+		}
+		// XXX: Other way to get FrameworkLog without context?
+
+		return null;
+	}
+
+	private static void logToEclipseFw(Object fwLog, int severity, String msg, Throwable t) {
+		try {
+			int fwSeverity = getFrameworkSeverity(severity);
+			FrameworkLogEntry logEntry = new FrameworkLogEntry("", fwSeverity, 0, msg, 0, t, null);
+			((FrameworkLog) fwLog).log(logEntry);
+		} catch (Exception ex) {
+			// Logging to the console instead
+			logToConsole(severity, msg, t);
+		}
+	}
+
+	private static void logToFile(File file, int severity, String msg, Throwable t) {
+		synchronized (lock) {
+			PrintWriter out = null;
+			try {
+				out = new PrintWriter(new FileWriter(file.getAbsolutePath(), true));
+				out.println(getDateTime() + " " + getSeverityString(severity) + msg);
+				if (t != null) {
+					out.println(getStackTrace(t));
+				}
+				out.flush();
+			} catch (Exception ex) {
+				// Logging to the console instead
+				logToConsole(severity, msg, t);
+			} finally {
+				if (out != null) {
+					out.close();
+				}
+			}
+		}
+	}
+
+	private static void logToConsole(int severity, String msg, Throwable e) {
+		if (severity == DEBUG || severity == INFO) {
+			return;
+		}
+		synchronized (lock) {
+			System.out.println(getSeverityString(severity) + msg);
+			if (e != null) {
+				e.printStackTrace(System.out);
 			}
 		}
 	}
 
 	public static String convertForDebug(long[] arr) {
-		if (!DEBUG)
+		if (!DEBUG_ENABLED)
 			return "(debug disabled)";
 		if (arr == null)
 			return "null";
@@ -71,7 +277,7 @@ public class DebugUtils {
 	}
 
 	public static String convertForDebug(Object[] arr) {
-		if (!DEBUG)
+		if (!DEBUG_ENABLED)
 			return "(debug disabled)";
 		if (arr == null)
 			return "[null]";
@@ -86,9 +292,8 @@ public class DebugUtils {
 			String elementStr;
 			if (element instanceof Dictionary) {
 				elementStr = convertForDebug((Dictionary) element);
-			} else if (element != null
-							&& element.getClass().isArray()
-							&& !element.getClass().getComponentType().isPrimitive()) {
+			} else if (element != null && element.getClass().isArray()
+					&& !element.getClass().getComponentType().isPrimitive()) {
 				elementStr = convertForDebug((Object[]) element);
 			} else {
 				elementStr = (element != null ? element.toString() : "null");
@@ -116,7 +321,7 @@ public class DebugUtils {
 	}
 
 	public static String convertForDebug(Dictionary dict) {
-		if (!DEBUG)
+		if (!DEBUG_ENABLED)
 			return "(debug disabled)";
 		if (dict == null)
 			return "{null}";
@@ -135,9 +340,8 @@ public class DebugUtils {
 			String valueStr;
 			if (value instanceof Dictionary) {
 				valueStr = convertForDebug((Dictionary) value);
-			} else if (value != null
-							&& value.getClass().isArray()
-							&& !value.getClass().getComponentType().isPrimitive()) {
+			} else if (value != null && value.getClass().isArray()
+					&& !value.getClass().getComponentType().isPrimitive()) {
 				valueStr = convertForDebug((Object[]) value);
 			} else {
 				valueStr = (value != null ? value.toString() : "null");
@@ -148,12 +352,12 @@ public class DebugUtils {
 		return buf.toString();
 	}
 
-	public static String getIndentityString(Object obj) {
-		if (!DEBUG)
-			return "(debug disabled)";
+	private static String getIdentityString(Object obj) {
 		if (obj == null)
 			return "(null)";
-		if (obj instanceof Class) {
+		if (obj instanceof String) {
+			return (String) obj;
+		} else if (obj instanceof Class) {
 			return getClassName(((Class) obj).getName());
 		} else {
 			Class cl = obj.getClass();
@@ -168,7 +372,7 @@ public class DebugUtils {
 		else
 			return fullClassName;
 	}
-	
+
 	public static String toString(Exception e) {
 		StringBuffer err = new StringBuffer();
 		err.append(e.toString());
@@ -177,7 +381,7 @@ public class DebugUtils {
 			if (cause != null) {
 				Object ex = cause.invoke(e, new Object[0]);
 				if (ex != null) {
-					err.append(lineSeparator).append("Caused by: ").append(ex.toString());
+					err.append(NL).append("Caused by: ").append(ex.toString());
 				}
 			}
 		} catch (IllegalAccessException ex) {
@@ -185,12 +389,9 @@ public class DebugUtils {
 		} catch (NoSuchMethodException ex) {
 		}
 		return err.toString();
-	}	
-	
-	
-	private static final String lineSeparator = System.getProperty("line.separator");
-	
-	public static String getStackTrace(Exception e) {
+	}
+
+	public static String getStackTrace(Throwable e) {
 		StringBuffer err = new StringBuffer();
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
@@ -199,8 +400,8 @@ public class DebugUtils {
 			Method cause = e.getClass().getMethod("getCause", new Class[0]);
 			if (cause != null) {
 				Object ex = cause.invoke(e, new Object[0]);
-				if (ex != null) {
-					err.append(lineSeparator).append(getStackTrace((Exception) ex));
+				if (ex instanceof Throwable) {
+					err.append(NL).append(getStackTrace((Throwable) ex));
 				}
 			}
 		} catch (IllegalAccessException ex) {
@@ -208,5 +409,5 @@ public class DebugUtils {
 		} catch (NoSuchMethodException ex) {
 		}
 		return err.toString();
-	}	  
+	}
 }

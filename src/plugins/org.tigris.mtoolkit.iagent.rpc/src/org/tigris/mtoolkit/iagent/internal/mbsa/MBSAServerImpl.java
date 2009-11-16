@@ -87,7 +87,7 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 		byte protocolVersion = 1;
 		if (request.available() > 0) {
 			protocolVersion = request.readByte();
-			log("[pingResponse] Clients supported version: " + protocolVersion);
+			debug("[pingResponse] Clients supported version: " + protocolVersion);
 			rsp.writeByte(SUPPORTED_VERSION);
 		}
 		rsp.done();
@@ -96,7 +96,7 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 	}
 
 	private MBSARequest readRequest(InputStream is) throws IOException {
-		log("[readRequest] >>> is: " + is);
+		debug("[readRequest] >>> is: " + is);
 		synchronized (is) {
 			int msgId = DataFormater.readInt(is);
 			int cmdId = DataFormater.readInt(is);
@@ -107,21 +107,19 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 				readed += is.read(data, readed, cmdLength - readed);
 			}
 			MBSARequest request = new MBSARequest(msgId, cmdId, data);
-			if (DebugUtils.DEBUG)
-				log("[readRequest] <<< " + request);
+			debug("[readRequest] <<< " + request);
 			return request;
 		}
 	}
 
 	private void sendRsp(MBSAResponse rsp, OutputStream os) throws IOException {
-		if (DebugUtils.DEBUG)
-			log("[sendRsp] Send response >>> " + rsp);
+		debug("[sendRsp] Send response >>> " + rsp);
 		if (protocolVersion > 1)
 			try {
 				rsp = new MBSAResponse(rsp.getId() | MBSAConstants.IAGENT_FLAGS_RESULT, rsp.getStatus(), rsp.getData())
 						.done();
 			} catch (MBSAException e) {
-				log("[sendRsp] Failed to send response", e);
+				info("[sendRsp] Failed to send response", e);
 				rsp = new MBSAResponse(rsp.getId(), MBSAConstants.IAGENT_RES_INTERNAL_ERROR);
 				rsp.writeString(e.toString());
 				rsp.done();
@@ -148,13 +146,12 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 		}
 	}
 
-	private final void log(String message) {
-		log(message, null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
-	private final void log(String message, Throwable t) {
-		if (DebugUtils.DEBUG)
-			DebugUtils.log(this, message, t);
+	private final void info(String message, Throwable t) {
+		DebugUtils.info(this, message, t);
 	}
 
 	public boolean isClosed() {

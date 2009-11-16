@@ -90,7 +90,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   }
 
   public void closeConnection(boolean aSendEvent) throws IAgentException {
-    log("[closeConnection] start");
+    debug("[closeConnection] start");
     boolean sendEvent = false;
     try {
       synchronized (lock) {
@@ -106,7 +106,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
           }
           os = null;
         }
-        log("[closeConnection] output closed!");
+        debug("[closeConnection] output closed!");
         if ( is != null ) {
           try {
             is.close();
@@ -115,7 +115,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
           }
           is = null;
         }
-        log("[closeConnection] input stream closed!");
+        debug("[closeConnection] input stream closed!");
         if ( deviceSocket != null ) {
           try {
             deviceSocket.close();
@@ -124,7 +124,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
           }
           deviceSocket = null;
         }
-        log("[closeConnection] socket closed!");
+        debug("[closeConnection] socket closed!");
         lock.notifyAll();
       }
     } finally { // send event in any case
@@ -132,11 +132,11 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         try {
           connManager.connectionClosed(this);
         } catch (Throwable e) {
-          log("Internal failure in connection manager", e);
+          error("Internal failure in connection manager", e);
         }
       }
     }
-    log("[closeConnection] finish");
+    debug("[closeConnection] finish");
   }
   
   public MBSAConnectionCallBack sendData(int aCmd, byte[] aData) throws IAgentException {
@@ -144,7 +144,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   }
 
   public MBSAConnectionCallBack sendData(int aCmd, byte[] aData, boolean disconnectOnFailure) throws IAgentException {
-    log("[sendData] aData: " + aData + " aData.length" + ( aData != null ? aData.length : 0));
+    debug("[sendData] aData: " + aData + " aData.length" + ( aData != null ? aData.length : 0));
     OutputStream l_os = null;
     InputStream l_is = null;
     synchronized (lock) {
@@ -168,24 +168,24 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       //send message
       try {
         headerBuffer.reset();//reset the header buffer
-        log("[sendData] sending messageID: " + messageID);
+        debug("[sendData] sending messageID: " + messageID);
         DataFormater.writeInt(headerBuffer, messageID);//write message ID
-        log("[sendData] messageID sent: " + messageID);
-        log("[sendData] sending command: " + aCmd);
+        debug("[sendData] messageID sent: " + messageID);
+        debug("[sendData] sending command: " + aCmd);
         DataFormater.writeInt(headerBuffer, aCmd);//write command
-        log("[sendData] command sent: " + aCmd);
-        log("[sendData] sending length: " + (aData != null ? aData.length : 0));
+        debug("[sendData] command sent: " + aCmd);
+        debug("[sendData] sending length: " + (aData != null ? aData.length : 0));
         DataFormater.writeInt(headerBuffer, (aData != null ? aData.length : 0));//write data length
         l_os.write(headerBuffer.toByteArray());//send header
         l_os.flush();
-        log("[sendData] length sent: " + (aData != null ? aData.length : 0));
-        log("[sendData] sending data: " + aData);
+        debug("[sendData] length sent: " + (aData != null ? aData.length : 0));
+        debug("[sendData] sending data: " + aData);
         if ( aData != null ) {//send data
           l_os.write(aData);//the data should be packed by the upper command layer
           l_os.flush();
-          log("[sendData] data sent: " + aData);
+          debug("[sendData] data sent: " + aData);
         } else {
-          log("[sendData] data skipped (it is null)");
+          debug("[sendData] data skipped (it is null)");
         }
       } catch (IOException e) {
     	  if (disconnectOnFailure || connection.isClosed())
@@ -198,16 +198,16 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       
       //read response
       try {
-          log("[sendData] reading response");
+          debug("[sendData] reading response");
         int rspMessageID = DataFormater.readInt(l_is);//read the response message id
-        log("[sendData] rspMessageID: " + rspMessageID);
+        debug("[sendData] rspMessageID: " + rspMessageID);
         if ( rspMessageID == messageID ) {//check if the response is for the sent message
           int rspStatus = DataFormater.readInt(l_is);//read the response message
-          log("[sendData] rspStatus: " + rspStatus);
+          debug("[sendData] rspStatus: " + rspStatus);
           int rspDataLength = DataFormater.readInt(l_is);//read response data length
-          log("[sendData] rspDataLength: " + rspDataLength);
+          debug("[sendData] rspDataLength: " + rspDataLength);
           byte[] rspData = rspDataLength > 0 ? new byte[rspDataLength] : null;
-          log("[sendData] rspData: " + rspData);
+          debug("[sendData] rspData: " + rspData);
           if ( rspDataLength > 0 ) {
             int readed = l_is.read(rspData);
             while ( readed < rspDataLength ) {
@@ -215,7 +215,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
             }
           }
           MBSAConnectionCallBack tCallBack = new MBSAConnectionCallBack(rspMessageID, rspStatus, rspData);
-          log("[sendData] tCallBack: " + tCallBack);
+          debug("[sendData] tCallBack: " + tCallBack);
           return tCallBack;
         } else {
           closeConnection();
@@ -244,7 +244,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   protected void connect() throws IAgentException {
     if ( isClient ) {
       try {
-        log("[MBSAConnectionImpl][connect] >>> deviceIP: " + deviceIP + "; port: " + port);
+        debug("[MBSAConnectionImpl][connect] >>> deviceIP: " + deviceIP + "; port: " + port);
         deviceSocket = new Socket(deviceIP, port);
       } catch (UnknownHostException e) {
         throw new IAgentException("Exception trying to establish connection!", IAgentErrors.ERROR_CANNOT_CONNECT, e);
@@ -283,7 +283,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       // create ping thread
       if (pingThread == null || !pingThread.isAlive()) {
         pingThread = new Thread(this, "[MBSAConnectionImpl][ping]");
-        log("[MBSAConnectionImpl][connect] Starting ping thread: " + pingThread);
+        debug("[MBSAConnectionImpl][connect] Starting ping thread: " + pingThread);
         // reset last cmd send time before start thread
         lastCmdTime = System.currentTimeMillis();              
         pingThread.start();
@@ -298,14 +298,14 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
    */
   protected void connect(Transport transport) throws IAgentException {
     try {
-  	  log("[MBSAConnectionImpl][connect] >>> " + transport);
+  	  debug("[MBSAConnectionImpl][connect] >>> " + transport);
       connection = transport.createConnection(port);
       os = connection.getOutputStream();
       is = connection.getInputStream();
 	  // create ping thread
       if (pingThread == null || !pingThread.isAlive()) {
         pingThread = new Thread(this, "[MBSAConnectionImpl][ping]");
-        log("[MBSAConnectionImpl][connect] Starting ping thread: " + pingThread);
+        debug("[MBSAConnectionImpl][connect] Starting ping thread: " + pingThread);
         // reset last cmd send time before start thread
         lastCmdTime = System.currentTimeMillis();              
         pingThread.start();
@@ -333,7 +333,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
    * @see java.lang.Runnable#run()
    */
   public void run() {
-    log("[MBSAConnectionImpl][run] Ping thread started: " + Thread.currentThread());
+    debug("[MBSAConnectionImpl][run] Ping thread started: " + Thread.currentThread());
     
     for(;;) {
       synchronized (lock) {
@@ -343,7 +343,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         try {
           lock.wait(PING_TIMEOUT/5);
         } catch (InterruptedException e) {
-          log("[MBSAConnectionImpl][run] Ping thread interrupted: " + Thread.currentThread(), e);
+          error("[run] Ping thread interrupted: " + Thread.currentThread(), e);
           break;
         }
       }
@@ -353,21 +353,21 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         try {
           sendData(IAgentCommands.IAGENT_CMD_PING, null);
         } catch (Exception e) {
-          log("[MBSAConnectionImpl][run] Failed to send ping cmd from thread: " + Thread.currentThread(), e);
+          error("[run] Failed to send ping cmd from thread: " + Thread.currentThread(), e);
           break;          
         }
       }
     }
     
-    log("[MBSAConnectionImpl][run] Ping thread stopped: " + Thread.currentThread());
+    debug("[MBSAConnectionImpl][run] Ping thread stopped: " + Thread.currentThread());
   }
-  
-  private final void log(String message) {
-		log(message, null);
+
+  private final void debug(String message) {
+	  DebugUtils.debug(this, message);
 	}
 
-	private final void log(String message, Throwable e) {
-		DebugUtils.log(this, message, e);
+	private final void error(String message, Throwable e) {
+		DebugUtils.error(this, message, e);
 	}
 
 }

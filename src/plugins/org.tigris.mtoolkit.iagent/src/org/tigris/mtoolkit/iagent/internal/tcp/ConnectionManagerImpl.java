@@ -35,7 +35,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	}
 
 	public AbstractConnection createConnection(int type) throws IAgentException {
-		log("[createConnection] >>> type: " + type);
+		debug("[createConnection] >>> type: " + type);
 		AbstractConnection connection = null;
 		AbstractConnection staleConnection = null;
 		boolean fireEvent = false;
@@ -65,7 +65,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 				}
 				break;
 			default:
-				log("[createConnection] Unknown connection type passed: " + type);
+				info("[createConnection] Unknown connection type passed: " + type);
 				throw new IllegalArgumentException("Unknown connection type passed: " + type);
 			}
 		}
@@ -99,26 +99,26 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		// If new connection was created, fire an event
 		if (fireEvent) {
 			fireConnectionEvent(ConnectionEvent.CONNECTED, connection);
-			log("[createConnection] Finished sending events");
+			debug("[createConnection] Finished sending events");
 		}
-		log("[createConnection] connection: " + connection);
+		debug("[createConnection] connection: " + connection);
 		return connection;
 	}
 
 	private MBSAConnectionImpl createMBSAConnection(Transport transport) throws IAgentException {
 		MBSAConnectionImpl connection = new MBSAConnectionImpl(transport, conProperties, this);
-		log("[createMBSAConnection] Created connection: " + connection);
+		debug("[createMBSAConnection] Created connection: " + connection);
 		return connection;
 	}
 
 	private PMPConnectionImpl createPMPConnection(Transport transport) throws IAgentException {
 		final PMPConnectionImpl connection = new PMPConnectionImpl(transport, conProperties, this);
-		log("[createPMPConnection] Created connection: " + connection);
+		debug("[createPMPConnection] Created connection: " + connection);
 		return connection;
 	}
 
 	public synchronized AbstractConnection getActiveConnection(int type) {
-		log("[getActiveConnection] >>> type: " + type);
+		debug("[getActiveConnection] >>> type: " + type);
 		AbstractConnection connection = null;
 		switch (type) {
 		case MBSA_CONNECTION:
@@ -130,12 +130,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
 				connection = pmpConnection;
 			break;
 		}
-		log("[getActiveConnection] connection: " + connection);
+		debug("[getActiveConnection] connection: " + connection);
 		return connection;
 	}
 
 	public void closeConnections() throws IAgentException {
-		log("[closeConnections] >>>");
+		debug("[closeConnections] >>>");
 		// only call closeConnection() because it will result in
 		// connectionClosed()
 		AbstractConnection mbsaConnection = this.mbsaConnection; 
@@ -153,43 +153,43 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	}
 
 	public void addConnectionListener(ConnectionListener listener) {
-		log("[addConnectionListener]  >>> listener: " + listener);
+		debug("[addConnectionListener]  >>> listener: " + listener);
 		synchronized (listeners) {
 			if (!listeners.contains(listener)) {
 				listeners.add(listener);
 			} else {
-				log("[addConnectionListener] listener already have been added");
+				debug("[addConnectionListener] listener already have been added");
 			}
 		}
 	}
 
 	public void removeConnectionListener(ConnectionListener listener) {
-		log("[removeConnectionListener] >>> listener: " + listener);
+		debug("[removeConnectionListener] >>> listener: " + listener);
 		synchronized (listeners) {
 			listeners.remove(listener);
 		}
 	}
 
 	private void fireConnectionEvent(int type, AbstractConnection connection) {
-		log("[fireConnectionEvent] >>> type=" + type + ";connection=" + connection);
+		debug("[fireConnectionEvent] >>> type=" + type + ";connection=" + connection);
 		ConnectionListener[] clonedListeners;
 		synchronized (listeners) {
 			if (listeners.size() == 0) {
-				log("[fireConnectionEvent] There were no listeners");
+				debug("[fireConnectionEvent] There were no listeners");
 				return;
 			}
 			clonedListeners = (ConnectionListener[]) listeners.toArray(new ConnectionListener[listeners.size()]);
 		}
 
 		ConnectionEvent event = new ConnectionEvent(type, connection);
-		log("[fireConnectionEvent] Sending event: " + event + " to " + clonedListeners.length + " connection listeners");
+		debug("[fireConnectionEvent] Sending event: " + event + " to " + clonedListeners.length + " connection listeners");
 		for (int i = 0; i < clonedListeners.length; i++) {
 			ConnectionListener listener = clonedListeners[i];
 			try {
-				log("[fireConnectionEvent] Sending event to " + listener);
+				debug("[fireConnectionEvent] Sending event to " + listener);
 				listener.connectionChanged(event);
 			} catch (Throwable e) {
-				log("[fireConnectionEvent] Failed to deliver event to " + listener, e);
+				error("[fireConnectionEvent] Failed to deliver event to " + listener, e);
 			}
 		}
 	}
@@ -202,17 +202,17 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	 * @param connection
 	 */
 	void connectionClosed(AbstractConnection connection) {
-		log("[connectionClosed] >>> connection: " + connection);
+		debug("[connectionClosed] >>> connection: " + connection);
 		boolean sendEvent = false;
 		synchronized (this) {
 			if (connection == null)
 				return;
 			if (mbsaConnection == connection) {
-		        log("[connectionClosed] Active MBSA connection match");
+				debug("[connectionClosed] Active MBSA connection match");
 		        mbsaConnection = null;
 		        sendEvent = true;
 			} else if (pmpConnection == connection) {
-				log("[connectionClosed] Active PMP connection match");
+				debug("[connectionClosed] Active PMP connection match");
 				pmpConnection = null;
 				sendEvent = true;
 			}
@@ -222,17 +222,21 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	}
 
 	public void removeListeners() throws IAgentException {
-		log("[removeListeners] >>>");
+		debug("[removeListeners] >>>");
 		synchronized (listeners) {
 			listeners.clear();
 		}
 	}
 
-	private final void log(String message) {
-		log(message, null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
-	private final void log(String message, Throwable e) {
-		DebugUtils.log(this, message, e);
+	private final void info(String message) {
+		DebugUtils.info(this, message);
+	}
+
+	private final void error(String message, Throwable e) {
+		DebugUtils.error(this, message, e);
 	}
 }

@@ -129,12 +129,12 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		ServiceReference[] refs = applicationTracker.getServiceReferences();
 		if (refs == null)
 			return new String[0];
-		log("[getApplications] " + refs.length + " applications available.");
+		debug("[getApplications] " + refs.length + " applications available.");
 		String[] ids = new String[refs.length];
 		for (int i = 0; i < refs.length; i++) {
 			ids[i] = (String) refs[i].getProperty(Constants.SERVICE_PID);
 		}
-		log("[getApplications] Application ids: " + DebugUtils.convertForDebug(ids));
+		debug("[getApplications] Application ids: " + DebugUtils.convertForDebug(ids));
 		return ids;
 	}
 
@@ -154,12 +154,12 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		}
 	}
 
-	private static final void log(String message) {
-		log(message, null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
-	private static final void log(String message, Throwable e) {
-		DebugUtils.log(RemoteApplicationAdmin.class, message, e);
+	private final void error(String message, Throwable e) {
+		DebugUtils.error(this, message, e);
 	}
 
 	public Object start(String applicationID, Map properties) {
@@ -247,7 +247,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		try {
 			return (String) invokeMethod0(handle, "getState");
 		} catch (Exception e) {
-			log("Failed to get application state: " + DebugUtils.toString(e), e);
+			error("Failed to get application state", e);
 			return ERROR_STATE;
 		}
 	}
@@ -282,7 +282,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			Object descriptor = invokeMethod0(obj, "getApplicationDescriptor");
 			return getApplicationIdFromDescriptor(descriptor);
 		} catch (Exception e) {
-			log("Failed to get application descriptor from " + obj, e);
+			error("Failed to get application descriptor from " + obj, e);
 			return null;
 		}
 	}
@@ -291,7 +291,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		try {
 			return (String) invokeMethod0(obj, "getApplicationId");
 		} catch (Exception e) {
-			log("Failed to get application id from " + obj, e);
+			error("Failed to get application id from " + obj, e);
 			return null;
 		}
 	}

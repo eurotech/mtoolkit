@@ -39,7 +39,7 @@ public class MBSAClientImpl implements MBSAClient {
 	}
 
 	private void pingWithVersion() throws MBSAException {
-		log("[pingWithVersion] Sending an extended ping command");
+		debug("[pingWithVersion] Sending an extended ping command");
 		MBSACommand cmd = new MBSACommand(MBSAConstants.IAGENT_CMD_PING);
 		cmd.writeByte(SUPPORTED_VERSION);
 		cmd.done();
@@ -49,18 +49,17 @@ public class MBSAClientImpl implements MBSAClient {
 			if (result.getStatus() == 0 && result.available() > 0) {
 				// the server supports version > 2
 				protocolVersion = result.readByte();
-				log("[pingWithVersion] Remote peer supports protocol " + protocolVersion);
+				debug("[pingWithVersion] Remote peer supports protocol " + protocolVersion);
 			}
 		} catch (IOException e) {
 			close();
-			log("[pingWithVersion] Failed to do the initial handshake", e);
+			info("[pingWithVersion] Failed to do the initial handshake", e);
 			throw new MBSAException(MBSAException.CODE_INITIAL_HANDSHAKE, "MBSA session initial handshake failed", e);
 		}
 	}
 
 	public MBSAResult send(MBSACommand command) throws MBSAException {
-		if (DebugUtils.DEBUG)
-			log("[send] >>> " + command);
+		debug("[send] >>> " + command);
 		try {
 			return sendAndReceive(command);
 		} catch (IOException e) {
@@ -84,8 +83,7 @@ public class MBSAClientImpl implements MBSAClient {
 	}
 
 	private void validateResult(MBSAResult req, int msgId) throws MBSAException {
-		if (DebugUtils.DEBUG)
-			log("[matchResult] >>> msgId: " + msgId + "; req: " + req + "; version: " + protocolVersion);
+		debug("[matchResult] >>> msgId: " + msgId + "; req: " + req + "; version: " + protocolVersion);
 		switch (protocolVersion) {
 		case 1:
 			if (req.getId() == msgId)
@@ -105,15 +103,14 @@ public class MBSAClientImpl implements MBSAClient {
 
 	private void sendCmd(MBSACommand cmd, OutputStream os, int msgId) throws IOException {
 		cmd.validate();
-		if (DebugUtils.DEBUG)
-			log("[sendCmd] Send command msgId: " + msgId + " >>> " + cmd);
+		debug("[sendCmd] Send command msgId: " + msgId + " >>> " + cmd);
 		DataFormater.writeInt(os, msgId);
 		cmd.writeTo(os);
 		os.flush();
 	}
 
 	private MBSAResult readResult(InputStream is) throws IOException {
-		log("[readResult] >>> is: " + is);
+		debug("[readResult] >>> is: " + is);
 		int msgId = DataFormater.readInt(is);
 		int cmdId = DataFormater.readInt(is);
 		int cmdLength = DataFormater.readInt(is);
@@ -123,8 +120,7 @@ public class MBSAClientImpl implements MBSAClient {
 			readed += is.read(data, readed, cmdLength - readed);
 		}
 		MBSAResult result = new MBSAResult(msgId, cmdId, data);
-		if (DebugUtils.DEBUG)
-			log("[readResult] <<< " + result);
+		debug("[readResult] <<< " + result);
 		return result;
 	}
 
@@ -132,12 +128,11 @@ public class MBSAClientImpl implements MBSAClient {
 		return msgId++;
 	}
 
-	private final void log(String message) {
-		log(message, null);
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
 	}
 
-	private final void log(String message, Throwable t) {
-		if (DebugUtils.DEBUG)
-			DebugUtils.log(this, message, t);
+	private final void info(String message, Throwable t) {
+		DebugUtils.info(this, message, t);
 	}
 }
