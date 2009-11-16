@@ -38,11 +38,7 @@ public class DeploymentPackage extends Model {
 				if (bundle == null)
 					continue;
 				Dictionary headers = bundle.getHeaders(null);
-				Bundle bundleNode = new Bundle(name,
-					bundle,
-					bundle.getState(),
-					fw.getRemoteBundleType(bundle, headers),
-					(String) headers.get("Bundle-Category")); //$NON-NLS-1$
+				Bundle bundleNode = new Bundle(fw.findBundle(bundle.getBundleId()));
 				addElement(bundleNode);
 				Bundle bundleNodeInBundles = (Bundle) fw.findBundle(bundle.getBundleId());
 				if (bundleNodeInBundles == null) {

@@ -425,22 +425,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		Bundle node = findBundle(id);
 		if (node != null) {
 			node.update();
-			node = findBundleInDP(id);
-			if (node != null) {
-				node.update();
-			}
-		}
-
-		for (int i = 0; servicesViewVector != null && i < servicesViewVector.size(); i++) {
-			Model service = (Model) servicesViewVector.elementAt(i);
-			Model children[] = service.getChildren();
-			for (int j = 0; j < children.length; j++) {
-				Model bundles[] = children[j].getChildren();
-				for (int k = 0; k < bundles.length; k++) {
-					Bundle bundle = (Bundle) bundles[k];
-					if (bundle.getID() == id) {
-						bundle.update();
-					}
+			Vector slaves = node.getSlaves();
+			if (slaves != null) {
+				for (int i=0; i<slaves.size(); i++) {
+					((Model)slaves.elementAt(i)).updateElement();
 				}
 			}
 		}
@@ -613,10 +601,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				Bundle bundle = findBundle(rBundle.getBundleId());
 				Bundle dpBundle = findBundleInDP(rBundle.getBundleId());
 
-				bundle.setState(org.osgi.framework.Bundle.ACTIVE);
-				if (dpBundle != null)
-					dpBundle.setState(org.osgi.framework.Bundle.ACTIVE);
-
 				RemoteService usedServ[] = bundle.getRemoteBundle().getServicesInUse();
 				if (usedServ.length > 0) {
 					Model bundleUsedInCategory = getServiceCategoryNode(bundle, ServicesCategory.USED_SERVICES, true);
@@ -624,10 +608,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 							ServicesCategory.USED_SERVICES, true);
 
 					for (int i = 0; i < usedServ.length; i++) {
-						createObjectClassNodes(bundleUsedInCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
+						addObjectClassNodes(bundleUsedInCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
 								.getServiceId()), usedServ[i]);
 						if (dpBundleCategory != null)
-							createObjectClassNodes(dpBundleCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
+							addObjectClassNodes(dpBundleCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
 									.getServiceId()), usedServ[i]);
 
 						for (int j = 0; j < servicesViewVector.size(); j++) {
@@ -643,8 +627,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 									}
 								}
 								if (!added) {
-									Bundle usedInBundle = new Bundle(bundle.getName(), bundle.getRemoteBundle(), bundle
-											.getState(), bundle.getType(), bundle.getCategory());
+									Bundle usedInBundle = new Bundle(bundle/*bundle.getName(), bundle.getRemoteBundle(), bundle
+											.getState(), bundle.getType(), bundle.getCategory()*/);
 									if (FrameworkConnectorFactory.isBundlesCategoriesShown)
 										bCategory.addElement(usedInBundle);
 									else
@@ -936,8 +920,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 							oc.addElement(regCategory);
 							oc.addElement(usedCategory);
 
-							Bundle newBundle = new Bundle(sourceBundle.getName(), sourceBundle.getRemoteBundle(),
-									sourceBundle.getState(), sourceBundle.getType(), sourceBundle.getCategory());
+							Bundle newBundle = new Bundle(sourceBundle);
 							regCategory.addElement(newBundle);
 							servicesViewVector.addElement(oc);
 							if (viewType == SERVICES_VIEW) {
@@ -952,9 +935,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 						for (int j = 0; j < servicesViewVector.size(); j++) {
 							ObjectClass oc = (ObjectClass) servicesViewVector.elementAt(j);
 							if (oc.getService().getServiceId() == usedInId) {
-								oc.getChildren()[1].addElement(new Bundle(sourceBundle.getName(), sourceBundle
-										.getRemoteBundle(), sourceBundle.getState(), sourceBundle.getType(),
-										sourceBundle.getCategory()));
+								oc.getChildren()[1].addElement(new Bundle(sourceBundle));
 								break;
 							}
 						}
@@ -1226,7 +1207,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				|| bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.STARTING) {
 			try {
 				Model registeredCategory = getServiceCategoryNode(bundle, ServicesCategory.REGISTERED_SERVICES, true);
-				createObjectClassNodes(registeredCategory, servObj.getObjectClass(), new Long(servObj
+				addObjectClassNodes(registeredCategory, servObj.getObjectClass(), new Long(servObj
 						.getRemoteService().getServiceId()), servObj.getRemoteService());
 
 				for (int i = 0; i < servObj.getObjectClass().length; i++) {
@@ -1237,20 +1218,17 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					BundlesCategory hashUsedCategory = new BundlesCategory(BundlesCategory.IN_USE);
 					hashService.addElement(hashRegisteredCategory);
 					hashService.addElement(hashUsedCategory);
-					hashRegisteredCategory.addElement(new Bundle(bundle.getName(), bundle.getRemoteBundle(), bundle
-							.getState(), bundle.getType(), bundle.getCategory()));
+					hashRegisteredCategory.addElement(new Bundle(bundle));
 
 					RemoteBundle usedInBundles[] = servObj.getUsedIn(this);
 					if (usedInBundles != null) {
 						for (int k = 0; k < usedInBundles.length; k++) {
-							Bundle usedInBundleNode = findBundle(servObj.getUsedIn(this)[k].getBundleId());
+							Bundle usedInBundleNode = findBundle(usedInBundles[k].getBundleId());
 							if (usedInBundleNode == null) {
 								throw new IllegalStateException(
 										"Bundle " + servObj.getUsedIn(this)[k].getBundleId() + " is missing"); //$NON-NLS-1$ //$NON-NLS-2$
 							}
-							hashUsedCategory.addElement(new Bundle(usedInBundleNode.getName(), usedInBundleNode
-									.getRemoteBundle(), usedInBundleNode.getState(), usedInBundleNode.getType(),
-									usedInBundleNode.getCategory()));
+							hashUsedCategory.addElement(new Bundle(usedInBundleNode));
 						}
 					}
 
@@ -1281,21 +1259,22 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					continue;
 				}
 				Model usedCategory = getServiceCategoryNode(usedInBundle, ServicesCategory.USED_SERVICES, true);
-				createObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
+				addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
 						.getServiceId()), servObj.getRemoteService());
 			}
 		}
 	}
 
-	private void createObjectClassNodes(Model parent, String objClasses[], Long nameID, RemoteService service)
+	private void addObjectClassNodes(Model parent, String objClasses[], Long nameID, RemoteService service)
 			throws IAgentException {
 		for (int i = 0; i < objClasses.length; i++) {
 			ObjectClass objClass = new ObjectClass(objClasses[i] + " [Service " + service.getServiceId() + "]", nameID,
 					service);
 			parent.addElement(objClass);
 			FrameworkImpl fw = (FrameworkImpl) objClass.findFramework();
-			if (fw != null && fw.isShownServicePropertiss())
+			if (fw != null && fw.isShownServicePropertiss()) {
 				addServicePropertiesNodes(objClass);
+			}
 		}
 	}
 

@@ -15,12 +15,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import org.eclipse.ui.IActionFilter;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public abstract class Model implements Comparable, IActionFilter, ConstantsDistributor {
 
@@ -29,10 +29,31 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	protected Set elementList;
 	protected boolean selected = false;
 	protected int selectedChilds = 0;
+	private Vector slaves;
+	private Model master;
 
 	public Model(String name) {
 		this.name = name;
 		elementList = new TreeSet();
+	}
+	
+	public Model(String name, Model master) {
+		this(name);
+		if (master != null) {
+			this.master = master;
+			if (master.slaves == null) {
+				master.slaves = new Vector();
+			}
+			master.slaves.addElement(this);
+		}
+	}
+	
+	public Vector getSlaves() {
+		return slaves;
+	}
+	
+	public Model getMaster() {
+		return master;
 	}
 
 	public void addElement(Model element) {

@@ -46,6 +46,16 @@ public class Bundle extends Model {
 		this.category = category;
 		needsUpdate = true;
 	}
+	
+	public Bundle(Bundle master) {
+		super(master.getName(), master);
+		rBundle = master.rBundle;
+		id = master.getID();
+		state = master.getState();
+		type = master.getType();
+		category = master.getCategory();
+		needsUpdate = true;
+	}
 
 	public RemoteBundle getRemoteBundle() {
 		return rBundle;
@@ -130,6 +140,9 @@ public class Bundle extends Model {
 	}
 
 	public int getState() {
+		if (getMaster() != null) {
+			return ((Bundle) getMaster()).getState();
+		}
 		return state;
 	}
 
