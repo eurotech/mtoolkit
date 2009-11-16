@@ -59,6 +59,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	private Object lock = new Object();
 	private volatile boolean isActive = true;
 	private Dictionary connectionProperties;
+	private MethodSignature methodGetCapabilities = new MethodSignature("getCapabilities"); //$NON-NLS-1$
 
 	private List devicePropertyListeners = new LinkedList();
 
@@ -248,8 +249,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION);
 				RemoteObject service = connection.getRemoteAdmin(RemoteCapabilitiesProvider.class.getName());
 				if (service != null) {
-					MethodSignature getCapabilities = new MethodSignature("getCapabilities"); //$NON-NLS-1$
-					Map devCapabilities = (Map) getCapabilities.call(service);
+					Map devCapabilities = (Map) methodGetCapabilities.call(service);
 					Iterator iterator = devCapabilities.keySet().iterator();
 					while (iterator.hasNext()) {
 						String property = (String) iterator.next();
