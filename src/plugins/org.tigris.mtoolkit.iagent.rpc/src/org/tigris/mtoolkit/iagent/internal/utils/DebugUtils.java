@@ -11,26 +11,21 @@
 package org.tigris.mtoolkit.iagent.internal.utils;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
-import org.eclipse.osgi.framework.log.FrameworkLog;
-import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.log.LogService;
+import org.tigris.mtoolkit.iagent.internal.utils.log.ConsoleLog;
+import org.tigris.mtoolkit.iagent.internal.utils.log.EclipseLog;
+import org.tigris.mtoolkit.iagent.internal.utils.log.FileLog;
+import org.tigris.mtoolkit.iagent.internal.utils.log.Log;
+import org.tigris.mtoolkit.iagent.internal.utils.log.OSGiLog;
 
 public class DebugUtils {
-
-	public static final int INFO = 0;
-	public static final int ERROR = 1;
-	public static final int DEBUG = 2;
 
 	private static final String PROP_DEBUG_ENABLED = "iagent.debug"; //$NON-NLS-1$
 	private static final String PROP_LOG_FILE = "iagent.log.file"; //$NON-NLS-1$
@@ -38,35 +33,31 @@ public class DebugUtils {
 
 	public static final boolean DEBUG_ENABLED = Boolean.getBoolean(PROP_DEBUG_ENABLED);
 
-	private static Object fwLog;
-	private static LogService logService;
-	private static File logFile;
+	private static Log log;
 	private static boolean initialized = false;
-	private static Object lock = new Object();
-
 
 	public static final void info(Object module, String message) {
-		log(module, INFO, message);
+		log(module, Log.INFO, message);
 	}
 
 	public static final void info(Object module, String message, Throwable t) {
-		log(module, INFO, message, t);
+		log(module, Log.INFO, message, t);
 	}
 
 	public static final void debug(Object module, String message) {
-		log(module, DEBUG, message);
+		log(module, Log.DEBUG, message);
 	}
 
 	public static final void debug(Object module, String message, Throwable t) {
-		log(module, DEBUG, message, t);
+		log(module, Log.DEBUG, message, t);
 	}
 
 	public static final void error(Object module, String message) {
-		log(module, ERROR, message);
+		log(module, Log.ERROR, message);
 	}
 
 	public static final void error(Object module, String message, Throwable t) {
-		log(module, ERROR, message, t);
+		log(module, Log.ERROR, message, t);
 	}
 
 	/**
@@ -84,28 +75,37 @@ public class DebugUtils {
 		initialized = true;
 
 		// First - try file logging
-		String logFileName = System.getProperty(PROP_LOG_FILE);
-		if (logFileName != null) {
-			logFile = new File(logFileName);
-			return;
+		try {
+			String logFileName = System.getProperty(PROP_LOG_FILE);
+			if (logFileName != null) {
+				log = new FileLog(new File(logFileName));
+				return;
+			}
+		} catch (Throwable t) { // Continue with other loggers
 		}
 
 		// Second - try org.eclipse.osgi.framework.log.FrameworkLog
-		fwLog = getFrameworkLog(context);
-		if (fwLog != null) {
+		try {
+			log = new EclipseLog(context);
 			return;
+		} catch (Throwable t) { // Continue with other loggers
 		}
 
 		// Third - try org.osgi.service.log.LogService
-		if (context != null) {
-			ServiceReference ref = context.getServiceReference(LogService.class.getName());
-			if (ref != null) {
-				logService = (LogService) context.getService(ref);
-				if (logService != null) {
-					return;
-				}
-			}
+		try {
+			log = new OSGiLog(context);
+			return;
+		} catch (Throwable t) { // Continue with other loggers
 		}
+
+		// Fourth - logging to console
+		try {
+			log = new ConsoleLog();
+			return;
+		} catch (Throwable t) {
+		}
+
+		log = null;
 	}
 
 	/**
@@ -128,11 +128,11 @@ public class DebugUtils {
 	 *            can be String, Class, null or any Object
 	 * @param severity
 	 * @param message
-	 * @param e
+	 * @param t
 	 *            exception, can be null
 	 */
-	public static final void log(Object module, int severity, String message, Throwable e) {
-		if (severity == DEBUG && !DEBUG_ENABLED) {
+	public static final void log(Object module, int severity, String message, Throwable t) {
+		if (severity == Log.DEBUG && !DEBUG_ENABLED) {
 			return;
 		}
 		if (!initialized) {
@@ -140,121 +140,8 @@ public class DebugUtils {
 		}
 		String logMessage = "[IAgent][" + getIdentityString(module) + "] " + message;
 
-		if (fwLog != null) {
-			logToEclipseFw(fwLog, severity, logMessage, e);
-		} else if (logService != null) {
-			logService.log(getLogServiceSeverity(severity), logMessage, e);
-		} else if (logFile != null) {
-			logToFile(logFile, severity, logMessage, e);
-		} else {
-			logToConsole(severity, logMessage, e);
-		}
-	}
-
-	private static int getLogServiceSeverity(int severity) {
-		switch (severity) {
-		case INFO:
-			return LogService.LOG_INFO;
-		case ERROR:
-			return LogService.LOG_ERROR;
-		case DEBUG:
-			return LogService.LOG_DEBUG;
-		default:
-			return LogService.LOG_ERROR;
-		}
-	}
-
-	private static int getFrameworkSeverity(int severity) {
-		switch (severity) {
-		case INFO:
-			return FrameworkLogEntry.INFO;
-		case ERROR:
-			return FrameworkLogEntry.ERROR;
-		case DEBUG:
-			return FrameworkLogEntry.INFO;
-		default:
-			return FrameworkLogEntry.ERROR;
-		}
-	}
-
-	private static String getSeverityString(int severity) {
-		switch (severity) {
-		case INFO:
-			return "[I]";
-		case ERROR:
-			return "[E]";
-		case DEBUG:
-			return "[D]";
-		default:
-			return "[E]";
-		}
-	}
-
-	private static String getDateTime() {
-		return new Date().toString();
-	}
-
-	private static Object getFrameworkLog(BundleContext context) {
-		String fwClass = null;
-		try {
-			// check we are on eclipse
-			fwClass = FrameworkLog.class.getName();
-		} catch (Throwable t) {
-			return null;
-		}
-
-		if (context != null) {
-			ServiceReference ref = context.getServiceReference(fwClass);
-			if (ref != null) {
-				return context.getService(ref);
-			}
-		}
-		// XXX: Other way to get FrameworkLog without context?
-
-		return null;
-	}
-
-	private static void logToEclipseFw(Object fwLog, int severity, String msg, Throwable t) {
-		try {
-			int fwSeverity = getFrameworkSeverity(severity);
-			FrameworkLogEntry logEntry = new FrameworkLogEntry("", fwSeverity, 0, msg, 0, t, null);
-			((FrameworkLog) fwLog).log(logEntry);
-		} catch (Exception ex) {
-			// Logging to the console instead
-			logToConsole(severity, msg, t);
-		}
-	}
-
-	private static void logToFile(File file, int severity, String msg, Throwable t) {
-		synchronized (lock) {
-			PrintWriter out = null;
-			try {
-				out = new PrintWriter(new FileWriter(file.getAbsolutePath(), true));
-				out.println(getDateTime() + " " + getSeverityString(severity) + msg);
-				if (t != null) {
-					out.println(getStackTrace(t));
-				}
-				out.flush();
-			} catch (Exception ex) {
-				// Logging to the console instead
-				logToConsole(severity, msg, t);
-			} finally {
-				if (out != null) {
-					out.close();
-				}
-			}
-		}
-	}
-
-	private static void logToConsole(int severity, String msg, Throwable e) {
-		if (severity == DEBUG || severity == INFO) {
-			return;
-		}
-		synchronized (lock) {
-			System.out.println(getSeverityString(severity) + msg);
-			if (e != null) {
-				e.printStackTrace(System.out);
-			}
+		if (log != null) {
+			log.log(severity, logMessage, t);
 		}
 	}
 
