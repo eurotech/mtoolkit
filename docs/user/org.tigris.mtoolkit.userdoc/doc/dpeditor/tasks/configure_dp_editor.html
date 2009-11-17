@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>Configuring Deployment Package Editor</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" href="../../book.css" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#000000"> 
+<h1>Configuring Deployment Package Editor</h1> 
+<p>You can customize the essential settings of your Deployment Package Editor.</p> 
+<ol> 
+  <li>Select <b>Window &gt; Preferences</b>.</li> 
+  <li>Browse the <b>Preferences</b> dialog page and locate the <b>mToolkit</b> preferences.</li> 
+  <li>Specify the preferences you want in the <b>Deployment Package Editor</b> pane:
+    <ul> 
+      <li>Check the box for <b>Accept bundle version updates automatically</b> to automatically accept detected updates of bundle resources developed with the Eclipse PDE in the Deployment Package Project file and in the generated deployment package file. For more information, refer to the &quot;<a href="model_dp_content/add_bundles.html#update">Automatic Update Detection</a>&quot; section of the &quot;Adding Bundle Resources&quot; document. </li> 
+      <li> Enter the path to the jarsigner executable of your JDK in the <b>Jar Signer Location </b>text field or use the <b>Browse </b>(<b>...</b>) button to locate it in the file system. It will be used to sign a generated deployment package. </li>
+      <li>Configure the available Resource Processors using the following options:
+        <ul> 
+          <li>To add a new Resource Processor:
+            <ol> 
+              <li>Use the <b>Add</b> button in the <b>Resource Processors</b> pane to make available the registered Resource Processors.</li> 
+              <li>In the text field of the <b>Add Resource Processor</b> dialog that appears, type the PID of the Resource Processor which will handle different non-bundle resources placed in  generated deployment packages.</li> 
+              <li>Click <b>OK</b> to make this Resource Processor available for selection in the <b>Resources</b> tab of a Deployment Package Project file opened from the Deployment Package Editor.
+                <p></p>                
+                <p><br> 
+                  <img src="img/add_rp.gif" width="399" height="171"><br> 
+                  Figure 1: Add a new registered Resource Processor.</p>
+              </li>
+            </ol> 
+          </li> 
+		  <li>To remove a Resource Processor, simply select its PID from the listed ones in the <b>Resource Processors</b> pane and click <b>Remove</b>.
+	      <p><br> 
+        <img src="img/configure_dpeditor.gif" width="470" height="684"><br> 
+        Figure 2: Configuring Deployment Package Editor.<br> 
+      </p> 
+
+</li>
+        </ul> 
+      </li> 
+    </ul> 
+  </li>
+  <li>To save the changes, click <b>Apply</b>. You can revert to the default settings of the Deployment Package Editor configuration by pressing <b>Restore Defaults</b>. </li> 
+</ol> 
+<p> <img src="../../ngrelc00.gif" width="159" height="27"> </p> 
+<p><a href="../concepts/dp_overview.html">Deployment Package Overview</a><br> 
+<a href="../concepts/dpeditor.html">Deployment Package Editor</a></p> 
+<p><img src="../../ngrelt00.gif" width="159" height="27"> </p> 
+<p><a href="model_dp_content/set_certificates.html">Setting Signers of a Deployment Package</a><br>
+  <a href="model_dp_content/add_bundles.html">Adding Bundle Resources</a> <br>
+  <a href="model_dp_content/add_resources.html">Adding Processed Resources</a> </p> 
+<p><img src="../../copyright.gif" width="364" height="17"></p> 
+</body>
+</html>

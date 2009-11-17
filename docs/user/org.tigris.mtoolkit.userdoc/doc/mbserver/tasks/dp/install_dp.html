@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Installing/Uninstalling Deployment Packages</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../../book.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Installing/Uninstalling Deployment Packages</h1>
+<h2>Installing a Deployment Package</h2>
+<h3>Installing a Deployment Package from the Workspace </h3>
+<p>Using mToolkit you can install directly from within Eclipse the deployment packages you are keeping in the workspace - package might be defined as deployment package project files (<b>.dpp</b> files containing a set of special properties) or might be present as  ready deployment package archives (<b>.dp</b> files). </p>
+<p>To install a deployment package from your Eclipse workspace, in one of the Eclipse navigation views (e.g. Package Explorer) right-click the deployment package project <b>.dpp</b> file node or the <b>.dp</b> file node and select the target  OSGi framework from the <b>Install to</b> menu. If you are installing the deployment package from a project, the project will be built and exported to a <b>.dp</b> archive file. Then, the <b>.dp</b> file will be transferred to the framework and installed. In case you are installing the package by using a ready archive file, the file will be directly deployed on the framework.</p>
+<p>On success, the installed deployment package will appear under the <b>Deployment packages </b> node of the framework-specific tree. </p>
+<h3>Installing a Deployment Package from outside the Workspace</h3>
+<p>To install a deployment package, located outside your Eclipse workspace, on a connected  OSGi framework: </p>
+<ol>
+  <li>Go to the <b>Frameworks</b> view. </li>
+  <li>Connect the OSGi framework where you will install the deployment package. </li>
+  <li>To install the deployment package JAR file, right-click the framework node or the <b>Deployment package </b> node, and use <b>Install Deployment Package</b>.</li>
+  <li>In the <b>Install deployment package </b> dialog, browse to the location of the deployment package JAR (with extension <b>.dp</b>) to install in the file system  and click <b>OK</b>. 
+
+<p class="Note">Note: The package will be automatically signed prior to installation in case you have selected <b>Automatic signing upon install</b> in the connecting settings of the relevant framework (see &quot;<a href="../add_fw.html">Adding/Removing an  OSGi Framework</a>&quot;). </p>
+    <p>
+  <img src="img/dp_install.gif" width="330" height="123"> <br>
+  Figure 1: Installing a deployment package. </p></li>
+</ol>
+<p>On success, the installed deployment package will appear under the <b>Deployment Packages </b> node of the framework-specific tree. Package's bundles will be attached to the package node as well as will be available in the <b>Bundles</b> node. </p>
+<p class="Note">Note: To be able to install deployment packages, which contain  additional resources beside bundles, you must have  the relevant resource processor bundle(s) running on the  OSGi framework. </p>
+<h2>Uninstalling a Deployment Package</h2>
+<p>To uninstall a deployment package from a connected  OSGi framework, in the <b>Frameworks</b> view   right-click the package  from the <b>Deployment Packages</b> device node and use <b>Uninstall Deployment Package</b>.</p>
+<p class="Note">Tip: You can also uninstall more than one deployment package with a single operation.</p>
+<p><img src="../../../ngrelc00.gif" width="159" height="27"></p>
+<p><a href="../../concepts/fw_overview.html">OSGi Management Overview</a><br>
+  <a href="../../concepts/fw_tree.html">OSGi FrameworksTree</a></p>
+<p><img src="../../../ngrelt00.gif" width="159" height="27"></p>
+<p><a href="mf_dp.html">Viewing the Manifest of a Deployment Package</a> <br>
+    <a href="../connect.html">Connecting to/Disconnecting from an  OSGi Framework</a><br>
+  <a href="../bundles/introduction.html">Managing  Bundles</a></p>
+<p><img src="../../../ngrelr00.gif" width="159" height="27"></p>
+<p><a href="../../reference/fw_views.html">Frameworks View</a><br>
+    <a href="../../reference/fw_tree.html">Frameworks View Tree Icons</a><br>
+  <a href="../../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
+<p><img src="../../../copyright.gif" width="364" height="17"></p>
+</body>
+</html>

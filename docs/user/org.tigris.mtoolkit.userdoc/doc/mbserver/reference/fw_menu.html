@@ -1,0 +1,291 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Devices View Menus and Toolbar</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../book.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1> Frameworks View   Menus and Toolbar</h1>
+<h2><a name="pop"></a>Frameworks View Popup Menu</h2>
+<p>The tree of a connected  OSGi framework, displayed in the <b>Frameworks</b> view, has a  popup menu, activated upon right-click, with different items depending on the currently selected node. </p>
+<p><img src="img/ctx_menu.gif" width="670" height="312"><br>
+  Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
+<table width="95%" border="1" cellspacing="0" cellpadding="3">
+  <tr>
+    <th width="14%" nowrap>Popup Menu Command</th>
+    <th width="86%">Description</th>
+  </tr>
+  <tr align="center">
+    <td colspan="2" nowrap><i>Common to All Node Types </i></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Search </b></td>
+    <td nowrap>Looks for a node whose name contains the specified string.</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Show Console</b></td>
+    <td nowrap>Displays the console for the relevant  OSGi framework.</td>
+  </tr>
+  <tr>
+    <td colspan="2" nowrap>
+      <div align="center"><i>Frameworks Root Node</i></div></td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Add Framework</b></td>
+    <td width="86%">Adds a new  OSGi framework to the tree of frameworks.</td>
+  </tr>
+  <tr>
+    <td height="29" colspan="2" nowrap>
+    <div align="center"><i>Framework Node</i></div></td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Connect Framework </b></td>
+    <td width="86%">Connects to the selected remote OSGi framework(s). Enabled only when there is no connection to the framework. </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Disconnect Framework </b></td>
+    <td width="86%">Disconnects from the remote framework(s). Enabled only when there is a connection to the device. </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Remove Framework</b></td>
+    <td width="86%">Removes the currently selected framework from the tree. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Refresh Framework Tree </b></td>
+    <td>Refreshes all  device  information shown in the  tree of a device(s). </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Install Bundle</b></td>
+    <td width="86%">Installs a new bundle on the selected framework. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Install Deployment Package</b></td>
+    <td>Installs a new deployment package on the selected framework. </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Show services / Show bundles</b></td>
+    <td width="86%">Switches to the Bundles/Services mode of the  tree of the OSGi device(s). </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Properties</b></td>
+    <td width="86%">Shows the connection settings for the current  OSGi framework</td>
+  </tr>
+  <tr>
+    <td height="34" colspan="2" nowrap>
+      <div align="center"><i>Bundle Node</i></div></td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Start</b></td>
+    <td width="86%">Starts the selected bundle(s). </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Stop</b></td>
+    <td width="86%">Stops the selected bundle(s). </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Update</b></td>
+    <td width="86%">Updates the selected bundle. </td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Uninstall Bundle</b></td>
+    <td width="86%">Uninstalls the selected bundle(s). </td>
+  </tr>
+  <tr>
+    <td nowrap><b> Bundle Headers </b></td>
+    <td>Shows the content of the manifest file of the selected bundle. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Refresh</b></td>
+    <td>Updates the information about the services of the selected bundle across the device's tree.</td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Show Bundles IDs</b></td>
+    <td width="86%">Displays the bundle IDs in braces after the bundle names.</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Show Bundles Versions </b></td>
+    <td>Displays the bundle versions in braces after the bundle names.</td>
+  </tr>
+  <tr align="center">
+    <td colspan="2" nowrap><i>Deployment package node </i></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Uninstall Deployment Package </b></td>
+    <td nowrap>Uninstalls the selected deployment package(s) from the OSGi framework removing all package resources.</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Properties</b></td>
+    <td nowrap>Shows the content of the most specific headers of a deployment package manifest file.</td>
+  </tr>
+  <tr>
+    <td colspan="2" nowrap>
+      <div align="center"><i>Service Node</i></div></td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Properties</b></td>
+    <td width="86%">
+      <p>Shows the registration properties of the selected service.</p>
+      <p><img src="img/service_props.gif" width="498" height="274" border="1"><br>
+        Figure 2: A service's properties.</p>    </td>
+  </tr>
+  <tr>
+    <td colspan="2" nowrap>
+      <div align="center"><i>Service Object Class Node</i></div></td>
+  </tr>
+  <tr>
+    <td width="14%" nowrap><b>Go to service</b></td>
+    <td width="86%">Allows you to go to the node of the registered service. Enabled only for the object classes of services within <b>Services in use</b> nodes, i.e. services used from other bundles. </td>
+  </tr>
+  <tr>
+    <td colspan="2" nowrap><div align="center"><i>Applications package node </i></div></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Start Application</b></td>
+    <td>Start the selected application</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Stop Application</b></td>
+    <td>Stops the selected application</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Properties</b></td>
+    <td>Shows the properties of the selected application</td>
+  </tr>
+</table>
+<h2> <a name="down"></a>Frameworks View Pulldown Menu</h2>
+<p>The <b>Frameworks</b> view has a pulldown menu with options similar to those from the view's context menu.</p>
+<p><img src="img/pulldown_menu.gif" width="753" height="313"><br>
+  Figure 3: The pulldown menu of the <b>Frameworks</b> view.
+</p>
+<table width="95%" border="1" cellspacing="0" cellpadding="3">
+  <tr>
+    <th width="14%" nowrap>Pulldown Menu Command</th>
+    <th width="86%">Description</th>
+  </tr>
+  <tr>
+    <td nowrap><b>Show Bundle IDs </b></td>
+    <td>Displays the bundle IDs in braces after the bundle names.</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Show Bundle Versions </b></td>
+    <td>Displays the bundle versions in braces after the bundle names.</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Show Service Properties </b></td>
+    <td>Shows the registration properties of the services.</td>
+  </tr>
+</table>
+<h2><a name="toolbar"></a>Frameworks View Toolbar </h2>
+<p>mToolkit adds a toolbar to the <b>Frameworks</b> view, which enables administration over  OSGi frameworks and has commands similar to those of the popup  menus. </p>
+<p><img src="img/device_toolbar.gif" width="473" height="166"><br>
+  Figure 4: Devices view toolbar.
+</p>
+<p>
+<table cellspacing=0 cellpadding=3 border=1 width="95%">
+  <tr>
+    <th width="8%" colspan="2" align="center">Button</th>
+    <th width="92%"> Toolbar  Command</th>
+  </tr>
+  <tr>
+    <td width="8%" colspan="2" align="center"><img src="img/connect_action.gif" width="16" height="16"></td>
+    <td>
+    <p><b>Connect Framework </b></p></td>
+  </tr>
+  <tr>
+    <td width="8%" colspan="2" align="center"><img src="img/disconnect_action.gif" width="16" height="16"></td>
+    <td>
+    <p><b>Disconnect Framework </b></p></td>
+  </tr>
+  <tr>
+    <td width="8%" height="45" rowspan="7" align="center"><img src="img/bundles_group.gif" width="16" height="16"></td>
+    <td height="2" colspan="2">Opens a pulldown menu for actions on a selected bundle.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/stop_bundle.gif" width="16" height="16"></td>
+    <td height="1"><b>Stop</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/start_bundle.gif" width="16" height="16"></td>
+    <td height="3"><b>Start</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/update_bundle.gif" width="16" height="16"></td>
+    <td height="6"><b>Update</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/install_bundle.gif" width="16" height="16"></td>
+    <td height="11"><b>Install Bundle </b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/uninstall_bundle.gif" width="16" height="16"></td>
+    <td height="22"><b>Uninstall Bundle</b></td>
+  </tr>
+  <tr>
+    <td width="8%" align="center"><img src="img/properties.gif" width="16" height="16"></td>
+    <td><b>Properties</b></td>
+  </tr>
+  <tr>
+    <td rowspan="4" align="center"><img src="img/dpackage.gif" width="16" height="16"></td>
+    <td colspan="2">Opens a pulldown menu for actions on a selected deployment package. </td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/install_dp.gif" width="16" height="16"></td>
+    <td><b>Install Deployment Package </b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/uninstall_dp.gif" width="16" height="16"></td>
+    <td><b>Uninstall Deployment Package</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/properties.gif" width="16" height="16"></td>
+    <td><b>Properties</b></td>
+  </tr>
+  <tr>
+    <td rowspan="4" align="center"><img src="img/application.gif" width="16" height="16"></td>
+    <td colspan="2">Opens a pulldown menu for actions on a selected application. </td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/start_appl_actionNew.gif" width="16" height="16"></td>
+    <td><b>Start Application</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/stop_appl_actionNew.gif" width="16" height="16"></td>
+    <td><b>Stop Application</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="img/properties.gif" width="16" height="16"></td>
+    <td><b>Properties</b></td>
+  </tr>
+  <tr>
+    <td width="8%" colspan="2" align="center"><img src="img/add_action.gif" width="16" height="16"></td>
+    <td>
+    <p><b>Add Framework</b></p></td>
+  </tr>
+  <tr>
+    <td width="8%" colspan="2" align="center"><img src="img/remove_action.gif" width="16" height="16"></td>
+    <td><b>Remove Framework</b></td>
+  </tr>
+  <tr>
+    <td width="8%" colspan="2" align="center"><img src="img/properties_action.gif" width="16" height="16"></td>
+    <td><b>Framework Properties</b></td>
+  </tr>
+ 
+</table>
+<p><img src="../../ngrelc00.gif" width="159" height="27"></p>
+<p><a href="../concepts/fw_overview.html">OSGi Management Overview</a><br>
+<a href="../concepts/fw_tree.html">OSGi Frameworks  Tree</a></p>
+<p><img src="../../ngrelt00.gif" width="159" height="27"></p>
+<p><a href="../tasks/add_fw.html">Adding/Removing an OSGi Framework </a><br>
+  <a href="../tasks/fw_props.html">Configuring the Properties of an OSGi Framework</a><br>
+  <a href="../tasks/connect.html">Connecting to/Disconnecting from an OSGi Framework</a><br>
+<a href="../tasks/bundles/introduction.html">Managing  Bundles</a> <br>
+<a href="../tasks/dp/introduction.html">Managing Deployment Packages</a></p>
+<p><img src="../../ngrelr00.gif" width="159" height="27"></p>
+<p><a href="fw_tree.html">Frameworks View  Tree Icons</a><br>
+</p>
+<p><img src="../../copyright.gif" width="364" height="17"></p>
+</body>
+</html>

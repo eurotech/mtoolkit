@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Adding Processed Resources</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../../book.css" rel="stylesheet" type="text/css"></head>
+<body> 
+<h1>Adding Processed Resources</h1> 
+<p>Since one of the main reasons for using deployment packages is to manage the lifecycle of bundles together with their configurations, permissions and other types of resources, the Deployment Package Editor of ProSyst mToolkit supports adding, deleting and modifying of different non-bundle artifacts. You can perform such operations in the <b>Resources</b> tab displayed for a Deployment Package Project file by the Deployment Package Editor.</p> 
+<p>To add a new resource to the deployment package:</p> 
+<ol> 
+  <li>In one of the navigation views, locate and open the Deployment Package Project (<b>.dpp</b>) file to launch the Deployment Package Editor in the editor area.</li> 
+  <li>Go to the <b>Resources</b> tab of the Deployment Package Editor.</li> 
+  <li>Add a new entry to the table for each processed resource which will be a part of the desired deployment package:
+    <ol> 
+      <li>Click the <b>New</b> button.</li> 
+      <li>Specify the following resource properties in the displayed empty row:
+        <ul> 
+          <li><b>Resource Path</b> - Specify the location of the desired resource by using the <b>Browse</b> (<b>...</b>) button to locate it in the file system, or type the resource file path by hand. </li> 
+          <li><b>Name</b> - Specify the location of the added processed resource within the JAR file of the deployment package by typing it in the empty cell of the <b>Name</b> column. The default path name is <b>resources/&lt;resource_name&gt;.&lt;resource_extension&gt;</b>.</li> 
+          <li><b>Resource Processor</b> - Type or select from the drop-down list the PID of the Resource Processor service registered to handle this particular resource. The default list of available Resource Processors is configured through the <b>Window &gt; Preferences &gt; mToolkit </b> preference page.</li> 
+          <li><b>Missing</b> - Select the <i>true</i> option of the drop-down list to indicate that the processed resource is logically a part of the generated deployment package, but is not physically included in the deployment package JAR file. Such resources are only mentioned in the <i>Name section </i> of the manifest file of a Fix Package. It is a modification of a deployment package used to quickly upgrade or downgrade an existing deployment package and all processed resources marked as <i>missing </i> should be available in the initial version of this deployment package. The purpose of including such resources in the manifest file of a deployment package is to distinguish between resources that will not be changed and resources that must be removed. The default value is <i>false</i>.</li> 
+          <li><b>Custom Headers</b> - Add some additional custom headers, if needed by the relevant Resource Processor, by using the <b>Browse</b> (<b>...</b>) button in the <b>Custom Headers</b> column of the processed resource. In the displayed <b>Resource  Custom Headers </b>dialog, use the <b>New</b> button to add a new empty row in the table. Then enter the header name in the text field under the <b>Key</b> column and the header value in the text field under the <b>Value </b>column. When ready, click <b>OK</b>. In case you want to remove a custom manifest header, select it from the table in the <b>Resource Custom Headers</b> dialog and use the <b>Remove </b> button.</li>
+        </ul> 
+      </li> 
+      <br><p><img src="img/add_resources.gif" width="724" height="356"><br> 
+        Figure 1: Adding processed resources to a deployment package.</p> <br>
+    </ol> 
+  </li> 
+  <li>Save the Deployment Package Project file to save the changes you have made on the resources included in the deployment package. </li> 
+</ol>
+<h2>Common Errors </h2> 
+<p>When adding a new processed resource to a deployment package, make sure you have entered the PID of the Resource Processor that will handle this resource. Otherwise, an error dialog will be displayed to remind you to enter the PID in the <b>Resource Processor</b> column.  </p>
+<p><img src="../../../ngrelc00.gif" width="159" height="27"></p> 
+<p><a href="../../concepts/dp_overview.html">Deployment Package Overview</a><br> 
+  <a href="../../concepts/dpeditor.html">Deployment Package Editor</a> 
+<p><img src="../../../ngrelt00.gif" width="159" height="27"></p> 
+<p><a href="../create_dpp.html">Creating a Deployment Package Project File</a><br> 
+  <a href="../generate_dp.html">Generating a Deployment Package</a><br> 
+  <a href="../quick_build.html">Quick Deployment Package Build</a><br> 
+  <a href="../export_build_files.html">Exporting Deployment Package Build Files</a><br> 
+<a href="../configure_dp_editor.html">Configuring Deployment Package Editor</a></p> 
+<p><img src="../../../copyright.gif" width="364" height="17"></p> 
+</body>
+</html>

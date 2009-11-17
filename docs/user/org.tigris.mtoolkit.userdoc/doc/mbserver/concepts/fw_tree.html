@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>OSGi Device Tree</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../book.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>OSGi Frameworks  Tree </h1>
+<p> OSGi frameworks are displayed in a separate view in the Eclipse Workbench - the <b>Frameworks</b> view. The view arranges the  OSGi frameworks in separate trees as you can unfold the tree of a connected framework and browse its components.</p>
+<p>Every framework has the name assigned to  it in its properties. Depending on whether the framework is connected or not, the framework node has different icon.</p>
+<p>Basically, an OSGi framework tree has two display modes - <i>Bundles</i> and <i>Services</i>. In the Bundles (default) mode, the main components of the tree are the bundles, organized by category, the deployment packages, widgets and applications currently installed in the target framework. In the Services mode, the main components of the tree are the services registered in the OSGi framework. </p>
+<h2>Bundles Display Mode</h2>
+<p>You can observe the following hierarchy of components in the Bundles display mode:</p>
+<ul>
+  <li><i>Framework</i>
+    <ul>
+      <li><b>Application</b> 
+        <ul>
+          <li><i>Application</i> - An Application compatible with the OSGi Application Admin specification, currently available on the target framework. For example, such an applications might be eRCP applications, MIDlets, widgets, etc., depending on the application containers installed in  the target framework. </li>
+        </ul>
+      </li>
+      <li><b>Bundles</b>
+        <ul>
+          <li><i>Bundle category</i>  -  Bundles are sorted by category according to the value of the <i>Bundle-Category</i> manifest header of the relevant bundle.
+            <ul>
+              <li><i>Bundle node</i> -  Bundles are displayed by  symbolic name as set in the corresponding <i>Bundle-SymbolicName</i> manifest header, or if the symbolic name is missing - by name as set in the corresponding <i>Bundle-Name</i> manifest header. If the <i>Bundle-Name</i> header is not available either, then the bundle is shown by its file name. Optionally, you can choose to display bundle IDs and bundle versions as well. This is done via respectively the <b>Show Bundles IDs</b> and the <b>Show Bundle Versions</b> commands that appear when you right-click a bundle. Depending on the state a bundle is in - started or stopped, the  framework tree shows the bundle with different icons.
+                <ul>
+                  <li><b>Registered services</b>  - Contains all services currently registered by this bundle.
+                    <ul>
+                      <li><i>Service object class [Service ID]</i> - Shows the service object class (aka <i>service interface</i>) under which a service of this bundle is <i>registered</i>. The ID of the service object implementing the object class is placed within the square brackets next to the object class name. Note that a single service object can be registered under more than one object class.</li>
+                    </ul>
+                  </li>
+                  <li><b>Services in use</b>  - Contains all services of other bundles in the OSGi framework  used by this bundle.
+                    <ul>
+                      <li><i>Service object class [Service ID]</i>  - Shows the object class (aka service interface) of the <i>used</i> service object. The ID of the used service object implementing the object class is placed within the square brackets next to the object class name.</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li> <b>Deployment packages </b></li>
+   
+      <ul>
+        <li><i>Deployment
+package</i> - Deployment packages are shown by symbolic name according to the value of the <i>DeploymentPackage-SymbolicName</i> header of the package's manifest.
+<ul>
+  <li><i>Bundle node </i>- Bundles are shown in the same way as in the <b>Bundles</b> sub-tree.
+    <ul>
+      <li><b>. . .</b></li>
+     </ul>
+  </li>
+  </ul>
+        </li>
+      </ul>  
+    </ul>
+  </li>
+</ul>
+<h2>Services Display Mode </h2>
+<p>You can observe the following hierarchy of components in the Services display mode:</p>
+<ul>
+  <li><i>Framework</i>
+    <ul>
+      <li><i>Service</i>  - Services are shown by object class and with ID 
+enclosed in square brackets. You can view the registration properties of a selected service
+by using the <b>Properties</b> command from the context menu.
+        <ul>
+          <li><b>Registered in bundle</b> - This node contains the bundle which has registered the service.
+<ul>
+              <li><i>Provider bundle</i> node - Shows  the bundle which has registered the service. The bundle is shown in the same way as in the Bundles display mode (see the previous section). </li>
+            </ul>
+          </li>
+          <li><b>Used in bundle(s)</b> - This node contains the bundles which are currently using the service.
+<ul>
+              <li><i>Consumer bundle</i> - Shows the  bundle which is using the service. The bundle is shown in the same way as in the Bundles display mode (see the previous section). </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p class="Note"><i>Tip:</i> To view the IDs and versions of bundles in the Services display mode, right-click a bundle node and call <b>Show Bundle IDs </b>and <b>Show Bundle Versions</b>. </p>
+<p><img src="../../ngrelc00.gif" width="159" height="27"></p>
+<p><a href="fw_overview.html">OSGi Management Overview</a></p>
+<p><img src="../../ngrelt00.gif" width="159" height="27"></p>
+<p><a href="../tasks/add_fw.html">Adding/Removing an OSGi Framework</a><br>
+  <a href="../tasks/fw_props.html">Configuring the Properties of an OSGi Framework</a><br>
+  <a href="../tasks/connect.html">Connecting to/Disconnecting from an  OSGi Framework</a><br>
+  <a href="../tasks/rem_console.html">Using the Remote Console</a><br>
+  <a href="../tasks/bundles/introduction.html">Managing  Bundles</a><br>
+  <a href="../tasks/applications/intorduction.html">Managing Applications</a><br>
+  <a href="../tasks/troubleshooting.html">OSGi Management Troubleshooting</a> <br>
+</p>
+<p><img src="../../ngrelr00.gif" width="159" height="27"></p>
+<p> <a href="../reference/fw_views.html">Frameworks View</a><br>
+  <a href="../reference/fw_tree.html">Frameworks View Tree Icons</a> <br>
+  <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
+<p><img src="../../copyright.gif" width="364" height="17"></p>
+</body>
+</html>

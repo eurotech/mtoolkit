@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>mBS Management Troubleshooting</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../book.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>OSGi Management Troubleshooting</h1>
+<ul>
+  <li><b>What do I do if I can't connect to the selected framework? </b>    <ul>
+      <li>A possible reason is that the IP address or domain name supplied in the settings is wrong. </li>
+      <li> The connection to the remote framework may be also impossible because the remote OSGi framework running on that host is down. </li>
+      <li>The OSGi framework is not running the IAgent bundle. </li>
+  </ul>
+  </li>
+  <li><b>What do I have to do if I change my bundle after I have installed it on the framework? </b>
+      <p>To reflect the changes to your bundle on the target  OSGi framework, you need to update that bundle. </p>
+  </li>
+  <li><b>What do I do if the  OSGi framework refuses to accept and install my bundle?</b>
+    <ul>
+    <li>A possible reason might be incorrect bundle  - missing class files, packages or resources;  etc. </li>
+      <li> It might also be possible that there is no connection with the  OSGi framework. In this case, you should try to reconnect to it.</li>
+    </ul>
+  </li>
+  <li><b>What do I do if my bundle does not perform any action on the  OSGi framework? </b>
+      <p>Perhaps you have forgotten to start it. Installing a bundle is not enough to make it handle its tasks within the OSGi framework. The installation only enables the framework to resolve the bundle's packages and make them available to the rest of the bundles. You must start it after installing it to observe any other results. </p>
+  </li>
+  <li><b>What do I do if the framework refuses to start my bundle? </b>
+      <p>This problem may be due to errors in the bundle activator or the bundle's services. Another possible reason is missing import packages or services. In any case, the error dialog that appears gives a hint on the exact reason. </p>
+      <p>If the problem is determined by the behavior of the activator or services, you may view the ERROR and EXCEPTION levels of the Log Service. To do this, enter the <b>Console </b> view and locate the console of the target framework. Use the relevant console command for getting generated logs.</p>
+  </li>
+</ul>
+<p><img src="../../ngrelc00.gif" width="159" height="27"></p>
+<p><a href="../concepts/fw_overview.html">OSGi Management Overview</a><br>
+  <a href="../concepts/fw_tree.html">OSGi Frameworks Tree</a> <br>
+</p>
+<p><img src="../../ngrelt00.gif" width="159" height="27"></p>
+<p><a href="fw_props.html">Configuring the Properties of an OSGi Framework</a><br>
+  <a href="add_fw.html">Adding/Removing an  OSGi Framework</a><br>
+  <a href="connect.html">Connecting to/Disconnecting from an OSGi Framework</a><br> 
+  <a href="rem_console.html">Using the Remote Console</a> </p>
+<p><img src="../../ngrelr00.gif" width="159" height="27"></p>
+<p><a href="../reference/fw_views.html">Frameworks View </a><br>
+<a href="../reference/fw_tree.html">Frameworks View Tree Icons</a> <br>
+  <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
+<p><img src="../../copyright.gif" width="364" height="17"></p>
+</body>
+</html>

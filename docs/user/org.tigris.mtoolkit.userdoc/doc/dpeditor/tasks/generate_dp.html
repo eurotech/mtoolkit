@@ -1,0 +1,49 @@
+<html>
+<head>
+<title>Generating a Deployment Package</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../book.css" rel="stylesheet" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" text="#000000"> 
+<h1>Generating a Deployment Package</h1> 
+<p>A deployment package can be generated from a Deployment Package Project file by using the internal generator of the mToolkit Deployment Package Editor. You can use the <b>Build</b> tab of the package project from the editor to specify its export path. </p> 
+<p>To export a deployment package JAR file with the internal generator:</p> 
+<ol> 
+  <li>(Optional) If you want to generate a deployment package  JAR file (with extension <b>.dp</b>)  without having to additionally browse the workspace for the source Deployment Package Project (<b>.dpp</b>) file, select the <b>.dpp</b> file in one of the Eclipse navigation views (e.g. Package Explorer) prior to opening the <b>Export</b> wizard. As a result, mToolkit will automatically fill in the location of the <b>.dpp</b> file in the <b>Export</b> wizard. </li> 
+  <li>Right-click on a node in the navigation view and use <b>File &gt; Export</b> menu to launch the <b>Export</b> wizard. </li> 
+  <li>Expand the <b>Deployment Package Development</b> node and select the <b>Deployment Package</b> command to launch the corresponding wizard. Click <b>Next</b>.</li> 
+  <li>In the <b>Deployment Package Export Wizard</b> view and specify if needed:
+    <ul>
+      <li> <b>DPP file</b> - The location within the workspace of the  <b>.dpp</b> file which will be used to create the deployment package JAR file. If you have opened the <b>Export</b> wizard with a <b>.dpp</b> file selected in the navigation view, the <b>DPP file</b> field will be automatically populated.</li>
+      <li><b>DP file</b> - The location of the generated <b>.dp</b> file on the local file system. If you have opened the <b>Export</b> wizard with a <b>.dpp</b> file selected in the navigation view, the <b>DP file</b> field will be automatically populated with the location specified in the <b>Build</b> tab of the editor for the relevant <b>.dpp</b> file.<br> 
+        <br> 
+      </li>
+    </ul>
+
+    <p><img src="img/export_dp.gif" width="470" height="550"><br> 
+    Figure 1: Exporting deployment packages with the Deployment Package Editor.</p>
+
+    <p><img src="img/export_dp.gif" width="470" height="550"><br> 
+      Figure 1: Exporting deployment packages with the Deployment Package Editor.</p>
+
+    <p><br> 
+    </p>
+  </li> 
+  <li>Click <b>Finish</b> to generate the deployment package or <b>Cancel</b> - to exit the wizard.</li> 
+</ol> 
+<p class="Note">Note: If you  have not specified the keystore password(s) and/or the key password(s) associated with the deployment package signer(s) before generating a signed deployment package, a <b>Certificates Passwords </b>dialog is displayed. It prompts you to fill in the missing password(s). Passwords entered in this way are used only in the current generation operation and are not permanently saved in the Deployment Package Project file.<br>
+    <br>
+    <img src="model_dp_content/img/dp_certs_pass.gif" width="450" height="300"><br>
+  Figure 2: Enter the missing password(s) related to the deployment package signer(s). </p>
+<p class="Note">Note: If some package's bundle resources, created with Eclipse PDE, have been updated (see &quot;<a href="model_dp_content/add_bundles.html#update">Automatic Update Detection</a>&quot;),     depending on its settings (see &quot;<a href="configure_dp_editor.html">Configuring Deployment Package Editor</a>&quot;)  the Deployment Package Editor will auto-accept the updates in the deployment package or will ask you to do so.</p>
+<p><img src="../../ngrelc00.gif" width="159" height="27"> </p> 
+<p><a href="../concepts/dp_overview.html">Deployment Package Overview</a><br> 
+<a href="../concepts/dpeditor.html">Deployment Package Editor</a></p> 
+<p><img src="../../ngrelt00.gif" width="159" height="27"> </p> 
+<p><a href="configure_dp_editor.html">Configuring Deployment Package Editor</a><br>
+<a href="create_dpp.html">Creating a Deployment Package Project File</a><br> 
+  <a href="model_dp_content/introduction.html">Modeling Deployment Package Content</a><br> 
+<a href="model_dp_content/set_build.html">Configuring Deployment Package Building</a></p> 
+<p><img src="../../copyright.gif" width="364" height="17"></p> 
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Customizing mBS Management</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../../book.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Customizing OSGi Management</h1>
+<p>mToolkit allows you to customize remote management of OSGi frameworks - you can configure mToolkit to automatically connect to frameworks which have been already connected by third party Eclipse plug-ins, or to have information about OSGi management logged:</p>
+<ol>
+  <li>Select <b>Window &gt; Preferences </b>.
+  <li>Browse the <b>Preferences </b> dialog and locate the <b> mToolkit </b>preference page. </li>
+  <li> Under the <b>Remote Management</b> preference category if needed use the following options: </li>
+  <ul>
+    <li>Activate
+      automatic connection to OSGi framework instances when a third party
+    plug-in opens such a connection - check the <b>Enable OSGi Frameworks automatic connection</b> option.</li>
+    <li>Activate logging of events in the <b>Error Log</b> view  - check the <b>Enable extended logging</b> option. </li>
+    <li>To have a bundle automatically started upon install, select <b>Autostart bundles on install</b>.</li>
+    <li>To view the bundles of a connected framework in the <b>Frameworks </b>view grouped by category, select <b>Group bundles in categories</b>.</li>
+  </ul>
+  <li>Under <b>Certificates</b> specify the own certificates (certificate and private/public key pair) which can be used to sign bundles and deployment packages upon deployment on a connected OSGi framework. Signing is activated individually for each OSGi framework in the relevant connection settings (see &quot;<a href="add_fw.html">Adding/Removing an OSGi Framework</a>&quot;). 
+    <p>Use the <b>Add</b> button to specify a signer by keystore type and location, and  signer alias within the keystore.</p>
+    <p class="Note"> Note: To be able to use the alias for signing, the passwords protecting the keystore and the private key associated with the alias must be the same.</p>
+  </li>
+  <li>To save the changes:
+  </li>
+  <ul>
+    <li>To apply the changes and exit the <b>Preferences</b> dialog, click <b>OK</b>.</li>
+    <li>To apply the changes and to continue using the <b>Preferences</b> dialog for setting specific preferences, click <b>Apply</b>.</li>
+  </ul>
+</ol>
+<p><img src="../../ngrelc00.gif" width="159" height="27"></p>
+<p><a href="../concepts/fw_overview.html">OSGi Management Overview</a></p>
+<p><img src="../../ngrelt00.gif" width="159" height="27"> </p>
+<p><a href="fw_props.html">Configuring the Properties of an  OSGi Framework</a><br>
+  <a href="add_fw.html">Adding/Removing an OSGi Framework </a><br>
+<a href="bundles/introduction.html">Managing  Bundles</a></p>
+<p><img src="../../ngrelr00.gif" width="159" height="27"> </p>
+<p><a href="../reference/fw_views.html">Frameworks View </a><br>
+    <a href="../reference/fw_tree.html"> Frameworks View Tree Icons</a><br>
+  <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
+<p><img src="../../copyright.gif" width="364" height="17"></p>
+</body>
+</html>
