@@ -372,6 +372,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void setViewType(int viewType) {
 		if (this.viewType == viewType)
 			return;
+		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		}
+		
 		this.viewType = viewType;
 
 		Model[] children = getChildren();
@@ -559,96 +562,93 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 		final int type = e.getType();
 
-		if (isConnecting()) {
-			synchronized ((FrameworkConnectorFactory.getLockObject(connector))) {
-			}
-		}
-
-		final RemoteBundle rBundle = e.getBundle();
-		long id = rBundle.getBundleId();
-		try {
-			if (!bundleHash.containsKey(new Long(id)) && type != RemoteBundleEvent.UNINSTALLED) {
-				// add this bundle - apparently, we have missed the INSTALLED
-				// event
-				addBundle(rBundle);
-			} else if (type == RemoteBundleEvent.UPDATED) {
-				Bundle bundle = findBundle(id);
-				String category = rBundle.getHeader("Bundle-Category", ""); //$NON-NLS-1$ //$NON-NLS-2$
-				if (!bundle.getParent().getName().equals(category)
-						&& FrameworkConnectorFactory.isBundlesCategoriesShown) {
-					udpateBundleCategory(rBundle);
-				}
-				bundle = findBundle(id);
-				String newName = getBundleName(rBundle, null);
-				bundle.setName(newName);
-				bundle = findBundleInDP(id);
-				if (bundle != null) {
+		synchronized ((FrameworkConnectorFactory.getLockObject(connector))) {
+			final RemoteBundle rBundle = e.getBundle();
+			long id = rBundle.getBundleId();
+			try {
+				if (!bundleHash.containsKey(new Long(id)) && type != RemoteBundleEvent.UNINSTALLED) {
+					// add this bundle - apparently, we have missed the INSTALLED
+					// event
+					addBundle(rBundle);
+				} else if (type == RemoteBundleEvent.UPDATED) {
+					Bundle bundle = findBundle(id);
+					String category = rBundle.getHeader("Bundle-Category", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					if (!bundle.getParent().getName().equals(category)
+							&& FrameworkConnectorFactory.isBundlesCategoriesShown) {
+						udpateBundleCategory(rBundle);
+					}
+					bundle = findBundle(id);
+					String newName = getBundleName(rBundle, null);
 					bundle.setName(newName);
-				}
-				updateBundleNodes(rBundle);
-			} else if (type == RemoteBundleEvent.UNINSTALLED) {
-				removeBundle(rBundle.getBundleId());
-			} else if (type == RemoteBundleEvent.STOPPED) {
-				Bundle bundle = findBundle(rBundle.getBundleId());
-				bundle.removeChildren();
-				bundle = findBundleInDP(bundle.getID());
-				if (bundle != null) {
+					bundle = findBundleInDP(id);
+					if (bundle != null) {
+						bundle.setName(newName);
+					}
+					updateBundleNodes(rBundle);
+				} else if (type == RemoteBundleEvent.UNINSTALLED) {
+					removeBundle(rBundle.getBundleId());
+				} else if (type == RemoteBundleEvent.STOPPED) {
+					Bundle bundle = findBundle(rBundle.getBundleId());
 					bundle.removeChildren();
-				}
-				removeBundleInServicesView(rBundle.getBundleId());
-				updateBundleNodes(rBundle);
-			} else if (type == RemoteBundleEvent.STARTED) {
-				Bundle bundle = findBundle(rBundle.getBundleId());
-				Bundle dpBundle = findBundleInDP(rBundle.getBundleId());
+					bundle = findBundleInDP(bundle.getID());
+					if (bundle != null) {
+						bundle.removeChildren();
+					}
+					removeBundleInServicesView(rBundle.getBundleId());
+					updateBundleNodes(rBundle);
+				} else if (type == RemoteBundleEvent.STARTED) {
+					Bundle bundle = findBundle(rBundle.getBundleId());
+					Bundle dpBundle = findBundleInDP(rBundle.getBundleId());
 
-				RemoteService usedServ[] = bundle.getRemoteBundle().getServicesInUse();
-				if (usedServ.length > 0) {
-					Model bundleUsedInCategory = getServiceCategoryNode(bundle, ServicesCategory.USED_SERVICES, true);
-					Model dpBundleCategory = dpBundle == null ? null : getServiceCategoryNode(dpBundle,
-							ServicesCategory.USED_SERVICES, true);
+					RemoteService usedServ[] = bundle.getRemoteBundle().getServicesInUse();
+					if (usedServ.length > 0) {
+						Model bundleUsedInCategory = getServiceCategoryNode(bundle, ServicesCategory.USED_SERVICES, true);
+						Model dpBundleCategory = dpBundle == null ? null : getServiceCategoryNode(dpBundle,
+								ServicesCategory.USED_SERVICES, true);
 
-					for (int i = 0; i < usedServ.length; i++) {
-						addObjectClassNodes(bundleUsedInCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
-								.getServiceId()), usedServ[i]);
-						if (dpBundleCategory != null)
-							addObjectClassNodes(dpBundleCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
-									.getServiceId()), usedServ[i]);
+						for (int i = 0; i < usedServ.length; i++) {
+							addObjectClassNodes(bundleUsedInCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
+							                                                                                          .getServiceId()), usedServ[i]);
+							if (dpBundleCategory != null)
+								addObjectClassNodes(dpBundleCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
+								                                                                                      .getServiceId()), usedServ[i]);
 
-						for (int j = 0; j < servicesViewVector.size(); j++) {
-							ObjectClass oc = (ObjectClass) servicesViewVector.elementAt(j);
-							if (oc.getNameID().longValue() == usedServ[i].getServiceId()) {
-								BundlesCategory bCategory = (BundlesCategory) oc.getChildren()[1];
-								Model bundles[] = bCategory.getChildren();
-								boolean added = false;
-								for (int k = 0; k < bundles.length; k++) {
-									if (((Bundle) bundles[k]).getID() == bundle.getID()) {
-										added = true;
-										break;
+							for (int j = 0; j < servicesViewVector.size(); j++) {
+								ObjectClass oc = (ObjectClass) servicesViewVector.elementAt(j);
+								if (oc.getNameID().longValue() == usedServ[i].getServiceId()) {
+									BundlesCategory bCategory = (BundlesCategory) oc.getChildren()[1];
+									Model bundles[] = bCategory.getChildren();
+									boolean added = false;
+									for (int k = 0; k < bundles.length; k++) {
+										if (((Bundle) bundles[k]).getID() == bundle.getID()) {
+											added = true;
+											break;
+										}
+									}
+									if (!added) {
+										Bundle usedInBundle = new Bundle(bundle/*bundle.getName(), bundle.getRemoteBundle(), bundle
+											.getState(), bundle.getType(), bundle.getCategory()*/);
+										if (FrameworkConnectorFactory.isBundlesCategoriesShown)
+											bCategory.addElement(usedInBundle);
+										else
+											((FrameworkImpl) bCategory.findFramework()).getBundlesNode().addElement(
+													usedInBundle);
 									}
 								}
-								if (!added) {
-									Bundle usedInBundle = new Bundle(bundle/*bundle.getName(), bundle.getRemoteBundle(), bundle
-											.getState(), bundle.getType(), bundle.getCategory()*/);
-									if (FrameworkConnectorFactory.isBundlesCategoriesShown)
-										bCategory.addElement(usedInBundle);
-									else
-										((FrameworkImpl) bCategory.findFramework()).getBundlesNode().addElement(
-												usedInBundle);
-								}
 							}
-						}
 
+						}
 					}
+					updateBundleNodes(rBundle);
+				} else {
+					updateBundleNodes(rBundle);
 				}
-				updateBundleNodes(rBundle);
-			} else {
-				updateBundleNodes(rBundle);
-			}
-		} catch (IAgentException ex) {
-			// ignore bundle installed exceptions, we will receive uninstalled
-			// event shortly
-			if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
-				BrowserErrorHandler.processError(ex, connector, userDisconnect);
+			} catch (IAgentException ex) {
+				// ignore bundle installed exceptions, we will receive uninstalled
+				// event shortly
+				if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+					BrowserErrorHandler.processError(ex, connector, userDisconnect);
+				}
 			}
 		}
 		updateContextMenuStates();
@@ -662,56 +662,54 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		if (!isConnected())
 			return;
 
-		if (isConnecting()) {
-			synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
-			}
-		}
+		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
 
-		try {
-			RemoteDP remoteDP = e.getDeploymentPackage();
-			if (e.getType() == RemoteDPEvent.INSTALLED) {
-				Model dpNodeRoot = getDPNode();
-				try {
-					// check if this install actually is update
-					DeploymentPackage dp = findDP(remoteDP.getName());
-					if (dp != null) {
-						getDPNode().removeElement(dp);
+			try {
+				RemoteDP remoteDP = e.getDeploymentPackage();
+				if (e.getType() == RemoteDPEvent.INSTALLED) {
+					Model dpNodeRoot = getDPNode();
+					try {
+						// check if this install actually is update
+						DeploymentPackage dp = findDP(remoteDP.getName());
+						if (dp != null) {
+							getDPNode().removeElement(dp);
+						}
+
+						DeploymentPackage dpNode = new DeploymentPackage(remoteDP, FrameworkImpl.this);
+						dpNodeRoot.addElement(dpNode);
+						dpHash.put(remoteDP.getName(), dpNode);
+					} catch (IAgentException e1) {
+						if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE
+								&& e1.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
+							BrowserErrorHandler.processError(e1, connector, userDisconnect);
+						}
 					}
+				} else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
+					try {
+						if (remoteDP != null) {
+							DeploymentPackage dpNode = (DeploymentPackage) dpHash.remove(remoteDP.getName());
+							// there are cases where the dp failed to be added,
+							// because it was too quickly uninstalled/updated
+							if (dpNode != null) {
 
-					DeploymentPackage dpNode = new DeploymentPackage(remoteDP, FrameworkImpl.this);
-					dpNodeRoot.addElement(dpNode);
-					dpHash.put(remoteDP.getName(), dpNode);
-				} catch (IAgentException e1) {
-					if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE
-							&& e1.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
+								getDPNode().removeElement(dpNode);
+							}
+						}
+					} catch (IAgentException e1) {
+						e1.printStackTrace();
 						BrowserErrorHandler.processError(e1, connector, userDisconnect);
 					}
 				}
-			} else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
-				try {
-					if (remoteDP != null) {
-						DeploymentPackage dpNode = (DeploymentPackage) dpHash.remove(remoteDP.getName());
-						// there are cases where the dp failed to be added,
-						// because it was too quickly uninstalled/updated
-						if (dpNode != null) {
 
-							getDPNode().removeElement(dpNode);
-						}
-					}
-				} catch (IAgentException e1) {
-					e1.printStackTrace();
-					BrowserErrorHandler.processError(e1, connector, userDisconnect);
-				}
+				updateElement();
+			} catch (IllegalStateException ex) {
+				// ignore state exceptions, which usually indicates that something
+				// is was fast enough to disappear
+				BrowserErrorHandler.debug(ex);
+			} catch (Throwable t) {
+				t.printStackTrace();
+				BrowserErrorHandler.processError(t, connector, userDisconnect);
 			}
-
-			updateElement();
-		} catch (IllegalStateException ex) {
-			// ignore state exceptions, which usually indicates that something
-			// is was fast enough to disappear
-			BrowserErrorHandler.debug(ex);
-		} catch (Throwable t) {
-			t.printStackTrace();
-			BrowserErrorHandler.processError(t, connector, userDisconnect);
 		}
 		updateContextMenuStates();
 	}
@@ -796,41 +794,39 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		if (!isConnected())
 			return;
 
-		if (isConnecting()) {
-			synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
-			}
-		}
+		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
 
-		try {
-			RemoteService rService = e.getService();
-			if (e.getType() == RemoteServiceEvent.UNREGISTERED) {
-				removeService(rService.getServiceId());
-			} else {
-				RemoteBundle rBundle = rService.getBundle();
-				if (rBundle != null) {
-					Bundle bundle = findBundle(rBundle.getBundleId());
-					if (bundle == null) {
-						addBundle(rBundle);
-					}
-					if (e.getType() == RemoteServiceEvent.REGISTERED) {
-						ServiceObject servObj = new ServiceObject(rService, rBundle);
-						RemoteBundle usedInBundles[] = rService.getUsingBundles();
-						for (int i = 0; i < usedInBundles.length; i++) {
-							ServiceObject.addUsedInBundle(rService, usedInBundles[i], this);
+			try {
+				RemoteService rService = e.getService();
+				if (e.getType() == RemoteServiceEvent.UNREGISTERED) {
+					removeService(rService.getServiceId());
+				} else {
+					RemoteBundle rBundle = rService.getBundle();
+					if (rBundle != null) {
+						Bundle bundle = findBundle(rBundle.getBundleId());
+						if (bundle == null) {
+							addBundle(rBundle);
 						}
-						addServiceNodes(servObj);
+						if (e.getType() == RemoteServiceEvent.REGISTERED) {
+							ServiceObject servObj = new ServiceObject(rService, rBundle);
+							RemoteBundle usedInBundles[] = rService.getUsingBundles();
+							for (int i = 0; i < usedInBundles.length; i++) {
+								ServiceObject.addUsedInBundle(rService, usedInBundles[i], this);
+							}
+							addServiceNodes(servObj);
+						}
 					}
 				}
+				updateElement();
+			} catch (IAgentException e1) {
+				BrowserErrorHandler.processError(e1, connector, userDisconnect);
+			} catch (IllegalStateException ex) {
+				// ignore illegal states, they are usually due to working with stale
+				// data
+				BrowserErrorHandler.debug(ex);
+			} catch (Throwable t) {
+				BrowserErrorHandler.processError(t, connector, userDisconnect);
 			}
-			updateElement();
-		} catch (IAgentException e1) {
-			BrowserErrorHandler.processError(e1, connector, userDisconnect);
-		} catch (IllegalStateException ex) {
-			// ignore illegal states, they are usually due to working with stale
-			// data
-			BrowserErrorHandler.debug(ex);
-		} catch (Throwable t) {
-			BrowserErrorHandler.processError(t, connector, userDisconnect);
 		}
 	}
 

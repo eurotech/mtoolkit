@@ -76,7 +76,7 @@ public class ViewContentProvider implements ITreeContentProvider, ContentChangeL
 			display = Display.getCurrent();
 			if (display == null)
 				display = Display.getDefault();
-			display.syncExec(new Runnable() {
+			display.asyncExec(new Runnable() {
 				public void run() {
 					if (event.getTarget().getParent() != null) {
 						viewer.add(event.getTarget().getParent(), event.getTarget());
@@ -91,7 +91,7 @@ public class ViewContentProvider implements ITreeContentProvider, ContentChangeL
 			display = Display.getCurrent();
 			if (display == null)
 				display = Display.getDefault();
-			display.syncExec(new Runnable() {
+			display.asyncExec(new Runnable() {
 				public void run() {
 //					if (event.getTarget().getParent() != null) {
 //						viewer.refresh(event.getTarget().getParent());
@@ -109,7 +109,7 @@ public class ViewContentProvider implements ITreeContentProvider, ContentChangeL
 			display = Display.getCurrent();
 			if (display == null)
 				display = Display.getDefault();
-			display.syncExec(new Runnable() {
+			display.asyncExec(new Runnable() {
 				public void run() {
 					viewer.remove(target);
 				}
