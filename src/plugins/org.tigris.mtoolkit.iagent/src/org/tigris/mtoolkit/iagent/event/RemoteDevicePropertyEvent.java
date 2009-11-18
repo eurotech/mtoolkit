@@ -5,7 +5,7 @@ package org.tigris.mtoolkit.iagent.event;
  */
 public class RemoteDevicePropertyEvent extends RemoteEvent {
 
-	private static final int PROPERTY_CHANGED_TYPE = 0;
+	public static final int PROPERTY_CHANGED_TYPE = 0;
 
 	public String property;
 	public Object value;

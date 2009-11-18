@@ -36,8 +36,11 @@ import org.tigris.mtoolkit.iagent.event.RemoteBundleEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
 import org.tigris.mtoolkit.iagent.event.RemoteDPEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDPListener;
+import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
+import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
+import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
@@ -50,7 +53,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnec
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 
-public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteDPListener, RemoteServiceListener {
+public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteDPListener, RemoteServiceListener, RemoteDevicePropertyListener {
 
 	private boolean showServicePropertiesInTree = false;
 
@@ -77,7 +80,12 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	// flag indicates user has forced disconnect action
 	public boolean userDisconnect = false;
+	
+	private boolean supportBundles = false;
+	private boolean supportDPs = false;
+	private boolean supportServices = false;
 
+	
 	public FrameworkImpl(String name, boolean autoConnected) {
 		super(name);
 		this.autoConnected = autoConnected;
@@ -123,23 +131,23 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		return connecting;
 	}
 
-	// private void refreshViewers() {
-	// display = Display.getDefault();
-	// if (display == null)
-	// display = Display.getCurrent();
-	// display.asyncExec(new Runnable() {
-	// public void run() {
-	// TreeViewer[] all = FrameWorkView.getTreeViewers();
-	// if (all != null) {
-	// for (int i = 0; i < all.length; i++) {
-	// if (!all[i].getControl().isDisposed()) {
-	// all[i].refresh();
-	// }
-	// }
-	// }
-	// }
-	// });
-	// }
+//	private void refreshViewers() {
+//		display = Display.getDefault();
+//		if (display == null)
+//			display = Display.getCurrent();
+//		display.asyncExec(new Runnable() {
+//			public void run() {
+//				TreeViewer[] all = FrameWorkView.getTreeViewers();
+//				if (all != null) {
+//					for (int i = 0; i < all.length; i++) {
+//						if (!all[i].getControl().isDisposed()) {
+//							all[i].refresh();
+//						}
+//					}
+//				}
+//			}
+//		});
+//	}
 
 	public void setConnector(DeviceConnector connector) {
 		this.connector = connector;
@@ -159,15 +167,36 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	private void addRemoteListeners() {
 		try {
+			connector.addRemoteDevicePropertyListener(this);
 			DeploymentManager deploymentManager = connector.getDeploymentManager();
-			if (deploymentManager != null) {
+			if (supportBundles) {
 				deploymentManager.addRemoteBundleListener(this);
+			}
+			if (supportDPs) {
 				deploymentManager.addRemoteDPListener(this);
 			}
-			connector.getServiceManager().addRemoteServiceListener(this);
+			if (supportServices) {
+				connector.getServiceManager().addRemoteServiceListener(this);
+			}
 		} catch (IAgentException e) {
 			BrowserErrorHandler.processError(e, connector, userDisconnect);
 		}
+	}
+	
+	private void updateSupportedModels() {
+		Dictionary connectorProperties = connector.getProperties();
+		Object support = connectorProperties.get(Capabilities.BUNDLE_SUPPORT);
+		if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+			supportBundles = true;
+		}
+		support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
+		if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+			supportDPs = true;
+		}
+		support = connectorProperties.get(Capabilities.SERVICE_SUPPORT);
+		if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+			supportServices = true;
+		}		
 	}
 
 	private void removeRemoteListeners() {
@@ -247,6 +276,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 					if (monitor != null && monitor.isCanceled())
 						return false;
+					updateSupportedModels();
 					addRemoteListeners();
 					updateElement();
 					buildModel(monitor);
@@ -265,6 +295,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	public void disconnect() {
+//		TODO:
+		if (connector == null) return;
 		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
 			if (connector != null) {
 				removeRemoteListeners();
@@ -294,6 +326,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		servicesViewVector.removeAllElements();
 		dpHash.clear();
 		ServiceObject.usedInHashFWs.remove(this);
+		supportBundles = false;
+		supportDPs = false;
+		supportServices = false;
 	}
 
 	public Bundle findBundle(long id) {
@@ -387,10 +422,14 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				addElement((Model) servicesViewVector.elementAt(i));
 			}
 		} else {
-			Model bundlesNode = getBundlesNode();
-			Model dpNode = getDPNode();
-			addElement(bundlesNode);
-			addElement(dpNode);
+			if (supportBundles) {
+				Model bundlesNode = getBundlesNode();
+				addElement(bundlesNode);
+			}
+			if (supportDPs) {
+				Model dpNode = getDPNode();
+				addElement(dpNode);
+			}
 		}
 		updateElement();
 
@@ -850,6 +889,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					refreshing = true;
 					clearModel();
 					monitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
+					updateSupportedModels();
 					buildModel(monitor);
 					updateContextMenuStates();
 					refreshing = false;
@@ -1008,10 +1048,15 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	 * @throws IAgentException
 	 */
 	private void addBundles(IProgressMonitor monitor) throws IAgentException {
-		RemoteBundle rBundlesArray[] = null;
-		DeviceConnector connector = getConnector();
-		if (connector == null)
+		if (!supportBundles) {
 			return;
+		}
+		DeviceConnector connector = getConnector();
+		if (connector == null) {
+			return;
+		}
+		RemoteBundle rBundlesArray[] = null;
+		
 		rBundlesArray = connector.getDeploymentManager().listBundles();
 
 		if (rBundlesArray != null) {
@@ -1031,7 +1076,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				monitor.worked(work);
 			}
 		}
+		retrieveServicesInfo(rBundlesArray, monitor);
+	}
 
+	private void retrieveServicesInfo(RemoteBundle rBundlesArray[], IProgressMonitor monitor) throws IAgentException {
 		if (rBundlesArray != null) {
 			monitor.subTask(Messages.retrieve_services_info);
 
@@ -1064,13 +1112,17 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			}
 		}
 	}
-
+	
 	private void addDPs(IProgressMonitor monitor, int totalWork) throws IAgentException {
+		if (!supportDPs) {
+			return;
+		}
+		DeviceConnector connector = getConnector();
+		if (connector == null) {
+			return;
+		}
 		Model deplPackagesNode = getDPNode();
 		RemoteDP dps[] = null;
-		DeviceConnector connector = getConnector();
-		if (connector == null)
-			return;
 		dps = connector.getDeploymentManager().listDeploymentPackages();
 
 		if (dps != null && dps.length > 0) {
@@ -1179,6 +1231,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	private void addServices(IProgressMonitor monitor) throws IAgentException {
+		if (!supportServices) {
+			return;
+		}
 		for (int i = 0; i < servicesVector.size(); i++) {
 			ServiceObject servObj = (ServiceObject) servicesVector.elementAt(i);
 			addServiceNodes(servObj);
@@ -1298,6 +1353,91 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			} else {
 				ServiceProperty node = new ServiceProperty(key + ": " + value.toString());
 				objClass.addElement(node);
+			}
+		}
+	}
+
+	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
+		if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
+			boolean enabled = ((Boolean) e.getValue()).booleanValue();
+			Object property = e.getProperty();
+			if (Capabilities.BUNDLE_SUPPORT.equals(property)) {
+				if (enabled) {
+					Job addJob = new Job(Messages.retrieve_bundles_info) {
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								int total = FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES;
+								monitor.beginTask(Messages.retrieve_bundles_info, total);
+								addBundles(monitor);
+							} catch (IAgentException e) {
+								return FrameworkPlugin.handleIAgentException(e);
+							} finally {
+								monitor.done();
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					addJob.schedule();
+				} else {
+					connector.getDeploymentManager().removeRemoteBundleListener(this);
+					bundles.removeChildren();
+					removeElement(bundles);
+					bundles = null;
+					supportBundles = false;
+				}
+			}
+			if (Capabilities.DEPLOYMENT_SUPPORT.equals(property)) {
+				if (enabled) {
+					supportDPs = true;
+					Job addJob = new Job(Messages.retrieve_dps_info) {
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								int total = 100;
+								monitor.beginTask(Messages.retrieve_dps_info, total);
+								connector.getDeploymentManager().addRemoteDPListener(FrameworkImpl.this);
+								addDPs(monitor, total);
+							} catch (IAgentException e) {
+								return FrameworkPlugin.handleIAgentException(e);
+							} finally {
+								monitor.done();
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					addJob.schedule();
+				} else {
+					connector.getDeploymentManager().removeRemoteDPListener(this);
+					deplPackages.removeChildren();
+					removeElement(deplPackages);
+					deplPackages = null;
+					supportDPs = false;
+				}
+			}
+			if (Capabilities.SERVICE_SUPPORT.equals(property)) {
+				if (enabled) {
+					supportServices = true;
+					Job addJob = new Job(Messages.retrieve_services_info) {
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								int total = FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES;
+								monitor.beginTask(Messages.retrieve_services_info, total);
+								connector.getServiceManager().addRemoteServiceListener(FrameworkImpl.this);
+								retrieveServicesInfo(connector.getDeploymentManager().listBundles(), monitor);
+								addServices(monitor);
+							} catch (IAgentException e) {
+								return FrameworkPlugin.handleIAgentException(e);
+							} finally {
+								monitor.done();
+							}
+							return Status.OK_STATUS;
+						}
+					};
+					addJob.schedule();
+				} else {
+					connector.getServiceManager().removeRemoteServiceListener(this);
+					//TODO remove services nodes
+					supportServices = false;
+				}
 			}
 		}
 	}
