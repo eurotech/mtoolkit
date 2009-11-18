@@ -82,6 +82,9 @@
 		<copy todir="${buildDirectory}">
 			<fileset dir="${sourceRepDirectory}"/>
 		</copy>
+		<copy todir="${buildDirectory}/plugins">
+			<fileset dir="${docsDirectory}"/>
+		</copy>
 	</target>
 
 	<!-- ===================================================================== -->
