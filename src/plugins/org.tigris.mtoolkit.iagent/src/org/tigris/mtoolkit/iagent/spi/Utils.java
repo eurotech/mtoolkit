@@ -216,7 +216,6 @@ public class Utils {
 				int verificationResult = ((PMPRemoteObjectAdapter) remote).verifyRemoteReference();
 				if (verificationResult == PMPRemoteObjectAdapter.REPEAT) {
 					debug("[callRemoteMethod] Remote reference verification says REPEAT");
-					clearCache(remote);
 					try {
 						return callRemoteMethod0(remote, parameters, methodSignature);
 					} catch (PMPException e1) {
@@ -247,7 +246,6 @@ public class Utils {
 				int verificationResult = ((PMPRemoteObjectAdapter) remote).verifyRemoteReference();
 				if (verificationResult == PMPRemoteObjectAdapter.REPEAT) {
 					debug("[isRemoteMethodDefined] Remote reference verification says REPEAT");
-					clearCache(remote);
 					try {
 						return getRemoteMethod(remote, methodSignature) != null;
 					} catch (PMPException e1) {
@@ -279,7 +277,7 @@ public class Utils {
 	private static RemoteMethod getRemoteMethod(RemoteObject remote, MethodSignature methodSignature)
 			throws PMPException {
 		synchronized (methodSignature) {
-			if (methodSignature.cachedMethod == null || methodSignature.cachedObject != remote) {
+			if (!validateMethodCache(remote, methodSignature)) {
 				debug("[invokeCachedMethod] Method wasn't found in the cache. Quering remote site...");
 				// we don't want to left behind incosistence cache, if the
 				// getMethod fails
@@ -290,22 +288,15 @@ public class Utils {
 			return methodSignature.cachedMethod;
 		}
 	}
-
-	public static void clearCache() {
-		debug("[clearCache] >>>");
-		for (int i = 0; i < METHOD_SIGNATURES.length; i++) {
-			METHOD_SIGNATURES[i].cachedMethod = null;
-		}
-	}
-
-	public static void clearCache(RemoteObject object) {
-		debug("[clearCache] >>> RemoteObject:" + object);
-		for (int i = 0; i < METHOD_SIGNATURES.length; i++) {
-			if (METHOD_SIGNATURES[i].cachedObject == object) {
-				METHOD_SIGNATURES[i].cachedMethod = null;
-				METHOD_SIGNATURES[i].cachedObject = null;
-			}
-		}
+	
+	private static boolean validateMethodCache(RemoteObject object, MethodSignature signature) {
+		if (signature.cachedMethod == null)
+			return false;
+		if (signature.cachedObject != object)
+			return false;
+		if (!(object instanceof PMPRemoteObjectAdapter))
+			return true;
+		return ((PMPRemoteObjectAdapter)object).validateCache(signature.cachedMethod);
 	}
 
 	private static final void debug(String message) {

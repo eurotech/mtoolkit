@@ -127,4 +127,8 @@ class RemoteMethodImpl implements RemoteMethod {
 		}
 		return s;
 	}
+
+	public RemoteObject getRemoteObject() {
+		return ro;
+	}
 }

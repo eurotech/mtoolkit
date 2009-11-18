@@ -121,7 +121,6 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 
 	private void resetRemoteReferences() {
 		debug("[resetRemoteReferences] >>>");
-		Utils.clearCache();
 		if (remoteObjects != null) {
 			Collection objects = remoteObjects.values();
 			for (Iterator iterator = objects.iterator(); iterator.hasNext();) {

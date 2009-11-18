@@ -88,4 +88,5 @@ public interface RemoteMethod {
 
 	public String toString();
 
+	public RemoteObject getRemoteObject();
 }

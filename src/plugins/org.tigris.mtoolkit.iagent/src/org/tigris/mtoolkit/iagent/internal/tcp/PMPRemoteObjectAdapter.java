@@ -55,6 +55,10 @@ public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 	public RemoteMethod[] getMethods() throws PMPException {
 		return delegate.getMethods();
 	}
+	
+	public boolean validateCache(RemoteMethod method) {
+		return delegate == method.getRemoteObject();
+	}
 
 	public abstract int verifyRemoteReference() throws IAgentException;
 
