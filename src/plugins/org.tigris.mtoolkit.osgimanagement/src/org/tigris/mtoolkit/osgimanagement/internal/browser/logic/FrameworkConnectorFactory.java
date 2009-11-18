@@ -223,7 +223,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					if (fw.getConnector() == connector) {
 						fw.disconnect();
 						fw.setPMPConnectionListener(null);
-						fw.setConnector(null);
 						if (fw.autoConnected) {
 							FrameWorkView.treeRoot.removeElement(fw);
 						}
