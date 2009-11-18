@@ -188,7 +188,6 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		return null;
 	}
 
-	@Override
 	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
 		if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
 			boolean enabled = ((Boolean) e.getValue()).booleanValue();
