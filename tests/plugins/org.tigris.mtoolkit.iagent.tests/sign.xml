@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="sign" default="all">
+    <description>
+            description
+    </description>
+
+    <!-- ================================= 
+          target: default              
+         ================================= -->
+    <target name="all">
+    	<mkdir dir="signed"/>
+		<signjar destDir="signed"
+                        alias="titan_test"
+                        keystore="titantestcert.jks"
+						storepass="123456"
+						storetype="jks"
+					preservelastmodified="true">
+        <fileset dir="unsigned"/>
+        <flattenmapper />
+    </signjar>
+    </target>
+
+</project>
