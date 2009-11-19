@@ -113,8 +113,6 @@ public class ConnectFrameworkJob extends Job {
 					}
 					aConnProps.put("framework-name", fw.getName()); //$NON-NLS-1$
 					connector = DeviceConnector.connect(transportType, id, aConnProps);
-					fw.setConnector(connector);
-					FrameworkConnectorFactory.createPMPConnection(connector, fw, fw.getName(), false);
 				} else {
 //					TODO: show proper error msg
 				}

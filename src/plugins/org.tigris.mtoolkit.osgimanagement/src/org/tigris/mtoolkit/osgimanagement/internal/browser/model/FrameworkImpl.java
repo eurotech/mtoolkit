@@ -149,12 +149,12 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 //		});
 //	}
 
-	public void setConnector(DeviceConnector connector) {
-		this.connector = connector;
-		if (connector == null) {
-			connectedFlag = false;
-		}
-	}
+//	public void setConnector(DeviceConnector connector) {
+//		this.connector = connector;
+//		if (connector == null) {
+//			connectedFlag = false;
+//		}
+//	}
 
 	public void connect(final DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
@@ -307,7 +307,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			}
 
 			clearModel();
-			connector = null;
+			if (!autoConnected) {
+				connector = null;
+			}
 			connectedFlag = false;
 			updateElement();
 			updateContextMenuStates();

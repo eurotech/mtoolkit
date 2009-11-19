@@ -147,14 +147,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 //		}
 
 		BrowserErrorHandler.debug("FrameworkPlugin: " + connProps.get("framework-name") + " was connected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		// already started connection job for this framework
-//		if (connectJobs.containsKey(connector))
-//			return;
-
-		if (autoConnected) {
-			createPMPConnection(connector, fw, frameworkName, autoConnected);
-		}
+		createPMPConnection(connector, fw, frameworkName, autoConnected);
 	}
 
 	static void createPMPConnection(final DeviceConnector connector, FrameworkImpl fw, String frameworkName,
