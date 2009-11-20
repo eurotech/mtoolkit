@@ -82,8 +82,6 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			}
 		}
 		
-		Activator.getSynchronizer().addEventSource(CUSTOM_SERVICE_EVENT);
-
 		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
 		if (capMan != null) {
 			capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(true));
@@ -116,8 +114,6 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(false));
 		}
 
-		Activator.getSynchronizer().removeEventSource(CUSTOM_SERVICE_EVENT);
-		
 		this.bc = null;
 
 		debug("[unregister] Unregistered.");

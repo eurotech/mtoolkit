@@ -22,6 +22,7 @@ import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
@@ -42,6 +43,8 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 	protected String uri;
 
 	private BundleContext context;
+
+	protected Hashtable eventTypes = new Hashtable(10);
 
 	public Server(BundleContext context, Dictionary config) throws IOException {
 		this.context = context;
@@ -122,23 +125,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 		return run;
 	}
 
-	public synchronized void addEventSource(String eventType) {
-		if (eventTypes.get(eventType) == null) {
-			eventTypes.put(eventType, new Vector());
-			synchronized (connections) {
-				for (Iterator it = connections.iterator(); it.hasNext();) {
-					PMPSessionThread session = (PMPSessionThread) it.next();
-					if (session.connected)
-						session.registerEventType(eventType);
-				}
-			}
-		}
-	}
-
-	public void removeEventSource(String eventType) {
-		eventTypes.remove(eventType);
-	}
-
 	public void event(Object ev, String t) {
 		Vector ls = (Vector) eventTypes.get(t);
 		if (ls != null) {
@@ -150,8 +136,10 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 
 	protected synchronized byte addListener(String evType, PMPSessionThread listener) {
 		Vector ls = (Vector) eventTypes.get(evType);
-		if (ls == null)
-			return 0;
+		if (ls == null) {
+			ls = new Vector();
+			eventTypes.put(evType, ls);
+		}
 		if (ls.contains(listener))
 			return 1;
 		ls.addElement(listener);
@@ -160,7 +148,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 
 	protected synchronized byte removeListener(String evType, PMPSessionThread listener) {
 		Vector ls = (Vector) eventTypes.get(evType);
-		return ls == null ? 0 : ls.removeElement(listener) ? 2 : (byte) 1;
+		return ls == null ? 1 : ls.removeElement(listener) ? 2 : (byte) 1;
 	}
 
 	protected synchronized void removeListeners(Vector evTypes, PMPSessionThread listener) {
@@ -169,18 +157,16 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 		}
 	}
 
-	protected Hashtable eventTypes = new Hashtable(10);
-
 	protected void debug(String msg) {
-		// TODO: Add logging
+		DebugUtils.debug(this, msg);
 	}
 
 	protected void error(String msg, Throwable exc) {
-		// TODO: Add logging
+		DebugUtils.error(this, msg, exc);
 	}
 
 	protected void info(String msg) {
-		// TODO: Add logging
+		DebugUtils.info(this, msg);
 	}
 
 	protected ObjectInfo getService(String clazz, String filter) {

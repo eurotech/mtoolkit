@@ -28,23 +28,4 @@ public interface PMPServer extends PMPPeer {
 	 */
 	public void event(Object ev, String eventType);
 
-	/**
-	 * Registeres an event type at the event collector. After an event type has
-	 * been registered listeners can register for recieving events of this type.
-	 * 
-	 * @param eventType
-	 *            The event type to register
-	 */
-	public void addEventSource(String eventType);
-
-	/**
-	 * Unregisteres an event type from the event collector. All listeners
-	 * registered for receiving events of this type will recieve a notification
-	 * for this unregistration.
-	 * 
-	 * @param eventType
-	 *            The event type to unregister.
-	 */
-	public void removeEventSource(String eventType);
-
 }

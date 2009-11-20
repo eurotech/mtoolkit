@@ -95,12 +95,6 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		delegatesTrack = new ServiceTracker(bc, BundleManagerDelegate.class.getName(), null);
 		delegatesTrack.open();
 		
-		EventSynchronizer synchronizer = Activator.getSynchronizer();
-		if (synchronizer != null) {
-			synchronizer.addEventSource(RemoteBundleAdminImpl.SYNCH_BUNDLE_EVENTS);
-			synchronizer.addEventSource(RemoteBundleAdminImpl.SYSTEM_BUNDLE_EVENT);
-		}
-		
 		registration = bc.registerService(RemoteBundleAdmin.class.getName(), this, null);
 
 		bc.addBundleListener(this);
@@ -129,9 +123,6 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			startLevelTrack.close();
 			startLevelTrack = null;
 		}
-		
-		Activator.getSynchronizer().removeEventSource(SYSTEM_BUNDLE_EVENT);
-		Activator.getSynchronizer().removeEventSource(SYNCH_BUNDLE_EVENTS);
 		
 		bc.removeBundleListener(this);
 

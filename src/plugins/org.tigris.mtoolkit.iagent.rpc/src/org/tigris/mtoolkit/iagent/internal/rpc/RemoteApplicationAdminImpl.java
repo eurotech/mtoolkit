@@ -73,8 +73,6 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	public void register(BundleContext bundleContext) {
 		this.bc = bundleContext;
 
-		Activator.getSynchronizer().addEventSource(SYNCH_APPLICATION_EVENT);
-
 		suppressEventFiring = true;
 		try {
 			applicationTracker = new ServiceTracker(bc, APPLICATION_DESCRIPTOR, this);
@@ -108,7 +106,6 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			handlesTracker.close();
 			handlesTracker = null;
 		}
-		Activator.getSynchronizer().removeEventSource(SYNCH_APPLICATION_EVENT);
 
 		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
 		if (capMan != null) {

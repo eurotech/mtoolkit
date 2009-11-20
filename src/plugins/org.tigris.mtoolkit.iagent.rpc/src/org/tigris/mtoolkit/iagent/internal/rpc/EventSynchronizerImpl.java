@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +23,6 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 
 	private List eventQueue = new LinkedList();
-	private List eventTypes = new ArrayList();
 	private volatile boolean running;
 	private PMPServer server;
 	private ServiceRegistration registration;
@@ -46,33 +43,6 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 		if (this.server != null)
 			throw new IllegalStateException("Event synchronizer already initialized");
 		this.server = server;
-		synchronized (eventTypes) {
-			for (Iterator it = eventTypes.iterator(); it.hasNext();) {
-				String evType = (String) it.next();
-				server.addEventSource(evType);
-			}
-		}
-	}
-
-	public void addEventSource(String eventType) {
-		debug("[addEventSource] >>> eventType: " + eventType);
-		synchronized (eventTypes) {
-			if (eventTypes.contains(eventType))
-				return;
-			
-			eventTypes.add(eventType);
-			if (server != null)
-				server.addEventSource(eventType);
-		}
-	}
-
-	public void removeEventSource(String eventType) {
-		debug("[removeEventSource] >>> eventType: " + eventType);
-		synchronized (eventTypes) {
-			if (server != null)
-				server.removeEventSource(eventType);
-			eventTypes.remove(eventType);
-		}
 	}
 
 	public void start() {
@@ -128,10 +98,6 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 
 	public void unregister(BundleContext bc) {
 		debug("[unregister] Unregistering EventSynchronizer...");
-
-		for (int i = 0; i < eventTypes.size(); i++) {
-			server.removeEventSource((String) eventTypes.get(i));
-		}
 
 		if (registration != null) {
 			registration.unregister();

@@ -13,10 +13,6 @@ package org.tigris.mtoolkit.iagent.event;
 
 public interface EventSynchronizer {
 
-	public void addEventSource(String eventType);
-	
-	public void removeEventSource(String eventType);
-	
 	public void enqueue(EventData eventData);
 
 }

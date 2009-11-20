@@ -77,11 +77,7 @@ public class PMPSessionThread extends Thread {
 	// 00011000
 	protected static final int NEW_EVENT_REQ_OP = 16;
 	protected static final byte[] EVENT = { (byte) NEW_EVENT_REQ_OP }; // 00010000
-	protected static final int REGISTER_EVENT_REQ_OP = 48;
-	protected static final byte[] REGISTER_EVENT = { (byte) REGISTER_EVENT_REQ_OP }; // 16
-	// +
-	// 32
-	// 00110000
+
 	protected static final int GET_METHODS_REPLY_OP = 32;
 	protected static final byte[] METHODS = { (byte) GET_METHODS_REPLY_OP }; // 00100000
 	protected static final int GET_METHOD_REPLY_OP = 96;
@@ -126,7 +122,6 @@ public class PMPSessionThread extends Thread {
 	private static final String ERRMSG1 = "Protocol Error";
 	protected static final String ERRMSG2 = "Write Error";
 	private static final String ERRMSG3 = "Read Error";
-	private static final String ERRMSG4 = "No Such Event Type ";
 	private static final String DSCMSG1 = "Normal Disconnect Received";
 	private static final String DSCMSG2 = "Error Disconnect Received: ";
 	
@@ -641,16 +636,14 @@ public class PMPSessionThread extends Thread {
 			return;
 		}
 		if ((opID & 16) != 0) {
+			// remove
 			String evType = PMPData.readString(is, maxS);
 			byte res = peer.removeListener(evType, this);
-			if (res == 0) {
-				writeEventFailed(ERRMSG4 + evType);
-				return;
-			} else if (res == 2) {
+			if (res == 2) {
 				eventTypes.removeElement(evType);
 			}
 		} else {
-			// // add
+			// add
 			String evType = null;
 			try {
 				evType = PMPData.readString(is, maxS);
@@ -659,10 +652,7 @@ public class PMPSessionThread extends Thread {
 				return;
 			}
 			byte res = peer.addListener(evType, this);
-			if (res == 0) {
-				writeEventFailed(ERRMSG4 + evType);
-				return;
-			} else if (res == 2) {
+			if (res == 2) {
 				if (eventTypes == null)
 					eventTypes = new Vector();
 				eventTypes.addElement(evType);
@@ -732,20 +722,6 @@ public class PMPSessionThread extends Thread {
 
 	public void postEvent(Object event, String eventType) {
 		event(event, eventType);
-	}
-
-	/** notifies clients that an event type is registered */
-
-	protected void registerEventType(String eventType) {
-		try {
-			os.begin((short) -1);
-			os.write(REGISTER_EVENT);
-			PMPData.writeString(eventType, os);
-			os.end(false);
-		} catch (Exception exc) {
-			error("Error Sending Event Type Registration", exc);
-			os.unlock();
-		}
 	}
 
 	private void writeEventFailed(String errMsg) {
@@ -989,12 +965,6 @@ public class PMPSessionThread extends Thread {
 			return;
 		}
 		try {
-			if ((opID & 32) != 0) {
-				if (connection.evMngr != null) {
-					connection.evMngr.registerListeners(PMPData.readString(is, maxS));
-				}
-				return;
-			}
 			if (connection.evMngr != null) {
 				String sEvType = PMPData.readString(is, maxS);
 				debug(sEvType);

@@ -40,8 +40,6 @@ public class RemoteCapabilitiesManagerImpl implements Remote, RemoteCapabilities
 		this.bc = bundleContext;
 		initCapabilities();
 
-		Activator.getSynchronizer().addEventSource(PROPERTY_EVENT);
-
 		registration = bc.registerService(new String[] { RemoteCapabilitiesProvider.class.getName(),
 				RemoteCapabilitiesManager.class.getName() }, this, null);
 	}
@@ -51,8 +49,6 @@ public class RemoteCapabilitiesManagerImpl implements Remote, RemoteCapabilities
 			registration.unregister();
 			registration = null;
 		}
-
-		Activator.getSynchronizer().removeEventSource(PROPERTY_EVENT);
 
 		this.bc = null;
 	}

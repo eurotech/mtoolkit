@@ -229,21 +229,6 @@ class PMPEventsManager extends Thread {
 		addEvent(e);
 	}
 
-	/**
-	 * Registers listener in the Framework
-	 * 
-	 * @param eventType
-	 *            The event type of the listeners ot register
-	 */
-	public void registerListeners(String eventType) {
-		synchronized (listeners) {
-			Vector ls = (Vector) listeners.get(eventType);
-			if (ls != null) {
-				addEvent(new ListenerEvent(ListenerEvent.ADD_LISTENER_OP, eventType, (EventListener) ls.elementAt(0)));
-			}
-		}
-	}
-
 	protected ClassLoader getClassLoader(String type) {
 		synchronized (listeners) {
 			Vector v = (Vector) listeners.get(type);

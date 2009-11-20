@@ -47,21 +47,15 @@ public class DeploymentEventListener implements EventHandler {
 				COMPLETE_EVENT_TOPIC, });
 		registration = context.registerService(EventHandler.class.getName(), this, eventProps);
 		debug("[register] Event handler registered.");
-		
-		Activator.getSynchronizer().addEventSource(DEPLOYMENT_EVENT);
 	}
 
 	public void unregister() {
-		Activator.getSynchronizer().removeEventSource(DEPLOYMENT_EVENT);
-		
 		if (registration != null) {
 			debug("[unregister] Unregistering event handler for deployment packages...");
 			registration.unregister();
 			registration = null;
 			debug("[unregister] Event handler unregistered.");
-		} else {
 		}
-
 	}
 
 	public void handleEvent(Event event) {
