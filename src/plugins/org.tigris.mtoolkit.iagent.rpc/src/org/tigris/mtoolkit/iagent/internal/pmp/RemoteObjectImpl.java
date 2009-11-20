@@ -75,7 +75,8 @@ class RemoteObjectImpl implements RemoteObject {
 	 */
 	public void dispose() throws PMPException {
 		if (!c.connected)
-			throw new PMPException("PMPConnection closed");
+			// if we are not connected, we don't have to dispose anything
+			return;
 		c.dispose(IOR);
 	}
 
