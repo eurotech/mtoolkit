@@ -134,7 +134,8 @@ public class PluginProvider implements InstallationItemProvider {
 			file = new File(path);
 			if (exporter.getResult().isOK() && file.exists()) {
 				try {
-					if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))) {
+					if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
+							!AndroidUtils.isConvertedToDex(file)) {
 						File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/" + file.getName());
 						convertedFile.getParentFile().mkdirs();
 						AndroidUtils.convertToDex(file, convertedFile, monitor);

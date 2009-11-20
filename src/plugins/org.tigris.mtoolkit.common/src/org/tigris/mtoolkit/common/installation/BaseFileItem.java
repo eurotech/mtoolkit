@@ -57,10 +57,11 @@ public class BaseFileItem implements InstallationItem {
         convertedFile.getParentFile().mkdirs();
         if (FileUtils.getFileExtension(baseFile).equals("dp")) {
           AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
-        } else {
+          preparedFile = convertedFile;
+        } else if (!AndroidUtils.isConvertedToDex(baseFile)){
           AndroidUtils.convertToDex(baseFile, convertedFile, monitor);
+          preparedFile = convertedFile;
         }
-        preparedFile = convertedFile;
       }
 
       File signedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/signed/" + getName());
