@@ -34,6 +34,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -44,9 +45,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Propert
 public class ConnectFrameworkJob extends Job {
 	private static List connectingFrameworks = new ArrayList();
 
-	private FrameworkImpl fw;
+	private Framework fw;
 
-	public ConnectFrameworkJob(FrameworkImpl framework) {
+	public ConnectFrameworkJob(Framework framework) {
 		super(NLS.bind(Messages.connect_framework, framework.getName()));
 		this.fw = framework;
 	}
@@ -83,7 +84,7 @@ public class ConnectFrameworkJob extends Job {
 		DeviceConnector connector = fw.getConnector();
 		try {
 			if (connector != null && connector.isActive()) {
-				FrameworkConnectorFactory.createPMPConnection(connector, fw, fw.getName(), fw.autoConnected);
+				FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl)fw, fw.getName(), ((FrameworkImpl)fw).autoConnected);
 			} else {
 				IMemento config = fw.getConfig();
 				String id = null;

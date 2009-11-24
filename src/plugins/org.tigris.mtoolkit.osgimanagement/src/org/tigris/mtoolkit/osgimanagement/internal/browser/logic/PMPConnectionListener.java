@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -75,9 +76,10 @@ public class PMPConnectionListener implements ConnectionListener {
 			return;
 		Job connectJob = new Job(frameworkName) {
 			protected IStatus run(IProgressMonitor monitor) {
+				SubMonitor sMonitor = SubMonitor.convert(monitor, FrameworkConnectorFactory.CONNECT_PROGRESS);
 				try {
-					monitor.beginTask("Connecting "+frameworkName, FrameworkConnectorFactory.CONNECT_PROGRESS);
-					monitor.subTask("Connecting "+frameworkName);
+					sMonitor.setTaskName("Connecting "+frameworkName);
+					SubMonitor connectMonitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
 					try {
 						// force creation of pmp connection
 						if (!connector.getVMManager().isVMActive()) {
@@ -104,19 +106,19 @@ public class PMPConnectionListener implements ConnectionListener {
 						return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection failed", e);
 					}
 					
-					monitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
+					connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
 
 					
 					
 					if (fw != null) {
-						fw.connect(connector, monitor);
+						fw.connect(connector, sMonitor);
 					}
 					if (!autoConnected && fw.isConnected()) {
 						ConsoleManager.connectConsole(fw);
 					}
 					return Status.OK_STATUS;
 				} finally {
-					monitor.done();
+					sMonitor.done();
 				}
 			}
 		};

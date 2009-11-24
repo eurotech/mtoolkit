@@ -103,7 +103,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ListUtil;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
@@ -112,14 +111,11 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Add
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.BundlePropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.CommonPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ConnectAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DPPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DeInstallBundleAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DeInstallDPAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DisconnectAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.FindAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.GotoServiceAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallBundleAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallDPAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.PropertyAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RefreshAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RemoveAction;
@@ -144,16 +140,13 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public static final String UPDATE_BUNDLE_IMAGE_PATH = "update_bundle.gif"; //$NON-NLS-1$
 	public static final String STOP_BUNDLE_IMAGE_PATH = "stop_bundle.gif"; //$NON-NLS-1$
 	public static final String START_BUNDLE_IMAGE_PATH = "start_bundle.gif"; //$NON-NLS-1$
-	public static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif"; //$NON-NLS-1$
 	public static final String UNINSTALL_BUNDLE_IMAGE_PATH = "uninstall_bundle.gif"; //$NON-NLS-1$
-	public static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif"; //$NON-NLS-1$
 	public static final String INSTALL_BUNDLE_IMAGE_PATH = "install_bundle.gif"; //$NON-NLS-1$
 	public static final String DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif"; //$NON-NLS-1$
 	public static final String CONNECT_ACTION_IMAGE_PATH = "connect_action.gif"; //$NON-NLS-1$
 	public static final String PROPERTIES_ACTION_IMAGE_PATH = "properties_action.gif"; //$NON-NLS-1$
 	public static final String REMOVE_ACTION_ACTION_PATH = "remove_action.gif"; //$NON-NLS-1$
 	public static final String ADD_ACTION_IMAGE_PATH = "add_action.gif"; //$NON-NLS-1$
-	public static final String DP_GROUP_IMAGE_PATH = "dp_group.gif"; //$NON-NLS-1$
 	public static final String BUNDLES_GROUP_IMAGE_PATH = "bundles_group.gif"; //$NON-NLS-1$
 	public static final String SEARCH_IMAGE_PATH = "search_action.gif";
 	public static final String REFRESH_IMAGE_PATH = "refresh_action.gif";
@@ -170,9 +163,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private static ConnectAction connectAction;
 	private static DisconnectAction disconnectAction;
 	private static InstallBundleAction installBundleAction;
-	private static InstallDPAction installDPAction;
 	private static DeInstallBundleAction deinstallBundleAction;
-	private static DeInstallDPAction deinstallDPAction;
 	
 	private static StartAction startAction;
 	private static StopAction stopAction;
@@ -185,7 +176,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private static ViewAction viewBundlesAction;
 	private ShowBundleIDAction showBundleIDAction;
 	private ShowBundleVersionAction showBundleVersionAction;
-	private static DPPropertiesAction dpPropertiesAction;
 	private static BundlePropertiesAction bundlePropertiesAction;
 	private FindAction findAction;
 	private static ShowFrameworkConsole showConsoleAction;
@@ -421,12 +411,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, bundlesTB);
 
-		Action[] actions = new Action[] { installDPAction, deinstallDPAction, dpPropertiesAction };
-		ToolbarIMenuCreator dpTB = new ToolbarIMenuCreator(actions, tree);
-		dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
-		dpTB.setToolTipText(Messages.DPAction_ToolTip);
-		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, dpTB);
-
 		for (int i = 0; i < actionProviders.size(); i++) {
 			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
 			provider.fillToolBar(toolBar);
@@ -546,14 +530,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		installBundleAction = new InstallBundleAction(tree, Messages.install_action_label);
 		installBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(INSTALL_BUNDLE_IMAGE_PATH));
 
-		installDPAction = new InstallDPAction(tree, Messages.install_dp_action_label);
-		installDPAction.setImageDescriptor(ImageHolder.getImageDescriptor(INSTALL_DP_IMAGE_PATH));
-
 		deinstallBundleAction = new DeInstallBundleAction(tree, Messages.deinstall_action_label);
 		deinstallBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(UNINSTALL_BUNDLE_IMAGE_PATH));
-
-		deinstallDPAction = new DeInstallDPAction(tree, Messages.deinstall_dp_action_label);
-		deinstallDPAction.setImageDescriptor(ImageHolder.getImageDescriptor(UNINSTALL_DP_IMAGE_PATH));
 
 		startAction = new StartAction(tree, Messages.start_action_label);
 		startAction.setImageDescriptor(ImageHolder.getImageDescriptor(START_BUNDLE_IMAGE_PATH));
@@ -577,9 +555,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree, getTreeRoot());
 
 		showServPropsInTreeAction = new ShowServicePropertiesInTree(tree, Messages.show_service_properties_in_tree);
-
-		dpPropertiesAction = new DPPropertiesAction(tree, Messages.property_action_label);
-		dpPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
 
 		bundlePropertiesAction = new BundlePropertiesAction(tree, Messages.property_action_label);
 		bundlePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
@@ -635,10 +610,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		bundlePropertiesAction.updateState(selection);
 
 		installBundleAction.updateState(selection);
-		installDPAction.updateState(selection);
-
-		deinstallDPAction.updateState(selection);
-		dpPropertiesAction.updateState(selection);
 
 		addFrameworkAction.setEnabled(true);
 		removeFrameworkAction.updateState(selection);
@@ -683,7 +654,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
 
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installBundleAction);
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
 				}
 				if (element instanceof TreeRoot) {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_UNSIGNED, addFrameworkAction);
@@ -714,13 +684,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 					if (element.getName().equals(Messages.bundles_node_label)) {
 						manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installBundleAction);
 					}
-					if (element.getName().equals(Messages.dpackages_node_label)) {
-						manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
-					}
-				}
-				if (element instanceof DeploymentPackage) {
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, deinstallDPAction);
-					// manager.add(dpPropertiesAction);
 				}
 			}
 		} else {
@@ -741,8 +704,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, frameworkPropertiesAction);
 			if (element instanceof Bundle)
 				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, bundlePropertiesAction);
-			if (element instanceof DeploymentPackage)
-				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, dpPropertiesAction);
 			if (element instanceof ObjectClass)
 				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, servicePropertiesAction);
 		}

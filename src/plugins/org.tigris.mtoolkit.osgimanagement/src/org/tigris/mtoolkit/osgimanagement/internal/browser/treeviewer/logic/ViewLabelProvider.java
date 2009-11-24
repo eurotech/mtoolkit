@@ -32,7 +32,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty;
@@ -43,7 +42,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 public class ViewLabelProvider extends StyledCellLabelProvider implements ConstantsDistributor {
 
 	public static final String ROOT_ICON = "homefolder.gif"; //$NON-NLS-1$
-	public static final String DP_ICON = "dpackage.gif"; //$NON-NLS-1$
 	public static final String BUNDLE_ICON_EXTENSION_INSTALLED = "bundle_extension_installed.gif"; //$NON-NLS-1$
 	public static final String OBJECT_CLASS_ICON = "objectClass.gif"; //$NON-NLS-1$
 	public static final String SERVICES_CATEGORY_ICON = "services.gif"; //$NON-NLS-1$
@@ -58,7 +56,6 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 	public static final String BUNDLE_ICON_UNKNOWN = "bundle_unk.gif"; //$NON-NLS-1$
 	public static final String BUNDLE_ICON_RESOLVED = "bundle_resolved.gif"; //$NON-NLS-1$
 	public static final String BUNDLE_ICON_ACTIVE = "bundle_active.gif"; //$NON-NLS-1$
-	public static final String DP_NODE_ICON = "dp_package.gif"; //$NON-NLS-1$
 	public static final String BUNDLE_NODE_ICON = "bundles_package.gif"; //$NON-NLS-1$
 
 	// Override to return proper image for every element
@@ -131,14 +128,8 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		if (element instanceof SimpleNode) {
 			if (((SimpleNode) element).getName().equals(Messages.bundles_node_label)) {
 				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_NODE_ICON);
-			} else if (((SimpleNode) element).getName().equals(Messages.dpackages_node_label)) {
-				return ImageHolder.getImage(ViewLabelProvider.DP_NODE_ICON);
 			}
 		}
-		if (element instanceof DeploymentPackage) {
-			return ImageHolder.getImage(ViewLabelProvider.DP_ICON);
-		}
-
 		if (element instanceof ServiceProperty) {
 			return null;
 		}

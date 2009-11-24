@@ -123,7 +123,7 @@ public class Bundle extends Model {
 	// exception
 	public void update() throws IAgentException {
 		Framework framework = findFramework();
-		if (framework != null && framework.getConnector() != null) {
+//		if (framework != null && framework.getConnector() != null) {
 			try {
 				refreshStateFromRemote();
 				RemoteBundle rBundle = getRemoteBundle();
@@ -132,7 +132,7 @@ public class Bundle extends Model {
 				// always update the viewers
 				updateElement();
 			}
-		}
+//		}
 	}
 
 	public boolean isNeedUpdate() {

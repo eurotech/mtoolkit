@@ -10,13 +10,9 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -33,7 +29,6 @@ import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
@@ -48,10 +43,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOpe
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StartBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StopBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UninstallBundleOperation;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UninstallDeploymentOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UpdateBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.InstallDialog;
@@ -63,7 +56,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkTarget;
 
 public class ActionsManager {
 	private static final String MIME_JAR = "application/java-archive"; //$NON-NLS-1$
-	private static final String MIME_DP = "application/vnd.osgi.dp"; //$NON-NLS-1$
 
 	public static void addFrameworkAction(TreeRoot treeRoot, TreeViewer parentView) {
 		String frameworkName = generateName(treeRoot);
@@ -106,87 +98,10 @@ public class ActionsManager {
 		}
 	}
 
-	public static void dpPropertiesAction(DeploymentPackage dp, TreeViewer parentView) {
-		try {
-			RemoteDP rdp = dp.getRemoteDP();
-
-			Shell shell = parentView.getTree().getShell();
-			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.dp_properties_title) {
-				protected void attachHelp(Composite container) {
-					PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
-							IHelpContextIds.PROPERTY_PACKAGE);				}
-			};
-			Dictionary headers = new Hashtable();
-			
-			String header = "ManifestFile";
-			String value = rdp.getHeader(header);
-			if (value != null) {
-				BufferedReader br = new BufferedReader(new StringReader(value));
-				String line = null;
-				try {
-					while ((line = br.readLine()) != null) {
-						headers.put(line.substring(0, line.indexOf(':')), line.substring(line.indexOf(':')+1));
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} else {
-				headers.put("DeploymentPackage-SymbolicName", rdp.getHeader("DeploymentPackage-SymbolicName")); //$NON-NLS-1$ //$NON-NLS-2$
-				headers.put("DeploymentPackage-Version", rdp.getHeader("DeploymentPackage-Version")); //$NON-NLS-1$ //$NON-NLS-2$
-	
-				header = "DeploymentPackage-FixPack"; //$NON-NLS-1$
-				value = rdp.getHeader(header);
-				if (value != null)
-					headers.put(header, value);
-	
-				header = "DeploymentPackage-Copyright";value = rdp.getHeader(header); //$NON-NLS-1$
-				if (value != null)
-					headers.put(header, value);
-	
-				header = "DeploymentPackage-ContactAddress";value = rdp.getHeader(header); //$NON-NLS-1$
-				if (value != null)
-					headers.put(header, value);
-	
-				header = "DeploymentPackage-Description";value = rdp.getHeader(header); //$NON-NLS-1$
-				if (value != null)
-					headers.put(header, value);
-	
-				header = "DeploymentPackage-DocURL";value = rdp.getHeader(header); //$NON-NLS-1$
-				if (value != null)
-					headers.put(header, value);
-	
-				header = "DeploymentPackage-Vendor";value = rdp.getHeader(header); //$NON-NLS-1$
-				if (value != null)
-					headers.put(header, value);
-	
-				header = "DeploymentPackage-License";value = rdp.getHeader(header); //$NON-NLS-1$
-				if (value != null)
-					headers.put(header, value);
-	
-				header = "DeploymentPackage-Icon";value = rdp.getHeader(header); //$NON-NLS-1$
-				if (value != null)
-					headers.put(header, value);
-			}
-			
-			propertiesDialog.open();
-			propertiesDialog.getMainControl().setData(headers);
-
-		} catch (IAgentException e) {
-			BrowserErrorHandler.processError(e, true);
-			return;
-		}
-	}
-
 	public static void deinstallBundleAction(Bundle bundle) {
 		RemoteBundleOperation job = new UninstallBundleOperation(bundle);
 		job.schedule();
 		ConsoleManager.showConsole(bundle.findFramework());
-	}
-
-	public static void deinstallDPAction(DeploymentPackage dpNode) {
-		UninstallDeploymentOperation job = new UninstallDeploymentOperation(dpNode);
-		job.schedule();
-		ConsoleManager.showConsoleIfCreated(dpNode.findFramework());
 	}
 
 	public static void installBundleAction(final FrameworkImpl framework, TreeViewer parentView) {
@@ -215,32 +130,6 @@ public class ActionsManager {
 		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
-	public static void installDPAction(final FrameworkImpl framework, TreeViewer parentView) {
-		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.INSTALL_DP_TYPE);
-		installDialog.open();
-		final String result = installDialog.getResult();
-		if ((installDialog.getReturnCode() > 0) || (result == null) || result.trim().equals("")) { //$NON-NLS-1$
-			return;
-		}
-
-		Job job = new Job("Installing to " + framework.getName()) {
-			public IStatus run(IProgressMonitor monitor) {
-				InstallationItem item = new BaseFileItem(new File(result), MIME_DP);
-				FrameworkProcessor processor = new FrameworkProcessor();
-				processor.setUseAdditionalProcessors(false);
-				IStatus status = processor.processInstallationItem(item, new FrameworkTarget(framework), monitor);
-				monitor.done();
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
-				}
-				return status;
-			}
-		};
-		job.schedule();
-
-		ConsoleManager.showConsoleIfCreated(framework);
-	}
-
 	public static void frameworkPropertiesAction(FrameworkImpl framework, TreeViewer parentView) {
 		PropertySheet sheet = new PropertySheet(parentView, framework.getParent(), framework, false);
 		sheet.open();
@@ -250,7 +139,6 @@ public class ActionsManager {
 //		if (framework.isConnected()) {
 //			framework.disconnect();
 //		}
-
 		framework.dispose();
 		ConsoleManager.disconnectConsole(framework);
 	}

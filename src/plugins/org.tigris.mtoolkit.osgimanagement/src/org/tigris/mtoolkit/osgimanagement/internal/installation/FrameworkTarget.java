@@ -13,15 +13,15 @@ package org.tigris.mtoolkit.osgimanagement.internal.installation;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public class FrameworkTarget implements InstallationTarget {
-	private FrameworkImpl fw;
+	private Framework fw;
 	private static final String MIME_DP = "application/vnd.osgi.dp";
 
-	public FrameworkTarget(FrameworkImpl fw) {
+	public FrameworkTarget(Framework fw) {
 		this.fw = fw;
 	}
 
@@ -40,18 +40,21 @@ public class FrameworkTarget implements InstallationTarget {
 		return "framework_" + fw.getName().hashCode();
 	}
 
-	public FrameworkImpl getFramework() {
+	public Framework getFramework() {
 		return fw;
 	}
 
 	public boolean isMimeTypeSupported(String type) {
-		boolean supportDP = false;
-		if (fw.getConnector() != null) {
-			Object prop = fw.getConnector().getProperties().get(Capabilities.DEPLOYMENT_SUPPORT);
-			supportDP = (prop instanceof Boolean) && ((Boolean) prop).booleanValue();
-		}
-		if (!supportDP && type.equals(MIME_DP))
+//		boolean supportDP = false;
+//		if (fw.getConnector() != null) {
+//			Object prop = fw.getConnector().getProperties().get(Capabilities.DEPLOYMENT_SUPPORT);
+//			supportDP = (prop instanceof Boolean) && ((Boolean) prop).booleanValue();
+//		}
+//		if (!supportDP && type.equals(MIME_DP))
+//			return false;
+		if (type.equals(MIME_DP)) {
 			return false;
+		}
 		return true;
 	}
 }

@@ -90,19 +90,6 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 	private void setViewType(final FrameworkImpl fw, int newViewType) {
 		if (fw.getViewType() == newViewType)
 			return;
-// 		if (fw.getViewType() == FrameworkImpl.BUNDLES_VIEW) {
-// 			fw.getBundlesNode().removeChildren();
-// 			fw.getDPNode().removeChildren();
-// 		}
-// 		fw.removeChildren();
-//		try {
-//			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
-//			fw.setViewType(newViewType);
-//			ActionsManager.setViewTypeAction(fw, newViewType);
-//		} catch (Throwable t) {
-//			FrameworkPlugin.error("Exception while switching framework view type", t);
-//		}
-//		fw.updateElement();
 		try {
 			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
 			fw.setViewType(newViewType);

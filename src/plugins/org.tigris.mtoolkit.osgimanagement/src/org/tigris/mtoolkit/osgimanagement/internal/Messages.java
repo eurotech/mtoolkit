@@ -42,7 +42,6 @@ public final class Messages extends NLS {
 	public static String services_view_action_label;
 	public static String show_bundle_id_action_label;
 	public static String show_bundle_version_action_label;
-	public static String show_dp_properties_action_label;
 	public static String show_bundle_properties_action_label;
 	public static String find_action_label;
 	public static String find_action_run_string;
@@ -52,7 +51,6 @@ public final class Messages extends NLS {
 	public static String show_framework_console;
 	public static String framework_properties_title;
 	public static String service_properties_title;
-	public static String dp_properties_title;
 	public static String bundle_properties_title;
 	public static String service_label;
 	public static String headers_label;
@@ -136,15 +134,12 @@ public final class Messages extends NLS {
 	public static String retrieve_framework_info;
 	public static String retrieve_bundles_info;
 	public static String retrieve_services_info;
-	public static String retrieve_dps_info;
 	public static String stop_bundle;
 	public static String start_bundle;
 	public static String update_bundle;
 
 	public static String update_file_not_found;
-	public static String install_dp;
 	public static String install_bundle;
-	public static String uninstall_dp;
 	public static String uninstall_bundle;
 
 	public static String rcp_bundle_missing_title;

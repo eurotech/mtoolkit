@@ -48,7 +48,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallDeploymentOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider.PluginItem;
@@ -58,7 +57,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	private static FrameworkProcessor defaultinstance;
 	private static final String MIME_JAR = "application/java-archive";
 	private static final String MIME_ZIP = "application/zip";
-	private static final String MIME_DP = "application/vnd.osgi.dp";
 
 	private static Vector additionalProcessors = new Vector();
 	
@@ -101,7 +99,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		Vector mimeTypes = new Vector();
 		mimeTypes.addElement(MIME_JAR);
 		mimeTypes.addElement(MIME_ZIP);
-		mimeTypes.addElement(MIME_DP);
 		for (int i = 0; useAdditionalProcessors && i < additionalProcessors.size(); i++) {
 			String additionalMT[] = ((InstallationItemProcessor) additionalProcessors.get(i)).getSupportedMimeTypes();
 			for (int j = 0; j < additionalMT.length; j++) {
@@ -121,7 +118,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-		FrameworkImpl framework = ((FrameworkTarget) target).getFramework();
+		Framework framework = ((FrameworkTarget) target).getFramework();
 
 		// TODO: Connecting to framework should report the connection progress
 		// to the current monitor
@@ -135,6 +132,14 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			}
 			if (!connectJob.getResult().isOK()) {
 				return connectJob.getResult();
+			}
+			int counter = 0;
+			while (!framework.isConnected() && counter++ < 100) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -164,7 +169,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 			
 		if (item instanceof PluginItem) {
-			IStatus status = ((PluginItem) item).checkAdditionalBundles(framework, monitor);
+			IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, monitor);
 			if (status.getSeverity() == IStatus.CANCEL) {
 				monitor.setCanceled(true);
 				return status;
@@ -175,7 +180,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		try {
 			String mimeType = item.getMimeType();
 			Vector processors = new Vector();
-			if (mimeType.equals(MIME_DP) || mimeType.equals(MIME_JAR) || mimeType.equals(MIME_ZIP)) {
+			if (mimeType.equals(MIME_JAR) || mimeType.equals(MIME_ZIP)) {
 				processors.addElement(this);
 			}
 			for (int i = 0; useAdditionalProcessors && i < additionalProcessors.size(); i++) {
@@ -244,13 +249,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 	public void install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
 			throws Exception {
-		if (item.getMimeType().equals(MIME_DP)) {
-			// TODO: Make methods, which are called from inside jobs to do
-			// the real job
-			installDP(input, item.getName(), (FrameworkImpl) framework);
-		} else {
-			installBundle(input, item.getName(), (FrameworkImpl) framework);
-		}
+		// TODO: Make methods, which are called from inside jobs to do
+		// the real job
+		installBundle(input, item.getName(), (FrameworkImpl) framework);
 	}
 
 	private void installBundle(InputStream input, String name, FrameworkImpl framework) {
@@ -265,21 +266,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 	}
 
-	private void installDP(InputStream stream, String name, FrameworkImpl framework) {
-		try {
-			final File packageFile = saveFile(stream, name);
-			InstallDeploymentOperation job = new InstallDeploymentOperation(packageFile, framework);
-			job.schedule();
-			job.addJobChangeListener(new DeleteWhenDoneListener(packageFile));
-		} catch (IOException e) {
-			StatusManager.getManager().handle(FrameworkPlugin.newStatus(IStatus.ERROR,
-				"Unable to install deployment package",
-				e),
-				StatusManager.SHOW | StatusManager.LOG);
-		}
-	}
-
-	private File saveFile(InputStream input, String name) throws IOException {
+	protected File saveFile(InputStream input, String name) throws IOException {
 		// TODO: Make saving stream to file done in a job
 		IPath statePath = Platform.getStateLocation(FrameworkPlugin.getDefault().getBundle());
 		File file = new File(statePath.toFile(), name);
@@ -321,10 +308,10 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		this.useAdditionalProcessors = enable;
 	}
 	
-	private static class DeleteWhenDoneListener extends JobChangeAdapter {
+	protected static class DeleteWhenDoneListener extends JobChangeAdapter {
 		private final File packageFile;
 
-		private DeleteWhenDoneListener(File packageFile) {
+		public DeleteWhenDoneListener(File packageFile) {
 			this.packageFile = packageFile;
 		}
 

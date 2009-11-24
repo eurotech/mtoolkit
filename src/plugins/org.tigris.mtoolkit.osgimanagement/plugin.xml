@@ -3,6 +3,7 @@
 <plugin>
    <extension-point id="contentTypeExtensions" name="Content Type Extensions" schema="schema/contentTypeExtensions.exsd"/>
    <extension-point id="osgiDeviceTypes" name="osgiDeviceTypes" schema="schema/osgiDeviceTypes.exsd"/>
+   <extension-point id="mimeTypeExtensions" name="mimeTypeExtensions" schema="schema/mimeTypeExtensions.exsd"/>
 
    <extension point="org.eclipse.ui.views">
       <category
@@ -36,7 +37,7 @@
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
-            file-extensions="zip,jar,dp"
+            file-extensions="zip,jar"
             id="org.tigris.mtoolkit.osgimanagement.zip"
             name="Zip Archive"
             priority="normal">
@@ -51,13 +52,6 @@
    </extension>
    <extension
          point="org.tigris.mtoolkit.common.installationItemProviders">
-      <provider
-            class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
-            extension="dp"
-            id="org.tigris.mtoolkit.osgimanagement.deploymentprovider"
-            name="Deployment package provider"
-            type="application/vnd.osgi.dp">
-      </provider>
       <provider
             class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
             extension="jar"
@@ -139,6 +133,12 @@
             id="plainSocket"
             name="Plain Socket">
       </osgiDeviceTypeProvider>
+   </extension>
+   <extension
+         point="org.tigris.mtoolkit.osgimanagement.mimeTypeExtensions">
+      <mime_type
+            class="org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundleModelProvider">
+      </mime_type>
    </extension>
 
 </plugin>

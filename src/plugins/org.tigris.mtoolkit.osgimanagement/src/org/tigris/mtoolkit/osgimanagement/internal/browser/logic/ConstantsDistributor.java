@@ -49,10 +49,6 @@ public interface ConstantsDistributor {
 	static final String BUNDLE_STOPPING_VALUE = "stopping"; //$NON-NLS-1$
 	static final String BUNDLE_ACTIVE_VALUE = "active"; //$NON-NLS-1$
 
-	static final String DP_STALE_NAME = "stale"; //$NON-NLS-1$
-	static final String DP_STALE_VALUE_TRUE = "true"; //$NON-NLS-1$
-	static final String DP_STALE_VALUE_FALSE = "false"; //$NON-NLS-1$
-
 	static final String NODE_NAME = "node_name"; //$NON-NLS-1$
 
 	static final String INSTALL_TO_DLG_ICON = "selection_dlg.gif"; //$NON-NLS-1$

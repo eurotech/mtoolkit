@@ -17,6 +17,5 @@ public interface IHelpContextIds {
 	public static final String FRAMEWORKS_VIEW = "org.tigris.mtoolkit.osgimanagement.frameworks_view_context"; //$NON-NLS-1$
 	public static final String PROPERTY_BUNDLE = "org.tigris.mtoolkit.osgimanagement.property_bundle_context"; //$NON-NLS-1$
 	public static final String PROPERTY_SERVICE = "org.tigris.mtoolkit.osgimanagement.property_service_context"; //$NON-NLS-1$
-	public static final String PROPERTY_PACKAGE = "org.tigris.mtoolkit.osgimanagement.property_dp_context"; //$NON-NLS-1$
 
 }

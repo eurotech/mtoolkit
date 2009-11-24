@@ -29,7 +29,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	protected Set elementList;
 	protected boolean selected = false;
 	protected int selectedChilds = 0;
-	private Vector slaves;
+	private Vector slaves = new Vector();
 	private Model master;
 
 	public Model(String name) {
@@ -194,6 +194,9 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	}
 
 	public String getName() {
+		if (master != null) {
+			return master.getName();
+		}
 		return name;
 	}
 
@@ -216,6 +219,9 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		for (int i = 0; i < elements.length; i++) {
 			elements[i].removeChildren();
 			removeElement(elements[i]);
+		}
+		for (int i=0; i<getSlaves().size(); i++) {
+			((Model)getSlaves().elementAt(i)).removeChildren();
 		}
 	}
 
