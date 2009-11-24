@@ -12,6 +12,9 @@ package org.tigris.mtoolkit.osgimanagement.application;
 
 import java.util.Dictionary;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.iagent.ApplicationManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -48,7 +51,7 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 	public static final String APPLICATION_ICON_PATH = "application.gif";
 	public static final String APPLICATION_PACKAGE_ICON_PATH = "application_package.gif";
 
-	public Model connect(Model parent, DeviceConnector connector) {
+	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
 		this.parent = parent;
 		
@@ -64,19 +67,20 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		}
 		
 		if (supportApplications) {
-			initModel();
+			initModel(monitor);
 		}
+		monitor.done();
 		return applicationsNode;
 	}
 	
-	private void initModel() {
+	private void initModel(IProgressMonitor monitor) {
 		applicationsNode = new ApplicationPackage("Application");
 		if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) { 
 			parent.addElement(applicationsNode);
 		}
 		try {
 			manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
-			addApplications();
+			addApplications(monitor);
 			try {
 				manager.addRemoteApplicationListener(this);
 			} catch (IAgentException e) {
@@ -87,12 +91,14 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		}
 	}
 
-	private void addApplications() {
+	private void addApplications(IProgressMonitor monitor) {
 		try {
 			RemoteApplication[] applications = manager.listApplications();
+			SubMonitor sMonitor = SubMonitor.convert(monitor, applications.length);
 			for (int i=0; i<applications.length; i++) {
 				Application application = new Application(applications[i].getApplicationId(), applications[i]);
 				applicationsNode.addElement(application);
+				sMonitor.worked(1);
 			}
 		} catch (IAgentException e) {
 			if (e.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
@@ -195,7 +201,7 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 			if (Capabilities.APPLICATION_SUPPORT.equals(property)) {
 				if (enabled) {
 					supportApplications = true;
-					initModel();
+					initModel(new NullProgressMonitor());
 				} else {
 					supportApplications = false;
 					manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
