@@ -89,8 +89,11 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				Set bundleIds = new HashSet();
 				bundleIds.addAll(framework.getBundlesKeys());
 				rBundle = new RemoteBundle[1];
+				String location = "remote:" + bundle.getName() + " " + Calendar.getInstance().getTime().toString();
+				location = location.replace(' ', '_');
+				location = location.replace(':', '_');
 				rBundle[0] = connector.getDeploymentManager().installBundle(
-						"remote:" + bundle.getName() + " " + Calendar.getInstance().getTime().toString(), input);
+						location, input);
 				// check again if already installed
 				if (bundleIds.contains(new Long(rBundle[0].getBundleId()))) {
 					update[0] = true;
@@ -188,8 +191,11 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 
 				if (install[0]) {
 					monitor.beginTask(Messages.install_bundle, work);
+					String location = "remote:" + bundle.getName() + " " + Calendar.getInstance().getTime().toString();
+					location = location.replace(' ', '_');
+					location = location.replace(':', '_');
 					rBundle[0] = connector.getDeploymentManager().installBundle(
-							"remote:" + bundle.getName() + " " + Calendar.getInstance().getTime().toString(),
+							location,
 							new ProgressInputStream(new FileInputStream(bundle), monitor));
 				} else if (update[0]) {
 					monitor.beginTask(Messages.update_bundle, work);
