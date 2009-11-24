@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 public interface ContentTypeModelProvider {
 
-	public Model connect(Model parent, DeviceConnector connector);
+	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor);
 	
 	public void disconnect();
 	
