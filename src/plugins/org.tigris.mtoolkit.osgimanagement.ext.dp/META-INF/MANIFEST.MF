@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OSGi Management Deployment Package Support Extension
+Bundle-SymbolicName: org.tigris.mtoolkit.osgimanagement.ext.dp;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.tigris.mtoolkit.osgimanagement.dp.Activator
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.jface,
+ org.eclipse.ui.workbench,
+ org.eclipse.swt,
+ org.tigris.mtoolkit.common,
+ org.tigris.mtoolkit.osgimanagement,
+ org.tigris.mtoolkit.iagent
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.4

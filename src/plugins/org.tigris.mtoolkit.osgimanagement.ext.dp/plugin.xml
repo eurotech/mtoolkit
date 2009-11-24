@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.tigris.mtoolkit.osgimanagement.contentTypeExtensions">
+      <actions
+            class="org.tigris.mtoolkit.osgimanagement.dp.DPActionsProvider">
+      </actions>
+      <model
+            class="org.tigris.mtoolkit.osgimanagement.dp.DPModelProvider">
+      </model>
+   </extension>
+   <extension
+         point="org.tigris.mtoolkit.common.installationItemProviders">
+      <provider
+            class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
+            extension="dp"
+            id="org.tigris.mtoolkit.osgimanagement.ext.dp.processor"
+            name="Deployment package provider"
+            type="application/vnd.osgi.dp">
+      </provider>
+   </extension>
+
+</plugin>
