@@ -86,14 +86,16 @@ public class CertificatesPanel {
 			setNoCertificatesAvailable();
 		}
 		boolean foundCert = false;
-		for (int i = 0; i < certificates.length; i++) {
-			TableItem item = new TableItem(tblCertificates, SWT.NONE);
-			item.setText(0, certificates[i].getAlias());
-			item.setText(1, certificates[i].getStoreLocation());
-			item.setData(certificates[i].getUid());
-			if (signUids != null && signUids.contains(certificates[i].getUid())) {
-				item.setChecked(true);
-				foundCert = true;
+		if (certificates != null) {
+			for (int i = 0; i < certificates.length; i++) {
+				TableItem item = new TableItem(tblCertificates, SWT.NONE);
+				item.setText(0, certificates[i].getAlias());
+				item.setText(1, certificates[i].getStoreLocation());
+				item.setData(certificates[i].getUid());
+				if (signUids != null && signUids.contains(certificates[i].getUid())) {
+					item.setChecked(true);
+					foundCert = true;
+				}
 			}
 		}
 		tblCertificates.setEnabled(foundCert);
