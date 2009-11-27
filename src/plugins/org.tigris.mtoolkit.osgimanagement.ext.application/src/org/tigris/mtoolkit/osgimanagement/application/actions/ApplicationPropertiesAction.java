@@ -46,8 +46,9 @@ public class ApplicationPropertiesAction extends SelectionProviderAction impleme
 				}
 			};
 
-			propertiesDialog.open();
+			propertiesDialog.create();
 			propertiesDialog.getMainControl().setData(headers);
+			propertiesDialog.open();
 
 			// needed to update workbench menu and toolbar status
 			getSelectionProvider().setSelection(getSelection());

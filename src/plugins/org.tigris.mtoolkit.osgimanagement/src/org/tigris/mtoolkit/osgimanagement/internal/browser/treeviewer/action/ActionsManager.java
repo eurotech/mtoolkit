@@ -89,8 +89,9 @@ public class ActionsManager {
 				
 			};
 			Dictionary headers = rBundle.getHeaders(null);
-			propertiesDialog.open();
+			propertiesDialog.create();
 			propertiesDialog.getMainControl().setData(headers);
+			propertiesDialog.open();
 		} catch (IAgentException e) {
 			e.printStackTrace();
 			BrowserErrorHandler.processError(e, true);

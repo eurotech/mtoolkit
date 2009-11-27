@@ -12,10 +12,13 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
 import java.io.File;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -27,16 +30,12 @@ import org.eclipse.swt.widgets.Text;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.logic.InstallDialogLogic;
 
-public class InstallDialog extends Window implements ConstantsDistributor {
-
-	private InstallDialogLogic logic;
+public class InstallDialog extends TrayDialog implements ConstantsDistributor {
 
 	private Text textLocation;
 	private Button browseButton;
 	private Button okButton;
-	private Button cancelButton;
 
 	private String text;
 	private FileDialog locationChooser;
@@ -82,7 +81,6 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 	}
 	
 	private void init() {
-		logic = new InstallDialogLogic(this);
 		this.setShellStyle(SWT.RESIZE | SWT.TITLE | SWT.CLOSE | SWT.APPLICATION_MODAL);
 		
 		switch (type) {
@@ -110,12 +108,15 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 		}
 	}
 
-	protected Control createContents(Composite parent) {
+	protected Control createDialogArea(Composite comp) {
+		Composite parent = (Composite) super.createDialogArea(comp);
+		
 		setBlockOnOpen(true);
 		GridData grid;
 
 		GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 2;
+		// create button method increases columns number
+		gridLayout.numColumns = 1;
 		parent.setLayout(gridLayout);
 
 		Label labelLocation = new Label(parent, SWT.NONE);
@@ -127,43 +128,18 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 		parent.getShell().setText(title);
 		textLocation = new Text(parent, SWT.SINGLE | SWT.BORDER);
 
-		browseButton = new Button(parent, SWT.PUSH);
-		browseButton.setText(Messages.browse_button_label);
+		browseButton = createButton(parent, IDialogConstants.CLIENT_ID, Messages.browse_button_label, false);
 
 		grid = new GridData(GridData.FILL_HORIZONTAL);
 		grid.widthHint = 4 * browseButton.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		textLocation.setLayoutData(grid);
-		textLocation.addModifyListener(logic);
+		textLocation.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				updateButtons();
+			}
+		});
 
 		grid = new GridData();
-		browseButton.setLayoutData(grid);
-		browseButton.addSelectionListener(logic);
-
-		// OK, Cancel properties holder
-		Composite okcancelHolder = new Composite(parent, SWT.NONE);
-		grid = new GridData(GridData.HORIZONTAL_ALIGN_END);
-		grid.horizontalSpan = 2;
-		okcancelHolder.setLayoutData(grid);
-		GridLayout okcancelHolderGrid = new GridLayout();
-		okcancelHolderGrid.numColumns = 2;
-		okcancelHolderGrid.makeColumnsEqualWidth = true;
-		okcancelHolder.setLayout(okcancelHolderGrid);
-
-		okButton = new Button(okcancelHolder, SWT.PUSH);
-		grid = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		okButton.setText(Messages.ok_button_label);
-		okButton.setLayoutData(grid);
-		okButton.addSelectionListener(logic);
-		parent.getShell().setDefaultButton(okButton);
-
-		cancelButton = new Button(okcancelHolder, SWT.PUSH);
-		grid = new GridData(GridData.HORIZONTAL_ALIGN_END);
-		cancelButton.setText(Messages.cancel_button_label);
-		cancelButton.setLayoutData(grid);
-		cancelButton.addSelectionListener(logic);
-
-		getShell().setDefaultButton(okButton);
-		updateButtons();
 		return parent;
 	}
 
@@ -194,6 +170,14 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 			textLocation.setText(FrameworkPlugin.fileDialogLastSelection);
 			okButton.setFocus();
 		}
+		updateButtons();
+	}
+	
+	protected void createButtonsForButtonBar(Composite parent) {
+		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,
+				true);
+		createButton(parent, IDialogConstants.CANCEL_ID,
+				IDialogConstants.CANCEL_LABEL, false);
 		updateButtons();
 	}
 
@@ -257,6 +241,18 @@ public class InstallDialog extends Window implements ConstantsDistributor {
 			return false;
 		}
 		return super.close();
+	}
+	
+	protected void okPressed() {
+		closeOK();
+		super.okPressed();
+	}
+	
+	protected void buttonPressed(int buttonId) {
+		super.buttonPressed(buttonId);
+		if (buttonId == IDialogConstants.CLIENT_ID) {
+			startLocationChooser();
+		}
 	}
 
 }

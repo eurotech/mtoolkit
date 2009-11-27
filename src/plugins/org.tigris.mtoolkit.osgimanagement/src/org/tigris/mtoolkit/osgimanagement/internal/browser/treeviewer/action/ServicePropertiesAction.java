@@ -59,14 +59,15 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
 				}
 				
 			};
-			dialog.open();
 			try {
+				dialog.create();
 				PropertiesPage mainControl = (PropertiesPage) dialog.getMainControl();
 				mainControl.setData(service.getProperties());
 			} catch (IAgentException e) {
 				BrowserErrorHandler.processError(e, true);
 				e.printStackTrace();
 			}
+			dialog.open();
 		}
 	}
 

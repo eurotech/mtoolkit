@@ -10,28 +10,19 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.window.Window;
+import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.FontMetrics;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 
-public abstract class PropertiesDialog extends Window implements ConstantsDistributor, SelectionListener {
+public abstract class PropertiesDialog extends TrayDialog implements ConstantsDistributor/*, SelectionListener*/ {
 
 	private PropertiesPage mainControl;
-	private Button closeBtn;
-	private FontMetrics fontMetrics;
 	private String title;
 	private String tableTitle;
 	
@@ -46,39 +37,19 @@ public abstract class PropertiesDialog extends Window implements ConstantsDistri
 		this.tableTitle = tableTitle;
 	}
 
-	public Control createContents(Composite parent) {
-		GC gc = new GC(parent);
-		gc.setFont(parent.getFont());
-		fontMetrics = gc.getFontMetrics();
-		gc.dispose();
-
-		Composite container = new Composite(parent, SWT.NONE);
+	public Control createDialogArea(Composite parent) {
+		Composite container = (Composite) super.createDialogArea(parent);
+//		setTitle(title);
+//		if (tableTitle != null) {
+//			setMessage(tableTitle);
+//		}
 		container.setLayout(new GridLayout());
 		GridData mGD = new GridData(GridData.FILL_BOTH);
 		mGD.heightHint = 470;
 		mGD.heightHint = 240;
 		container.setLayoutData(mGD);
-
 		mainControl = createMainControl(container);
-
-		// Bottom buttons group
-		Composite buttonsArea = new Composite(container, SWT.NONE);
-		buttonsArea.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		GridLayout buttonsGrid = new GridLayout();
-		buttonsArea.setLayout(buttonsGrid);
-		closeBtn = new Button(buttonsArea, SWT.PUSH);
-		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-		data.widthHint = Dialog.convertHorizontalDLUsToPixels(fontMetrics, IDialogConstants.BUTTON_WIDTH);
-		closeBtn.setLayoutData(data);
-
-		closeBtn.setText(Messages.close_button_label);
-		closeBtn.addSelectionListener(this);
-
-		getShell().setDefaultButton(closeBtn);
-		container.pack();
-
 		attachHelp(container);
-
 		return container;
 	}
 
@@ -98,27 +69,8 @@ public abstract class PropertiesDialog extends Window implements ConstantsDistri
 
 	protected abstract void attachHelp(Composite container);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
-	 * .events.SelectionEvent)
-	 */
-	public void widgetSelected(SelectionEvent event) {
-		if (event.getSource().equals(closeBtn)) {
-			close();
-		}
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL,
+				true);
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
-	 * .swt.events.SelectionEvent)
-	 */
-	public void widgetDefaultSelected(SelectionEvent event) {
-	}
-
 }

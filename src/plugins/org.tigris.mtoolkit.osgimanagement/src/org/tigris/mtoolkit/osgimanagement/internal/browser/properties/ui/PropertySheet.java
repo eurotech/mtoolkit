@@ -21,15 +21,14 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -43,28 +42,25 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
 import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
+import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.logic.PropertySheetLogic;
 
-public class PropertySheet extends Window implements ControlListener, ConstantsDistributor, SelectionListener {
-
-	private PropertySheetLogic logic;
+public class PropertySheet extends TitleAreaDialog implements /*ControlListener, */ConstantsDistributor, SelectionListener, DeviceTypeProviderValidator {
 
 	private Text textServer;
 
 	public Button connectButton;
-	public Button okButton;
-	public Button cancelButton;
 
 	private CertificatesPanel certificatesPanel;
 
-	private Composite bottomButtonsHolder;
 	private FrameworkImpl fw;
 
 	private List deviceTypesProviders;
@@ -77,21 +73,31 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 	private Composite mainContent;
 
+	private boolean addFramework;
+
+	private Model parent;
+
+	private TreeViewer parentView;
+
 	// Constructor
-	public PropertySheet(TreeViewer parentView, Model parent, FrameworkImpl element, boolean firstTime) {
+	public PropertySheet(TreeViewer parentView, Model parent, FrameworkImpl element, boolean newFramework) {
 		super(parentView.getControl().getShell());
-		logic = new PropertySheetLogic(parentView, parent, element, firstTime, this);
+		this.addFramework = newFramework;
+		this.parent = parent;
+		this.parentView = parentView;
 		this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
 		fw = element;
 	}
 
 	// Create page contents
-	protected Control createContents(Composite parent) {
-
+	protected Control createDialogArea(Composite parent) {
+		Control main = super.createDialogArea(parent);
+		setTitle("Framework details");
+		setMessage("Edit framework details");
+		
 		parent.getShell().setText(Messages.framework_properties_title);
-		getShell().addControlListener(this);
 
-		mainContent = new Composite(parent, SWT.NONE);
+		mainContent = new Composite((Composite) main, SWT.NONE);
 		mainContent.setLayout(new GridLayout());
 		GridData mainGD = new GridData(GridData.FILL_BOTH);
 		mainGD.minimumWidth = 300;
@@ -103,8 +109,13 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		deviceGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		textServer = createText(1, deviceGroup);
+		textServer.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				checkFrameworkInfo();
+			}
+		});
 
-		deviceTypesProviders = obtainDeviceTypeProviders();
+		deviceTypesProviders = obtainDeviceTypeProviders(this);
 		
 		createDeviceTypeCombo(mainContent);
 
@@ -128,18 +139,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
 		connectButton.setEnabled(!fw.isConnected());
 
-		// Bottom buttons group
-		bottomButtonsHolder = new Composite(mainContent, SWT.NONE);
-		bottomButtonsHolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout bottomButtonsGrid = new GridLayout();
-		bottomButtonsGrid.numColumns = 2;
-		bottomButtonsHolder.setLayout(bottomButtonsGrid);
-
-		okButton = createButton(Messages.ok_button_label, bottomButtonsHolder);
-		cancelButton = createButton(Messages.cancel_button_label, bottomButtonsHolder);
-		getShell().setDefaultButton(okButton);
-
-		logic.sheetLoaded();
+		init();
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(mainContent, IHelpContextIds.PROPERTY_FRAMEWORK);
 
@@ -184,45 +184,8 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		mainContent.layout(true);
 	}
 
-	// Initialize ui values from storage
-	public void initValues(IMemento config) {
-		String providerId = config.getString(TRANSPORT_PROVIDER_ID);
-		if (providerId != null) {
-			for (Iterator it = deviceTypesProviders.iterator(); it.hasNext();) {
-				DeviceTypeProviderElement provider = (DeviceTypeProviderElement) it.next();
-				if (providerId.equals(provider.getTypeId())) {
-					selectedProvider = provider;
-					break;
-				}
-			}
-		}
-		logic.setValue(textServer, FRAMEWORK_NAME);
-		selectType(selectedProvider);
-		try {
-			selectedProvider.getProvider().setProperties(config);
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
-		if (logic.setValue(connectButton, CONNECT_TO_FRAMEWORK)) {
-			// connectButton.setVisible(false);
-			Composite parent = connectButton.getParent();
-			Control[] children = parent.getChildren();
-			for (int i = 0; i < children.length; i++) {
-				if (children[i].equals(connectButton)) {
-					children[i].dispose();
-					break;
-					// children[i] = null;
-				}
-			}
-			parent.pack();
-		}
-
-		// Signing Certificates
-		certificatesPanel.initialize(FrameworkImpl.getSignCertificateUids(config));
-	}
-
 	// Save ui values to storage and update target element
-	public void saveValues(IMemento config) {
+	public void saveConfig(IMemento config) {
 		config.putString(FRAMEWORK_NAME, textServer.getText());
 		try {
 			selectedProvider.getProvider().save(config);
@@ -235,37 +198,17 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
 
 		// Signing Certificates
-		FrameworkImpl.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
+		fw.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
 
 		fw.setConfig(config);
-	}
-
-	// Get currently entered server name
-	public String getNewName() {
-		return textServer.getText();
 	}
 
 	private Button createCheckboxButton(String label, Composite parent) {
 		Button resultButton = new Button(parent, SWT.CHECK);
 		GridData grid = new GridData(GridData.FILL_HORIZONTAL);
-
 		resultButton.setText(label);
 		resultButton.setLayoutData(grid);
-		resultButton.addSelectionListener(logic);
 		resultButton.setSelection(false);
-
-		return resultButton;
-	}
-
-	// Create Button
-	private Button createButton(String label, Composite parent) {
-		Button resultButton = new Button(parent, SWT.PUSH);
-		GridData grid = new GridData(GridData.FILL_HORIZONTAL);
-
-		resultButton.setText(label);
-		resultButton.setLayoutData(grid);
-		resultButton.addSelectionListener(logic);
-
 		return resultButton;
 	}
 
@@ -279,29 +222,15 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		return resultText;
 	}
 
-	// Override to give the window correct size
-	protected Point getInitialSize() {
-		Point preferedSize = getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		return (preferedSize);
-	}
-
-	public void controlMoved(ControlEvent e) {
-		// do nothing
-	}
-
-	public void controlResized(ControlEvent e) {
-		bottomButtonsHolder.layout();
-	}
-
-	public static List obtainDeviceTypeProviders() {
+	public static List obtainDeviceTypeProviders(DeviceTypeProviderValidator validator) {
 			IExtensionRegistry registry = Platform.getExtensionRegistry();
 			IExtensionPoint extensionPoint = registry
 					.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes");
 
-		return obtainProviders(extensionPoint.getConfigurationElements());
+		return obtainProviders(extensionPoint.getConfigurationElements(), validator);
 	}
 
-	private static List obtainProviders(IConfigurationElement[] elements) {
+	private static List obtainProviders(IConfigurationElement[] elements, DeviceTypeProviderValidator validator) {
 		List providers = new ArrayList();
 		for (int i = 0; i < elements.length; i++) {
 			IConfigurationElement element = elements[i];
@@ -312,7 +241,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 				continue;
 			}
 			try {
-				DeviceTypeProviderElement providerElement = new DeviceTypeProviderElement(element);
+				DeviceTypeProviderElement providerElement = new DeviceTypeProviderElement(element, validator);
 				providers.add(providerElement);
 			} catch (CoreException e) {
 				FrameworkPlugin.error("Exception while initializing device type providers", e);
@@ -329,10 +258,12 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		private IConfigurationElement confElement;
 		private CoreException initFailure;
 		private Control panel;
+		private DeviceTypeProviderValidator validator;
 
-		public DeviceTypeProviderElement(IConfigurationElement configurationElement) throws CoreException {
+		public DeviceTypeProviderElement(IConfigurationElement configurationElement, DeviceTypeProviderValidator validator) throws CoreException {
 			// TODO: Change to not throw exception, but rather display a an
 			// error panel
+			this.validator = validator;
 			confElement = configurationElement;
 			typeId = configurationElement.getAttribute("id");
 			if (typeId == null)
@@ -374,7 +305,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 
 		public Control createPanel(Composite parent) {
 			try {
-				panel = getProvider().createPanel(parent);
+				panel = getProvider().createPanel(parent, validator);
 				if (panel != null)
 					panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			} catch (CoreException e) {
@@ -384,7 +315,7 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 			return panel;
 		}
 
-		public boolean validate() {
+		public String validate() {
 			return provider.validate();
 		}
 	}
@@ -405,15 +336,129 @@ public class PropertySheet extends Window implements ControlListener, ConstantsD
 		}
 	}
 
-	public boolean validate() {
+	private String validate() {
 		return selectedProvider.validate();
 	}
 
-	public void setEditable(boolean editable) {
+	protected void okPressed() {
+		boolean correct = checkFrameworkInfo();
+		if (correct) {
+			setFWSettings();
+			if (connectButton != null && !connectButton.isDisposed()
+					&& connectButton.getSelection()) {
+				FrameworkConnectorFactory.connectFrameWork(fw);
+			}
+			super.okPressed();
+		}
+	}
+	
+	private void init() {
+		IMemento config = fw.getConfig();
+		String providerId = config.getString(TRANSPORT_PROVIDER_ID);
+		if (providerId != null) {
+			for (Iterator it = deviceTypesProviders.iterator(); it.hasNext();) {
+				DeviceTypeProviderElement provider = (DeviceTypeProviderElement) it.next();
+				if (providerId.equals(provider.getTypeId())) {
+					selectedProvider = provider;
+					break;
+				}
+			}
+		}
+		String name = fw.getConfig().getString(FRAMEWORK_NAME);
+		if (name != null) {
+			textServer.setText(name);
+		}
+		
+		selectType(selectedProvider);
 		try {
-			selectedProvider.getProvider().setEditable(editable);
+			selectedProvider.getProvider().setProperties(config);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
+
+		Boolean connect = fw.getConfig().getBoolean(CONNECT_TO_FRAMEWORK);
+		if (connect != null) {
+			connectButton.setSelection(connect.booleanValue());
+			Composite parent = connectButton.getParent();
+			Control[] children = parent.getChildren();
+			for (int i = 0; i < children.length; i++) {
+				if (children[i].equals(connectButton)) {
+					children[i].dispose();
+					break;
+				}
+			}
+			parent.pack();
+		}
+
+		// Signing Certificates
+		certificatesPanel.initialize(fw.getSignCertificateUids(config));
+		
+		if (fw.isConnected() && fw.autoConnected) {
+			try {
+				selectedProvider.getProvider().setEditable(false);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
 	}
+
+	// Called when target options are changed
+	public void setFWSettings() {
+		saveConfig(fw.getConfig());
+		fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
+
+		if (addFramework) {
+			parent.addElement(fw);
+			addFramework = false;
+		} else {
+			DeviceConnector connector = fw.getConnector();
+			if (connector != null) {
+				connector.getProperties().put("framework-name", fw.getName()); //$NON-NLS-1$
+				// String prevIP = (String)
+				// connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
+				//				connector.getProperties().put("framework-connection-ip", target.getNewIP()); //$NON-NLS-1$
+				// if (fw.isConnected() && !target.getNewIP().equals(prevIP)) {
+				// MessageDialog.openInformation(target.getShell(),
+				// Messages.framework_ip_changed_title,
+				// Messages.framework_ip_changed_message);
+				// }
+			}
+			fw.updateElement();
+			parentView.setSelection(parentView.getSelection());
+		}
+	}
+
+	// Check for duplicate
+	private boolean checkFrameworkInfo() {
+		String newName = textServer.getText().trim();
+		if (newName.equals("")) { //$NON-NLS-1$
+			setErrorMessage(Messages.incorrect_framework_name_message);
+			return false;
+		}
+
+		Model[] frameworks = parent.getChildren();
+		for (int i = 0; i < frameworks.length; i++) {
+			if (newName.equals(frameworks[i].getName()) && !frameworks[i].equals(fw)) {
+				setErrorMessage(Messages.duplicate_framework_name_message);
+				return false;
+			}
+		}
+
+		String result = validate();
+		setErrorMessage(result);
+		return result == null;
+	}
+	
+	public void setErrorMessage(String newErrorMessage) {
+		super.setErrorMessage(newErrorMessage);
+		Button ok = getButton(OK);
+		if (ok != null) {
+			ok.setEnabled(newErrorMessage == null);
+		}
+	}
+
+	public void setValidState(String error) {
+		setErrorMessage(error);
+	}
+
 }
