@@ -101,7 +101,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 
 		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
 		if (capMan != null) {
-			capMan.setCapability(Capabilities.BUNDLE_SUPPORT, new Boolean(true));
+			capMan.setCapability(Capabilities.BUNDLE_SUPPORT, Boolean.TRUE);
 		}
 
 		debug("[register] Remote Bundle Admin Registered.");
