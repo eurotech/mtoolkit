@@ -134,11 +134,5 @@
             name="Plain Socket">
       </osgiDeviceTypeProvider>
    </extension>
-   <extension
-         point="org.tigris.mtoolkit.osgimanagement.mimeTypeExtensions">
-      <mime_type
-            class="org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundleModelProvider">
-      </mime_type>
-   </extension>
 
 </plugin>

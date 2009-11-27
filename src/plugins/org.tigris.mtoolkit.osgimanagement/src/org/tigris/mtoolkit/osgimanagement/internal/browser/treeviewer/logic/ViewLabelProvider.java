@@ -22,11 +22,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
+import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework.ModelProviderElement;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView.ActionsProviderElement;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
@@ -136,9 +137,9 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		if (element instanceof Model) {
 			FrameworkImpl fw = (FrameworkImpl) ((Model) element).findFramework();
 			if (fw != null) {
-				List modelProviders = fw.getModelProviders();
-				for (int i=0; i<modelProviders.size(); i++) {
-					ContentTypeModelProvider manager = ((ModelProviderElement)modelProviders.get(i)).getProvider();
+				List actionProviders = FrameWorkView.getActionsProviders();
+				for (int i=0; i<actionProviders.size(); i++) {
+					ContentTypeActionsProvider manager = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
 					Image image = manager.getImage((Model) element);
 					if (image != null) {
 						return image;

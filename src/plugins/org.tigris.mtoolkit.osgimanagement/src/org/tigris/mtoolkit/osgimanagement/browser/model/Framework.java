@@ -11,24 +11,12 @@
 package org.tigris.mtoolkit.osgimanagement.browser.model;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.ui.IMemento;
-import org.tigris.mtoolkit.common.certificates.CertUtils;
-import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
-import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
-public class Framework extends Model {
+public abstract class Framework extends Model {
 
 	public final static int BUNDLES_VIEW = 0;
 	public final static int SERVICES_VIEW = 1;
@@ -36,7 +24,6 @@ public class Framework extends Model {
 	protected DeviceConnector connector;
 	protected boolean connectedFlag;
 	protected int viewType;
-	protected IMemento configs;
 	protected List modelProviders = new ArrayList();
 
 	public Framework(String name) {
@@ -62,124 +49,7 @@ public class Framework extends Model {
 	 * is required, then empty Map is returned.
 	 * @return the map with certificate properties
 	 */
-	public Map getSigningProperties() {
-		Map properties = new Hashtable();
-		List certUids = getSignCertificateUids(getConfig());
-		Iterator signIterator = certUids.iterator();
-		int certId = 0;
-		while (signIterator.hasNext()) {
-			ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
-			if (cert != null) {
-				CertUtils.pushCertificate(properties, cert, certId++);
-			}
-		}
-		return properties;
-	}
+	public abstract Map getSigningProperties();
 
-	public static List getSignCertificateUids(IMemento config) {
-		String keys[] = config.getAttributeKeys();
-		List result = new ArrayList();
-		for (int i = 0; i < keys.length; i++) {
-			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
-				String uid = config.getString(keys[i]);
-				if (uid != null && uid.trim().length() > 0) {
-					result.add(uid.trim());
-				}
-			}
-		}
-		return result;
-	}
-
-	public static void setSignCertificateUids(IMemento config, List uids) {
-		String keys[] = config.getAttributeKeys();
-		for (int i = 0; i < keys.length; i++) {
-			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
-				config.putString(keys[i], ""); //$NON-NLS-1$
-			}
-		}
-		Iterator iterator = uids.iterator();
-		int num = 0;
-		while (iterator.hasNext()) {
-			config.putString(FRAMEWORK_SIGN_CERTIFICATE_ID + num, (String) iterator.next());
-			num++;
-		}
-	}
-
-	public IMemento getConfig() {
-		return configs;
-	}
-
-
-	public List getModelProviders() {
-		return modelProviders;
-	}
-
-	protected void obtainModelProviders() {
-		modelProviders.clear();
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint extensionPoint = registry
-				.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.contentTypeExtensions");
-
-		obtainModelProviderElements(extensionPoint.getConfigurationElements(), modelProviders);
-	}
-
-	private void obtainModelProviderElements(IConfigurationElement[] elements, List providers) {
-		for (int i = 0; i < elements.length; i++) {
-			if (!elements[i].getName().equals("model")) {
-				continue;
-			}
-			String clazz = elements[i].getAttribute("class");
-			if (clazz == null) {
-				continue;
-			}
-
-			ModelProviderElement providerElement = new ModelProviderElement(elements[i]);
-			if (providers.contains(providerElement))
-				continue;
-
-			try {
-				Object provider = elements[i].createExecutableExtension("class");
-
-				if (provider instanceof ContentTypeModelProvider) {
-					providerElement.setProvider(((ContentTypeModelProvider) provider));
-					providers.add(providerElement);
-				}
-			} catch (CoreException e) {
-				FrameworkPlugin.error(e.getMessage(), e);
-			}
-		}
-	}
-
-	public class ModelProviderElement {
-		private String extension;
-		private String clazz;
-		private ContentTypeModelProvider provider;
-		private IConfigurationElement confElement;
-
-		public ModelProviderElement(IConfigurationElement configurationElement) {
-			confElement = configurationElement;
-			extension = configurationElement.getAttribute("extension");
-			clazz = configurationElement.getAttribute("class");
-		}
-
-		public void setProvider(ContentTypeModelProvider provider) {
-			this.provider = provider;
-		}
-
-		public IConfigurationElement getConfigurationElement() {
-			return confElement;
-		}
-
-		public ContentTypeModelProvider getProvider() {
-			return provider;
-		}
-
-		public boolean equals(ModelProviderElement otherElement) {
-			if (this.clazz.equals(otherElement.clazz) && this.extension.equals(otherElement.extension))
-				return true;
-			return false;
-		}
-	}
-
-
+	public abstract Model createModel(String mimeType, String id, String version);
 }

@@ -10,22 +10,32 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
+import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -79,6 +89,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	
 	private boolean supportBundles = false;
 	private boolean supportServices = false;
+	private IMemento configs;
 
 	
 	public FrameworkImpl(String name, boolean autoConnected) {
@@ -1243,5 +1254,177 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			}
 		}
 	}
+	
+	public IMemento getConfig() {
+		return configs;
+	}
+
+	/**
+	 * Returns map, containing information for certificates which shall be 
+	 * used for signing the content, installed to this framework. If no signing
+	 * is required, then empty Map is returned.
+	 * @return the map with certificate properties
+	 */
+	public Map getSigningProperties() {
+		Map properties = new Hashtable();
+		List certUids = getSignCertificateUids(getConfig());
+		Iterator signIterator = certUids.iterator();
+		int certId = 0;
+		while (signIterator.hasNext()) {
+			ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
+			if (cert != null) {
+				CertUtils.pushCertificate(properties, cert, certId++);
+			}
+		}
+		return properties;
+	}
+
+	public List getModelProviders() {
+		return modelProviders;
+	}
+
+	protected void obtainModelProviders() {
+		modelProviders.clear();
+		IExtensionRegistry registry = Platform.getExtensionRegistry();
+		IExtensionPoint extensionPoint = registry
+				.getExtensionPoint("org.tigris.mtoolkit.osgimanagement.contentTypeExtensions");
+
+		obtainModelProviderElements(extensionPoint.getConfigurationElements(), modelProviders);
+	}
+
+	private void obtainModelProviderElements(IConfigurationElement[] elements, List providers) {
+		for (int i = 0; i < elements.length; i++) {
+			if (!elements[i].getName().equals("model")) {
+				continue;
+			}
+			String clazz = elements[i].getAttribute("class");
+			if (clazz == null) {
+				continue;
+			}
+
+			ModelProviderElement providerElement = new ModelProviderElement(elements[i]);
+			if (providers.contains(providerElement))
+				continue;
+
+			try {
+				Object provider = elements[i].createExecutableExtension("class");
+
+				if (provider instanceof ContentTypeModelProvider) {
+					providerElement.setProvider(((ContentTypeModelProvider) provider));
+					providers.add(providerElement);
+				}
+			} catch (CoreException e) {
+				FrameworkPlugin.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	public List getSignCertificateUids(IMemento config) {
+		String keys[] = config.getAttributeKeys();
+		List result = new ArrayList();
+		for (int i = 0; i < keys.length; i++) {
+			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
+				String uid = config.getString(keys[i]);
+				if (uid != null && uid.trim().length() > 0) {
+					result.add(uid.trim());
+				}
+			}
+		}
+		return result;
+	}
+
+	public void setSignCertificateUids(IMemento config, List uids) {
+		String keys[] = config.getAttributeKeys();
+		for (int i = 0; i < keys.length; i++) {
+			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
+				config.putString(keys[i], ""); //$NON-NLS-1$
+			}
+		}
+		Iterator iterator = uids.iterator();
+		int num = 0;
+		while (iterator.hasNext()) {
+			config.putString(FRAMEWORK_SIGN_CERTIFICATE_ID + num, (String) iterator.next());
+			num++;
+		}
+	}
+	
+	
+	public Model createModel(String mimeType, String id, String version) {
+		Model model = null;
+		if (ContentTypeModelProvider.MIME_TYPE_BUNDLE.equals(mimeType)) {
+			try {
+				model = getResource(id, version);
+			} catch (IAgentException e) {
+				e.printStackTrace();
+			} 
+		} else {
+			List providers = getModelProviders();
+			for (int i=0; i<providers.size(); i++) {
+				ModelProviderElement providerElement = ((ModelProviderElement)providers.get(i));
+				ContentTypeModelProvider provider = providerElement.getProvider();
+				String types[] = provider.getSupportedMimeTypes();
+				for (int j=0; j<types.length; j++) {
+					if (mimeType.equals(types[j])) {
+						try {
+							model = provider.getResource(id, version, this);
+						} catch (IAgentException e) {
+							e.printStackTrace();
+						}
+						return model;
+					}
+				}
+			}
+		}
+		return model;
+	}
+	
+	private Model getResource(String id, String version) throws IAgentException {
+		Bundle master = findBundle(new Long(id));
+		Bundle slave = new Bundle(master);
+		
+		
+		Model children[] = master.getChildren();
+		if (children != null && children.length > 0) {
+			Model regServ[] = children[0].getChildren();
+			if (regServ != null) {
+				Model servCategory = getServiceCategoryNode(slave, ServicesCategory.REGISTERED_SERVICES, true);
+				for (int i = 0; i < regServ.length; i++) {
+					ObjectClass oc = new ObjectClass(regServ[i].getName(),
+						new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
+						((ObjectClass) regServ[i]).getService());
+					servCategory.addElement(oc);
+					if (isShownServicePropertiss()) {
+						try {
+							addServicePropertiesNodes(oc);
+						} catch (IAgentException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+
+			Model usedServ[] = children[1].getChildren();
+			if (usedServ != null) {
+				Model servCategory = getServiceCategoryNode(slave, ServicesCategory.USED_SERVICES, true);
+				for (int i = 0; i < usedServ.length; i++) {
+					ObjectClass oc = new ObjectClass(usedServ[i].getName(),
+						new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
+						((ObjectClass) usedServ[i]).getService());
+					servCategory.addElement(oc);
+					if (isShownServicePropertiss()) {
+						try {
+							addServicePropertiesNodes(oc);
+						} catch (IAgentException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		
+		
+		return slave;
+	}
+
 
 }

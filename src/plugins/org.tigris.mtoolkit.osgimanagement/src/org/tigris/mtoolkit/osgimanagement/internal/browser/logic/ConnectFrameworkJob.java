@@ -86,13 +86,13 @@ public class ConnectFrameworkJob extends Job {
 			if (connector != null && connector.isActive()) {
 				FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl)fw, fw.getName(), ((FrameworkImpl)fw).autoConnected);
 			} else {
-				IMemento config = fw.getConfig();
+				IMemento config = ((FrameworkImpl) fw).getConfig();
 				String id = null;
 				String transportType = null;
 				Dictionary aConnProps = null;
 				
 				String providerID = config.getString(ConstantsDistributor.TRANSPORT_PROVIDER_ID);
-				List providers = PropertySheet.obtainDeviceTypeProviders();
+				List providers = PropertySheet.obtainDeviceTypeProviders(null);
 				for (int i=0; i<providers.size(); i++) {
 					DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);
 					if (providerID.equals(provider.getTypeId())) {

@@ -15,7 +15,6 @@ import java.util.Dictionary;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.iagent.ApplicationManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -27,7 +26,6 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
-import org.tigris.mtoolkit.osgimanagement.application.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
@@ -42,14 +40,6 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 	private Model parent;
 	private ApplicationManager manager;
 	private boolean supportApplications;
-
-	public static final String APPLICATION_STARTED_ICON_PATH = "started_application_state.gif";
-	public static final String APPLICATION_STOPPING_ICON_PATH = "stopping_application_state.gif";
-	public static final String APPLICATION_INSTALLED_ICON_PATH = "installed_application_state.gif";
-	public static final String APPLICATION_MIXED_ICON_PATH = "mixed_application_state.gif";
-	
-	public static final String APPLICATION_ICON_PATH = "application.gif";
-	public static final String APPLICATION_PACKAGE_ICON_PATH = "application_package.gif";
 
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
@@ -170,30 +160,6 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		}
 	}
 
-	public Image getImage(Model node) {
-		if (node instanceof Application) {
-			try {
-				String state = ((Application)node).getRemoteApplication().getState();
-				if (RemoteApplication.STATE_RUNNING.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_STARTED_ICON_PATH);
-				} else if (RemoteApplication.STATE_INSTALLED.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_INSTALLED_ICON_PATH);
-				} else if (RemoteApplication.STATE_MIXED.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_MIXED_ICON_PATH);
-				} else if (RemoteApplication.STATE_STOPPING.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_STOPPING_ICON_PATH);
-				}
-			} catch (IAgentException e) {
-				e.printStackTrace();
-				return ImageHolder.getImage(APPLICATION_INSTALLED_ICON_PATH);
-			}
-		}
-		if (node instanceof ApplicationPackage) {
-			return ImageHolder.getImage(APPLICATION_PACKAGE_ICON_PATH);
-		}
-		return null;
-	}
-
 	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
 		if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
 			boolean enabled = ((Boolean) e.getValue()).booleanValue();
@@ -217,5 +183,13 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 				}
 			}
 		}
+	}
+
+	public Model getResource(String id, String version, Framework fw) throws IAgentException {
+		return null;
+	}
+
+	public String[] getSupportedMimeTypes() {
+		return null;
 	}
 }

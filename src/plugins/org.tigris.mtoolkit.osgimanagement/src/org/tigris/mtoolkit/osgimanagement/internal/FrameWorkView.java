@@ -835,8 +835,12 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		return null;
 	}
 
-	private List actionProviders = new ArrayList();
+	private static List actionProviders = new ArrayList();
 
+	public static List getActionsProviders() {
+		return actionProviders;
+	}
+	
 	private void obtainActionProviders() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint extensionPoint = registry

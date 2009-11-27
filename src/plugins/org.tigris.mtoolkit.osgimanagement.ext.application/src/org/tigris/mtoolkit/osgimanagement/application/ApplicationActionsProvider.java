@@ -17,6 +17,9 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.graphics.Image;
+import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.application.actions.ApplicationPropertiesAction;
@@ -24,6 +27,7 @@ import org.tigris.mtoolkit.osgimanagement.application.actions.StartApplicationAc
 import org.tigris.mtoolkit.osgimanagement.application.actions.StopApplicationAction;
 import org.tigris.mtoolkit.osgimanagement.application.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
+import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 
@@ -33,7 +37,15 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 	private static final String STOP_APPLICATION_IMAGE_PATH = "stop_application_action.gif";
 	private static final String APPLICATION_GROUP_IMAGE_PATH = "application_group.gif";
 	private static final String APPLICATION_PROPERTIES_IMAGE_PATH = "application_properties.gif";
+
+	public static final String APPLICATION_STARTED_ICON_PATH = "started_application_state.gif";
+	public static final String APPLICATION_STOPPING_ICON_PATH = "stopping_application_state.gif";
+	public static final String APPLICATION_INSTALLED_ICON_PATH = "installed_application_state.gif";
+	public static final String APPLICATION_MIXED_ICON_PATH = "mixed_application_state.gif";
 	
+	public static final String APPLICATION_ICON_PATH = "application.gif";
+	public static final String APPLICATION_PACKAGE_ICON_PATH = "application_package.gif";
+
 	private StartApplicationAction startApplicationAction;
 	private StopApplicationAction stopApplicationAction;
 	private ApplicationPropertiesAction applicationPropertiesAction;
@@ -83,6 +95,30 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 			}
 		}
 		
+	}
+
+	public Image getImage(Model node) {
+		if (node instanceof Application) {
+			try {
+				String state = ((Application)node).getRemoteApplication().getState();
+				if (RemoteApplication.STATE_RUNNING.equals(state)) {
+					return ImageHolder.getImage(APPLICATION_STARTED_ICON_PATH);
+				} else if (RemoteApplication.STATE_INSTALLED.equals(state)) {
+					return ImageHolder.getImage(APPLICATION_INSTALLED_ICON_PATH);
+				} else if (RemoteApplication.STATE_MIXED.equals(state)) {
+					return ImageHolder.getImage(APPLICATION_MIXED_ICON_PATH);
+				} else if (RemoteApplication.STATE_STOPPING.equals(state)) {
+					return ImageHolder.getImage(APPLICATION_STOPPING_ICON_PATH);
+				}
+			} catch (IAgentException e) {
+				e.printStackTrace();
+				return ImageHolder.getImage(APPLICATION_INSTALLED_ICON_PATH);
+			}
+		}
+		if (node instanceof ApplicationPackage) {
+			return ImageHolder.getImage(APPLICATION_PACKAGE_ICON_PATH);
+		}
+		return null;
 	}
 
 }

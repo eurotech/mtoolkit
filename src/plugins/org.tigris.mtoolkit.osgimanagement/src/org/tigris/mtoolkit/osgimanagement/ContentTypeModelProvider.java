@@ -11,17 +11,24 @@
 package org.tigris.mtoolkit.osgimanagement;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 public interface ContentTypeModelProvider {
+
+	public static final String MIME_TYPE_BUNDLE = "bundle";
+	
 
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor);
 	
 	public void disconnect();
 	
 	public Model switchView(int viewType);
+
+	public Model getResource(String id, String version, Framework fw) throws IAgentException;
 	
-	public Image getImage(Model node);
+	public String[] getSupportedMimeTypes();
+
 }

@@ -14,6 +14,8 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.graphics.Image;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 
 public interface ContentTypeActionsProvider {
 	
@@ -38,5 +40,7 @@ public interface ContentTypeActionsProvider {
 	public void menuAboutToShow(StructuredSelection selection, IMenuManager manager);
 	
 	public void fillToolBar(ToolBarManager tbm);
+
+	public Image getImage(Model node);
 
 }

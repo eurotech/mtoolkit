@@ -10,17 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement;
 
-import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+public interface DeviceTypeProviderValidator {
 
-public interface MimeTypeContentProvider {
-
-	public static final String MIME_TYPE_BUNDLE = "bundle";
-	
-	public Model getResource(String id, String version, Framework fw) throws IAgentException;
-	
-	public String[] getSupportedMimeTypes();
-	
-	
+	public void setValidState(String error);
 }
