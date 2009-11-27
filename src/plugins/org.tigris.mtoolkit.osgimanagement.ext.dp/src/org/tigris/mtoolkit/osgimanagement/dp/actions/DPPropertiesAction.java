@@ -113,8 +113,9 @@ public class DPPropertiesAction extends SelectionProviderAction implements IStat
 					headers.put(header, value);
 			}
 
-			propertiesDialog.open();
+			propertiesDialog.create();
 			propertiesDialog.getMainControl().setData(headers);
+			propertiesDialog.open();
 
 		} catch (IAgentException e) {
 			BrowserErrorHandler.processError(e, true);
