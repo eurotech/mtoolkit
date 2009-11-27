@@ -16,8 +16,7 @@ import java.util.Enumeration;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.osgimanagement.MimeTypeContentProvider;
-import org.tigris.mtoolkit.osgimanagement.MimeTypeManager;
+import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
@@ -43,7 +42,7 @@ public class DeploymentPackage extends Model {
 
 				if (bundle == null)
 					continue;
-				Model bundleNode = MimeTypeManager.createModel(fw, MimeTypeContentProvider.MIME_TYPE_BUNDLE, Long.toString(bundle.getBundleId()), bundle.getVersion());
+				Model bundleNode = fw.createModel(ContentTypeModelProvider.MIME_TYPE_BUNDLE, Long.toString(bundle.getBundleId()), bundle.getVersion());
 				if (bundleNode != null) {
 					addElement(bundleNode);
 				}

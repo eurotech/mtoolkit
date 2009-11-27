@@ -12,12 +12,9 @@ package org.tigris.mtoolkit.osgimanagement.dp;
 
 import java.util.Dictionary;
 
-import javax.swing.text.StyleContext.SmallAttributeSet;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -32,7 +29,6 @@ import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
-import org.tigris.mtoolkit.osgimanagement.dp.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
@@ -45,8 +41,6 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 	private DeploymentManager manager;
 	private boolean supportDP;
 	
-	private static final String DP_ICON_PATH = "dpackage.gif";
-
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
 		this.parent = parent;
@@ -104,10 +98,6 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 		connector = null;
 		dpNode = null;
 		supportDP = false;
-	}
-
-	public Image getImage(Model node) {
-		return ImageHolder.getImage(DP_ICON_PATH);
 	}
 
 	public Model switchView(int viewType) {
@@ -225,6 +215,14 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 				}
 			}
 		}
+	}
+
+	public Model getResource(String id, String version, Framework fw) throws IAgentException {
+		return null;
+	}
+
+	public String[] getSupportedMimeTypes() {
+		return null;
 	}
 
 }

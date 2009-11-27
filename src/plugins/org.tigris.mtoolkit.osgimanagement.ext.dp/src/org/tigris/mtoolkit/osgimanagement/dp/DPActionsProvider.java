@@ -17,9 +17,12 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
+import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.DPPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.InstallDPAction;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.UninstallDPAction;
@@ -32,6 +35,8 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 	private static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif";
 	private static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif";
 	private static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif";
+	private static final String DP_ICON_PATH = "dpackage.gif";
+	private static final String DP_PACKAGE_PATH = "dp_package.gif";
 	
 	private InstallDPAction installDPAction;
 	private UninstallDPAction uninstallDPAction;
@@ -77,10 +82,21 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, installDPAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, uninstallDPAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, dpPropertiesAction);
+				} else if (element instanceof SimpleNode && "Deployment Packages".equals(element.getName()) ||
+								element instanceof Framework) {
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
 				}
 			}
 		}
 		
+	}
+
+	public Image getImage(Model node) {
+		if (node instanceof DeploymentPackage) {
+			return ImageHolder.getImage(DP_ICON_PATH);
+		} else {
+			return ImageHolder.getImage(DP_PACKAGE_PATH);
+		}
 	}
 
 
