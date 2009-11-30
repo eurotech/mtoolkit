@@ -13,7 +13,7 @@ package org.tigris.mtoolkit.osgimanagement.dp;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.osgimanagement.dp.logic.DPProcessor;
-import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 
 /**
  * The activator class controls the plug-in life cycle

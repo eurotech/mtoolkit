@@ -13,8 +13,11 @@ package org.tigris.mtoolkit.osgimanagement.dp;
 import java.util.Dictionary;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -26,12 +29,10 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListener, RemoteDevicePropertyListener {
 
@@ -138,10 +139,12 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 
 	public void deploymentPackageChanged(final RemoteDPEvent e) {
 		try {
-			BrowserErrorHandler
-					.debug("Deployment package changed " + e.getDeploymentPackage().getName() + " " + (e.getType() == RemoteDPEvent.INSTALLED ? "INSTALLED" : "UNINSTALLED"));} catch (IAgentException e2) {} //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			StatusManager.getManager().handle(new Status(IStatus.INFO, Activator.PLUGIN_ID, 
+				"Deployment package changed " + e.getDeploymentPackage().getName() + " " + (e.getType() == RemoteDPEvent.INSTALLED ? "INSTALLED" : "UNINSTALLED")));
+		} catch (IAgentException e2) {
+		}
 
-		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 			try {
 				RemoteDP remoteDP = e.getDeploymentPackage();
 				if (e.getType() == RemoteDPEvent.INSTALLED) {
@@ -158,7 +161,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 					} catch (IAgentException e1) {
 						if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE
 								&& e1.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
-							BrowserErrorHandler.processError(e1, connector, e1.getMessage());
+							StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e1.getMessage(), e1));
 						}
 					}
 				} else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
@@ -176,10 +179,8 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 			} catch (IllegalStateException ex) {
 				// ignore state exceptions, which usually indicates that something
 				// is was fast enough to disappear
-				BrowserErrorHandler.debug(ex);
 			} catch (Throwable t) {
-				t.printStackTrace();
-				BrowserErrorHandler.processError(t, connector, t.getMessage());
+				StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, t.getMessage(), t));
 			}
 		}
 	}

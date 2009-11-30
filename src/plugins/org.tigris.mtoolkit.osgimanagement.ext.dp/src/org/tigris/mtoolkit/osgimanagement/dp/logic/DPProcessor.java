@@ -19,9 +19,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
-import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 
 public class DPProcessor extends FrameworkProcessor {

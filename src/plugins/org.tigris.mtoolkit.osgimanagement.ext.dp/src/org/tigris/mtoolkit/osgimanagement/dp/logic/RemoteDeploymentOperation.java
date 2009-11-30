@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.Utils;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
 public abstract class RemoteDeploymentOperation extends Job {
 
@@ -54,7 +54,7 @@ public abstract class RemoteDeploymentOperation extends Job {
 	protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;
 
 	protected IStatus handleException(IAgentException e) {
-		return FrameworkPlugin.handleIAgentException(e);
+		return Utils.handleIAgentException(e);
 	}
 
 	protected abstract String getMessage(IStatus operationStatus);

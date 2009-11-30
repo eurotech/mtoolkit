@@ -23,14 +23,14 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.DPModelProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 
@@ -95,7 +95,7 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 		final int[] result = new int[1];
 		display.syncExec(new Runnable() {
 			public void run() {
-				dialog = new MessageDialog(FrameWorkView.getShell(),
+				dialog = new MessageDialog(PluginUtilities.getActiveWorkbenchShell(),
 						"Uninstall Existing Deployment Package",
 						null,
 						NLS.bind("The deployment package {0} exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",

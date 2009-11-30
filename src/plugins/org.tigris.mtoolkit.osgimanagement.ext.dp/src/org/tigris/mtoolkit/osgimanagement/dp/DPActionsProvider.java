@@ -20,14 +20,14 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.DPPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.InstallDPAction;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.UninstallDPAction;
 import org.tigris.mtoolkit.osgimanagement.dp.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class DPActionsProvider implements ContentTypeActionsProvider {
 

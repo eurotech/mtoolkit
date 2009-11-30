@@ -16,6 +16,8 @@ import java.io.StringReader;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -23,14 +25,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
 
 public class DPPropertiesAction extends SelectionProviderAction implements IStateAction {
 
@@ -118,7 +119,7 @@ public class DPPropertiesAction extends SelectionProviderAction implements IStat
 			propertiesDialog.open();
 
 		} catch (IAgentException e) {
-			BrowserErrorHandler.processError(e, true);
+			StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
 			return;
 		}
 	}

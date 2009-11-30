@@ -24,12 +24,12 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.dp.logic.DPProcessor;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.InstallDialog;
-import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor;
-import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkTarget;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class InstallDPAction extends SelectionProviderAction implements IStateAction {
 
@@ -60,7 +60,7 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
 			public IStatus run(IProgressMonitor monitor) {
 				InstallationItem item = new BaseFileItem(new File(result), DPProcessor.MIME_DP);
 				FrameworkProcessor processor = new FrameworkProcessor();
-				processor.setUseAdditionalProcessors(false);
+				processor.setUseAdditionalProcessors(true);
 				IStatus status = processor.processInstallationItem(item, new FrameworkTarget(framework), monitor);
 				monitor.done();
 				if (monitor.isCanceled()) {

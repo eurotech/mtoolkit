@@ -16,13 +16,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
+import org.tigris.mtoolkit.osgimanagement.Utils;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 
 public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
 
@@ -40,7 +39,7 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
 			if (IAgentErrors.toDeploymentExceptionCode(e.getErrorCode()) > 0) {
 				// remote deployment admin threw an exception, ask the user for
 				// forced uninstallation
-				if (askUserToForceUninstallation(FrameworkPlugin.handleIAgentException(e))) {
+				if (askUserToForceUninstallation(Utils.handleIAgentException(e))) {
 					return uninstallDeploymentPackage(true);
 				} else {
 					// the user has already been notified, skip the error dialog
@@ -62,7 +61,7 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
 		final int[] result = new int[1];
 		display.syncExec(new Runnable() {
 			public void run() {
-				dialog = new MessageDialog(FrameWorkView.getShell(),
+				dialog = new MessageDialog(PluginUtilities.getActiveWorkbenchShell(),
 						"Force Deployment Package Uninstallation",
 						null,
 						NLS.bind("Deployment package {0} uninstallation failed: {1}",

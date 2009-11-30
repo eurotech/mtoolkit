@@ -19,10 +19,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.dp.logic.UninstallDeploymentOperation;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class UninstallDPAction extends SelectionProviderAction implements IStateAction {
 
@@ -35,7 +34,7 @@ public class UninstallDPAction extends SelectionProviderAction implements IState
 		final int result[] = new int[1];
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				result[0] = PluginUtilities.showConfirmationDialog(FrameWorkView.getShell(), "Confirm uninstall",
+				result[0] = PluginUtilities.showConfirmationDialog(PluginUtilities.getActiveWorkbenchShell(), "Confirm uninstall",
 				"Are you sure you want to uninstall selected resource(s)");
 			}
 		});

@@ -13,13 +13,16 @@ package org.tigris.mtoolkit.osgimanagement.dp.model;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
+import org.tigris.mtoolkit.osgimanagement.dp.Activator;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class DeploymentPackage extends Model {
 
@@ -64,8 +67,7 @@ public class DeploymentPackage extends Model {
 		try {
 			return dp.isStale();
 		} catch (IAgentException e) {
-			e.printStackTrace();
-			BrowserErrorHandler.processError(e, this);
+			StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
 		}
 		return false;
 	}
