@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.application.model;
 
-import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
+import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class ApplicationPackage extends SimpleNode {
 	

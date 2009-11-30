@@ -28,9 +28,8 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 
 public class ApplicationModelProvider implements ContentTypeModelProvider, RemoteApplicationListener, RemoteDevicePropertyListener {
@@ -133,7 +132,7 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 	}
 
 	public void applicationChanged(RemoteApplicationEvent event) {
-		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 			if (event.getType() == RemoteApplicationEvent.INSTALLED) {
 				RemoteApplication rApplication = event.getApplication();
 				Application application;

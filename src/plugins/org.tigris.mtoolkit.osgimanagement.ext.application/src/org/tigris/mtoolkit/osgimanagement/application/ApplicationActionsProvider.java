@@ -28,7 +28,7 @@ import org.tigris.mtoolkit.osgimanagement.application.actions.StopApplicationAct
 import org.tigris.mtoolkit.osgimanagement.application.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 
 public class ApplicationActionsProvider implements ContentTypeActionsProvider {

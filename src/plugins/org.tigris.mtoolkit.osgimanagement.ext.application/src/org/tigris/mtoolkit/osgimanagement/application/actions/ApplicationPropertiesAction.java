@@ -18,10 +18,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
 
 
 public class ApplicationPropertiesAction extends SelectionProviderAction implements IStateAction {

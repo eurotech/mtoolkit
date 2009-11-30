@@ -21,7 +21,7 @@ import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.application.logic.RemoteApplicationOperation;
 import org.tigris.mtoolkit.osgimanagement.application.logic.StartApplicationOperation;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 
 public class StartApplicationAction extends SelectionProviderAction implements IStateAction {

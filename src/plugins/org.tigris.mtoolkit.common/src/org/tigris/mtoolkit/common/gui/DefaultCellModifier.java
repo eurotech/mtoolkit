@@ -8,21 +8,20 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.application.model;
+package org.tigris.mtoolkit.common.gui;
 
-import org.tigris.mtoolkit.iagent.RemoteApplication;
-import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.eclipse.jface.viewers.ICellModifier;
 
-public class Application extends Model {
-	
-	private RemoteApplication remoteApplication;
-	
-	public Application(String name, RemoteApplication remoteApplication) {
-		super(name);
-		this.remoteApplication = remoteApplication;
+public class DefaultCellModifier implements ICellModifier {
+
+	public boolean canModify(Object element, String property) {
+		return true;
 	}
-	
-	public RemoteApplication getRemoteApplication() {
-		return remoteApplication;
+
+	public Object getValue(Object element, String property) {
+		return element;
+	}
+
+	public void modify(Object element, String property, Object value) {
 	}
 }

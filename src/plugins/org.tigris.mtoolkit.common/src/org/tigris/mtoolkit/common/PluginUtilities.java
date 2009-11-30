@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.osgi.framework.Version;
 
 public class PluginUtilities {
@@ -772,6 +773,15 @@ public class PluginUtilities {
 		Version bundleVersion = getBundleVersion(bundleName);
 		Version compatibleRange = new Version(version);
 		return compatibleRange.compareTo(bundleVersion) <= 0;
+	}
+	
+	public static Shell getActiveWorkbenchShell() {
+		Shell shell = null;
+		IWorkbenchWindow aWindow = UtilitiesPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
+		if (aWindow != null) {
+			shell = aWindow.getShell();
+		}
+		return shell;
 	}
 
 }
