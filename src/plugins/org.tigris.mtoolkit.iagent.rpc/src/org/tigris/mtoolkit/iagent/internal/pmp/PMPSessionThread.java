@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Hashtable;
@@ -493,13 +496,23 @@ public class PMPSessionThread extends Thread {
 				if (refs)
 					readReal = (is.read() == 1);
 				if (readReal) {
-					args[i] = PMPData.readObject(null,
-						info.obj.getClass().getClassLoader(),
-						is,
-						new String(),
-						maxA,
-						-1,
-						null);
+					args[i] = PMPData.readObject(null, info.obj.getClass().getClassLoader(), is, new String(), maxA,
+							-1, null);
+					// check that if the arguments is InputStream and it is not
+					// the last argument we need to load it entirely in the memory
+					if ((i != (args.length - 1)) && (args[i] instanceof InputStream)) {
+						byte[] buf = new byte[256];
+						int read;
+						InputStream input = (InputStream) args[i];
+						ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);
+						while ((read = input.read(buf)) != -1) {
+							bos.write(buf, 0, read);
+						}
+						// close the old input stream
+						input.close();
+						// replace the args[i] with ByteArrayInputStream
+						args[i] = new ByteArrayInputStream(bos.toByteArray());
+					}
 				} else {
 					int tempID = PMPData.readInt(is);
 					args[i] = ((ObjectInfo) objects.get(new Integer(tempID))).obj;
