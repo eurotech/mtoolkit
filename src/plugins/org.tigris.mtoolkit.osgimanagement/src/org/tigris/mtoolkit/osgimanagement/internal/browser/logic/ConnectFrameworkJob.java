@@ -34,13 +34,14 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet.DeviceTypeProviderElement;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class ConnectFrameworkJob extends Job {
 	private static List connectingFrameworks = new ArrayList();
@@ -73,7 +74,7 @@ public class ConnectFrameworkJob extends Job {
 				if (fw.isConnected()) {
 					return Status.OK_STATUS;
 				} else {
-					return FrameworkPlugin.newStatus(IStatus.ERROR,
+					return Util.newStatus(IStatus.ERROR,
 						"Could not connect to framework " + fw.getName(),
 						null);
 				}
@@ -99,7 +100,7 @@ public class ConnectFrameworkJob extends Job {
 						try {
 							transportType = provider.getProvider().getTransportType();
 							aConnProps = provider.getProvider().load(config);
-							id = (String) aConnProps.get(ConstantsDistributor.FRAMEWORK_ID);
+							id = (String) aConnProps.get(Framework.FRAMEWORK_ID);
 						} catch (CoreException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -122,7 +123,7 @@ public class ConnectFrameworkJob extends Job {
 			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT)
 				handleConnectionFailure();
 			else
-				return FrameworkPlugin.handleIAgentException(e);
+				return Util.handleIAgentException(e);
 		} finally {
 			// remove the framework in any case
 			synchronized (connectingFrameworks) {
@@ -183,7 +184,7 @@ public class ConnectFrameworkJob extends Job {
 						}
 
 					} catch (IOException e1) {
-						StatusManager.getManager().handle(FrameworkPlugin.newStatus(IStatus.ERROR,
+						StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR,
 							"An error occurred while saving IAgent bundle",
 							e1));
 					} finally {

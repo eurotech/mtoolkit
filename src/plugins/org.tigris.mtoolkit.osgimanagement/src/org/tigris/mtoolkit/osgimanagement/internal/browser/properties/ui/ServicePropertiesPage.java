@@ -14,6 +14,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.common.gui.PropertiesPage;
+import org.tigris.mtoolkit.common.gui.PropertyObject;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;

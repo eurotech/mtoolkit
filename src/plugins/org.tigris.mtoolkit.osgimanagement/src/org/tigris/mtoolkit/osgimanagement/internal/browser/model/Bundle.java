@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.Assert;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class Bundle extends Model {
 

@@ -28,6 +28,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
@@ -196,7 +197,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			return;
 
 		BrowserErrorHandler.debug("FrameworkPlugin: " + fwName + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
-		synchronized (getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 
 			FrameworkImpl fws[] = FrameWorkView.getFrameworks();
 			if (fws != null) {
@@ -214,14 +215,5 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			}
 			ActionsManager.disconnectConsole(fw); //$NON-NLS-1$
 		}
-	}
-
-	public static Object getLockObject(DeviceConnector connector) {
-		Object lockObj = lockObjHash.get(connector);
-		if (lockObj == null) {
-			lockObj = new Object();
-			lockObjHash.put(connector, lockObj);
-		}
-		return lockObj;
 	}
 }

@@ -12,9 +12,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
+import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
@@ -34,7 +35,7 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 			pis = new ProgressInputStream(new FileInputStream(bundleFile), monitor);
 			rBundle.update(pis);
 		} catch (IOException e) {
-			return FrameworkPlugin.newStatus(IStatus.ERROR, NLS.bind(Messages.update_file_not_found,
+			return Util.newStatus(IStatus.ERROR, NLS.bind(Messages.update_file_not_found,
 				bundleFile.toString()), e);
 		} finally {
 			if (pis != null)

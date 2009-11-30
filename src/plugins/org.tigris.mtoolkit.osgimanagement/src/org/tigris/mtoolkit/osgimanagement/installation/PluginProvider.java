@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.internal.installation;
+package org.tigris.mtoolkit.osgimanagement.installation;
 
 import java.io.File;
 import java.io.FileInputStream;

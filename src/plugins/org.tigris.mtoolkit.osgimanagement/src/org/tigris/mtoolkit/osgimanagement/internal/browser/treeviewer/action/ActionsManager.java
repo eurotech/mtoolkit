@@ -24,6 +24,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -32,6 +33,8 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
@@ -48,11 +51,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.InstallDialog;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
-import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor;
-import org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkTarget;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class ActionsManager {
 	private static final String MIME_JAR = "application/java-archive"; //$NON-NLS-1$
@@ -215,7 +216,7 @@ public class ActionsManager {
 				if ((connector = fw.getConnector()) != null) {
 					// framework connects synchronously, while holding a lock
 					// wait until the lock is released to know when the connect op has finished
-					synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+					synchronized (Framework.getLockObject(connector)) {
 					}
 				}
 				// if the connection fails, connector will be null, so we need to recheck the condition

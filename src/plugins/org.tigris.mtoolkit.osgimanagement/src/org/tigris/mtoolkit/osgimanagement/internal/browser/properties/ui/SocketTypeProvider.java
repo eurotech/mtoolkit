@@ -22,6 +22,7 @@ import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistributor {
 
@@ -33,7 +34,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 
 	// Initialize ui values from storage
 	public void setProperties(IMemento config) {
-		String idString = config.getString(FRAMEWORK_ID);
+		String idString = config.getString(Framework.FRAMEWORK_ID);
 		if (idString == null) {
 			idString = "127.0.0.1";
 		}
@@ -112,12 +113,12 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 	public Dictionary load(IMemento config) {
 		Dictionary aConnProps = new Hashtable();
 		aConnProps.put("framework-connection-immediate", Boolean.FALSE);
-		aConnProps.put(ConstantsDistributor.FRAMEWORK_ID, config.getString(ConstantsDistributor.FRAMEWORK_ID));
+		aConnProps.put(Framework.FRAMEWORK_ID, config.getString(Framework.FRAMEWORK_ID));
 		return aConnProps;
 	}
 
 	public void save(IMemento config) {
-		config.putString(ConstantsDistributor.FRAMEWORK_ID, getTransportID());
+		config.putString(Framework.FRAMEWORK_ID, getTransportID());
 	}
 
 	public void setEditable(boolean editable) {

@@ -25,11 +25,13 @@ import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class PMPConnectionListener implements ConnectionListener {
 
@@ -65,7 +67,7 @@ public class PMPConnectionListener implements ConnectionListener {
 
 		// if disconnect event received while connect thread is running
 		// block disconnect until connect thread is finished/breaked
-		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 		}
 
 		fw.disconnect();
@@ -83,10 +85,10 @@ public class PMPConnectionListener implements ConnectionListener {
 					try {
 						// force creation of pmp connection
 						if (!connector.getVMManager().isVMActive()) {
-							return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection failed", null);
+							return Util.newStatus(IStatus.ERROR, "Connection failed", null);
 						}
 					} catch (IAgentException e) {
-						return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection failed", e);
+						return Util.newStatus(IStatus.ERROR, "Connection failed", e);
 					}
 					
 					
@@ -103,7 +105,7 @@ public class PMPConnectionListener implements ConnectionListener {
 							}
 						}
 					} catch (IAgentException e) {
-						return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection failed", e);
+						return Util.newStatus(IStatus.ERROR, "Connection failed", e);
 					}
 					
 					connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);

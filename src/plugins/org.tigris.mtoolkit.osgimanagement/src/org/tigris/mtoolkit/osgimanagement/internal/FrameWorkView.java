@@ -91,11 +91,10 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.ViewPart;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
@@ -131,6 +130,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Vie
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewContentProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewLabelProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
@@ -199,7 +200,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		if (tree != null) {
 			return tree.getControl().getShell();
 		} else {
-			return Display.getDefault().getActiveShell();
+			return PluginUtilities.getActiveWorkbenchShell();
 		}
 	}
 

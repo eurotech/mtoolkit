@@ -8,11 +8,9 @@ Bundle-Activator: org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.tigris.mtoolkit.osgimanagement,
- org.tigris.mtoolkit.osgimanagement.browser.model,
- org.tigris.mtoolkit.osgimanagement.internal,
- org.tigris.mtoolkit.osgimanagement.internal.browser.logic,
+ org.tigris.mtoolkit.osgimanagement.installation,
  org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui,
- org.tigris.mtoolkit.osgimanagement.internal.installation
+ org.tigris.mtoolkit.osgimanagement.model
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.ide,
  org.eclipse.ui.views,

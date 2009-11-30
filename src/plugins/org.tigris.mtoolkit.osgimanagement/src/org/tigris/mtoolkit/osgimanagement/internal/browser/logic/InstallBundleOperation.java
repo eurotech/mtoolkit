@@ -28,11 +28,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
@@ -57,12 +58,12 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			input = new ProgressInputStream(new FileInputStream(bundle), monitor);
 			DeviceConnector connector = framework.getConnector();
 			if (connector == null)
-				return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection lost", null);
+				return Util.newStatus(IStatus.ERROR, "Connection lost", null);
 
 			zip = new ZipFile(bundle);
 			ZipEntry entry = zip.getEntry("META-INF/MANIFEST.MF");
 			if (entry == null) {
-				return FrameworkPlugin.newStatus(IStatus.ERROR, "Invalid bundle content", null);
+				return Util.newStatus(IStatus.ERROR, "Invalid bundle content", null);
 			}
 			zis = zip.getInputStream(entry);
 			Manifest mf = new Manifest(zis);
@@ -204,7 +205,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				}
 			}
 		} catch (IOException e) {
-			return FrameworkPlugin.newStatus(IStatus.ERROR, NLS.bind(Messages.update_file_not_found, bundle.getName()),
+			return Util.newStatus(IStatus.ERROR, NLS.bind(Messages.update_file_not_found, bundle.getName()),
 					e);
 		} finally {
 			if (input != null) {
@@ -232,7 +233,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			} catch (IAgentException e) {
 				// only log this exception, because the user requested install
 				// bundle, which succeeded
-				StatusManager.getManager().handle(FrameworkPlugin.handleIAgentException(e), StatusManager.LOG);
+				StatusManager.getManager().handle(Util.handleIAgentException(e), StatusManager.LOG);
 			}
 		}
 		return Status.OK_STATUS;

@@ -12,7 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.internal;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class MyViewerFilter extends ViewerFilter {
 

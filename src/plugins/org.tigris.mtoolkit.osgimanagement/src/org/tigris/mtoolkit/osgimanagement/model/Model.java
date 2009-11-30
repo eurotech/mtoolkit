@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.browser.model;
+package org.tigris.mtoolkit.osgimanagement.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;

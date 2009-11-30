@@ -23,8 +23,6 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView.ActionsProviderElement;
@@ -39,6 +37,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class ViewLabelProvider extends StyledCellLabelProvider implements ConstantsDistributor {
 

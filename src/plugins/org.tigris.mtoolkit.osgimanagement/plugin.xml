@@ -67,7 +67,7 @@
             type="application/zip">
       </provider>
       <provider
-            class="org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider"
+            class="org.tigris.mtoolkit.osgimanagement.installation.PluginProvider"
             id="org.tigris.mtoolkit.osgimanagement.pluginprovider"
             name="Plugin project provider">
       </provider>
@@ -75,9 +75,9 @@
    <extension
          point="org.tigris.mtoolkit.common.installationItemProcessors">
       <processor
-            class="org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkProcessor"
+            class="org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor"
             id="org.tigris.mtoolkit.osgimanagement.frameworkprocessor"
-            selectionDialog="org.tigris.mtoolkit.osgimanagement.internal.installation.FrameworkSelectionDialog">
+            selectionDialog="org.tigris.mtoolkit.osgimanagement.installation.FrameworkSelectionDialog">
       </processor>
    </extension>
 

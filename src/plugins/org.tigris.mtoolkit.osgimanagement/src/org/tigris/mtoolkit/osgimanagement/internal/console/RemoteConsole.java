@@ -24,12 +24,13 @@ import org.eclipse.ui.part.IPageBookViewPage;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class RemoteConsole extends IOConsole {
 
@@ -94,12 +95,12 @@ public class RemoteConsole extends IOConsole {
 			}
 		} catch (IAgentException e) {
 			try {
-				IStatus status = FrameworkPlugin.handleIAgentException(e);
+				IStatus status = Util.handleIAgentException(e);
 				output.write(NLS.bind("Failed to redirect framework output: {0}", status.getMessage()));
 			} catch (IOException e1) {
 				FrameworkPlugin.error("Exception while writing to console", e1);
 			}
-			FrameworkPlugin.log(FrameworkPlugin.handleIAgentException(e));
+			FrameworkPlugin.log(Util.handleIAgentException(e));
 		}
 	}
 	

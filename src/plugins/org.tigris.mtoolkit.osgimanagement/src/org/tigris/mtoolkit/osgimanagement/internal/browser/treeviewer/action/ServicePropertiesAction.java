@@ -16,6 +16,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.common.gui.PropertiesDialog;
+import org.tigris.mtoolkit.common.gui.PropertiesPage;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
@@ -23,8 +25,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesDialog;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertiesPage;
 
 public class ServicePropertiesAction extends SelectionProviderAction implements IStateAction {
 

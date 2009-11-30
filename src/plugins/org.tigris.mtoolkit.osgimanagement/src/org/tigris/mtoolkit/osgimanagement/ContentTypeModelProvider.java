@@ -13,8 +13,8 @@ package org.tigris.mtoolkit.osgimanagement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public interface ContentTypeModelProvider {
 

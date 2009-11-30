@@ -8,13 +8,14 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.browser.model;
+package org.tigris.mtoolkit.osgimanagement.model;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 
 public abstract class Framework extends Model {
 
@@ -25,6 +26,8 @@ public abstract class Framework extends Model {
 	protected boolean connectedFlag;
 	protected int viewType;
 	protected List modelProviders = new ArrayList();
+	// framework IP or other ID
+	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
 
 	public Framework(String name) {
 		super(name);
@@ -52,4 +55,13 @@ public abstract class Framework extends Model {
 	public abstract Map getSigningProperties();
 
 	public abstract Model createModel(String mimeType, String id, String version);
+
+	public static Object getLockObject(DeviceConnector connector) {
+		Object lockObj = FrameworkConnectorFactory.lockObjHash.get(connector);
+		if (lockObj == null) {
+			lockObj = new Object();
+			FrameworkConnectorFactory.lockObjHash.put(connector, lockObj);
+		}
+		return lockObj;
+	}
 }

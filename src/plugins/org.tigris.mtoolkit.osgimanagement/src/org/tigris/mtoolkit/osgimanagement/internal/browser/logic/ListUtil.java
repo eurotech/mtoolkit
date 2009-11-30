@@ -13,10 +13,10 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class ListUtil {
 

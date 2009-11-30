@@ -6,7 +6,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
 public abstract class RemoteBundleOperation extends Job {
@@ -36,7 +36,7 @@ public abstract class RemoteBundleOperation extends Job {
 			monitor.done();
 		}
 		if (!operationResult.isOK())
-			StatusManager.getManager().handle(FrameworkPlugin.newStatus(getMessage(operationResult), operationResult),
+			StatusManager.getManager().handle(Util.newStatus(getMessage(operationResult), operationResult),
 				StatusManager.SHOW | StatusManager.LOG);
 		return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 	}
@@ -48,7 +48,7 @@ public abstract class RemoteBundleOperation extends Job {
 	protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;
 
 	protected IStatus handleException(IAgentException e) {
-		return FrameworkPlugin.handleIAgentException(e);
+		return Util.handleIAgentException(e);
 	}
 
 	protected abstract String getMessage(IStatus operationStatus);

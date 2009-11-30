@@ -19,14 +19,13 @@ import java.util.Hashtable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
@@ -97,20 +96,6 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		super.initializeImageRegistry(reg);
 	}
 
-	public static IStatus newStatus(int severity, String message, Throwable t) {
-		return new Status(severity, PLUGIN_ID, message, t);
-	}
-
-	public static IStatus newStatus(String message, IStatus e) {
-		return new MultiStatus(PLUGIN_ID, 0, new IStatus[] { e }, message, null);
-	}
-
-	public static IStatus handleIAgentException(IAgentException e) {
-		String message = Messages.get(String.valueOf(e.getErrorCode()).replace('-', '_'));
-		if (message == null) message = e.getMessage();
-		return newStatus(IStatus.ERROR, message, e);
-	}
-	
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
@@ -148,7 +133,7 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 					return new FileInputStream(bundleFile);
 				}
 			} catch (IOException e) {
-				getDefault().getLog().log(newStatus(IStatus.ERROR, "Failed to find IAgent RPC bundle", e));
+				getDefault().getLog().log(Util.newStatus(IStatus.ERROR, "Failed to find IAgent RPC bundle", e));
 			}
 		}
 		return null;

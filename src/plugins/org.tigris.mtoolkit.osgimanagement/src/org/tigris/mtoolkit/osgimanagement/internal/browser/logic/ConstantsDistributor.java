@@ -18,8 +18,6 @@ public interface ConstantsDistributor {
 	static final int LIST_DIALOG_HEIGHT = 200;
 
 	static final String FRAMEWORK_NAME = "framework_name_key"; //$NON-NLS-1$
-	// framework IP or other ID
-	static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
 	static final String TRANSPORT_PROVIDER_ID = "transport_type_key"; //$NON-NLS-1$
 	
 	static final String FRAMEWORK_SIGN_CERTIFICATE_ID = "framework_sign_certificate_uid"; //$NON-NLS-1$

@@ -50,9 +50,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Model;
-import org.tigris.mtoolkit.osgimanagement.browser.model.SimpleNode;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -60,6 +58,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHan
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener, RemoteDevicePropertyListener {
 
@@ -235,7 +236,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	private boolean initModel(SubMonitor sMonitor) {
-		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 			try {
 				connecting = true;
 				userDisconnect = false;
@@ -268,7 +269,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void disconnect() {
 //		TODO:
 		if (connector == null) return;
-		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 			if (connector != null) {
 				removeRemoteListeners();
 			}
@@ -357,7 +358,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void setViewType(int viewType) {
 		if (this.viewType == viewType)
 			return;
-		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 		}
 		
 		this.viewType = viewType;
@@ -547,7 +548,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 		final int type = e.getType();
 
-		synchronized ((FrameworkConnectorFactory.getLockObject(connector))) {
+		synchronized ((Framework.getLockObject(connector))) {
 			final RemoteBundle rBundle = e.getBundle();
 			long id = rBundle.getBundleId();
 			try {
@@ -695,7 +696,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		if (!isConnected())
 			return;
 
-		synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+		synchronized (Framework.getLockObject(connector)) {
 
 			try {
 				RemoteService rService = e.getService();
@@ -745,7 +746,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void refreshAction() {
 		Job job = new Job(Messages.refresh_framework_info) {
 			protected IStatus run(IProgressMonitor monitor) {
-				synchronized (FrameworkConnectorFactory.getLockObject(connector)) {
+				synchronized (Framework.getLockObject(connector)) {
 					SubMonitor sMonitor = SubMonitor.convert(monitor, FrameworkConnectorFactory.CONNECT_PROGRESS);
 					sMonitor.setTaskName("Refreshing " + FrameworkImpl.this.getName());
 					try {
@@ -1209,7 +1210,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 							try {
 								addBundles(sMonitor);
 							} catch (IAgentException e) {
-								return FrameworkPlugin.handleIAgentException(e);
+								return Util.handleIAgentException(e);
 							} finally {
 								sMonitor.done();
 							}
@@ -1238,7 +1239,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 								retrieveServicesInfo(connector.getDeploymentManager().listBundles(), sMonitor);
 								addServices(sMonitor);
 							} catch (IAgentException e) {
-								return FrameworkPlugin.handleIAgentException(e);
+								return Util.handleIAgentException(e);
 							} finally {
 								sMonitor.done();
 							}

@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.internal.installation;
+package org.tigris.mtoolkit.osgimanagement.installation;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,7 +42,8 @@ import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.browser.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.Util;
+import org.tigris.mtoolkit.osgimanagement.installation.PluginProvider.PluginItem;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
@@ -50,7 +51,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
-import org.tigris.mtoolkit.osgimanagement.internal.installation.PluginProvider.PluginItem;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class FrameworkProcessor implements InstallationItemProcessor {
 
@@ -151,7 +152,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		// Platform properties
 		try {
 			DeviceConnector connector = framework.getConnector();
-			if (connector == null) return FrameworkPlugin.newStatus(IStatus.ERROR, "Connection lost", null);
+			if (connector == null) return Util.newStatus(IStatus.ERROR, "Connection lost", null);
 			Map platformProps = connector.getVMManager().getPlatformProperties();
 			preparationProps.putAll(platformProps);
 		} catch (IAgentException iae) {
@@ -229,7 +230,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			input = item.getInputStream();
 			processor[0].install(input, item, framework, monitor);
 		} catch (Exception e) {
-			return FrameworkPlugin.newStatus(IStatus.ERROR, "Remote content installation failed", e);
+			return Util.newStatus(IStatus.ERROR, "Remote content installation failed", e);
 		} finally {
 			if (input != null) {
 				try {
@@ -261,7 +262,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			installBundleJob.addJobChangeListener(new DeleteWhenDoneListener(bundle));
 			installBundleJob.schedule();
 		} catch (IOException e) {
-			StatusManager.getManager().handle(FrameworkPlugin.newStatus(IStatus.ERROR, "Unable to install bundle", e),
+			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e),
 				StatusManager.SHOW | StatusManager.LOG);
 		}
 	}
