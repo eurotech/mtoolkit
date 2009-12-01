@@ -47,9 +47,14 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 		this.parent = parent;
 		
 		Dictionary connectorProperties = connector.getProperties();
-		Object support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
-		if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
 			supportDP = true;
+		} else {
+			support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
+			if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+				supportDP = true;
+			}
 		}
 		try {
 			connector.addRemoteDevicePropertyListener(this);
