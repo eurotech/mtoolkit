@@ -136,8 +136,10 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		certificatesPanel = new CertificatesPanel(mainContent, 2, 1);
 
 		// Autoconnect checkbox
-		connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
-		connectButton.setEnabled(!fw.isConnected());
+		if (!fw.autoConnected && fw.getParent() == null) {
+			connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
+			connectButton.setEnabled(!fw.isConnected());
+		}
 
 		init();
 
@@ -194,9 +196,10 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			e.printStackTrace();
 		}
 
-		if (!connectButton.isDisposed())
+		if (connectButton != null) {
 			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
-
+		}
+			
 		// Signing Certificates
 		fw.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
 
@@ -376,18 +379,11 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			e.printStackTrace();
 		}
 
-		Boolean connect = fw.getConfig().getBoolean(CONNECT_TO_FRAMEWORK);
-		if (connect != null) {
-			connectButton.setSelection(connect.booleanValue());
-			Composite parent = connectButton.getParent();
-			Control[] children = parent.getChildren();
-			for (int i = 0; i < children.length; i++) {
-				if (children[i].equals(connectButton)) {
-					children[i].dispose();
-					break;
-				}
+		if (connectButton != null) {
+			Boolean connect = fw.getConfig().getBoolean(CONNECT_TO_FRAMEWORK);
+			if (connect != null) {
+				connectButton.setSelection(connect.booleanValue());
 			}
-			parent.pack();
 		}
 
 		// Signing Certificates
