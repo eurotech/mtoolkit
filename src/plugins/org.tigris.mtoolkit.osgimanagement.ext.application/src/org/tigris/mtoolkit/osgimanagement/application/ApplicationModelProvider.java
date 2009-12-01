@@ -45,9 +45,14 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		this.parent = parent;
 		
 		Dictionary connectorProperties = connector.getProperties();
-		Object support = connectorProperties.get(Capabilities.APPLICATION_SUPPORT);
-		if (support != null && Boolean.parseBoolean(support.toString())) {
+		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
 			supportApplications = true;
+		} else {
+			support = connectorProperties.get(Capabilities.APPLICATION_SUPPORT);
+			if (support != null && Boolean.parseBoolean(support.toString())) {
+				supportApplications = true;
+			}
 		}
 		try {
 			connector.addRemoteDevicePropertyListener(this);
