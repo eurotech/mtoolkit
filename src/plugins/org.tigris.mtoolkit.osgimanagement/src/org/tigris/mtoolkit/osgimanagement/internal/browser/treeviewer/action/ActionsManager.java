@@ -103,7 +103,6 @@ public class ActionsManager {
 	public static void deinstallBundleAction(Bundle bundle) {
 		RemoteBundleOperation job = new UninstallBundleOperation(bundle);
 		job.schedule();
-		ConsoleManager.showConsole(bundle.findFramework());
 	}
 
 	public static void installBundleAction(final FrameworkImpl framework, TreeViewer parentView) {
@@ -128,8 +127,6 @@ public class ActionsManager {
 			}
 		};
 		job.schedule();
-
-		ConsoleManager.showConsoleIfCreated(framework);
 	}
 
 	public static void frameworkPropertiesAction(FrameworkImpl framework, TreeViewer parentView) {
@@ -148,7 +145,6 @@ public class ActionsManager {
 	public static void startBundleAction(Bundle bundle) {
 		RemoteBundleOperation job = new StartBundleOperation(bundle);
 		job.schedule();
-		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void stopBundleAction(Bundle bundle) {
@@ -167,7 +163,6 @@ public class ActionsManager {
 
 		RemoteBundleOperation job = new StopBundleOperation(bundle);
 		job.schedule();
-		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void updateBundleAction(final Bundle bundle, TreeViewer parentView) {
@@ -179,7 +174,6 @@ public class ActionsManager {
 		}
 		RemoteBundleOperation job = new UpdateBundleOperation(bundle, new File(bundleFileName));
 		job.schedule();
-		ConsoleManager.showConsoleIfCreated(bundle.findFramework());
 	}
 
 	public static void disconnectFrameworkAction(final FrameworkImpl fw) {

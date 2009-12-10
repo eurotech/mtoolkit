@@ -82,7 +82,7 @@ public class ConsoleManager {
 		showConsoleIfCreated(fw);
 	}
 	
-	public static void showConsoleIfCreated(Framework fw) {
+	private static void showConsoleIfCreated(Framework fw) {
 		RemoteConsole con; 
 		synchronized (consoles) {
 			Object obj = consoles.get(fw);
