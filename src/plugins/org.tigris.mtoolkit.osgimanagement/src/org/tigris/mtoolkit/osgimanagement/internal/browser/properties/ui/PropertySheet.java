@@ -319,7 +319,12 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		}
 
 		public String validate() {
-			return provider.validate();
+			try {
+				return getProvider().validate();
+			} catch (CoreException e) {
+				FrameworkPlugin.error("Unable to validate dialog", e);
+			}
+			return "Internal error: unable to validate dialog";
 		}
 	}
 
@@ -362,7 +367,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			for (Iterator it = deviceTypesProviders.iterator(); it.hasNext();) {
 				DeviceTypeProviderElement provider = (DeviceTypeProviderElement) it.next();
 				if (providerId.equals(provider.getTypeId())) {
-					selectedProvider = provider;
+					selectType(provider);
 					break;
 				}
 			}
@@ -372,11 +377,10 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			textServer.setText(name);
 		}
 		
-		selectType(selectedProvider);
 		try {
 			selectedProvider.getProvider().setProperties(config);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			FrameworkPlugin.error("Failed to initialize device type provider", e);
 		}
 
 		if (connectButton != null) {
@@ -393,7 +397,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			try {
 				selectedProvider.getProvider().setEditable(false);
 			} catch (CoreException e) {
-				e.printStackTrace();
+				FrameworkPlugin.error("Failed to switch device type provider to read-only mode", e);
 			}
 		}
 	}
