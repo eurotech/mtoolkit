@@ -130,7 +130,7 @@ public class CDUndoManager implements ICDModifyListener {
 			return;
 		}
 		debug("addOperation: " + e);
-		for (int i = cursor + 1; i < operationsStack.size(); i++) {
+		for (int i = operationsStack.size() - 1; i > cursor; i--) {
 			operationsStack.remove(i);
 		}
 		operationsStack.add(e);
