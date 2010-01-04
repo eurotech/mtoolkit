@@ -171,8 +171,10 @@ public class VMCommander {
 		}
 
 		public void disconnected(MBSAServer server) {
-			debug("[disconnected] MBSA Server got disconnected, shutdown the framework");
-			stopVM();
+			if (shutdownOnDisconnect) {
+				debug("[disconnected] MBSA Server got disconnected, shutdown the framework");
+				stopVM();
+			}
 		}
 		
 	}
