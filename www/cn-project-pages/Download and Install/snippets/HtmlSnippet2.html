@@ -1,4 +1,4 @@
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />There are more then one way to install additional plug-ins in Eclipse, which are listed below. Note that it is not advisable to use both or switch from to another. Eclipse p2 is not mature enough (as of January 2010) to handle this and will often result in broken Eclipse configuration, which are almost impossible to fix.
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />                              There are more then one way to install additional plug-ins in Eclipse, which are listed below. Note that it is not advisable to use both or switch from to another. Eclipse p2 is not mature enough (as of January 2010) to handle this and will often result in broken Eclipse configuration, which are almost impossible to fix.
 
 <h3>Eclipse Update Site/p2 Repository</h3>
 <p>
@@ -10,12 +10,26 @@ This is the preferred method for installing new plug-ins. More information about
 This is less supported method for installing plugins. You just grab the build archive and extract it in <em>dropins/</em> folder, found in the Eclipse installation. For better organization, it is advisable to first create new folder, which will hold mToolkit installation. Your tree structure should look like this:
 </p>
 <p>
-&lt;eclipse&gt;/<br/>
-&nbsp;dropins/<br/>
-&nbsp;&nbsp;mToolkit/<br/>
-&nbsp;&nbsp;&nbsp;eclipse/<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;features/<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;plugins/<br/>
+<div style="margin-left: 5px">
+<eclipse>/
+<div style="margin-left: 5px">
+ dropins/
+<div style="margin-left: 5px">
+  mToolkit/
+<div style="margin-left: 5px">
+   eclipse/
+<div style="margin-left: 5px">
+    features/
+</div>
+<div style="margin-left: 5px">
+    plugins/
+</div>
+</div>
+</div>
+</div>
+</div>
 </p>
-<p>All plug-ins from the archive should end up in the <em>plugins/</em> folder shown above. &lt;eclipse&gt; is your Eclipse installation folder.
+<p>All plug-ins from the archive should end up in the <em>plugins/</em> folder shown above. <eclipse> is your Eclipse installation folder.
 </p>
+
+              
