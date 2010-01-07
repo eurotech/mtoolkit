@@ -36,7 +36,7 @@ import org.tigris.mtoolkit.cdeditor.internal.ReflowingExpansionHandler;
 import org.tigris.mtoolkit.cdeditor.internal.model.CDModelEvent;
 import org.tigris.mtoolkit.cdeditor.internal.model.ICDElement;
 import org.tigris.mtoolkit.cdeditor.internal.model.ICDModifyListener;
-import org.tigris.mtoolkit.cdeditor.widgets.StatusSectionDecoration;
+import org.tigris.mtoolkit.common.gui.StatusSectionDecoration;
 
 
 public abstract class ComponentDetailsPart extends AbstractFormPart implements
