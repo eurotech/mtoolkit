@@ -37,6 +37,8 @@ public class MBSACommand extends MBSAWriter {
 		String dataLength;
 		try {
 			dataLength = Integer.toString(getData().length);
+		} catch (IllegalStateException e) {
+			dataLength = "(not flushed)";
 		} catch (MBSAException e) {
 			dataLength = "(not flushed)";
 		}
