@@ -17,6 +17,7 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -134,11 +135,17 @@ public class ActionsManager {
 		sheet.open();
 	}
 
-	public static void removeFrameworkAction(FrameworkImpl framework) {
-//		if (framework.isConnected()) {
-//			framework.disconnect();
-//		}
-		framework.dispose();
+	public static void removeFrameworkAction(final FrameworkImpl framework) {
+		Job removeJob = new Job("Remove device") {
+			protected IStatus run(IProgressMonitor monitor) {
+				framework.dispose();
+				return Status.OK_STATUS;
+			}
+		};
+		// When disconnect action is scheduled before this action, we need 
+		// to be sure that it is completed before we dispose the framework
+		removeJob.setRule(new FwMutexRule(framework));
+		removeJob.schedule();
 		ConsoleManager.disconnectConsole(framework);
 	}
 
@@ -187,6 +194,7 @@ public class ActionsManager {
 				}
 			}
 		};
+		disconnectJob.setRule(new FwMutexRule(fw));
 		disconnectJob.schedule();
 		disconnectConsole(fw);
 	}
@@ -247,5 +255,20 @@ public class ActionsManager {
 		}
 	}
 
+	private static class FwMutexRule implements ISchedulingRule {
+		private Framework fw;
+
+		public FwMutexRule(Framework fw) {
+			this.fw = fw;
+		}
+
+		public boolean isConflicting(ISchedulingRule rule) {
+			return (rule instanceof FwMutexRule) && (((FwMutexRule) rule).fw == fw);
+		}
+
+		public boolean contains(ISchedulingRule rule) {
+			return (rule instanceof FwMutexRule) && (((FwMutexRule) rule).fw == fw);
+		}
+	}
 
 }
