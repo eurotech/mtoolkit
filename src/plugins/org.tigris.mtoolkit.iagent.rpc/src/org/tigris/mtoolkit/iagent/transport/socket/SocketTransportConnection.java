@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.internal.transport;
+package org.tigris.mtoolkit.iagent.transport.socket;
 
 import java.io.IOException;
 import java.io.InputStream;

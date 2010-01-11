@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.internal.transport;
+package org.tigris.mtoolkit.iagent.transport.socket;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import org.tigris.mtoolkit.iagent.transport.TransportType;
 
 public class SocketTransport implements Transport {
 
-	private static final int PMP_PORT = 1450;
+	public static final int PMP_PORT = 1450;
 
 	private String host;
 	private SocketTransportType type;
