@@ -9,6 +9,7 @@ import java.net.Socket;
 
 import org.tigris.mtoolkit.iagent.internal.mbsa.MBSAClientImpl;
 import org.tigris.mtoolkit.iagent.internal.mbsa.MBSAServerImpl;
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 
 
 public class MBSASessionFactory {
@@ -32,14 +33,26 @@ public class MBSASessionFactory {
 	}
 	
 	public static MBSAClient clientListen(InetAddress bindAddress, int port, int timeout) throws MBSAException {
+		DebugUtils.debug(MBSASessionFactory.class, "[clientListen] address=" + bindAddress + ", port=" + port + ", timeout=" + timeout);
+		ServerSocket ssocket = null;
 		try {
-			ServerSocket ssocket = new ServerSocket(port, 1, bindAddress);
+			ssocket = new ServerSocket(port, 1, bindAddress);
 			if (timeout > 0)
 				ssocket.setSoTimeout(timeout);
 			Socket clientSocket = ssocket.accept();
 			return wrapClient(clientSocket.getInputStream(), clientSocket.getOutputStream());
 		} catch (IOException e) {
+			DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Cannot connect: address=" + bindAddress + ", port=" + port);
 			throw new MBSAException(MBSAException.CODE_CANNOT_CONNECT, e);
+		} finally {
+			if (ssocket != null) {
+				DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Close socket: address=" + bindAddress + ", port=" + port);
+				try {
+					ssocket.close();
+					DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Socket closed: address=" + bindAddress + ", port=" + port);
+				} catch (IOException e) {
+				}
+			}
 		}
 	}
 	
