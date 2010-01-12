@@ -1111,10 +1111,29 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			return provider;
 		}
 
-		public boolean equals(ActionsProviderElement otherElement) {
-			if (this.clazz.equals(otherElement.clazz) && this.extension.equals(otherElement.extension))
+		public boolean equals(Object obj) {
+			if (this == obj)
 				return true;
-			return false;
+			if (!(obj instanceof ActionsProviderElement))
+				return false;
+
+			final ActionsProviderElement otherElement = (ActionsProviderElement) obj;
+
+			if (clazz == null) {
+				if (otherElement.clazz != null)
+					return false;
+			} else if (!clazz.equals(otherElement.clazz)) {
+				return false;
+			}
+
+			if (extension == null) {
+				if (otherElement.extension != null)
+					return false;
+			} else if (!extension.equals(otherElement.extension)) {
+				return false;
+			}
+
+			return true;
 		}
 	}
 
