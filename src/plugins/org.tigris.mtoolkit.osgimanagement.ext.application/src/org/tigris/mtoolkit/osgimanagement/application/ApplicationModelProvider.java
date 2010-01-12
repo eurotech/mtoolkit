@@ -43,17 +43,9 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
 		this.parent = parent;
-		
-		Dictionary connectorProperties = connector.getProperties();
-		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
-			supportApplications = true;
-		} else {
-			support = connectorProperties.get(Capabilities.APPLICATION_SUPPORT);
-			if (support != null && Boolean.parseBoolean(support.toString())) {
-				supportApplications = true;
-			}
-		}
+
+		supportApplications = isApplicationsSupported(connector);
+
 		try {
 			connector.addRemoteDevicePropertyListener(this);
 		} catch (IAgentException e1) {
@@ -195,5 +187,22 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 
 	public String[] getSupportedMimeTypes() {
 		return null;
+	}
+
+	public static boolean isApplicationsSupported(DeviceConnector connector) {
+		if (connector == null) {
+			return true;
+		}
+		Dictionary connectorProperties = connector.getProperties();
+		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
+			return true;
+		} else {
+			support = connectorProperties.get(Capabilities.APPLICATION_SUPPORT);
+			if (support != null && Boolean.parseBoolean(support.toString())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

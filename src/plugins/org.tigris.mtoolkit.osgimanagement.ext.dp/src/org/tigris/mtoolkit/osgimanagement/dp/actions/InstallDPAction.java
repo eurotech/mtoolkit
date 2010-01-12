@@ -23,7 +23,9 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.dp.DPModelProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.logic.DPProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
@@ -92,6 +94,11 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
 			while (iterator.hasNext()) {
 				Model model = (Model) iterator.next();
 				if (model.findFramework() != fw) {
+					enabled = false;
+					break;
+				}
+				DeviceConnector connector = model.findFramework().getConnector();
+				if (connector == null || !DPModelProvider.isDpSupported(connector)) {
 					enabled = false;
 					break;
 				}

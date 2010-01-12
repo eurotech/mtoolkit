@@ -45,17 +45,9 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
 		this.parent = parent;
-		
-		Dictionary connectorProperties = connector.getProperties();
-		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
-			supportDP = true;
-		} else {
-			support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
-			if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
-				supportDP = true;
-			}
-		}
+
+		supportDP = isDpSupported(connector);
+
 		try {
 			connector.addRemoteDevicePropertyListener(this);
 		} catch (IAgentException e1) {
@@ -231,4 +223,20 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 		return null;
 	}
 
+	public static boolean isDpSupported(DeviceConnector connector) {
+		if (connector == null) {
+			return false;
+		}
+		Dictionary connectorProperties = connector.getProperties();
+		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
+			return true;
+		} else {
+			support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
+			if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
