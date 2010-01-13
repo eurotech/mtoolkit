@@ -189,30 +189,44 @@ class PMPEventsManager extends Thread {
 		// synchronize over listeners vector, otherwise the add/remove listener
 		// operations can be executed in reverse order on the remote side,
 		// resulting in no more events
-		synchronized (listeners) {
-			try {
+		try {
+			boolean sendRemove = false;
+			synchronized (listeners) {
 				Vector ls = (Vector) listeners.get(evType);
 				if (ls != null) {
 					ls.removeElement(el);
 					if (ls.size() == 0) {
-						ls = null;
 						listeners.remove(evType);
-						if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType))
-							return;
-						PMPAnswer answer = new PMPAnswer(session);
-						os.begin(answer);
-						os.write(PMPSessionThread.REMOVE_LS);
-						PMPData.writeString(evType, os);
-						os.end(true);
-						answer.get(session.is.timeout);
-						if (!answer.success) {
-							throw new PMPException(answer.errMsg);
-						}
+						sendRemove = true;
 					}
 				}
-			} catch (Exception exc) { // PMPException, IOException
-				session.error("error unregitering event listener", exc);
 			}
+			// the code below is not in the synchronized block, because can 
+			// cause the following deadlock: PMPSessionThread.readEvent() calls
+			// getClassLoader() and blocks if listeners is locked by this
+			// thread, thus the PMPAnswer cannot be read until listeners is 
+			// unlocked.
+			// The add/remove listener operations are guaranteed to be executed
+			// in the order they come in the events queue because:
+			// 1. deliverEvent() calls this method sequentially and no other
+			// operation can be executed until this method returns.
+			// 2. This method cannot finish until answer.get() returns - it 
+			// blocks until the answer is received from the remote side.
+			if (sendRemove) {
+				if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType))
+					return;
+				PMPAnswer answer = new PMPAnswer(session);
+				os.begin(answer);
+				os.write(PMPSessionThread.REMOVE_LS);
+				PMPData.writeString(evType, os);
+				os.end(true);
+				answer.get(session.is.timeout);
+				if (!answer.success) {
+					throw new PMPException(answer.errMsg);
+				}
+			}
+		} catch (Exception exc) { // PMPException, IOException
+			session.error("error unregitering event listener", exc);
 		}
 	}
 
