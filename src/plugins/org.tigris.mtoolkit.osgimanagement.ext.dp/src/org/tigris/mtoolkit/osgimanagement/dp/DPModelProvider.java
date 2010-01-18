@@ -207,9 +207,11 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 					} catch (IAgentException ex) {
 						ex.printStackTrace();
 					}
-					dpNode.removeChildren();
-					parent.removeElement(dpNode);
-					dpNode = null;
+					if (dpNode != null) {
+						dpNode.removeChildren();
+						parent.removeElement(dpNode);
+						dpNode = null;
+					}
 				}
 			}
 		}
