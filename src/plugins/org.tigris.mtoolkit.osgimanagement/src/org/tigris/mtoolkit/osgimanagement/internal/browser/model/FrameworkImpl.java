@@ -609,11 +609,11 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 									}
 									if (!added) {
 										Bundle usedInBundle = new Bundle(bundle);
-										if (FrameworkConnectorFactory.isBundlesCategoriesShown)
+										if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
 											bCategory.addElement(usedInBundle);
-										else
-											((FrameworkImpl) bCategory.findFramework()).getBundlesNode().addElement(
-													usedInBundle);
+										} else {
+											getBundlesNode().addElement(usedInBundle);
+										}
 									}
 								}
 							}
