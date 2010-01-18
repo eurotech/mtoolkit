@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import org.osgi.framework.AllServiceListener;
@@ -35,12 +36,16 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 
 	public static final String PORT = "port";
 
+	private static final int DEFAULT_PORT = 1450;
+
 	protected int maxStringLength;
 	protected int maxArrayLength;
 	private ServerSocket socket;
 	protected volatile boolean run; // for what's this !?
 
 	protected String uri;
+
+	protected int port = DEFAULT_PORT;
 
 	private BundleContext context;
 
@@ -51,6 +56,10 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 		this.uri = ((String) config.get(URI));
 		this.maxArrayLength = ((Integer) config.get(PMPServerFactory.MAX_ARRAY)).intValue();
 		this.maxStringLength = ((Integer) config.get(PMPServerFactory.MAX_STRING)).intValue();
+		Integer port = (Integer) config.get(PORT);
+		if (port != null) {
+			this.port = port.intValue();
+		}
 		init();
 		context.addServiceListener(this);
 	}
@@ -71,7 +80,13 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 
 	protected void init() throws IOException {
 		run = true;
-		socket = new ServerSocket(1450);
+		try {
+			socket = new ServerSocket(port);
+		} catch (IOException e) {
+			// the specified port is in use, try random free port
+			socket = new ServerSocket(0);
+			port = socket.getLocalPort();
+		}
 		socket.setSoTimeout(1000);
 		new Thread(this, "IAgent Server Thread").start();
 	}
@@ -225,4 +240,9 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 		return "Server";
 	}
 
+	public Map getProperties() {
+		Hashtable properties = new Hashtable();
+		properties.put(PORT, new Integer(port));
+		return properties;
+	}
 }

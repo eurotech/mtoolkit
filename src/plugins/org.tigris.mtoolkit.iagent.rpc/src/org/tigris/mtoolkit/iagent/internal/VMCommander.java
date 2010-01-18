@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -17,6 +18,7 @@ import java.net.SocketException;
 import java.util.Arrays;
 
 import org.osgi.framework.BundleContext;
+import org.tigris.mtoolkit.iagent.internal.mbsa.DataFormater;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAConstants;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAException;
@@ -25,21 +27,27 @@ import org.tigris.mtoolkit.iagent.mbsa.MBSARequestHandler;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAResponse;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAServer;
 import org.tigris.mtoolkit.iagent.mbsa.MBSASessionFactory;
+import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 
 public class VMCommander {
 
-	private static final int VM_COMMAND_PORT = 7366;
+	private static final int VM_CONTROLLER_PORT = 7366;
 	private static final int UDP_LISTENER_PORT = 7367;
 	private static final int IAGENT_CMD_STOPVM = 0x00020002;
+	private static final int IAGENT_CMD_GET_PMP_LISTENING_PORT = 0x0002000E;
 	private static final byte UDP_NOTIFICATION[] = { 0x44, 0x48, 0x54, 0x58 };
+	private static final String PROP_VM_CONTROLLER_PORT = "vm.controller.port";
+	private static final String SERVER_PROP_PORT = "port";
 
 	private MBSAServer vmServer;
 	private BundleContext bc;
 	private UDPListener udpListener;
+	private PMPServer pmpServer;
 	private boolean shutdownOnDisconnect;
 
-	public VMCommander(BundleContext bc, boolean shutdownOnDisconnect) {
+	public VMCommander(BundleContext bc, PMPServer pmpServer, boolean shutdownOnDisconnect) {
 		this.bc = bc;
+		this.pmpServer = pmpServer;
 		this.shutdownOnDisconnect = shutdownOnDisconnect;
 		startUDPListener();
 		startServer();
@@ -56,7 +64,7 @@ public class VMCommander {
 			return;
 		}
 		try {
-			vmServer = MBSASessionFactory.serverConnect(null, VM_COMMAND_PORT, new VMRequestHandler());
+			vmServer = MBSASessionFactory.serverConnect(null, getControllerPort(), new VMRequestHandler());
 		} catch (MBSAException e) {
 			// There is no active controller at the moment.
 			// UDP notification shall be sent if controller is activated.
@@ -71,11 +79,26 @@ public class VMCommander {
 	private synchronized void stopServer() {
 		if (vmServer != null) {
 			// disable shutdown disconnect
-			// the framework is either shutting down or we have stopped the bundle
+			// the framework is either shutting down or we have stopped the
+			// bundle
 			shutdownOnDisconnect = false;
 			vmServer.close();
 			vmServer = null;
 		}
+	}
+
+	private int getControllerPort() {
+		int port = VM_CONTROLLER_PORT;
+		String portStr = System.getProperty(PROP_VM_CONTROLLER_PORT);
+		debug("[getControllerPort] " + PROP_VM_CONTROLLER_PORT + " = " + portStr);
+		if (portStr != null) {
+			try {
+				port = Integer.parseInt(portStr);
+			} catch (NumberFormatException e) {
+				info("[getControllerPort] Incorrect value of property: " + PROP_VM_CONTROLLER_PORT + ": " + portStr, e);
+			}
+		}
+		return port;
 	}
 
 	private void startUDPListener() {
@@ -93,6 +116,27 @@ public class VMCommander {
 			return false;
 		}
 		return true;
+	}
+
+	private int getPmpListeningPort() {
+		debug("[getPmpListeningPort] getPmpListeningPort command received.");
+		if (pmpServer == null) {
+			return 0;
+		}
+		Object port = pmpServer.getProperties().get(SERVER_PROP_PORT);
+		debug("[getPmpListeningPort] port = " + port);
+		if (port == null) {
+			return 0;
+		}
+		if (port instanceof Integer) {
+			return ((Integer) port).intValue();
+		}
+		try {
+			return Integer.parseInt(port.toString());
+		} catch (NumberFormatException e) {
+			error("[getPmpListeningPort] unrecognized port value: " + port, e);
+			return 0;
+		}
 	}
 
 	private final void debug(String message) {
@@ -113,16 +157,16 @@ public class VMCommander {
 
 	private class UDPListener extends Thread {
 		private volatile boolean listenerRunning;
-		
+
 		public UDPListener() {
 			super("IAgent UDP Listener");
 		}
-		
+
 		public void start() {
 			listenerRunning = true;
 			super.start();
 		}
-		
+
 		public void dispose() {
 			listenerRunning = false;
 			interrupt();
@@ -162,6 +206,16 @@ public class VMCommander {
 				response = msg.respond((res == true) ? 0 : -1);
 				response.done();
 				break;
+			case IAGENT_CMD_GET_PMP_LISTENING_PORT:
+				int port = getPmpListeningPort();
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				try {
+					DataFormater.writeInt(bos, port);
+				} catch (IOException e) {
+				}
+				response = msg.respond(0, bos.toByteArray());
+				response.done();
+				break;
 			default:
 				response = msg.respond(MBSAConstants.IAGENT_RES_UNKNOWN_COMMAND);
 				response.done();
@@ -176,6 +230,6 @@ public class VMCommander {
 				stopVM();
 			}
 		}
-		
+
 	}
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.pmp;
 
+import java.util.Map;
+
 public interface PMPServer extends PMPPeer {
 
 	public void close();
@@ -27,5 +29,12 @@ public interface PMPServer extends PMPPeer {
 	 *            The id of the bundle that the event source belongs to
 	 */
 	public void event(Object ev, String eventType);
+
+	/**
+	 * Returns a Map that contains server properties.
+	 * 
+	 * @return
+	 */
+	public Map getProperties();
 
 }

@@ -80,10 +80,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		serviceAdmin = new RemoteServiceAdminImpl();
 		serviceAdmin.register(context);
 
-		boolean registerVMController = !"false".equals(System.getProperty("iagent.controller"));
-		if (registerVMController)
-			registerControllerSupport(context);
-
 		registerConsole(context);
 
 		pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
@@ -91,6 +87,10 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, null);
 		synchronizer.setPMPServer(pmpServer);
 		synchronizer.start();
+
+		boolean registerVMController = !"false".equals(System.getProperty("iagent.controller"));
+		if (registerVMController)
+			registerControllerSupport(context);
 	}
 
 	private void registerControllerSupport(BundleContext context) {
@@ -107,7 +107,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
 	private void startController(BundleContext context) {
 		boolean shutdownOnDisconnect = Boolean.getBoolean("iagent.shutdownOnDisconnect");
-		vmCommander = new VMCommander(context, shutdownOnDisconnect);
+		vmCommander = new VMCommander(context, pmpServer, shutdownOnDisconnect);
 	}
 
 	private void registerConsole(BundleContext context) {
@@ -183,6 +183,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		if (vmCommander != null) {
 			context.removeFrameworkListener(this);
 			vmCommander.close();
+			vmCommander = null;
 		}
 
 		if (capabilitiesManager != null) {

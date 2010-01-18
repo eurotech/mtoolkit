@@ -55,7 +55,41 @@ public class MBSASessionFactory {
 			}
 		}
 	}
-	
+
+	public static MBSAClient clientListen(ServerSocket ssocket) throws MBSAException {
+		DebugUtils.debug(MBSASessionFactory.class, "[clientListen] ssocket = " + ssocket);
+		try {
+			Socket clientSocket = ssocket.accept();
+			return wrapClient(clientSocket.getInputStream(), clientSocket.getOutputStream());
+		} catch (IOException e) {
+			DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Cannot connect: ssocket = " + ssocket);
+			throw new MBSAException(MBSAException.CODE_CANNOT_CONNECT, e);
+		} finally {
+			if (ssocket != null) {
+				DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Close socket: ssocket = " + ssocket);
+				try {
+					ssocket.close();
+					DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Socket closed: ssocket = " + ssocket);
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+
+	public static ServerSocket getServerSocketOnFreePort(InetAddress bindAddress, int defaultPort, int backlog,
+			int timeout) throws IOException {
+		ServerSocket ssocket = null;
+		try {
+			ssocket = new ServerSocket(defaultPort, backlog, bindAddress);
+		} catch (IOException e) {
+			// the default port is in use, try random free port
+			ssocket = new ServerSocket(0, backlog, bindAddress);
+		}
+		if (timeout > 0)
+			ssocket.setSoTimeout(timeout);
+		return ssocket;
+	}
+
 	public static MBSAServer serverListen(InetAddress bindAddress, int port, int timeout, MBSARequestHandler handler) throws MBSAException {
 		try {
 			ServerSocket ssocket = new ServerSocket(port, 1, bindAddress);
