@@ -172,9 +172,11 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 					} catch (IAgentException ex) {
 						ex.printStackTrace();
 					}
-					applicationsNode.removeChildren();
-					parent.removeElement(applicationsNode);
-					applicationsNode = null;
+					if (applicationsNode != null) {
+						applicationsNode.removeChildren();
+						parent.removeElement(applicationsNode);
+						applicationsNode = null;
+					}
 
 				}
 			}
