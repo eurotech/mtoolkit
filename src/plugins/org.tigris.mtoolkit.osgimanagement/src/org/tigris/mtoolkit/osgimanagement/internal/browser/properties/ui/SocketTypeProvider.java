@@ -91,6 +91,9 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 	}
 	
 	public String validate(String ip) {
+		if (ip.trim().equals("")) {
+			return "Type framework address";
+		}
 		try {
 			// just check if address is correct
 			InetAddress.getByName(ip);
