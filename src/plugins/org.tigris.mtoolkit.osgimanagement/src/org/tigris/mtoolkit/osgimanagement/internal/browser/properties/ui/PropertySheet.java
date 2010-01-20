@@ -54,6 +54,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class PropertySheet extends TitleAreaDialog implements /*ControlListener, */ConstantsDistributor, SelectionListener, DeviceTypeProviderValidator {
+	
+	private static final String DEFAULT_DEVICE_TYPE = "DEFAULT_DEVICE_TYPE";
 
 	private Text textServer;
 
@@ -128,7 +130,21 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		pageBook = new PageBook(connectPropertiesGroup, SWT.NONE);
 		pageBook.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
-		deviceTypeCombo.select(0);
+		String type = FrameworkPlugin.getDefault().getPreferenceStore().getString(DEFAULT_DEVICE_TYPE);
+		if ("".equals(type)) {
+			type = "plainSocket";
+		}
+		
+		int index = 0;
+		for (int i=0; i<deviceTypesProviders.size(); i++) {
+			DeviceTypeProviderElement provider = (DeviceTypeProviderElement) deviceTypesProviders.get(i);
+			if (type.equals(provider.getTypeId())) {
+				index = i;
+				break;
+			}
+		}
+		deviceTypeCombo.select(index);
+		
 		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(0);
 		showDeviceTypePanel(selectedProvider);
 
@@ -356,6 +372,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 					&& connectButton.getSelection()) {
 				FrameworkConnectorFactory.connectFrameWork(fw);
 			}
+			FrameworkPlugin.getDefault().getPreferenceStore().setValue(DEFAULT_DEVICE_TYPE, selectedProvider.getTypeId());
 			super.okPressed();
 		}
 	}
