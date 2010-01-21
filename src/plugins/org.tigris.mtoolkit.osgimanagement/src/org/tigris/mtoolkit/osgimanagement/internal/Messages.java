@@ -27,9 +27,7 @@ public final class Messages extends NLS {
 	public static String connect_action_label;
 	public static String disconnect_action_label;
 	public static String install_action_label;
-	public static String install_dp_action_label;
 	public static String deinstall_action_label;
-	public static String deinstall_dp_action_label;
 
 	public static String deployment_package_filter_label;
 	public static String start_action_label;
@@ -212,8 +210,6 @@ public final class Messages extends NLS {
 	public static String Toolbar_Bundles_Label;
 
 	public static String Toolbar_DP_Label;
-
-	public static String value_column_label;
 
 	public static String start_bundle_failure_title;
 
