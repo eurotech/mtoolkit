@@ -16,7 +16,12 @@ public class MBSASessionFactory {
 
 	public static MBSAClient clientConnect(String host, int port) throws MBSAException {
 		try {
-			Socket socket = new Socket(host, port);
+			Socket socket;
+			if (host != null)
+				socket = new Socket(host, port);
+			else
+				// Some environments have problem with using null as host
+				socket = new Socket(InetAddress.getLocalHost(), port);
 			return wrapClient(socket.getInputStream(), socket.getOutputStream());
 		} catch (IOException e) {
 			throw new MBSAException(MBSAException.CODE_CANNOT_CONNECT, e);
@@ -25,7 +30,12 @@ public class MBSASessionFactory {
 	
 	public static MBSAServer serverConnect(String host, int port, MBSARequestHandler handler) throws MBSAException {
 		try {
-			Socket socket = new Socket(host, port);
+			Socket socket;
+			if (host != null)
+				socket = new Socket(host, port);
+			else
+				// Some environments have problem with using null as host
+				socket = new Socket(InetAddress.getLocalHost(), port);
 			return wrapServer(handler, socket.getInputStream(), socket.getOutputStream());
 		} catch (IOException e) {
 			throw new MBSAException(MBSAException.CODE_CANNOT_CONNECT, e);
@@ -55,7 +65,7 @@ public class MBSASessionFactory {
 			}
 		}
 	}
-
+	
 	public static MBSAClient clientListen(ServerSocket ssocket) throws MBSAException {
 		DebugUtils.debug(MBSASessionFactory.class, "[clientListen] ssocket = " + ssocket);
 		try {
