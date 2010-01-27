@@ -29,7 +29,9 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -116,7 +118,7 @@ public class ConnectFrameworkJob extends Job {
 					aConnProps.put("framework-name", fw.getName()); //$NON-NLS-1$
 					connector = DeviceConnector.connect(transportType, id, aConnProps);
 				} else {
-//					TODO: show proper error msg
+					errorProviderNotFound();
 				}
 			}
 		} catch (IAgentException e) {
@@ -134,6 +136,17 @@ public class ConnectFrameworkJob extends Job {
 
 		monitor.done();
 		return Status.OK_STATUS;
+	}
+
+	private static void errorProviderNotFound() {
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		display.syncExec(new Runnable() {
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				MessageDialog.openError(shell, "Error", "Could not connect to framework. The selected " +
+						"connection type provider is no more available. Please select another connection type.");
+			}
+		});
 	}
 
 	public static boolean isConnecting(FrameworkImpl fw) {

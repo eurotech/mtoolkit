@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.osgi.util.NLS;
@@ -37,6 +38,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
@@ -380,11 +382,13 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 	private void init() {
 		IMemento config = fw.getConfig();
 		String providerId = config.getString(TRANSPORT_PROVIDER_ID);
+		boolean providerFound = false;
 		if (providerId != null) {
 			for (Iterator it = deviceTypesProviders.iterator(); it.hasNext();) {
 				DeviceTypeProviderElement provider = (DeviceTypeProviderElement) it.next();
 				if (providerId.equals(provider.getTypeId())) {
 					selectType(provider);
+					providerFound = true;
 					break;
 				}
 			}
@@ -393,7 +397,11 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		if (name != null) {
 			textServer.setText(name);
 		}
-		
+
+		if (providerId != null && !providerFound) {
+			warningProviderNotFound();
+		}
+
 		try {
 			selectedProvider.getProvider().setProperties(config);
 		} catch (CoreException e) {
@@ -417,6 +425,12 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 				FrameworkPlugin.error("Failed to switch device type provider to read-only mode", e);
 			}
 		}
+	}
+
+	private static void warningProviderNotFound() {
+		Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		MessageDialog.openWarning(shell, "Warning", "The selected connection type provider is no more " +
+				"available. Default connection type will be set.");
 	}
 
 	// Called when target options are changed
