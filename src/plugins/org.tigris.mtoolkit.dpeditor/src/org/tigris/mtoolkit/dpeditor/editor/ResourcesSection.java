@@ -437,7 +437,12 @@ public class ResourcesSection extends DPPFormSection implements
 				String key = DPPUtilities.getStringValue(resource.getResourceProcessor());
 				String value = (String) comboValues.get(key);
 				processorsCellEditor.setItems(items);
-
+				for (int i=0; i<items.length; i++) {
+					if (items[i].equals(key)) {
+						value = ""+i;
+						break;
+					}
+				}
 				if (value == null) {
 					if (key.equals("")) {
 						value = "0";
@@ -461,34 +466,19 @@ public class ResourcesSection extends DPPFormSection implements
 		private void refreshItems() {
 			String rpProp = System.getProperty("dpeditor.resourceprcessors");
 			itemsFromProperty = getItemsFromProperty(rpProp);
-
-			int itemsByUserCount = 0;
-			itemsByUserCount = (itemsEnteredByUser != null) ? itemsEnteredByUser.length : 0;
-			String temp[] = new String[itemsFromProperty.length + itemsByUserCount];
-			int tempInnerPointer = 0;
-			for (int i = 0; i < itemsFromProperty.length; i++) {
-				temp[tempInnerPointer++] = itemsFromProperty[i];
+			Vector itemsV = new Vector();
+			for (int i=0; i<itemsFromProperty.length; i++) {
+				itemsV.addElement(itemsFromProperty[i]);
 			}
-			for (int i = 0; i < itemsByUserCount; i++) {
-				temp[tempInnerPointer++] = itemsEnteredByUser[i];
-			}
-			Hashtable h = new Hashtable();
-			for (int i = 0; i < temp.length; i++) {
-				h.put(temp[i], "");
-			}
-			Enumeration e = h.keys();
-			int t = 1;
-			temp = new String[h.size()];
-			temp[0] = "";
-			while (e.hasMoreElements()) {
-				String next = (String) e.nextElement();
-				if (next.equals("")) {
-					continue;
+			
+			if (itemsEnteredByUser != null) {
+				for (int i=0; i<itemsEnteredByUser.length; i++) {
+					if (itemsV.indexOf(itemsEnteredByUser[i]) == -1) {
+						itemsV.addElement(itemsEnteredByUser[i]);
+					}
 				}
-				temp[t] = next;
-				t++;
 			}
-			items = temp;
+			items = (String[]) itemsV.toArray(new String[0]);
 		}
 	}
 
