@@ -51,4 +51,11 @@ public interface DPPConstants {
 
 	/** corresponds to the "DeploymentPackage-Icon" header */
 	public static String dpIcon = "DeploymentPackage-Icon";
+	
+	/** corresponds to the "DeploymentPackage-Name" header */
+	public static String dpName = "DeploymentPackage-Name";
+	
+	/** corresponds to the "DeploymentPackage-RequiredStorage" header */
+	public static String dpRequiredStorage = "DeploymentPackage-RequiredStorage";
+
 }

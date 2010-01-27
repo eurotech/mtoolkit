@@ -134,7 +134,7 @@ public class HeadersSection extends DPPFormSection implements
 								 * DPPConstants.dpSymbolicNameHeader,
 								 * DPPConstants.dpVersionHeader,
 								 */
-	DPPConstants.dpFixPackHeader, DPPConstants.dpCopyrightHeader, DPPConstants.dpAddressHeader, DPPConstants.dpDescriptionHeader, DPPConstants.dpDocURLHeader, DPPConstants.dpVendorHeader, DPPConstants.dpLicenseHeader, DPPConstants.dpIcon };
+	DPPConstants.dpFixPackHeader, DPPConstants.dpCopyrightHeader, DPPConstants.dpAddressHeader, DPPConstants.dpDescriptionHeader, DPPConstants.dpDocURLHeader, DPPConstants.dpVendorHeader, DPPConstants.dpLicenseHeader, DPPConstants.dpIcon, DPPConstants.dpName, DPPConstants.dpRequiredStorage };
 
 	/** The parent composite in which all components will be added */
 	private Composite container;
@@ -624,6 +624,9 @@ public class HeadersSection extends DPPFormSection implements
 		comboValues.put(DPPConstants.dpVendorHeader, "6");
 		comboValues.put(DPPConstants.dpLicenseHeader, "7");
 		comboValues.put(DPPConstants.dpIcon, "8");
+		comboValues.put(DPPConstants.dpName, "9");
+		comboValues.put(DPPConstants.dpRequiredStorage, "10");
+		
 		keyCellEditor = new ComboBoxCellEditor(table, data, SWT.NULL);
 		CellEditor[] editors = new CellEditor[] { keyCellEditor, new TextCellEditor(table) };
 		String[] properties = { "key", "value" };
