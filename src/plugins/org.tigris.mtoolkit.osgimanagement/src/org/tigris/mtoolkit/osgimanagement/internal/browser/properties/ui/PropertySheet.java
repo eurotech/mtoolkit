@@ -147,7 +147,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		}
 		deviceTypeCombo.select(index);
 		
-		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(0);
+		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(index);
 		showDeviceTypePanel(selectedProvider);
 
 		// Signing Certificates
