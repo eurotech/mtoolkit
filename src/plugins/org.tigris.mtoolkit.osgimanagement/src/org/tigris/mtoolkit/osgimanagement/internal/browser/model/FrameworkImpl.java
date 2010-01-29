@@ -146,12 +146,12 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 //		});
 //	}
 
-//	public void setConnector(DeviceConnector connector) {
-//		this.connector = connector;
+	public void setConnector(DeviceConnector connector) {
+		this.connector = connector;
 //		if (connector == null) {
 //			connectedFlag = false;
 //		}
-//	}
+	}
 
 	public void connect(final DeviceConnector connector, SubMonitor monitor) {
 		this.connector = connector;
@@ -299,10 +299,18 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		modelProviders.clear();
 		removeChildren();
 		bundles = null;
-		bundleHash.clear();
-		categoryHash.clear();
-		servicesVector.removeAllElements();
-		servicesViewVector.removeAllElements();
+		if (bundleHash != null) {
+			bundleHash.clear();
+		}
+		if (categoryHash != null) {
+			categoryHash.clear();
+		}
+		if (servicesVector != null) {
+			servicesVector.removeAllElements();
+		}
+		if (servicesViewVector != null) {
+			servicesViewVector.removeAllElements();
+		}
 		ServiceObject.usedInHashFWs.remove(this);
 		supportBundles = false;
 		supportServices = false;
