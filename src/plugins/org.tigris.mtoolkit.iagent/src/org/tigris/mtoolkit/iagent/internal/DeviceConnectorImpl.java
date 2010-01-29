@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -51,7 +52,7 @@ import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
  * DeviceConnector implementation
  * 
  */
-public class DeviceConnectorImpl extends DeviceConnector implements EventListener, DeviceConnectorSpi {
+public class DeviceConnectorImpl extends DeviceConnector implements EventListener, ConnectionListener, DeviceConnectorSpi {
 	private LightServiceRegistry serviceRegistry;
 	private VMManagerImpl runtimeCommands;
 	private DeploymentManagerImpl deploymentCommands;
@@ -70,6 +71,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	private static final String EVENT_CAPABILITY_VALUE = "capability.value";
 	
 	private HashMap managers;
+	private HashSet currentConnectionTypes = new HashSet();
 
 	/**
 	 * Creates new DeviceConnector with specified transport object
@@ -98,14 +100,8 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			throw new IAgentException("Unable to find compatible transport provider.", IAgentErrors.ERROR_CANNOT_CONNECT);
 		}
 		connectionManager = new ConnectionManagerImpl(transport, props);
-		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
-	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
-	      debug("[Constructor] Connect to device which support MBSA");
-	      connect(ConnectionManager.MBSA_CONNECTION);
-	    } else {  // connect directly to PMP
-	      debug("[Constructor] Connect to device which doesn't support MBSA");
-	      connect(ConnectionManager.PMP_CONNECTION);
-	    }
+		connectionManager.addConnectionListener(this);
+		connect(props);
 	}
 
 	/**
@@ -122,40 +118,55 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		setTransportProps(transport);
 		
 		connectionManager = new ConnectionManagerImpl(transport, props);
-		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate"); 
-	    if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
-	      debug("[Constructor] Connect to device which support MBSA");
-	      connect(ConnectionManager.MBSA_CONNECTION);
-	    } else {  // connect directly to PMP
-	      debug("[Constructor] Connect to device which doesn't support MBSA");
-	      connect(ConnectionManager.PMP_CONNECTION);
-	    }
+		connectionManager.addConnectionListener(this);
+		connect(props);
 	}
 
-	private void monitorConnection(final int connectionType) {
-		debug("[monitorConnection] >>> connectionType: " + connectionType);
-		connectionManager.addConnectionListener(new ConnectionListener() {
-			public void connectionChanged(ConnectionEvent event) {
-				if (event.getType() == ConnectionEvent.DISCONNECTED
-								&& event.getConnection().getType() == connectionType) {
-					debug("[Constructor] connection of type: "
-									+ connectionType
-									+ " was disconnected. Close DeviceConnector...");
-					try {
-						if (isActive)
-							closeConnection();
-					} catch (IAgentException e) {
-						IAgentLog.error("[DeviceConnectorImpl][Constructor] Failed to cleanup after disconnection", e);
-					}
+	public void connectionChanged(ConnectionEvent event) {
+		int connectionType = event.getConnection().getType();
+		switch (event.getType()) {
+		case ConnectionEvent.CONNECTED:
+			currentConnectionTypes.add(new Integer(connectionType));
+			break;
+		case ConnectionEvent.DISCONNECTED:
+			currentConnectionTypes.remove(new Integer(connectionType));
+			break;
+		}
+		if (currentConnectionTypes.isEmpty()) {
+			debug("No active connections. Closing DeviceConnector...");
+			try {
+				if (isActive) {
+					closeConnection();
 				}
+			} catch (IAgentException e) {
+				error("Failed to cleanup after disconnection", e);
 			}
-		});
+		}
 	}
 
-	private void connect(int connectionType) throws IAgentException {
+	private void connect(Dictionary props) throws IAgentException {
+		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate");
+		if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
+			// Trying controller connections
+			try {
+				debug("[connect] Connect to device which support MBSA");
+				connect0(ConnectionManager.MBSA_CONNECTION);
+				return;
+			} catch (IAgentException e) {
+				debug("[connect] Failed: " + e);
+			}
+			// TODO: Try other controller connections here
+
+			debug("[connect] Unable to create connection.");
+			throw new IAgentException("Unable to create connection", IAgentErrors.ERROR_CANNOT_CONNECT);
+		} else { // connect directly to PMP
+			debug("[connect] Connect directly to PMP");
+			connect0(ConnectionManager.PMP_CONNECTION);
+		}
+	}
+
+	private void connect0(int connectionType) throws IAgentException {
 		debug("[connect] >>> connectionType: " + connectionType);
-		// start monitoring the connection before connecting
-		monitorConnection(connectionType);
 		AbstractConnection connection = connectionManager.getActiveConnection(connectionType);
 		if (connection == null) {
 			debug("[connect] No active connection with type: " + connectionType + ". Create new...");
