@@ -10,9 +10,13 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.tcp;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
@@ -20,18 +24,27 @@ import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.ExtConnectionFactory;
 import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public class ConnectionManagerImpl implements ConnectionManager {
 	protected Dictionary conProperties;
-	protected MBSAConnectionImpl mbsaConnection;
-	protected PMPConnectionImpl pmpConnection;
 	protected Transport transport;
 	private List listeners = new LinkedList();
+	private List extFactories = new LinkedList();
+	private Map connections = new Hashtable();
 
 	public ConnectionManagerImpl(Transport transport, Dictionary aConProperties) {
 		this.transport = transport;
 		this.conProperties = aConProperties;
+		LightServiceRegistry registry = new LightServiceRegistry(ConnectionManagerImpl.class.getClassLoader());
+		Object[] extenders = registry.getAll(ExtConnectionFactory.class.getName());
+		for (int i = 0; i < extenders.length; i++) {
+			if (extenders[i] instanceof ExtConnectionFactory) {
+				extFactories.add(extenders[i]);
+			}
+		}
 	}
 
 	public AbstractConnection createConnection(int type) throws IAgentException {
@@ -39,6 +52,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		AbstractConnection connection = null;
 		AbstractConnection staleConnection = null;
 		boolean fireEvent = false;
+		Integer key = new Integer(type);
 
 		// Connection creation is done in two steps. This have the side effect
 		// that DISCONNECT event
@@ -51,22 +65,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		// connectionClosed() method
 		// 2. saved reference will be used when firing the event
 		synchronized (this) {
-			switch (type) {
-			case MBSA_CONNECTION:
-		        if (mbsaConnection != null && !mbsaConnection.isConnected()) {
-		          staleConnection = mbsaConnection;
-		          mbsaConnection = null;
-		        }
-		        break;
-			case PMP_CONNECTION:
-				if (pmpConnection != null && !pmpConnection.isConnected()) {
-					staleConnection = pmpConnection;
-					pmpConnection = null;
-				}
-				break;
-			default:
-				info("[createConnection] Unknown connection type passed: " + type);
-				throw new IllegalArgumentException("Unknown connection type passed: " + type);
+			connection = (AbstractConnection) connections.get(key);
+			if (connection != null && !connection.isConnected()) {
+				staleConnection = connection;
+				connections.remove(key);
 			}
 		}
 		// If stale connection is detected, try to close it (just in case) and
@@ -79,21 +81,25 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		// It is very unlikely to get stale connection here, because we have
 		// already checked it in Step 1
 		synchronized (this) {
-			switch (type) {
-			case MBSA_CONNECTION:
-		        if (mbsaConnection == null) {
-		          mbsaConnection = createMBSAConnection(transport);
-		          fireEvent = true;
-		        }
-		        connection = mbsaConnection;
-		        break;
-			case PMP_CONNECTION:
-				if (pmpConnection == null) {
-					pmpConnection = createPMPConnection(transport);
-					fireEvent = true;
+			connection = (AbstractConnection) connections.get(key);
+			if (connection == null) {
+				fireEvent = true;
+				switch (type) {
+				case MBSA_CONNECTION:
+					connection = createMBSAConnection(transport);
+					break;
+				case PMP_CONNECTION:
+					connection = createPMPConnection(transport);
+					break;
+				default:
+					ExtConnectionFactory factory = findFactoryForType(type);
+					if (factory == null) {
+						info("[createConnection] Unknown connection type passed: " + type);
+						throw new IllegalArgumentException("Unknown connection type passed: " + type);
+					}
+					connection = factory.createConnection(transport, conProperties, this);
 				}
-				connection = pmpConnection;
-				break;
+				connections.put(key, connection);
 			}
 		}
 		// If new connection was created, fire an event
@@ -119,16 +125,9 @@ public class ConnectionManagerImpl implements ConnectionManager {
 
 	public synchronized AbstractConnection getActiveConnection(int type) {
 		debug("[getActiveConnection] >>> type: " + type);
-		AbstractConnection connection = null;
-		switch (type) {
-		case MBSA_CONNECTION:
-		    if (mbsaConnection != null && mbsaConnection.isConnected())
-		        connection = mbsaConnection;
-		    break;
-		case PMP_CONNECTION:
-			if (pmpConnection != null && pmpConnection.isConnected())
-				connection = pmpConnection;
-			break;
+		AbstractConnection connection = (AbstractConnection) connections.get(new Integer(type));
+		if (connection != null && !connection.isConnected()) {
+			connection = null;
 		}
 		debug("[getActiveConnection] connection: " + connection);
 		return connection;
@@ -138,13 +137,15 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		debug("[closeConnections] >>>");
 		// only call closeConnection() because it will result in
 		// connectionClosed()
-		AbstractConnection mbsaConnection = this.mbsaConnection; 
-	    if ( mbsaConnection != null ){
-	      mbsaConnection.closeConnection();
-	    }
-		AbstractConnection pmpConnection = this.pmpConnection;
-		if (pmpConnection != null) {
-			pmpConnection.closeConnection();
+
+		ArrayList tmpConnections = new ArrayList();
+		synchronized (this) {
+			tmpConnections.addAll(connections.values());
+		}
+		Iterator it = tmpConnections.iterator();
+		while (it.hasNext()) {
+			AbstractConnection connection = (AbstractConnection) it.next();
+			connection.closeConnection();
 		}
 	}
 
@@ -182,7 +183,8 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		}
 
 		ConnectionEvent event = new ConnectionEvent(type, connection);
-		debug("[fireConnectionEvent] Sending event: " + event + " to " + clonedListeners.length + " connection listeners");
+		debug("[fireConnectionEvent] Sending event: " + event + " to " + clonedListeners.length
+				+ " connection listeners");
 		for (int i = 0; i < clonedListeners.length; i++) {
 			ConnectionListener listener = clonedListeners[i];
 			try {
@@ -201,19 +203,17 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	 * 
 	 * @param connection
 	 */
-	void connectionClosed(AbstractConnection connection) {
+	public void connectionClosed(AbstractConnection connection) {
 		debug("[connectionClosed] >>> connection: " + connection);
 		boolean sendEvent = false;
 		synchronized (this) {
 			if (connection == null)
 				return;
-			if (mbsaConnection == connection) {
-				debug("[connectionClosed] Active MBSA connection match");
-		        mbsaConnection = null;
-		        sendEvent = true;
-			} else if (pmpConnection == connection) {
-				debug("[connectionClosed] Active PMP connection match");
-				pmpConnection = null;
+			Integer key = new Integer(connection.getType());
+			AbstractConnection currentConnection = (AbstractConnection) connections.get(key);
+			if (currentConnection == connection) {
+				debug("[connectionClosed] Active connection match, connection type: " + connection.getType());
+				connections.remove(key);
 				sendEvent = true;
 			}
 		}
@@ -238,5 +238,36 @@ public class ConnectionManagerImpl implements ConnectionManager {
 
 	private final void error(String message, Throwable e) {
 		DebugUtils.error(this, message, e);
+	}
+
+	/**
+	 * Returns types of ext controller connections.
+	 * 
+	 * @return array of types or empty array
+	 */
+	public int[] getExtControllerConnectionTypes() {
+		List types = new ArrayList();
+		for (Iterator it = extFactories.iterator(); it.hasNext();) {
+			ExtConnectionFactory factory = (ExtConnectionFactory) it.next();
+			if (factory.isControllerType()) {
+				types.add(new Integer(factory.getConnectionType()));
+			}
+		}
+		int[] result = new int[types.size()];
+		int i = 0;
+		for (Iterator it = types.iterator(); it.hasNext();) {
+			result[i++] = ((Integer) it.next()).intValue();
+		}
+		return result;
+	}
+
+	private ExtConnectionFactory findFactoryForType(int type) {
+		for (Iterator it = extFactories.iterator(); it.hasNext();) {
+			ExtConnectionFactory factory = (ExtConnectionFactory) it.next();
+			if (factory.getConnectionType() == type) {
+				return factory;
+			}
+		}
+		return null;
 	}
 }

@@ -66,4 +66,14 @@ public interface ConnectionManager {
 	 * @param listener
 	 */
 	public void removeConnectionListener(ConnectionListener listener);
+
+	/**
+	 * This method should be called by
+	 * {@link AbstractConnection#closeConnection()} method every time it is
+	 * called, passing itself as argument for the method.
+	 * 
+	 * @param connection
+	 */
+	public void connectionClosed(AbstractConnection connection);
+
 }

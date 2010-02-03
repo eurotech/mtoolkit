@@ -57,7 +57,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	private VMManagerImpl runtimeCommands;
 	private DeploymentManagerImpl deploymentCommands;
 	private ServiceManagerImpl serviceManager;
-	private ConnectionManager connectionManager;
+	private ConnectionManagerImpl connectionManager;
 	private Object lock = new Object();
 	private volatile boolean isActive = true;
 	private Dictionary connectionProperties;
@@ -149,16 +149,26 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
 			// Trying controller connections
 			try {
-				debug("[connect] Connect to device which support MBSA");
+				debug("[connect] Trying to connect to device which support MBSA");
 				connect0(ConnectionManager.MBSA_CONNECTION);
 				return;
 			} catch (IAgentException e) {
 				debug("[connect] Failed: " + e);
 			}
-			// TODO: Try other controller connections here
+			// Trying ext controller connections
+			int[] extControllerTypes = connectionManager.getExtControllerConnectionTypes();
+			for (int i = 0; i < extControllerTypes.length; i++) {
+				try {
+					debug("[connect] Trying to connect to controller of type: " + extControllerTypes[i]);
+					connect0(extControllerTypes[i]);
+					return;
+				} catch (IAgentException e) {
+					debug("[connect] Failed: " + e);
+				}
+			}
 
-			debug("[connect] Unable to create connection.");
-			throw new IAgentException("Unable to create connection", IAgentErrors.ERROR_CANNOT_CONNECT);
+			debug("[connect] Unable to create controller connection.");
+			throw new IAgentException("Unable to create controller connection", IAgentErrors.ERROR_CANNOT_CONNECT);
 		} else { // connect directly to PMP
 			debug("[connect] Connect directly to PMP");
 			connect0(ConnectionManager.PMP_CONNECTION);
