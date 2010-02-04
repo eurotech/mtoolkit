@@ -123,6 +123,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Sho
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowBundleVersionAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowFrameworkConsole;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowServicePropertiesInTree;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowWebAdminAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StartAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StopAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.UpdateBundleAction;
@@ -144,6 +145,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public static final String UNINSTALL_BUNDLE_IMAGE_PATH = "uninstall_bundle.gif"; //$NON-NLS-1$
 	public static final String INSTALL_BUNDLE_IMAGE_PATH = "install_bundle.gif"; //$NON-NLS-1$
 	public static final String DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif"; //$NON-NLS-1$
+	public static final String WEBADMIN_ACTION_IMAGE_PATH = "webadmin_action.gif"; //$NON-NLS-1$
 	public static final String CONNECT_ACTION_IMAGE_PATH = "connect_action.gif"; //$NON-NLS-1$
 	public static final String PROPERTIES_ACTION_IMAGE_PATH = "properties_action.gif"; //$NON-NLS-1$
 	public static final String REMOVE_ACTION_ACTION_PATH = "remove_action.gif"; //$NON-NLS-1$
@@ -192,7 +194,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private MenuManager mgr;
 	
 	private FilterJob filterJob = new FilterJob();
-	private MyViewerFilter filter = new MyViewerFilter();;
+	private MyViewerFilter filter = new MyViewerFilter();
+
+	private static ShowWebAdminAction showWebAdmin;;
 	private static String notFoundText = null;
 
 	// Get current shell
@@ -398,6 +402,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, connectAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, disconnectAction);
+		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, showWebAdmin);
 
 		ContributionItem items[] = new ContributionItem[] {
 				new ActionContributionItem(startAction), 
@@ -527,6 +532,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 		disconnectAction = new DisconnectAction(tree, Messages.disconnect_action_label);
 		disconnectAction.setImageDescriptor(ImageHolder.getImageDescriptor(DISCONNECT_ACTION_IMAGE_PATH));
+		
+		showWebAdmin = new ShowWebAdminAction(tree, "Show Web Admin");
+		showWebAdmin.setImageDescriptor(ImageHolder.getImageDescriptor(WEBADMIN_ACTION_IMAGE_PATH));
+		
 
 		installBundleAction = new InstallBundleAction(tree, Messages.install_action_label);
 		installBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(INSTALL_BUNDLE_IMAGE_PATH));
@@ -602,6 +611,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 		connectAction.updateState(selection);
 		disconnectAction.updateState(selection);
+		showWebAdmin.updateState(selection);
 		refreshAction.updateState(selection);
 
 		startAction.updateState(selection);
@@ -653,6 +663,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, disconnectAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, removeFrameworkAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
+					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, showWebAdmin);
 
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installBundleAction);
 				}

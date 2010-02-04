@@ -134,5 +134,15 @@
             name="Plain Socket">
       </osgiDeviceTypeProvider>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.tigris.mtoolkit.osgimanagement.internal.editor.WebAdminEditor"
+            default="false"
+            icon="images/webadmin_action.gif"
+            id="org.tigris.mtoolkit.osgimanagement.webadmin"
+            name="Web Editor">
+      </editor>
+   </extension>
 
 </plugin>
