@@ -155,6 +155,7 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 			PreferencePageWrapper page = (PreferencePageWrapper) it.next();
 			if (page.getPage() == null)
 				continue;
+			page.getPage().setContainer(getContainer());
 
 			Label pageName = new Label(prefPane, SWT.NONE);
 			pageName.setText(page.getName());
@@ -171,6 +172,7 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 			layout.marginHeight = 10;
 			layout.marginWidth = 10;
 			externalPrefPage.setLayout(layout);
+			
 			Control result = page.getPage().createContents(externalPrefPage);
 			if (result != null)
 				result.setLayoutData(new GridData(GridData.FILL_BOTH));
