@@ -13,8 +13,11 @@ package org.tigris.mtoolkit.iagent.rpc;
 /**
  * Contains constants that represent different device capabilities.
  */
-public class Capabilities {
+public final class Capabilities {
 
+	private Capabilities() {
+	}
+	
 	/**
 	 * Support for remote applications
 	 */
