@@ -16,8 +16,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class StartBundleOperation extends RemoteBundleOperation {
 	
-	public StartBundleOperation(Bundle bundle) {
-		super(Messages.start_bundle, bundle);
+	public StartBundleOperation(String bName, Bundle bundle) {
+		super(Messages.start_bundle+bName, bundle);
 	}
 
 	protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {

@@ -150,7 +150,12 @@ public class ActionsManager {
 	}
 
 	public static void startBundleAction(Bundle bundle) {
-		RemoteBundleOperation job = new StartBundleOperation(bundle);
+		String name = bundle.getName();
+		try {
+			name = " " + name + " ("+bundle.getVersion()+")";
+		} catch (IAgentException e) {
+		}
+		RemoteBundleOperation job = new StartBundleOperation(name, bundle);
 		job.schedule();
 	}
 
