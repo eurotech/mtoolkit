@@ -11,7 +11,10 @@
 package org.tigris.mtoolkit.common.certificates;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -21,9 +24,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -40,6 +45,10 @@ public class CertificatesPanel {
 	private Button chkSignContent;
 	private Label lblCertificates;
 	private Table tblCertificates;
+	private Link link;
+	private Set listeners = new HashSet();
+
+	public static final int EVENT_CONTENT_MODIFIED = 1;
 
 	public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan) {
 		// Signing content group
@@ -57,6 +66,7 @@ public class CertificatesPanel {
 		chkSignContent.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				tblCertificates.setEnabled(chkSignContent.getSelection());
+				fireModifyEvent();
 			}
 		});
 
@@ -72,6 +82,13 @@ public class CertificatesPanel {
 		tblCertificates.setLayoutData(gridData);
 		tblCertificates.setLinesVisible(true);
 		tblCertificates.setHeaderVisible(true);
+		tblCertificates.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				if (e.detail == SWT.CHECK) {
+					fireModifyEvent();
+				}
+			}
+		});
 		TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
 		column.setText(Messages.CertificatesPanel_tblCertColAlias);
 		column.setWidth(100);
@@ -80,11 +97,19 @@ public class CertificatesPanel {
 		column.setWidth(160);
 	}
 
+	/**
+	 * Initializes the signing certificates with the given list of certificate
+	 * ids (of type String). This method could be called multiple times.
+	 * 
+	 * @param signUids
+	 *            list with certificate ids or <code>null</code>
+	 */
 	public void initialize(List signUids) {
 		ICertificateDescriptor certificates[] = CertUtils.getCertificates();
 		if (certificates == null || certificates.length == 0) {
 			setNoCertificatesAvailable();
 		}
+		tblCertificates.removeAll();
 		boolean foundCert = false;
 		if (certificates != null) {
 			for (int i = 0; i < certificates.length; i++) {
@@ -115,26 +140,53 @@ public class CertificatesPanel {
 		return signUids;
 	}
 
+	public void addEventListener(Listener listener) {
+		if (listener != null) {
+			listeners.add(listener);
+		}
+	}
+
+	public void removeEventListener(Listener listener) {
+		if (listener != null) {
+			listeners.remove(listener);
+		}
+	}
+
+	private void fireModifyEvent() {
+		if (listeners.isEmpty()) {
+			return;
+		}
+		Event event = new Event();
+		event.type = EVENT_CONTENT_MODIFIED;
+		for (Iterator it = listeners.iterator(); it.hasNext();) {
+			Listener listener = (Listener) it.next();
+			listener.handleEvent(event);
+		}
+	}
+
 	private void setNoCertificatesAvailable() {
 		setCertificateControlsVisible(false);
 
-		final Link link = new Link(signContentGroup, SWT.NONE);
-		link.setLayoutData(new GridData());
-		link.setText(Messages.CertificatesPanel_lblNoCertificates);
-		link.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-				PreferencesUtil.createPreferenceDialogOn(shell, MTOOLKIT_PAGE_ID, null, null).open();
-				ICertificateDescriptor certificates[] = CertUtils.getCertificates();
-				if (certificates == null || certificates.length == 0) {
-					return;
+		if (link == null) {
+			link = new Link(signContentGroup, SWT.NONE);
+			link.setLayoutData(new GridData());
+			link.setText(Messages.CertificatesPanel_lblNoCertificates);
+			link.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+					PreferencesUtil.createPreferenceDialogOn(shell, MTOOLKIT_PAGE_ID, null, null).open();
+					ICertificateDescriptor certificates[] = CertUtils.getCertificates();
+					if (certificates == null || certificates.length == 0) {
+						return;
+					}
+					link.dispose();
+					link = null;
+					setCertificateControlsVisible(true);
+					layoutControls();
+					initialize(null);
 				}
-				link.dispose();
-				setCertificateControlsVisible(true);
-				layoutControls();
-				initialize(null);
-			}
-		});
+			});
+		}
 
 		signContentGroup.layout();
 	}
@@ -158,7 +210,9 @@ public class CertificatesPanel {
 			if (parent instanceof Shell) {
 				Shell shell = (Shell) parent;
 				Point size = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-				shell.setBounds(shell.getLocation().x, shell.getLocation().y, size.x, size.y);
+				int sizeX = Math.max(shell.getSize().x, size.x);
+				int sizeY = Math.max(shell.getSize().y, size.y);
+				shell.setBounds(shell.getLocation().x, shell.getLocation().y, sizeX, sizeY);
 				break;
 			}
 			parent = parent.getParent();
