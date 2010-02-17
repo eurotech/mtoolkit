@@ -36,12 +36,7 @@ public class SocketTransport implements Transport {
 	public TransportConnection createConnection(int port) throws IOException {
 		if (closed)
 			throw new IOException("Transport is closed");
-		int timeout = 0; // by default, no timeout
-		// if we have PMP connection, we need a timeout
-		// because PMP have own ping mechanism
-		if (port == PMP_PORT)
-			timeout = 1000;
-		SocketTransportConnection connection = new SocketTransportConnection(host, port, timeout);
+		SocketTransportConnection connection = new SocketTransportConnection(host, port, 0);
 			synchronized (connections) {
 				connections.add(connection);
 			}

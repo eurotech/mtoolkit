@@ -13,9 +13,8 @@ package org.tigris.mtoolkit.iagent.transport.socket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Socket;
+import java.net.SocketException;
 
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 
@@ -24,15 +23,29 @@ public class SocketTransportConnection implements TransportConnection {
 	private int port;
 	private Socket socket;
 	private volatile boolean closed;
-	private static Method socketIsClosed;
 	private static boolean preJava14EE = false;
 
 	public SocketTransportConnection(String host, int port, int timeout) throws IOException {
 		this.host = host;
 		this.port = port;
 		socket = new Socket(host, port);
+		try {
+			setKeepAlive(socket, true);
+		} catch (SocketException e) {
+			// problem setting keepalive shouldn't affect the connection
+		}
 		if (timeout > 0)
 			socket.setSoTimeout(timeout);
+	}
+	
+	private void setKeepAlive(Socket socket, boolean keepAlive) throws SocketException {
+		if (preJava14EE)
+			return;
+		try {
+			socket.setKeepAlive(keepAlive);
+		} catch (NoSuchMethodError e) {
+			preJava14EE = false;
+		}
 	}
 
 	public void close() {
@@ -61,24 +74,12 @@ public class SocketTransportConnection implements TransportConnection {
 	private static boolean isSocketClosed(Socket socket) {
 		if (preJava14EE)
 			return false;
-		if (socketIsClosed == null) {
-			try {
-				socketIsClosed = Socket.class.getMethod("isClosed", null);
-			} catch (Throwable e) {
-				preJava14EE = true;
-			}
-			if (preJava14EE)
-				return false;
-		}
 		try {
-			Boolean bool = (Boolean) socketIsClosed.invoke(socket, null);
-			return bool != null ? bool.booleanValue() : false;
-		} catch (IllegalAccessException e) {
-			// ignore
-		} catch (InvocationTargetException e) {
-			// ignore
+			return socket.isClosed();
+		} catch (NoSuchMethodError e) {
+			preJava14EE = true;
+			return false;
 		}
-		return false;
 	}
 
 	public String toString() {
