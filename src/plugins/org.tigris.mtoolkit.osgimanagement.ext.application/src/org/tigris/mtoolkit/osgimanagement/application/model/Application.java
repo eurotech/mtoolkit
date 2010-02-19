@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.application.model;
 
+import org.osgi.service.application.ApplicationDescriptor;
+import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
@@ -20,6 +22,14 @@ public class Application extends Model {
 	public Application(String name, RemoteApplication remoteApplication) {
 		super(name);
 		this.remoteApplication = remoteApplication;
+		try {
+			String localizedName = (String) remoteApplication.getProperties().get(ApplicationDescriptor.APPLICATION_NAME);
+			if (localizedName != null) {
+				setName(localizedName);
+			}
+		} catch (IAgentException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public RemoteApplication getRemoteApplication() {
