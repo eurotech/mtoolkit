@@ -11,12 +11,14 @@
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.zip.DeflaterOutputStream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -302,6 +305,60 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		long[] bids = convertBundlesToIds(bundles);
 		debug("[listBundles] bundles: " + DebugUtils.convertForDebug(bids));
 		return bids;
+	}
+
+	public Object getBundlesSnapshot(int includeOptions, Dictionary properties) {
+		debug("[getBundlesSnapshot] >>>");
+		long[] ids = listBundles();
+		List snapshots = new ArrayList();
+		for (int i = 0; i < ids.length; i++) {
+			Dictionary bundleInfo = new Hashtable();
+			bundleInfo.put(KEY_BUNDLE_ID, new Long(ids[i]));
+			if ((includeOptions & INCLUDE_BUNDLE_HEADERS) != 0) {
+				Dictionary headers = getBundleHeaders(ids[i], null);
+				if (headers == null) {
+					continue; // bundle is uninstalled
+				}
+				bundleInfo.put(KEY_BUNDLE_HEADERS, headers);
+			}
+			if ((includeOptions & INCLUDE_BUNDLE_STATES) != 0) {
+				int state = getBundleState(ids[i]);
+				if (state == Bundle.UNINSTALLED) {
+					continue; // bundle is uninstalled
+				}
+				bundleInfo.put(KEY_BUNDLE_STATE, new Integer(state));
+			}
+			if ((includeOptions & INCLUDE_REGISTERED_SERVICES) != 0) {
+				Dictionary[] registeredServices = getRegisteredServices(ids[i]);
+				if (registeredServices == null) {
+					continue; // bundle is uninstalled
+				}
+				bundleInfo.put(KEY_REGISTERED_SERVICES, registeredServices);
+			}
+			if ((includeOptions & INCLUDE_USED_SERVICES) != 0) {
+				Dictionary[] usedServices = getUsingServices(ids[i]);
+				if (usedServices == null) {
+					continue; // bundle is uninstalled
+				}
+				bundleInfo.put(KEY_USED_SERVICES, usedServices);
+			}
+			snapshots.add(bundleInfo);
+		}
+		Dictionary[] result = (Dictionary[]) snapshots.toArray(new Dictionary[snapshots.size()]);
+
+		String transportType = System.getProperty("iagent.snapshot.transport.type");
+		if ("compressed".equals(transportType)) {
+			try {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				ObjectOutputStream oos = new ObjectOutputStream(new DeflaterOutputStream(bos));
+				oos.writeObject(result);
+				oos.close();
+				return bos.toByteArray();
+			} catch (IOException e) {
+				// failed to compress result, return uncompressed data
+			}
+		}
+		return result;
 	}
 
 	public Object installBundle(String location, InputStream is) {

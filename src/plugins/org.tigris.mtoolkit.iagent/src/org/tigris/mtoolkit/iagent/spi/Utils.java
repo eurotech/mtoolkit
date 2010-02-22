@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
+import java.util.Dictionary;
+
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.tcp.PMPRemoteObjectAdapter;
@@ -94,6 +96,8 @@ public class Utils {
 			new MethodSignature("getBundleStartLevel", new String[] { "long" }, true),
 			new MethodSignature("getFrameworkStartLevel", NO_ARGS, true),
 			new MethodSignature("getSystemProperty", new String[] { STRING_TYPE }, true), 
+
+			new MethodSignature("getBundlesSnapshot", new String[] { "int", Dictionary.class.getName() }, true),
 	};
 
 	public static final int INSTALL_BUNDLE_METHOD = 0;
@@ -152,7 +156,9 @@ public class Utils {
 
 	public static final int GET_SYSTEM_PROPERTY = 44;
 
-	public static final int LAST = 44;
+	public static final int GET_BUNDLES_SNAPSHOT = 45;
+
+	public static final int LAST = 45;
 
 	static {
 		if (METHOD_SIGNATURES.length != LAST + 1) {
@@ -191,7 +197,8 @@ public class Utils {
 	 */
 	public static Object callRemoteMethod(RemoteObject remote, int method, Object[] parameters) throws IAgentException {
 		MethodSignature methodSignature = METHOD_SIGNATURES[method];
-		debug("[callRemoteMethod] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
+		if (DebugUtils.DEBUG_ENABLED)
+			debug("[callRemoteMethod] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
 		return callRemoteMethod(remote, methodSignature, parameters);
 	}
 
@@ -233,7 +240,8 @@ public class Utils {
 
 	public static boolean isRemoteMethodDefined(RemoteObject remote, int method) throws IAgentException {
 		MethodSignature methodSignature = METHOD_SIGNATURES[method];
-		debug("[isRemoteDefined] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
+		if (DebugUtils.DEBUG_ENABLED)
+			debug("[isRemoteDefined] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
 		return isRemoteMethodDefined(remote, methodSignature);
 	}
 
@@ -260,7 +268,10 @@ public class Utils {
 
 	private final static String formatRemoteMethodInformation(RemoteObject remote, int method,
 			MethodSignature methodSignature) {
-		return "RemoteObject: " + remote + "; methodNumber: " + method + "; methodName: " + methodSignature.name;
+		if (DebugUtils.DEBUG_ENABLED)
+			return "RemoteObject: " + remote + "; methodNumber: " + method + "; methodName: " + methodSignature.name;
+		else
+			return "Debug not enabled";
 	}
 
 	private static Object callRemoteMethod0(RemoteObject remote, Object[] parameters, MethodSignature methodSignature)
@@ -270,7 +281,8 @@ public class Utils {
 			throw new IAgentException("Method " + methodSignature + " is not defined.",
 					IAgentErrors.ERROR_INTERNAL_ERROR);
 		Object result = method.invoke(parameters, methodSignature.shouldSerialize);
-		debug("[invokeCachedMethod] remote method invocation result: " + result);
+		if (DebugUtils.DEBUG_ENABLED)
+			debug("[invokeCachedMethod] remote method invocation result: " + result);
 		return result;
 	}
 

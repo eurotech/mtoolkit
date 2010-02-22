@@ -36,6 +36,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
+import org.tigris.mtoolkit.iagent.BundleSnapshot;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -936,28 +937,66 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		if (connector == null) {
 			return;
 		}
+
+		try {
+			addBundlesBySnapshot(sMonitor);
+			return;
+		} catch (Exception e) {
+			// getting bundles snapshot is not supported, retrieve info in standard way
+		}
+
 		RemoteBundle rBundlesArray[] = null;
 		
 		rBundlesArray = connector.getDeploymentManager().listBundles();
 
-		if (rBundlesArray != null) {
-			SubMonitor monitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES);
-			monitor.setTaskName(Messages.retrieve_bundles_info);
-			int work = (int) (FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES / rBundlesArray.length);
-			for (int i = 0; i < rBundlesArray.length; i++) {
-				try {
-					addBundle(rBundlesArray[i]);
-				} catch (IAgentException e) {
-					if (!userDisconnect && e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
-						BrowserErrorHandler.processError(e, getConnector(), userDisconnect);
-					}
+		SubMonitor monitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES);
+		monitor.setTaskName(Messages.retrieve_bundles_info);
+		int work = (int) (FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES / rBundlesArray.length);
+		for (int i = 0; i < rBundlesArray.length; i++) {
+			try {
+				addBundle(rBundlesArray[i]);
+			} catch (IAgentException e) {
+				if (!userDisconnect && e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+					BrowserErrorHandler.processError(e, getConnector(), userDisconnect);
 				}
-				if (monitor.isCanceled())
-					return;
-				monitor.worked(work);
 			}
+			if (monitor.isCanceled())
+				return;
+			monitor.worked(work);
 		}
 		retrieveServicesInfo(rBundlesArray, sMonitor);
+	}
+
+	private void addBundlesBySnapshot(SubMonitor sMonitor) throws IAgentException {
+		if (!supportBundles) {
+			return;
+		}
+		DeviceConnector connector = getConnector();
+		if (connector == null) {
+			return;
+		}
+		Hashtable options = new Hashtable();
+		BundleSnapshot[] snapshots = connector.getDeploymentManager().getBundlesSnapshot(options);
+
+		int totalWork = FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES
+				+ FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES;
+		SubMonitor monitor = sMonitor.newChild(totalWork);
+		monitor.setTaskName(Messages.retrieve_bundles_info);
+		int work = (int) (totalWork / snapshots.length);
+		for (int i = 0; i < snapshots.length; i++) {
+			try {
+				RemoteBundle rBundle = snapshots[i].getRemoteBundle();
+				addBundle(rBundle, snapshots[i].getBundleHeaders(), snapshots[i].getBundleState());
+				retrieveServicesInfo(rBundle, snapshots[i].getRegisteredServices(), snapshots[i].getUsedServices());
+			} catch (IAgentException e) {
+				if (!userDisconnect && e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+					BrowserErrorHandler.processError(e, getConnector(), userDisconnect);
+				}
+			}
+			if (monitor.isCanceled())
+				return;
+			monitor.worked(work);
+		}
 	}
 
 	private void retrieveServicesInfo(RemoteBundle rBundlesArray[], SubMonitor sMonitor) throws IAgentException {
@@ -968,33 +1007,40 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			int work = (int) (FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES / rBundlesArray.length);
 
 			for (int i = 0; i < rBundlesArray.length; i++) {
-				Bundle bundle = findBundle(rBundlesArray[i].getBundleId());
-				if (bundle != null
-						&& (bundle.getState() != org.osgi.framework.Bundle.ACTIVE || bundle.getState() != org.osgi.framework.Bundle.STARTING)) {
-					try {
-						RemoteService rServices[] = rBundlesArray[i].getRegisteredServices();
-						for (int j = 0; j < rServices.length; j++) {
-							servicesVector.addElement(new ServiceObject(rServices[j], rBundlesArray[i]));
-						}
-						rServices = rBundlesArray[i].getServicesInUse();
-						if (rServices != null) {
-							for (int j = 0; j < rServices.length; j++) {
-								ServiceObject.addUsedInBundle(rServices[j], rBundlesArray[i], this);
-							}
-						}
-					} catch (IAgentException e) {
-						if (e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
-							throw e;
-						}
-					}
-				}
+				retrieveServicesInfo(rBundlesArray[i], null, null);
 				if (monitor.isCanceled())
 					return;
 				monitor.worked(work);
 			}
 		}
 	}
-	
+
+	private void retrieveServicesInfo(RemoteBundle rBundle, RemoteService[] registeredSvcs, RemoteService[] usedSvcs)
+			throws IAgentException {
+		Bundle bundle = findBundle(rBundle.getBundleId());
+		if (bundle != null
+				&& (bundle.getState() != org.osgi.framework.Bundle.ACTIVE || bundle.getState() != org.osgi.framework.Bundle.STARTING)) {
+			try {
+				if (registeredSvcs == null) {
+					registeredSvcs = rBundle.getRegisteredServices();
+				}
+				if (usedSvcs == null) {
+					usedSvcs = rBundle.getServicesInUse();
+				}
+				for (int j = 0; j < registeredSvcs.length; j++) {
+					servicesVector.addElement(new ServiceObject(registeredSvcs[j], rBundle));
+				}
+				for (int j = 0; j < usedSvcs.length; j++) {
+					ServiceObject.addUsedInBundle(usedSvcs[j], rBundle, this);
+				}
+			} catch (IAgentException e) {
+				if (e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+					throw e;
+				}
+			}
+		}
+	}
+
 	public Model getServiceCategoryNode(Bundle bundle, int type, boolean add) {
 		Model[] categories = bundle.getChildren();
 		Model category = null;
@@ -1014,11 +1060,20 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	private void addBundle(RemoteBundle rBundle) throws IAgentException {
+		addBundle(rBundle, null, 0);
+	}
+
+	private void addBundle(RemoteBundle rBundle, Dictionary headers, int state) throws IAgentException {
 		try {
 			if (bundleHash.containsKey(new Long(rBundle.getBundleId())))
 				return;
 
-			Dictionary headers = rBundle.getHeaders(null);
+			if (headers == null) {
+				headers = rBundle.getHeaders(null);
+			}
+			if (state == 0) {
+				state = rBundle.getState();
+			}
 			Model bundleParentModel;
 			String categoryName = (String) headers.get("Bundle-Category");
 			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
@@ -1038,8 +1093,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			}
 
 			String bundleName = getBundleName(rBundle, headers);
-			Bundle bundle = new Bundle(bundleName, rBundle, rBundle.getState(), getRemoteBundleType(rBundle, headers),
-					categoryName);
+			String bundleVersion = (String) headers.get("Bundle-Version");
+			Bundle bundle = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers), categoryName,
+					bundleVersion);
 			bundleParentModel.addElement(bundle);
 			bundleHash.put(new Long(bundle.getID()), bundle);
 		} catch (IllegalArgumentException e) {

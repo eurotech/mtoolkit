@@ -33,8 +33,8 @@ public class Bundle extends Model {
 	private final RemoteBundle rBundle;
 	private String category;
 
-	public Bundle(String name, RemoteBundle rBundle, int state, int type, String category)
-					throws IAgentException {
+	public Bundle(String name, RemoteBundle rBundle, int state, int type, String category, String version)
+			throws IAgentException {
 		super(name);
 		Assert.isNotNull(rBundle);
 		this.rBundle = rBundle;
@@ -44,6 +44,7 @@ public class Bundle extends Model {
 		this.state = state;
 		this.type = type;
 		this.category = category;
+		this.version = version;
 		needsUpdate = true;
 	}
 	
@@ -55,6 +56,7 @@ public class Bundle extends Model {
 		type = master.getType();
 		category = master.getCategory();
 		needsUpdate = true;
+		version = master.version;
 	}
 
 	public RemoteBundle getRemoteBundle() {

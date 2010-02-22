@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.InflaterInputStream;
 
+import org.tigris.mtoolkit.iagent.BundleSnapshot;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.Error;
@@ -31,6 +35,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteDPListener;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
@@ -523,5 +528,39 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		return (String[]) names.toArray(new String[names.size()]);
 	}
 
+	public BundleSnapshot[] getBundlesSnapshot(Dictionary properties) throws IAgentException {
+		debug("[getBundlesSnapshot] >>>");
+		int options = RemoteBundleAdmin.INCLUDE_BUNDLE_HEADERS | RemoteBundleAdmin.INCLUDE_BUNDLE_STATES
+				| RemoteBundleAdmin.INCLUDE_REGISTERED_SERVICES | RemoteBundleAdmin.INCLUDE_USED_SERVICES;
+		Object snapshotData = Utils.callRemoteMethod(getBundleAdmin(), Utils.GET_BUNDLES_SNAPSHOT, new Object[] {
+				new Integer(options), properties });
+		if (snapshotData == null) {
+			info("[getBundlesSnapshot] getBundlesSnapshot() must not return null array. There is a problem with the transport.");
+			throw new IAgentException(
+					"getBundlesSnapshot() must not return null array. There is a problem with the transport.",
+					IAgentErrors.GENERAL_ERROR);
+		}
+		Dictionary[] snapshots;
+		if (snapshotData instanceof Dictionary[]) {
+			snapshots = (Dictionary[]) snapshotData;
+		} else {
+			try {
+				ByteArrayInputStream bis = new ByteArrayInputStream((byte[]) snapshotData);
+				ObjectInputStream ois = new ObjectInputStream(new InflaterInputStream(bis));
+				snapshots = (Dictionary[]) ois.readObject();
+				ois.close();
+			} catch (Exception e) {
+				throw new IAgentException(
+						"getBundlesSnapshot() Cannot decode the result. There is a problem with the transport.",
+						IAgentErrors.GENERAL_ERROR);
+			}
+		}
+
+		BundleSnapshot[] result = new BundleSnapshot[snapshots.length];
+		for (int i = 0; i < snapshots.length; i++) {
+			result[i] = new BundleSnapshotImpl(this, snapshots[i]);
+		}
+		return result;
+	}
 
 }

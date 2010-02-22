@@ -17,6 +17,37 @@ import org.tigris.mtoolkit.iagent.Error;
 
 public interface RemoteBundleAdmin {
 
+	public static final int INCLUDE_BUNDLE_HEADERS = 0x01;
+	public static final int INCLUDE_BUNDLE_STATES = 0x02;
+	public static final int INCLUDE_REGISTERED_SERVICES = 0x04;
+	public static final int INCLUDE_USED_SERVICES = 0x08;
+
+	/**
+	 * Key for bundle id. The value is of type Long.
+	 */
+	public static final String KEY_BUNDLE_ID = "bundle.id";
+
+	/**
+	 * Key for bundle headers. The value is of type Dictionary.
+	 */
+	public static final String KEY_BUNDLE_HEADERS = "bundle.headers";
+
+	/**
+	 * Key for bundle state. The value is of type Integer.
+	 */
+	public static final String KEY_BUNDLE_STATE = "bundle.state";
+
+	/**
+	 * Key for registered services. The value is of type Dictionary[].
+	 */
+	public static final String KEY_REGISTERED_SERVICES = "registered.services";
+
+	/**
+	 * Key for used services. The value is of type Dictionary[].
+	 */
+	public static final String KEY_USED_SERVICES = "used.services";
+
+
 	long getBundleByLocation(String location);
 
 	int getBundleState(long id);
@@ -86,6 +117,8 @@ public interface RemoteBundleAdmin {
 	boolean resolveBundles(long[] ids);
 
 	long[] listBundles();
+
+	public Object getBundlesSnapshot(int includeOptions, Dictionary properties);
 
 	/**
 	 * Installs bundle from given input stream

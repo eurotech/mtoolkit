@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.iagent;
 
 import java.io.InputStream;
+import java.util.Dictionary;
 
 import org.tigris.mtoolkit.iagent.event.RemoteBundleEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
@@ -157,4 +158,16 @@ public interface DeploymentManager {
 	 *             if the remote OSGi framework is already disconnected
 	 */
 	public void removeRemoteDPListener(RemoteDPListener listener) throws IAgentException;
+
+	/**
+	 * Returns array with snapshots for current bundles.
+	 * 
+	 * @param properties
+	 *            properties that determine what snapshot info to be obtained
+	 * 
+	 * @return array with BundleSnapshot objects. The result is never null.
+	 * @throws IAgentException
+	 */
+	public BundleSnapshot[] getBundlesSnapshot(Dictionary properties) throws IAgentException;
+
 }
