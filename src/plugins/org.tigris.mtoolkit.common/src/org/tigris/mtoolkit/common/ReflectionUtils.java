@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.common;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -111,6 +112,24 @@ public class ReflectionUtils {
 			throw new InvocationException(e);
 		} catch (InvocationTargetException e) {
 			throw new InvocationException(e.getTargetException());
+		}
+	}
+
+	public static void setField(Object receiver, String fieldName, Object value) throws InvocationException {
+		if (receiver == null)
+			throw new NullPointerException();
+		Class clazz = receiver.getClass();
+		try {
+			Field f = clazz.getField(fieldName);
+			f.set(receiver, value);
+		} catch (SecurityException e) {
+			throw new InvocationException(e);
+		} catch (IllegalArgumentException e) {
+			throw new InvocationException(e);
+		} catch (IllegalAccessException e) {
+			throw new InvocationException(e);
+		} catch (NoSuchFieldException e) {
+			throw new InvocationException(e);
 		}
 	}
 

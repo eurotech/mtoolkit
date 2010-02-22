@@ -31,6 +31,10 @@ public class PluginExporter_35 implements IPluginExporter {
 	public void exportPlugins(Object info) {
 		try {
 			final FeatureExportInfo fInfo = (FeatureExportInfo) info;
+			
+			// always allow binary cucles
+			ReflectionUtils.setField(fInfo, "allowBinaryCycles", Boolean.TRUE);
+			
 			final Object op = ReflectionUtils.newInstance("org.eclipse.pde.internal.core.exports.PluginExportOperation", new Class[] { //$NON-NLS-1$
 				FeatureExportInfo.class, String.class },
 				new Object[] { fInfo, "" });

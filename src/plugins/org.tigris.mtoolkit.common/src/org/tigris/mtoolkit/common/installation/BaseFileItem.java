@@ -52,13 +52,14 @@ public class BaseFileItem implements InstallationItem {
 
   public IStatus prepare(IProgressMonitor monitor, Map properties) {
     try {
-      if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))) {
+	if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
+		!AndroidUtils.isConvertedToDex(baseFile)) {
         File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + getName());
         convertedFile.getParentFile().mkdirs();
         if (FileUtils.getFileExtension(baseFile).equals("dp")) {
           AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
           preparedFile = convertedFile;
-        } else if (!AndroidUtils.isConvertedToDex(baseFile)){
+        } else if (!AndroidUtils.isConvertedToDex(baseFile) && AndroidUtils.isDexCompatible(baseFile)) {
           AndroidUtils.convertToDex(baseFile, convertedFile, monitor);
           preparedFile = convertedFile;
         }

@@ -36,29 +36,41 @@ import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 public class AndroidUtils {
 
+	private static final String[] DEX_COMPATIBLE_EXTENSIONS = new String[] {
+			".jar", ".zip" };
+
   /**
    * Converts jar file to dex format.
    * 
    * @param file
-   *          the file to be converted.
+	 *            the file to be converted.
    * @param outputFile
-   *          the result file. The file extension of outputFile must be one of
-   *          supported by dx tool.
+	 *            the result file. The file extension of outputFile must be one
+	 *            of supported by dx tool.
    * @param monitor
-   *          the progress monitor.
+	 *            the progress monitor.
    * @throws IOException
-   *           in case of error
+	 *             in case of error
    */
-  public static void convertToDex(File file, File outputFile, IProgressMonitor monitor) throws IOException {
+	public static void convertToDex(File file, File outputFile,
+			IProgressMonitor monitor) throws IOException {
     String androidSDK = getAndroidSdkLocation();
-    String androidVersion = getAndroidVersion();
+		String[] androidVersions = getAndroidVersion();
 
-    String dxTool = MessageFormat.format("{0}/platforms/{1}/tools/lib/dx.jar", new String[] { androidSDK,
-        androidVersion });
-    File dxToolFile = new File(dxTool);
-    if (!dxToolFile.exists()) {
-      throw new IOException("Unable to find dx tool at " + dxToolFile.getAbsolutePath());
+		File dxToolFile = null;
+		String dxTool = null;
+		for (int i = 0; i < androidVersions.length; i++) {
+			String androidVersion = androidVersions[i];
+			dxTool = MessageFormat.format("{0}/platforms/{1}/tools/lib/dx.jar",
+					new String[] { androidSDK, androidVersion });
+			dxToolFile = new File(dxTool);
+			if (dxToolFile.exists())
+				break;
     }
+
+		if (dxToolFile == null)
+			throw new IOException(
+					"Unable to find DEX tool. Last tried location: " + dxTool);
 
     List command = new ArrayList();
     command.add("java");
@@ -70,15 +82,19 @@ public class AndroidUtils {
 
     Process process;
     try {
-      process = Runtime.getRuntime().exec((String[]) command.toArray(new String[command.size()]));
+			process = Runtime.getRuntime().exec(
+					(String[]) command.toArray(new String[command.size()]));
     } catch (IOException ioe) {
-      IOException e = new IOException("Cannot convert to dex format. Error occured while executing dx tool.");
+			IOException e = new IOException(
+					"Cannot convert to dex format. Error occured while executing dx tool.");
       e.initCause(ioe);
       throw e;
     }
-    ProcessOutputReader outputReader = new ProcessOutputReader(process.getInputStream(), "[dx tool] Output Reader");
+		ProcessOutputReader outputReader = new ProcessOutputReader(process
+				.getInputStream(), "[dx tool] Output Reader");
     outputReader.start();
-    ProcessOutputReader errorReader = new ProcessOutputReader(process.getErrorStream(), "[dx tool] Error Reader");
+		ProcessOutputReader errorReader = new ProcessOutputReader(process
+				.getErrorStream(), "[dx tool] Error Reader");
     errorReader.start();
 
     int retries = 150;
@@ -109,10 +125,14 @@ public class AndroidUtils {
     }
     if (result != 0 || !outputFile.exists()) {
       if (retries == 0) {
-        throw new IOException("Cannot convert to dex format. Operation timed out.");
+				throw new IOException(
+						"Cannot convert to dex format. Operation timed out.");
       } else {
-        throw new IOException("Cannot convert to dex format. \ndx tool output: '" + outputReader.getOutput()
-            + "'\ndx tool error: '" + errorReader.getOutput() + "'");
+				throw new IOException(
+						"Cannot convert to dex format. \ndx tool output: '"
+								+ outputReader.getOutput()
+								+ "'\ndx tool error: '"
+								+ errorReader.getOutput() + "'");
       }
     }
   }
@@ -125,10 +145,13 @@ public class AndroidUtils {
    * @param monitor
    * @throws IOException
    */
-  public static void convertDpToDex(File dpFile, File outputFile, IProgressMonitor monitor) throws IOException {
-    File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.extracted");
+	public static void convertDpToDex(File dpFile, File outputFile,
+			IProgressMonitor monitor) throws IOException {
+		File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation()
+				+ "/tmp.extracted");
     FileUtils.deleteDir(tmpDir);
-    File dexDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.dex");
+		File dexDir = new File(UtilitiesPlugin.getDefault().getStateLocation()
+				+ "/tmp.dex");
     FileUtils.deleteDir(dexDir);
 
     JarInputStream jis = null;
@@ -139,7 +162,8 @@ public class AndroidUtils {
       if (manifest == null) {
         throw new IOException("DP file has no manifest.");
       }
-      jos = new JarOutputStream(new FileOutputStream(outputFile), manifest);
+			jos = new JarOutputStream(new FileOutputStream(outputFile),
+					manifest);
 
       byte[] buf = new byte[1024];
       int len;
@@ -152,11 +176,14 @@ public class AndroidUtils {
         jos.putNextEntry(newEntry);
 
         Attributes attributes = jarEntry.getAttributes();
-        if (attributes != null && attributes.getValue(Constants.BUNDLE_SYMBOLICNAME) != null) {
+				if (attributes != null
+						&& attributes.getValue(Constants.BUNDLE_SYMBOLICNAME) != null) {
           // this entry is bundle - convert it to dex format
-          // TODO: No need to use the jarEntry.getName() as a name for the temporary file
+					// TODO: No need to use the jarEntry.getName() as a name for
+					// the temporary file
           String entryName = jarEntry.getName();
-          File file = new File(tmpDir.getAbsolutePath() + "/" + entryName);
+					File file = new File(tmpDir.getAbsolutePath() + "/"
+							+ entryName);
           file.getParentFile().mkdirs();
           FileOutputStream outputStream = new FileOutputStream(file);
           try {
@@ -171,7 +198,8 @@ public class AndroidUtils {
           }
           File dexFile = file;
           if (!isConvertedToDex(file)) {
-            dexFile = new File(dexDir.getAbsolutePath() + "/" + entryName);
+						dexFile = new File(dexDir.getAbsolutePath() + "/"
+								+ entryName);
             dexFile.getParentFile().mkdirs();
             convertToDex(file, dexFile, monitor);
           }
@@ -213,16 +241,19 @@ public class AndroidUtils {
   }
 
   private static String getAndroidSdkLocation() {
-    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(), "com.prosyst.tools.android");
+		ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(
+				new InstanceScope(), "com.prosyst.tools.android");
     return preferenceStore.getString("android.sdk.location");
   }
 
-  private static String getAndroidVersion() {
-    return "android-1.5"; // TODO read from preferences?
+	private static String[] getAndroidVersion() {
+		return new String[] { "android-1.5", "android-1.6" }; // TODO read from
+		// preferences?
   }
 
   /**
    * Checks if file is in android dex format.
+	 * 
    * @param file
    * @return
    */
@@ -230,10 +261,12 @@ public class AndroidUtils {
     ZipFile zipFile = null;
     try {
       zipFile = new ZipFile(file);
-      // TODO: ZipFile.getEntry() can be used directly for this functionality
+			// TODO: ZipFile.getEntry() can be used directly for this
+			// functionality
       Enumeration zipEntries = zipFile.entries();
       while (zipEntries.hasMoreElements()) {
-        if ("classes.dex".equalsIgnoreCase(((ZipEntry) zipEntries.nextElement()).getName())) {
+				if ("classes.dex".equalsIgnoreCase(((ZipEntry) zipEntries
+						.nextElement()).getName())) {
           return true;
         }
       }
@@ -249,4 +282,27 @@ public class AndroidUtils {
     }
     return false;
   }
+
+	/**
+	 * Checks whether the file is compatible with Android's dex format.
+	 * 
+	 * <p>
+	 * Android 'dx' tool has limitations on the output format of the files: only
+	 * <em>zip</em> and <em>jar</em> files are supported as output. This method
+	 * returns whether the file can be converted to dex format without special
+	 * handling or options.
+	 * </p>
+	 * 
+	 * @param file
+	 *            the file to be checked for compatibility
+	 * @return whether the file can be converted to dex format without
+	 *         additional processing or options
+	 */
+	public static boolean isDexCompatible(File file) {
+		for (int i = 0; i < DEX_COMPATIBLE_EXTENSIONS.length; i++) {
+			if (file.getName().endsWith(DEX_COMPATIBLE_EXTENSIONS[i]))
+				return true;
+		}
+		return false;
+	}
 }

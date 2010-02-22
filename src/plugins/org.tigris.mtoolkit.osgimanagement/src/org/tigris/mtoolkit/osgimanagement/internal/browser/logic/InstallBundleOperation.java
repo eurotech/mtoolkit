@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.Manifest;
@@ -90,11 +92,8 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				Set bundleIds = new HashSet();
 				bundleIds.addAll(framework.getBundlesKeys());
 				rBundle = new RemoteBundle[1];
-				String location = "remote:" + bundle.getName() + " " + Calendar.getInstance().getTime().toString();
-				location = location.replace(' ', '_');
-				location = location.replace(':', '_');
 				rBundle[0] = connector.getDeploymentManager().installBundle(
-						location, input);
+						"remote:" + bundle.getName() + "." + getTimestamp(), input);
 				// check again if already installed
 				if (bundleIds.contains(new Long(rBundle[0].getBundleId()))) {
 					update[0] = true;
@@ -192,11 +191,8 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 
 				if (install[0]) {
 					monitor.beginTask(Messages.install_bundle, work);
-					String location = "remote:" + bundle.getName() + " " + Calendar.getInstance().getTime().toString();
-					location = location.replace(' ', '_');
-					location = location.replace(':', '_');
 					rBundle[0] = connector.getDeploymentManager().installBundle(
-							location,
+							"remote:" + bundle.getName() + "." + getTimestamp(),
 							new ProgressInputStream(new FileInputStream(bundle), monitor));
 				} else if (update[0]) {
 					monitor.beginTask(Messages.update_bundle, work);
@@ -237,6 +233,12 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			}
 		}
 		return Status.OK_STATUS;
+	}
+
+	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");
+	
+	private String getTimestamp() {
+		return df.format(new Date());
 	}
 
 	protected String getMessage(IStatus operationStatus) {
