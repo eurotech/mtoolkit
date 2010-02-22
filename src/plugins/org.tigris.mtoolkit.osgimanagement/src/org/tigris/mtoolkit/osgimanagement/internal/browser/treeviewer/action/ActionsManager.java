@@ -31,9 +31,6 @@ import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
-import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
-import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
@@ -227,12 +224,8 @@ public class ActionsManager {
 					}
 				}
 				// if the connection fails, connector will be null, so we need to recheck the condition
-				if (fw.getConnector() != null) {
-					// connection is alive, disconnect
-					AbstractConnection conn = ((DeviceConnectorImpl) fw.getConnector()).getConnectionManager().getActiveConnection(ConnectionManager.PMP_CONNECTION);
-					if (conn != null) {
-						conn.closeConnection();
-					}
+				if ((connector = fw.getConnector()) != null) {
+					connector.closeConnection();
 				}
 			}
 		} catch (IAgentException e) {
