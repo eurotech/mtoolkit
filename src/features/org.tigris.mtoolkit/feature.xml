@@ -71,6 +71,13 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
-		 unpack="false"/>
+         unpack="false"/>
+
+   <plugin
+         id="org.tigris.mtoolkit.osgimanagement.ext.dp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
