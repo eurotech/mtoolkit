@@ -40,6 +40,7 @@ public class PMPConnectionListener implements ConnectionListener {
 	private DeviceConnector connector;
 	private boolean autoConnected;
 	boolean shouldInstallIAgent = false;
+	private boolean instrumenting = false;
 
 	public PMPConnectionListener(FrameworkImpl fw, String frameworkName, DeviceConnector connector, boolean autoConnected) {
 		this.fw = fw;
@@ -56,7 +57,9 @@ public class PMPConnectionListener implements ConnectionListener {
 		if (e.getType() == ConnectionEvent.DISCONNECTED) {
 			disconnected();
 		} else if (e.getType() == ConnectionEvent.CONNECTED) {
-			connected();
+			// in case we are instrumenting the framework, we want to ignore connection events
+			if (!instrumenting)
+				connected();
 		}
 	}
 
@@ -96,9 +99,12 @@ public class PMPConnectionListener implements ConnectionListener {
 						if (!connector.getVMManager().isVMInstrumented(false)) {
 							if (shouldInstallIAgent()) {
 								try {
+									instrumenting = true;
 									connector.getVMManager().instrumentVM();
 								} catch (IAgentException iae) {
 									return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Unable to instrument VM.", iae);
+								} finally {
+									instrumenting = false;
 								}
 							} else {
 								return Status.OK_STATUS;
@@ -109,8 +115,6 @@ public class PMPConnectionListener implements ConnectionListener {
 					}
 					
 					connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
-
-					
 					
 					if (fw != null) {
 						fw.connect(connector, sMonitor);
