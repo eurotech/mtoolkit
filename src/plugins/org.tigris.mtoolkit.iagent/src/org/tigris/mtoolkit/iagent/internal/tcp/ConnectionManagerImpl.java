@@ -75,6 +75,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		// fire an event for the disconnection
 		if (staleConnection != null) {
 			staleConnection.closeConnection();
+			fireConnectionEvent(ConnectionEvent.DISCONNECTED, staleConnection);
 		}
 		// Step 2: check whether there is an active connection. Create if
 		// necessary.
@@ -203,7 +204,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	 * 
 	 * @param connection
 	 */
-	public void connectionClosed(AbstractConnection connection) {
+	public void connectionClosed(AbstractConnection connection, boolean notify) {
 		debug("[connectionClosed] >>> connection: " + connection);
 		boolean sendEvent = false;
 		synchronized (this) {
@@ -217,8 +218,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
 				sendEvent = true;
 			}
 		}
-		if (sendEvent)
+		if (sendEvent && notify)
 			fireConnectionEvent(ConnectionEvent.DISCONNECTED, connection);
+	}
+	
+	public void connectionClosed(AbstractConnection connection) {
+		connectionClosed(connection, true);
 	}
 
 	public void removeListeners() throws IAgentException {

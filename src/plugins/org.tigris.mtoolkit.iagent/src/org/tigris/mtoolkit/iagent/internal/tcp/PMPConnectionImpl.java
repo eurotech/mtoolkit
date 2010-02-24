@@ -97,9 +97,9 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 					new String[] { org.tigris.mtoolkit.iagent.pmp.PMPConnection.FRAMEWORK_DISCONNECTED });
 			pmpConnection.disconnect("Integration Agent request");
 		} finally {
-			if (connManager != null && aSendEvent) {
+			if (connManager != null) {
 				try {
-					connManager.connectionClosed(this);
+					connManager.connectionClosed(this, aSendEvent);
 				} catch (Throwable e) {
 					error("[closeConnection] Internal error in connection manager", e);
 				}

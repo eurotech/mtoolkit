@@ -128,9 +128,9 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         lock.notifyAll();
       }
     } finally { // send event in any case
-      if (sendEvent && connManager != null) {
+      if (connManager != null) {
         try {
-          connManager.connectionClosed(this);
+          connManager.connectionClosed(this, sendEvent);
         } catch (Throwable e) {
           error("Internal failure in connection manager", e);
         }

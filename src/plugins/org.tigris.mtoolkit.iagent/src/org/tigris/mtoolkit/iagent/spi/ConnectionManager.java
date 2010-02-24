@@ -76,4 +76,13 @@ public interface ConnectionManager {
 	 */
 	public void connectionClosed(AbstractConnection connection);
 
+	/**
+	 * This method should be called by
+	 * {@link AbstractConnection#closeConnection()} method every time it is
+	 * called, passing itself as argument for the method.
+	 * 
+	 * @param connection
+	 * @param notify true if event should be fired, false otherwise
+	 */
+	public void connectionClosed(AbstractConnection connection, boolean notify);
 }
