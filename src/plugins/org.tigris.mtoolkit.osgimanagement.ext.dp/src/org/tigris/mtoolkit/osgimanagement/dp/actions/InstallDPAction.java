@@ -98,7 +98,7 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
 					break;
 				}
 				DeviceConnector connector = model.findFramework().getConnector();
-				if (connector == null || !DPModelProvider.isDpSupported(connector)) {
+				if (connector == null || !DPModelProvider.supportDPDictionary.get(connector)) {
 					enabled = false;
 					break;
 				}

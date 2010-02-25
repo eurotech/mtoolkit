@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.dp;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -41,12 +42,14 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 	private Model parent;
 	private DeploymentManager manager;
 	private boolean supportDP;
+	public static final Dictionary<DeviceConnector, Boolean> supportDPDictionary = new Hashtable<DeviceConnector, Boolean>();
 	
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
 		this.parent = parent;
 
 		supportDP = isDpSupported(connector);
+		supportDPDictionary.put(connector, supportDP);
 
 		try {
 			connector.addRemoteDevicePropertyListener(this);
@@ -197,6 +200,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 			boolean enabled = ((Boolean) e.getValue()).booleanValue();
 			Object property = e.getProperty();
 			if (Capabilities.DEPLOYMENT_SUPPORT.equals(property)) {
+				supportDPDictionary.put(connector, enabled);
 				if (enabled) {
 					supportDP = true;
 					initModel(new NullProgressMonitor());
