@@ -23,6 +23,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class DeInstallBundleAction extends SelectionProviderAction implements IStateAction {
@@ -73,15 +74,18 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 				break;
 			}
 			Bundle bundle = (Bundle) model;
-			try {
-				if (bundle.getState() == org.osgi.framework.Bundle.UNINSTALLED
-								|| bundle.getRemoteBundle().isSystemBundle()) {
-					enabled = false;
-					break;
-				}
-			} catch (IAgentException e) {
+//			try {
+			if (bundle.getState() == org.osgi.framework.Bundle.UNINSTALLED/*
+								|| bundle.getRemoteBundle().isSystemBundle()*/
+					|| ((FrameworkImpl)bundle.findFramework()).systemBundles.contains(new Long(bundle.getID()))
+			) {
 				enabled = false;
+				break;
 			}
+				
+//			} catch (IAgentException e) {
+//				enabled = false;
+//			}
 		}
 		this.setEnabled(enabled);
 	}

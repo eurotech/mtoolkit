@@ -42,6 +42,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 public class InstallBundleOperation extends RemoteBundleOperation {
 	private final File bundle;
 	private final FrameworkImpl framework;
+	private String symbolicName;
+	private String version;
 
 	public InstallBundleOperation(File bundle, FrameworkImpl framework) {
 		super(Messages.install_bundle, null);
@@ -69,18 +71,18 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			}
 			zis = zip.getInputStream(entry);
 			Manifest mf = new Manifest(zis);
-			final String symbName = (String) mf.getMainAttributes().getValue("Bundle-SymbolicName");
-			final String version = (String) mf.getMainAttributes().getValue("Bundle-Version");
+			symbolicName = (String) mf.getMainAttributes().getValue("Bundle-SymbolicName");
+			version = (String) mf.getMainAttributes().getValue("Bundle-Version");
 
 			// check if already installd
 			final boolean update[] = new boolean[] { false };
 			final boolean install[] = new boolean[] { false };
-			if (symbName != null) {
-				rBundle = connector.getDeploymentManager().getBundles(symbName, "[" + version + "," + version + "]");
+			if (symbolicName != null) {
+				rBundle = connector.getDeploymentManager().getBundles(symbolicName, "[" + version + "," + version + "]");
 				if (rBundle != null) {
 					update[0] = true;
 				} else {
-					rBundle = connector.getDeploymentManager().getBundles(symbName, null);
+					rBundle = connector.getDeploymentManager().getBundles(symbolicName, null);
 					if (rBundle != null) {
 						install[0] = true;
 					}
@@ -115,7 +117,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 							// if bundle with same symbolic name and version is
 							// installed - ask user for update
 							MessageDialog updateDialog = new MessageDialog(FrameWorkView.getShell(),
-									Messages.update_dialog_title, null, "Bundle \"" + symbName + " (" + version
+									Messages.update_dialog_title, null, "Bundle \"" + symbolicName + " (" + version
 											+ ")\" is already installed.\nDo you want to update bundle?",
 									MessageDialog.QUESTION, new String[] { "Update", "Cancel" }, 0);
 							int updateResult = updateDialog.open();
@@ -137,7 +139,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 									list = new List((Composite) main, SWT.BORDER);
 									try {
 										for (int i = 0; i < rBundles.length; i++) {
-											list.add(symbName + " (" + ((RemoteBundle) rBundles[i]).getVersion() + ")");
+											list.add(symbolicName + " (" + ((RemoteBundle) rBundles[i]).getVersion() + ")");
 										}
 									} catch (IAgentException e) {
 									}
@@ -152,7 +154,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 										}
 									});
 									list.setLayoutData(new GridData(GridData.FILL_BOTH));
-									setTitle("Bundle \"" + symbName + "\" is already installed!\nInstall version "
+									setTitle("Bundle \"" + symbolicName + "\" is already installed!\nInstall version "
 											+ version + ", or select bundle to update.");
 									getShell().setText("Update bundle");
 									return main;
@@ -223,8 +225,9 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				}
 			}
 		}
-		if (FrameworkConnectorFactory.isAutoStartBundlesEnabled && rBundle != null) {
+		if (FrameworkConnectorFactory.isAutoStartBundlesEnabled && rBundle != null && rBundle[0].getType() != RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
 			try {
+				monitor.setTaskName("Starting bundle "+symbolicName+" ("+version+")");
 				rBundle[0].start(0);
 			} catch (IAgentException e) {
 				// only log this exception, because the user requested install

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -92,6 +93,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	private boolean supportBundles = false;
 	private boolean supportServices = false;
 	private IMemento configs;
+	public HashSet systemBundles;
 
 	
 	public FrameworkImpl(String name, boolean autoConnected) {
@@ -120,6 +122,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 		FrameWorkView.treeRoot.removeElement(this);
 		bundleHash = null;
+		systemBundles = null;
 		categoryHash = null;
 		servicesVector = null;
 		servicesViewVector = null;
@@ -252,6 +255,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					categoryHash = new Hashtable();
 					servicesVector = new Vector();
 					servicesViewVector = new Vector();
+					systemBundles = new HashSet();
 
 					if (sMonitor != null && sMonitor.isCanceled())
 						return false;
@@ -311,6 +315,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 		if (servicesViewVector != null) {
 			servicesViewVector.removeAllElements();
+		}
+		if (systemBundles != null) {
+			systemBundles.clear();
 		}
 		ServiceObject.usedInHashFWs.remove(this);
 		supportBundles = false;
@@ -468,6 +475,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 		FrameworkImpl fw = (FrameworkImpl) bundle.findFramework();
 		bundleHash.remove(new Long(id));
+		systemBundles.remove(new Long(id));
 		if (bundle != null) {
 			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
 				Category category = (Category) bundle.getParent();
@@ -1098,6 +1106,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					bundleVersion);
 			bundleParentModel.addElement(bundle);
 			bundleHash.put(new Long(bundle.getID()), bundle);
+			if (rBundle.isSystemBundle()) {
+				systemBundles.add(new Long(rBundle.getBundleId()));
+			}
 		} catch (IllegalArgumentException e) {
 			// bundle was uninstalled
 		}
