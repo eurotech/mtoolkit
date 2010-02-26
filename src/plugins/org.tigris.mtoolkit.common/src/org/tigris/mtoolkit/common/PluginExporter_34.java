@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -19,38 +19,31 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.pde.internal.ui.PDEPluginImages;
 import org.eclipse.ui.progress.IProgressConstants;
-import org.osgi.framework.Version;
+import org.tigris.mtoolkit.common.ReflectionUtils.InvocationException;
 
-public class PluginExporter_34 implements IPluginExporter {
+public class PluginExporter_34 extends BasePluginExporter implements IPluginExporter {
 
-	private volatile IStatus result;
-
-	public void exportPlugins(Object info) {
+	public void asyncExportPlugins(Object info) {
 		try {
-			Object obj = ReflectionUtils.newInstance("org.eclipse.pde.internal.ui.build.PluginExportJob", new Class[] { FeatureExportInfo.class }, new Object[] { info }); //$NON-NLS-1$
-
-			((Job) obj).setUser(true);
-			((Job) obj).setProperty(IProgressConstants.ICON_PROPERTY, PDEPluginImages.DESC_PLUGIN_OBJ);
+			Object obj = createExportOperation(info);
 			((Job) obj).addJobChangeListener(new JobChangeAdapter() {
 				public void done(IJobChangeEvent event) {
-					result = event.getResult();
+					setResult(event.getResult());
 				}
 			});
 
 			((Job) obj).schedule();
 		} catch (ReflectionUtils.InvocationException e) {
-			result = new Status(IStatus.ERROR,
-				UtilitiesPlugin.PLUGIN_ID,
-				"Plugin exporter is not compatible with current version of Eclipse", e); //$NON-NLS-1$
+			setResult(new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, Messages.plugin_exporter_not_compatible, e)); //$NON-NLS-1$
 		}
 	}
 
-	public IStatus getResult() {
-		return result;
-	}
+	private Object createExportOperation(Object info) throws InvocationException {
+		Object obj = ReflectionUtils.newInstance("org.eclipse.pde.internal.ui.build.PluginExportJob", new Class[] { FeatureExportInfo.class }, new Object[] { info }); //$NON-NLS-1$
 
-	public boolean hasFinished() {
-		return result != null;
+		((Job) obj).setUser(true);
+		((Job) obj).setProperty(IProgressConstants.ICON_PROPERTY, PDEPluginImages.DESC_PLUGIN_OBJ);
+		return obj;
 	}
 
 	public static boolean isCompatible() {
@@ -62,6 +55,28 @@ public class PluginExporter_34 implements IPluginExporter {
 			return (String) ReflectionUtils.invokeStaticMethod("org.eclipse.pde.internal.core.exports.FeatureExportOperation", "getDate"); //$NON-NLS-1$
 		} catch (ReflectionUtils.InvocationException e) {
 			return "qualifier"; //$NON-NLS-1$
+		}
+	}
+
+	public IStatus syncExportPlugins(Object info, IProgressMonitor monitor) {
+		try {
+			Object op = createExportOperation(info);
+			IStatus result;
+			try {
+				Job.getJobManager().beginRule(((Job) op).getRule(), monitor);
+				result = (IStatus) ReflectionUtils.invokeMethod(op, "run", new Class[] { IProgressMonitor.class }, new Object[] { monitor });
+			} catch (ReflectionUtils.InvocationException e) {
+				result = UtilitiesPlugin.newStatus(IStatus.ERROR, Messages.plugin_exporter_not_compatible, e);
+			} catch (ThreadDeath e) {
+				throw e;
+			} catch (Throwable t) {
+				result = UtilitiesPlugin.newStatus(IStatus.ERROR, "An internal error ocurred during: " + ((Job)op).getName(), t);
+			} finally {
+				Job.getJobManager().endRule(((Job) op).getRule());
+			}
+			return result;
+		} catch (ReflectionUtils.InvocationException e) {
+			return new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, Messages.plugin_exporter_not_compatible, e); //$NON-NLS-1$
 		}
 	}
 }

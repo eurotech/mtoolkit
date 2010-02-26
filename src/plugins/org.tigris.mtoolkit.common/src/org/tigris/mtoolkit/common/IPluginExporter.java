@@ -10,15 +10,20 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 public interface IPluginExporter {
 
-	void exportPlugins(Object info);
+	void asyncExportPlugins(Object info);
+	
+	IStatus syncExportPlugins(Object info, IProgressMonitor monitor);
 
 	boolean hasFinished();
 
 	IStatus getResult();
 
 	String getQualifier();
+	
+	IStatus join(long timeout) throws InterruptedException;
 }
