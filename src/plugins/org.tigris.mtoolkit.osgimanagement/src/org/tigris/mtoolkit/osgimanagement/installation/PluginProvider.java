@@ -122,7 +122,7 @@ public class PluginProvider implements InstallationItemProvider {
 
 			final String path = exportInfo.destinationDirectory + "/plugins/" + name + "_" + version + ".jar";
 			// TODO: Make Plugin exporter a separate API
-			exporter.exportPlugins(exportInfo);
+			exporter.asyncExportPlugins(exportInfo);
 			// TODO: The plugin exporter should be joinable
 			while (!exporter.hasFinished()) {
 				try {

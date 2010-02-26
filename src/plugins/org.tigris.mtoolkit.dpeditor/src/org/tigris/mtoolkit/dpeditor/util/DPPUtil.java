@@ -446,7 +446,7 @@ public class DPPUtil {
 
 								result.put(prjInfo, jarFile);
 
-								exporter.exportPlugins(info);
+								exporter.asyncExportPlugins(info);
 
 								while (!exporter.hasFinished()) {
 									if (Display.getCurrent() != null) {
