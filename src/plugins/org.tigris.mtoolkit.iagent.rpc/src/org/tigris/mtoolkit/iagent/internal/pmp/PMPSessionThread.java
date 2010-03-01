@@ -255,6 +255,9 @@ public class PMPSessionThread extends Thread {
 						readMethods(opID);
 						break;
 					}
+				} catch (IOException exc) {
+					error("An unexpected error occurred: " + exc.toString(), exc);
+					disconnect("An unexpected error occurred: " + exc.toString(), false);
 				} catch (Exception exc) {
 					debug("Runtime Exception " + exc);
 				}
