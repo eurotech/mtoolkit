@@ -42,14 +42,14 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 	private Model parent;
 	private DeploymentManager manager;
 	private boolean supportDP;
-	public static final Dictionary<DeviceConnector, Boolean> supportDPDictionary = new Hashtable<DeviceConnector, Boolean>();
+	public static final Dictionary supportDPDictionary = new Hashtable();
 	
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
 		this.connector = connector;
 		this.parent = parent;
 
 		supportDP = isDpSupported(connector);
-		supportDPDictionary.put(connector, supportDP);
+		supportDPDictionary.put(connector, Boolean.valueOf(supportDP));
 
 		try {
 			connector.addRemoteDevicePropertyListener(this);
@@ -197,10 +197,10 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 
 	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
 		if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
-			boolean enabled = ((Boolean) e.getValue()).booleanValue();
 			Object property = e.getProperty();
 			if (Capabilities.DEPLOYMENT_SUPPORT.equals(property)) {
-				supportDPDictionary.put(connector, enabled);
+				boolean enabled = ((Boolean) e.getValue()).booleanValue();
+				supportDPDictionary.put(connector, Boolean.valueOf(enabled));
 				if (enabled) {
 					supportDP = true;
 					initModel(new NullProgressMonitor());
