@@ -19,14 +19,15 @@ Require-Bundle: org.eclipse.ui.ide,
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  not-yet-commons-ssl-0.3.10.jar
-Export-Package: org.tigris.mtoolkit.common,
- org.tigris.mtoolkit.common.android,
- org.tigris.mtoolkit.common.certificates,
- org.tigris.mtoolkit.common.gui,
- org.tigris.mtoolkit.common.images,
- org.tigris.mtoolkit.common.installation,
- org.tigris.mtoolkit.common.preferences,
- org.tigris.mtoolkit.common.security
+Export-Package: org.tigris.mtoolkit.common;version="1.0.0",
+ org.tigris.mtoolkit.common.android;version="1.0.0",
+ org.tigris.mtoolkit.common.certificates;version="1.0.0",
+ org.tigris.mtoolkit.common.export;version="1.0.0",
+ org.tigris.mtoolkit.common.gui;version="1.0.0",
+ org.tigris.mtoolkit.common.images;version="1.0.0",
+ org.tigris.mtoolkit.common.installation;version="1.0.0",
+ org.tigris.mtoolkit.common.preferences;version="1.0.0",
+ org.tigris.mtoolkit.common.security;version="1.0.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Import-Package: org.eclipse.core.expressions,
  org.eclipse.core.resources,
