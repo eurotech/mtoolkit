@@ -25,6 +25,7 @@ import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -47,7 +48,7 @@ public class PMPConnectionListener implements ConnectionListener {
 		this.frameworkName = frameworkName;
 		this.connector = connector;
 		this.autoConnected = autoConnected;
-		((DeviceConnectorImpl) connector).getConnectionManager().addConnectionListener(this);
+		((DeviceConnectorSpi) connector).getConnectionManager().addConnectionListener(this);
 	}
 
 	public void connectionChanged(ConnectionEvent e) {

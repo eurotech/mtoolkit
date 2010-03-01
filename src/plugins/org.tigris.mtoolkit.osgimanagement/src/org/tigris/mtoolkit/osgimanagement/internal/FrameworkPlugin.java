@@ -92,6 +92,10 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
 	}
 
+	public static void warning(String message, Throwable t) {
+		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
+	}
+	
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 	}

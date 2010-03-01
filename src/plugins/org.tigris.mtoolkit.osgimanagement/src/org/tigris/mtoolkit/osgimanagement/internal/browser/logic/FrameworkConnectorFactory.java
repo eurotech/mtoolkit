@@ -18,11 +18,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
+import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -74,7 +76,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public void connected(final DeviceConnector connector) {
-		Dictionary connProps = connector.getProperties();
+		// wrap the connector
+		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, Display.getDefault());
+		Dictionary connProps = fConnector.getProperties();
 		if (connProps.get("framework-connection-temporary") != null)
 			// the connection is only temporary and will be closed shortly
 			return;
@@ -132,19 +136,19 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			FrameWorkView.getTreeRoot().addElement(fw);
 		}
 
-		if (fw.getConnector() != connector) {
-			fw.setConnector(connector);
+		if (fw.getConnector() != fConnector) {
+			fw.setConnector(fConnector);
 		}
 
-		BrowserErrorHandler.debug("FrameworkPlugin: " + connProps.get("framework-name") + " was connected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		createPMPConnection(connector, fw, frameworkName, autoConnected);
+		BrowserErrorHandler.debug("FrameworkPlugin: " + connProps.get("framework-name") + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		createPMPConnection(fConnector, fw, frameworkName, autoConnected);
 	}
 
 	static void createPMPConnection(final DeviceConnector connector, FrameworkImpl fw, String frameworkName,
 					boolean autoConnected) {
 		boolean pmp = false;
 		try {
-			pmp = ((DeviceConnectorImpl) connector).getConnectionManager().getActiveConnection(ConnectionManager.PMP_CONNECTION) != null;
+			pmp = ((DeviceConnectorSpi) connector).getConnectionManager().getActiveConnection(ConnectionManager.PMP_CONNECTION) != null;
 		} catch (IAgentException e1) {
 			e1.printStackTrace();
 		}
@@ -203,7 +207,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			if (fws != null) {
 				for (int i = 0; i < fws.length; i++) {
 					fw = fws[i];
-					if (fw.getConnector() == connector) {
+					if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
 						fw.disconnect();
 						fw.setPMPConnectionListener(null);
 						if (fw.autoConnected) {
