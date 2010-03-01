@@ -116,7 +116,7 @@ public class PluginExporter_35 extends BasePluginExporter implements IPluginExpo
 			IStatus result;
 			try {
 				Job.getJobManager().beginRule(((Job)op).getRule(), monitor);
-				result = (IStatus) ReflectionUtils.invokeMethod(op, "run", new Class[] { IProgressMonitor.class }, new Object[] { monitor });
+				result = (IStatus) ReflectionUtils.invokeProtectedMethod(op, "run", new Class[] { IProgressMonitor.class }, new Object[] { monitor });
 			} catch (ReflectionUtils.InvocationException e) {
 				result = UtilitiesPlugin.newStatus(IStatus.ERROR, Messages.plugin_exporter_not_compatible, e);
 			} catch (ThreadDeath e) {

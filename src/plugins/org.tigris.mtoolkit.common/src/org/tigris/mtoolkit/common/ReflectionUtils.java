@@ -39,13 +39,14 @@ public class ReflectionUtils {
 
 	}
 
-	public static Object invokeMethod(Object obj, String methodName, Class[] parameterTypes, Object[] parameterValues)
+	
+	private static Object doInvokeMethod(Object obj, String methodName, Class[] parameterTypes, Object[] parameterValues, boolean invokeProtected)
 					throws InvocationException {
 		if (obj == null)
 			throw new NullPointerException();
 		Class clazz = obj.getClass();
 		try {
-			Method m = clazz.getMethod(methodName, parameterTypes);
+			Method m = findMethod(clazz, methodName, parameterTypes, invokeProtected);
 			Object result = m.invoke(obj, parameterValues);
 			return result;
 		} catch (SecurityException e) {
@@ -60,6 +61,34 @@ public class ReflectionUtils {
 			throw new InvocationException(e.getTargetException());
 		}
 	}
+	
+	public static Object invokeMethod(Object obj, String methodName, Class[] parameterTypes, Object[] parameterValues) throws InvocationException {
+		return doInvokeMethod(obj, methodName, parameterTypes, parameterValues, false);
+	}
+	
+	public static Object invokeProtectedMethod(Object obj, String methodName, Class[] parameterTypes, Object[] parameterValues) throws InvocationException {
+		return doInvokeMethod(obj, methodName, parameterTypes, parameterValues, true);
+	}
+	
+	private static Method findMethod(Class clazz, String methodName, Class[] parameterTypes, boolean searchProtected) throws NoSuchMethodException {
+		Method m = null;
+			do {
+				try {
+					if (searchProtected)
+						m = clazz.getDeclaredMethod(methodName, parameterTypes);
+					else
+						m = clazz.getMethod(methodName, parameterTypes);
+				} catch (NoSuchMethodException e) {
+					// no method in this class, move up the hierarchy
+					clazz = clazz.getSuperclass();
+				}
+			} while (m == null && clazz != null);
+			if (m == null || clazz == null)
+				throw new NoSuchMethodError("Cannot find method " + methodName);
+			if (searchProtected)
+				m.setAccessible(true);
+			return m;
+	}
 
 	public static Object invokeMethod(Object obj, String methodName) throws InvocationException {
 		return invokeMethod(obj, methodName, null, null);
@@ -70,7 +99,7 @@ public class ReflectionUtils {
 		Class cl;
 		try {
 			cl = ReflectionUtils.class.getClassLoader().loadClass(className);
-			Method method = cl.getMethod(methodName, parameterTypes);
+			Method method = findMethod(cl, methodName, parameterTypes, false);
 			return method.invoke(null, parameterValues);
 		} catch (ClassNotFoundException e) {
 			throw new InvocationException(e);
