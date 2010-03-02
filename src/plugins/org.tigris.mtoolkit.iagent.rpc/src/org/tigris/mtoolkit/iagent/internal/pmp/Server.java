@@ -101,6 +101,10 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 			}
 			try {
 				if (run) {
+					if (System.getProperty("pmp.server.timeout") != null) {
+						Integer timeout = Integer.getInteger("pmp.server.timeout", 0);
+						client.setSoTimeout(timeout.intValue());
+					}
 					PMPSessionThread newSession = new PMPSessionThread(this,
 						client,
 						createSessionId(),
