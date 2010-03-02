@@ -1,5 +1,6 @@
 package org.tigris.mtoolkit.iagent.internal.tcp;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +51,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   private ByteArrayOutputStream headerBuffer;
 
   private ConnectionManagerImpl connManager;
+  private Dictionary properties;
 
   public MBSAConnectionImpl(String device_ip, int port) {
     isClient = true;
@@ -66,9 +68,13 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
 
   public MBSAConnectionImpl(Dictionary conProperties, ConnectionManagerImpl connManager) throws IAgentException {
     deviceIP = (String) conProperties.get(DeviceConnector.KEY_DEVICE_IP);
+    this.properties = conProperties;
     if ( deviceIP != null ) {
       isClient = true;
-      this.port = 7365;
+      this.port = getConnectionPort();
+      if (port == -1) {
+    	  throw new IAgentException("No free connection port found!", IAgentErrors.ERROR_CANNOT_CONNECT);
+      }
       headerBuffer = new ByteArrayOutputStream(15);
       connect();
       this.connManager = connManager;
@@ -79,7 +85,11 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
 
   public MBSAConnectionImpl(Transport transport, Dictionary conProperties, ConnectionManagerImpl connManager) throws IAgentException {
     isClient = true;
-    this.port = 7365;
+    this.properties = conProperties;
+    this.port = getConnectionPort();
+    if (port == -1) {
+  	  throw new IAgentException("No free connection port found!", IAgentErrors.ERROR_CANNOT_CONNECT);
+    }
     headerBuffer = new ByteArrayOutputStream(15);
     connect(transport);
     this.connManager = connManager;
@@ -368,6 +378,40 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
 
 	private final void error(String message, Throwable e) {
 		DebugUtils.error(this, message, e);
+	}
+	
+	private int getConnectionPort() {
+		Object conPort = properties.get("connection-port");
+	    int port = conPort == null || !(conPort instanceof Integer) ? -1 : ((Integer) conPort).intValue();
+	    return port;
+	}
+
+	public Object getProperty(String propertyName) {
+		if ("pmp-port".equals(propertyName)) {
+			return new Integer(getPmpListeningPort());
+		}
+		return null;
+	}
+	
+	public int getPmpListeningPort() {
+		try {
+			MBSAConnectionCallBack callback = sendData(IAgentCommands.IAGENT_CMD_GET_PMP_LISTENING_PORT, null);
+			if (callback.getRspStatus() == 0) {
+				byte[] data = callback.getRspData();
+				if (data != null) {
+					ByteArrayInputStream bis = null;
+					bis = new ByteArrayInputStream(data);
+					try {
+						return DataFormater.getInt(bis);
+					} catch (IOException e) {
+						return -1;
+					}
+				}
+			}
+		} catch (IAgentException e) {
+			error("[getPmpListeningPort] Error getting PMP listening port", e);
+		}
+		return -1;
 	}
 
 }

@@ -41,15 +41,18 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 
 	private LightServiceRegistry pmpRegistry;
 	private volatile boolean closed = false;
+	private Dictionary properties;
 
 	public PMPConnectionImpl(Transport transport, Dictionary conProperties, ConnectionManagerImpl connManager)
 			throws IAgentException {
 		debug("[Constructor] >>> Create PMP Connection: props: " + DebugUtils.convertForDebug(conProperties)
 				+ "; manager: " + connManager);
+
+		this.properties = conProperties;
 		PMPService pmpService = PMPServiceFactory.getDefault();
 		try {
 			debug("[Constructor] Transport: " + transport);
-			pmpConnection = pmpService.connect(transport);
+			pmpConnection = pmpService.connect(transport, conProperties);
 		} catch (PMPException e) {
 			info("[Constructor] Failed to create PMP connection 1", e);
 			if ("socket".equals(transport.getType().getTypeId())) {
@@ -319,5 +322,9 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 	public Object getManager(String className) {
 		LightServiceRegistry registry = getServiceRegistry();
 		return registry.get(className);
+	}
+	
+	public Object getProperty(String propertyName) {
+		return properties.get(propertyName);
 	}
 }

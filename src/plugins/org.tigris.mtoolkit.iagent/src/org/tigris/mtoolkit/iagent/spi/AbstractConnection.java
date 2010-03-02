@@ -46,4 +46,10 @@ public interface AbstractConnection {
 	 * @return
 	 */
 	public boolean isConnected();
+	
+	/**
+	 * Returns the property value.
+	 * @return
+	 */
+	public Object getProperty(String propertyName);
 }
