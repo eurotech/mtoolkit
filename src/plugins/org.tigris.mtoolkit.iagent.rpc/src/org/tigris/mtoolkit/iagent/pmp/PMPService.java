@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.pmp;
 
+import java.util.Dictionary;
+import java.util.Map;
+
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
 /**
@@ -32,6 +35,6 @@ public interface PMPService extends PMPPeer {
 	 *                occured.
 	 */
 
-	public PMPConnection connect(Transport transport) throws PMPException;
+	public PMPConnection connect(Transport transport, Dictionary conProperties) throws PMPException;
 
 }

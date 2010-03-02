@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
 import java.net.Socket;
+import java.util.Dictionary;
 
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
@@ -18,6 +19,8 @@ import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
+	private static final int DEFAULT_PMP_PORT = 1450;
+	
 	protected boolean running = false;
 
 	protected static ClassLoader loader;
@@ -55,7 +58,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 		try {
 			info("Creating new connection for " + uri);
 			PMPSessionThread st = null;
-			Socket socket = new Socket(uri, 1450);
+			Socket socket = new Socket(uri, DEFAULT_PMP_PORT);
 			// read timeout of 1 sec
 			socket.setSoTimeout(1000);
 			st = new PMPSessionThread(this, socket, createSessionId(), uri);
@@ -72,14 +75,23 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 		}
 	}
 
-	public PMPConnection connect(Transport transport) throws PMPException {
+	public PMPConnection connect(Transport transport, Dictionary properties) throws PMPException {
 		if (!running) {
 			throw new PMPException("Stopping pmpservice");
 		}
 		try {
 			info("Creating new connection for " + transport);
+			Object pmpPort = properties.get("pmp-port");
+			int port = -1;
+			if (pmpPort != null && pmpPort instanceof Integer) {
+				port = ((Integer) pmpPort).intValue();
+			}
+			if (port < 0) {
+				port = DEFAULT_PMP_PORT;
+			}
+			
 			PMPSessionThread st = null;
-			st = new PMPSessionThread(this, transport.createConnection(1450), createSessionId());
+			st = new PMPSessionThread(this, transport.createConnection(port), createSessionId());
 
 			Connection con = st.getConnection();
 			con.connect();
