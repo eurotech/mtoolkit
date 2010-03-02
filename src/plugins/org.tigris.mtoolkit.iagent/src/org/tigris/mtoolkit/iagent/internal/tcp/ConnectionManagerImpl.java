@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.tcp;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -34,6 +36,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	private List listeners = new LinkedList();
 	private List extFactories = new LinkedList();
 	private Map connections = new Hashtable();
+	private int connectedType;
 
 	public ConnectionManagerImpl(Transport transport, Dictionary aConProperties) {
 		this.transport = transport;
@@ -90,6 +93,9 @@ public class ConnectionManagerImpl implements ConnectionManager {
 					connection = createMBSAConnection(transport);
 					break;
 				case PMP_CONNECTION:
+					AbstractConnection activeConnection = getActiveConnection(connectedType);
+					Integer pmpPort = (Integer) activeConnection.getProperty("pmp.port");
+					conProperties.put("pmp-port", pmpPort);
 					connection = createPMPConnection(transport);
 					break;
 				default:
@@ -99,6 +105,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 						throw new IllegalArgumentException("Unknown connection type passed: " + type);
 					}
 					connection = factory.createConnection(transport, conProperties, this);
+					connectedType = connection.getType();
 				}
 				connections.put(key, connection);
 			}
@@ -274,5 +281,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 			}
 		}
 		return null;
+	}
+	
+	  
+	public Object getProperty(Object propertyName) {
+		return conProperties.get(propertyName);
 	}
 }
