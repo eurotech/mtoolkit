@@ -94,8 +94,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 					break;
 				case PMP_CONNECTION:
 					AbstractConnection activeConnection = getActiveConnection(connectedType);
-					Integer pmpPort = (Integer) activeConnection.getProperty("pmp.port");
-					conProperties.put("pmp-port", pmpPort);
+					if (activeConnection != null) {
+						Integer pmpPort = (Integer) activeConnection.getProperty("pmp.port");
+						conProperties.put("pmp-port", pmpPort);
+					}
 					connection = createPMPConnection(transport);
 					break;
 				default:
