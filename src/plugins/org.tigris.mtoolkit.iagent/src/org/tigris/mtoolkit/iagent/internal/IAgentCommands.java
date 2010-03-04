@@ -52,5 +52,10 @@ public interface IAgentCommands {
    * InstAgent command to return system bundles names.
    */
   public static final int IAGENT_CMD_GET_SYSTEM_BUNDLES = 0x0002000D;
+  
+  /**
+   * InstAgent command to get PMP listening port.
+   */
+  public static final int IAGENT_CMD_GET_PMP_LISTENING_PORT = 0x0002000E;
 
 }
