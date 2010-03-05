@@ -25,6 +25,8 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 public interface ConnectionManager {
 	public static final int MBSA_CONNECTION = 0x0;
 	public static final int PMP_CONNECTION  = 0x1;
+	
+	public static final String PROP_PMP_PORT = "pmp-port";
 
 	public AbstractConnection getActiveConnection(int type) throws IAgentException;
 
@@ -85,4 +87,6 @@ public interface ConnectionManager {
 	 * @param notify true if event should be fired, false otherwise
 	 */
 	public void connectionClosed(AbstractConnection connection, boolean notify);
+	
+	public Object queryProperty(String propertyName) throws IAgentException;
 }

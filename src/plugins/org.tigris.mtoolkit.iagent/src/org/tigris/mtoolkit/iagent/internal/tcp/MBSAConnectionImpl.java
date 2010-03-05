@@ -31,6 +31,9 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   private static final int DATA_MAX_SIZE = Integer.getInteger("iagent.message.size", 2048).intValue() - 15;
   // ping timeout in seconds
   private static final int PING_TIMEOUT = Integer.getInteger("iagent.ping.timeout", 15000).intValue(); 
+  
+  private static final int DEFAULT_MBSA_PORT = 7365;
+  
   private int messageID = 0;
   protected boolean isClient;
   protected String deviceIP;
@@ -72,9 +75,6 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
     if ( deviceIP != null ) {
       isClient = true;
       this.port = getConnectionPort();
-      if (port == -1) {
-    	  throw new IAgentException("No free connection port found!", IAgentErrors.ERROR_CANNOT_CONNECT);
-      }
       headerBuffer = new ByteArrayOutputStream(15);
       connect();
       this.connManager = connManager;
@@ -87,9 +87,6 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
     isClient = true;
     this.properties = conProperties;
     this.port = getConnectionPort();
-    if (port == -1) {
-  	  throw new IAgentException("No free connection port found!", IAgentErrors.ERROR_CANNOT_CONNECT);
-    }
     headerBuffer = new ByteArrayOutputStream(15);
     connect(transport);
     this.connManager = connManager;
@@ -381,13 +378,13 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
 	}
 	
 	private int getConnectionPort() {
-		Object conPort = properties.get("connection-port");
-	    int port = conPort == null || !(conPort instanceof Integer) ? -1 : ((Integer) conPort).intValue();
+		Object conPort = properties.get(PROP_MBSA_PORT);
+	    int port = conPort == null ? DEFAULT_MBSA_PORT : ((Integer) conPort).intValue();
 	    return port;
 	}
 
 	public Object getProperty(String propertyName) {
-		if ("pmp-port".equals(propertyName)) {
+		if (ConnectionManager.PROP_PMP_PORT.equals(propertyName)) {
 			return new Integer(getPmpListeningPort());
 		}
 		return null;

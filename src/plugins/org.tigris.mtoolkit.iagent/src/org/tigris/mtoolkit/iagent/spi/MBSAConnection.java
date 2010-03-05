@@ -9,6 +9,9 @@ import org.tigris.mtoolkit.iagent.IAgentException;
  * @version 1.0
  */
 public interface MBSAConnection extends AbstractConnection {
+	
+	public static final String PROP_MBSA_PORT = "mbsa-port";
+	
   /**
    * Sends data to the device.
    * 

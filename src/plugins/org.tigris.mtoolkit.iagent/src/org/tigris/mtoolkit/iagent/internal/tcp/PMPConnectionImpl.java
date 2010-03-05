@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent.internal.tcp;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -41,16 +42,17 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 
 	private LightServiceRegistry pmpRegistry;
 	private volatile boolean closed = false;
-	private Dictionary properties;
 
 	public PMPConnectionImpl(Transport transport, Dictionary conProperties, ConnectionManagerImpl connManager)
 			throws IAgentException {
 		debug("[Constructor] >>> Create PMP Connection: props: " + DebugUtils.convertForDebug(conProperties)
 				+ "; manager: " + connManager);
 
-		this.properties = conProperties;
 		PMPService pmpService = PMPServiceFactory.getDefault();
 		try {
+			Integer port = getPmpPort(connManager);
+			if (port != null)
+				conProperties.put(PMPService.PROP_PMP_PORT, port);
 			debug("[Constructor] Transport: " + transport);
 			pmpConnection = pmpService.connect(transport, conProperties);
 		} catch (PMPException e) {
@@ -72,6 +74,10 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 		this.connManager = connManager;
 		pmpConnection.addEventListener(this,
 				new String[] { org.tigris.mtoolkit.iagent.pmp.PMPConnection.FRAMEWORK_DISCONNECTED });
+	}
+	
+	private Integer getPmpPort(ConnectionManager manager) throws IAgentException {
+		return (Integer) manager.queryProperty(ConnectionManager.PROP_PMP_PORT);
 	}
 
 	public int getType() {
@@ -325,6 +331,6 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 	}
 	
 	public Object getProperty(String propertyName) {
-		return properties.get(propertyName);
+		return null;
 	}
 }

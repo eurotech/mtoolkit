@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.tcp;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,7 +35,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	private List listeners = new LinkedList();
 	private List extFactories = new LinkedList();
 	private Map connections = new Hashtable();
-	private int connectedType;
 
 	public ConnectionManagerImpl(Transport transport, Dictionary aConProperties) {
 		this.transport = transport;
@@ -93,11 +91,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
 					connection = createMBSAConnection(transport);
 					break;
 				case PMP_CONNECTION:
-					AbstractConnection activeConnection = getActiveConnection(connectedType);
-					if (activeConnection != null) {
-						Integer pmpPort = (Integer) activeConnection.getProperty("pmp.port");
-						conProperties.put("pmp-port", pmpPort);
-					}
 					connection = createPMPConnection(transport);
 					break;
 				default:
@@ -107,7 +100,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
 						throw new IllegalArgumentException("Unknown connection type passed: " + type);
 					}
 					connection = factory.createConnection(transport, conProperties, this);
-					connectedType = connection.getType();
 				}
 				connections.put(key, connection);
 			}
@@ -286,7 +278,17 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	}
 	
 	  
-	public Object getProperty(Object propertyName) {
-		return conProperties.get(propertyName);
+	public Object queryProperty(String propertyName) {
+		Map activeConnections = new HashMap();
+		synchronized (this) {
+			activeConnections.putAll(connections);
+		}
+		for (Iterator it = activeConnections.values().iterator(); it.hasNext(); ) {
+			AbstractConnection connection = (AbstractConnection) it.next();
+			Object value = connection.getProperty(propertyName);
+			if (value != null)
+				return value;
+		}
+		return null;
 	}
 }
