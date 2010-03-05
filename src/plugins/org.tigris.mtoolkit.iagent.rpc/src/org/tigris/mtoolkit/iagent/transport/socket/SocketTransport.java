@@ -21,8 +21,6 @@ import org.tigris.mtoolkit.iagent.transport.TransportType;
 
 public class SocketTransport implements Transport {
 
-	public static final int PMP_PORT = 1450;
-
 	private String host;
 	private SocketTransportType type;
 	private List connections = new ArrayList();

@@ -81,7 +81,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 		}
 		try {
 			info("Creating new connection for " + transport);
-			Object pmpPort = properties.get("pmp-port");
+			Object pmpPort = properties.get(PROP_PMP_PORT);
 			int port = -1;
 			if (pmpPort != null && pmpPort instanceof Integer) {
 				port = ((Integer) pmpPort).intValue();

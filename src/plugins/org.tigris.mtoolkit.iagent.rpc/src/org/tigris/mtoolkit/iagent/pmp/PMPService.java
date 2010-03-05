@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.iagent.pmp;
 
 import java.util.Dictionary;
-import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
@@ -21,6 +20,8 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public interface PMPService extends PMPPeer {
 
+	public static final String PROP_PMP_PORT = "pmp-port";
+	
 	/**
 	 * Tries to establish a connection to remote PMP Service.
 	 * 
@@ -35,6 +36,6 @@ public interface PMPService extends PMPPeer {
 	 *                occured.
 	 */
 
-	public PMPConnection connect(Transport transport, Dictionary conProperties) throws PMPException;
+	public PMPConnection connect(Transport transport, Dictionary props) throws PMPException;
 
 }
