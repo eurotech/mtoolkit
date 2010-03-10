@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -55,14 +56,14 @@ public class AndroidUtils {
 	public static void convertToDex(File file, File outputFile,
 			IProgressMonitor monitor) throws IOException {
     String androidSDK = getAndroidSdkLocation();
-		String[] androidVersions = getAndroidVersion();
+		String[] androidPlatforms = getAndroidPlatforms(androidSDK);
 
 		File dxToolFile = null;
 		String dxTool = null;
-		for (int i = 0; i < androidVersions.length; i++) {
-			String androidVersion = androidVersions[i];
+		for (int i = 0; i < androidPlatforms.length; i++) {
+			String androidPlatform = androidPlatforms[i];
 			dxTool = MessageFormat.format("{0}/platforms/{1}/tools/lib/dx.jar",
-					new String[] { androidSDK, androidVersion });
+					new String[] { androidSDK, androidPlatform });
 			dxToolFile = new File(dxTool);
 			if (dxToolFile.exists())
 				break;
@@ -246,10 +247,29 @@ public class AndroidUtils {
     return preferenceStore.getString("android.sdk.location");
   }
 
-	private static String[] getAndroidVersion() {
-		return new String[] { "android-1.5", "android-1.6" }; // TODO read from
-		// preferences?
-  }
+	/**
+	 * Returns platforms for the specified android sdk location in ascending
+	 * order of versions.
+	 * 
+	 * @param sdkLocation
+	 * @return array with platforms or empty array
+	 */
+	public static String[] getAndroidPlatforms(String sdkLocation) {
+		if (sdkLocation == null) {
+			return new String[0];
+		}
+		File platformsDir = new File(sdkLocation, "platforms");
+		if (!platformsDir.exists() || !platformsDir.isDirectory()) {
+			return new String[0];
+		}
+		File[] children = platformsDir.listFiles();
+		String[] platforms = new String[children.length];
+		for (int i = 0; i < children.length; i++) {
+			platforms[i] = children[i].getName();
+		}
+		Arrays.sort(platforms);
+		return platforms;
+	}
 
   /**
    * Checks if file is in android dex format.
