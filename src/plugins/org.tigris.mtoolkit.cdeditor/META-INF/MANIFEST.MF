@@ -17,6 +17,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.pde.core,
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui,
- org.tigris.mtoolkit.common
+ org.tigris.mtoolkit.common;bundle-version="4.0.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Bundle-ActivationPolicy: lazy
