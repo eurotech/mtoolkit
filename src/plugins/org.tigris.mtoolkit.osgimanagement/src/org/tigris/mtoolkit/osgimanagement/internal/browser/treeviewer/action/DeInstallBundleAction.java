@@ -77,6 +77,7 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 //			try {
 			if (bundle.getState() == org.osgi.framework.Bundle.UNINSTALLED/*
 								|| bundle.getRemoteBundle().isSystemBundle()*/
+					|| bundle.findFramework() == null
 					|| ((FrameworkImpl)bundle.findFramework()).systemBundles.contains(new Long(bundle.getID()))
 			) {
 				enabled = false;
