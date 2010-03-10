@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.ModelEntry;
 import org.eclipse.pde.core.plugin.PluginRegistry;
@@ -71,12 +72,15 @@ public class PluginExportManager {
 	}
 	
 	public IStatus export(String location, IProgressMonitor monitor) {
+		List bundlesForExport = getBundlesForExport();
+		if (bundlesForExport.size() == 0)
+			return Status.OK_STATUS;
+		
 		FeatureExportInfo exportInfo = new FeatureExportInfo();
 		exportInfo.toDirectory = true;
 		exportInfo.useJarFormat = true;
 		exportInfo.destinationDirectory = location;
 		exportInfo.qualifier = exporter.getQualifier();
-		List bundlesForExport = getBundlesForExport();
 		exportInfo.items = bundlesForExport.toArray();
 
 		IStatus result = exporter.syncExportPlugins(exportInfo, monitor);
