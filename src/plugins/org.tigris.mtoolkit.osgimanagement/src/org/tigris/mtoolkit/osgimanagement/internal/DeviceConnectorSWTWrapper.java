@@ -73,7 +73,7 @@ public class DeviceConnectorSWTWrapper extends DeviceConnector implements Device
 	}
 
 	public boolean isActive() {
-		return false;
+		return delegate.isActive();
 	}
 
 	public void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
