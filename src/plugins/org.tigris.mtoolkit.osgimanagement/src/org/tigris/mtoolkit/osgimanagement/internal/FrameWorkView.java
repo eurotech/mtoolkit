@@ -831,7 +831,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			return null;
 		Model fws[] = treeRoot.getChildren();
 		for (int i = 0; i < fws.length; i++) {
-			if (((FrameworkImpl)fws[i]).getConnector() == connector) {
+			if (((FrameworkImpl)fws[i]).getConnector() != null && ((FrameworkImpl)fws[i]).getConnector().equals(connector)) {
 				return (FrameworkImpl) fws[i];
 			}
 		}
