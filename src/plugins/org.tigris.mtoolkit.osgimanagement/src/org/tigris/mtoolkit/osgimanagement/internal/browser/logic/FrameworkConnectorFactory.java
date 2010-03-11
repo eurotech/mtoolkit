@@ -136,7 +136,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			FrameWorkView.getTreeRoot().addElement(fw);
 		}
 
-		if (fw.getConnector() != fConnector) {
+		if (!fConnector.equals(fw.getConnector())) {
 			fw.setConnector(fConnector);
 		}
 

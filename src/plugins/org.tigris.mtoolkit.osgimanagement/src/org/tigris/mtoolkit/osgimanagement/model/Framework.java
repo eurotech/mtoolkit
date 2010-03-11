@@ -11,10 +11,12 @@
 package org.tigris.mtoolkit.osgimanagement.model;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 
 public abstract class Framework extends Model {
@@ -58,6 +60,16 @@ public abstract class Framework extends Model {
 
 	public static Object getLockObject(DeviceConnector connector) {
 		Object lockObj = FrameworkConnectorFactory.lockObjHash.get(connector);
+		if (lockObj == null && !(connector instanceof DeviceConnectorSWTWrapper)) {
+			Enumeration connectors = FrameworkConnectorFactory.lockObjHash.keys();
+			while (connectors.hasMoreElements()) {
+				DeviceConnector connKey = (DeviceConnector) connectors.nextElement();
+				if (connKey.equals(connector)) {
+					lockObj = FrameworkConnectorFactory.lockObjHash.get(connKey);
+					break;
+				}
+			}
+		}
 		if (lockObj == null) {
 			lockObj = new Object();
 			FrameworkConnectorFactory.lockObjHash.put(connector, lockObj);

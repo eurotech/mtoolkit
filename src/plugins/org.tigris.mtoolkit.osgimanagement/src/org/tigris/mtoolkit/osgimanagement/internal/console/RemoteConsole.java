@@ -146,7 +146,7 @@ public class RemoteConsole extends IOConsole {
 		}
 
 		public void disconnected(DeviceConnector connector) {
-			if (connector == RemoteConsole.this.connector) {
+			if (connector != null && connector.equals(RemoteConsole.this.connector)) {
 				disconnect();
 			}
 		}
