@@ -217,8 +217,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 			return;
 		Model[] elements = getChildren();
 		for (int i = 0; i < elements.length; i++) {
-			elements[i].removeChildren();
 			removeElement(elements[i]);
+			elements[i].removeChildren();
 		}
 		for (int i=0; i<getSlaves().size(); i++) {
 			((Model)getSlaves().elementAt(i)).removeChildren();
