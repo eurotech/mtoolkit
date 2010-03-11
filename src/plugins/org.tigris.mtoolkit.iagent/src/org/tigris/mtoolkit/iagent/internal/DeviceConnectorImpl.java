@@ -272,17 +272,22 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		Dictionary props = cloneDictionary(connectionProperties);
 		if (isActive) {
 			try {
-				PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION);
-				RemoteObject service = connection.getRemoteAdmin(RemoteCapabilitiesProvider.class.getName());
-				if (service != null) {
-					Map devCapabilities = (Map) methodGetCapabilities.call(service);
-					Iterator iterator = devCapabilities.keySet().iterator();
-					while (iterator.hasNext()) {
-						String property = (String) iterator.next();
-						props.put(property, devCapabilities.get(property));
+				// We shall not create PMP connection here, only check for active PMP connection.
+				// The connector can be active with only controller connection, which can be used
+				// later to create PMP connection to different port.
+				PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION, false);
+				if (connection != null) {
+					RemoteObject service = connection.getRemoteAdmin(RemoteCapabilitiesProvider.class.getName());
+					if (service != null) {
+						Map devCapabilities = (Map) methodGetCapabilities.call(service);
+						Iterator iterator = devCapabilities.keySet().iterator();
+						while (iterator.hasNext()) {
+							String property = (String) iterator.next();
+							props.put(property, devCapabilities.get(property));
+						}
 					}
+					props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.TRUE);
 				}
-				props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.TRUE);
 			} catch (Exception e) {
 				IAgentLog.error("[DeviceConnectorImpl][getProperties] Failed to get Remote Capabilities", e);
 				props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.FALSE);
