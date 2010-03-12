@@ -94,9 +94,11 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 	public Image getImage(Model node) {
 		if (node instanceof DeploymentPackage) {
 			return ImageHolder.getImage(DP_ICON_PATH);
-		} else {
+		} else if (node instanceof SimpleNode && 
+						"Deployment Packages".equals(node.getName())) {
 			return ImageHolder.getImage(DP_PACKAGE_PATH);
 		}
+		return null;
 	}
 
 
