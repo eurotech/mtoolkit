@@ -2,6 +2,7 @@ package org.tigris.mtoolkit.iagent.internal.tcp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +47,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
 
   protected Socket deviceSocket;
   protected TransportConnection connection;
+  protected Transport transport;
   protected OutputStream os;
   protected InputStream is;
 
@@ -105,32 +107,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
           return;
         isClosed = true;
         sendEvent = aSendEvent;
-        if ( os != null ) {
-          try {
-            os.close();
-          } catch (IOException e) {
-            // ignore
-          }
-          os = null;
-        }
-        debug("[closeConnection] output closed!");
-        if ( is != null ) {
-          try {
-            is.close();
-          } catch (IOException e) {
-            // ignore
-          }
-          is = null;
-        }
-        debug("[closeConnection] input stream closed!");
-        if ( deviceSocket != null ) {
-          try {
-            deviceSocket.close();
-          } catch (IOException e) {
-            // ignore
-          }
-          deviceSocket = null;
-        }
+        clean();
         debug("[closeConnection] socket closed!");
         lock.notifyAll();
       }
@@ -144,6 +121,35 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       }
     }
     debug("[closeConnection] finish");
+  }
+
+  private void clean() {
+	if ( os != null ) {
+	  try {
+	    os.close();
+	  } catch (IOException e) {
+	    // ignore
+	  }
+	  os = null;
+	}
+	debug("[closeConnection] output closed!");
+	if ( is != null ) {
+	  try {
+	    is.close();
+	  } catch (IOException e) {
+	    // ignore
+	  }
+	  is = null;
+	}
+	debug("[closeConnection] input stream closed!");
+	if ( deviceSocket != null ) {
+	  try {
+	    deviceSocket.close();
+	  } catch (IOException e) {
+	    // ignore
+	  }
+	  deviceSocket = null;
+	}
   }
   
   public MBSAConnectionCallBack sendData(int aCmd, byte[] aData) throws IAgentException {
@@ -197,6 +203,10 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       } catch (IOException e) {
     	  if (disconnectOnFailure || connection.isClosed())
     		  closeConnection();
+    	  else if (e instanceof EOFException && !disconnectOnFailure) {
+    		  clean();
+    		  connect(transport);
+    	  }
         throw new IAgentException(e.getMessage(), IAgentErrors.ERROR_INTERNAL_ERROR, e);
       }
       
@@ -231,6 +241,10 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       } catch (IOException e) {
     	  if (disconnectOnFailure || connection.isClosed())
     		  closeConnection();
+    	  else if (e instanceof EOFException && !disconnectOnFailure) {
+    		  clean();
+    		  connect(transport);
+    	  }
         throw new IAgentException(e.getMessage(), IAgentErrors.ERROR_INTERNAL_ERROR, e);
       }
     } finally {
@@ -306,6 +320,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   protected void connect(Transport transport) throws IAgentException {
     try {
   	  debug("[MBSAConnectionImpl][connect] >>> " + transport);
+  	  this.transport = transport;
       connection = transport.createConnection(port);
       os = connection.getOutputStream();
       is = connection.getInputStream();
@@ -392,7 +407,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
 	
 	public int getPmpListeningPort() {
 		try {
-			MBSAConnectionCallBack callback = sendData(IAgentCommands.IAGENT_CMD_GET_PMP_LISTENING_PORT, null);
+			MBSAConnectionCallBack callback = sendData(IAgentCommands.IAGENT_CMD_GET_PMP_LISTENING_PORT, null, false);
 			if (callback.getRspStatus() == 0) {
 				byte[] data = callback.getRspData();
 				if (data != null) {
