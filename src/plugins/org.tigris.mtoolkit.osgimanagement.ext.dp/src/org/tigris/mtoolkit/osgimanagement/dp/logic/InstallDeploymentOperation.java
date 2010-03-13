@@ -38,7 +38,7 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 	private Framework framework;
 
 	public InstallDeploymentOperation(File dpFile, Framework framework) {
-		super("Installing deployment package...", null);
+		super("Installing deployment package...", framework);
 		this.sourceFile = dpFile;
 		this.framework = framework;
 	}

@@ -19,6 +19,7 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public abstract class RemoteDeploymentOperation extends Job {
 
@@ -28,6 +29,12 @@ public abstract class RemoteDeploymentOperation extends Job {
 	public RemoteDeploymentOperation(String name, DeploymentPackage pack) {
 		super(name);
 		this.pack = pack;
+		setRule(new DPOperationSchedulingRule(pack.findFramework()));
+	}
+	
+	public RemoteDeploymentOperation(String name, Framework fw) {
+		super(name);
+		setRule(new DPOperationSchedulingRule(fw));
 	}
 
 	protected DeploymentPackage getDeploymentPackage() {
