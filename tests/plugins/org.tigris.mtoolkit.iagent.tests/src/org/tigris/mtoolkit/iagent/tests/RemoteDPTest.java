@@ -75,28 +75,17 @@ public class RemoteDPTest extends DeploymentTestCase {
 		assertEquals("test.depl.b1", bundle.getSymbolicName());
 		assertEquals("1.0.0", bundle.getVersion());
 
-		// uninstall, should return null
 		assertNotNull("DeviceConnector is null", connector);
 		VMManager vmManager = connectorSpi.getDeviceConnector().getVMManager();
 		assertNotNull("VMManager is null", vmManager);
-		String dpSwAdminEnable = vmManager.getSystemProperty("iagent.swadmin.deployment.support");
-		dpSwAdminEnable = dpSwAdminEnable == null ? null : dpSwAdminEnable.trim();
-		if (dpSwAdminEnable != null && dpSwAdminEnable.length() != 0 && dpSwAdminEnable.equals("true")) {
-			try {
-				bundle.uninstall();
-			} catch (IAgentException iae) {
-				assertEquals(Bundle.ACTIVE, bundle.getState());
-			}
-		} else {
+		try {
 			bundle.uninstall();
-			assertEquals(Bundle.UNINSTALLED, bundle.getState());
+			fail("Bundle uninstallation should not succeed for bundle contained in dp");
+		} catch (IAgentException iae) {
+			assertTrue(Bundle.UNINSTALLED != bundle.getState());
 		}
-		RemoteBundle bundle2 = dp.getBundle("test.depl.b1");
-		if (dpSwAdminEnable != null && dpSwAdminEnable.length() != 0 && dpSwAdminEnable.equals("true")) {
-			assertNotNull(bundle2);
-		} else {
-			assertNull(bundle2);
-		}
+		bundle = dp.getBundle("test.depl.b1");
+		assertNotNull(bundle);
 	}
 
 	public void testUninstall() throws IAgentException {
