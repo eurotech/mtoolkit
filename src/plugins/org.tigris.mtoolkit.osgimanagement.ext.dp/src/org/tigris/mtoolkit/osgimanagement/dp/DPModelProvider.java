@@ -37,7 +37,7 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListener, RemoteDevicePropertyListener {
 
-	private static SimpleNode dpNode;
+	private SimpleNode dpNode;
 	private DeviceConnector connector;
 	private Model parent;
 	private DeploymentManager manager;
@@ -151,7 +151,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 					Model dpNodeRoot = dpNode;
 					try {
 						// check if this install actually is update
-						DeploymentPackage dp = findDP(remoteDP.getName());
+						DeploymentPackage dp = findDP(dpNodeRoot, remoteDP.getName());
 						if (dp != null) {
 							dpNode.removeElement(dp);
 						}
@@ -168,7 +168,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 					if (remoteDP != null) {
 						// there are cases where the dp failed to be added,
 						// because it was too quickly uninstalled/updated
-						DeploymentPackage dp = findDP(remoteDP.getName());
+						DeploymentPackage dp = findDP(dpNode, remoteDP.getName());
 						if (dp != null) {
 							dpNode.removeElement(dp);
 						}
@@ -185,7 +185,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 		}
 	}
 
-	public static DeploymentPackage findDP(String name) {
+	public static DeploymentPackage findDP(Model dpNode, String name) {
 		Model[] dps = dpNode.getChildren();
 		for (int i=0; i<dps.length; i++) {
 			if (dps[i].getName().equals(name)) {

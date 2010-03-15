@@ -31,6 +31,8 @@ import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.DPModelProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 
@@ -67,7 +69,16 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 				String remoteVersion = remoteDP.getVersion();
 				if (remoteVersion.equals(version)) {
 					if (askUserToUninstallRemotePackage(symbolicName)) {
-						DeploymentPackage packageNode = DPModelProvider.findDP(symbolicName);
+						Model[] fwChildren = framework.getChildren();
+						Model dpNode = null;
+						for (int i=0; i<fwChildren.length; i++) {
+							if (fwChildren[i] instanceof SimpleNode &&
+								"Deployment Packages".equals(fwChildren[i])) {
+								dpNode = fwChildren[i];
+								break;
+							}
+						}
+						DeploymentPackage packageNode = DPModelProvider.findDP(dpNode, symbolicName);
 						if (packageNode == null)
 							return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 								"Local representation of the remote OSGi framework is stale. Refresh and try again.",
