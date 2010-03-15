@@ -73,7 +73,7 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 						Model dpNode = null;
 						for (int i=0; i<fwChildren.length; i++) {
 							if (fwChildren[i] instanceof SimpleNode &&
-								"Deployment Packages".equals(fwChildren[i])) {
+								"Deployment Packages".equals(fwChildren[i].getName())) {
 								dpNode = fwChildren[i];
 								break;
 							}
