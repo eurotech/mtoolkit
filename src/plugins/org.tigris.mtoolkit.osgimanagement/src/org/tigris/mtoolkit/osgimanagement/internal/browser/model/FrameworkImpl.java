@@ -206,8 +206,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				deploymentManager.removeRemoteBundleListener(this);
 			}
 			connector.getServiceManager().removeRemoteServiceListener(this);
-		} catch (IAgentException e) {
-			BrowserErrorHandler.processError(e, connector, userDisconnect);
+		} catch (final IAgentException e) {
+			if (e.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED) {
+				BrowserErrorHandler.processError(e, connector, userDisconnect);
+			}
 		}
 	}
 
@@ -1464,49 +1466,55 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		Bundle master = findBundle(new Long(id));
 		Bundle slave = new Bundle(master);
 		
-		
 		Model children[] = master.getChildren();
 		if (children != null && children.length > 0) {
-			Model regServ[] = children[0].getChildren();
-			if (regServ != null) {
-				Model servCategory = getServiceCategoryNode(slave, ServicesCategory.REGISTERED_SERVICES, true);
-				for (int i = 0; i < regServ.length; i++) {
-					ObjectClass oc = new ObjectClass(regServ[i].getName(),
-						new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
-						((ObjectClass) regServ[i]).getService());
-					servCategory.addElement(oc);
-					if (isShownServicePropertiss()) {
-						try {
-							addServicePropertiesNodes(oc);
-						} catch (IAgentException e) {
-							e.printStackTrace();
-						}
-					}
+			for (int i=0; i<children.length; i++) {
+				if (((ServicesCategory)children[i]).getType() == ServicesCategory.REGISTERED_SERVICES) {
+					addRegisteredServices(children[i].getChildren(), slave);
+				} else {
+					addUsedServices(children[i].getChildren(), slave);
 				}
 			}
-
-			Model usedServ[] = children[1].getChildren();
-			if (usedServ != null) {
-				Model servCategory = getServiceCategoryNode(slave, ServicesCategory.USED_SERVICES, true);
-				for (int i = 0; i < usedServ.length; i++) {
-					ObjectClass oc = new ObjectClass(usedServ[i].getName(),
-						new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
-						((ObjectClass) usedServ[i]).getService());
-					servCategory.addElement(oc);
-					if (isShownServicePropertiss()) {
-						try {
-							addServicePropertiesNodes(oc);
-						} catch (IAgentException e) {
-							e.printStackTrace();
-						}
+		}
+		return slave;
+	}
+		
+	private void addRegisteredServices(Model regServ[], Bundle slave) throws IAgentException {
+		if (regServ != null) {
+			Model servCategory = getServiceCategoryNode(slave, ServicesCategory.REGISTERED_SERVICES, true);
+			for (int i = 0; i < regServ.length; i++) {
+				ObjectClass oc = new ObjectClass(regServ[i].getName(),
+						new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
+						((ObjectClass) regServ[i]).getService());
+				servCategory.addElement(oc);
+				if (isShownServicePropertiss()) {
+					try {
+						addServicePropertiesNodes(oc);
+					} catch (IAgentException e) {
+						e.printStackTrace();
 					}
 				}
 			}
 		}
-		
-		
-		return slave;
 	}
 
+	private void addUsedServices(Model usedServ[], Bundle slave) throws IAgentException {
+		if (usedServ != null) {
+			Model servCategory = getServiceCategoryNode(slave, ServicesCategory.USED_SERVICES, true);
+			for (int i = 0; i < usedServ.length; i++) {
+				ObjectClass oc = new ObjectClass(usedServ[i].getName(),
+						new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
+						((ObjectClass) usedServ[i]).getService());
+				servCategory.addElement(oc);
+				if (isShownServicePropertiss()) {
+					try {
+						addServicePropertiesNodes(oc);
+					} catch (IAgentException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
 
 }
