@@ -156,7 +156,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 		// create and add pmp connection listener to fw
 		PMPConnectionListener pmpListener = fw.getPMPConnectionListener();
-		if (pmpListener == null) {
+		if (pmpListener == null || 
+				!connector.equals(pmpListener.connector)) {
 			pmpListener = new PMPConnectionListener(fw, frameworkName, connector, autoConnected);
 			fw.setPMPConnectionListener(pmpListener);
 		}

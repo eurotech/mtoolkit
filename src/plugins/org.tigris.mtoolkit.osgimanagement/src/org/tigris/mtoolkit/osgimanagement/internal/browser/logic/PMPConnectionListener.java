@@ -38,7 +38,7 @@ public class PMPConnectionListener implements ConnectionListener {
 
 	private FrameworkImpl fw;
 	private String frameworkName;
-	private DeviceConnector connector;
+	protected DeviceConnector connector;
 	private boolean autoConnected;
 	boolean shouldInstallIAgent = false;
 	private boolean instrumenting = false;
