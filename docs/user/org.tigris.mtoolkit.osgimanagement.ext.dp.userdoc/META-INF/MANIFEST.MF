@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: mToolkit DP Management Documentation
+Bundle-Name: mToolkit Deployment Packages Management Documentation
 Bundle-SymbolicName: org.tigris.mtoolkit.osgimanagement.ext.dp.userdoc;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.help
+Bundle-Vendor: Tigris.org
