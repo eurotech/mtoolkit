@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="Deployment Package Editor" link_to="../org.tigris.mtoolkit.userdoc/toc.xml#addons">
+		  <topic label="Deployment Package Editor">
+	       <topic label="Getting Started">
+				  <topic label="Creating Your First Deployment Package" href="doc/getting_started/create_dp.html"></topic>
+		  </topic>
+           <topic label="Concepts" href="doc/concepts/introduction.html">
+		       <topic label="Deployment Package Overview" href="doc/concepts/dp_overview.html"></topic>
+			   <topic label="Deployment Package Editor" href="doc/concepts/dpeditor.html"></topic>
+           </topic>
+		   <topic label="Tasks">
+		       <topic label="Creating a Deployment Package Project File" href="doc/tasks/create_dpp.html"></topic>
+			   <topic label="Modeling Deployment Package Content" href="doc/tasks/model_dp_content/introduction.html">
+					 <topic label="Editing Manifest Headers" href="doc/tasks/model_dp_content/edit_headers.html"></topic>
+					 <topic label="Adding Bundle Resources" href="doc/tasks/model_dp_content/add_bundles.html"></topic>
+					 <topic label="Adding Processed Resources" href="doc/tasks/model_dp_content/add_resources.html"></topic>
+					 <topic label="Setting Signers of a Deployment Package" href="doc/tasks/model_dp_content/set_certificates.html"></topic>
+					 <topic label="Configuring Deployment Package Building" href="doc/tasks/model_dp_content/set_build.html"></topic>
+					 
+					 <topic label="Viewing the Manifest of a Deployment Package" href="doc/tasks/model_dp_content/view_dp_manifest.html"></topic>
+			   </topic>
+			   <topic label="Generating a Deployment Package" href="doc/tasks/generate_dp.html"></topic>
+			   <topic label="Quick Deployment Package Build" href="doc/tasks/quick_build.html"></topic>
+			   <topic label="Exporting Deployment Packages Build Files" href="doc/tasks/export_build_files.html"></topic>
+			   <topic label="Configuring Deployment Package Editor" href="doc/tasks/configure_dp_editor.html"></topic>
+		   </topic>		   
+       </topic>
+</toc>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toc label="Managing Deployment Packages" link_to="../org.tigris.mtoolkit.userdoc/toc.xml#dpMgmt">
+   <topic label="Managing Deployment Packages" href="doc/introduction.html">          	
+		<topic label="Installing/Uninstalling Deployment Packages" href="doc/install_dp.html"/>
+		<topic label="Viewing the Manifest of a Deployment Package" href="doc/mf_dp.html"/>
+	    
+      
+   </topic>
+</toc>

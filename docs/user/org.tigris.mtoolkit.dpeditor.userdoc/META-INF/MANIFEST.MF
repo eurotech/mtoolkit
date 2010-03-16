@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Doumentation of mToolkit DP Editor
+Bundle-SymbolicName: org.tigris.mtoolkit.dpeditor.userdoc; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Tigris.org
