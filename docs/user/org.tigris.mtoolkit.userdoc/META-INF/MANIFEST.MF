@@ -4,3 +4,4 @@ Bundle-Name: mToolkit User Documentation
 Bundle-SymbolicName: org.tigris.mtoolkit.userdoc; singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Tigris.org
+Require-Bundle: org.eclipse.help

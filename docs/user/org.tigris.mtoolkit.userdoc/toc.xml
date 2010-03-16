@@ -3,37 +3,38 @@
     <!-- ============================================================================= -->
     <!-- Define topics for the main guide                                              -->
     <!-- ============================================================================= -->
-    <toc label="ProSyst mToolkit User Guide">
+    <toc label="mToolkit User Guide">
       <topic href="doc/overview.html" label="mToolkit Overview">
-         <anchor id="beforeOsgiManagement"/>
       </topic>
 
       <topic label="OSGi Management">
         <topic label="Concepts" href="doc/mbserver/concepts/fw_introduction.html">
           <topic label="OSGi Management Overview" href="doc/mbserver/concepts/fw_overview.html"/>
           <topic label="OSGi Frameworks Tree" href="doc/mbserver/concepts/fw_tree.html"/>
+          <topic label="Remote Console" href="doc/mbserver/concepts/rem_console.html"/>
         </topic>
-        <topic label="Tasks" href="mbserver/tasks/introduction.html">
-          <topic label="Adding/Removing an OSGi Framework" href="doc/mbserver/tasks/add_fw.html"/>
-          <topic label="Configuring the Properties of an OSGi Framework" href="doc/mbserver/tasks/fw_props.html"/>
-          <topic label="Connecting to/Disconnecting from an OSGi Framework" href="doc/mbserver/tasks/connect.html"/>
-          <topic label="Managing Bundles" href="doc/mbserver/tasks/bundles/introduction.html">
-            <topic label="Installing and Uninstalling a Bundle" href="doc/mbserver/tasks/bundles/install_bundle.html"/>
-            <topic label="Starting and Stopping a Bundle" href="doc/mbserver/tasks/bundles/start_stop.html"/>
-            <topic label="Updating a Bundle" href="doc/mbserver/tasks/bundles/update_bundle.html"/>
-            <topic label="Viewing the Manifest of a Bundle" href="doc/mbserver/tasks/bundles/mf_bundle.html"/>
-          </topic>
-          <topic label="Managing Deployment Packages" href="doc/mbserver/tasks/dp/introduction.html">
-            <topic label="Installing/Uninstalling Deployment Packages" href="doc/mbserver/tasks/dp/install_dp.html"/>
-            <topic label="Viewing the Manifest of a Deployment Package" href="doc/mbserver/tasks/dp/mf_dp.html"/>
-          </topic>
+        <topic label="Tasks" href="doc/mbserver/tasks/introduction.html">
+          <topic label="Adding/Removing an OSGi Runtime" href="doc/mbserver/tasks/add_fw.html"/>
+          <topic label="Configuring the Properties of an OSGi Runtime" href="doc/mbserver/tasks/fw_props.html"/>
+          <topic label="Connecting/Disconnecting an OSGi Runtime" href="doc/mbserver/tasks/connect.html"/>
+		  <topic label="Managing Bundles" href="doc/mbserver/tasks/bundles/introduction.html"> 
+		       <topic label="Installing and Uninstalling a Bundle" href="doc/mbserver/tasks/bundles/install_bundle.html"/> 
+			   <topic label="Starting and Stopping a Bundle" href="doc/mbserver/tasks/bundles/start_stop.html"/> 
+			   <topic label="Updating a Bundle" href="doc/mbserver/tasks/bundles/update_bundle.html"/> 
+			   <topic label="Viewing the Manifest of a Bundle" href="doc/mbserver/tasks/bundles/mf_bundle.html"/>
+			   <topic href="doc/mbserver/tasks/bundles/bundle_ids.html" label="Viewing Bundle IDs and Versions"/> 
+		  </topic>
+    <anchor id="dpMgmt"/> 
           <topic href="doc/mbserver/tasks/applications/intorduction.html" label="Managing Applications">
              <topic href="doc/mbserver/tasks/applications/start_stop.html" label="Starting and Stopping Applications">
              </topic>
              <topic href="doc/mbserver/tasks/applications/props.html" label="Viewing Application Properties">
              </topic>
           </topic>
+          <anchor id="widgetMgmt"/>
           <topic label="Using Console Commands Remotely" href="doc/mbserver/tasks/rem_console.html"/>
+          <topic href="doc/mbserver/tasks/fw_preferences.html" label="Customizing OSGi Management">
+          </topic>
           <topic label="OSGi Management Troubleshooting" href="doc/mbserver/tasks/troubleshooting.html"/>
         </topic>
         <topic label="Reference" href="doc/mbserver/reference/introduction.html">
@@ -45,31 +46,6 @@
             <topic label="Framewworks View Toolbar" href="doc/mbserver/reference/fw_menu.html#toolbar"/>
           </topic>
         </topic>
-        <anchor id="afterOsgiManagement"/>
       </topic>
-      <topic href="doc/dpeditor/concepts/introduction.html" label="Deployment Package Editor">
-        <topic label="Getting Started">          
-          <topic label="Creating Your First Deployment Package" href="doc/dpeditor/getting_started/create_dp.html"></topic>
-        </topic>
-        <topic label="Concepts" href="doc/dpeditor/concepts/introduction.html">
-          <topic label="Deployment Package Overview" href="doc/dpeditor/concepts/dp_overview.html"></topic>
-          <topic label="Deployment Package Editor" href="doc/dpeditor/concepts/dpeditor.html"></topic>
-        </topic>
-        <topic label="Tasks">
-          <topic label="Creating a Deployment Package Project File" href="doc/dpeditor/tasks/create_dpp.html"></topic>
-          <topic label="Modeling Deployment Package Content" href="doc/dpeditor/tasks/model_dp_content/introduction.html">
-            <topic label="Editing Manifest Headers" href="doc/dpeditor/tasks/model_dp_content/edit_headers.html"></topic>
-            <topic label="Adding Bundle Resources" href="doc/dpeditor/tasks/model_dp_content/add_bundles.html"></topic>
-            <topic label="Adding Processed Resources" href="doc/dpeditor/tasks/model_dp_content/add_resources.html"></topic>
-            <topic label="Setting Signers of a Deployment Package" href="doc/dpeditor/tasks/model_dp_content/set_certificates.html"></topic>
-            <topic label="Configuring Deployment Package Building" href="doc/dpeditor/tasks/model_dp_content/set_build.html"></topic>
-            <topic label="Viewing the Manifest of a Deployment Package" href="doc/dpeditor/tasks/model_dp_content/view_dp_manifest.html"></topic>
-          </topic>
-          <topic label="Generating a Deployment Package" href="doc/dpeditor/tasks/generate_dp.html"></topic>
-          <topic label="Quick Deployment Package Build" href="doc/dpeditor/tasks/quick_build.html"></topic>
-          <topic label="Exporting Deployment Packages Build Files" href="doc/dpeditor/tasks/export_build_files.html"></topic>
-          <topic label="Configuring Deployment Package Editor" href="doc/dpeditor/tasks/configure_dp_editor.html"></topic>
-        </topic>
-        <anchor id="afterDPEditor"/>
-      </topic>
+      <anchor id="addons"/>
     </toc>

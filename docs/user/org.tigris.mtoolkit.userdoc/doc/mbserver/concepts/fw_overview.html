@@ -2,38 +2,43 @@
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>mBS Management Overview</title>
+<title>OSGi Management Overview</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link href="../../book.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
-<h1>OSGi  Management Overview </h1>
-<p> The OSGi frameworks management capabilities of mToolkit allows managing bundles and optionally deployment packages on remote  OSGi frameworks directly from the development environment. This feature is useful for testing    behavior of deployable units (bundles, deployment packages, applications, etc) in a real OSGi framework environment, and bug-fixing, profiling and optimizing at runtime. You can change the  content of the deployable unit after having installed it on the framework, and  update it right away. </p>
-<h2>Management Model</h2>
-<p>mToolkit allows you to create a list of <i>OSGi frameworks</i> and connect to any of them by simply selecting it from the list and invoking &quot;connect&quot;. The list of  OSGi frameworks is placed in a separate view - the <b>Frameworks</b> view. </p>
-<p>Once connected, the framework can be ordered to install, start, stop, update and uninstall specific bundles, or install and uninstall deployment packages, MIDlets and Opera Widgets. You can also manage the applications compatible with the OSGi Application Admin specification currently installed on the framework.</p>
-<h2>Communication with  OSGi Frameworks</h2>
-<p>The communication with  an OSGi framework is acquired over the Instrumentation Agent (IAgent) running on top of it.</p>
-<p><img src="img/comm_model.gif" width="470" height="289"><br>
-  Figure 1: Communication context of mToolkit</p>
-<h1></h1>
+<h1>OSGi Management Overview </h1>
+<p> The OSGi management capabilities of mToolkit allows managing bundles and optionally deployment packages and W3C widgets on the OSGi framework directly from the development environment. This feature is useful for testing the   behavior of deployable units (bundles, deployment packages and W3C widgets) in a real OSGi runtime environment, and bug-fixing, profiling and optimizing at runtime. You can change the  content of the deployable unit after having installed it on the framework, and  update it right away. </p>
+<h2>Management Model </h2>
+<p>mToolkit allows you to create a list of <i>OSGi-enabled devices</i> (also termed as <i>frameworks</i> or <i>OSGi Runtimes</i>) and connect to any of them by simply selecting it from the list and invoking &quot;connect&quot;. The list of  OSGi devices is placed in a separate view - the <b>Frameworks</b> view. </p>
+<p>Once connected, the framework can be ordered to install, start, stop, update and uninstall specific bundles, or install and uninstall deployment packages. </p>
+<h2>Communication with  OSGi Runtimes </h2>
+<p>The communication with  an OSGi Runtime is acquired over the Instrumentation Agent (IAgent) running on top of it.</p>
+<p><img src="img/comm_model.gif" width="470" height="289"></p>
 <h2><a name="setup"></a>Setting up the OSGi Framework</h2>
 <p>To be able to connect your OSGi framework to mToolkit and to Eclipse, you have to install the IAgent OSGi bundle in it. The IAgent OSGi bundle is available here:</p>
-<p><i>&lt;eclipse_home_dir&gt;/dropins/mToolkit/iagent/org.tigris.mtoolkit.iagent.rpc_Xxx.jar </i></p>
-<p>Otherwise, in the <b>Frameworks</b> view try to connect to the OSGi framework with missing IAgent and use the <b>Get IAgent</b> option from the displayed error dialog to save the bundle on yout computer.</p>
-<p>Basically, the IAgent OSGi bundle needs the OSGi Package Admin and Start Level services and the Service Tracker. To use its full capabilities, the OSGi framework should be running its console parser, the OSGi Event Admin service and the Deployment Admin service. For the needs of application management, the framework should also have the OSGi Application Admin service along with a proper application container. </p>
-<p><img src="../../ngrelc00.gif" width="159" height="27"></p>
-<p><a href="fw_tree.html">OSGi Frameworks  Tree</a>  </p>
-<p><img src="../../ngrelt00.gif" width="159" height="27"></p>
-<p><a href="../tasks/add_fw.html">Adding/Removing an OSGi Framework</a><br>
-  <a href="../tasks/fw_props.html">Configuring the Properties of an OSGi Framework</a><br>
-  <a href="../tasks/connect.html">Connecting to/Disconnecting from an OSGi Framework</a><br>
-  <a href="../tasks/rem_console.html">Using the Remote Console</a><br>
-  <a href="../tasks/bundles/introduction.html">Managing  Bundles</a><br>
-  <a href="../tasks/applications/intorduction.html">Managing Applications</a><br>
-<a href="../tasks/troubleshooting.html">OSGi Management Troubleshooting</a> <br>
+<p><i>&lt;eclipse_home_dir&gt;/plugins/org.tigris.mtoolkit.iagent.rpc_Xxx.jar </i></p>
+<p>Otherwise, in the <b>Frameworks</b> view try to connect to the OSGi framework with missing IAgent and use the <b>Get IAgent</b> option from the displayed error dialog to save the bundle on your computer.</p>
+<p>Basically, the IAgent OSGi bundle needs the OSGi Package Admin and Start Level services and the Service Tracker. To use its full capabilities, the OSGi framework should be running its console parser, the OSGi Event Admin service and the Deployment Admin service. For the needs of application management, the framework should also have the OSGi Application Admin service along with a proper application container.</p>
+<p><img src="../../ngrelc00.gif" width="159" height="27"><br>
+  <a href="fw_tree.html">OSGi Frameworks  Tree</a><br>
+<a href="rem_console.html">Remote Console</a> </p>
+<p><img src="../../ngrelt00.gif" width="159" height="27"> </p>
+<p><a href="../tasks/add_fw.html">Adding/Removing an  OSGi Framework Runtime</a><br>
+    <a href="../tasks/fw_props.html">Configuring the Properties of an OSGi Framework Runtime</a><br>
+    <a href="../tasks/connect.html">Connecting to/Disconnecting from an OSGi Framework Runtime</a><br>
+    <a href="../tasks/bundles/introduction.html">Managing  Bundles</a><br>
+    <a href="../tasks/applications/intorduction.html">Managing Applications</a><br>
+    <a href="../tasks/rem_console.html">Using the Remote Console</a><br>
+    <a href="../tasks/fw_preferences.html">Customizing OSGi Framework Runtime Management</a><br>
+    <a href="../tasks/troubleshooting.html">OSGi Framework Runtime Management Troubleshooting</a> <br>
+  <a href="../tasks/fw_preferences.html"></a></p>
+<p><img src="../../ngrelr00.gif" width="159" height="27"> </p>
+<p> <a href="../reference/fw_views.html">Frameworks View</a><br>
+    <a href="../reference/fw_tree.html"> Frameworks View Tree Icons</a><br>
+    <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a><br>
 </p>
-<p><img src="../../copyright.gif" width="364" height="17"></p>
+<p><img src="../../copyright.gif" width="399" height="17"></p>
 </body>
 </html>

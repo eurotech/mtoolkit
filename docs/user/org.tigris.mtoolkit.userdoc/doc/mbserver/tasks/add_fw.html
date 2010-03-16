@@ -2,41 +2,55 @@
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>Adding/Removing an mBS OSGi Device </title>
+<title>Adding/Removing an  OSGi Runtime </title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link href="../../book.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
-<h1>Adding/Removing an  OSGi Framework </h1>
-<p>To add an OSGi framework to the OSGi frameworks list of the <b>Frameworks</b> view, right-click in the  view, and select  <b>Add Framework</b>. The <b>Framework Properties</b> dialog appears prompting you to specify the connection properties of  the  OSGi framework. </p>
-<h2>Setting Up Framework Connection Properties</h2>
-<ul>
-  <li>IP Address - You have to provide the friendly name of the framework and the IP address of its host. </li>
-  <li>Automatic signing upon install - If you want to have  bundles and deployment packages automatically signed when installed on this OSGi framework :
-    <ol>
-      <li>Add signer settings such as keystores and aliases within them under the <b>Certificates</b> section of the mToolkit preference page (Window &gt; Preferences &gt; mToolkit). </li>
-      <li>Check the <b>Sign content before deployment</b> box.</li>
-      <li>In the <b>Available Certificates</b> list select those signers from mToolkit certificate preferences which are needed for this OSGi framework.</li>
-    </ol>
+<h1>Adding/Removing an OSGi Runtime </h1>
+<h2>Adding an  OSGi  Runtime </h2>
+<p>To add an OSGi Runtime to the list of the <b>Frameworks</b> view:</p>
+<ol>
+  <li>Right-click in the  view, and select <b>Add Framework</b>. The <b>Framework Properties</b> dialog appears prompting you to specify the connection properties of  the  OSGi framework. </li>
+  <li>From <b>Connection Type </b>select <b>Plain Socket</b>.</li>
+  <li>Fill in the connection settings for the framework:
+    <ul>
+      <li>IP Address - You have to provide the friendly name of the framework and the IP address of its host. </li>
+      <li>Automatic signing upon install - If you want to have  bundles and deployment packages automatically signed when installed on this OSGi framework:
+        <ol>
+          <li>Add signer settings such as keystores and aliases within them under the <b>Certificates</b> section of the mToolkit preference page (Window &gt; Preferences &gt; mToolkit). </li>
+          <li>Check the <b>Sign content before deployment</b> box.</li>
+          <li>In the <b>Available Certificates</b> list select those signers from mToolkit certificate preferences which are needed for this OSGi framework.</li>
+        </ol>
+      </li>
+      <li>Connect automatically after completing the framework registration in Eclipse - Select <b>Auto connect to the remote framework after its creation</b>. mToolkit will try to connect the framework after you click the <b>OK</b> button. </li>
+    </ul>
+    <p><img src="img/add_fw_win_mobile.gif" width="445" height="468"><br>
+      Figure 1: Setting up connection properties for an OSGi Runtime</p>
   </li>
-  <li>Connect automatically after completing the framework registration in Eclipse - Select <b>Auto connect to the remote framework after its creation</b>. mToolkit will try to connect the framework after you click the <b>OK</b> button. </li>
-</ul>
-<p><img src="img/add_fw_win_mobile.gif" width="445" height="468"><br>
-Figure 1: Setting up connection properties for an OSGi framework </p>
-<h2>Removing an  OSGi Framework </h2>
-<p>To remove an OSGi Framework from the frameworks list, in the <b>Frameworks</b> view make sure the framework is not connected to Eclipse, and right-click the framework node and select <b>Remove Framework</b>.</p>
+  <li>Select <b>OK</b> to complete adding the OSGi framework. </li>
+</ol>
+<h2>Removing an  OSGi Runtime </h2>
+<p>To remove an OSGi Runtime from the frameworks list, in the <b>Frameworks</b> view make sure the framework is not connected to Eclipse, and right-click the framework node and select <b>Remove Framework</b>.</p>
 <p><img src="../../ngrelc00.gif" width="159" height="27"></p>
-<p><a href="../concepts/fw_overview.html">OSGi  Management Overview</a><br>
-  <a href="../concepts/fw_tree.html">OSGi Frameworks  Tree</a></p>
+<p><a href="../concepts/fw_overview.html">OSGi Management Overview</a><br>
+    <a href="../concepts/fw_tree.html">OSGi Frameworks  Tree</a><br>
+    <a href="../concepts/rem_console.html">Remote Console</a><br>
+</p>
 <p><img src="../../ngrelt00.gif" width="159" height="27"></p>
-<p><a href="fw_props.html">Configuring the Properties of an OSGi Framework</a><br>
-    <a href="connect.html">Connecting to/Disconnecting from an OSGi Framework</a><br>
-  <a href="bundles/introduction.html">Managing  Bundles</a></p>
-<p><img src="../../ngrelr00.gif" width="159" height="27"> </p>
-<p><a href="../reference/fw_views.html">Frameworks View </a><br>
-    <a href="../reference/fw_tree.html"> Frameworks View Tree Icons</a><br>
+<p><a href="add_fw.html">Adding/Removing an OSGi  Runtime</a><br>
+    <a href="fw_props.html">Configuring the Properties of an OSGi  Runtime</a><br>
+    <a href="connect.html">Connecting to/Disconnecting from an OSGi  Runtime</a><br>
+    <a href="bundles/introduction.html">Managing  Bundles</a><br>
+    <a href="applications/intorduction.html">Managing Applications</a><br>
+  	<a href="rem_console.html">Using the Remote Console</a><a href="fw_preferences.html">Customizing OSGi  Management</a><br>
+ <a href="troubleshooting.html">OSGi Management Troubleshooting</a> <br>
+</p>
+<p><img src="../../ngrelr00.gif" width="159" height="27"></p>
+<p><a href="../reference/fw_views.html">Frameworks View</a><br>
+  <a href="../reference/fw_tree.html">Frameworks View  Tree Icons</a><br>
   <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
-<p><img src="../../copyright.gif" width="364" height="17"></p>
+<p><img src="../../copyright.gif" width="399" height="17"></p>
 </body>
 </html>
