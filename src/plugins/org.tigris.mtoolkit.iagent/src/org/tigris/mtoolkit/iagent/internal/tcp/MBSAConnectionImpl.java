@@ -207,7 +207,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
     		  clean();
     		  connect(transport);
     	  }
-        throw new IAgentException(e.getMessage(), IAgentErrors.ERROR_INTERNAL_ERROR, e);
+        throw new IAgentException(e.getMessage(), isClosed ? IAgentErrors.ERROR_DISCONNECTED : IAgentErrors.ERROR_INTERNAL_ERROR, e);
       }
       
       // get last cmd send time
@@ -245,7 +245,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
     		  clean();
     		  connect(transport);
     	  }
-        throw new IAgentException(e.getMessage(), IAgentErrors.ERROR_INTERNAL_ERROR, e);
+        throw new IAgentException(e.getMessage(), isClosed ? IAgentErrors.ERROR_DISCONNECTED : IAgentErrors.ERROR_INTERNAL_ERROR, e);
       }
     } finally {
       synchronized (lock) {
@@ -374,9 +374,11 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       if ((curTime - lastCmdTime) > PING_TIMEOUT) {
         try {
           sendData(IAgentCommands.IAGENT_CMD_PING, null);
-        } catch (Exception e) {
-          error("[run] Failed to send ping cmd from thread: " + Thread.currentThread(), e);
-          break;          
+        } catch (IAgentException e) {
+        	if (e.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED)
+        		error("[run] Failed to send ping cmd from thread: " + Thread.currentThread(), e);
+        	else
+        		break;          
         }
       }
     }
