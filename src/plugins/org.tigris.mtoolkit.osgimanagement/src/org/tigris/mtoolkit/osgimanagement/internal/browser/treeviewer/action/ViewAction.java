@@ -55,8 +55,8 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 		if (selection.isEmpty()) {
 			return;
 		}
-		tree.getTree().setRedraw(false);
 		try {
+			tree.getTree().setRedraw(false);
 			Set frameworks = new HashSet();
 			for (Iterator it = selection.iterator(); it.hasNext();) {
 				Object next = it.next();

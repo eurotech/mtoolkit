@@ -51,10 +51,13 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 						getSelectionProvider().setSelection(new StructuredSelection(services[i]));
 						if (!selection.equals(getSelectionProvider().getSelection())) {
 							Object expanded[] = ((TreeViewer) getSelectionProvider()).getExpandedElements();
-							((TreeViewer) getSelectionProvider()).getTree().setRedraw(false);
-							((TreeViewer) getSelectionProvider()).expandAll();
-							((TreeViewer) getSelectionProvider()).setExpandedElements(expanded);
-							((TreeViewer) getSelectionProvider()).getTree().setRedraw(true);
+							try {
+								((TreeViewer) getSelectionProvider()).getTree().setRedraw(false);
+								((TreeViewer) getSelectionProvider()).expandAll();
+								((TreeViewer) getSelectionProvider()).setExpandedElements(expanded);
+							} finally {
+								((TreeViewer) getSelectionProvider()).getTree().setRedraw(true);
+							}
 							getSelectionProvider().setSelection(selection);
 						}
 						return;

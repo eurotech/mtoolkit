@@ -944,8 +944,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				savedExpansionState = tree.getExpandedElements();
 			}
 			ignoreSelectionEvents = true;
-			tree.getTree().setRedraw(false);
 			try {
+				tree.getTree().setRedraw(false);
 				boolean refreshed = false;
 				if (treeRoot.getFilter() != "") {
 					tree.refresh();

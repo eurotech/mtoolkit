@@ -39,20 +39,23 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 	// run method
 	public void run() {
 		Iterator iterator = getStructuredSelection().iterator();
-		tree.getTree().setRedraw(false);
-		while (iterator.hasNext()) {
-			Model node = (Model) iterator.next();
-			if (node instanceof FrameworkImpl) {
-				FrameworkImpl framework = (FrameworkImpl) node;
-				if (framework.isConnected() && !framework.isRefreshing()) {
-					framework.refreshAction();
+		try {
+			tree.getTree().setRedraw(false);
+			while (iterator.hasNext()) {
+				Model node = (Model) iterator.next();
+				if (node instanceof FrameworkImpl) {
+					FrameworkImpl framework = (FrameworkImpl) node;
+					if (framework.isConnected() && !framework.isRefreshing()) {
+						framework.refreshAction();
+					}
+				} else if (node instanceof Bundle) {
+					Bundle bundle = (Bundle) node;
+					ActionsManager.refreshBundleAction(bundle);
 				}
-			} else if (node instanceof Bundle) {
-				Bundle bundle = (Bundle) node;
-				ActionsManager.refreshBundleAction(bundle);
 			}
+		} finally {
+			tree.getTree().setRedraw(true);
 		}
-		tree.getTree().setRedraw(true);
 	}
 
 	// override to react properly to selection change
