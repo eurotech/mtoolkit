@@ -57,9 +57,11 @@ public class BaseFileItem implements InstallationItem {
         File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + getName());
         convertedFile.getParentFile().mkdirs();
         if (FileUtils.getFileExtension(baseFile).equals("dp")) {
-          AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
-          preparedFile = convertedFile;
-        } else if (!AndroidUtils.isConvertedToDex(baseFile) && AndroidUtils.isDexCompatible(baseFile)) {
+          if (!AndroidUtils.isDpConvertedToDex(baseFile)) {
+            AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
+            preparedFile = convertedFile;
+          }
+        } else if (AndroidUtils.isDexCompatible(baseFile) && !AndroidUtils.isConvertedToDex(baseFile)) {
           AndroidUtils.convertToDex(baseFile, convertedFile, monitor);
           preparedFile = convertedFile;
         }

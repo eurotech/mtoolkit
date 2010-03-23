@@ -66,7 +66,7 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 				delete = !dpFile.exists();
 				DPPUtil.generateDeploymentPackage(dppFile, monitor, file.getProject(), DPPUtil.TYPE_QUICK_BUILD_DPP);
 
-				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))) {
+				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) && !AndroidUtils.isDpConvertedToDex(dpFile)) {
 					File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + file.getName());
 					convertedFile.getParentFile().mkdirs();
 					AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
