@@ -190,7 +190,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 				remoteParserService = pmpConnection.getReference(REMOTE_CONSOLE_NAME, null);
 			} catch (PMPException e) {
 				info("[getRemoteParserService] RemoteParserGenerator service isn't available", e);
-				throw new IAgentException("Unable to retrieve reference to remote administration service",
+				throw new IAgentException("Unable to retrieve reference to remote administration service " + REMOTE_CONSOLE_NAME,
 						IAgentErrors.ERROR_INTERNAL_ERROR);
 			}
 		}
@@ -275,7 +275,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 							// admin = null;
 							info("[verifyRemoteReference] Reference to remote service cannot be got, service is not available. Fail fast.",
 											e);
-							throw new IAgentException("Unable to retrieve reference to remote administration service",
+							throw new IAgentException("Unable to retrieve reference to remote administration service " + adminClass,
 									IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE, e);
 						}
 					}

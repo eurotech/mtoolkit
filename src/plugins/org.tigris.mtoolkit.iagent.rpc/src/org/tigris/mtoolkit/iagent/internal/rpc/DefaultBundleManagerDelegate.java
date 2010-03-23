@@ -51,7 +51,7 @@ public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 		} catch (BundleException e) {
 			return new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to update bundle: " + DebugUtils.toString(e));
 		} catch (IllegalStateException e) {
-			return new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
+			return new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + bundle.getBundleId() + " has been uninstalled");
 		} finally {
 			try {
 				in.close();

@@ -255,7 +255,7 @@ public class VMManagerImpl implements VMManager {
 				return false;
 			}
 			info("[removeRawArgument] Command failure: " + rspStatus);
-			throw new IAgentException("Command failure: " + rspStatus, rspStatus);
+			throw new IAgentException("Failed to remove VM argument: " + rspStatus, rspStatus);
 		} else {
 			debug("[removeRawArgument] argument removal successful");
 		}
@@ -273,7 +273,7 @@ public class VMManagerImpl implements VMManager {
 		int rspStatus = tCallBack.getRspStatus();
 		if (rspStatus < 0) {
 			info("[resetArgs] Command failure: " + rspStatus);
-			throw new IAgentException("Command failure: " + rspStatus, rspStatus);
+			throw new IAgentException("Failed to reset VM arguments: " + rspStatus, rspStatus);
 		}
 		debug("[resetArgs] Arguments successfully reset");
 	}
@@ -289,7 +289,7 @@ public class VMManagerImpl implements VMManager {
 		int rspStatus = tCallBack.getRspStatus();
 		if (rspStatus < 0) {
 			info("[startVM] Command failure: " + rspStatus);
-			throw new IAgentException("Command failure: " + rspStatus, rspStatus);
+			throw new IAgentException("Failed to start VM: " + rspStatus, rspStatus);
 		}
 		debug("[startVM] VM successfully started");
 	}
@@ -305,7 +305,7 @@ public class VMManagerImpl implements VMManager {
 		int rspStatus = tCallBack.getRspStatus();
 		if (rspStatus < 0) {
 			info("[stopVM] Command failure: " + rspStatus);
-			throw new IAgentException("Command failure: " + rspStatus, rspStatus);
+			throw new IAgentException("Failed to stop VM: " + rspStatus, rspStatus);
 		}
 		debug("[stopVM] VM successfully stopped");
 	}

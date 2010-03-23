@@ -178,7 +178,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		debug("[getBundleHeader] >>> id: " + id + "; headerName" + headerName + "; locale" + locale);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
 			info("[getBundleHeader] No such bundle: " + error);
 			return error;
 		}
@@ -221,7 +221,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		debug("[startBundle] >>> id: " + id + "; flags" + flags);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
 			info("[startBundle] No such bundle");
 			return error;
 		}
@@ -236,7 +236,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			info("[startBundle] Bundle cannot be started: " + error, e);
 			return error;
 		} catch (IllegalStateException e) {
-			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
 			info("[startBundle] No such bundle: " + error);
 			return error;
 		}
@@ -248,7 +248,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		debug("[stopBundle] id: " + id + "; flags" + flags);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
 			debug("[stopBundle] No such bundle: " + error);
 			return error;
 		}
@@ -394,7 +394,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			debug("[uninstallBundle] Bundle uninstalled");
 			return result;
 		} else {
-			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
 			info("[uninstallBundle] Unable to uninstall bundle: " + error);
 			return error;
 		}
@@ -416,7 +416,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		debug("[updateBundle] installBundle; id: " + id + "; inputStream: " + is);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
 			info("[updateBundle] No such bundle: " + error);
 			return error;
 		} else {

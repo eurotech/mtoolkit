@@ -145,7 +145,7 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		debug("[getDeploymentPackageHeader] >> dpName: " + name + "; version: " + version + "; headerName: " + headerName);
 		DeploymentPackage dp = internalGetDeploymentPackage(name, version);
 		if (dp == null) {
-			Error error = new Error(Error.DEPLOYMENT_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.DEPLOYMENT_UNINSTALLED_CODE, "Deployment package " + name + " (" + version + ") has been uninstalled");
 			info("[getDeploymentPackageHeader] No such deployment package: " + error);
 			return error;
 		}
@@ -200,7 +200,7 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		debug("[uninstallDeploymentPackage] >>> dpName: " + dpName + "; version: " + version + "; force: " + force);
 		DeploymentPackage dp = internalGetDeploymentPackage(dpName, version);
 		if (dp == null) {
-			Error error = new Error(Error.DEPLOYMENT_UNINSTALLED_CODE, null);
+			Error error = new Error(Error.DEPLOYMENT_UNINSTALLED_CODE, "Deployment package " + dpName + " (" + version + ") has been uninstalled");
 			info("[uninstallDeploymentPackage] No such deployment package: " + error);
 			return error;
 		}
