@@ -653,10 +653,15 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		if (loadedSymbolicNames == null) {
 			BufferedReader reader = null;
 			try {
-				File systemBundleFile = new File(System.getProperty(PROP_SYSTEM_BUNDLES_LIST, SYSTEM_BUNDLES_FILE_NAME));
-				if (systemBundleFile.exists()) {
+				String systemBundlesName = System.getProperty(PROP_SYSTEM_BUNDLES_LIST, SYSTEM_BUNDLES_FILE_NAME);
+				File systemBundlesFile = new File(systemBundlesName);
+				if (!systemBundlesFile.exists()) {
+					File cwd = new File("").getAbsoluteFile();
+					systemBundlesFile = new File(cwd.getParentFile(), systemBundlesName);
+				}
+				if (systemBundlesFile.exists()) {
 					try {
-						reader = new BufferedReader(new FileReader(systemBundleFile));
+						reader = new BufferedReader(new FileReader(systemBundlesFile));
 					} catch (FileNotFoundException e) {
 						// ignore and fall down
 					}
