@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent.internal.rpc.console;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -92,8 +93,16 @@ public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Re
 						if (fw != null) {
 							frameworkProvider = (FrameworkCommandProvider) invokeConstructor(
 									FrameworkCommandProvider.class, fw);
-							if (frameworkProvider != null)
-								frameworkProvider.intialize();
+							if (frameworkProvider != null) {
+								try {
+									// the mistake is correct (it is
+									// "intialize", not "initialize")
+									invokeMethod(frameworkProvider, "intialize");
+								} catch (Exception e) {
+									// On 3.6 method is called start()
+									invokeMethod(frameworkProvider, "start");
+								}
+							}
 						}
 					} catch (Throwable e) {
 						// TODO: Add logging
@@ -151,5 +160,11 @@ public class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Re
 			e.getTargetException().printStackTrace();
 			return null;
 		}
+	}
+
+	private static Object invokeMethod(Object obj, String methodName) throws Exception {
+		Method method = obj.getClass().getDeclaredMethod(methodName, null);
+		method.setAccessible(true);
+		return method.invoke(obj, null);
 	}
 }
