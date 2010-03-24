@@ -20,7 +20,6 @@ import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
 
 public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
@@ -39,7 +38,7 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
 			if (IAgentErrors.toDeploymentExceptionCode(e.getErrorCode()) > 0) {
 				// remote deployment admin threw an exception, ask the user for
 				// forced uninstallation
-				if (askUserToForceUninstallation(Util.handleIAgentException(e))) {
+				if (askUserToForceUninstallation(handleException(e))) {
 					return uninstallDeploymentPackage(true);
 				} else {
 					// the user has already been notified, skip the error dialog
