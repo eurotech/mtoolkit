@@ -34,9 +34,9 @@ import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class InstallBundleOperation extends RemoteBundleOperation {

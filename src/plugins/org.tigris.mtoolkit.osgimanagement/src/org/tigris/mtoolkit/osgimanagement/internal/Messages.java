@@ -153,63 +153,12 @@ public final class Messages extends NLS {
 	public static String refresh_bundles_info;
 	public static String connect_framework;
 	public static String show_service_properties_in_tree;
-	public static String _1;
-	public static String _8401;
-	public static String _8404;
-	public static String _8450;
-	public static String _8451;
-	public static String _8452;
-	public static String _8453;
-	public static String _8454;
-	public static String _8455;
-	public static String _8456;
-	public static String _8457;
-	public static String _8458;
-	public static String _8460;
-	public static String _8461;
-	public static String _8462;
-	public static String _8463;
-	public static String _8464;
-	public static String _8465;
-	public static String _3001;
-	public static String _3002;
-	public static String _3003;
-	public static String _3004;
-	public static String _3005;
-	public static String _3006;
-	public static String _3007;
-	public static String _3008;
-	public static String _3009;
-	public static String _4001;
-	public static String _4002;
-	public static String _4003;
-	public static String _4004;
-	public static String _4005;
-	public static String _4006;
-	public static String _4007;
-	public static String _4008;
-	public static String _4009;
-	public static String _4010;
-	public static String _4011;
-	public static String _4012;
-	public static String _4013;
-	public static String _4014;
-	public static String _5001;
-	public static String _5003;
-	public static String _5004;
-	public static String _5005;
-	public static String _5006;
-	public static String _5007;
-	public static String _6000;
-	public static String _7000;
 
 	public static String question_dialog_title;
 
 	public static String text_files_filter_label;
 
 	public static String Toolbar_Bundles_Label;
-
-	public static String Toolbar_DP_Label;
 
 	public static String start_bundle_failure_title;
 

@@ -13,16 +13,17 @@ package org.tigris.mtoolkit.osgimanagement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class Util {
 
 	public static IStatus handleIAgentException(IAgentException e) {
-		String message = Messages.get(String.valueOf(e.getErrorCode()).replace('-', '_'));
-		if (message == null) message = e.getMessage();
-		return Util.newStatus(IStatus.ERROR, message, e);
+		return Util.newStatus(IStatus.ERROR, null, e);
 	}
 
 	public static IStatus newStatus(String message, IStatus e) {
@@ -31,6 +32,17 @@ public class Util {
 
 	public static IStatus newStatus(int severity, String message, Throwable t) {
 		return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
+	}
+	
+	public static Framework addFramework(DeviceConnector connector, String name) {
+		try {
+			FrameworkImpl fw = new FrameworkImpl(name, true);
+			FrameWorkView.getTreeRoot().addElement(fw);
+			fw.connect(connector, null);
+			return fw;
+		} finally {
+			throw new RuntimeException("Not yet implemented");
+		}
 	}
 
 }

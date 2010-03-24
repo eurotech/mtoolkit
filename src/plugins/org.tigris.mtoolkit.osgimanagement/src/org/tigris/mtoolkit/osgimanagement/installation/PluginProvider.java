@@ -233,7 +233,7 @@ public class PluginProvider implements InstallationItemProvider {
 							break;
 						}
 					} catch (IAgentException e) {
-						e.printStackTrace();
+						FrameworkPlugin.error(e);
 					}
 				}
 				if (!found) {

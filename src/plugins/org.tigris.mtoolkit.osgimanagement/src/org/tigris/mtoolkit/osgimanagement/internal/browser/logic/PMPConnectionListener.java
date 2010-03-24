@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;

@@ -25,6 +25,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -86,6 +87,10 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 
 	public static Object getFromStorage(Object key) {
 		return storage.get(key);
+	}
+
+	public static void error(IAgentException e) {
+		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
 	}
 
 	public static void error(String message, Throwable t) {
