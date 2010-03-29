@@ -25,7 +25,7 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 
 	public static final String     PLUGIN_ID = "org.tigris.mtoolkit.common"; //$NON-NLS-1$
 	
-	public static final boolean DEBUG = Boolean.getBoolean("mtoolkit.common.debug");
+	private static final boolean DEBUG = Boolean.getBoolean("mtoolkit.common.debug");
 	private static final String DEBUG_TAG = "[Common] ";
 
 	private static UtilitiesPlugin inst;
@@ -98,26 +98,44 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 		log(newStatus(IStatus.ERROR, message, t));
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static void warning(String message, Throwable t) {
 		log(newStatus(IStatus.WARNING, message, t));
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static void throwException(int severity, String message, Throwable t) throws CoreException {
 		throw newException(severity, message, t);
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static CoreException newException(int severity, String message, Throwable t) {
 		return new CoreException(newStatus(severity, message, t));
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static void debug(String message) {
 		debug(message, null);
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static void debug(String message, Throwable t) {
 		if (!DEBUG)
 			return;
@@ -131,6 +149,9 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 		return new Status(severity, PLUGIN_ID, message, t);
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static IStatus newStatus(int severity, int code, String message, Throwable t) {
 		return new Status(severity, PLUGIN_ID, code, message, t);
 	}

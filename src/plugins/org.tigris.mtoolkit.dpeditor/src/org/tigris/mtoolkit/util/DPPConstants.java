@@ -15,7 +15,7 @@ package org.tigris.mtoolkit.util;
  * Editor API .
  * 
  * @author Antonia Avramova
- * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface DPPConstants {
 
@@ -52,10 +52,12 @@ public interface DPPConstants {
 	/** corresponds to the "DeploymentPackage-Icon" header */
 	public static String dpIcon = "DeploymentPackage-Icon";
 	
-	/** corresponds to the "DeploymentPackage-Name" header */
+	/** corresponds to the "DeploymentPackage-Name" header 
+	 * @since 1.2*/
 	public static String dpName = "DeploymentPackage-Name";
 	
-	/** corresponds to the "DeploymentPackage-RequiredStorage" header */
+	/** corresponds to the "DeploymentPackage-RequiredStorage" header 
+	 * @since 1.2*/
 	public static String dpRequiredStorage = "DeploymentPackage-RequiredStorage";
 
 }

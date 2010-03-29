@@ -15,6 +15,9 @@ import java.io.InputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+/**
+ * @since 5.0
+ */
 public class ProgressInputStream extends InputStream {
 
 	byte[] b = new byte[1];

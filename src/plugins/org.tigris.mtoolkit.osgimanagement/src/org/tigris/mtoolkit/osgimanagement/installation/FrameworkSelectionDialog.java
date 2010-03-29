@@ -52,6 +52,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
+/**
+ * @since 5.0
+ */
 public class FrameworkSelectionDialog extends TargetSelectionDialog {
 	private Button btnAdd;
 	private Button btnEdit;

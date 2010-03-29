@@ -19,6 +19,9 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 import org.tigris.mtoolkit.iagent.transport.TransportType;
 
+/**
+ * @since 3.0
+ */
 public class SocketTransport implements Transport {
 
 	private String host;

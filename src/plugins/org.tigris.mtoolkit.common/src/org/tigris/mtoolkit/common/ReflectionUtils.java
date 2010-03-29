@@ -66,6 +66,9 @@ public class ReflectionUtils {
 		return doInvokeMethod(obj, methodName, parameterTypes, parameterValues, false);
 	}
 	
+	/**
+	 * @since 5.0
+	 */
 	public static Object invokeProtectedMethod(Object obj, String methodName, Class[] parameterTypes, Object[] parameterValues) throws InvocationException {
 		return doInvokeMethod(obj, methodName, parameterTypes, parameterValues, true);
 	}
@@ -144,6 +147,9 @@ public class ReflectionUtils {
 		}
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public static void setField(Object receiver, String fieldName, Object value) throws InvocationException {
 		if (receiver == null)
 			throw new NullPointerException();

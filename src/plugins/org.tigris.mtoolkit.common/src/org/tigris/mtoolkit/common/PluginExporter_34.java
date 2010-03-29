@@ -21,8 +21,16 @@ import org.eclipse.pde.internal.ui.PDEPluginImages;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.tigris.mtoolkit.common.ReflectionUtils.InvocationException;
 
+/**
+ * 
+ * @author danail
+ * @noextend This class is not intended to be subclassed by clients.
+ */
 public class PluginExporter_34 extends BasePluginExporter implements IPluginExporter {
 
+	/**
+	 * @since 5.0
+	 */
 	public void asyncExportPlugins(Object info) {
 		try {
 			Object obj = createExportOperation(info);
@@ -58,6 +66,9 @@ public class PluginExporter_34 extends BasePluginExporter implements IPluginExpo
 		}
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public IStatus syncExportPlugins(Object info, IProgressMonitor monitor) {
 		try {
 			Object op = createExportOperation(info);

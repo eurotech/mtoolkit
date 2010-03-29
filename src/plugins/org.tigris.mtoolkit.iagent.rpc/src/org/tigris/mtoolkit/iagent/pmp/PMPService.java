@@ -16,10 +16,14 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 
 /**
  * Interface of the PMP Service
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 
 public interface PMPService extends PMPPeer {
 
+	/**
+	 * @since 3.0
+	 */
 	public static final String PROP_PMP_PORT = "pmp-port";
 	
 	/**
@@ -34,6 +38,7 @@ public interface PMPService extends PMPPeer {
 	 * @exception PMPException
 	 *                If an IOException, protocol or authentication error
 	 *                occured.
+	 * @since 3.0
 	 */
 
 	public PMPConnection connect(Transport transport, Dictionary props) throws PMPException;

@@ -22,6 +22,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 
+/**
+ * @since 5.0
+ */
 public abstract class Model implements Comparable, IActionFilter, ConstantsDistributor {
 
 	protected String name;

@@ -50,6 +50,7 @@ public interface AbstractConnection {
 	/**
 	 * Returns the property value.
 	 * @return
+	 * @since 3.0
 	 */
 	public Object getProperty(String propertyName);
 }

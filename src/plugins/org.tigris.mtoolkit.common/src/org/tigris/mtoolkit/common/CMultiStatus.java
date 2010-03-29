@@ -3,6 +3,9 @@ package org.tigris.mtoolkit.common;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 
+/**
+ * @since 5.0
+ */
 public class CMultiStatus extends MultiStatus {
 
 	public CMultiStatus(String pluginId, int code, Throwable exception) {

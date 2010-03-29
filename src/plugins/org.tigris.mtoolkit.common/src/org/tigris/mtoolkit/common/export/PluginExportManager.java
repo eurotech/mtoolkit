@@ -21,6 +21,9 @@ import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
+/**
+ * @since 5.0
+ */
 public class PluginExportManager {
 
 	private static final String EXPORTED_FILENAME_EXTENSION = ".jar";

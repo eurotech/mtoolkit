@@ -15,8 +15,14 @@ import org.eclipse.core.runtime.IStatus;
 
 public interface IPluginExporter {
 
+	/**
+	 * @since 5.0
+	 */
 	void asyncExportPlugins(Object info);
 	
+	/**
+	 * @since 5.0
+	 */
 	IStatus syncExportPlugins(Object info, IProgressMonitor monitor);
 
 	boolean hasFinished();
@@ -25,5 +31,8 @@ public interface IPluginExporter {
 
 	String getQualifier();
 	
+	/**
+	 * @since 5.0
+	 */
 	IStatus join(long timeout) throws InterruptedException;
 }

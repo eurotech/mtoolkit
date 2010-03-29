@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement;
 
+/**
+ * @noimplement This interface is not intended to be implemented by clients.
+ * @since 5.0
+ */
 public interface DeviceTypeProviderValidator {
 
 	public void setValidState(String error);

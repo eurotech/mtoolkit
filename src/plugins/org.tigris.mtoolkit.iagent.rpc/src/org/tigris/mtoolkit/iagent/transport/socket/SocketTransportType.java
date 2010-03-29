@@ -15,6 +15,9 @@ import java.util.List;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportType;
 
+/**
+ * @since 3.0
+ */
 public class SocketTransportType implements TransportType {
 
 	private static final String TYPE_ID = "socket";

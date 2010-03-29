@@ -12,6 +12,9 @@ package org.tigris.mtoolkit.common.gui;
 
 import org.eclipse.jface.viewers.ICellModifier;
 
+/**
+ * @since 5.0
+ */
 public class DefaultCellModifier implements ICellModifier {
 
 	public boolean canModify(Object element, String property) {

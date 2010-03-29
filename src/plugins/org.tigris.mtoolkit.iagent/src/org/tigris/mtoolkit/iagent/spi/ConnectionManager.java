@@ -20,12 +20,16 @@ import org.tigris.mtoolkit.iagent.IAgentException;
  * connections.
  * 
  * @author Danail Nachev
+ * @noimplement This interface is not intended to be implemented by clients.
  * 
  */
 public interface ConnectionManager {
 	public static final int MBSA_CONNECTION = 0x0;
 	public static final int PMP_CONNECTION  = 0x1;
 	
+	/**
+	 * @since 3.0
+	 */
 	public static final String PROP_PMP_PORT = "pmp-port";
 
 	public AbstractConnection getActiveConnection(int type) throws IAgentException;
@@ -75,6 +79,7 @@ public interface ConnectionManager {
 	 * called, passing itself as argument for the method.
 	 * 
 	 * @param connection
+	 * @since 3.0
 	 */
 	public void connectionClosed(AbstractConnection connection);
 
@@ -85,8 +90,12 @@ public interface ConnectionManager {
 	 * 
 	 * @param connection
 	 * @param notify true if event should be fired, false otherwise
+	 * @since 3.0
 	 */
 	public void connectionClosed(AbstractConnection connection, boolean notify);
 	
+	/**
+	 * @since 3.0
+	 */
 	public Object queryProperty(String propertyName) throws IAgentException;
 }

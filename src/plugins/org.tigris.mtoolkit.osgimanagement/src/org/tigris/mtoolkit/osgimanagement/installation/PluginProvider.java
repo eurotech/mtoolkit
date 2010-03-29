@@ -48,6 +48,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOpe
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
+/**
+ * @since 5.0
+ */
 public class PluginProvider implements InstallationItemProvider {
 
 	public class PluginItem implements InstallationItem {

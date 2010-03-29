@@ -41,6 +41,9 @@ public interface ContentTypeActionsProvider {
 	
 	public void fillToolBar(ToolBarManager tbm);
 
+	/**
+	 * @since 5.0
+	 */
 	public Image getImage(Model node);
 
 }

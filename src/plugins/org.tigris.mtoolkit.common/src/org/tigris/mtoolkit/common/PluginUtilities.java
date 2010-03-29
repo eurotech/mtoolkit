@@ -66,6 +66,9 @@ public class PluginUtilities {
 	
 	public static final String VERSION_3_4_0 = "3.4.0";
 	public static final String VERSION_3_5_0 = "3.5.0";
+	/**
+	 * @since 5.0
+	 */
 	public static final String VERSION_3_6_0 = "3.6.0";
 
 	static {
@@ -776,6 +779,9 @@ public class PluginUtilities {
 		return compatibleRange.compareTo(bundleVersion) <= 0;
 	}
 	
+	/**
+	 * @since 5.0
+	 */
 	public static Shell getActiveWorkbenchShell() {
 		Shell shell = null;
 		IWorkbenchWindow aWindow = UtilitiesPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();

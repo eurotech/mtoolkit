@@ -14,6 +14,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 
+/**
+ * @since 5.0
+ */
 public class DefaultTextCellEditor extends TextCellEditor {
 
 	private int fColumn;

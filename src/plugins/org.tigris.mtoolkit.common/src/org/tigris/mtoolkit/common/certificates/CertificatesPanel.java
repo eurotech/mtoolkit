@@ -48,6 +48,9 @@ public class CertificatesPanel {
 	private Link link;
 	private Set listeners = new HashSet();
 
+	/**
+	 * @since 5.0
+	 */
 	public static final int EVENT_CONTENT_MODIFIED = 1;
 
 	public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan) {
@@ -140,12 +143,18 @@ public class CertificatesPanel {
 		return signUids;
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public void addEventListener(Listener listener) {
 		if (listener != null) {
 			listeners.add(listener);
 		}
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public void removeEventListener(Listener listener) {
 		if (listener != null) {
 			listeners.remove(listener);

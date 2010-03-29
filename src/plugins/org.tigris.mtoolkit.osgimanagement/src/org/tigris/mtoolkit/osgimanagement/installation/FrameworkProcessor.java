@@ -53,6 +53,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
+/**
+ * @since 5.0
+ */
 public class FrameworkProcessor implements InstallationItemProcessor {
 
 	private static FrameworkProcessor defaultinstance;

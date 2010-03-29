@@ -29,6 +29,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 
+/**
+ * @since 5.0
+ */
 public class DependenciesSelectionDialog extends TitleAreaDialog {
 
 	private Shell shell;

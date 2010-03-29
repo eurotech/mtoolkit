@@ -12,6 +12,10 @@ package org.tigris.mtoolkit.iagent.pmp;
 
 import java.util.Map;
 
+/**
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
+ */
 public interface PMPServer extends PMPPeer {
 
 	public void close();
@@ -34,6 +38,7 @@ public interface PMPServer extends PMPPeer {
 	 * Returns a Map that contains server properties.
 	 * 
 	 * @return
+	 * @since 3.0
 	 */
 	public Map getProperties();
 

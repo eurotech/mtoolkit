@@ -66,6 +66,9 @@ public class MBSASessionFactory {
 		}
 	}
 	
+	/**
+	 * @since 3.0
+	 */
 	public static MBSAClient clientListen(ServerSocket ssocket) throws MBSAException {
 		DebugUtils.debug(MBSASessionFactory.class, "[clientListen] ssocket = " + ssocket);
 		try {
@@ -86,6 +89,9 @@ public class MBSASessionFactory {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public static ServerSocket getServerSocketOnFreePort(InetAddress bindAddress, int defaultPort, int backlog,
 			int timeout) throws IOException {
 		ServerSocket ssocket = null;

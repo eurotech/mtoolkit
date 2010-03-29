@@ -25,6 +25,7 @@ import org.tigris.mtoolkit.common.images.UIResources;
  * A wrapper class for Section widget, which adds an API for displaying
  * indication for errors and warnings in the Section title area. The class uses
  * IStatus objects.
+ * @since 5.0
  * 
  */
 public class StatusSectionDecoration {

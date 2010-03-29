@@ -16,6 +16,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
+/**
+ * @since 5.0
+ */
 public class FrameworkTarget implements InstallationTarget {
 	private Framework fw;
 

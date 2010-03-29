@@ -26,8 +26,16 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.tigris.mtoolkit.common.ReflectionUtils.InvocationException;
 
+/**
+ * 
+ * @noextend This class is not intended to be subclassed by clients.
+ *
+ */
 public class PluginExporter_35 extends BasePluginExporter implements IPluginExporter {
 
+	/**
+	 * @since 5.0
+	 */
 	public void asyncExportPlugins(Object info) {
 		try {
 			final FeatureExportInfo fInfo = (FeatureExportInfo) info;
@@ -107,6 +115,9 @@ public class PluginExporter_35 extends BasePluginExporter implements IPluginExpo
 		}
 	}
 
+	/**
+	 * @since 5.0
+	 */
 	public IStatus syncExportPlugins(Object info, IProgressMonitor monitor) {
 		try {
 			final FeatureExportInfo fInfo = (FeatureExportInfo) info;

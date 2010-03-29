@@ -12,6 +12,9 @@ package org.tigris.mtoolkit.common;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * 
+ */
 public class Messages {
 
 	private static final String BUNDLE_NAME = "org.tigris.mtoolkit.common.messages";

@@ -235,6 +235,7 @@ public class AndroidUtils {
 	 * 
 	 * @param sdkLocation
 	 * @return array with platforms or empty array
+	 * @since 5.0
 	 */
 	public static String[] getAndroidPlatforms(String sdkLocation) {
 		if (sdkLocation == null) {
@@ -288,6 +289,7 @@ public class AndroidUtils {
 	 * Checks if dp file is in android dex format.
 	 * 
 	 * @param dpFile
+	 * @since 5.0
 	 */
 	public static boolean isDpConvertedToDex(File dpFile) {
 		File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation().toFile(), "tmp.extracted");

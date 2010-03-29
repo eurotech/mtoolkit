@@ -27,7 +27,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteDPListener;
  * deployment packages.<br>
  * 
  * @author Danail Nachev
- * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface DeploymentManager {
 
@@ -167,6 +167,7 @@ public interface DeploymentManager {
 	 * 
 	 * @return array with BundleSnapshot objects. The result is never null.
 	 * @throws IAgentException
+	 * @since 3.0
 	 */
 	public BundleSnapshot[] getBundlesSnapshot(Dictionary properties) throws IAgentException;
 
