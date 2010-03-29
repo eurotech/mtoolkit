@@ -46,22 +46,38 @@ public class PluginExportManager {
 	}
 	
 	public void addBundle(String symbolicName, String version) throws CoreException {
-		addBundle(findModel(symbolicName, version));
+		IPluginModelBase bundleModel = findModel(symbolicName, version);
+		if (bundleModel == null)
+			throw UtilitiesPlugin.newException(IStatus.ERROR, "Cannot find plugin " + symbolicName + " (" + version + ") in current target platform", null);
+		addBundle(bundleModel);
 	}
 	
-	public static IPluginModelBase findModel(String symbolicName, String version) throws CoreException {
+	public static IPluginModelBase findModel(String symbolicName, String version) {
 		ModelEntry entry = PluginRegistry.findEntry(symbolicName);
-		if (entry == null)
-			throw UtilitiesPlugin.newException(IStatus.ERROR, "Cannot find plugin " + symbolicName + " in current target platform", null);
-		if (version == null)
-			return entry.getModel();
+		if (entry == null) {
+			pluginModelNotFound(symbolicName, version);
+			return null;
+		}
+		if (version == null) {
+			IPluginModelBase model = entry.getModel();
+			if (!model.isEnabled()) {
+				pluginModelNotFound(symbolicName, version);
+				return null;
+			}
+			return model;
+		}
 		IPluginModelBase[] activeModels = entry.getActiveModels();
 		for (int i = 0; i < activeModels.length; i++) {
 			IPluginModelBase model = activeModels[i];
 			if (version.equals(model.getPluginBase().getVersion()))
 				return model;
 		}
-		throw UtilitiesPlugin.newException(IStatus.ERROR, "Cannot find plugin " + symbolicName + " (" + version + ") in current target platform", null);
+		pluginModelNotFound(symbolicName, version);
+		return null;
+	}
+
+	private static void pluginModelNotFound(String symbolicName, String version) {
+		UtilitiesPlugin.warning("Cannot find plugin model " + symbolicName + "_" + version + " in current target platform", null);
 	}
 	
 	public String getLocation(IPluginModelBase model) {
@@ -71,7 +87,10 @@ public class PluginExportManager {
 	}
 	
 	public String getLocation(String symbolicName, String version) throws CoreException {
-		return getLocation(findModel(symbolicName, version));
+		IPluginModelBase bundleModel = findModel(symbolicName, version);
+		if (bundleModel == null)
+			return null;
+		return getLocation(bundleModel);
 	}
 	
 	public IStatus export(String location, IProgressMonitor monitor) {
