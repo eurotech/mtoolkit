@@ -27,6 +27,7 @@ public class DeviceConnectorSWTWrapper extends DeviceConnector implements Device
 	
 	private DeviceConnector delegate;
 	private Thread displayThread;
+	private static final boolean IAGENT_UI_ACCESS = Boolean.getBoolean("osgimanagement.iagent.access.warn");
 	
 	public DeviceConnectorSWTWrapper(DeviceConnector delegate, Display display) {
 		this.delegate = delegate;
@@ -43,7 +44,7 @@ public class DeviceConnectorSWTWrapper extends DeviceConnector implements Device
 	}
 	
 	private void checkThread() {
-		if (Thread.currentThread() == displayThread)
+		if (IAGENT_UI_ACCESS && Thread.currentThread() == displayThread)
 			FrameworkPlugin.warning("Access to IAgent API in UI thread is detected", new Exception("Access to IAgent API in UI thread is detected"));
 	}
 
