@@ -648,7 +648,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			} catch (IAgentException ex) {
 				// ignore bundle installed exceptions, we will receive uninstalled
 				// event shortly
-				if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+				if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED &&
+						ex.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED) {
 					BrowserErrorHandler.processError(ex, connector, userDisconnect);
 				}
 			}
