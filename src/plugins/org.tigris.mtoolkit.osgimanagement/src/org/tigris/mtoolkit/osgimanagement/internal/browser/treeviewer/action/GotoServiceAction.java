@@ -21,6 +21,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class GotoServiceAction extends SelectionProviderAction implements IStateAction {
@@ -85,11 +86,13 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 			ObjectClass oClass = (ObjectClass) getStructuredSelection().getFirstElement();
 			if ((oClass.getParent() instanceof FrameworkImpl))
 				return;
-			ServicesCategory category = (ServicesCategory) oClass.getParent();
-			if (category.getType() == ServicesCategory.REGISTERED_SERVICES) {
-				this.setEnabled(false);
-			} else {
-				this.setEnabled(true);
+			if (oClass.findFramework().getViewType() == Framework.BUNDLES_VIEW) {
+				ServicesCategory category = (ServicesCategory) oClass.getParent();
+				if (category.getType() == ServicesCategory.REGISTERED_SERVICES) {
+					this.setEnabled(false);
+				} else {
+					this.setEnabled(true);
+				}
 			}
 		} else {
 			this.setEnabled(false);

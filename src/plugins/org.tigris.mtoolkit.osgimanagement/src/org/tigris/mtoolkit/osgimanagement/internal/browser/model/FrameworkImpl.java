@@ -339,11 +339,13 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		for (int i = 0; i < bundles.length; i++) {
 			Model serviceCategories[] = ((Bundle) bundles[i]).getChildren();
 			if (serviceCategories != null && serviceCategories.length > 0) {
-				Object services[] = serviceCategories[0].getChildren();
-				if (services != null) {
-					for (int j = 0; j < services.length; j++) {
-						if (((ObjectClass) services[j]).getService().getServiceId() == id) {
-							return (Bundle) bundles[i];
+				if (((ServicesCategory)serviceCategories[0]).getType() == ServicesCategory.REGISTERED_SERVICES) {
+					Object services[] = serviceCategories[0].getChildren();
+					if (services != null) {
+						for (int j = 0; j < services.length; j++) {
+							if (((ObjectClass) services[j]).getService().getServiceId() == id) {
+								return (Bundle) bundles[i];
+							}
 						}
 					}
 				}
