@@ -21,6 +21,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class GotoServiceAction extends SelectionProviderAction implements IStateAction {
@@ -40,11 +41,17 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 			RemoteService service = objectClass.getService();
 			String searchName = objectClass.getName();
 			if (((ServicesCategory) objectClass.getParent()).getType() == ServicesCategory.USED_SERVICES) {
-				Bundle bundle = ((FrameworkImpl) objectClass.findFramework()).findBundleForService(service.getServiceId());
-				if (bundle == null)
-					return;
-				ServicesCategory category = (ServicesCategory) bundle.getChildren()[0];
-				Model[] services = category.getChildren();
+				Model[] services = null;
+				FrameworkImpl fw = ((FrameworkImpl) objectClass.findFramework());
+				if (fw.getViewType() == Framework.BUNDLES_VIEW) {
+					Bundle bundle = fw.findBundleForService(service.getServiceId());
+					if (bundle == null)
+						return;
+					ServicesCategory category = (ServicesCategory) bundle.getChildren()[0];
+					services = category.getChildren();
+				} else {
+					services = fw.getChildren();
+				}
 				for (int i = 0; i < services.length; i++) {
 					if (services[i].getName().equals(searchName)) {
 						StructuredSelection selection = new StructuredSelection(services[i]);
