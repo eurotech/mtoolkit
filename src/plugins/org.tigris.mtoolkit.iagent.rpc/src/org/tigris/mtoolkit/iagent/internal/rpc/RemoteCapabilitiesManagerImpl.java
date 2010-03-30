@@ -15,6 +15,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
@@ -72,4 +74,20 @@ public class RemoteCapabilitiesManagerImpl implements Remote, RemoteCapabilities
 			synchronizer.enqueue(new EventData(pmpEventData, PROPERTY_EVENT));
 		}
 	}
+
+	public long getRemoteServiceID() {
+		try {
+			ServiceRegistration localRegistration = registration;
+			if (localRegistration == null)
+				return -1;
+			ServiceReference localRef = localRegistration.getReference();
+			if (localRef == null)
+				return -1;
+			return ((Long) localRef.getProperty(Constants.SERVICE_ID)).longValue();
+		} catch (IllegalStateException e) {
+			// catch it in case the service is unregistered mean while
+			return -1;
+		}
+	}
+
 }
