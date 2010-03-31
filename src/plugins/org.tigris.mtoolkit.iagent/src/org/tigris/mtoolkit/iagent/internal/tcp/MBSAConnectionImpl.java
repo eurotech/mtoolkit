@@ -309,6 +309,8 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         lastCmdTime = System.currentTimeMillis();              
         pingThread.start();
       }
+      // ensure that the connection is established successfully
+      sendData(IAgentCommands.IAGENT_CMD_PING, null);
     }
   }
 
@@ -332,6 +334,8 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         lastCmdTime = System.currentTimeMillis();              
         pingThread.start();
       }
+      // ensure that the connection is established successfully
+      sendData(IAgentCommands.IAGENT_CMD_PING, null);
     } catch (UnknownHostException e) {
       throw new IAgentException("Exception trying to establish connection!", IAgentErrors.ERROR_CANNOT_CONNECT, e);
     } catch (IOException e) {
