@@ -225,8 +225,8 @@ public class AndroidUtils {
 
 	private static String getAndroidSdkLocation() {
 		ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
-				"com.prosyst.tools.android");
-		return preferenceStore.getString("android.sdk.location");
+				"com.android.ide.eclipse.adt");
+		return preferenceStore.getString("com.android.ide.eclipse.adt.sdk");
 	}
 
 	/**
