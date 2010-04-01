@@ -101,8 +101,8 @@ public class TreeRoot extends Model {
 		if (model instanceof ServicesCategory || model instanceof BundlesCategory) {
 			return false;
 		}
-		String text = model.toString();
-		if (text.indexOf(filter) != -1 || text.toLowerCase().indexOf(filter) != -1) {
+		String text = model.getLabel();
+		if (text.toLowerCase().indexOf(filter) != -1) {
 			return true;
 		} else {
 			return false;

@@ -15,18 +15,15 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
-import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView.ActionsProviderElement;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
@@ -156,41 +153,22 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 
 	public void update(ViewerCell cell) {
 		Object element = cell.getElement();
-		String text;
+		String text = (element instanceof Model) ? ((Model) element).getLabel() : element.toString();
 		List styles = new ArrayList();
 
 		if (element instanceof Bundle) {
-			Bundle bundle = (Bundle) element;
-			text = bundle.getName();
-
-			if (bundle.isShowID()) {
-				text += " [" + String.valueOf(bundle.getID()) + "]";
-			}
-			if (bundle.isShowVersion()) {
-				try {
-					text += " [" + String.valueOf(bundle.getVersion()) + "]";
-				} catch (IAgentException e) {
-					BrowserErrorHandler.processError(e, NLS.bind(Messages.cant_get_bundle_version,
-						String.valueOf(bundle.getID())), false);
-				}
-			}
 			TextStyle style = new TextStyle();
 			styles.add(new StyleRange(0, text.length(), style.foreground, style.background));
 		} else if (element instanceof ServiceProperty) {
-			text = ((ServiceProperty) element).getLabel();
 			TextStyle style = new TextStyle();
 			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
 			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 			styles.add(new StyleRange(text.indexOf(":") + 1, text.length(), style.foreground, style.background));
-		} else if (element instanceof FrameworkImpl) {
-			text = element.toString();
 		} else {
-			text = element.toString();
 			TextStyle style = new TextStyle();
 			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
-
 		}
 		cell.setText(text);
 		cell.setStyleRanges((StyleRange[]) styles.toArray(new StyleRange[styles.size()]));

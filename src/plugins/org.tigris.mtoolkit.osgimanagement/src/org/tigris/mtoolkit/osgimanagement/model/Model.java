@@ -197,10 +197,15 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	}
 
 	public String getName() {
-		if (master != null) {
-			return master.getName();
-		}
 		return name;
+	}
+
+	/**
+	 * Returns human-readable text for using in UI.
+	 * @return the label
+	 */
+	public String getLabel() {
+		return getName();
 	}
 
 	public Model getParent() {

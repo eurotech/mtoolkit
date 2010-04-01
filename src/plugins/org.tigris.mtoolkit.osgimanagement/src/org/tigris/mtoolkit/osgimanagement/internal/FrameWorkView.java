@@ -1027,7 +1027,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				int startIndex = parent.indexOf(node) + 1;
 				for (int i = startIndex; i < parent.getSize(); i++) {
 					node = parent.getChildren()[i];
-					if (isTextFound(node.getName(), text)) {
+					if (isTextFound(node.getLabel(), text)) {
 						foundNode = node;
 						break;
 					}
@@ -1072,7 +1072,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			if (child == startNode) {
 				return child;
 			}
-			String text = child.getName();
+			String text = child.getLabel();
 			if (isTextFound(text, searching)) {
 				return child;
 			}
