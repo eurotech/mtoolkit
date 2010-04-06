@@ -52,7 +52,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
   protected InputStream is;
 
   private Object lock = new Object();
-  private boolean isSending = false;
+  private Thread sendingThread;
   private ByteArrayOutputStream headerBuffer;
 
   private ConnectionManagerImpl connManager;
@@ -160,8 +160,10 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
     debug("[sendData] aData: " + aData + " aData.length" + ( aData != null ? aData.length : 0));
     OutputStream l_os = null;
     InputStream l_is = null;
+    Thread oldSendingThread;
     synchronized (lock) {
-      while(isSending) {
+    	Thread currentThread = Thread.currentThread();
+      while(sendingThread != null && sendingThread != currentThread) {
         try {
           lock.wait(5000);
         } catch (InterruptedException e) {
@@ -174,7 +176,10 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
         throw new IAgentException("Connection to the device is closed!", IAgentErrors.ERROR_DISCONNECTED);
       l_os = os;
       l_is = is;
-      isSending = true;
+      // save the previous value so we can properly support
+      // method reentrance in the same thread
+      oldSendingThread = sendingThread;
+      sendingThread = currentThread;
     }
     try {
       messageID++;//increase the message ID
@@ -249,7 +254,7 @@ public class MBSAConnectionImpl implements MBSAConnection, Runnable {
       }
     } finally {
       synchronized (lock) {
-        isSending = false;
+        sendingThread = oldSendingThread;
         lock.notifyAll();
       }
       // get last cmd send time
