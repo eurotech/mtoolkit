@@ -156,8 +156,8 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		String text = (element instanceof Model) ? ((Model) element).getLabel() : element.toString();
 		List styles = new ArrayList();
 
-		TextStyle style = new TextStyle();
 		if (element instanceof ServiceProperty) {
+			TextStyle style = new TextStyle();
 			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
 			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
