@@ -113,6 +113,7 @@ public class ConsoleManager {
 	}
 	
 	private static void disconnectConsole0(RemoteConsole con) {
+		con.disconnect();
 	}
 	
 	private static RemoteConsole createConsole(Framework fw) {
