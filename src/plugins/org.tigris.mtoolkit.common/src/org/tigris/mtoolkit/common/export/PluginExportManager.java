@@ -48,7 +48,7 @@ public class PluginExportManager {
 	public void addBundle(String symbolicName, String version) throws CoreException {
 		IPluginModelBase bundleModel = findModel(symbolicName, version);
 		if (bundleModel == null)
-			throw UtilitiesPlugin.newException(IStatus.ERROR, "Cannot find plugin " + symbolicName + " (" + version + ") in current target platform", null);
+			throw UtilitiesPlugin.newException(IStatus.ERROR, "Cannot find bundle " + symbolicName + " (" + version + ") in current target platform", null);
 		addBundle(bundleModel);
 	}
 	
@@ -77,7 +77,7 @@ public class PluginExportManager {
 	}
 
 	private static void pluginModelNotFound(String symbolicName, String version) {
-		UtilitiesPlugin.warning("Cannot find plugin model " + symbolicName + "_" + version + " in current target platform", null);
+		UtilitiesPlugin.warning("Cannot find bundle " + symbolicName + (version != null ? "_" + version : "") + " in current target platform.", new Throwable("<from here>"));
 	}
 	
 	public String getLocation(IPluginModelBase model) {
