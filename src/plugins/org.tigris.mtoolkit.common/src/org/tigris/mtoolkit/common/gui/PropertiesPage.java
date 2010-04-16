@@ -32,6 +32,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+/**
+ * @since 5.0
+ */
 public class PropertiesPage extends PropertyPage {
 
 	protected TableViewer tableViewer;

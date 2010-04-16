@@ -232,4 +232,18 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 		}
 		return status;
 	}
+
+	public String getErrorMessage() {
+		for (Iterator it = preferencePages.iterator(); it.hasNext();) {
+			PreferencePageWrapper page = (PreferencePageWrapper) it.next();
+			if (page.getPage() == null) {
+				continue;
+			}
+			String errorMsg = page.getPage().getErrorMessage();
+			if (errorMsg != null && errorMsg.length() > 0) {
+				return errorMsg;
+			}
+		}
+		return null;
+	}
 }

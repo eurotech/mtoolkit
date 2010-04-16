@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.common.gui;
 /**
  * Describes a key-value pair, describing an element in the list of values of an
  * service property object.
+ * @since 5.0
  * 
  */
 public class PropertyObject implements Cloneable {

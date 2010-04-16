@@ -2,6 +2,9 @@ package org.tigris.mtoolkit.common;
 
 import org.eclipse.core.runtime.IStatus;
 
+/**
+ * @since 5.0
+ */
 public class BasePluginExporter {
 
 	private volatile IStatus result = null;

@@ -22,6 +22,9 @@ public class UIResources {
 
 	protected static final ImageData DEFAULT_IMAGE_DATA = new ImageData(6, 6, 1, new PaletteData(new RGB[] { new RGB(255, 0, 0) }));
 
+	/**
+	 * @since 5.0
+	 */
 	public static final String BLANK_ICON = UtilitiesPlugin.PLUGIN_ID + ".blank_icon";
 	public static final String SMALL_ERROR_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_error_icon";
 	public static final String SMALL_WARNING_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_warning_icon";

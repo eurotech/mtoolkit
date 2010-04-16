@@ -19,6 +19,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+/**
+ * @since 5.0
+ */
 public abstract class PropertiesDialog extends TrayDialog {
 
 	private PropertiesPage mainControl;
