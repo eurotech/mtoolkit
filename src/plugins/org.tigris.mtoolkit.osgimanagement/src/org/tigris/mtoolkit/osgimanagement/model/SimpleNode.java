@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.model;
 
+/**
+ * @since 5.0
+ */
 public class SimpleNode extends Model {
 
 	public SimpleNode(String name) {

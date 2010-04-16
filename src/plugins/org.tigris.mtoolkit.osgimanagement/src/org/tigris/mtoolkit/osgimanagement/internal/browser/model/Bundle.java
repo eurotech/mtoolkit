@@ -11,10 +11,12 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.osgi.util.NLS;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
@@ -191,9 +193,25 @@ public class Bundle extends Model {
 
 	public String toString() {
 		try {
-			return "" + name + " " + getVersion();
+			return name + " " + getVersion();
 		} catch (IAgentException e) {
 		}
 		return name;
+	}
+
+	public String getLabel() {
+		String label = getName();
+		if (isShowID()) {
+			label += " [" + String.valueOf(getID()) + "]";
+		}
+		if (isShowVersion()) {
+			try {
+				label += " [" + String.valueOf(getVersion()) + "]";
+			} catch (IAgentException e) {
+				BrowserErrorHandler.processError(e,
+						NLS.bind(Messages.cant_get_bundle_version, String.valueOf(getID())), false);
+			}
+		}
+		return label;
 	}
 }

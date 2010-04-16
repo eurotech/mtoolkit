@@ -20,6 +20,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
+/**
+ * @since 5.0
+ */
 public class Util {
 
 	public static IStatus handleIAgentException(IAgentException e) {

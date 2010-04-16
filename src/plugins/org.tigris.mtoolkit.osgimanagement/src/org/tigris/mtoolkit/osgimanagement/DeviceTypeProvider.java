@@ -18,10 +18,16 @@ import org.eclipse.ui.IMemento;
 
 public interface DeviceTypeProvider {
 
+	/**
+	 * @since 5.0
+	 */
 	public Control createPanel(Composite parent, DeviceTypeProviderValidator validator);
 	
 	public void setProperties(IMemento config);
 
+	/**
+	 * @since 5.0
+	 */
 	public String validate();
 	
 	public Dictionary load(IMemento config);

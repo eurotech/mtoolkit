@@ -53,11 +53,15 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
+/**
+ * @since 5.0
+ */
 public class FrameworkProcessor implements InstallationItemProcessor {
 
 	private static FrameworkProcessor defaultinstance;
 	private static final String MIME_JAR = "application/java-archive";
 	private static final String MIME_ZIP = "application/zip";
+	private static final String PROP_JVM_NAME = "jvm.name";
 
 	private static Vector additionalProcessors = new Vector();
 	
@@ -159,14 +163,21 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			// Cannot get platform properties - continuing.
 		}
 
+		if (framework.getConnector() == null) {
+			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to " + framework);
+		}
+
+		if (!preparationProps.containsKey(PROP_JVM_NAME)) {
+			String transportType = (String) framework.getConnector().getProperties().get(DeviceConnector.TRANSPORT_TYPE);
+			if ("android".equals(transportType)) {
+				preparationProps.put(PROP_JVM_NAME, "Dalvik");
+			}
+		}
+
 		IStatus preparationStatus = item.prepare(subMonitor.newChild(50), preparationProps);
 
 		if (preparationStatus.getSeverity() == IStatus.ERROR || preparationStatus.getSeverity() == IStatus.CANCEL) {
 			return preparationStatus;
-		}
-
-		if (framework.getConnector() == null) {
-			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to "+framework);
 		}
 			
 		if (item instanceof PluginItem) {

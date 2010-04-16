@@ -18,17 +18,32 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public interface ContentTypeModelProvider {
 
+	/**
+	 * @since 5.0
+	 */
 	public static final String MIME_TYPE_BUNDLE = "bundle";
 	
 
+	/**
+	 * @since 5.0
+	 */
 	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor);
 	
 	public void disconnect();
 	
+	/**
+	 * @since 5.0
+	 */
 	public Model switchView(int viewType);
 
+	/**
+	 * @since 5.0
+	 */
 	public Model getResource(String id, String version, Framework fw) throws IAgentException;
 	
+	/**
+	 * @since 5.0
+	 */
 	public String[] getSupportedMimeTypes();
 
 }

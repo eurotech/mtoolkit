@@ -41,11 +41,17 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 			RemoteService service = objectClass.getService();
 			String searchName = objectClass.getName();
 			if (((ServicesCategory) objectClass.getParent()).getType() == ServicesCategory.USED_SERVICES) {
-				Bundle bundle = ((FrameworkImpl) objectClass.findFramework()).findBundleForService(service.getServiceId());
-				if (bundle == null)
-					return;
-				ServicesCategory category = (ServicesCategory) bundle.getChildren()[0];
-				Model[] services = category.getChildren();
+				Model[] services = null;
+				FrameworkImpl fw = ((FrameworkImpl) objectClass.findFramework());
+				if (fw.getViewType() == Framework.BUNDLES_VIEW) {
+					Bundle bundle = fw.findBundleForService(service.getServiceId());
+					if (bundle == null)
+						return;
+					ServicesCategory category = (ServicesCategory) bundle.getChildren()[0];
+					services = category.getChildren();
+				} else {
+					services = fw.getChildren();
+				}
 				for (int i = 0; i < services.length; i++) {
 					if (services[i].getName().equals(searchName)) {
 						StructuredSelection selection = new StructuredSelection(services[i]);
@@ -86,13 +92,11 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 			ObjectClass oClass = (ObjectClass) getStructuredSelection().getFirstElement();
 			if ((oClass.getParent() instanceof FrameworkImpl))
 				return;
-			if (oClass.findFramework().getViewType() == Framework.BUNDLES_VIEW) {
-				ServicesCategory category = (ServicesCategory) oClass.getParent();
-				if (category.getType() == ServicesCategory.REGISTERED_SERVICES) {
-					this.setEnabled(false);
-				} else {
-					this.setEnabled(true);
-				}
+			ServicesCategory category = (ServicesCategory) oClass.getParent();
+			if (category.getType() == ServicesCategory.REGISTERED_SERVICES) {
+				this.setEnabled(false);
+			} else {
+				this.setEnabled(true);
 			}
 		} else {
 			this.setEnabled(false);

@@ -19,6 +19,9 @@ import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 
+/**
+ * @since 5.0
+ */
 public abstract class Framework extends Model {
 
 	public final static int BUNDLES_VIEW = 0;

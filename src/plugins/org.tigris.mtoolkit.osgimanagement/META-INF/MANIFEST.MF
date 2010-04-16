@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: org.tigris.mtoolkit.osgimanagement;singleton:=true
-Bundle-Version: 4.0.0.qualifier
+Bundle-Version: 5.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.tigris.mtoolkit.osgimanagement,
  org.tigris.mtoolkit.osgimanagement.installation,
- org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui,
+ org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;x-internal:=true,
  org.tigris.mtoolkit.osgimanagement.model
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.ide,

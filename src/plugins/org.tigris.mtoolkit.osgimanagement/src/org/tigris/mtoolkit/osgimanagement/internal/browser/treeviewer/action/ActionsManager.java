@@ -244,7 +244,10 @@ public class ActionsManager {
 	}
 
 	public static void refreshBundleAction(Bundle bundle) {
-		((FrameworkImpl) bundle.findFramework()).refreshBundleAction(bundle);
+		FrameworkImpl fw = ((FrameworkImpl) bundle.findFramework());
+		if (fw != null) {
+			fw.refreshBundleAction(bundle);
+		}
 	}
 
 	public static void setViewTypeAction(FrameworkImpl fw, int viewType) {

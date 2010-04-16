@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
@@ -648,7 +649,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			} catch (IAgentException ex) {
 				// ignore bundle installed exceptions, we will receive uninstalled
 				// event shortly
-				if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
+				if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED &&
+						ex.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED) {
 					BrowserErrorHandler.processError(ex, connector, userDisconnect);
 				}
 			}
@@ -771,6 +773,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	public void refreshAction() {
+		refreshAction(null);
+	}
+	
+	public void refreshAction(final Composite tree) {
 		Job job = new Job(Messages.refresh_framework_info) {
 			protected IStatus run(IProgressMonitor monitor) {
 				synchronized (Framework.getLockObject(connector)) {
@@ -780,7 +786,24 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 						SubMonitor connectMonitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
 						connectMonitor.setTaskName("Refreshing " + FrameworkImpl.this.getName());
 						refreshing = true;
-						clearModel();
+						try {
+							if (tree != null) {
+								tree.getDisplay().syncExec(new Runnable() {
+									public void run() {
+										tree.setRedraw(false);
+									}
+								});
+							}
+							clearModel();
+						} finally {
+							if (tree != null) {
+								tree.getDisplay().syncExec(new Runnable() {
+									public void run() {
+										tree.setRedraw(true);
+									}
+								});
+							}
+						}
 						updateSupportedModels();
 						connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
 						buildModel(sMonitor);
@@ -1231,11 +1254,11 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				Model usedCategory = getServiceCategoryNode(usedInBundle, ServicesCategory.USED_SERVICES, true);
 				addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
 						.getServiceId()), servObj.getRemoteService());
-				for (int i=0; i<usedInBundle.getSlaves().size(); i++) {
-					usedCategory = getServiceCategoryNode((Bundle) usedInBundle.getSlaves().elementAt(i), ServicesCategory.USED_SERVICES, true);
-					addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
-							.getServiceId()), servObj.getRemoteService());
-				}
+//				for (int i=0; i<usedInBundle.getSlaves().size(); i++) {
+//					usedCategory = getServiceCategoryNode((Bundle) usedInBundle.getSlaves().elementAt(i), ServicesCategory.USED_SERVICES, true);
+//					addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
+//							.getServiceId()), servObj.getRemoteService());
+//				}
 			}
 		}
 	}

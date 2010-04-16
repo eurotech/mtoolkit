@@ -22,6 +22,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 
+/**
+ * @since 5.0
+ */
 public abstract class Model implements Comparable, IActionFilter, ConstantsDistributor {
 
 	protected String name;
@@ -194,10 +197,15 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 	}
 
 	public String getName() {
-		if (master != null) {
-			return master.getName();
-		}
 		return name;
+	}
+
+	/**
+	 * Returns human-readable text for using in UI.
+	 * @return the label
+	 */
+	public String getLabel() {
+		return getName();
 	}
 
 	public Model getParent() {

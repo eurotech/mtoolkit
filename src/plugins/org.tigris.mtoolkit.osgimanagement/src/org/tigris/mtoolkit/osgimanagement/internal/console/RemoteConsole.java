@@ -128,6 +128,7 @@ public class RemoteConsole extends IOConsole {
 		firePropertyChange(this, P_DISCONNECTED, Boolean.FALSE, Boolean.TRUE);
 		if (fw.getParent() != null)
 			((TreeRoot)fw.getParent()).removeListener(listener);
+		super.dispose();
 	}
 	
 	public boolean isDisconnected() {

@@ -46,7 +46,7 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
 				if (node instanceof FrameworkImpl) {
 					FrameworkImpl framework = (FrameworkImpl) node;
 					if (framework.isConnected() && !framework.isRefreshing()) {
-						framework.refreshAction();
+						framework.refreshAction(tree.getTree());
 					}
 				} else if (node instanceof Bundle) {
 					Bundle bundle = (Bundle) node;
