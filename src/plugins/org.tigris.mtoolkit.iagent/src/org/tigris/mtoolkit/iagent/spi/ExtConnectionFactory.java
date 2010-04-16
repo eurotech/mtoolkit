@@ -17,6 +17,7 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 
 /**
  * Extenders which provide additional connections shall implement this interface
+ * @since 3.0
  */
 public interface ExtConnectionFactory {
 

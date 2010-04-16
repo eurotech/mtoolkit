@@ -156,6 +156,9 @@ public class Utils {
 
 	public static final int GET_SYSTEM_PROPERTY = 44;
 
+	/**
+	 * @since 3.0
+	 */
 	public static final int GET_BUNDLES_SNAPSHOT = 45;
 
 	public static final int LAST = 45;

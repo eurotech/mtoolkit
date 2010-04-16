@@ -12,6 +12,9 @@ package org.tigris.mtoolkit.iagent;
 
 import java.util.Dictionary;
 
+/**
+ * @since 3.0
+ */
 public interface BundleSnapshot {
 
 	public RemoteBundle getRemoteBundle();

@@ -5,15 +5,24 @@ package org.tigris.mtoolkit.iagent.event;
  */
 public class RemoteDevicePropertyEvent extends RemoteEvent {
 
+	/**
+	 * @since 3.0
+	 */
 	public static final int PROPERTY_CHANGED_TYPE = 0;
 
-	public String property;
-	public Object value;
+	private String property;
+	private Object value;
 
+	/**
+	 * @since 3.0
+	 */
 	public RemoteDevicePropertyEvent(String property, Object value) {
 		this(PROPERTY_CHANGED_TYPE, property, value);
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public RemoteDevicePropertyEvent(int type, String property, Object value) {
 		super(type);
 		this.property = property;
@@ -33,10 +42,16 @@ public class RemoteDevicePropertyEvent extends RemoteEvent {
 		}
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public Object getProperty() {
 		return property;
 	}
 
+	/**
+	 * @since 3.0
+	 */
 	public Object getValue() {
 		return value;
 	}
