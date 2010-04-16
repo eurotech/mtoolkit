@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.tigris.mtoolkit.common" version="2">
+    <resource path="src/org/tigris/mtoolkit/common/Messages.java" type="org.tigris.mtoolkit.common.Messages">
+        <filter id="1143996420">
+            <message_arguments>
+                <message_argument value="CertificatesPanel_lblNoCertificates"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
