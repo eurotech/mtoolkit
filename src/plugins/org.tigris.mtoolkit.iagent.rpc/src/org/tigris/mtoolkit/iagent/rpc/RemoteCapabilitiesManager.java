@@ -18,5 +18,8 @@ public interface RemoteCapabilitiesManager extends RemoteCapabilitiesProvider {
 	 * @param capability
 	 * @param value
 	 */
-	public void setCapability(String capability, Object value); 
+	public void setCapability(String capability, Object value);
+
+	public long getRemoteServiceID();
+
 }

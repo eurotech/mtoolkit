@@ -15,6 +15,8 @@ package org.tigris.mtoolkit.iagent.pmp;
  * Framework. Instances of this class can be received from the methods
  * {@link RemoteObject#getMethod RemoteObject.getMethod} and
  * {@link RemoteObject#getMethods RemoteObject.getMethods}.
+ * 
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 
 public interface RemoteMethod {
@@ -88,5 +90,8 @@ public interface RemoteMethod {
 
 	public String toString();
 
+	/**
+	 * @since 3.0
+	 */
 	public RemoteObject getRemoteObject();
 }

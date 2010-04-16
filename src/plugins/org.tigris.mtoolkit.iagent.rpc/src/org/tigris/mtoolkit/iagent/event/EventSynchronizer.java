@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
-
+/**
+ * @noimplement This interface is not intended to be implemented by clients.
+ *
+ */
 public interface EventSynchronizer {
 
 	public void enqueue(EventData eventData);

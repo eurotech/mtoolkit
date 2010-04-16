@@ -61,13 +61,13 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		}
 	}
 
-	public void register(BundleContext bc, DeploymentAdmin admin) {
+	public void register(BundleContext bc, Object admin) {
 		debug("[register] Registering remote Deployment Admin...");
 
 		this.context = bc;
-		this.deploymentAdmin = admin;
+		this.deploymentAdmin = (DeploymentAdmin) admin;
 
-		defaultDelegate = new DefaultDeploymentManagerDelegate(admin);
+		defaultDelegate = new DefaultDeploymentManagerDelegate(deploymentAdmin);
 		
 		delegatesTrack = new ServiceTracker(context, DeploymentManagerDelegate.class.getName(), null);
 		delegatesTrack.open();

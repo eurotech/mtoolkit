@@ -17,7 +17,6 @@ import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
@@ -68,8 +67,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		bundleAdmin = new RemoteBundleAdminImpl();
 		bundleAdmin.register(context);
 
-		applicationAdmin = new RemoteApplicationAdminImpl();
-		applicationAdmin.register(context);
+		registerApplicationAdmin(context);
 
 		deploymentAdminTrack = new ServiceTracker(context, DEPLOYMENT_ADMIN_CLASS, this);
 		deploymentAdminTrack.open(true);
@@ -135,6 +133,22 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		}
 	}
 
+	private void registerApplicationAdmin(BundleContext context) {
+		try {
+			applicationAdmin = new RemoteApplicationAdminImpl();
+			applicationAdmin.register(context);
+		} catch (Throwable t) {
+			applicationAdmin = null;
+		}
+	}
+
+	private void unregisterApplicationAdmin(BundleContext context) {
+		if (applicationAdmin != null) {
+			applicationAdmin.unregister(context);
+			applicationAdmin = null;
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -160,10 +174,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			bundleAdmin = null;
 		}
 
-		if (applicationAdmin != null) {
-			applicationAdmin.unregister(context);
-			applicationAdmin = null;
-		}
+		unregisterApplicationAdmin(context);
 
 		if (deploymentAdminTrack != null) {
 			deploymentAdminTrack.close();
@@ -195,17 +206,22 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		this.context = null;
 	}
 
-	private boolean registerDeploymentAdmin(DeploymentAdmin admin) {
+	private boolean registerDeploymentAdmin(Object admin) {
 		if (deploymentAdmin == null) {
-			deploymentAdmin = new RemoteDeploymentAdminImpl();
-			deploymentAdmin.register(context, admin);
-			return true;
+			try {
+				deploymentAdmin = new RemoteDeploymentAdminImpl();
+				deploymentAdmin.register(context, admin);
+				return true;
+			} catch (Throwable t) {
+				deploymentAdmin = null;
+				return false;
+			}
 		} else {
 			return false;
 		}
 	}
 
-	private boolean unregisterDeploymentAdmin(DeploymentAdmin admin) {
+	private boolean unregisterDeploymentAdmin(Object admin) {
 		if (deploymentAdmin != null && deploymentAdmin.getDeploymentAdmin() == admin) {
 			deploymentAdmin.unregister(context);
 			deploymentAdmin = null;
@@ -219,7 +235,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		String[] classes = (String[]) arg0.getProperty("objectClass");
 		for (int i = 0; i < classes.length; i++)
 			if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
-				DeploymentAdmin admin = (DeploymentAdmin) context.getService(arg0);
+				Object admin = context.getService(arg0);
 				registerDeploymentAdmin(admin);
 				return admin;
 			} else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
@@ -236,8 +252,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		String[] classes = (String[]) ref.getProperty("objectClass");
 		for (int i = 0; i < classes.length; i++) {
 			if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
-				if (unregisterDeploymentAdmin((DeploymentAdmin) obj)) {
-					DeploymentAdmin admin = (DeploymentAdmin) deploymentAdminTrack.getService();
+				if (unregisterDeploymentAdmin(obj)) {
+					Object admin = deploymentAdminTrack.getService();
 					if (admin != null)
 						registerDeploymentAdmin(admin);
 				}

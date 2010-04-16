@@ -18,6 +18,9 @@ import java.net.SocketException;
 
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 
+/**
+ * @since 3.0
+ */
 public class SocketTransportConnection implements TransportConnection {
 	private String host;
 	private int port;
