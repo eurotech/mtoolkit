@@ -196,6 +196,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 	}
 
 	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
+		if (connector == null) return;
 		if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
 			Object property = e.getProperty();
 			if (Capabilities.DEPLOYMENT_SUPPORT.equals(property)) {
