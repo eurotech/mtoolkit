@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Deployment Package Editor
 Bundle-SymbolicName: org.tigris.mtoolkit.dpeditor;singleton:=true
 Bundle-Activator: org.tigris.mtoolkit.dpeditor.DPActivator
-Bundle-Version: 1.1.2.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: Tigris.org
 Bundle-Localization: dppplugin
 Require-Bundle: org.eclipse.ui.ide,
