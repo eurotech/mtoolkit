@@ -11,14 +11,24 @@
 package org.tigris.mtoolkit.common.certificates;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -26,7 +36,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.osgi.framework.Constants;
 import org.osgi.util.tracker.ServiceTracker;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.ProcessOutputReader;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.gui.PasswordDialog;
@@ -236,42 +248,140 @@ public class CertUtils {
     if (count <= 0) {
       return;
     }
-    if (signedFile == null) {
-    	signedFile = file;
+    signJar0(file, signedFile, properties, new ArrayList(), monitor);
+  }
+
+  /**
+   * Convenient method for signing DP file with information provided in passed properties. 
+   * If no signing information is provided then this function does nothing.
+   * Multiple signing is allowed. If no password is provided for given certificate, 
+   * a dialog for entering password is displayed.
+   * @param dpFile the file to be signed.
+   * @param signedFile the output file.
+   * @param monitor the progress monitor.
+   * @param properties
+   * @throws IOException in case of signing error
+   */
+  public static void signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
+    if (properties == null) {
+      return;
+    }
+    int count = getCertificatesCount(properties);
+    if (count <= 0) {
+      return;
     }
 
-    for (int i = 0; i < count; i++) {
+    SubMonitor subMonitor = SubMonitor.convert(monitor);
+    File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.extracted");
+    FileUtils.deleteDir(tmpDir);
+
+    JarInputStream jis = null;
+    JarOutputStream jos = null;
+    try {
+      jis = new JarInputStream(new FileInputStream(dpFile));
+      Manifest manifest = jis.getManifest();
+      if (manifest == null) {
+        throw new IOException("DP file has no manifest.");
+      }
+      jos = new JarOutputStream(new FileOutputStream(signedFile), manifest);
+
+      List passwords = new ArrayList();
+      JarEntry jarEntry;
+      while ((jarEntry = jis.getNextJarEntry()) != null && !monitor.isCanceled()) {
+        JarEntry newEntry = new JarEntry(jarEntry.getName());
+        newEntry.setTime(jarEntry.getTime());
+        newEntry.setExtra(jarEntry.getExtra());
+        newEntry.setComment(jarEntry.getComment());
+        jos.putNextEntry(newEntry);
+
+        Attributes attributes = jarEntry.getAttributes();
+        if (attributes != null && attributes.getValue(Constants.BUNDLE_SYMBOLICNAME) != null) {
+          // this entry is bundle - sign it
+          String entryName = jarEntry.getName();
+          File file = new File(tmpDir.getAbsolutePath() + "/" + entryName);
+          file.getParentFile().mkdirs();
+
+          copyBytes(jis, new FileOutputStream(file), false, true);
+          if (!signJar0(file, null, properties, passwords, subMonitor.newChild(1))) {
+            // operation is cancelled
+            return;
+          }
+          copyBytes(new FileInputStream(file), jos, true, false);
+        } else {
+          // entry is not a bundle - put it unchanged
+          copyBytes(jis, jos, false, false);
+        }
+        jis.closeEntry();
+        jos.closeEntry();
+      }
+      jis.close();
+      jos.close();
+      signJar0(signedFile, null, properties, passwords, subMonitor.newChild(1));
+    } finally {
+      if (jis != null) {
+        try {
+          jis.close();
+        } catch (IOException e) {
+        }
+      }
+      if (jos != null) {
+        try {
+          jos.close();
+        } catch (IOException e) {
+        }
+      }
+      FileUtils.deleteDir(tmpDir);
+    }
+  }
+
+  private static void copyBytes(InputStream in, OutputStream out, boolean closeIn, boolean closeOut) throws IOException {
+    byte[] buf = new byte[1024];
+    int len;
+    try {
+      while ((len = in.read(buf)) > 0) {
+        out.write(buf, 0, len);
+      }
+    } finally {
+      if (closeIn)
+        try {
+          in.close();
+        } catch (IOException e) {
+        }
+      if (closeOut)
+        try {
+          out.close();
+        } catch (IOException e) {
+        }
+    }
+  }
+
+  private static boolean signJar0(File file, File signedFile, Map properties, List passwords, IProgressMonitor monitor)
+      throws IOException {
+    int count = getCertificatesCount(properties);
+    for (int i = 0; i < count && !monitor.isCanceled(); i++) {
       String alias = getCertificateAlias(properties, i);
-      final String location = getCertificateStoreLocation(properties, i);
+      String location = getCertificateStoreLocation(properties, i);
       String type = getCertificateStoreType(properties, i);
       String pass = getCertificateStorePass(properties, i);
       if (alias == null || location == null || type == null) {
         throw new IOException("Not enough information is specified for signing content.");
       }
       if (pass == null || pass.length() == 0) {
-        final Display display = PlatformUI.getWorkbench().getDisplay();
-        final String result[] = new String[1];
-        display.syncExec(new Runnable() {
-          public void run() {
-            Shell shell = display.getActiveShell();
-            PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
-            dialog.setMessage("Enter password for key store: \"" + location + "\"");
-            if (dialog.open() == Dialog.OK) {
-              result[0] = dialog.getPassword();
-            }
+        if (passwords.size() > i) {
+          pass = (String) passwords.get(i);
+        } else {
+          pass = getKeystorePassword(location);
+          if (pass == null) {
+            return false;
           }
-        });
-        if (result[0] == null) {
-          return;
+          passwords.add(pass);
         }
-        pass = result[0];
       }
-      if (i == 0) {
-        CertUtils.signJar(file.getAbsolutePath(), signedFile.getAbsolutePath(), monitor, alias, location, type, pass);
-      } else {
-        CertUtils.signJar(signedFile.getAbsolutePath(), null, monitor, alias, location, type, pass);
-      }
+      String inFileName = (signedFile != null && i > 0) ? signedFile.getAbsolutePath() : file.getAbsolutePath();
+      String outFileName = (signedFile != null && i == 0) ? signedFile.getAbsolutePath() : null;
+      signJar(inFileName, outFileName, monitor, alias, location, type, pass);
     }
+    return !monitor.isCanceled();
   }
 
   /**
@@ -329,5 +439,26 @@ public class CertUtils {
       }
     });
     return result[0] != null;
+  }
+
+  /**
+   * Opens password dialog for getting keystore password.
+   * @param keystoreLocation
+   * @return the password entered or null if dialog is canceled
+   */
+  public static String getKeystorePassword(final String keystoreLocation) {
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    final String result[] = new String[1];
+    display.syncExec(new Runnable() {
+      public void run() {
+        Shell shell = display.getActiveShell();
+        PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
+        dialog.setMessage("Enter password for key store: \"" + keystoreLocation + "\"");
+        if (dialog.open() == Dialog.OK) {
+          result[0] = dialog.getPassword();
+        }
+      }
+    });
+    return result[0];
   }
 }

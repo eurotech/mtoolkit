@@ -73,7 +73,12 @@ public class BaseFileItem implements InstallationItem {
         signedFile.delete();
       }
       try {
-        CertUtils.signJar(preparedFile != null ? preparedFile : baseFile, signedFile, monitor, properties);
+        File fileToSign = preparedFile != null ? preparedFile : baseFile;
+        if (FileUtils.getFileExtension(baseFile).equals("dp")) {
+          CertUtils.signDp(fileToSign, signedFile, monitor, properties);
+        } else {
+          CertUtils.signJar(fileToSign, signedFile, monitor, properties);
+        }
       } catch (IOException ioe) {
          if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
            signedFile.delete();
