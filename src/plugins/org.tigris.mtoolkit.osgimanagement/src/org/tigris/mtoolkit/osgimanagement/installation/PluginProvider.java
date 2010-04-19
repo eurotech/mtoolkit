@@ -307,6 +307,8 @@ public class PluginProvider implements InstallationItemProvider {
 			} else {
 				project = ((IProject) resource).getProject();
 			}
+			if (!project.isOpen())
+				return false;
 			return PDE.hasPluginNature(project);
 		}
 		return false;
