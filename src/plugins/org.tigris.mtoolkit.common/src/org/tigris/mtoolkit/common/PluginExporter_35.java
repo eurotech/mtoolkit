@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common;
 
+import java.io.File;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -17,7 +19,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.pde.internal.ui.PDEPlugin;
@@ -75,17 +76,18 @@ public class PluginExporter_35 extends BasePluginExporter implements IPluginExpo
 		try {
 			errors = ((Boolean) ReflectionUtils.invokeMethod(operation, "hasAntErrors")).booleanValue(); //$NON-NLS-1$
 			if (errors) {
-				Display display = Display.getCurrent();
-				if (display == null)
-					display = Display.getDefault();
-				display.syncExec(new Runnable() {
-					public void run() {
-						String errorMessage = NLS.bind("Errors occurred during the export operation. The ant tasks generated log files which can be found at {0}", //$NON-NLS-1$
-							info.destinationDirectory);
-						MessageDialog.openError(PDEPlugin.getActiveWorkbenchShell(),
-							"Problem during export", errorMessage); //$NON-NLS-1$
-					}
-				});
+				final File logLocation = new File(info.destinationDirectory, "logs.zip"); //$NON-NLS-1$
+				if (logLocation.exists()) {
+					Display display = Display.getCurrent();
+					if (display == null)
+						display = Display.getDefault();
+					display.syncExec(new Runnable() {
+						public void run() {
+							ExportErrorDialog dialog = new ExportErrorDialog("Problem during export", logLocation); //$NON-NLS-1$
+							dialog.open();
+						}
+					});
+				}
 			}
 		} catch (ReflectionUtils.InvocationException t) {
 			UtilitiesPlugin.error("Failed to get export plugins status", t); //$NON-NLS-1$
