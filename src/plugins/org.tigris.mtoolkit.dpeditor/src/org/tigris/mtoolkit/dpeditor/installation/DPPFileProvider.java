@@ -55,6 +55,9 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 		}
 
 		public InputStream getInputStream() throws IOException {
+			if (preparedFile != null) {
+				return new FileInputStream(preparedFile);
+			}
 			return new FileInputStream(dpFile);
 		}
 
@@ -67,20 +70,20 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 				DPPUtil.generateDeploymentPackage(dppFile, monitor, file.getProject(), DPPUtil.TYPE_QUICK_BUILD_DPP);
 
 				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) && !AndroidUtils.isDpConvertedToDex(dpFile)) {
-					File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + file.getName());
+					File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + dpFile.getName());
 					convertedFile.getParentFile().mkdirs();
 					AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
 					preparedFile = convertedFile;
 				}
 
 				// sign file if properties contain signing info
-				File signedFile = new File(DPActivator.getDefault().getStateLocation() + "/signed/" + file.getName());
+				File signedFile = new File(DPActivator.getDefault().getStateLocation() + "/signed/" + dpFile.getName());
 				signedFile.getParentFile().mkdirs();
 				if (signedFile.exists()) {
 					signedFile.delete();
 				}
 				try {
-					CertUtils.signJar(preparedFile != null ? preparedFile : dpFile, signedFile, monitor, properties);
+					CertUtils.signDp(preparedFile != null ? preparedFile : dpFile, signedFile, monitor, properties);
 				} catch (IOException ioe) {
 					if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
 						signedFile.delete();
