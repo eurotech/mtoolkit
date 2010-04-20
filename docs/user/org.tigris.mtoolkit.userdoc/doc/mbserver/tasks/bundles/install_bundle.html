@@ -15,7 +15,7 @@
 <h3>Installing a Bundle from the Workspace</h3>
 <p>You can  install a bundle from the workspace on a connected OSGi framework if there is an active plug-in project dedicated to the bundle or if the bundle is built in a JAR file.</p>
 <p>To install a bundle from your Eclipse workspace, in one of the Eclipse navigation views (e.g. Package Explorer) right-click the  plug-in project node or the JAR file node and select the target framework from the <b>Install to</b> menu. If you are installing the bundle from a plug-in project, the plug-in project will be built and exported to a JAR file. Then, the JAR file will be transferred to the  OSGi framework and installed. In case you are installing the bundle by using a ready JAR file, the file will be directly deployed on the framework.</p>
-<p>On success, the installed bundle will appear under the <b>Bundles</b> node of the framework-specific tree. Bundles being installed are not started automatically - you have to start them by yourself. </p>
+<p>On success, the installed bundle will appear under the <b>Bundles</b> node of the framework-specific tree. If the <b>Autostart bundles on install</b> option from <a href="../fw_preferences.html">mToolkit's preferences</a> is not selected, then the bundles being installed will not be started automatically - you have to start them  yourself. </p>
 <h3>Installing a Bundle from outside the Workspace</h3>
 <p>To install a bundle from the Devices view: </p>
 <ol>
@@ -23,7 +23,7 @@
   <li>To install the bundle JAR, right-click the device node or the <b>Bundles</b> node and use  <b>Install Bundle</b>.</li>
   <li>In the <b>Install bundle</b> dialog, indicate the location in the file system of the bundle JAR to install and click <b>OK</b>. <br>
     <br>
-    <p><img src="img/b_install.gif" width="330" height="123"><br>
+    <p><img src="img/b_install.gif" width="347" height="130"><br>
     Figure 1: Choosing the bundle to install</p>
   </li>
 </ol>
@@ -42,6 +42,6 @@
 <p><a href="../../reference/fw_views.html">Frameworks View</a><br>
 <a href="../../reference/fw_views.html">Frameworks View Tree Icons</a><br>
 <a href="../../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
-<p><img src="../../../copyright.gif" width="399" height="17"></p>
+<p><img src="../../../copyright.gif" width="398" height="23"></p>
 </body>
 </html>

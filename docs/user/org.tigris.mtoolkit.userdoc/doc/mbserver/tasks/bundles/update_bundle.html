@@ -10,10 +10,20 @@
 <body>
 <h1>Updating a Bundle </h1>
 <p>To update an installed bundle on an OSGi framework available in the <b>Frameworks</b> view, execute the next steps:</p>
-<ol>
-  <li>Select the bundle from the framework's tree, right-click it and invoke <b>Update</b>.</li>
-  <li>In the displayed dialog, specify the location of the bundle JAR file which contains the update and click <b>OK</b>. </li>
-</ol>
+<ul>
+  <li>If new bundle version is available in the local file system:
+    <ol>
+      <li>Select the bundle from the framework's tree, right-click it and invoke <b>Update</b>.</li>
+      <li>In the displayed dialog, specify the location of the bundle JAR file which contains the update and click <b>OK</b>. </li>
+    </ol>
+  </li>
+  <li>If the new bundle version is being developed in the Eclipse workspace:
+    <ol>
+      <li>Right-click the plug-in project of the bundle or its  JAR file if added to the workspace and select <b>Install To</b> &gt; <b>Select OSGi Framework</b>.</li>
+      <li>Select the target OSGi framework where the update should be executed and click <b>OK</b>. </li>
+    </ol>
+  </li>
+</ul>
 <p class="Note">Note: You are not allowed to update system bundles providing vital system functionality -  updating some of them might lead to loss of important OSGi framework capabilities.</p>
 <p><img src="../../../ngrelc00.gif" width="159" height="27"></p>
 <p><a href="../../concepts/fw_overview.html">OSGi Management Overview</a><br>
@@ -24,6 +34,6 @@
 <p><img src="../../../ngrelr00.gif" width="159" height="27"></p>
 <p><a href="../../reference/fw_tree.html"> Frameworks View Tree Icons</a><br>
 <a href="../../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
-<p><img src="../../../copyright.gif" width="399" height="17"></p>
+<p><img src="../../../copyright.gif" width="398" height="23"></p>
 </body>
 </html>
