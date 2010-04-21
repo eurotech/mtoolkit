@@ -10,8 +10,8 @@
 <body>
 <h1> Frameworks View   Menus and Toolbar</h1>
 <h2><a name="pop"></a>Frameworks View Popup Menu</h2>
-<p>The tree of a connected  OSGi framework, displayed in the <b>Frameworks</b> view, has a  popup menu, activated upon right-click, with different items depending on the currently selected node. </p>
-<p><img src="img/ctx_menu.gif" width="670" height="312"><br>
+<p>The tree of a connected  OSGi framework, displayed in the <b>Frameworks</b> view, has a  popup menu, activated upon right-click, with different items depending on the currently selected node as well as on the mToolkit extensions installed in Eclipse. </p>
+<p><img src="img/ctx_menu.gif" width="502" height="404"><br>
 Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
 <table width="95%" border="1" cellspacing="0" cellpadding="3">
   <tr>
@@ -19,7 +19,18 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
     <th width="86%">Description</th>
   </tr>
   <tr align="center">
+    <td colspan="2" nowrap><i>No node is selected</i></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Add Framework</b></td>
+    <td>Adds a new OSGi framework to the tree of frameworks.</td>
+  </tr>
+  <tr align="center">
     <td colspan="2" nowrap><i>Common to All Node Types </i></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Show Web Admin </b></td>
+    <td>Shows  the Web Admin Console running on the connected framework in a Web view. Enabled only if the framework has the bundles of the Web Admin Console installed. </td>
   </tr>
   <tr>
     <td nowrap><b>Search </b></td>
@@ -28,13 +39,6 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
   <tr>
     <td nowrap><b>Show Console</b></td>
     <td nowrap>Displays the console for the relevant  OSGi framework.</td>
-  </tr>
-  <tr>
-    <td colspan="2" nowrap><div align="center"><i>Frameworks Root Node</i></div></td>
-  </tr>
-  <tr>
-    <td width="14%" nowrap><b>Add Framework</b></td>
-    <td width="86%">Adds a new  OSGi framework to the tree of frameworks.</td>
   </tr>
   <tr>
     <td height="29" colspan="2" nowrap><div align="center"><i>Framework Node</i></div></td>
@@ -60,8 +64,16 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
     <td width="86%">Installs a new bundle on the selected framework. </td>
   </tr>
   <tr>
-    <td width="14%" nowrap><b>Show services / Show bundles</b></td>
-    <td width="86%">Switches to the Bundles/Services mode of the  tree of the OSGi device(s). </td>
+    <td nowrap><b>Install Deployment Package </b></td>
+    <td>Install a deployment package on the selected framework. Available if a specific mToolkit extension is installed. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Add  Server</b></td>
+    <td>Adds an account of an OMA DM management server to the OSGi runtime management server registry. Available if a specific mToolkit extension is installed.  </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Install Widget </b></td>
+    <td>Install a widget on the selected framework. Available if a specific mToolkit extension is installed. </td>
   </tr>
   <tr>
     <td width="14%" nowrap><b>Properties</b></td>
@@ -87,7 +99,7 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
     <td width="86%">Uninstalls the selected bundle(s). </td>
   </tr>
   <tr>
-    <td nowrap><b> Bundle Headers </b></td>
+    <td nowrap><b> Properties </b></td>
     <td>Shows the content of the manifest file of the selected bundle. </td>
   </tr>
   <tr>
@@ -103,11 +115,16 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
     <td>Displays the bundle versions in braces after the bundle names.</td>
   </tr>
   <tr align="center">
-    <td colspan="2" nowrap><i>Deployment package node </i></td>
+    <td colspan="2" nowrap><i>Deployment package node<br>
+    (available if a specific mToolkit extension is installed)</i></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Uninstall Deployment Package </b></td>
+    <td nowrap>Uninstall the selected deployment package(s).</td>
   </tr>
   <tr>
     <td nowrap><b>Properties</b></td>
-    <td nowrap>Shows the content of the most specific headers of a deployment package manifest file.</td>
+    <td nowrap>Shows the  headers from the main section of the deployment package manifest file.</td>
   </tr>
   <tr>
     <td colspan="2" nowrap><div align="center"><i>Service Node</i></div></td>
@@ -123,14 +140,19 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
   </tr>
   <tr>
     <td width="14%" nowrap><b>Go to service</b></td>
-    <td width="86%">Allows you to go to the node of the registered service. Enabled only for the object classes of services within <b>Services in use</b> nodes, i.e. services used from other bundles. </td>
+    <td width="86%">Allows you to go to the node of the registered service. Enabled only for the object classes of services within <b>Used Services </b> sub-nodes, i.e. services used from other bundles. </td>
   </tr>
   <tr>
-    <td colspan="2" nowrap><div align="center"><i>Applications package node </i></div></td>
+    <td nowrap><b>Properties</b></td>
+    <td>Shows the registration properties of the selected service. </td>
+  </tr>
+  <tr>
+    <td colspan="2" nowrap><div align="center"><i>Application  node<br>
+    (available if a specific mToolkit extension is installed)    </i></div></td>
   </tr>
   <tr>
     <td nowrap><b>Start Application</b></td>
-    <td>Start the selected application</td>
+    <td>Starts the selected application</td>
   </tr>
   <tr>
     <td nowrap><b>Stop Application</b></td>
@@ -140,10 +162,41 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
     <td nowrap><b>Properties</b></td>
     <td>Shows the properties of the selected application</td>
   </tr>
+  <tr>
+    <td colspan="2" align="center" nowrap><i>Widget node <br>
+    (available if a specific mToolkit extension is installed)    </i></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Uninstall Widget</b></td>
+    <td>Uninstall the selected widget. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Properties</b></td>
+    <td>Shows the properties of the widget according to its configuration file. </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center" nowrap><i>Management server node </i></td>
+  </tr>
+  <tr>
+    <td nowrap><b>Connect Server </b></td>
+    <td>Connects the framework with the selected management server. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Disconnect</b></td>
+    <td>Disconnects the framework from the server. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Remove Server </b></td>
+    <td>Deletes the server account from the framework.</td>
+  </tr>
+  <tr>
+    <td nowrap><b>Properties</b></td>
+    <td>Shows the connection properties of the management server. </td>
+  </tr>
 </table>
 <h2> <a name="down"></a>Frameworks View Pulldown Menu</h2>
 <p>The <b>Frameworks</b> view has a pulldown menu with options similar to those from the view's context menu.</p>
-<p><img src="img/pulldown_menu.gif" width="602" height="197"><br>
+<p><img src="img/pulldown_menu.gif" width="571" height="244"><br>
 Figure 3: The pulldown menu of the <b>Frameworks</b> view. </p>
 <table width="95%" border="1" cellspacing="0" cellpadding="3">
   <tr>
@@ -165,7 +218,7 @@ Figure 3: The pulldown menu of the <b>Frameworks</b> view. </p>
 </table>
 <h2><a name="toolbar"></a>Frameworks View Toolbar </h2>
 <p>mToolkit adds a toolbar to the <b>Frameworks</b> view, which enables administration over  OSGi frameworks and has commands similar to those of the popup  menus. </p>
-<p><img src="img/device_toolbar.gif" width="601" height="196"><br>
+<p><img src="img/device_toolbar.gif" width="708" height="242"><br>
 Figure 4: <b>Frameworks</b> view toolbar. </p>
 <p>
 <table cellspacing=0 cellpadding=3 border=1 width="95%">
@@ -293,6 +346,22 @@ Figure 4: <b>Frameworks</b> view toolbar. </p>
     <td width="8%" colspan="2" align="center"><img src="img/properties_action.gif" width="16" height="16"></td>
     <td><b>Framework Properties</b></td>
   </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="../tasks/img/webadmin_action.gif" width="16" height="16"></td>
+    <td><b>Show Web Admin </b></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="img/services.gif" width="16" height="16"></td>
+    <td><b>Show Services</b></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="img/bundles_group.gif" width="16" height="16"></td>
+    <td><b>Show Bundles </b></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="img/console.gif" width="16" height="16"></td>
+    <td><b>Show Console </b></td>
+  </tr>
 </table>
 <p><img src="../../ngrelc00.gif" width="159" height="27"></p>
 <p><a href="../concepts/fw_overview.html">OSGi Management Overview</a> <br>
@@ -305,6 +374,7 @@ Figure 4: <b>Frameworks</b> view toolbar. </p>
     <a href="../tasks/connect.html">Connecting to/Disconnecting from an OSGi  Runtime</a><br>
     <a href="../tasks/bundles/introduction.html">Managing  Bundles</a><br>
     <a href="../tasks/applications/intorduction.html">Managing Applications</a><br>
+    <a href="../tasks/web_console.html">Opening the Web Admin Console inside Eclipse</a><br>
     <a href="../tasks/rem_console.html">Using the Remote Console</a><br>
     <a href="../tasks/fw_preferences.html">Customizing OSGi  Management</a><br>
 <a href="../tasks/troubleshooting.html">OSGi Management Troubleshooting</a></p>
