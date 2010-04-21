@@ -65,6 +65,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	private ServiceTracker applicationTracker;
 	private ServiceTracker handlesTracker;
 	private boolean suppressEventFiring = false;
+	private boolean applicationSupport = false;
 
 	public Class[] remoteInterfaces() {
 		return new Class[] { RemoteApplicationAdmin.class };
@@ -85,11 +86,6 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		}
 
 		registration = bc.registerService(RemoteApplicationAdmin.class.getName(), this, null);
-
-		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-		if (capMan != null) {
-			capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(true));
-		}
 	}
 
 	public void unregister(BundleContext bc) {
@@ -107,12 +103,17 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			handlesTracker = null;
 		}
 
-		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-		if (capMan != null) {
-			capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(false));
-		}
+		setApplicationSupport(false);
 
 		this.bc = null;
+	}
+
+	private void setApplicationSupport(boolean enabled) {
+		applicationSupport = enabled;
+		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+		if (capMan != null) {
+			capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(enabled));
+		}
 	}
 
 	private void fireApplicationEvent(String id, int type) {
@@ -327,6 +328,9 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	}
 
 	public Object addingService(ServiceReference reference) {
+		if (!applicationSupport) {
+			setApplicationSupport(true);
+		}
 		Object service = bc.getService(reference);
 		if (!suppressEventFiring) {
 			if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
