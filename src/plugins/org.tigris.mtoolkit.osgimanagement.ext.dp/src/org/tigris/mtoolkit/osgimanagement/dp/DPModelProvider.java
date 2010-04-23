@@ -138,12 +138,6 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 	}
 
 	public void deploymentPackageChanged(final RemoteDPEvent e) {
-		try {
-			StatusManager.getManager().handle(new Status(IStatus.INFO, Activator.PLUGIN_ID, 
-				"Deployment package changed " + e.getDeploymentPackage().getName() + " " + (e.getType() == RemoteDPEvent.INSTALLED ? "INSTALLED" : "UNINSTALLED")));
-		} catch (IAgentException e2) {
-		}
-
 		synchronized (Framework.getLockObject(connector)) {
 			try {
 				RemoteDP remoteDP = e.getDeploymentPackage();
