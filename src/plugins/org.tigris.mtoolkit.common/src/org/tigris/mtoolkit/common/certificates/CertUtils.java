@@ -261,6 +261,7 @@ public class CertUtils {
    * @param monitor the progress monitor.
    * @param properties
    * @throws IOException in case of signing error
+   * @since 5.0
    */
   public static void signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
     if (properties == null) {
@@ -445,6 +446,7 @@ public class CertUtils {
    * Opens password dialog for getting keystore password.
    * @param keystoreLocation
    * @return the password entered or null if dialog is canceled
+   * @since 5.0
    */
   public static String getKeystorePassword(final String keystoreLocation) {
     final Display display = PlatformUI.getWorkbench().getDisplay();
