@@ -281,8 +281,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	public void disconnect() {
-//		TODO:
-		if (connector == null) return;
+		if (!isConnected()) return;
 		synchronized (Framework.getLockObject(connector)) {
 			if (connector != null) {
 				removeRemoteListeners();
