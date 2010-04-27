@@ -186,6 +186,7 @@ public class ActionsManager {
 	}
 
 	public static void disconnectFrameworkAction(final FrameworkImpl fw) {
+		disconnectConsole(fw);
 		Job disconnectJob = new Job("Disconnect device") {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -198,7 +199,6 @@ public class ActionsManager {
 		};
 		disconnectJob.setRule(new FwMutexRule(fw));
 		disconnectJob.schedule();
-		disconnectConsole(fw);
 	}
 	
 	public static void disconnectConsole(FrameworkImpl fw) {
