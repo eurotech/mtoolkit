@@ -88,6 +88,9 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 					}
 				}
 			}
+			if (rBundle != null && rBundle[0].isSystemBundle()) {
+				return Util.newStatus(IStatus.ERROR, "Bundle "+symbolicName+" is system", null);
+			}
 
 			// install if missing
 			if (!update[0] && !install[0]) {
