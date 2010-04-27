@@ -110,7 +110,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			int index = 1;
 			Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
 			String defaultFWName = Messages.new_framework_default_name+
-			" ["+connProps.get(DeviceConnector.TRANSPORT_TYPE)+":"+connProps.get(DeviceConnector.TRANSPORT_ID)+"]";
+			" ("+connProps.get(DeviceConnector.TRANSPORT_TYPE)+"="+connProps.get(DeviceConnector.TRANSPORT_ID)+")";
 			String frameWorkName = defaultFWName;
 			String suffix = " ";
 			if (ip != null) { 
