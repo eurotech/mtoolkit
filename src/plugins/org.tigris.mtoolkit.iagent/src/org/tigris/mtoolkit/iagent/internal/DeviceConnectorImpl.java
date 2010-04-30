@@ -437,6 +437,9 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			if (manager == null) {
 				LightServiceRegistry registry = getServiceRegistry();
 				manager = (IAgentManager) registry.get(className);
+				if (manager == null) {
+					return null;
+				}
 				manager.init(this);
 				managers.put(className, manager);
 			}
