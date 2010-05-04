@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.PageBook;
 import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -82,6 +83,8 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 	private Model parent;
 
 	private TreeViewer parentView;
+
+	private DeviceTypeProviderElement initialProvider;
 
 	// Constructor
 	public PropertySheet(TreeViewer parentView, Model parent, FrameworkImpl element, boolean newFramework) {
@@ -149,6 +152,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		
 		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(index);
 		showDeviceTypePanel(selectedProvider);
+		initialProvider = selectedProvider;
 
 		// Signing Certificates
 		certificatesPanel = new CertificatesPanel(mainContent, 2, 1);
@@ -183,8 +187,10 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			deviceTypeCombo.add(element.getDeviceTypeName());
 		}
 
-		if (selectedProvider != null)
+		if (selectedProvider != null) {
 			selectType(selectedProvider);
+			initialProvider = selectedProvider;
+		}
 	}
 
 	private void selectType(DeviceTypeProviderElement element) {
@@ -280,6 +286,8 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		private CoreException initFailure;
 		private Control panel;
 		private DeviceTypeProviderValidator validator;
+		private IMemento props;
+		public IMemento initialProps;
 
 		public DeviceTypeProviderElement(IConfigurationElement configurationElement, DeviceTypeProviderValidator validator) throws CoreException {
 			// TODO: Change to not throw exception, but rather display a an
@@ -329,6 +337,9 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 				panel = getProvider().createPanel(parent, validator);
 				if (panel != null)
 					panel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				if (props != null) {
+					getProvider().setProperties(props);
+				}
 			} catch (CoreException e) {
 				// TODO: Display the error directly in the UI
 				FrameworkPlugin.error("Unable to create device type panel", e);
@@ -379,6 +390,13 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		}
 	}
 	
+	public boolean close() {
+		if (getReturnCode() == CANCEL) {
+			fw.setConfig(initialProvider.initialProps);
+		}
+		return super.close();
+	}
+	
 	private void init() {
 		IMemento config = fw.getConfig();
 		String providerId = config.getString(TRANSPORT_PROVIDER_ID);
@@ -403,6 +421,8 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		}
 
 		try {
+			selectedProvider.props = config;
+			selectedProvider.initialProps = ((XMLMemento)config).copyChild(config);
 			selectedProvider.getProvider().setProperties(config);
 		} catch (CoreException e) {
 			FrameworkPlugin.error("Failed to initialize device type provider", e);

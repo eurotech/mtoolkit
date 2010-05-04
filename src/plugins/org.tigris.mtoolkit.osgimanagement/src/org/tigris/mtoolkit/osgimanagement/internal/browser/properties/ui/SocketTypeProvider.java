@@ -32,8 +32,12 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 	
 	private DeviceTypeProviderValidator validator;
 
+	private IMemento config;
+
 	// Initialize ui values from storage
 	public void setProperties(IMemento config) {
+		if (config == null) return;
+		this.config = config;
 		String idString = config.getString(Framework.FRAMEWORK_ID);
 		if (idString == null) {
 			idString = "127.0.0.1";
@@ -77,6 +81,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 						}
 					};
 					validateJob.schedule();
+					config.putString(Framework.FRAMEWORK_ID, getTransportID());
 				}
 			});
 		}
