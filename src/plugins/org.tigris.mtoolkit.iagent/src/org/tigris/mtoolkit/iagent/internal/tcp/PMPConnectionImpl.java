@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
@@ -50,7 +51,8 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 
 		PMPService pmpService = PMPServiceFactory.getDefault();
 		try {
-			Integer port = getPmpPort(connManager);
+			String portString = (String) conProperties.get(DeviceConnector.PROP_PMP_PORT);
+			Integer port = portString != null ? Integer.decode(portString)  : getPmpPort(connManager);
 			if (port != null && port.intValue() == 0)
 				throw new IAgentException("Cannot determine PMP port", IAgentErrors.ERROR_CANNOT_CONNECT);
 			if (port != null)

@@ -20,6 +20,7 @@ import java.util.Map;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.IAgentLog;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportsHub;
 
@@ -55,6 +56,8 @@ public abstract class DeviceConnector {
 	public static final String TRANSPORT_TYPE = "transport-type";
 	
 	public static final String TRANSPORT_ID = "transport-id";
+
+	public static final String PROP_PMP_PORT = ConnectionManager.PROP_PMP_PORT;
 
 	/**
 	 * Internal constant indicating that a device connector was disconnected.

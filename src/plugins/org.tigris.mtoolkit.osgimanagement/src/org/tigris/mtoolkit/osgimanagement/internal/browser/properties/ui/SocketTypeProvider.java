@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -29,7 +30,8 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 	private final String TRANSPORT_TYPE = "socket";
 
 	private Text idText;
-	
+	private Text portText;
+
 	private DeviceTypeProviderValidator validator;
 
 	private IMemento config;
@@ -43,6 +45,13 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 			idString = "127.0.0.1";
 		}
 		idText.setText(idString);
+		
+		String portString = config.getString(DeviceConnector.PROP_PMP_PORT);
+		if (portString == null) {
+			portString = "1450";
+		}
+		portText.setText(portString);
+
 	}
 
 	public Control createPanel(Composite parent, DeviceTypeProviderValidator validator) {
@@ -85,6 +94,28 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 				}
 			});
 		}
+		
+		Label portLabel = new Label(contentPanel, SWT.NONE);
+		portLabel.setText("Port:");
+		portLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+
+		portText = new Text(contentPanel, SWT.SINGLE | SWT.BORDER);
+		portText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		if (validator != null) {
+			portText.addModifyListener(new ModifyListener() {
+				public void modifyText(ModifyEvent e) {
+					String result = portText.getText();
+					try {
+						Integer.parseInt(result);
+						result = null;
+					} catch (NumberFormatException ex) {
+						result = "Invalid port: "+result;
+					}
+					SocketTypeProvider.this.validator.setValidState(result);
+				}
+			});
+		}
+		
 		return contentPanel;
 	}
 
@@ -117,20 +148,29 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 	public String getTransportType() {
 		return TRANSPORT_TYPE;
 	}
+	
+	private String getTransportPort() {
+		return portText.getText().trim();
+	}
 
 	public Dictionary load(IMemento config) {
 		Dictionary aConnProps = new Hashtable();
 		aConnProps.put("framework-connection-immediate", Boolean.FALSE);
 		aConnProps.put(Framework.FRAMEWORK_ID, config.getString(Framework.FRAMEWORK_ID));
+		String port = config.getString(DeviceConnector.PROP_PMP_PORT);
+		if (port == null) port = "1450";
+		aConnProps.put(DeviceConnector.PROP_PMP_PORT, port);
 		return aConnProps;
 	}
 
 	public void save(IMemento config) {
 		config.putString(Framework.FRAMEWORK_ID, getTransportID());
+		config.putString(DeviceConnector.PROP_PMP_PORT, getTransportPort());
 	}
 
 	public void setEditable(boolean editable) {
 		idText.setEditable(editable);
+		portText.setEditable(editable);
 	}
 
 }
