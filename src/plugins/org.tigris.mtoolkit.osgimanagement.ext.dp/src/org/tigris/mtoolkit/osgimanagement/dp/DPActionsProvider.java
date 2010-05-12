@@ -18,6 +18,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.DPPropertiesAction;
@@ -43,6 +44,7 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 	private DPPropertiesAction dpPropertiesAction;
 
 	private TreeViewer tree;
+	private ToolbarIMenuCreator dpTB;
 
 	public void init(TreeViewer tree) {
 		this.tree = tree;
@@ -56,10 +58,10 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 
 	public void fillToolBar(ToolBarManager tbm) {
 		Action[] actions = new Action[] { installDPAction, uninstallDPAction, dpPropertiesAction};
-		ToolbarIMenuCreator applicationTB = new ToolbarIMenuCreator(actions, tree);
-		applicationTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
-		applicationTB.setToolTipText("Various deployment package actions");
-		tbm.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, applicationTB);
+		dpTB = new ToolbarIMenuCreator(actions, tree);
+		dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
+		dpTB.setToolTipText("Various deployment package actions");
+		tbm.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, dpTB);
 	}
 
 	public void menuAboutToShow(StructuredSelection selection, IMenuManager manager) {
@@ -99,6 +101,10 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 			return ImageHolder.getImage(DP_PACKAGE_PATH);
 		}
 		return null;
+	}
+
+	public void updateEnabledState(DeviceConnector connector) {
+		dpTB.setEnabled(DPModelProvider.isDpSupported(connector));
 	}
 
 

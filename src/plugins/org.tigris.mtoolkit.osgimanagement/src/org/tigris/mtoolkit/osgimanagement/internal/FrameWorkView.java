@@ -130,6 +130,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Vie
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewContentProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewLabelProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
@@ -340,6 +341,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 					if (b.isNeedUpdate())
 						tree.update(b, null);
 				}
+				updateContextMenuStates();
 			}
 		});
 		tree.getTree().addTreeListener(new TreeAdapter() {
@@ -621,6 +623,23 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		viewBundlesAction.updateState(selection);
 		viewServicesAction.updateState(selection);
 		showConsoleAction.updateState(selection);
+		
+		DeviceConnector connector = null;
+		if (selection != null) {
+			Model model = (Model) selection.getFirstElement();
+			if (model != null) {
+				Framework fw = model.findFramework();
+				if (fw != null) {
+					connector = fw.getConnector();
+				}
+			}
+		}
+		
+		for (int i = 0; i < actionProviders.size(); i++) {
+			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
+			provider.updateEnabledState(connector);
+		}
+
 	}
 
 	// Fill context menu Actions when menu is about to show

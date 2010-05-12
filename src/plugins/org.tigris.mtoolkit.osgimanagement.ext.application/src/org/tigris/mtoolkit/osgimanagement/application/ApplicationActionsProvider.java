@@ -15,9 +15,11 @@ import java.util.Iterator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
@@ -51,6 +53,7 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 	private ApplicationPropertiesAction applicationPropertiesAction;
 	
 	private TreeViewer tree;
+	private ToolbarIMenuCreator applicationTB;
 	
 	
 	public void init(TreeViewer tree) {
@@ -65,7 +68,7 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 	
 	public void fillToolBar(ToolBarManager tbm) {
 		Action[] actions = new Action[] { startApplicationAction, stopApplicationAction, applicationPropertiesAction};
-		ToolbarIMenuCreator applicationTB = new ToolbarIMenuCreator(actions, tree);
+		applicationTB = new ToolbarIMenuCreator(actions, tree);
 		applicationTB.setImageDescriptor(ImageHolder.getImageDescriptor(APPLICATION_GROUP_IMAGE_PATH));
 		applicationTB.setToolTipText("Various application actions");
 		tbm.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, applicationTB);
@@ -119,6 +122,16 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 			return ImageHolder.getImage(APPLICATION_PACKAGE_ICON_PATH);
 		}
 		return null;
+	}
+
+	@Override
+	public void updateEnabledState(DeviceConnector connector) {
+		boolean enabled = ApplicationModelProvider.isApplicationsSupported(connector);
+		if (enabled) {
+			applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
+			enabled = applicationPropertiesAction.isEnabled();
+		}
+		applicationTB.setEnabled(enabled);
 	}
 
 }

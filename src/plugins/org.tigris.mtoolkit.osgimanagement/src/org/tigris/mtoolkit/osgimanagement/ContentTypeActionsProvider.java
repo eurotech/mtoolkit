@@ -15,6 +15,7 @@ import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public interface ContentTypeActionsProvider {
@@ -46,4 +47,5 @@ public interface ContentTypeActionsProvider {
 	 */
 	public Image getImage(Model node);
 
+	public void updateEnabledState(DeviceConnector connector);
 }
