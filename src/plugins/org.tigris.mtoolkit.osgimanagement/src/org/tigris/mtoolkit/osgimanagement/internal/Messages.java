@@ -144,6 +144,7 @@ public final class Messages extends NLS {
 	public static String rcp_bundle_missing_message;
 	public static String get_iagent_button_label;
 	public static String save_as_dialog_title;
+	public static String install_file_dialog_title;
 
 	public static String framework_not_instrumented;
 	public static String framework_not_instrumented_msg;

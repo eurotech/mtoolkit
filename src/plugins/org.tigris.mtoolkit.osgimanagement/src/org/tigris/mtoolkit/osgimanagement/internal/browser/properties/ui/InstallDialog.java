@@ -164,6 +164,7 @@ public class InstallDialog extends TrayDialog implements ConstantsDistributor {
 			chooser.setFileName(null);
 			chooser.setFilterPath(FrameworkPlugin.fileDialogLastSelection);
 		}
+		chooser.setText(Messages.install_file_dialog_title);
 		String tmp = chooser.open();
 		if (tmp != null) {
 			FrameworkPlugin.fileDialogLastSelection = tmp;

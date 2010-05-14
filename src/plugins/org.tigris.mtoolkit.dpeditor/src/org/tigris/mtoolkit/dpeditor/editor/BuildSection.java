@@ -422,7 +422,7 @@ public class BuildSection extends DPPFormSection implements IFormTextListener,
 		dialog.setFilterExtensions(ext);
 		String path = DPPUtil.getFileDialogPath(fileText.getValue());
 		dialog.setFilterPath(path);
-
+		dialog.setText("Open");
 		selectedFile = dialog.open();
 
 		if (selectedFile != null) {

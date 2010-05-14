@@ -212,7 +212,7 @@ public class CertPreferencesPage extends PreferencePage implements
 		String path = txtJarsignerLocation.getText();
 		FileDialog dialog = new FileDialog(Display.getCurrent().getActiveShell(), SWT.OPEN);
 		dialog.setFilterPath(path);
-
+		dialog.setText("Open");
 		selectedFile = dialog.open();
 
 		if (selectedFile != null) {

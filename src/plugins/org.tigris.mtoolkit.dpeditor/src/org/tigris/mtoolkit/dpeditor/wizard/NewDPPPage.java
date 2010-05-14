@@ -591,6 +591,7 @@ public class NewDPPPage extends WizardPage implements ModifyListener,
 		dialog.setFilterExtensions(ext);
 		String path = DPPUtil.getFileDialogPath(optionText.getText());
 		dialog.setFilterPath(path);
+		dialog.setText("Open");
 
 		selectedFile = dialog.open();
 

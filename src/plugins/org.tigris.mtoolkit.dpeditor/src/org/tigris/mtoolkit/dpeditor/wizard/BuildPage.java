@@ -430,6 +430,7 @@ public class BuildPage extends WizardPage implements ModifyListener,
 		dialog.setFilterExtensions(new String[] { "*.dp" }); //$NON-NLS-1$
 		String filterPath = dpFileText.getText();
 		dialog.setFilterPath(filterPath);
+		dialog.setText("Save");
 		String selectedFileName = dialog.open();
 		if (selectedFileName != null) {
 			DPPUtil.fileDialogLastSelection = selectedFileName;

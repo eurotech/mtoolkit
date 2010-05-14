@@ -440,6 +440,7 @@ public class AntPage extends WizardPage implements ModifyListener, KeyListener,
 		dialog.setFilterExtensions(new String[] { "*.xml" }); //$NON-NLS-1$
 		String filterPath = antFileText.getText();
 		dialog.setFilterPath(filterPath);
+		dialog.setText("Save");
 		String selectedFileName = dialog.open();
 		if (selectedFileName != null) {
 			DPPUtil.fileDialogLastSelection = selectedFileName;
