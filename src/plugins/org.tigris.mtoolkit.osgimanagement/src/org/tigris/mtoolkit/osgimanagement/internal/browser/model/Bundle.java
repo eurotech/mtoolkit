@@ -181,6 +181,10 @@ public class Bundle extends Model {
 		return type;
 	}
 
+	public void refreshTypeFromRemote() throws IAgentException {
+		type = ((FrameworkImpl) findFramework()).getRemoteBundleType(rBundle, rBundle.getHeaders(null));
+	}
+	
 	public String getCategory() {
 		return category;
 	}
