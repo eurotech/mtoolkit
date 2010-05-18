@@ -66,7 +66,8 @@ public class StopApplicationAction extends SelectionProviderAction implements IS
 			Application application = (Application) model;
 			try {
 				if (!(RemoteApplication.STATE_RUNNING.equals(application.getRemoteApplication().getState()) ||
-					  RemoteApplication.STATE_MIXED.equals(application.getRemoteApplication().getState()))) {
+					  RemoteApplication.STATE_MIXED.equals(application.getRemoteApplication().getState()) ||
+					  RemoteApplication.STATE_STARTING.equals(application.getRemoteApplication().getState()))) {
 					enabled = false;
 					break;
 				}

@@ -28,6 +28,8 @@ public interface RemoteApplication {
 	public final static String STATE_UNINSTALLED = "UNINSTALLED";
 
 	public final static String STATE_MIXED = "MIXED";
+	
+	public final static String STATE_STARTING = "org.eclipse.equinox.app.starting";
 
 	/**
 	 * Starts the application.

@@ -112,6 +112,8 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 					return ImageHolder.getImage(APPLICATION_MIXED_ICON_PATH);
 				} else if (RemoteApplication.STATE_STOPPING.equals(state)) {
 					return ImageHolder.getImage(APPLICATION_STOPPING_ICON_PATH);
+				} else if (RemoteApplication.STATE_STARTING.equals(state)) {
+					return ImageHolder.getImage(APPLICATION_STARTED_ICON_PATH);
 				}
 			} catch (IAgentException e) {
 				e.printStackTrace();
