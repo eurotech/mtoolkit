@@ -46,11 +46,11 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		}
 		idText.setText(idString);
 		
-		String portString = config.getString(DeviceConnector.PROP_PMP_PORT);
-		if (portString == null) {
-			portString = "1450";
+		Integer port = config.getInteger(DeviceConnector.PROP_PMP_PORT);
+		if (port == null) {
+			port = new Integer(1450);
 		}
-		portText.setText(portString);
+		portText.setText(port.toString());
 
 	}
 
@@ -149,23 +149,23 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		return TRANSPORT_TYPE;
 	}
 	
-	private String getTransportPort() {
-		return portText.getText().trim();
+	private Integer getTransportPort() {
+		return Integer.decode(portText.getText().trim());
 	}
 
 	public Dictionary load(IMemento config) {
 		Dictionary aConnProps = new Hashtable();
 		aConnProps.put("framework-connection-immediate", Boolean.FALSE);
 		aConnProps.put(Framework.FRAMEWORK_ID, config.getString(Framework.FRAMEWORK_ID));
-		String port = config.getString(DeviceConnector.PROP_PMP_PORT);
-		if (port == null) port = "1450";
+		Integer port = config.getInteger(DeviceConnector.PROP_PMP_PORT);
+		if (port == null) port = new Integer(1450);
 		aConnProps.put(DeviceConnector.PROP_PMP_PORT, port);
 		return aConnProps;
 	}
 
 	public void save(IMemento config) {
 		config.putString(Framework.FRAMEWORK_ID, getTransportID());
-		config.putString(DeviceConnector.PROP_PMP_PORT, getTransportPort());
+		config.putInteger(DeviceConnector.PROP_PMP_PORT, getTransportPort().intValue());
 	}
 
 	public void setEditable(boolean editable) {
