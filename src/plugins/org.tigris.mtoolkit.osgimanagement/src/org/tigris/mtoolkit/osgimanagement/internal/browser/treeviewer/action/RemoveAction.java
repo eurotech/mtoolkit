@@ -29,7 +29,14 @@ public class RemoveAction extends SelectionProviderAction implements IStateActio
 
 	// run method
 	public void run() {
-		boolean confirm = MessageDialog.openQuestion(FrameWorkView.getShell(), "Remove Framework", "Remove selected framework(s)?");
+		int count = getStructuredSelection().size();
+		String msg = "Are you sure you want to remove ";
+		if (count == 1) {
+			msg +=  getStructuredSelection().getFirstElement() + "?";
+		} else {
+			msg += count + " selected frameworks?";
+		}
+		boolean confirm = MessageDialog.openQuestion(FrameWorkView.getShell(), "Remove Framework", msg);
 		if (confirm) {
 			Iterator iterator = getStructuredSelection().iterator();
 			while (iterator.hasNext()) {

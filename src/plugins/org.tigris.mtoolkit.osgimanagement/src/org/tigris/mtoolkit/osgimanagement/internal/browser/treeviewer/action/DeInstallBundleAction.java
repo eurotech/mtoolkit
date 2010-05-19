@@ -37,8 +37,14 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 		final int result[] = new int[1];
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				result[0] = PluginUtilities.showConfirmationDialog(FrameWorkView.getShell(), "Confirm uninstall",
-				"Are you sure you want to uninstall selected resource(s)");
+				int count = getStructuredSelection().size();
+				String msg = "Are you sure you want to uninstall ";
+				if (count == 1) {
+					msg += getStructuredSelection().getFirstElement()+"?";
+				} else {
+					msg += count + " selected resources?";
+				}
+				result[0] = PluginUtilities.showConfirmationDialog(FrameWorkView.getShell(), "Confirm uninstall", msg);
 			}
 		});
 		if (result[0] != SWT.OK) {
