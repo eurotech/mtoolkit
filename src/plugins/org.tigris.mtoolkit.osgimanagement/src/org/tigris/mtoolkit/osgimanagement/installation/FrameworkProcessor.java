@@ -34,6 +34,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
@@ -219,7 +220,11 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 						ListDialog dialog = new ListDialog(FrameWorkView.getShell());
 
 						dialog.setTitle("Select processor");
-						dialog.setLabelProvider(new LabelProvider());
+						dialog.setLabelProvider(new LabelProvider() {
+							public Image getImage(Object element) {
+								return ((FrameworkProcessor)element).getImage();
+							}
+						});
 						dialog.setMessage("Select installation processor for " + item.getName());
 						dialog.setContentProvider(new ArrayContentProvider());
 						dialog.setInput(Arrays.asList(prArr));
@@ -257,6 +262,10 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			return Status.CANCEL_STATUS;
 		}
 		return Status.OK_STATUS;
+	}
+
+	protected Image getImage() {
+		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}
 
 	public void install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)

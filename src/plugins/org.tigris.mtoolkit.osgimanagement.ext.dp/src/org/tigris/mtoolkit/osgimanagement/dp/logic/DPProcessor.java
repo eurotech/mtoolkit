@@ -17,9 +17,12 @@ import java.io.InputStream;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
+import org.tigris.mtoolkit.osgimanagement.dp.DPActionsProvider;
+import org.tigris.mtoolkit.osgimanagement.dp.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
@@ -48,6 +51,10 @@ public class DPProcessor extends FrameworkProcessor {
 	
 	public String getName() {
 		return "Deployment package processor";
+	}
+
+	protected Image getImage() {
+		return ImageHolder.getImage(DPActionsProvider.DP_GROUP_IMAGE_PATH);
 	}
 
 	

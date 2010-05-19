@@ -32,7 +32,7 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class DPActionsProvider implements ContentTypeActionsProvider {
 
-	private static final String DP_GROUP_IMAGE_PATH = "dp_group.gif";
+	public static final String DP_GROUP_IMAGE_PATH = "dp_group.gif";
 	private static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif";
 	private static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif";
 	private static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif";
