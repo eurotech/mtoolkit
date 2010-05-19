@@ -60,7 +60,7 @@ public class PluginExportManager {
 		}
 		if (version == null) {
 			IPluginModelBase model = entry.getModel();
-			if (!model.isEnabled()) {
+			if (model == null || !model.isEnabled()) {
 				pluginModelNotFound(symbolicName, version);
 				return null;
 			}
