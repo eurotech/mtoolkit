@@ -292,13 +292,15 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		tree.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				Model node = (Model) ((TreeSelection) event.getSelection()).getFirstElement();
-				if (node instanceof FrameworkImpl) {
-					if (!((FrameworkImpl) node).isConnected()) {
-						FrameworkConnectorFactory.connectFrameWork((FrameworkImpl) node);
-					}
-				}					
-				boolean expand = !tree.getExpandedState(node);
-				tree.setExpandedState(node, expand);
+				if (node != null) {
+					if (node instanceof FrameworkImpl) {
+						if (!((FrameworkImpl) node).isConnected()) {
+							FrameworkConnectorFactory.connectFrameWork((FrameworkImpl) node);
+						}
+					}	
+					boolean expand = !tree.getExpandedState(node);
+					tree.setExpandedState(node, expand);
+				}
 			}
 		});
 		
