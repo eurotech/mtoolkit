@@ -429,6 +429,18 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void setShowServicePropertiesInTree(boolean state) {
 		showServicePropertiesInTree = state;
 	}
+	
+	public void clearServicePropertiesNodes(Model parent) {
+		Model children[] = parent.getChildren();
+		for (int i=0; i<children.length; i++) {
+			if (children[i] instanceof ServiceProperty) {
+				parent.removeElement(children[i]);
+			} else {
+				clearServicePropertiesNodes(children[i]);
+			}
+		}
+	}
+	
 
 	public boolean isShownServicePropertiss() {
 		return showServicePropertiesInTree;

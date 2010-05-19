@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -25,9 +26,16 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 			((FrameworkImpl) frameworks.get(i)).setShowServicePropertiesInTree(newState);
 		}
 
-		for (int i = 0; i < frameworks.size(); i++)
-			((FrameworkImpl) frameworks.get(i)).refreshAction();
-
+		if (newState) {
+			for (int i = 0; i < frameworks.size(); i++) {
+				((FrameworkImpl) frameworks.get(i)).refreshAction();
+			}
+		} else {
+			for (int i = 0; i < frameworks.size(); i++) {
+				((FrameworkImpl) frameworks.get(i)).clearServicePropertiesNodes((Model) frameworks.get(i));
+			}
+			((TreeViewer)getSelectionProvider()).refresh();
+		}
 		// FrameWorkView.getActiveInstance().addFilter();
 	}
 
