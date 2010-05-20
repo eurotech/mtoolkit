@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -41,6 +42,7 @@ public class DPPropertiesAction extends SelectionProviderAction implements IStat
 		super(provider, label);
 		this.parentView = (TreeViewer) provider;
 		this.setText(label + "@Alt+Enter");
+		this.setAccelerator(SWT.ALT | SWT.TRAVERSE_RETURN);
 	}
 
 	// run method

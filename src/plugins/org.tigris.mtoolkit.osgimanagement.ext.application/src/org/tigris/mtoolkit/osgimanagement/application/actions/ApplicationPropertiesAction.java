@@ -15,6 +15,7 @@ import java.util.Map;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.actions.SelectionProviderAction;
@@ -32,6 +33,7 @@ public class ApplicationPropertiesAction extends SelectionProviderAction impleme
 		super(provider, label);
 		this.parentView = (TreeViewer) provider;
 		this.setText(label + "@Alt+Enter");
+		this.setAccelerator(SWT.ALT | SWT.TRAVERSE_RETURN);
 	}
 
 	// run method

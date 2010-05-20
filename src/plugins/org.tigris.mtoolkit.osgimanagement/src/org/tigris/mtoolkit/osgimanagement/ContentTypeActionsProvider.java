@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement;
 
+import java.util.Map;
+
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -34,6 +36,8 @@ public interface ContentTypeActionsProvider {
 	public static final String GROUP_CONNECT = "connect";
 	public static final String GROUP_DEPLOYMENT = "deployment";
 	public static final String GROUP_FRAMEWORK = "framework";
+
+	public static final String PROPERTIES_ACTION = "PROPERTIES";
 	
 	
 	public void init(TreeViewer tree);
@@ -41,6 +45,8 @@ public interface ContentTypeActionsProvider {
 	public void menuAboutToShow(StructuredSelection selection, IMenuManager manager);
 	
 	public void fillToolBar(ToolBarManager tbm);
+	
+	public Map getCommonActions();
 
 	/**
 	 * @since 5.0

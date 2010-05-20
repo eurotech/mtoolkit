@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.application;
 
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -54,6 +56,7 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 	
 	private TreeViewer tree;
 	private ToolbarIMenuCreator applicationTB;
+	private Hashtable commonActions;
 	
 	
 	public void init(TreeViewer tree) {
@@ -64,8 +67,15 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 		stopApplicationAction.setImageDescriptor(ImageHolder.getImageDescriptor(STOP_APPLICATION_IMAGE_PATH));
 		applicationPropertiesAction = new ApplicationPropertiesAction(tree, "Properties");
 		applicationPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(APPLICATION_PROPERTIES_IMAGE_PATH));
+		commonActions = new Hashtable();
+		commonActions.put(PROPERTIES_ACTION, applicationPropertiesAction);
 	}
-	
+
+	@Override
+	public Map getCommonActions() {
+		return commonActions;
+	}
+
 	public void fillToolBar(ToolBarManager tbm) {
 		Action[] actions = new Action[] { startApplicationAction, stopApplicationAction, applicationPropertiesAction};
 		applicationTB = new ToolbarIMenuCreator(actions, tree);

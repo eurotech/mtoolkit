@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
@@ -42,6 +43,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -421,6 +423,13 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		for (int i = 0; i < actionProviders.size(); i++) {
 			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
 			provider.fillToolBar(toolBar);
+			Map actionsMap = provider.getCommonActions();
+			if (actionsMap != null) {
+				IAction action = (IAction) actionsMap.get(ContentTypeActionsProvider.PROPERTIES_ACTION);
+				if (action != null) {
+					commonPropertiesAction.registerAction(action);
+				}
+			}
 		}
 
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, addFrameworkAction);

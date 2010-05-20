@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.dp;
 
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
@@ -45,6 +47,7 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 
 	private TreeViewer tree;
 	private ToolbarIMenuCreator dpTB;
+	private Hashtable commonActions;
 
 	public void init(TreeViewer tree) {
 		this.tree = tree;
@@ -54,6 +57,12 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 		uninstallDPAction.setImageDescriptor(ImageHolder.getImageDescriptor(UNINSTALL_DP_IMAGE_PATH));
 		dpPropertiesAction = new DPPropertiesAction(tree, "Properties");
 		dpPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(DP_PROPERTIES_IMAGE_PATH));
+		commonActions = new Hashtable();
+		commonActions.put(PROPERTIES_ACTION, dpPropertiesAction);
+	}
+
+	public Map getCommonActions() {
+		return commonActions;
 	}
 
 	public void fillToolBar(ToolBarManager tbm) {
@@ -106,6 +115,5 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 	public void updateEnabledState(DeviceConnector connector) {
 		dpTB.setEnabled(DPModelProvider.isDpSupported(connector));
 	}
-
 
 }
