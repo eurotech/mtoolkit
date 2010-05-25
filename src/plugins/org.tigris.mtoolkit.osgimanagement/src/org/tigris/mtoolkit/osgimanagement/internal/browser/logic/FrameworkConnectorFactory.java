@@ -76,6 +76,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public void connected(final DeviceConnector connector) {
+	}
+
+	public static void connectFramework(final DeviceConnector connector) {
 		// wrap the connector
 		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, Display.getDefault());
 		Dictionary connProps = fConnector.getProperties();
@@ -139,7 +142,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		if (!fConnector.equals(fw.getConnector())) {
 			fw.setConnector(fConnector);
 		}
-
+//		fw.connect(connector, SubMonitor.convert(new NullProgressMonitor()));
 		BrowserErrorHandler.debug("FrameworkPlugin: " + connProps.get("framework-name") + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		createPMPConnection(fConnector, fw, frameworkName, autoConnected);
 	}

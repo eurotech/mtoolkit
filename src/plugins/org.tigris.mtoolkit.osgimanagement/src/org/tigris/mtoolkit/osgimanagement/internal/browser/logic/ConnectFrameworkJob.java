@@ -117,6 +117,7 @@ public class ConnectFrameworkJob extends Job {
 					}
 					aConnProps.put("framework-name", fw.getName()); //$NON-NLS-1$
 					connector = DeviceConnector.connect(transportType, id, aConnProps);
+					FrameworkConnectorFactory.connectFramework(connector);
 				} else {
 					errorProviderNotFound();
 				}

@@ -10,13 +10,19 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
@@ -37,15 +43,45 @@ public class Util {
 		return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
 	}
 	
-	public static Framework addFramework(DeviceConnector connector, String name) {
-		try {
-			FrameworkImpl fw = new FrameworkImpl(name, true);
-			FrameWorkView.getTreeRoot().addElement(fw);
-			fw.connect(connector, null);
-			return fw;
-		} finally {
-			throw new RuntimeException("Not yet implemented");
+	public static Framework addFramework(DeviceConnector connector) {
+		Hashtable frameWorkMap = new Hashtable();
+		FrameworkImpl fws[] = FrameWorkView.getFrameworks();
+		if (fws != null) {
+			for (int i = 0; i < fws.length; i++) {
+				frameWorkMap.put(fws[i].getName(), ""); //$NON-NLS-1$
+			}
 		}
+
+		int index = 1;
+		Dictionary connProps = connector.getProperties();
+		Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
+		String defaultFWName = Messages.new_framework_default_name+
+		" ("+connProps.get(DeviceConnector.TRANSPORT_TYPE)+"="+connProps.get(DeviceConnector.TRANSPORT_ID)+")";
+		String frameWorkName = defaultFWName;
+		String suffix = " ";
+		if (ip != null) { 
+			suffix += ip;
+		}
+		if (frameWorkMap.containsKey(frameWorkName)) {
+			do {
+				frameWorkName = defaultFWName
+								+ suffix
+								+ "("
+								+ index
+								+ ")";
+				index++;
+			} while (frameWorkMap.containsKey(frameWorkName));
+		}
+		return addFramework(connector, frameWorkName);
 	}
+	
+	public static Framework addFramework(DeviceConnector connector, String name) {
+		FrameworkImpl fw = new FrameworkImpl(name, true);
+		FrameWorkView.getTreeRoot().addElement(fw);
+		fw.connect(connector, SubMonitor.convert(new NullProgressMonitor()));
+		return fw;
+	}
+	
+	
 
 }
