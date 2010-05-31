@@ -127,18 +127,9 @@ public class PluginProvider implements InstallationItemProvider {
 			exportInfo.targets = null;
 
 			final String path = exportInfo.destinationDirectory + "/plugins/" + name + "_" + version + ".jar";
-			// TODO: Make Plugin exporter a separate API
-			exporter.asyncExportPlugins(exportInfo);
-			// TODO: The plugin exporter should be joinable
-			while (!exporter.hasFinished()) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
+			IStatus result = exporter.syncExportPlugins(exportInfo, monitor);
 			file = new File(path);
-			if (exporter.getResult().isOK() && file.exists()) {
+			if (result.isOK() && file.exists()) {
 				try {
 					if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
 							!AndroidUtils.isConvertedToDex(file)) {

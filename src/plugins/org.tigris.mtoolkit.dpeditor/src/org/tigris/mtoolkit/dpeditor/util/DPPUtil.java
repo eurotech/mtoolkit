@@ -446,28 +446,16 @@ public class DPPUtil {
 
 								result.put(prjInfo, jarFile);
 
-								exporter.asyncExportPlugins(info);
+								IStatus exportResult = exporter.syncExportPlugins(info, new NullProgressMonitor());
 
-								while (!exporter.hasFinished()) {
-									if (Display.getCurrent() != null) {
-										while (Display.getCurrent().readAndDispatch()) {
-										}
-									}
-									try {
-										Thread.sleep(10);
-									} catch (Throwable e) {
-										e.printStackTrace();
-									}
-								}
-
-								if (!exporter.getResult().isOK()) {
-									if (exporter.getResult().matches(IStatus.ERROR)) {
-										if (exporter.getResult().getException() != null) {
-											throw exporter.getResult().getException();
+								if (!exportResult.isOK()) {
+									if (exportResult.matches(IStatus.ERROR)) {
+										if (exportResult.getException() != null) {
+											throw exportResult.getException();
 										}
 										throw new Exception("Error while exporting project " + project.getName());
 									}
-									if (exporter.getResult().matches(IStatus.CANCEL)) {
+									if (exportResult.matches(IStatus.CANCEL)) {
 										throw new Exception("Exporting project " + project.getName() + " was canceled.");
 									}
 								}
