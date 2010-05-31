@@ -28,6 +28,7 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnection;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnectionCallBack;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
@@ -38,6 +39,11 @@ import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
  * 
  */
 public class VMManagerImpl implements VMManager {
+
+	private static MethodSignature REGISTER_METHOD = new MethodSignature("registerOutput", new String[] { RemoteObject.class.getName() }, true);
+	private static MethodSignature EXECUTE_METHOD = new MethodSignature("executeCommand", new String[] { Utils.STRING_TYPE }, true);
+	private static MethodSignature GET_FW_START_LEVEL = new MethodSignature("getFrameworkStartLevel", Utils.NO_ARGS, true);
+	private static MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty", new String[] { Utils.STRING_TYPE }, true);
 
 	private DeviceConnectorImpl connector;
 
@@ -62,9 +68,7 @@ public class VMManagerImpl implements VMManager {
 
 	public void executeFrameworkCommand(String command) throws IAgentException {
 		debug("[executeFrameworkCommand] >>> command: " + command);
-		Utils.callRemoteMethod(getPMPConnection().getRemoteParserService(),
-			Utils.EXECUTE_METHOD,
-			new Object[] { command });
+		EXECUTE_METHOD.call(getPMPConnection().getRemoteParserService(), new Object[] { command });
 	}
 
 	public void redirectFrameworkOutput(OutputStream os) throws IAgentException {
@@ -72,7 +76,7 @@ public class VMManagerImpl implements VMManager {
 		PMPConnection connection = getPMPConnection();
 		if (os != null) {
 			RemoteObject parser = connection.getRemoteParserService();
-			Utils.callRemoteMethod(parser, Utils.REGISTER_METHOD, new Object[] { os });
+			REGISTER_METHOD.call(parser, new Object[] { os });
 			if (lastKnownRemoteConsole != parser) {
 				lastKnownRemoteConsole = parser;
 			}
@@ -115,10 +119,7 @@ public class VMManagerImpl implements VMManager {
 
 	public int getFrameworkStartLevel() throws IAgentException {
 		debug("[getFrameworkStartLevel] >>> ");
-		Integer fwStartLevel = (Integer) Utils.callRemoteMethod(
-				getPMPConnection().getRemoteBundleAdmin(), 
-				Utils.GET_FW_START_LEVEL,
-				new Object[0]);
+		Integer fwStartLevel = (Integer) GET_FW_START_LEVEL.call(getPMPConnection().getRemoteBundleAdmin());
 		return fwStartLevel.intValue();
 	}
 
@@ -374,7 +375,7 @@ public class VMManagerImpl implements VMManager {
 	}
 	
 	public String getSystemProperty(String propertyName) throws IAgentException {
-		return (String) Utils.callRemoteMethod(getPMPConnection().getRemoteBundleAdmin(), Utils.GET_SYSTEM_PROPERTY, new Object[] { propertyName });
+		return (String) GET_SYSTEM_PROPERTY.call(getPMPConnection().getRemoteBundleAdmin(), new Object[] { propertyName });
 	}
 
 	public String[] getSystemBundlesNames() throws IAgentException {

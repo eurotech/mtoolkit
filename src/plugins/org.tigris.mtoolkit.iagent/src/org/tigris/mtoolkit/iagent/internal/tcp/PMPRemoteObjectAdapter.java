@@ -16,9 +16,12 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public abstract class PMPRemoteObjectAdapter implements RemoteObject {
+
+	private static MethodSignature GET_REMOTE_SERVICE_ID_METHOD = new MethodSignature("getRemoteServiceID", Utils.NO_ARGS, true);
 
 	public static final int REPEAT = 1;
 	public static final int CONTINUE = 2;
@@ -34,8 +37,8 @@ public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 		this.delegate = remote;
 		try {
 			Long l = new Long(-1);
-			if (Utils.isRemoteMethodDefined(this.delegate, Utils.GET_REMOTE_SERVICE_ID_METHOD)) {
-				l = (Long) Utils.callRemoteMethod(this.delegate, Utils.GET_REMOTE_SERVICE_ID_METHOD, null);
+			if (GET_REMOTE_SERVICE_ID_METHOD.isDefined(this.delegate)) {
+				l = (Long) GET_REMOTE_SERVICE_ID_METHOD.call(this.delegate);
 			}
 			this.initialServiceId = l.longValue();
 			debug("[Constructor] initialServiceId: " + l);

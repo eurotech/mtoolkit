@@ -20,9 +20,29 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class RemoteBundleImpl implements RemoteBundle {
+
+	private static MethodSignature GET_BUNDLE_STATE_METHOD = new MethodSignature("getBundleState", Utils.BID_ARGS, true);
+	private static MethodSignature GET_BUNDLE_LAST_MODIFIED_METHOD = new MethodSignature("getBundleLastModified", Utils.BID_ARGS, true);
+	private static MethodSignature GET_BUNDLE_HEADERS_METHOD = new MethodSignature("getBundleHeaders", new String[] { "long", Utils.STRING_TYPE }, true);
+	private static MethodSignature GET_BUNDLE_LOCATION_METHOD = new MethodSignature("getBundleLocation", Utils.BID_ARGS, true);
+	private static MethodSignature START_BUNDLE_METHOD = new MethodSignature("startBundle", new String[] { "long", "int" }, true);
+	private static MethodSignature STOP_BUNDLE_METHOD = new MethodSignature("stopBundle", new String[] { "long", "int" }, true);
+	private static MethodSignature UPDATE_BUNDLE_METHOD = new MethodSignature("updateBundle", new String[] { "long", Utils.INPUT_STREAM_TYPE }, true);
+	private static MethodSignature UNINSTALL_BUNDLE_METHOD = new MethodSignature("uninstallBundle", Utils.BID_ARGS, true);
+	private static MethodSignature GET_BUNDLE_NAME_METHOD = new MethodSignature("getBundleSymbolicName", Utils.BID_ARGS, true);
+	private static MethodSignature RESOLVE_BUNDLES_METHOD = new MethodSignature("resolveBundles", new String[] { long[].class.getName() }, true);
+	private static MethodSignature GET_REGISTERED_SERVICES_METHOD = new MethodSignature("getRegisteredServices", Utils.BID_ARGS, true);
+	private static MethodSignature GET_USING_SERVICES_METHOD = new MethodSignature("getUsingServices", Utils.BID_ARGS, true);
+	private static MethodSignature GET_FRAGMENT_BUNDLES_METHOD = new MethodSignature("getFragmentBundles", Utils.BID_ARGS, true);
+	private static MethodSignature GET_HOST_BUNDLES_METHOD = new MethodSignature("getHostBundles", Utils.BID_ARGS, true);
+	private static MethodSignature GET_BUNDLE_TYPE_METHOD = new MethodSignature("getBundleType", Utils.BID_ARGS, true);
+	private static MethodSignature GET_BUNDLE_HEADER_METHOD = new MethodSignature("getBundleHeader", new String[] { "long", Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
+	private static MethodSignature GET_BUNDLE_START_LEVEL_METHOD = new MethodSignature("getBundleStartLevel", new String[] { "long" }, true);
+
 	private Long id;
 	private String location;
 	public boolean uninstalled = false;
@@ -54,9 +74,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public Dictionary getHeaders(String locale) throws IAgentException {
 		debug("[getHeaders] >>> locale: " + locale);
 		checkBundleState();
-		Dictionary headers = (Dictionary) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_BUNDLE_HEADERS_METHOD,
-			new Object[] { id, locale });
+		Dictionary headers = (Dictionary) GET_BUNDLE_HEADERS_METHOD.call(getBundleAdmin(), new Object[] { id, locale });
 		if (headers == null) {
 			debug("[getHeaders] Bundle cannot be found on the remote site. Assuming it is uninstalled");
 			uninstalled = true;
@@ -69,7 +87,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public String getHeader(String headerName, String locale) throws IAgentException {
 		debug("[getHeader] >>> headerName: " + headerName + "; locale: " + locale);
 		checkBundleState();
-		Object result = Utils.callRemoteMethod(getBundleAdmin(), Utils.GET_BUNDLE_HEADER_METHOD, new Object[] { id,
+		Object result = GET_BUNDLE_HEADER_METHOD.call(getBundleAdmin(), new Object[] { id,
 			headerName,
 			locale });
 		if (result == null) {
@@ -97,9 +115,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 		debug("[getLocation] >>>");
 		checkBundleState();
 		if (location == null) {
-			location = (String) Utils.callRemoteMethod(getBundleAdmin(),
-				Utils.GET_BUNDLE_LOCATION_METHOD,
-				new Object[] { id });
+			location = (String) GET_BUNDLE_LOCATION_METHOD.call(getBundleAdmin(), new Object[] { id });
 			if (location == null) {
 				debug("[getLocation] Bundle cannot be found on the remote site. Assuming it is uninstalled");
 				uninstalled = true;
@@ -120,9 +136,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 			debug("[getState] bundle state: " + UNINSTALLED);
 			return UNINSTALLED;
 		}
-		Integer state = (Integer) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_BUNDLE_STATE_METHOD,
-			new Object[] { id });
+		Integer state = (Integer) GET_BUNDLE_STATE_METHOD.call(getBundleAdmin(), new Object[] { id });
 		if (state.intValue() == UNINSTALLED)
 			uninstalled = true;
 		debug("[getState] bundle state: " + state);
@@ -132,9 +146,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public String getSymbolicName() throws IAgentException {
 		debug("[getSymbolicName] >>>");
 		checkBundleState();
-		String symbolicName = (String) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_BUNDLE_NAME_METHOD,
-			new Object[] { id });
+		String symbolicName = (String) GET_BUNDLE_NAME_METHOD.call(getBundleAdmin(), new Object[] { id });
 		if (symbolicName == null) { // the bundle is uninstalled
 			debug("[getSymbolicName] Bundle cannot be found on the remote site. Assuming it was uninstalled");
 			uninstalled = true;
@@ -162,8 +174,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 		if (!uninstalled && getState() == UNINSTALLED)
 			uninstalled = true; // check for uninstall before call
 		checkBundleState();
-		boolean resolvingResult = ((Boolean) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.RESOLVE_BUNDLES_METHOD,
+		boolean resolvingResult = ((Boolean) RESOLVE_BUNDLES_METHOD.call(getBundleAdmin(),
 			new Object[] { new long[] { id.longValue() } })).booleanValue();
 		debug("[resolve] resolve status: " + resolvingResult);
 		return resolvingResult;
@@ -172,8 +183,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public void start(int flags) throws IAgentException {
 		debug("[start] >>> flags: " + flags);
 		checkBundleState();
-		Error error = (Error) Utils.callRemoteMethod(getBundleAdmin(), Utils.START_BUNDLE_METHOD, new Object[] { id,
-			new Integer(flags) });
+		Error error = (Error) START_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] { id, new Integer(flags) });
 		debug("[start] Bundle start result: " + error);
 		checkBundleErrorResult(error);
 	}
@@ -181,8 +191,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public void stop(int flags) throws IAgentException {
 		debug("[stop] flags: " + flags);
 		checkBundleState();
-		Error error = (Error) Utils.callRemoteMethod(getBundleAdmin(), Utils.STOP_BUNDLE_METHOD, new Object[] { id,
-			new Integer(flags) });
+		Error error = (Error) STOP_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] { id, new Integer(flags) });
 		debug("[stop] Bundle stop result: " + error);
 		checkBundleErrorResult(error);
 	}
@@ -190,7 +199,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public void uninstall() throws IAgentException {
 		debug("[uninstall] >>>");
 		checkBundleState();
-		Error err = (Error) Utils.callRemoteMethod(getBundleAdmin(), Utils.UNINSTALL_BUNDLE_METHOD, new Object[] { id });
+		Error err = (Error) UNINSTALL_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] { id });
 		debug("[uninstall] Bundle uninstallation result: " + err);
 		if (err == null) {
 			uninstalled = true;
@@ -205,9 +214,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 			throw new IllegalArgumentException();
 		}
 		checkBundleState();
-		Error err = (Error) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.UPDATE_BUNDLE_METHOD,
-			new Object[] { id, in });
+		Error err = (Error) UPDATE_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] { id, in });
 		debug("[update] Bundle update result: " + err);
 		checkBundleErrorResult(err);
 	}
@@ -226,9 +233,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public long getLastModified() throws IAgentException {
 		debug("[getLastModified] >>>");
 		checkBundleState();
-		Long lastModified = (Long) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_BUNDLE_LAST_MODIFIED_METHOD,
-			new Object[] { id });
+		Long lastModified = (Long) GET_BUNDLE_LAST_MODIFIED_METHOD.call(getBundleAdmin(), new Object[] { id });
 		if (lastModified.longValue() == -2) {
 			debug("[getLastModified] remote call result: " + lastModified + " -> bundle is uninstalled");
 			uninstalled = true;
@@ -242,8 +247,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public RemoteService[] getRegisteredServices() throws IAgentException {
 		debug("[getRegisteredServices] >>>");
 		checkBundleState();
-		Dictionary[] servicesProps = (Dictionary[]) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_REGISTERED_SERVICES_METHOD,
+		Dictionary[] servicesProps = (Dictionary[]) GET_REGISTERED_SERVICES_METHOD.call(getBundleAdmin(),
 			new Object[] { id });
 		if (servicesProps == null) {
 			debug("[getRegisteredServices] remote call result is: " + servicesProps + " -> bundle is uninstalled");
@@ -262,8 +266,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public RemoteService[] getServicesInUse() throws IAgentException {
 		debug("[getServicesInUse] >>>");
 		checkBundleState();
-		Dictionary[] servicesProps = (Dictionary[]) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_USING_SERVICES_METHOD,
+		Dictionary[] servicesProps = (Dictionary[]) GET_USING_SERVICES_METHOD.call(getBundleAdmin(),
 			new Object[] { id });
 		if (servicesProps == null) {
 			debug("[getServicesInUse] remote call result is: " + servicesProps + " -> bundle is uninstalled");
@@ -282,9 +285,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public RemoteBundle[] getFragments() throws IAgentException {
 		debug("[getFragments] >>>");
 		checkBundleState();
-		long[] fragmentBundleIDs = (long[]) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_FRAGMENT_BUNDLES_METHOD,
-			new Object[] { id });
+		long[] fragmentBundleIDs = (long[]) GET_FRAGMENT_BUNDLES_METHOD.call(getBundleAdmin(), new Object[] { id });
 		if (fragmentBundleIDs == null) {
 			debug("[getFragments] remote call result is: " + fragmentBundleIDs + " -> bundle is uninstalled");
 			uninstalled = true;
@@ -305,9 +306,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public RemoteBundle[] getHosts() throws IAgentException {
 		debug("[getHosts] >>>");
 		checkBundleState();
-		long[] hostBundleIDs = (long[]) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_HOST_BUNDLES_METHOD,
-			new Object[] { id });
+		long[] hostBundleIDs = (long[]) GET_HOST_BUNDLES_METHOD.call(getBundleAdmin(), new Object[] { id });
 		if (hostBundleIDs == null) {
 			debug("[getHosts] remote call result is: " + hostBundleIDs + " -> bundle is uninstalled");
 			uninstalled = true;
@@ -328,9 +327,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public int getType() throws IAgentException {
 		debug("[getType] >>>");
 		checkBundleState();
-		Integer bundleType = (Integer) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_BUNDLE_TYPE_METHOD,
-			new Object[] { id });
+		Integer bundleType = (Integer) GET_BUNDLE_TYPE_METHOD.call(getBundleAdmin(), new Object[] { id });
 		if (bundleType.intValue() == -1) {
 			debug("[getType] remote call result is: " + bundleType + " -> bundle is uninstalled");
 			uninstalled = true;
@@ -366,8 +363,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	public int getBundleStartLevel() throws IAgentException {
 		debug("[getBundleStartLevel] >>>");
 		checkBundleState();
-		Integer bundleStartLevel = (Integer) Utils.callRemoteMethod(getBundleAdmin(),
-			Utils.GET_BUNDLE_START_LEVEL_METHOD,
+		Integer bundleStartLevel = (Integer) GET_BUNDLE_START_LEVEL_METHOD.call(getBundleAdmin(),
 			new Object[] { id });
 		return bundleStartLevel.intValue();
 	}

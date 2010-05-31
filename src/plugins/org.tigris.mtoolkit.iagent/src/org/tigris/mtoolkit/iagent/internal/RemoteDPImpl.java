@@ -19,9 +19,19 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class RemoteDPImpl implements RemoteDP {
+
+	private static MethodSignature GET_DP_HEADER_METHOD = new MethodSignature("getDeploymentPackageHeader", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE, Utils.STRING_TYPE },
+			true);
+	private static MethodSignature GET_DP_BUNDLES_METHOD = new MethodSignature("getDeploymentPackageBundles", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
+	private static MethodSignature GET_DP_BUNDLE_METHOD = new MethodSignature("getDeploymentPackageBundle", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE, Utils.STRING_TYPE },
+			true);
+	private static MethodSignature UNINSTALL_DP_METHOD = new MethodSignature("uninstallDeploymentPackage", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE, "boolean" },
+			true);
+	private static MethodSignature IS_DP_STALE_METHOD = new MethodSignature("isDeploymentPackageStale", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
 
 	private String symbolicName;
 	private String version;
@@ -47,9 +57,7 @@ public class RemoteDPImpl implements RemoteDP {
 	public RemoteBundle getBundle(String bsn) throws IAgentException {
 		debug("[getBundle] >>> symbolicName: " + bsn);
 		checkState();
-		Long bid = (Long) Utils.callRemoteMethod(getDeploymentAdmin(),
-			Utils.GET_DP_BUNDLE_METHOD,
-			new Object[] { this.symbolicName, version, bsn });
+		Long bid = (Long) GET_DP_BUNDLE_METHOD.call(getDeploymentAdmin(), new Object[] { this.symbolicName, version, bsn });
 		// TODO: Rework this to work with Error objects instead of longs
 		if (bid.longValue() == -2) {
 			debug("[getBundle] remote call result is: " + bid + " -> deployment package is stale");
@@ -76,9 +84,7 @@ public class RemoteDPImpl implements RemoteDP {
 	public Dictionary getBundles() throws IAgentException {
 		debug("[getBundles] >>>");
 		checkState();
-		Dictionary bundles = (Dictionary) Utils.callRemoteMethod(getDeploymentAdmin(),
-			Utils.GET_DP_BUNDLES_METHOD,
-			new Object[] { symbolicName, version });
+		Dictionary bundles = (Dictionary) GET_DP_BUNDLES_METHOD.call(getDeploymentAdmin(), new Object[] { symbolicName, version });
 		if (bundles == null) {
 			debug("[getBundle] remote call result is: " + bundles + " -> deployment package is stale");
 			stale = true;
@@ -93,9 +99,7 @@ public class RemoteDPImpl implements RemoteDP {
 		if (header == null)
 			throw new IllegalArgumentException();
 		checkState();
-		Object result = Utils.callRemoteMethod(getDeploymentAdmin(),
-			Utils.GET_DP_HEADER_METHOD,
-			new Object[] { symbolicName, version, header });
+		Object result = GET_DP_HEADER_METHOD.call(getDeploymentAdmin(), new Object[] { symbolicName, version, header });
 		if (result == null) {
 			debug("[getHeader] remote call result is: " + result + " -> header not found");
 			return null;
@@ -131,9 +135,7 @@ public class RemoteDPImpl implements RemoteDP {
 	public boolean isStale() throws IAgentException {
 		if (!stale) {
 			debug("[isStale] Quering remote site...");
-			Boolean result = (Boolean) Utils.callRemoteMethod(getDeploymentAdmin(),
-				Utils.IS_DP_STALE_METHOD,
-				new Object[] { symbolicName, version });
+			Boolean result = (Boolean) IS_DP_STALE_METHOD.call(getDeploymentAdmin(), new Object[] { symbolicName, version });
 			stale = result.booleanValue();
 		}
 		debug("[isStale] deployment package is " + (stale ? "stale" : "not stale"));
@@ -143,9 +145,7 @@ public class RemoteDPImpl implements RemoteDP {
 	public boolean uninstall(boolean force) throws IAgentException {
 		debug("[uninstall] >>> force: " + force);
 		checkState();
-		Object result = Utils.callRemoteMethod(getDeploymentAdmin(),
-			Utils.UNINSTALL_DP_METHOD,
-			new Object[] { symbolicName, version, new Boolean(force) });
+		Object result = UNINSTALL_DP_METHOD.call(getDeploymentAdmin(), new Object[] { symbolicName, version, new Boolean(force) });
 		if (result instanceof Boolean) { // OK, no exception was thrown
 			debug("[uninstall] remote call result is: " + result + " -> no exceptions");
 			return ((Boolean) result).booleanValue();

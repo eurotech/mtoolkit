@@ -51,8 +51,17 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 	private static final String EVENT_TYPE_KEY = "type";
 	private static final String EVENT_DEPLOYMENT_PACKAGE_KEY = "deployment.package";
 	private static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
-	
-	private final MethodSignature GET_SYSTEM_BUNDLES_NAMES = new MethodSignature("getSystemBundlesNames");
+
+	private static MethodSignature INSTALL_BUNDLE_METHOD = new MethodSignature("installBundle", new String[] { Utils.STRING_TYPE, Utils.INPUT_STREAM_TYPE }, true);
+	private static MethodSignature GET_SYSTEM_BUNDLES_NAMES = new MethodSignature("getSystemBundlesNames");
+	private static MethodSignature LIST_BUNDLES_METHOD = new MethodSignature("listBundles", Utils.NO_ARGS, true);
+	private static MethodSignature GET_BUNDLES_METHOD = new MethodSignature("getBundles", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
+	private static MethodSignature LIST_DPS_METHOD = new MethodSignature("listDeploymentPackages", Utils.NO_ARGS, true);
+	private static MethodSignature GET_DP_VERSION_METHOD = new MethodSignature("getDeploymentPackageVersion", new String[] { Utils.STRING_TYPE }, true);
+	private static MethodSignature INSTALL_DP_METHOD = new MethodSignature("installDeploymentPackage", new String[] { Utils.INPUT_STREAM_TYPE }, true);
+	private static MethodSignature GET_BUNDLE_BY_LOCATION_METHOD = new MethodSignature("getBundleByLocation", new String[] { Utils.STRING_TYPE }, true);
+	private static MethodSignature GET_SYSTEM_BUNDLES_IDS_METHOD = new MethodSignature("getSystemBundlesIDs", Utils.NO_ARGS, true);
+	private static MethodSignature GET_BUNDLES_SNAPSHOT_METHOD = new MethodSignature("getBundlesSnapshot", new String[] { "int", Dictionary.class.getName() }, true);
 
 	private DeviceConnectorImpl connector;
 
@@ -74,8 +83,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		debug("[getBundles] >>> symbolicName: " + symbolicName + "; version: " + version);
 		if (symbolicName == null)
 			throw new IllegalArgumentException("Symbolic name parameter cannot be null");
-		long[] bids = (long[]) Utils.callRemoteMethod(getBundleAdmin(), Utils.GET_BUNDLES_METHOD, new Object[] {
-				symbolicName, version });
+		long[] bids = (long[]) GET_BUNDLES_METHOD.call(getBundleAdmin(), new Object[] { symbolicName, version });
 		if (bids == null) {
 			final String msg = "PackageAdmin service is unavailable on the remote site";
 			info("[getBundles] " + msg);
@@ -97,8 +105,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		debug("[getDeploymentPackage] >>> name: " + name);
 		if (name == null)
 			throw new IllegalArgumentException();
-		String version = (String) Utils.callRemoteMethod(getDeploymentAdmin(), Utils.GET_DP_VERSION_METHOD,
-				new Object[] { name });
+		String version = (String) GET_DP_VERSION_METHOD.call(getDeploymentAdmin(), new Object[] { name });
 		if (version == null) {
 			debug("[getDeploymentPackage] No deployment package with this name: " + name + " is found.");
 			return null;
@@ -112,8 +119,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		debug("[installBundle] >>> location: " + location + "; inputStream: " + is);
 		if (location == null || is == null)
 			throw new IllegalArgumentException();
-		Long bundleId = (Long) Utils.callRemoteMethod(getBundleAdmin(), Utils.GET_BUNDLE_BY_LOCATION_METHOD,
-				new Object[] { location });
+		Long bundleId = (Long) GET_BUNDLE_BY_LOCATION_METHOD.call(getBundleAdmin(), new Object[] { location });
 		if (bundleId != null) {
 			if (bundleId.longValue() != -1)
 				return new RemoteBundleImpl(this, bundleId, location); // directly
@@ -131,8 +137,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			// for
 			// this
 		}
-		Object result = Utils.callRemoteMethod(getBundleAdmin(), Utils.INSTALL_BUNDLE_METHOD, new Object[] { location,
-				is });
+		Object result = INSTALL_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] { location, is });
 		if (result instanceof Long) {
 			bundleId = (Long) result;
 			debug("[installBundle] installed bundle id: " + bundleId);
@@ -165,7 +170,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		if (is == null) {
 			throw new IllegalArgumentException("Non-null InputStream must be passed");
 		}
-		Object result = Utils.callRemoteMethod(getDeploymentAdmin(), Utils.INSTALL_DP_METHOD, new Object[] { is });
+		Object result = INSTALL_DP_METHOD.call(getDeploymentAdmin(), new Object[] { is });
 		if (result instanceof Error) {
 			Error error = (Error) result;
 			info("[installDeploymentPackage] Installation failed: " + error);
@@ -178,7 +183,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 
 	public RemoteBundle[] listBundles() throws IAgentException {
 		debug("[listBundles] >>>");
-		long[] bids = (long[]) Utils.callRemoteMethod(getBundleAdmin(), Utils.LIST_BUNDLES_METHOD, new Object[0]);
+		long[] bids = (long[]) LIST_BUNDLES_METHOD.call(getBundleAdmin());
 		if (bids == null) {
 			info("[listBundles] listBundles() must not return null array. There is a problem with the transport.");
 			throw new IAgentException(
@@ -195,8 +200,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 
 	public RemoteDP[] listDeploymentPackages() throws IAgentException {
 		debug("[listDeploymentPackages] >>>");
-		Dictionary dps = (Dictionary) Utils.callRemoteMethod(getDeploymentAdmin(), Utils.LIST_DPS_METHOD,
-				new Object[] {});
+		Dictionary dps = (Dictionary) LIST_DPS_METHOD.call(getDeploymentAdmin());
 		RemoteDP[] result = new RemoteDP[dps.size()];
 		int i = 0;
 		for (Enumeration e = dps.keys(); e.hasMoreElements(); i++) {
@@ -418,8 +422,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		if (systemBundlesIDs != null) {
 			return systemBundlesIDs;
 		}
-		long[] result = (long[]) Utils.callRemoteMethod(getBundleAdmin(), Utils.GET_SYSTEM_BUNDLES_IDS_METHOD,
-				new Object[0]);
+		long[] result = (long[]) GET_SYSTEM_BUNDLES_IDS_METHOD.call(getBundleAdmin());
 		if (result == null) {
 			info("[getSystemBundlesIDs] getSystemBundlesIDs() must not return null array. There is a problem with the transport.");
 			throw new IAgentException(
@@ -532,7 +535,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		debug("[getBundlesSnapshot] >>>");
 		int options = RemoteBundleAdmin.INCLUDE_BUNDLE_HEADERS | RemoteBundleAdmin.INCLUDE_BUNDLE_STATES
 				| RemoteBundleAdmin.INCLUDE_REGISTERED_SERVICES | RemoteBundleAdmin.INCLUDE_USED_SERVICES;
-		Object snapshotData = Utils.callRemoteMethod(getBundleAdmin(), Utils.GET_BUNDLES_SNAPSHOT, new Object[] {
+		Object snapshotData = GET_BUNDLES_SNAPSHOT_METHOD.call(getBundleAdmin(), new Object[] {
 				new Integer(options), properties });
 		if (snapshotData == null) {
 			info("[getBundlesSnapshot] getBundlesSnapshot() must not return null array. There is a problem with the transport.");

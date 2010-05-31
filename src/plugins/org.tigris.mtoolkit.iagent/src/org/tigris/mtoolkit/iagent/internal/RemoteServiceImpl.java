@@ -18,10 +18,16 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class RemoteServiceImpl implements RemoteService {
+
+	private static MethodSignature GET_PROPERTIES_METHOD = new MethodSignature("getProperties", Utils.SERVICEID_ARGS, true);
+	private static MethodSignature GET_USING_BUNDLES_METHOD = new MethodSignature("getUsingBundles", Utils.SERVICEID_ARGS, true);
+	private static MethodSignature GET_BUNDLE_METHOD = new MethodSignature("getBundle", Utils.SERVICEID_ARGS, true);
+	private static MethodSignature IS_SERVICE_STALE_METHOD = new MethodSignature("isServiceStale", Utils.SERVICEID_ARGS, true);
 
 	private ServiceManagerImpl manager;
 	private Long serviceId;
@@ -55,9 +61,7 @@ public class RemoteServiceImpl implements RemoteService {
 		checkState();
 		if (registeredBundle == null) {
 			debug("[getBundle] Querying for registered bundle...");
-			Long bid = (Long) Utils.callRemoteMethod(getServiceAdmin(),
-				Utils.GET_BUNDLE_METHOD,
-				new Object[] { serviceId });
+			Long bid = (Long) GET_BUNDLE_METHOD.call(getServiceAdmin(), new Object[] { serviceId });
 			if (bid.longValue() == -1) {
 				stale = true;
 				debug("[getBundle] service reference is stale");
@@ -100,9 +104,7 @@ public class RemoteServiceImpl implements RemoteService {
 	public Dictionary getProperties() throws IAgentException {
 		debug("[getProperties] >>>");
 		checkState();
-		Dictionary properties = (Dictionary) Utils.callRemoteMethod(getServiceAdmin(),
-			Utils.GET_PROPERTIES_METHOD,
-			new Object[] { serviceId });
+		Dictionary properties = (Dictionary) GET_PROPERTIES_METHOD.call(getServiceAdmin(), new Object[] { serviceId });
 		if (properties == null) {
 			debug("[getProperties] service reference is stale");
 			stale = true;
@@ -119,9 +121,7 @@ public class RemoteServiceImpl implements RemoteService {
 	public RemoteBundle[] getUsingBundles() throws IAgentException {
 		debug("[getUsingBundles] >>>");
 		checkState();
-		long[] bids = (long[]) Utils.callRemoteMethod(getServiceAdmin(),
-			Utils.GET_USING_BUNDLES_METHOD,
-			new Object[] { serviceId });
+		long[] bids = (long[]) GET_USING_BUNDLES_METHOD.call(getServiceAdmin(), new Object[] { serviceId });
 		if (bids == null) {
 			debug("[getUsingBundles] service reference is stale");
 			stale = true;
@@ -144,9 +144,7 @@ public class RemoteServiceImpl implements RemoteService {
 		}
 		if (!stale) {
 			debug("[isStale] Quering remote status...");
-			Boolean isStale = (Boolean) Utils.callRemoteMethod(getServiceAdmin(),
-				Utils.IS_SERVICE_STALE_METHOD,
-				new Object[] { serviceId });
+			Boolean isStale = (Boolean) IS_SERVICE_STALE_METHOD.call(getServiceAdmin(), new Object[] { serviceId });
 			stale = isStale.booleanValue();
 		}
 		debug("[isStale] result: " + stale);

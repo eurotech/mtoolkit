@@ -13,7 +13,6 @@ package org.tigris.mtoolkit.iagent.internal.tcp;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -26,6 +25,7 @@ import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.PMPServiceFactory;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.spi.PMPConnector;
 import org.tigris.mtoolkit.iagent.spi.Utils;
@@ -33,6 +33,9 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public class PMPConnectionImpl implements PMPConnection, EventListener {
+
+	private static MethodSignature RELEASE_METHOD = new MethodSignature("releaseConsole", Utils.NO_ARGS, true);
+	private static MethodSignature GET_REMOTE_SERVICE_ID_METHOD = new MethodSignature("getRemoteServiceID", Utils.NO_ARGS, true);
 
 	private org.tigris.mtoolkit.iagent.pmp.PMPConnection pmpConnection;
 	private ConnectionManagerImpl connManager;
@@ -207,7 +210,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 		debug("[releaseRemoteParserService] >>>");
 		if (remoteParserService != null) {
 			try {
-				Utils.callRemoteMethod(remoteParserService, Utils.RELEASE_METHOD, null);
+				RELEASE_METHOD.call(remoteParserService);
 				remoteParserService.dispose();
 			} catch (PMPException e) {
 				error("[releaseRemoteParserService]", e);
@@ -259,8 +262,8 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 						try {
 							RemoteObject newRemoteObject = pmpConnection.getReference(adminClass, null);
 							Long l = new Long(-1);
-							if (Utils.isRemoteMethodDefined(newRemoteObject, Utils.GET_REMOTE_SERVICE_ID_METHOD)) {
-								l = (Long) Utils.callRemoteMethod(newRemoteObject, Utils.GET_REMOTE_SERVICE_ID_METHOD, null);
+							if (GET_REMOTE_SERVICE_ID_METHOD.isDefined(newRemoteObject)) {
+								l = (Long) GET_REMOTE_SERVICE_ID_METHOD.call(newRemoteObject);
 							}
 							long newServiceID = l.longValue();
 							if (newServiceID == -1) {

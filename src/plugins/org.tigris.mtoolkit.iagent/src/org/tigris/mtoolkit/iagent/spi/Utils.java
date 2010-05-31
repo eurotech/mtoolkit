@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
-import java.util.Dictionary;
-
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.tcp.PMPRemoteObjectAdapter;
@@ -22,188 +20,12 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 
 public class Utils {
 
-	private static final String STRING_TYPE = "java.lang.String";
-	private static final String INPUT_STREAM_TYPE = "java.io.InputStream";
+	public static final String STRING_TYPE = "java.lang.String";
+	public static final String INPUT_STREAM_TYPE = "java.io.InputStream";
 
-	private static final String[] NO_ARGS = new String[0];
-	private static final String[] BID_ARGS = new String[] { "long" };
-	private static final String[] SERVICEID_ARGS = new String[] { "long" };
-
-	// TODO: Change the way remote method calls are made, use
-	// MethodSignature.call() instead of this class
-
-	private static MethodSignature[] METHOD_SIGNATURES = {
-			new MethodSignature("installBundle", new String[] { STRING_TYPE, INPUT_STREAM_TYPE }, true),
-			new MethodSignature("getBundleState", BID_ARGS, true),
-			new MethodSignature("getBundleLastModified", BID_ARGS, true),
-			new MethodSignature("getBundleHeaders", new String[] { "long", STRING_TYPE }, true),
-			new MethodSignature("getBundleLocation", BID_ARGS, true),
-			new MethodSignature("startBundle", new String[] { "long", "int" }, true),
-			new MethodSignature("stopBundle", new String[] { "long", "int" }, true),
-			new MethodSignature("updateBundle", new String[] { "long", INPUT_STREAM_TYPE }, true),
-			new MethodSignature("uninstallBundle", BID_ARGS, true),
-			new MethodSignature("getBundleSymbolicName", BID_ARGS, true),
-			new MethodSignature("getBundleVersion", BID_ARGS, true),
-			new MethodSignature("resolveBundles", new String[] { long[].class.getName() }, true),
-			new MethodSignature("listBundles", NO_ARGS, true),
-			new MethodSignature("getBundles", new String[] { STRING_TYPE, STRING_TYPE }, true),
-
-			new MethodSignature("listDeploymentPackages", NO_ARGS, true),
-			new MethodSignature("getDeploymentPackageHeader", new String[] { STRING_TYPE, STRING_TYPE, STRING_TYPE },
-					true),
-			new MethodSignature("getDeploymentPackageBundles", new String[] { STRING_TYPE, STRING_TYPE }, true),
-			new MethodSignature("getDeploymentPackageBundle", new String[] { STRING_TYPE, STRING_TYPE, STRING_TYPE },
-					true),
-			new MethodSignature("uninstallDeploymentPackage", new String[] { STRING_TYPE, STRING_TYPE, "boolean" },
-					true),
-			new MethodSignature("isDeploymentPackageStale", new String[] { STRING_TYPE, STRING_TYPE }, true),
-			new MethodSignature("getDeploymentPackageVersion", new String[] { STRING_TYPE }, true),
-			new MethodSignature("installDeploymentPackage", new String[] { INPUT_STREAM_TYPE }, true),
-
-			new MethodSignature("registerOutput", new String[] { RemoteObject.class.getName() }, true),
-			new MethodSignature("executeCommand", new String[] { STRING_TYPE }, true),
-			new MethodSignature("releaseConsole", NO_ARGS, true),
-
-			new MethodSignature("getAllRemoteServices", new String[] { STRING_TYPE, STRING_TYPE }, true),
-			new MethodSignature("getObjectClass", SERVICEID_ARGS, true),
-			new MethodSignature("getProperties", SERVICEID_ARGS, true),
-			new MethodSignature("getUsingBundles", SERVICEID_ARGS, true),
-			new MethodSignature("getBundle", SERVICEID_ARGS, true),
-			new MethodSignature("isServiceStale", SERVICEID_ARGS, true),
-			new MethodSignature("checkFilter", new String[] { STRING_TYPE }, true),
-
-			// additional methods to Bundle Admin
-			new MethodSignature("getRegisteredServices", BID_ARGS, true),
-			new MethodSignature("getUsingServices", BID_ARGS, true),
-			new MethodSignature("getFragmentBundles", BID_ARGS, true),
-			new MethodSignature("getHostBundles", BID_ARGS, true),
-			new MethodSignature("getBundleType", BID_ARGS, true),
-
-			// additional method for getting single header
-			new MethodSignature("getBundleHeader", new String[] { "long", STRING_TYPE, STRING_TYPE }, true),
-
-			// method for identifying the remote admins
-			new MethodSignature("getRemoteServiceID", NO_ARGS, true),
-
-			// method for getting a bundle by location
-			new MethodSignature("getBundleByLocation", new String[] { STRING_TYPE }, true),
-
-			// method from RemoteBundleAdmin for retreiving agentData
-			new MethodSignature("getAgentData", NO_ARGS, true),
-			new MethodSignature("getSystemBundlesIDs", NO_ARGS, true),
-
-			// methods for getting the bundle and framework start levels
-			new MethodSignature("getBundleStartLevel", new String[] { "long" }, true),
-			new MethodSignature("getFrameworkStartLevel", NO_ARGS, true),
-			new MethodSignature("getSystemProperty", new String[] { STRING_TYPE }, true), 
-
-			new MethodSignature("getBundlesSnapshot", new String[] { "int", Dictionary.class.getName() }, true),
-	};
-
-	public static final int INSTALL_BUNDLE_METHOD = 0;
-	public static final int GET_BUNDLE_STATE_METHOD = 1;
-	public static final int GET_BUNDLE_LAST_MODIFIED_METHOD = 2;
-	public static final int GET_BUNDLE_HEADERS_METHOD = 3;
-	public static final int GET_BUNDLE_LOCATION_METHOD = 4;
-	public static final int START_BUNDLE_METHOD = 5;
-	public static final int STOP_BUNDLE_METHOD = 6;
-	public static final int UPDATE_BUNDLE_METHOD = 7;
-	public static final int UNINSTALL_BUNDLE_METHOD = 8;
-	public static final int GET_BUNDLE_NAME_METHOD = 9;
-	public static final int GET_BUNDLE_VERSION_METHOD = 10;
-	public static final int RESOLVE_BUNDLES_METHOD = 11;
-	public static final int LIST_BUNDLES_METHOD = 12;
-	public static final int GET_BUNDLES_METHOD = 13;
-
-	public static final int LIST_DPS_METHOD = 14;
-	public static final int GET_DP_HEADER_METHOD = 15;
-	public static final int GET_DP_BUNDLES_METHOD = 16;
-	public static final int GET_DP_BUNDLE_METHOD = 17;
-	public static final int UNINSTALL_DP_METHOD = 18;
-	public static final int IS_DP_STALE_METHOD = 19;
-	public static final int GET_DP_VERSION_METHOD = 20;
-	public static final int INSTALL_DP_METHOD = 21;
-
-	public static final int REGISTER_METHOD = 22;
-	public static final int EXECUTE_METHOD = 23;
-	public static final int RELEASE_METHOD = 24;
-
-	public static final int GET_ALL_REMOTE_SERVICES_METHOD = 25;
-	public static final int GET_OBJECT_CLASS_METHOD = 26;
-	public static final int GET_PROPERTIES_METHOD = 27;
-	public static final int GET_USING_BUNDLES_METHOD = 28;
-	public static final int GET_BUNDLE_METHOD = 29;
-	public static final int IS_SERVICE_STALE_METHOD = 30;
-	public static final int CHECK_FILTER_METHOD = 31;
-
-	public static final int GET_REGISTERED_SERVICES_METHOD = 32;
-	public static final int GET_USING_SERVICES_METHOD = 33;
-	public static final int GET_FRAGMENT_BUNDLES_METHOD = 34;
-	public static final int GET_HOST_BUNDLES_METHOD = 35;
-	public static final int GET_BUNDLE_TYPE_METHOD = 36;
-
-	public static final int GET_BUNDLE_HEADER_METHOD = 37;
-
-	public static final int GET_REMOTE_SERVICE_ID_METHOD = 38;
-
-	public static final int GET_BUNDLE_BY_LOCATION_METHOD = 39;
-
-	public static final int GET_AGENT_DATA_METHOD = 40;
-	public static final int GET_SYSTEM_BUNDLES_IDS_METHOD = 41;
-
-	public static final int GET_BUNDLE_START_LEVEL_METHOD = 42;
-	public static final int GET_FW_START_LEVEL = 43;
-
-	public static final int GET_SYSTEM_PROPERTY = 44;
-
-	/**
-	 * @since 3.0
-	 */
-	public static final int GET_BUNDLES_SNAPSHOT = 45;
-
-	public static final int LAST = 45;
-
-	static {
-		if (METHOD_SIGNATURES.length != LAST + 1) {
-			error("ERROR: There is a mismatch between the method constants and the array holding the method descriptions: [expected: "
-							+ METHOD_SIGNATURES.length + ", actual: " + (LAST + 1) + "]");
-		}
-	}
-
-	public static int[] addMethodSignatures(MethodSignature[] signatures) {
-		if (signatures == null)
-			return null;
-		int[] result = new int[signatures.length];
-		MethodSignature[] newSignatures = new MethodSignature[METHOD_SIGNATURES.length + signatures.length];
-		int i = 0;
-		for (; i < METHOD_SIGNATURES.length; i++) {
-			newSignatures[i] = METHOD_SIGNATURES[i];
-		}
-		for (int j = 0; j < signatures.length; j++) {
-			newSignatures[i + j] = signatures[j];
-			result[j] = i + j;
-		}
-		METHOD_SIGNATURES = newSignatures;
-		return result;
-	}
-
-	/**
-	 * 
-	 * @param remote
-	 * @param method
-	 * @param parameters
-	 * @return
-	 * @throws IAgentException
-	 * @deprecated Using this method result in too verbose code. Consider using
-	 *             {@link MethodSignature#call(RemoteObject)} or one of its
-	 *             siblings instead.
-	 */
-	public static Object callRemoteMethod(RemoteObject remote, int method, Object[] parameters) throws IAgentException {
-		MethodSignature methodSignature = METHOD_SIGNATURES[method];
-		if (DebugUtils.DEBUG_ENABLED)
-			debug("[callRemoteMethod] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
-		return callRemoteMethod(remote, methodSignature, parameters);
-	}
+	public static final String[] NO_ARGS = new String[0];
+	public static final String[] BID_ARGS = new String[] { "long" };
+	public static final String[] SERVICEID_ARGS = new String[] { "long" };
 
 	/**
 	 * 
@@ -241,13 +63,6 @@ public class Utils {
 		}
 	}
 
-	public static boolean isRemoteMethodDefined(RemoteObject remote, int method) throws IAgentException {
-		MethodSignature methodSignature = METHOD_SIGNATURES[method];
-		if (DebugUtils.DEBUG_ENABLED)
-			debug("[isRemoteDefined] >>> " + formatRemoteMethodInformation(remote, method, methodSignature));
-		return isRemoteMethodDefined(remote, methodSignature);
-	}
-
 	public static boolean isRemoteMethodDefined(RemoteObject remote, MethodSignature methodSignature)
 			throws IAgentException {
 		try {
@@ -269,10 +84,9 @@ public class Utils {
 		return false;
 	}
 
-	private final static String formatRemoteMethodInformation(RemoteObject remote, int method,
-			MethodSignature methodSignature) {
+	private final static String formatRemoteMethodInformation(RemoteObject remote, MethodSignature methodSignature) {
 		if (DebugUtils.DEBUG_ENABLED)
-			return "RemoteObject: " + remote + "; methodNumber: " + method + "; methodName: " + methodSignature.name;
+			return "RemoteObject: " + remote + "; methodName: " + methodSignature.name;
 		else
 			return "Debug not enabled";
 	}

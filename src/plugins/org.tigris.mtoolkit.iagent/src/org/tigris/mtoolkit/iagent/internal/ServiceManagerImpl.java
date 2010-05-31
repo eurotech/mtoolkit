@@ -26,10 +26,14 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class ServiceManagerImpl implements ServiceManager, EventListener, ConnectionListener {
+
+	private static MethodSignature GET_ALL_REMOTE_SERVICES_METHOD = new MethodSignature("getAllRemoteServices", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
+	private static MethodSignature CHECK_FILTER_METHOD = new MethodSignature("checkFilter", new String[] { Utils.STRING_TYPE }, true);
 
 	private DeviceConnectorImpl connector;
 
@@ -53,16 +57,14 @@ public class ServiceManagerImpl implements ServiceManager, EventListener, Connec
 	public RemoteService[] getAllRemoteServices(String clazz, String filter) throws IAgentException {
 		debug("[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
 		if (filter != null) {
-			String filterCheck = (String) Utils.callRemoteMethod(getServiceAdmin(getConnection()),
-				Utils.CHECK_FILTER_METHOD,
+			String filterCheck = (String) CHECK_FILTER_METHOD.call(getServiceAdmin(getConnection()),
 				new Object[] { filter });
 			if (filterCheck != null) { // invalid filter syntax
 				info("[getAllRemoteServices] Filter check failed: " + filterCheck);
 				throw new IllegalArgumentException("Invalid Filter Syntax: " + filterCheck);
 			}
 		}
-		Dictionary[] servicesProps = (Dictionary[]) Utils.callRemoteMethod(getServiceAdmin(getConnection()),
-			Utils.GET_ALL_REMOTE_SERVICES_METHOD,
+		Dictionary[] servicesProps = (Dictionary[]) GET_ALL_REMOTE_SERVICES_METHOD.call(getServiceAdmin(getConnection()),
 			new Object[] { clazz, filter });
 		if (servicesProps == null) {
 			info("[getAllRemoteServices] Internal error: it seems that filter check either returned invalid result or we interpreted it wrong");
