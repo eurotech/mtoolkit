@@ -97,13 +97,16 @@ public class PluginProvider implements InstallationItemProvider {
 				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Can not parse the manifest file for project \""+project.getName()+"\"");
 			}
 			BundleDescription descr = model.getBundleDescription();
+			String name = null;
 			if (descr != null) {
 				Object ver = descr.getVersion();
 				if (ver != null) {
 					version = ver.toString();
 				}
+				name = descr.getSymbolicName();
+			} else {
+				name = model.toString();
 			}
-			String name = descr.getSymbolicName();
 
 			IPluginExporter exporter = PluginExporter.getInstance();
 
