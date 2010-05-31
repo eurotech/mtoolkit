@@ -32,7 +32,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 public class Util {
 
 	public static IStatus handleIAgentException(IAgentException e) {
-		return Util.newStatus(IStatus.ERROR, null, e);
+		return Util.newStatus(IStatus.ERROR, e.getMessage(), e.getCauseException());
 	}
 
 	public static IStatus newStatus(String message, IStatus e) {
