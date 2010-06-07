@@ -60,6 +60,11 @@ public class Bundle extends Model {
 		needsUpdate = true;
 		version = master.version;
 	}
+	
+	public Bundle(Bundle master, String category) {
+		this(master);
+		this.category = category;
+	}
 
 	public RemoteBundle getRemoteBundle() {
 		return rBundle;

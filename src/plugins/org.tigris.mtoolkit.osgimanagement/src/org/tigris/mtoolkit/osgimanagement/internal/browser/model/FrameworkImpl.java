@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
@@ -1120,33 +1121,57 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			if (state == 0) {
 				state = rBundle.getState();
 			}
-			Model bundleParentModel;
 			String categoryName = (String) headers.get("Bundle-Category");
-			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
-				if (categoryName == null)
-					categoryName = Messages.unknown_category_label;
-				Category category = null;
-				if (categoryHash.containsKey(categoryName)) {
-					category = (Category) categoryHash.get(categoryName);
-				} else {
-					category = new Category(categoryName);
-					categoryHash.put(categoryName, category);
-					getBundlesNode().addElement(category);
-				}
-				bundleParentModel = category;
-			} else {
-				bundleParentModel = getBundlesNode();
-			}
-
+			Vector categoriesNames = new Vector();
 			String bundleName = getBundleName(rBundle, headers);
 			String bundleVersion = (String) headers.get("Bundle-Version");
-			Bundle bundle = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers), categoryName,
-					bundleVersion);
-			bundleParentModel.addElement(bundle);
-			bundleHash.put(new Long(bundle.getID()), bundle);
-			if (rBundle.isSystemBundle()) {
-				systemBundles.add(new Long(rBundle.getBundleId()));
+
+			if (categoryName == null) {
+				categoriesNames.addElement(Messages.unknown_category_label);
+			} else {
+				if (categoryName.indexOf(",") != -1) {
+					StringTokenizer tokenizer = new StringTokenizer(categoryName, ",");
+					while (tokenizer.hasMoreElements()) {
+						categoriesNames.addElement(tokenizer.nextToken().trim());
+					}
+				} else {
+					categoriesNames.addElement(categoryName);
+				}
 			}
+			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
+				for (int i=0; i<categoriesNames.size(); i++) {
+					if (!categoryHash.containsKey(categoriesNames.elementAt(i))) {
+						Category category = new Category((String) categoriesNames.elementAt(i));
+						getBundlesNode().addElement(category);
+						categoryHash.put(categoriesNames.elementAt(i), category);
+					}
+				}
+				Bundle bundleMaster = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers), (String) categoriesNames.elementAt(0),
+						bundleVersion);
+				Model category = (Model) categoryHash.get(categoriesNames.elementAt(0));
+				category.addElement(bundleMaster);
+				bundleHash.put(new Long(bundleMaster.getID()), bundleMaster);
+				if (rBundle.isSystemBundle()) {
+					systemBundles.add(new Long(rBundle.getBundleId()));
+				}
+				for (int i=1; i<categoriesNames.size(); i++) {
+					category = (Category) categoryHash.get(categoriesNames.elementAt(i));
+					Bundle bundle = new Bundle(bundleMaster, (String) categoriesNames.elementAt(i));
+					category.addElement(bundle);
+				}
+			} else {
+				Model bundleParentModel = getBundlesNode();
+				
+				Bundle bundle = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers), (String) categoriesNames.elementAt(0),
+						bundleVersion);
+				bundleParentModel.addElement(bundle);
+				bundleHash.put(new Long(bundle.getID()), bundle);
+				if (rBundle.isSystemBundle()) {
+					systemBundles.add(new Long(rBundle.getBundleId()));
+				}
+
+			}
+
 		} catch (IllegalArgumentException e) {
 			// bundle was uninstalled
 		}
@@ -1214,6 +1239,12 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				Model registeredCategory = getServiceCategoryNode(bundle, ServicesCategory.REGISTERED_SERVICES, true);
 				addObjectClassNodes(registeredCategory, servObj.getObjectClass(), new Long(servObj
 						.getRemoteService().getServiceId()), servObj.getRemoteService());
+				
+				for (int i=0; i<bundle.getSlaves().size(); i++) {
+					Model registeredCategoryS = getServiceCategoryNode((Bundle) bundle.getSlaves().elementAt(i), ServicesCategory.REGISTERED_SERVICES, true);
+					addObjectClassNodes(registeredCategoryS, servObj.getObjectClass(), new Long(servObj
+							.getRemoteService().getServiceId()), servObj.getRemoteService());
+				}
 
 				for (int i = 0; i < servObj.getObjectClass().length; i++) {
 					ObjectClass hashService = new ObjectClass(servObj.getObjectClass()[i] + " [Service "
@@ -1265,11 +1296,11 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				Model usedCategory = getServiceCategoryNode(usedInBundle, ServicesCategory.USED_SERVICES, true);
 				addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
 						.getServiceId()), servObj.getRemoteService());
-//				for (int i=0; i<usedInBundle.getSlaves().size(); i++) {
-//					usedCategory = getServiceCategoryNode((Bundle) usedInBundle.getSlaves().elementAt(i), ServicesCategory.USED_SERVICES, true);
-//					addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
-//							.getServiceId()), servObj.getRemoteService());
-//				}
+				for (int i=0; i<usedInBundle.getSlaves().size(); i++) {
+					usedCategory = getServiceCategoryNode((Bundle) usedInBundle.getSlaves().elementAt(i), ServicesCategory.USED_SERVICES, true);
+					addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
+							.getServiceId()), servObj.getRemoteService());
+				}
 			}
 		}
 	}
