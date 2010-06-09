@@ -79,7 +79,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		// wrap the connector
 		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, Display.getDefault());
 		Dictionary connProps = fConnector.getProperties();
-		if (connProps.get("framework-connection-temporary") != null)
+		Boolean temporary = (Boolean) connProps.get("framework-connection-temporary");
+		if (temporary != null && temporary.booleanValue())
 			// the connection is only temporary and will be closed shortly
 			return;
 		String frameworkName = (String) connProps.get("framework-name"); //$NON-NLS-1$
