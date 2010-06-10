@@ -47,6 +47,8 @@ public final class Messages extends NLS {
 	public static String find_in_frameworks_view;
 	public static String refresh_action_label;
 	public static String show_framework_console;
+
+	public static String add_framework_title;
 	public static String framework_properties_title;
 	public static String service_properties_title;
 	public static String bundle_properties_title;

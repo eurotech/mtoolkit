@@ -102,7 +102,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		setTitle("Framework details");
 		setMessage("Edit framework details");
 		
-		parent.getShell().setText(Messages.framework_properties_title);
+		parent.getShell().setText(addFramework ? Messages.add_framework_title : Messages.framework_properties_title);
 
 		mainContent = new Composite((Composite) main, SWT.NONE);
 		mainContent.setLayout(new GridLayout());
