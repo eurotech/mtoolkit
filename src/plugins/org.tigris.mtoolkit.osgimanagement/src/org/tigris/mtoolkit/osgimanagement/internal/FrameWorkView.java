@@ -412,7 +412,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				new ActionContributionItem(stopAction), 
 				new ActionContributionItem(updateBundleAction), 
 				new ActionContributionItem(deinstallBundleAction),
-				new ActionContributionItem(bundlePropertiesAction),
+//				new ActionContributionItem(bundlePropertiesAction),
 				new Separator(), 
 				new ActionContributionItem(installBundleAction) };
 		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(items, tree);
@@ -436,7 +436,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, removeFrameworkAction);
 		commonPropertiesAction.setToolTipText(Messages.property_action_label);
 //		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, commonPropertiesAction);
-		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, frameworkPropertiesAction);
+//		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, frameworkPropertiesAction);
 
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewServicesAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewBundlesAction);
@@ -733,12 +733,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		manager.appendToGroup(ContentTypeActionsProvider.GROUP_DEFAULT, showConsoleAction);
 		if (selection.size() > 0 && homogen) {
 			Model element = (Model) selection.getFirstElement();
-			if (element instanceof FrameworkImpl)
-				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, frameworkPropertiesAction);
-			if (element instanceof Bundle)
-				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, bundlePropertiesAction);
-			if (element instanceof ObjectClass)
-				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, servicePropertiesAction);
+			if (element instanceof FrameworkImpl
+					|| element instanceof Bundle
+					|| element instanceof ObjectClass)
+				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, commonPropertiesAction);
 		}
 	}
 
