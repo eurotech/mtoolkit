@@ -164,7 +164,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 	private static AddAction addFrameworkAction;
 	private static RemoveAction removeFrameworkAction;
-	private static PropertyAction frameworkPropertiesAction;
 	private static ConnectAction connectAction;
 	private static DisconnectAction disconnectAction;
 	private static InstallBundleAction installBundleAction;
@@ -175,13 +174,11 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private static UpdateBundleAction updateBundleAction;
 	private static CommonPropertiesAction commonPropertiesAction;
 	private static ShowServicePropertiesInTree showServPropsInTreeAction;
-	private ServicePropertiesAction servicePropertiesAction;
 	private GotoServiceAction gotoServiceAction;
 	private static ViewAction viewServicesAction;
 	private static ViewAction viewBundlesAction;
 	private ShowBundleIDAction showBundleIDAction;
 	private ShowBundleVersionAction showBundleVersionAction;
-	private static BundlePropertiesAction bundlePropertiesAction;
 	private FindAction findAction;
 	private static ShowFrameworkConsole showConsoleAction;
 	private static RefreshAction refreshAction;
@@ -412,7 +409,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				new ActionContributionItem(stopAction), 
 				new ActionContributionItem(updateBundleAction), 
 				new ActionContributionItem(deinstallBundleAction),
-//				new ActionContributionItem(bundlePropertiesAction),
 				new Separator(), 
 				new ActionContributionItem(installBundleAction) };
 		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(items, tree);
@@ -534,9 +530,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		removeFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(REMOVE_ACTION_ACTION_PATH));
 		removeFrameworkAction.setAccelerator(SWT.DEL);
 
-		frameworkPropertiesAction = new PropertyAction(tree, Messages.property_action_label);
-		frameworkPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_ACTION_IMAGE_PATH));
-
 		connectAction = new ConnectAction(tree, Messages.connect_action_label);
 		connectAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONNECT_ACTION_IMAGE_PATH));
 
@@ -558,9 +551,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		updateBundleAction = new UpdateBundleAction(tree, Messages.update_action_label);
 		updateBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(UPDATE_BUNDLE_IMAGE_PATH));
 
-		servicePropertiesAction = new ServicePropertiesAction(tree, Messages.property_action_label);
-		servicePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
-		
 		gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
 		viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameworkImpl.SERVICES_VIEW);
 		viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ViewLabelProvider.SERVICES_CATEGORY_ICON));
@@ -571,9 +561,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree, getTreeRoot());
 
 		showServPropsInTreeAction = new ShowServicePropertiesInTree(tree, Messages.show_service_properties_in_tree);
-
-		bundlePropertiesAction = new BundlePropertiesAction(tree, Messages.property_action_label);
-		bundlePropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
 
 		commonPropertiesAction = new CommonPropertiesAction(tree, Messages.property_action_label);
 		commonPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
@@ -623,13 +610,13 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		stopAction.updateState(selection);
 		updateBundleAction.updateState(selection);
 		deinstallBundleAction.updateState(selection);
-		bundlePropertiesAction.updateState(selection);
+		commonPropertiesAction.updateState(selection);
 
 		installBundleAction.updateState(selection);
 
 		addFrameworkAction.setEnabled(true);
 		removeFrameworkAction.updateState(selection);
-		frameworkPropertiesAction.updateState(selection);
+		commonPropertiesAction.updateState(selection);
 		
 		viewBundlesAction.updateState(selection);
 		viewServicesAction.updateState(selection);
