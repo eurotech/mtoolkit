@@ -155,6 +155,8 @@ public final class Messages extends NLS {
 	public static String refresh_framework_info;
 	public static String refresh_bundles_info;
 	public static String connect_framework;
+	public static String connection_failed;
+	
 	public static String show_service_properties_in_tree;
 
 	public static String question_dialog_title;
