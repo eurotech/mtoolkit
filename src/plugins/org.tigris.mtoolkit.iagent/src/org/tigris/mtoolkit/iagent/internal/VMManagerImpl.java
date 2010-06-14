@@ -25,6 +25,8 @@ import org.tigris.mtoolkit.iagent.instrumentation.Instrument;
 import org.tigris.mtoolkit.iagent.internal.tcp.DataFormater;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
+import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnection;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnectionCallBack;
@@ -38,7 +40,7 @@ import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
  * Implementation of VMManager
  * 
  */
-public class VMManagerImpl implements VMManager {
+public class VMManagerImpl implements VMManager, ConnectionListener {
 
 	private static MethodSignature REGISTER_METHOD = new MethodSignature("registerOutput", new String[] { RemoteObject.class.getName() }, true);
 	private static MethodSignature EXECUTE_METHOD = new MethodSignature("executeCommand", new String[] { Utils.STRING_TYPE }, true);
@@ -47,7 +49,7 @@ public class VMManagerImpl implements VMManager {
 
 	private DeviceConnectorImpl connector;
 
-	private RemoteObject lastKnownRemoteConsole;
+	private OutputStream lastRegisteredOutput;
 
 	private LightServiceRegistry extensionsRegistry;
 
@@ -60,6 +62,21 @@ public class VMManagerImpl implements VMManager {
 		if (connector == null)
 			throw new IllegalArgumentException();
 		this.connector = connector;
+		connector.getConnectionManager().addConnectionListener(this);
+	}
+
+	public void connectionChanged(ConnectionEvent event) {
+		if (event.getType() == ConnectionEvent.CONNECTED
+				&& event.getConnection().getType() == ConnectionManager.PMP_CONNECTION) {
+			if (lastRegisteredOutput != null) {
+				// automatically redirect fw output when reconnected
+				try {
+					redirectFrameworkOutput(lastRegisteredOutput);
+				} catch (IAgentException e) {
+					info("[connectionChanged] Failed to redirect framework output", e);
+				}
+			}
+		}
 	}
 
 	public boolean isVMActive() throws IAgentException {
@@ -77,10 +94,9 @@ public class VMManagerImpl implements VMManager {
 		if (os != null) {
 			RemoteObject parser = connection.getRemoteParserService();
 			REGISTER_METHOD.call(parser, new Object[] { os });
-			if (lastKnownRemoteConsole != parser) {
-				lastKnownRemoteConsole = parser;
-			}
+			lastRegisteredOutput = os;
 		} else {
+			lastRegisteredOutput = null;
 			connection.releaseRemoteParserService();
 		}
 	}
