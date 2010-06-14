@@ -124,7 +124,7 @@ public class ConnectFrameworkJob extends Job {
 			}
 		} catch (IAgentException e) {
 			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT)
-				handleConnectionFailure();
+				handleConnectionFailure(e);
 			else
 				return Util.handleIAgentException(e);
 		} finally {
@@ -156,15 +156,24 @@ public class ConnectFrameworkJob extends Job {
 		}
 	}
 
-	protected void handleConnectionFailure() {
+	protected void handleConnectionFailure(final IAgentException e) {
 		final Display display = Display.getDefault();
 		display.asyncExec(new Runnable() {
 			public void run() {
 				String[] buttons = { Messages.close_button_label, Messages.get_iagent_button_label };
+				String message = Messages.connection_failed;
+				if (e != null) {//add cause for connection failed
+					message += "\nCause: " + e.getMessage();
+					Throwable cause = e.getCauseException();
+					if (cause != null) {
+						message +=  " (" + cause.getLocalizedMessage() + ")";
+					}
+				}
+				message += "\n\n" + Messages.rcp_bundle_missing_message;
 				MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(),
 					Messages.rcp_bundle_missing_title,
 					null,
-					Messages.rcp_bundle_missing_message,
+					message,
 					MessageDialog.INFORMATION,
 					buttons,
 					0);
