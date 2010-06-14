@@ -84,8 +84,6 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 
 	private TreeViewer parentView;
 
-	private DeviceTypeProviderElement initialProvider;
-
 	// Constructor
 	public PropertySheet(TreeViewer parentView, Model parent, FrameworkImpl element, boolean newFramework) {
 		super(parentView.getControl().getShell());
@@ -152,7 +150,6 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		
 		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(index);
 		showDeviceTypePanel(selectedProvider);
-		initialProvider = selectedProvider;
 
 		// Signing Certificates
 		certificatesPanel = new CertificatesPanel(mainContent, 2, 1);
@@ -189,7 +186,6 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 
 		if (selectedProvider != null) {
 			selectType(selectedProvider);
-			initialProvider = selectedProvider;
 		}
 	}
 
@@ -210,12 +206,20 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		mainContent.layout(true);
 	}
 
-	// Save ui values to storage and update target element
-	public void saveConfig(IMemento config) {
+	/**
+	 * Save ui values to storage and update target element
+	 * 
+	 * @param config
+	 * @return true if connection properties have changed
+	 */
+	public boolean saveConfig(IMemento config) {
 		config.putString(FRAMEWORK_NAME, textServer.getText());
+		boolean connChanged = false;
 		try {
+			IMemento initialConfig = cloneMemento(config);
 			selectedProvider.getProvider().save(config);
 			config.putString(TRANSPORT_PROVIDER_ID, selectedProvider.getTypeId());
+			connChanged = !mementoEquals(initialConfig, config);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -228,6 +232,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		fw.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
 
 		fw.setConfig(config);
+		return connChanged;
 	}
 
 	private Button createCheckboxButton(String label, Composite parent) {
@@ -287,7 +292,6 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		private Control panel;
 		private DeviceTypeProviderValidator validator;
 		private IMemento props;
-		public IMemento initialProps;
 
 		public DeviceTypeProviderElement(IConfigurationElement configurationElement, DeviceTypeProviderValidator validator) throws CoreException {
 			// TODO: Change to not throw exception, but rather display a an
@@ -366,6 +370,16 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			if (selectedIdx != -1) {
 				DeviceTypeProviderElement newProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(selectedIdx);
 				if (newProvider != selectedProvider) {
+					// remember settings of the old provider
+					try {
+						if (selectedProvider.props == null) {
+							selectedProvider.props = cloneMemento(fw.getConfig());
+						}
+						selectedProvider.getProvider().save(selectedProvider.props);
+					} catch (CoreException ex) {
+						FrameworkPlugin.error("Failed to initialize device type provider", ex);
+					}
+					// switching to the new provider
 					selectedProvider = newProvider;
 					showDeviceTypePanel(selectedProvider);
 				}
@@ -389,14 +403,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			super.okPressed();
 		}
 	}
-	
-	public boolean close() {
-		if (getReturnCode() == CANCEL) {
-			fw.setConfig(initialProvider.initialProps);
-		}
-		return super.close();
-	}
-	
+
 	private void init() {
 		IMemento config = fw.getConfig();
 		String providerId = config.getString(TRANSPORT_PROVIDER_ID);
@@ -411,7 +418,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 				}
 			}
 		}
-		String name = fw.getConfig().getString(FRAMEWORK_NAME);
+		String name = config.getString(FRAMEWORK_NAME);
 		if (name != null) {
 			textServer.setText(name);
 		}
@@ -421,15 +428,14 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		}
 
 		try {
-			selectedProvider.props = config;
-			selectedProvider.initialProps = ((XMLMemento)config).copyChild(config);
-			selectedProvider.getProvider().setProperties(config);
+			selectedProvider.props = cloneMemento(config);
+			selectedProvider.getProvider().setProperties(selectedProvider.props);
 		} catch (CoreException e) {
 			FrameworkPlugin.error("Failed to initialize device type provider", e);
 		}
 
 		if (connectButton != null) {
-			Boolean connect = fw.getConfig().getBoolean(CONNECT_TO_FRAMEWORK);
+			Boolean connect = config.getBoolean(CONNECT_TO_FRAMEWORK);
 			if (connect != null) {
 				connectButton.setSelection(connect.booleanValue());
 			}
@@ -455,7 +461,7 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 
 	// Called when target options are changed
 	public void setFWSettings() {
-		saveConfig(fw.getConfig());
+		boolean connChanged = saveConfig(fw.getConfig());
 		fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
 
 		if (addFramework) {
@@ -465,14 +471,11 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 			DeviceConnector connector = fw.getConnector();
 			if (connector != null) {
 				connector.getProperties().put("framework-name", fw.getName()); //$NON-NLS-1$
-				// String prevIP = (String)
-				// connector.getProperties().get(DeviceConnector.KEY_DEVICE_IP);
-				//				connector.getProperties().put("framework-connection-ip", target.getNewIP()); //$NON-NLS-1$
-				// if (fw.isConnected() && !target.getNewIP().equals(prevIP)) {
-				// MessageDialog.openInformation(target.getShell(),
-				// Messages.framework_ip_changed_title,
-				// Messages.framework_ip_changed_message);
-				// }
+				if (fw.isConnected() && connChanged) {
+					Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+					MessageDialog.openInformation(shell, Messages.framework_ip_changed_title,
+							Messages.framework_ip_changed_message);
+				}
 			}
 			fw.updateElement();
 			parentView.setSelection(parentView.getSelection());
@@ -512,4 +515,28 @@ public class PropertySheet extends TitleAreaDialog implements /*ControlListener,
 		setErrorMessage(error);
 	}
 
+	private static boolean mementoEquals(IMemento m1, IMemento m2) {
+		if (m1 == null || m2 == null) {
+			return m1 != m2;
+		}
+		String keys[] = m1.getAttributeKeys();
+		if (keys.length != m2.getAttributeKeys().length) {
+			return false;
+		}
+		for (int i = 0; i < keys.length; i++) {
+			String val = m1.getString(keys[i]);
+			if (!val.equals(m2.getString(keys[i]))) {
+				return false;
+			}
+		}
+		// Note: we can't compare children because we can't get them (if we
+		// don't know their types).
+		return true;
+	}
+
+	private static IMemento cloneMemento(IMemento memento) {
+		IMemento result = XMLMemento.createWriteRoot("temp");
+		result.putMemento(memento);
+		return result;
+	}
 }
