@@ -14,6 +14,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -21,6 +25,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
@@ -70,8 +75,8 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 		commonActions = new Hashtable();
 		commonActions.put(PROPERTIES_ACTION, applicationPropertiesAction);
 	}
-
-	@Override
+	
+    @Override
 	public Map getCommonActions() {
 		return commonActions;
 	}
@@ -136,14 +141,26 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 		return null;
 	}
 
-	@Override
-	public void updateEnabledState(DeviceConnector connector) {
-		boolean enabled = ApplicationModelProvider.isApplicationsSupported(connector);
-		if (enabled) {
-			applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
-			enabled = applicationPropertiesAction.isEnabled();
-		}
-		applicationTB.setEnabled(enabled);
+    @Override
+	public void updateEnabledState(final DeviceConnector connector) {
+       Job job = new Job("Update state") {
+            protected IStatus run(IProgressMonitor monitor) {
+                final boolean enabled = ApplicationModelProvider.isApplicationsSupported(connector);
+                Display.getDefault().asyncExec(new Runnable() {
+                    
+                    public void run() {
+                        boolean enabledState = false;
+                        if (enabled) {
+                            applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
+                            enabledState  = applicationPropertiesAction.isEnabled();
+                        }
+                        applicationTB.setEnabled(enabledState);
+                    }
+                });
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
 	}
 
 }
