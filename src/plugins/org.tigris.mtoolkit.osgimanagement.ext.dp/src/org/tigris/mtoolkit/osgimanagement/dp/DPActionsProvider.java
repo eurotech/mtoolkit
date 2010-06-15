@@ -14,12 +14,17 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
@@ -112,8 +117,20 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 		return null;
 	}
 
-	public void updateEnabledState(DeviceConnector connector) {
-		dpTB.setEnabled(DPModelProvider.isDpSupported(connector));
+	public void updateEnabledState(final DeviceConnector connector) {
+	    Job job = new Job("Update state") {
+            protected IStatus run(IProgressMonitor monitor) {
+                final boolean isSupported = DPModelProvider.isDpSupported(connector);
+                Display.getDefault().asyncExec(new Runnable() {
+                    
+                    public void run() {
+                        dpTB.setEnabled(isSupported);
+                    }
+                });
+                return Status.OK_STATUS;
+            }
+        };
+        job.schedule();
 	}
 
 }
