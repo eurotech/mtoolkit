@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IConsoleView;
@@ -24,8 +27,9 @@ import org.eclipse.ui.part.IPageBookViewPage;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.Util;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
@@ -59,11 +63,19 @@ public class RemoteConsole extends IOConsole {
 	
 	public IPageBookViewPage createPage(IConsoleView view) {
 		IPageBookViewPage createPage = super.createPage(view);
-		if (connector != null && connector.isActive()) {
-			reader = redirectInput();
-			output = newOutputStream();
-			redirectOutput(output);
-		}
+		
+		Job job = new Job(Messages.redirect_console_output) {
+			protected IStatus run(IProgressMonitor monitor) {
+				if (connector != null && connector.isActive()) {
+					reader = redirectInput();
+					output = newOutputStream();
+					redirectOutput(output);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.schedule();
+
 		setName(computeName());
 		return createPage;
 	}
