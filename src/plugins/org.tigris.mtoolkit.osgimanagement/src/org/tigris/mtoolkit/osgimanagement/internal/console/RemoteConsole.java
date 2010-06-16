@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.IConsoleView;
@@ -30,6 +31,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
@@ -48,7 +50,8 @@ public class RemoteConsole extends IOConsole {
 	public static final String P_DISCONNECTED = "org.tigris.mtoolkit.osgimanagement.console.disconnected";
 	
 	public RemoteConsole(Framework fw) {
-		super("", "osgiManagementConsole", ImageHolder.getImageDescriptor("frameworks.gif"), true);
+		super("", "osgiManagementConsole", 
+				ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED), true);
 		this.fw = fw;
 		this.connector = fw.getConnector();
 		timestamp = new Date();
@@ -59,6 +62,13 @@ public class RemoteConsole extends IOConsole {
 	
 	protected void init() {
 		super.init();
+	}
+	
+	public ImageDescriptor getImageDescriptor() {
+		if (isDisconnected()) {
+			return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
+		}
+		return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
 	}
 	
 	public IPageBookViewPage createPage(IConsoleView view) {
@@ -83,10 +93,9 @@ public class RemoteConsole extends IOConsole {
 	
 	
 	private String computeName() {
-		boolean connected = connector != null && connector.isActive();
 		String fwName = fw.getName();
 		String timeStamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp);
-		return (connected ? "" : "<disconnected> ") + fwName + " [Remote Framework] (" + timeStamp + ")";
+		return (isDisconnected() ? "<disconnected> " : "") + fwName + " [Remote Framework] (" + timeStamp + ")";
 	}
 
 	private ConsoleReader redirectInput() {
