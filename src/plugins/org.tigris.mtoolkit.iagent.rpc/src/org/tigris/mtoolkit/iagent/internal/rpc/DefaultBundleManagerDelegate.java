@@ -1,5 +1,6 @@
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -8,8 +9,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
-import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
 public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 
@@ -21,7 +22,11 @@ public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 	
 	public Object installBundle(String location, InputStream in) {
 		try {
-			Bundle bundle = bc.installBundle(location, in);
+			String name = getFileNameFromLocation(location);
+			if (!name.toLowerCase().endsWith(".jar")) {
+				name = name + ".jar";
+			}
+			Bundle bundle = bc.installBundle(name, in);
 			return bundle;
 		} catch (BundleException e) {
 			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to install bundle: " + e.getMessage());
@@ -60,4 +65,16 @@ public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 		}
 	}
 
+	public static String getFileNameFromLocation(String location) {
+		if (location == null) {
+			return null;
+		}
+		String name = (new File(location)).getName();
+		if (name.startsWith("remote:")) {
+			name = name.substring("remote:".length(), name.length());
+		}
+		name = name.replace(':', '_');
+		name = name.replace(' ', '_');
+		return name;
+	}
 }
