@@ -89,18 +89,21 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 			RemoteBundle rBundle = getBundle().getRemoteBundle();
 			
 			boolean warning = true;
+			boolean versionsDiff = true;
 			ZipFile zip = new ZipFile(updateFile);
 			ZipEntry mf = zip.getEntry("META-INF/MANIFEST.MF");
 			final String symbNames[] = new String[] {"", rBundle.getSymbolicName()};
+			final String versions[] = new String[] {"", rBundle.getVersion()};
 			if (mf != null) {
 				Map headers = getManifestHeaders(zip.getInputStream(mf));
 				if (headers != null) {
 					symbNames[0] = (String) headers.get("Bundle-SymbolicName");
+					versions[0] = (String) headers.get("Bundle-Version");
 				}
-				warning = !symbNames[1].equals(symbNames[0]);
+				warning = symbNames[1] != null && !symbNames[1].equals(symbNames[0]);
+				versionsDiff = versions[1] != null && !versions[1].equals(versions[0]);
 			}
 			if (warning) {
-				// TODO: show warning/confirm message
 				final int confirm[] = new int[SWT.CANCEL];
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
@@ -115,7 +118,22 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 					return Status.OK_STATUS;
 				}
 			}
-			
+			if (versionsDiff) {
+				final int confirm[] = new int[SWT.CANCEL];
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						String message = "The new and old bundles have different versions:\n"+
+							"Existing: "+versions[1]+"\n" +
+							"New: "+versions[0]+"\n" +
+							"Are you sure you want to do this?";
+						confirm[0] = PluginUtilities.showConfirmationDialog(FrameWorkView.getShell(), "Update bundle", message);
+					}
+				});
+				if (confirm[0] == SWT.CANCEL) {
+					return Status.OK_STATUS;
+				}
+			}
+
 			SubMonitor mon = subMonitor.newChild(80);
 			mon.beginTask(Messages.update_bundle, (int) updateFile.length());
 			
