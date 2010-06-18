@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
@@ -349,15 +350,11 @@ class Connection implements PMPConnection {
 	}
 
 	protected void dump(String s) {
-		reader.debug(s);
-	}
-
-	protected void dumpnnl(String s) {
-		reader.debug(s);
+		DebugUtils.debug(this, s);
 	}
 
 	protected void dump(Exception t) {
-		reader.error(new String(), t);
+		DebugUtils.debug(this, "", t);
 	}
 
 	/** Called to assign object id to a new remote object */
