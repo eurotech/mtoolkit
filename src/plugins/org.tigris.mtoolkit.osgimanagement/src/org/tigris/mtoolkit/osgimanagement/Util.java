@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement;
 
+import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -18,6 +19,9 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
@@ -81,7 +85,31 @@ public class Util {
 		fw.connect(connector, SubMonitor.convert(new NullProgressMonitor()));
 		return fw;
 	}
-	
-	
+
+	public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel, boolean multiple) {
+		FileDialog dialog = new FileDialog(shell, SWT.OPEN | (multiple ? SWT.MULTI : SWT.SINGLE));
+		String[] filterArr = { filter, "*.*" }; //$NON-NLS-1$
+		String[] namesArr = { filterLabel, Messages.all_files_filter_label };
+		dialog.setFilterExtensions(filterArr);
+		dialog.setFilterNames(namesArr);
+		if (FrameworkPlugin.fileDialogLastSelection != null) {
+			dialog.setFileName(null);
+			dialog.setFilterPath(FrameworkPlugin.fileDialogLastSelection);
+		}
+		dialog.setText(title);
+		String res = dialog.open();
+		if (res != null) {
+			FrameworkPlugin.fileDialogLastSelection = res;
+			// getFileNames returns relative names!
+			String[] names = dialog.getFileNames();
+			String path = dialog.getFilterPath();
+			File[] files = new File[names.length];
+			for (int i = 0; i < names.length; i++) {
+				files[i] = new File(path, names[i]);
+			}
+			return files;
+		}
+		return null;
+	}
 
 }

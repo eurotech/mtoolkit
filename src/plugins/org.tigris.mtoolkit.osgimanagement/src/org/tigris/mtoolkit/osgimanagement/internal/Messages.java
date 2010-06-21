@@ -71,6 +71,10 @@ public final class Messages extends NLS {
 	public static String install_label;
 	public static String update_label;
 	public static String install_dp_label;
+
+	public static String install_bundle_title;
+	public static String update_bundle_title;
+
 	public static String standard_error_title;
 	public static String standard_info_title;
 	public static String registered_services;

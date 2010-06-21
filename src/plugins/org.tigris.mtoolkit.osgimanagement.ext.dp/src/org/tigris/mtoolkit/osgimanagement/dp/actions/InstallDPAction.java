@@ -16,6 +16,7 @@ import java.util.Iterator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,17 +24,20 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
+import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.dp.DPModelProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.logic.DPProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.InstallDialog;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class InstallDPAction extends SelectionProviderAction implements IStateAction {
+
+	private static final String DP_FILTER = "*.dp"; //$NON-NLS-1$
 
 	private TreeViewer parentView;
 
@@ -51,19 +55,28 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
 	}
 
 	private void installDPAction(final Framework framework, TreeViewer parentView) {
-		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.INSTALL_DP_TYPE);
-		installDialog.open();
-		final String result = installDialog.getResult();
-		if ((installDialog.getReturnCode() > 0) || (result == null) || result.trim().equals("")) { //$NON-NLS-1$
+		final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
+				"Select Deployment Package To Install", DP_FILTER, "Deployment Package (*.dp)", true);
+		if (files == null || files.length == 0) {
 			return;
 		}
 
 		Job job = new Job("Installing to " + framework.getName()) {
 			public IStatus run(IProgressMonitor monitor) {
-				InstallationItem item = new BaseFileItem(new File(result), DPProcessor.MIME_DP);
 				FrameworkProcessor processor = new FrameworkProcessor();
 				processor.setUseAdditionalProcessors(true);
-				IStatus status = processor.processInstallationItem(item, new FrameworkTarget(framework), monitor);
+				InstallationTarget target = new FrameworkTarget(framework);
+
+				IStatus status = Status.OK_STATUS;
+				SubMonitor subMonitor = SubMonitor.convert(monitor, files.length);
+				for (int i = 0; i < files.length; i++) {
+					SubMonitor mon = subMonitor.newChild(1);
+					InstallationItem item = new BaseFileItem(files[i], DPProcessor.MIME_DP);
+					status = processor.processInstallationItem(item, target, mon);
+					if (monitor.isCanceled()) {
+						break;
+					}
+				}
 				monitor.done();
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;

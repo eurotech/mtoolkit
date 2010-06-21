@@ -17,6 +17,7 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,9 +29,11 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
+import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
@@ -48,13 +51,13 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UpdateBundleOpe
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.InstallDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class ActionsManager {
 	private static final String MIME_JAR = "application/java-archive"; //$NON-NLS-1$
+	private static final String JAR_FILTER = "*.jar"; //$NON-NLS-1$
 
 	public static void addFrameworkAction(TreeRoot treeRoot, TreeViewer parentView) {
 		String frameworkName = generateName(treeRoot);
@@ -104,19 +107,28 @@ public class ActionsManager {
 	}
 
 	public static void installBundleAction(final FrameworkImpl framework, TreeViewer parentView) {
-		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.INSTALL_BUNDLE_TYPE);
-		installDialog.open();
-		final String result = installDialog.getResult();
-		if ((installDialog.getReturnCode() > 0) || (result == null) || result.trim().equals("")) { //$NON-NLS-1$
+		final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
+				Messages.install_bundle_title, JAR_FILTER, Messages.bundle_filter_label, true);
+		if (files == null || files.length == 0) {
 			return;
 		}
 
 		Job job = new Job("Installing to " + framework.getName()) {
 			public IStatus run(IProgressMonitor monitor) {
-				InstallationItem item = new BaseFileItem(new File(result), MIME_JAR);
 				FrameworkProcessor processor = new FrameworkProcessor();
 				processor.setUseAdditionalProcessors(false);
-				IStatus status = processor.processInstallationItem(item, new FrameworkTarget(framework), monitor);
+				InstallationTarget target = new FrameworkTarget(framework);
+
+				IStatus status = Status.OK_STATUS;
+				SubMonitor subMonitor = SubMonitor.convert(monitor, files.length);
+				for (int i = 0; i < files.length; i++) {
+					SubMonitor mon = subMonitor.newChild(1);
+					InstallationItem item = new BaseFileItem(files[i], MIME_JAR);
+					status = processor.processInstallationItem(item, target, mon);
+					if (monitor.isCanceled()) {
+						break;
+					}
+				}
 				monitor.done();
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
@@ -175,13 +187,12 @@ public class ActionsManager {
 	}
 
 	public static void updateBundleAction(final Bundle bundle, TreeViewer parentView) {
-		InstallDialog installDialog = new InstallDialog(parentView, InstallDialog.UPDATE_BUNDLE_TYPE);
-		installDialog.open();
-		final String bundleFileName = installDialog.getResult();
-		if ((installDialog.getReturnCode() > 0) || (bundleFileName == null) || bundleFileName.trim().equals("")) { //$NON-NLS-1$
+		final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
+				Messages.update_bundle_title, JAR_FILTER, Messages.bundle_filter_label, false);
+		if (files == null || files.length == 0) {
 			return;
 		}
-		RemoteBundleOperation job = new UpdateBundleOperation(bundle, new File(bundleFileName));
+		RemoteBundleOperation job = new UpdateBundleOperation(bundle, files[0]);
 		job.schedule();
 	}
 
