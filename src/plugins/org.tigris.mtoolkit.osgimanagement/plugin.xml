@@ -115,18 +115,6 @@
       </consolePatternMatchListener>
    </extension>
    <extension
-         point="org.eclipse.ui.console.consolePageParticipants">
-      <consolePageParticipant
-            class="org.tigris.mtoolkit.osgimanagement.internal.console.ConsolePageParticipant"
-            id="org.tigris.mtoolkit.osgimanagement.consolePageParticipant">
-         <enablement>
-            <test
-                  property="org.eclipse.ui.console.consoleTypeTest"
-                  value="osgiManagementConsole">
-            </test></enablement>
-      </consolePageParticipant>
-   </extension>
-   <extension
          point="org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes">
       <osgiDeviceTypeProvider
             class="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SocketTypeProvider"
