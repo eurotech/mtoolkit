@@ -37,6 +37,9 @@ public interface ContentTypeActionsProvider {
 	public static final String GROUP_DEPLOYMENT = "deployment";
 	public static final String GROUP_FRAMEWORK = "framework";
 
+	/**
+	 * @since 6.0
+	 */
 	public static final String PROPERTIES_ACTION = "PROPERTIES";
 	
 	
@@ -46,6 +49,9 @@ public interface ContentTypeActionsProvider {
 	
 	public void fillToolBar(ToolBarManager tbm);
 	
+	/**
+	 * @since 6.0
+	 */
 	public Map getCommonActions();
 
 	/**
@@ -53,5 +59,8 @@ public interface ContentTypeActionsProvider {
 	 */
 	public Image getImage(Model node);
 
+	/**
+	 * @since 6.0
+	 */
 	public void updateEnabledState(DeviceConnector connector);
 }

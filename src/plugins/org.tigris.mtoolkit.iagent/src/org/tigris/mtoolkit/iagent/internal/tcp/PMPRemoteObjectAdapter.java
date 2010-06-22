@@ -17,11 +17,10 @@ import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public abstract class PMPRemoteObjectAdapter implements RemoteObject {
 
-	private static MethodSignature GET_REMOTE_SERVICE_ID_METHOD = new MethodSignature("getRemoteServiceID", Utils.NO_ARGS, true);
+	private static MethodSignature GET_REMOTE_SERVICE_ID_METHOD = new MethodSignature("getRemoteServiceID", MethodSignature.NO_ARGS, true);
 
 	public static final int REPEAT = 1;
 	public static final int CONTINUE = 2;

@@ -53,6 +53,9 @@ public class BasePluginExporter {
 		return result;
 	}
 
+	/**
+	 * @since 5.1
+	 */
 	public class ExportErrorDialog extends MessageDialog {
 		private File logLocation;
 

@@ -20,14 +20,13 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class RemoteServiceImpl implements RemoteService {
 
-	private static MethodSignature GET_PROPERTIES_METHOD = new MethodSignature("getProperties", Utils.SERVICEID_ARGS, true);
-	private static MethodSignature GET_USING_BUNDLES_METHOD = new MethodSignature("getUsingBundles", Utils.SERVICEID_ARGS, true);
-	private static MethodSignature GET_BUNDLE_METHOD = new MethodSignature("getBundle", Utils.SERVICEID_ARGS, true);
-	private static MethodSignature IS_SERVICE_STALE_METHOD = new MethodSignature("isServiceStale", Utils.SERVICEID_ARGS, true);
+	private static MethodSignature GET_PROPERTIES_METHOD = new MethodSignature("getProperties", MethodSignature.SERVICEID_ARGS, true);
+	private static MethodSignature GET_USING_BUNDLES_METHOD = new MethodSignature("getUsingBundles", MethodSignature.SERVICEID_ARGS, true);
+	private static MethodSignature GET_BUNDLE_METHOD = new MethodSignature("getBundle", MethodSignature.SERVICEID_ARGS, true);
+	private static MethodSignature IS_SERVICE_STALE_METHOD = new MethodSignature("isServiceStale", MethodSignature.SERVICEID_ARGS, true);
 
 	private ServiceManagerImpl manager;
 	private Long serviceId;

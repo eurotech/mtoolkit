@@ -32,7 +32,6 @@ import org.tigris.mtoolkit.iagent.spi.MBSAConnection;
 import org.tigris.mtoolkit.iagent.spi.MBSAConnectionCallBack;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 
@@ -43,9 +42,9 @@ import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 public class VMManagerImpl implements VMManager, ConnectionListener {
 
 	private static MethodSignature REGISTER_METHOD = new MethodSignature("registerOutput", new String[] { RemoteObject.class.getName() }, true);
-	private static MethodSignature EXECUTE_METHOD = new MethodSignature("executeCommand", new String[] { Utils.STRING_TYPE }, true);
-	private static MethodSignature GET_FW_START_LEVEL = new MethodSignature("getFrameworkStartLevel", Utils.NO_ARGS, true);
-	private static MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty", new String[] { Utils.STRING_TYPE }, true);
+	private static MethodSignature EXECUTE_METHOD = new MethodSignature("executeCommand", new String[] { MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature GET_FW_START_LEVEL = new MethodSignature("getFrameworkStartLevel", MethodSignature.NO_ARGS, true);
+	private static MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty", new String[] { MethodSignature.STRING_TYPE }, true);
 
 	private DeviceConnectorImpl connector;
 

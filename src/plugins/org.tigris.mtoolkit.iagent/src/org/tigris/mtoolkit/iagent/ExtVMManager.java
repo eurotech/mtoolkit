@@ -15,6 +15,8 @@ import java.util.Map;
 /**
  * Extenders which provide additional VM Management shall implement this
  * interface
+ * 
+ * @since 4.0
  */
 public interface ExtVMManager {
 

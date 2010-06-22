@@ -20,13 +20,6 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 
 public class Utils {
 
-	public static final String STRING_TYPE = "java.lang.String";
-	public static final String INPUT_STREAM_TYPE = "java.io.InputStream";
-
-	public static final String[] NO_ARGS = new String[0];
-	public static final String[] BID_ARGS = new String[] { "long" };
-	public static final String[] SERVICEID_ARGS = new String[] { "long" };
-
 	/**
 	 * 
 	 * @param remote

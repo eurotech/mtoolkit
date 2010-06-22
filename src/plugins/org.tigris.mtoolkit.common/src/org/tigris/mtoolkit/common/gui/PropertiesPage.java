@@ -55,9 +55,6 @@ public class PropertiesPage extends PropertyPage {
 	public class TableContentProvider implements IStructuredContentProvider {
 		public Object[] getElements(Object parent) {
 			if (parent instanceof Vector) {
-				if (parent == null) {
-					return null;
-				}
 				PropertyObject[] result = new PropertyObject[((Vector) parent).size()];
 				result = (PropertyObject[]) ((Vector) parent).toArray(result);
 
@@ -228,6 +225,9 @@ public class PropertiesPage extends PropertyPage {
 		copyAction = new CopyAction(shell);
 	}
 
+	/**
+	 * @since 5.1
+	 */
 	protected void fillContextMenu(IMenuManager manager) {
 		IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();
 

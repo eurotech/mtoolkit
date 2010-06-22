@@ -264,6 +264,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return Status.OK_STATUS;
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	protected Image getImage() {
 		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}

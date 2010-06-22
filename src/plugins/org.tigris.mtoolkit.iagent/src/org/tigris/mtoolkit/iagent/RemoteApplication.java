@@ -29,6 +29,9 @@ public interface RemoteApplication {
 
 	public final static String STATE_MIXED = "MIXED";
 	
+	/**
+	 * @since 4.0
+	 */
 	public final static String STATE_STARTING = "org.eclipse.equinox.app.starting";
 
 	/**

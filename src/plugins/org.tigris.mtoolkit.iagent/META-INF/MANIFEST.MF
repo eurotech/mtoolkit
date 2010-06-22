@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.tigris.mtoolkit.iagent;singleton:=true
 Bundle-Name: mToolkit Instrumentation Agent Bundle
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 4.0.0.qualifier
 Bundle-Vendor: Tigris.org
 Bundle-Description: Provides Instrumentation Agent API and implementation
 Export-Package: org.tigris.mtoolkit.iagent;version="2.0.0",

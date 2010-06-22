@@ -12,6 +12,28 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 
 public class MethodSignature {
 
+	/**
+	 * @since 4.0
+	 */
+	public static final String INPUT_STREAM_TYPE = "java.io.InputStream";
+	/**
+	 * @since 4.0
+	 */
+	public static final String STRING_TYPE = "java.lang.String";
+	
+	/**
+	 * @since 4.0
+	 */
+	public static final String[] NO_ARGS = new String[0];
+	/**
+	 * @since 4.0
+	 */
+	public static final String[] BID_ARGS = new String[] { "long" };
+	/**
+	 * @since 4.0
+	 */
+	public static final String[] SERVICEID_ARGS = new String[] { "long" };
+	
 	String name;
 	String[] parameterTypes;
 	boolean shouldSerialize;

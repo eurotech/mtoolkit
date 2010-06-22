@@ -47,6 +47,9 @@ public class Util {
 		return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
 	}
 	
+	/**
+	 * @since 6.0
+	 */
 	public static Framework addFramework(DeviceConnector connector) {
 		Hashtable frameWorkMap = new Hashtable();
 		FrameworkImpl fws[] = FrameWorkView.getFrameworks();

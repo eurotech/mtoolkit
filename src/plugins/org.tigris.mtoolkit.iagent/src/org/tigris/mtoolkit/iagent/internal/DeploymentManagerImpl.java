@@ -41,7 +41,6 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class DeploymentManagerImpl implements DeploymentManager, EventListener, ConnectionListener {
 
@@ -52,15 +51,15 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 	private static final String EVENT_DEPLOYMENT_PACKAGE_KEY = "deployment.package";
 	private static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
 
-	private static MethodSignature INSTALL_BUNDLE_METHOD = new MethodSignature("installBundle", new String[] { Utils.STRING_TYPE, Utils.INPUT_STREAM_TYPE }, true);
+	private static MethodSignature INSTALL_BUNDLE_METHOD = new MethodSignature("installBundle", new String[] { MethodSignature.STRING_TYPE, MethodSignature.INPUT_STREAM_TYPE }, true);
 	private static MethodSignature GET_SYSTEM_BUNDLES_NAMES = new MethodSignature("getSystemBundlesNames");
-	private static MethodSignature LIST_BUNDLES_METHOD = new MethodSignature("listBundles", Utils.NO_ARGS, true);
-	private static MethodSignature GET_BUNDLES_METHOD = new MethodSignature("getBundles", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
-	private static MethodSignature LIST_DPS_METHOD = new MethodSignature("listDeploymentPackages", Utils.NO_ARGS, true);
-	private static MethodSignature GET_DP_VERSION_METHOD = new MethodSignature("getDeploymentPackageVersion", new String[] { Utils.STRING_TYPE }, true);
-	private static MethodSignature INSTALL_DP_METHOD = new MethodSignature("installDeploymentPackage", new String[] { Utils.INPUT_STREAM_TYPE }, true);
-	private static MethodSignature GET_BUNDLE_BY_LOCATION_METHOD = new MethodSignature("getBundleByLocation", new String[] { Utils.STRING_TYPE }, true);
-	private static MethodSignature GET_SYSTEM_BUNDLES_IDS_METHOD = new MethodSignature("getSystemBundlesIDs", Utils.NO_ARGS, true);
+	private static MethodSignature LIST_BUNDLES_METHOD = new MethodSignature("listBundles", MethodSignature.NO_ARGS, true);
+	private static MethodSignature GET_BUNDLES_METHOD = new MethodSignature("getBundles", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature LIST_DPS_METHOD = new MethodSignature("listDeploymentPackages", MethodSignature.NO_ARGS, true);
+	private static MethodSignature GET_DP_VERSION_METHOD = new MethodSignature("getDeploymentPackageVersion", new String[] { MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature INSTALL_DP_METHOD = new MethodSignature("installDeploymentPackage", new String[] { MethodSignature.INPUT_STREAM_TYPE }, true);
+	private static MethodSignature GET_BUNDLE_BY_LOCATION_METHOD = new MethodSignature("getBundleByLocation", new String[] { MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature GET_SYSTEM_BUNDLES_IDS_METHOD = new MethodSignature("getSystemBundlesIDs", MethodSignature.NO_ARGS, true);
 	private static MethodSignature GET_BUNDLES_SNAPSHOT_METHOD = new MethodSignature("getBundlesSnapshot", new String[] { "int", Dictionary.class.getName() }, true);
 
 	private DeviceConnectorImpl connector;

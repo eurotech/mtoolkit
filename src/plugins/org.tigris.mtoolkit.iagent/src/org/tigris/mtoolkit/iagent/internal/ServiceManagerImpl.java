@@ -28,12 +28,11 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class ServiceManagerImpl implements ServiceManager, EventListener, ConnectionListener {
 
-	private static MethodSignature GET_ALL_REMOTE_SERVICES_METHOD = new MethodSignature("getAllRemoteServices", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
-	private static MethodSignature CHECK_FILTER_METHOD = new MethodSignature("checkFilter", new String[] { Utils.STRING_TYPE }, true);
+	private static MethodSignature GET_ALL_REMOTE_SERVICES_METHOD = new MethodSignature("getAllRemoteServices", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature CHECK_FILTER_METHOD = new MethodSignature("checkFilter", new String[] { MethodSignature.STRING_TYPE }, true);
 
 	private DeviceConnectorImpl connector;
 

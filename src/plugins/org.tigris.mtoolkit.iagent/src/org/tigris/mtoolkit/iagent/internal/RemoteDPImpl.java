@@ -20,18 +20,17 @@ import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public class RemoteDPImpl implements RemoteDP {
 
-	private static MethodSignature GET_DP_HEADER_METHOD = new MethodSignature("getDeploymentPackageHeader", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE, Utils.STRING_TYPE },
+	private static MethodSignature GET_DP_HEADER_METHOD = new MethodSignature("getDeploymentPackageHeader", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE },
 			true);
-	private static MethodSignature GET_DP_BUNDLES_METHOD = new MethodSignature("getDeploymentPackageBundles", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
-	private static MethodSignature GET_DP_BUNDLE_METHOD = new MethodSignature("getDeploymentPackageBundle", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE, Utils.STRING_TYPE },
+	private static MethodSignature GET_DP_BUNDLES_METHOD = new MethodSignature("getDeploymentPackageBundles", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature GET_DP_BUNDLE_METHOD = new MethodSignature("getDeploymentPackageBundle", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE },
 			true);
-	private static MethodSignature UNINSTALL_DP_METHOD = new MethodSignature("uninstallDeploymentPackage", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE, "boolean" },
+	private static MethodSignature UNINSTALL_DP_METHOD = new MethodSignature("uninstallDeploymentPackage", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE, "boolean" },
 			true);
-	private static MethodSignature IS_DP_STALE_METHOD = new MethodSignature("isDeploymentPackageStale", new String[] { Utils.STRING_TYPE, Utils.STRING_TYPE }, true);
+	private static MethodSignature IS_DP_STALE_METHOD = new MethodSignature("isDeploymentPackageStale", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE }, true);
 
 	private String symbolicName;
 	private String version;

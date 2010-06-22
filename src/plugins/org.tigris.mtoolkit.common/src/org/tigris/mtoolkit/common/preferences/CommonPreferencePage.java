@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -246,4 +247,50 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 		}
 		return null;
 	}
+
+	public String getMessage() {
+		IMessageProvider messageProv = getMessageProvider();
+		return messageProv != null ? messageProv.getMessage() : null;
+	}
+
+	private IMessageProvider getMessageProvider() {
+		IMessageProvider selectedMessageProv = null;
+		int selectedMessageType = NONE;
+		String selectedMessage = null;
+		for (Iterator it = preferencePages.iterator(); it.hasNext();) {
+			PreferencePageWrapper page = (PreferencePageWrapper) it.next();
+			if (page.getPage() == null)
+				continue;
+			if (!(page.getPage() instanceof IMessageProvider))
+				continue;
+			IMessageProvider messageProv = (IMessageProvider) page.getPage();
+			if (selectedMessageProv == null) {
+				selectedMessageProv = messageProv;
+				continue;
+			}
+			
+			int messageType = messageProv.getMessageType();
+			if (selectedMessageType < messageType) {
+				selectedMessageProv = messageProv;
+				selectedMessageType = messageType;
+				selectedMessage = messageProv.getMessage();
+			} else if (selectedMessageType == messageType) {
+				String message = messageProv.getMessage();
+				if ((selectedMessage == null || selectedMessage.length() == 0) 
+								&& message != null && message.length() > 0) {
+					selectedMessageProv = messageProv;
+					selectedMessageType = messageType;
+					selectedMessage = messageProv.getMessage();
+				}
+			}
+		}
+		return selectedMessageProv;
+	}
+	
+	public int getMessageType() {
+		IMessageProvider messageProv = getMessageProvider();
+		return messageProv != null ? messageProv.getMessageType() : NONE;
+	}
+	
+	
 }

@@ -28,14 +28,13 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.spi.PMPConnector;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public class PMPConnectionImpl implements PMPConnection, EventListener {
 
-	private static MethodSignature RELEASE_METHOD = new MethodSignature("releaseConsole", Utils.NO_ARGS, true);
-	private static MethodSignature GET_REMOTE_SERVICE_ID_METHOD = new MethodSignature("getRemoteServiceID", Utils.NO_ARGS, true);
+	private static MethodSignature RELEASE_METHOD = new MethodSignature("releaseConsole", MethodSignature.NO_ARGS, true);
+	private static MethodSignature GET_REMOTE_SERVICE_ID_METHOD = new MethodSignature("getRemoteServiceID", MethodSignature.NO_ARGS, true);
 
 	private org.tigris.mtoolkit.iagent.pmp.PMPConnection pmpConnection;
 	private ConnectionManagerImpl connManager;

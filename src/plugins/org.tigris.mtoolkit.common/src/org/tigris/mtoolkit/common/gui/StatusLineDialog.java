@@ -135,12 +135,14 @@ public class StatusLineDialog extends TrayDialog {
 	protected void refresh() {
 
 	}
-
+	
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			if ((getStatus().getSeverity() == IStatus.OK) || (getStatus().getSeverity() == IStatus.WARNING)) {
+			if (getStatus().matches(IStatus.OK | IStatus.WARNING))
 				commit();
-			}
+			// recheck dialog status and cancel if not OK
+			if (getStatus().matches(IStatus.OK | IStatus.WARNING))
+				return;
 		}
 		super.buttonPressed(buttonId);
 	}
