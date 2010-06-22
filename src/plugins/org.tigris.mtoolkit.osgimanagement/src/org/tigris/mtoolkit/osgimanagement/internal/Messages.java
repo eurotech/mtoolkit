@@ -173,8 +173,6 @@ public final class Messages extends NLS {
 
 	public static String stop_system_bundle;
 
-	public static String redirect_console_output;
-
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
