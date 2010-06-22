@@ -25,19 +25,41 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 /**
+ * Simple panel, which takes a single {@link IStatus} and display it in simple
+ * form: a single line with an icon (determined by the severity of the status),
+ * a text (with the message of the status) and optional button to show details
+ * regarding the status (determined by the contained exception).
+ * <p>
+ * Multistatuses are not supported at the moment.
+ * </p>
+ * 
  * @noextend This class is not intended to be subclassed by clients.
  * @since 5.1
  */
 public class ErrorPanel extends Composite {
 
+	/**
+	 * Default style for the error panel.
+	 */
 	public static final int NONE = 0;
-	
+
+	/**
+	 * Style constant for initially expanded state. When this constant is set,
+	 * the error panel will show details area by default.
+	 */
 	public static final int EXPANDED = 1 << 0;
-	
+
+	/**
+	 * Style constant for disabling the details area in the error panel.
+	 */
 	public static final int NO_DETAILS = 1 << 1;
-	
+
+	/**
+	 * Style constant for using small icon. Usable, when the error panel is
+	 * embedded among other dialog controls.
+	 */
 	public static final int SMALL_ICONS = 1 << 2;
-	
+
 	private final int panelStyle;
 	private IStatus status;
 	private Label statusIcon;
@@ -47,6 +69,19 @@ public class ErrorPanel extends Composite {
 	private FontMetrics fontMetrics;
 	private boolean detailsAreaShowed;
 
+	/**
+	 * Constructs new {@link ErrorPanel} with given parent, panel style and
+	 * style for the underlying Composite.
+	 * <p>
+	 * Panel style:
+	 * 
+	 * </p>
+	 * @param parent
+	 *            the parent of the new error panel
+	 * @param panelStyle
+	 * 			the 
+	 * @param style
+	 */
 	public ErrorPanel(Composite parent, int panelStyle, int style) {
 		super(parent, style);
 		this.panelStyle = panelStyle;
@@ -57,24 +92,24 @@ public class ErrorPanel extends Composite {
 		initializeDialogUnits(this);
 		createContents();
 	}
-	
-	protected void initializeDialogUnits(Control control) {
+
+	private void initializeDialogUnits(Control control) {
 		// Compute and store a font metric
 		GC gc = new GC(control);
 		gc.setFont(JFaceResources.getDialogFont());
 		fontMetrics = gc.getFontMetrics();
 		gc.dispose();
 	}
-	
+
 	private void createContents() {
 		statusIcon = new Label(this, SWT.NONE);
 		statusIcon.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		
+
 		statusText = new Text(this, SWT.WRAP | SWT.READ_ONLY);
 		statusText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-//		statusText.setEnabled(false);
-		
-		if ((panelStyle & NO_DETAILS) == 0) { 
+		//		statusText.setEnabled(false);
+
+		if ((panelStyle & NO_DETAILS) == 0) {
 			Button btnDetails = new Button(this, SWT.PUSH);
 			btnDetails.setText("Details >>");
 			GridData gd = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
@@ -85,11 +120,11 @@ public class ErrorPanel extends Composite {
 					toggleDetailsArea();
 				}
 			});
-			
+
 			createDetailsArea();
 		}
 	}
-	
+
 	private void createDetailsArea() {
 		Composite detailsArea = new Composite(this, SWT.NONE);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1);
@@ -97,26 +132,44 @@ public class ErrorPanel extends Composite {
 		detailsArea.setLayoutData(gd);
 		detailsArea.setLayout(new FillLayout());
 		detailsArea.setVisible(false);
-		
+
 		detailsText = new Text(detailsArea, SWT.READ_ONLY | SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		
+
 		this.detailsArea = detailsArea;
 	}
 
+	/**
+	 * Toggles details area on and off
+	 */
 	public void toggleDetailsArea() {
 		detailsArea.setVisible(!detailsAreaShowed);
 		detailsAreaShowed = !detailsAreaShowed;
 		layout(true);
 	}
-	
+
+	/**
+	 * Returns whether details area is visible or not
+	 * 
+	 * @return true if the details area is currently visible
+	 */
 	public boolean isDetailsAreaVisible() {
 		return detailsAreaShowed;
 	}
 
+	/**
+	 * Returns the current {@link IStatus} shown
+	 * 
+	 * @return current {@link IStatus}
+	 */
 	public IStatus getStatus() {
 		return status;
 	}
-	
+
+	/**
+	 * Sets {@link IStatus} object to be shown
+	 * 
+	 * @param status
+	 */
 	public void setStatus(IStatus status) {
 		this.status = status;
 		showStatus();
@@ -135,7 +188,7 @@ public class ErrorPanel extends Composite {
 			detailsText.setText(getDetails(status));
 		layout(true);
 	}
-	
+
 	private Image getSeverityIcon(IStatus status) {
 		switch (status.getSeverity()) {
 		case IStatus.ERROR:
@@ -146,7 +199,7 @@ public class ErrorPanel extends Composite {
 			return getDisplay().getSystemImage(SWT.ICON_INFORMATION);
 		}
 	}
-	
+
 	private Image getSeverityIconSmall(IStatus status) {
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
 		switch (status.getSeverity()) {
@@ -158,21 +211,21 @@ public class ErrorPanel extends Composite {
 			return images.getImage(ISharedImages.IMG_OBJS_INFO_TSK);
 		}
 	}
-	
+
 	private String getDetails(IStatus status) {
 		if (status.getException() != null) {
-			return getStackTrace(status.getException()); 
+			return getStackTrace(status.getException());
 		}
 		return "No details are available";
 	}
-	
+
 	// IPLOG: This method is taken from org.eclipse.ui.internal.part.StatusPart
-    private String getStackTrace(Throwable throwable) {
-        StringWriter swriter = new StringWriter();
-        PrintWriter pwriter = new PrintWriter(swriter);
-        throwable.printStackTrace(pwriter);
-        pwriter.flush();
-        pwriter.close();
-        return swriter.toString();
-    }
+	private String getStackTrace(Throwable throwable) {
+		StringWriter swriter = new StringWriter();
+		PrintWriter pwriter = new PrintWriter(swriter);
+		throwable.printStackTrace(pwriter);
+		pwriter.flush();
+		pwriter.close();
+		return swriter.toString();
+	}
 }
