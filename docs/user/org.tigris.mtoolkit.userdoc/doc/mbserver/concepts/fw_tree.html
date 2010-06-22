@@ -10,11 +10,11 @@
 <body>
 <h1>OSGi Frameworks  Tree </h1>
 <p>OSGi frameworks are displayed in a separate view in the Eclipse Workbench - the <b>Frameworks</b> view. The view arranges the  OSGi frameworks in separate trees as you can unfold the tree of a connected framework and browse its components.</p>
-<p>Every framework has the name assigned to  it in its properties. Depending on whether the framework is connected or not, the framework node has different icon.</p>
 <p>Basically, an OSGi framework tree has two display modes - <i>Bundles</i> and <i>Services</i>. In the Bundles (default) mode, the main components of the tree are the bundles, organized by category, the deployment packages, widgets and applications currently installed in the target framework. In the Services mode, the main components of the tree are the services registered in the OSGi framework. </p>
+<p class="Note">Tip: Both modes by default do not show the IDs and versions of bundles. To view them as a part of a bundle node name, right-click a bundle node and call <b>Show Bundle IDs </b>and <b>Show Bundle Versions</b>. </p>
 <h2>Bundles Display Mode</h2>
 <p>You can observe the following hierarchy of components in the Bundles display mode:</p>
-<p class="Note">Note: Following the complete structure provided by mToolkit including base mToolkit features and available mToolkit extensions. </p>
+<p class="Note">Note: Following is the complete structure provided by mToolkit including base mToolkit features and available  extensions. </p>
 <ul>
   <li><i>Framework</i>
       <ul>
@@ -31,12 +31,20 @@
                       <ul>
                           <li><b>Registered services</b> - Contains all services currently registered by this bundle.
                             <ul>
-                                <li><i>Service object class [Service ID]</i> - Shows the service object class (aka <i>service interface</i>) under which a service of this bundle is <i>registered</i>. The ID of the service object implementing the object class is placed within the square brackets next to the object class name. Note that a single service object can be registered under more than one object class.</li>
+                                <li><i>Service object class [Service ID]</i> - Shows the service object class (aka <i>service interface</i>) under which a service of this bundle is <i>registered</i>. The ID of the service object implementing the object class is placed within the square brackets next to the object class name. Note that a single service object can be registered under more than one object class.
+                                  <ul>
+                                    <li><i>Service property</i> (shown upon selecting <b>Show Service Properties</b> from <b>Frameworks</b> view's pull-down menu) - Represents a specific property that the service is registered with, such as <code>objectClass</code>, <code>service.id</code>, <code>service.pid</code>, etc. </li>
+                                  </ul>
+                                </li>
                             </ul>
                           </li>
-                        <li><b>Services in use</b> - Contains all services of other bundles in the OSGi framework  used by this bundle.
+                        <li><b>Used Services</b> - Contains all services of other bundles in the OSGi framework  used by this bundle.
                           <ul>
-                                <li><i>Service object class [Service ID]</i> - Shows the object class (aka service interface) of the <i>used</i> service object. The ID of the used service object implementing the object class is placed within the square brackets next to the object class name.</li>
+                                <li><i>Service object class [Service ID]</i> - Shows the object class (aka service interface) of the <i>used</i> service object. The ID of the used service object implementing the object class is placed within the square brackets next to the object class name.
+                                  <ul>
+                                    <li><i>Service property</i> (shown upon selecting <b>Show Service Properties</b> from <b>Frameworks</b> view's pull-down menu) - Represents a specific property that the used service is registered with, such as <code>objectClass</code>, <code>service.id</code>, <code>service.pid</code>, etc. </li>
+                                  </ul>
+                                </li>
                           </ul>
                         </li>
                       </ul>
@@ -45,16 +53,12 @@
               </li>
             </ul>
         </li>
-        <li> <b>Deployment packages </b></li>
+        <li> <b>Deployment Packages </b></li>
         <ul>
           <li><i>Deployment
             package</i> - Deployment packages are shown by symbolic name according to the value of the <i>DeploymentPackage-SymbolicName</i> header of the package's manifest.
             <ul>
-              <li><i>Bundle node </i>- Bundles are shown in the same way as in the <b>Bundles</b> sub-tree.
-                <ul>
-                  <li><b>. . .</b></li>
-                </ul>
-              </li>
+              <li><i>Bundle node </i>- Bundles are shown in the same way as in the <b>Bundles</b> sub-tree.</li>
             </ul>
           </li>
         </ul>
@@ -68,7 +72,7 @@
 (Available upon installing an extension)             
   <ul>
           <li><i>Widget</i> - W3C widgets are shown by their name as defined in the <i>widgetname </i> tag of the <i>config.xml</i> files. To be able to install and manage W3C widgets, you have to enable a widget container on the target OSGi framework. </li>
-            </ul>
+          </ul>
         </li>
       </ul>
   </li>
@@ -82,12 +86,12 @@
           enclosed in square brackets. You can view the registration properties of a selected service
           by using the <b>Properties</b> command from the context menu.
           <ul>
-            <li><b>Registered in bundle</b> - This node contains the bundle which has registered the service.
+            <li><b>Registered by </b> - This node contains the bundle which has registered the service.
               <ul>
                 <li><i>Provider bundle</i> node - Shows  the bundle which has registered the service. The bundle is shown in the same way as in the Bundles display mode (see the previous section). </li>
               </ul>
             </li>
-            <li><b>Used in bundle(s)</b> - This node contains the bundles which are currently using the service.
+            <li><b>Used by </b> - This node contains the bundles which are currently using the service.
               <ul>
                 <li><i>Consumer bundle</i> - Shows the  bundle which is using the service. The bundle is shown in the same way as in the Bundles display mode (see the previous section). </li>
               </ul>
@@ -97,25 +101,26 @@
       </ul>
   </li>
 </ul>
-<p class="Note"><i>Tip:</i> To view the IDs and versions of bundles in the Services display mode, right-click a bundle node and call <b>Show Bundle IDs </b>and <b>Show Bundle Versions</b>. </p>
+<p class="Note">&nbsp;</p>
 <p><img src="../../ngrelc00.gif" width="159" height="27"></p>
 <p><a href="fw_overview.html">OSGi Management Overview</a><br>
 <a href="rem_console.html">Remote Console</a> </p>
 <p><img src="../../ngrelt00.gif" width="159" height="27"> </p>
-<p><a href="../tasks/add_fw.html">Adding/Removing an  OSGi Framework Runtime</a><br>
-    <a href="../tasks/fw_props.html">Configuring the Properties of an OSGi Framework Runtime</a><br>
-    <a href="../tasks/connect.html">Connecting to/Disconnecting from an OSGi Framework Runtime</a><br>
+<p><a href="../tasks/add_fw.html">Adding/Removing an  OSGi  Runtime</a><br>
+    <a href="../tasks/fw_props.html">Configuring the Properties of an OSGi  Runtime</a><br>
+    <a href="../tasks/connect.html">Connecting to/Disconnecting from an OSGi  Runtime</a><br>
     <a href="../tasks/bundles/introduction.html">Managing  Bundles</a><br>
     <a href="../tasks/applications/intorduction.html">Managing Applications</a><br>
     <a href="../tasks/rem_console.html">Using the Remote Console</a><br>
-    <a href="../tasks/fw_preferences.html">Customizing OSGi Framework Runtime Management</a><br>
-    <a href="../tasks/troubleshooting.html">OSGi Framework Runtime Management Troubleshooting</a> <br>
-  <a href="../tasks/fw_preferences.html"></a></p>
+<a href="../tasks/web_console.html">Opening the Web Admin Console inside Eclipse</a><br>
+    <a href="../tasks/fw_preferences.html">Customizing OSGi  Runtime Management</a><br>
+    <a href="../tasks/troubleshooting.html">OSGi  Runtime Management Troubleshooting</a> <br>
+</p>
 <p><img src="../../ngrelr00.gif" width="159" height="27"> </p>
 <p> <a href="../reference/fw_views.html">Frameworks View</a><br>
     <a href="../reference/fw_tree.html"> Frameworks View Tree Icons</a><br>
     <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a><br>
 </p>
-<p><img src="../../copyright.gif" width="399" height="17"></p>
+<p><img src="../../copyright.gif" width="398" height="23"></p>
 </body>
 </html>
