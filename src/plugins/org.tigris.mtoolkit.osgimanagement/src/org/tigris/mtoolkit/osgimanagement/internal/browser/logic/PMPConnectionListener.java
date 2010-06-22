@@ -19,6 +19,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
@@ -30,7 +31,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
-import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class PMPConnectionListener implements ConnectionListener {
@@ -120,7 +120,7 @@ public class PMPConnectionListener implements ConnectionListener {
 						fw.connect(connector, sMonitor);
 					}
 					if (!autoConnected && fw.isConnected()) {
-						ConsoleManager.connectConsole(fw);
+						ConsoleManager.connectConsole(connector, fw.getName());
 					}
 					return Status.OK_STATUS;
 				} finally {

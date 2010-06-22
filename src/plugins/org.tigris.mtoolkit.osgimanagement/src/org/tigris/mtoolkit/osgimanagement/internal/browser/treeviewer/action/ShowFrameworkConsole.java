@@ -16,9 +16,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
-import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class ShowFrameworkConsole extends SelectionProviderAction implements IStateAction {
@@ -35,7 +35,7 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 		if (selection.isEmpty())
 			return;	// don't execute for empty selection
 		final FrameworkImpl fw = (FrameworkImpl) ((Model) selection.getFirstElement()).findFramework();
-		ConsoleManager.showConsole(fw);
+		ConsoleManager.showConsole(fw.getConnector(), fw.getName());
 	}
 
 	// override to react properly to selection change
@@ -59,6 +59,6 @@ public class ShowFrameworkConsole extends SelectionProviderAction implements ISt
 			}
 		}
 		// TODO: Disable the button when the framework is disconnected
-		setEnabled(enabled && fw != null && fw.isConnected() && !fw.autoConnected);
+		setEnabled(enabled && fw != null && fw.isConnected());// && !fw.autoConnected);
 	}
 }

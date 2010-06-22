@@ -30,6 +30,7 @@ import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
+import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -52,7 +53,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
-import org.tigris.mtoolkit.osgimanagement.internal.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class ActionsManager {
@@ -155,7 +155,7 @@ public class ActionsManager {
 		// to be sure that it is completed before we dispose the framework
 		removeJob.setRule(new FwMutexRule(framework));
 		removeJob.schedule();
-		ConsoleManager.disconnectConsole(framework);
+		ConsoleManager.disconnectConsole(framework.getConnector());
 	}
 
 	public static void startBundleAction(Bundle bundle) {
@@ -213,7 +213,7 @@ public class ActionsManager {
 	}
 	
 	public static void disconnectConsole(FrameworkImpl fw) {
-		ConsoleManager.disconnectConsole(fw);
+		ConsoleManager.disconnectConsole(fw.getConnector());
 	}
 
 
