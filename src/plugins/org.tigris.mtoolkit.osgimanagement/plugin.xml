@@ -122,5 +122,31 @@
             name="Plain Socket">
       </osgiDeviceTypeProvider>
    </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPropertyPage"
+            id="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPropertyPage"
+            name="General">
+         <enabledWhen>
+            <instanceof
+                  value="org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl">
+            </instanceof>
+         </enabledWhen>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            class="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SigningPropertyPage"
+            id="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SigningPropertyPage"
+            name="Signing">
+         <enabledWhen>
+            <instanceof
+                  value="org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl">
+            </instanceof>
+         </enabledWhen>
+      </page>
+   </extension>
 
 </plugin>

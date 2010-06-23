@@ -36,13 +36,13 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet.DeviceTypeProviderElement;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel.DeviceTypeProviderElement;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class ConnectFrameworkJob extends Job {
@@ -95,7 +95,7 @@ public class ConnectFrameworkJob extends Job {
 				Dictionary aConnProps = null;
 				
 				String providerID = config.getString(ConstantsDistributor.TRANSPORT_PROVIDER_ID);
-				List providers = PropertySheet.obtainDeviceTypeProviders(null);
+				List providers = FrameworkPanel.obtainDeviceTypeProviders(null);
 				for (int i=0; i<providers.size(); i++) {
 					DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);
 					if (providerID.equals(provider.getTypeId())) {

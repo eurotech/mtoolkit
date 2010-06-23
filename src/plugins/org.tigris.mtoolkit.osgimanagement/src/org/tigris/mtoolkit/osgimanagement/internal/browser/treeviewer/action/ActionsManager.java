@@ -22,10 +22,12 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
@@ -140,8 +142,9 @@ public class ActionsManager {
 	}
 
 	public static void frameworkPropertiesAction(FrameworkImpl framework, TreeViewer parentView) {
-		PropertySheet sheet = new PropertySheet(parentView, framework.getParent(), framework, false);
-		sheet.open();
+		PropertyDialogAction action = new PropertyDialogAction(new SameShellProvider(parentView.getControl()),
+				parentView);
+		action.run();
 	}
 
 	public static void removeFrameworkAction(final FrameworkImpl framework) {

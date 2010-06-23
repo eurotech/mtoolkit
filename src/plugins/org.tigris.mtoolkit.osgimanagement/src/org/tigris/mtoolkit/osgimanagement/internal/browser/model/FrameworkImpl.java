@@ -24,6 +24,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
@@ -37,6 +38,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.XMLMemento;
+import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.ui.model.WorkbenchAdapter;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.iagent.BundleSnapshot;
@@ -66,7 +69,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
-public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener, RemoteDevicePropertyListener {
+public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener, RemoteDevicePropertyListener, IAdaptable {
 
 	private boolean showServicePropertiesInTree = false;
 
@@ -1583,6 +1586,23 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				}
 			}
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(IWorkbenchAdapter.class)) {
+			return new WorkbenchAdapter() {
+				public String getLabel(Object o) {
+					if (o instanceof Model) {
+						return ((Model) o).getLabel();
+					}
+					return "";
+				}
+			};
+		}
+		return null;
 	}
 
 }
