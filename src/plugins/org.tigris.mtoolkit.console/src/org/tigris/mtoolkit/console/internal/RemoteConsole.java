@@ -62,8 +62,6 @@ public class RemoteConsole extends IOConsole implements IConsole {
 		this.process = iProcess;
 		timestamp = new Date();
 		DeviceConnector.addDeviceConnectionListener(listener);
-//		if (fw.getParent() != null)
-//			((TreeRoot)fw.getParent()).addListener(listener);
 	}
 	
 	protected void init() {
@@ -94,6 +92,12 @@ public class RemoteConsole extends IOConsole implements IConsole {
 
 		setName(computeName());
 		return createPage;
+	}
+	
+
+	public void setConsoleName(String name) {
+		this.name = name;
+		setName(computeName());
 	}
 	
 	private String computeName() {
@@ -151,8 +155,6 @@ public class RemoteConsole extends IOConsole implements IConsole {
 			}
 		}
 		firePropertyChange(this, P_DISCONNECTED, Boolean.FALSE, Boolean.TRUE);
-//		if (fw.getParent() != null)
-//			((TreeRoot)fw.getParent()).removeListener(listener);
 		super.dispose();
 	}
 	
@@ -167,7 +169,7 @@ public class RemoteConsole extends IOConsole implements IConsole {
 
 
 
-	private class Listener implements DeviceConnectionListener {//, ContentChangeListener {
+	private class Listener implements DeviceConnectionListener {
 		public void connected(DeviceConnector connector) {
 		}
 
@@ -176,22 +178,6 @@ public class RemoteConsole extends IOConsole implements IConsole {
 				disconnect();
 			}
 		}
-
-//		public void elementAdded(ContentChangeEvent event) {
-//		}
-//
-//		public void elementChanged(ContentChangeEvent event) {
-//			if (event.getTarget() == fw) {
-//				Display.getDefault().asyncExec(new Runnable() {
-//					public void run() {
-//						setName(computeName());
-//					}
-//				});
-//			}
-//		}
-//
-//		public void elementRemoved(ContentChangeEvent event) {
-//		}
 	}
 
 	public IProcess getProcess() {

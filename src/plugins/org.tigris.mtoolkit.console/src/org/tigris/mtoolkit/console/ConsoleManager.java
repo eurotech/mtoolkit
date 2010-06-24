@@ -133,5 +133,14 @@ public class ConsoleManager {
 		RemoteConsole console = new RemoteConsole(dc, name, iProcess);
 		return console;
 	}
+
+	public static void setName(DeviceConnector connector, String name) {
+		synchronized (consoles) {
+			Object console = consoles.get(connector);
+			if (console instanceof RemoteConsole) {
+				((RemoteConsole) console).setConsoleName(name);
+			}
+		}
+	}
 	
 }
