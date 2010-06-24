@@ -14,10 +14,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Hashtable;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -58,7 +61,6 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		instance = null;
 	}
 
-	// Initialize perespectives
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		// TODO: These settings should be kept in separate class, which also
@@ -90,15 +92,15 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 	}
 
 	public static void error(IAgentException e) {
-		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
+		log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
 	}
 
 	public static void error(String message, Throwable t) {
-		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
+		log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
 	}
 
 	public static void warning(String message, Throwable t) {
-		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
+		log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
 	}
 	
 	protected void initializeImageRegistry(ImageRegistry reg) {
@@ -106,7 +108,28 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 	}
 
 	public static void log(IStatus status) {
-		getDefault().getLog().log(status);
+		FrameworkPlugin fwPlugin = getDefault();
+		if (fwPlugin == null) {
+			System.out.println(formatStatus(status));
+			return;
+		}
+		ILog fwLog = fwPlugin.getLog();
+		if (fwLog == null) {
+			System.out.println(formatStatus(status));
+			return;
+		}
+		fwLog.log(status);
+	}
+	
+	private static String formatStatus(IStatus status) {
+		String statusText = status.toString();
+		if (status.getException() == null)
+			return statusText;
+		StringWriter swriter = new StringWriter();
+		PrintWriter pwriter = new PrintWriter(swriter);
+		status.getException().printStackTrace(pwriter);
+		pwriter.flush();
+		return statusText + System.getProperty("line.separator") + swriter.toString();
 	}
 	
 	public static InputStream getIAgentBundleAsStream() {
