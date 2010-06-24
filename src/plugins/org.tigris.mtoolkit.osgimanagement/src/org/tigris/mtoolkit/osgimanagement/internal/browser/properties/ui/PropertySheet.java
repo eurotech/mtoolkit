@@ -140,7 +140,6 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 		} else {
 			DeviceConnector connector = fw.getConnector();
 			if (connector != null) {
-				connector.getProperties().put("framework-name", fw.getName()); //$NON-NLS-1$
 				if (fw.isConnected() && connChanged) {
 					Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 					MessageDialog.openInformation(shell, Messages.framework_ip_changed_title,

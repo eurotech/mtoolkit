@@ -58,7 +58,6 @@ public class FrameworkPropertyPage extends PropertyPage implements ConstantsDist
 
 			DeviceConnector connector = fw.getConnector();
 			if (connector != null) {
-				connector.getProperties().put("framework-name", fw.getName()); //$NON-NLS-1$
 				if (fw.isConnected() && connChanged) {
 					MessageDialog.openInformation(getShell(), Messages.framework_ip_changed_title,
 							Messages.framework_ip_changed_message);

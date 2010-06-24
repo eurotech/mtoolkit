@@ -78,7 +78,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	public void connected(final DeviceConnector connector) {
 	}
 
-	public static void connectFramework(final DeviceConnector connector) {
+	public static void connectFramework(final DeviceConnector connector, String frameworkName) {
 		// wrap the connector
 		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, Display.getDefault());
 		Dictionary connProps = fConnector.getProperties();
@@ -86,7 +86,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		if (temporary != null && temporary.booleanValue())
 			// the connection is only temporary and will be closed shortly
 			return;
-		String frameworkName = (String) connProps.get("framework-name"); //$NON-NLS-1$
 		boolean autoConnected = true;
 		FrameworkImpl fw = null;
 		FrameworkImpl fws[] = FrameWorkView.getFrameworks();
@@ -115,28 +114,26 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
 			String defaultFWName = Messages.new_framework_default_name+
 			" ("+connProps.get(DeviceConnector.TRANSPORT_TYPE)+"="+connProps.get(DeviceConnector.TRANSPORT_ID)+")";
-			String frameWorkName = defaultFWName;
+			String genName = defaultFWName;
 			String suffix = " ";
 			if (ip != null) { 
 				suffix += ip;
 			}
-			if (frameWorkMap.containsKey(frameWorkName)) {
+			if (frameWorkMap.containsKey(genName)) {
 				do {
-					frameWorkName = defaultFWName
+					genName = defaultFWName
 									+ suffix
 									+ "("
 									+ index
 									+ ")";
 					index++;
-				} while (frameWorkMap.containsKey(frameWorkName));
+				} while (frameWorkMap.containsKey(genName));
 			}
-			frameworkName = frameWorkName;
-			connProps.put("framework-name", frameworkName); //$NON-NLS-1$
+			frameworkName = genName;
 		}
 
 		if (FrameWorkView.getTreeRoot() != null && fw == null) {
 			fw = new FrameworkImpl(frameworkName, true);
-			fw.setName(frameworkName);
 			FrameWorkView.getTreeRoot().addElement(fw);
 		}
 
@@ -144,11 +141,11 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			fw.setConnector(fConnector);
 		}
 //		fw.connect(connector, SubMonitor.convert(new NullProgressMonitor()));
-		BrowserErrorHandler.debug("FrameworkPlugin: " + connProps.get("framework-name") + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$
 		createPMPConnection(fConnector, fw, frameworkName, autoConnected);
 	}
 
-	static void createPMPConnection(final DeviceConnector connector, FrameworkImpl fw, String frameworkName,
+	static void createPMPConnection(final DeviceConnector connector, final FrameworkImpl fw, String frameworkName,
 					boolean autoConnected) {
 		boolean pmp = false;
 		try {
@@ -181,7 +178,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 						connector.getVMManager().isVMActive();
 					} catch (IAgentException e) {
 						BrowserErrorHandler.processError(e, NLS.bind(Messages.pmp_connect_error_message,
-							connector.getProperties().get("framework-name")), true); //$NON-NLS-1$
+							fw.getName()), true); //$NON-NLS-1$
 						e.printStackTrace();
 					}
 				}
@@ -194,18 +191,12 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public void disconnected(DeviceConnector connector) {
-		FrameworkImpl fw = null;
-		String fwName = (String) connector.getProperties().get("framework-name"); //$NON-NLS-1$
-		if (fwName != null) {
-			fw = FrameWorkView.findFramework(fwName);
-		} else {
-			fw = FrameWorkView.findFramework(connector);
-		}
-		
+		FrameworkImpl fw = FrameWorkView.findFramework(connector);
+
 		if (fw == null /* || !fw.isConnected() */)
 			return;
 
-		BrowserErrorHandler.debug("FrameworkPlugin: " + fwName + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
+		BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
 		synchronized (Framework.getLockObject(connector)) {
 
 			FrameworkImpl fws[] = FrameWorkView.getFrameworks();
