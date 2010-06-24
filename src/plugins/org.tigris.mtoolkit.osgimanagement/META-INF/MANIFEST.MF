@@ -30,7 +30,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.pde.core,
  org.eclipse.pde.ui,
  org.eclipse.core.expressions,
- org.tigris.mtoolkit.console;bundle-version="5.0.0"
+ org.tigris.mtoolkit.console;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.jdt.internal.debug.ui.console,
  org.tigris.mtoolkit.common.installation,

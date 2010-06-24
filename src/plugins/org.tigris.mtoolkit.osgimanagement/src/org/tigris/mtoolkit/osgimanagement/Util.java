@@ -89,6 +89,9 @@ public class Util {
 		return fw;
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel, boolean multiple) {
 		FileDialog dialog = new FileDialog(shell, SWT.OPEN | (multiple ? SWT.MULTI : SWT.SINGLE));
 		String[] filterArr = { filter, "*.*" }; //$NON-NLS-1$
