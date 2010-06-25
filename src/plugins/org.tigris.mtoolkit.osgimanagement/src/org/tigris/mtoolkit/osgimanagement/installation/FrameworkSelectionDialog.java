@@ -56,6 +56,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
  * @since 5.0
  */
 public class FrameworkSelectionDialog extends TargetSelectionDialog {
+	private static final String FW_ICON_WIZBAN = "framework_wizban.gif"; //$NON-NLS-1$
+
 	private Button btnAdd;
 	private Button btnEdit;
 	private Button btnRem;
@@ -78,6 +80,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		Control contents = super.createContents(parent);
 		getShell().setText("Install to");
 		setTitle("OSGi Framework");
+		setTitleImage(ImageHolder.getImage(FW_ICON_WIZBAN));
 		setMessage("Select OSGi Framework from the list", IMessageProvider.INFORMATION);
 
 		updateButtonsState();
