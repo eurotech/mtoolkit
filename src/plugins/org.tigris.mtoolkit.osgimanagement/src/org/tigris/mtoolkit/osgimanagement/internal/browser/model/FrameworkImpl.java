@@ -83,7 +83,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	private Model bundles;
 
-	public boolean autoConnected;
 	private Display display;
 
 	// public IProgressMonitor monitor;
@@ -102,8 +101,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	
 	public FrameworkImpl(String name, boolean autoConnected) {
-		super(name);
-		this.autoConnected = autoConnected;
+		super(name, autoConnected);
 		configs = XMLMemento.createWriteRoot(MEMENTO_TYPE);
 		configs.putString(FRAMEWORK_NAME, name);
 	}
