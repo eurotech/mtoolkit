@@ -28,14 +28,14 @@ public class FrameworkPropertyPage extends PropertyPage implements ConstantsDist
 	protected Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
 		composite.setLayout(layout);
-		GridData gridData = new GridData(GridData.FILL);
-		gridData.grabExcessHorizontalSpace = true;
-		composite.setLayoutData(gridData);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		fw = (FrameworkImpl) getElement();
 
-		fwPanel = new FrameworkPanel(composite, fw, fw.getParent());
+		fwPanel = new FrameworkPanel(composite, fw, fw.getParent(), GridData.FILL_HORIZONTAL);
 		fwPanel.setErrorMonitor(this);
 		fwPanel.initialize(fw.getConfig());
 
@@ -67,6 +67,11 @@ public class FrameworkPropertyPage extends PropertyPage implements ConstantsDist
 		}
 
 		return correct;
+	}
+
+	public void setErrorMessage(String error) {
+		super.setErrorMessage(error);
+		setValid(error == null);
 	}
 
 	private void updateTitle(String oldName, String newName) {

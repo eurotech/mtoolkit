@@ -57,6 +57,10 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 	private ErrorMonitor errorMonitor;
 
 	public FrameworkPanel(Composite composite, FrameworkImpl fw, Model parent) {
+		this(composite, fw, parent, GridData.FILL_BOTH);
+	}
+
+	public FrameworkPanel(Composite composite, FrameworkImpl fw, Model parent, int style) {
 		this.composite = composite;
 		this.fw = fw;
 		this.parent = parent;
@@ -80,7 +84,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 		// Connect properties group
 		Group connectPropertiesGroup = new Group(composite, SWT.NONE);
 		connectPropertiesGroup.setText(Messages.connect_properties_group_label);
-		connectPropertiesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		connectPropertiesGroup.setLayoutData(new GridData(style));
 		connectPropertiesGroup.setLayout(new GridLayout());
 
 		pageBook = new PageBook(connectPropertiesGroup, SWT.NONE);

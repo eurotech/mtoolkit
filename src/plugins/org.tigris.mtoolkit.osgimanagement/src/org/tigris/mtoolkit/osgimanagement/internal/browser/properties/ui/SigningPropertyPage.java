@@ -25,14 +25,14 @@ public class SigningPropertyPage extends PropertyPage {
 	protected Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
 		composite.setLayout(layout);
-		GridData gridData = new GridData(GridData.FILL);
-		gridData.grabExcessHorizontalSpace = true;
-		composite.setLayoutData(gridData);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		fw = (FrameworkImpl) getElement();
 
-		certificatesPanel = new CertificatesPanel(composite, 1, 1);
+		certificatesPanel = new CertificatesPanel(composite, 1, 1, GridData.FILL_HORIZONTAL);
 		certificatesPanel.initialize(fw.getSignCertificateUids(fw.getConfig()));
 
 		return composite;

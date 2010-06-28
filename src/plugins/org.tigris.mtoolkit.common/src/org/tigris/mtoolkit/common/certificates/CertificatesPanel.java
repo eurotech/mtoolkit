@@ -54,10 +54,14 @@ public class CertificatesPanel {
 	public static final int EVENT_CONTENT_MODIFIED = 1;
 
 	public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan) {
+		this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
+	}
+
+	public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style) {
 		// Signing content group
 		signContentGroup = new Group(parent, SWT.NONE);
 		signContentGroup.setText(Messages.CertificatesPanel_signContentGroup);
-		GridData gridData = new GridData(GridData.FILL_BOTH);
+		GridData gridData = new GridData(style);
 		gridData.horizontalSpan = horizontalSpan;
 		gridData.verticalSpan = verticalSpan;
 		signContentGroup.setLayoutData(gridData);
@@ -78,10 +82,10 @@ public class CertificatesPanel {
 		lblCertificates.setLayoutData(new GridData());
 
 		// Certificates table
-		int style = SWT.SINGLE | SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
-		tblCertificates = new Table(signContentGroup, style);
+		int stl = SWT.SINGLE | SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
+		tblCertificates = new Table(signContentGroup, stl);
 		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.heightHint = 50;
+		gridData.heightHint = 60;
 		tblCertificates.setLayoutData(gridData);
 		tblCertificates.setLinesVisible(true);
 		tblCertificates.setHeaderVisible(true);
@@ -225,6 +229,10 @@ public class CertificatesPanel {
 				break;
 			}
 			parent = parent.getParent();
+		}
+
+		if (signContentGroup.getParent() != null) {
+			signContentGroup.getParent().layout();
 		}
 	}
 }
