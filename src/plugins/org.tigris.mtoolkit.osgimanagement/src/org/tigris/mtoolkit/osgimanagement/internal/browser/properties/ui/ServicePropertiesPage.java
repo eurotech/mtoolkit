@@ -62,7 +62,7 @@ public class ServicePropertiesPage extends PropertiesPage {
 					data.addElement(object);
 				}
 			}
-			tableViewer.setInput(data);
+			viewer.setInput(data);
 		} catch (IAgentException e) {
 			BrowserErrorHandler.processError(e, true);
 		} catch (Throwable t) {

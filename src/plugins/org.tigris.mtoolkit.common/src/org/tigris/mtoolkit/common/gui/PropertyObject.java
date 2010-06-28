@@ -20,6 +20,7 @@ public class PropertyObject implements Cloneable {
 
 	String name;
 	String value;
+	private Object data;
 
 	public PropertyObject(String name, String value) {
 		this.name = name;
@@ -40,5 +41,13 @@ public class PropertyObject implements Cloneable {
 
 	public String getValue() {
 		return value;
+	}
+
+	public void setData(Object data) {
+		this.data = data;
+	}
+
+	public Object getData() {
+		return data;
 	}
 }
