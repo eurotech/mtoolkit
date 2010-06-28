@@ -27,6 +27,7 @@ public abstract class Framework extends Model {
 	public final static int BUNDLES_VIEW = 0;
 	public final static int SERVICES_VIEW = 1;
 
+	public boolean autoConnected;
 	protected DeviceConnector connector;
 	protected boolean connectedFlag;
 	protected int viewType;
@@ -34,8 +35,9 @@ public abstract class Framework extends Model {
 	// framework IP or other ID
 	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
 
-	public Framework(String name) {
+	public Framework(String name, boolean autoConnected) {
 		super(name);
+		this.autoConnected = autoConnected;
 	}
 
 	public DeviceConnector getConnector() {
@@ -44,6 +46,10 @@ public abstract class Framework extends Model {
 
 	public boolean isConnected() {
 		return connectedFlag;
+	}
+	
+	public boolean isAutoConnected() {
+		return autoConnected;
 	}
 	
 	public int getViewType() {
