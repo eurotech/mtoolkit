@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.ContributionItem;
+import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -651,6 +652,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		manager.add(new Separator(ContentTypeActionsProvider.GROUP_INSTALL));
 		manager.add(new Separator(ContentTypeActionsProvider.GROUP_OPTIONS));
 		manager.add(new Separator(ContentTypeActionsProvider.GROUP_DEFAULT));
+		manager.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator(ContentTypeActionsProvider.GROUP_PROPERTIES));
 
 		if (selection.size() > 0) {
@@ -715,7 +717,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		}
 
 		// call menuAboutToShow
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.appendToGroup(ContentTypeActionsProvider.GROUP_DEFAULT, findAction);
 		manager.appendToGroup(ContentTypeActionsProvider.GROUP_DEFAULT, showConsoleAction);
 		if (selection.size() > 0 && homogen) {
