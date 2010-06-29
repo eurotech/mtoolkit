@@ -18,8 +18,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.SameShellProvider;
@@ -51,6 +53,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StartBundleOper
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StopBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UninstallBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UpdateBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UpdatePreverifyOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
@@ -195,8 +198,20 @@ public class ActionsManager {
 		if (files == null || files.length == 0) {
 			return;
 		}
-		RemoteBundleOperation job = new UpdateBundleOperation(bundle, files[0]);
-		job.schedule();
+
+		RemoteBundleOperation preverifyJob = new UpdatePreverifyOperation(bundle, files[0]);
+		preverifyJob.setUser(false);
+		preverifyJob.setSystem(true);
+		preverifyJob.addJobChangeListener(new JobChangeAdapter() {
+			public void done(IJobChangeEvent event) {
+				if (event.getResult() != null && event.getResult().isOK()) {
+					// everything is OK, do the update
+					RemoteBundleOperation job = new UpdateBundleOperation(bundle, files[0]);
+					job.schedule();
+				}
+			}
+		});
+		preverifyJob.schedule();
 	}
 
 	public static void disconnectFrameworkAction(final FrameworkImpl fw) {

@@ -4,7 +4,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
@@ -35,10 +34,10 @@ public abstract class RemoteBundleOperation extends Job {
 				bundle.updateElement();
 			monitor.done();
 		}
-		if (!operationResult.isOK())
-			StatusManager.getManager().handle(Util.newStatus(getMessage(operationResult), operationResult),
-				StatusManager.SHOW | StatusManager.LOG);
-		return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+		if (monitor.isCanceled()) {
+			return Status.CANCEL_STATUS;
+		}
+		return Util.newStatus(getMessage(operationResult), operationResult);
 	}
 
 	protected Bundle getBundle() {
