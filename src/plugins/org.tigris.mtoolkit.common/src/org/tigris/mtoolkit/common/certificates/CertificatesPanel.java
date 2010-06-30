@@ -10,15 +10,25 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.certificates;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -32,10 +42,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.tigris.mtoolkit.common.Messages;
+import org.tigris.mtoolkit.common.images.UIResources;
 
 public class CertificatesPanel {
 
@@ -45,6 +55,7 @@ public class CertificatesPanel {
 	private Button chkSignContent;
 	private Label lblCertificates;
 	private Table tblCertificates;
+	private CheckboxTableViewer certificatesViewer;
 	private Link link;
 	private Set listeners = new HashSet();
 
@@ -102,6 +113,10 @@ public class CertificatesPanel {
 		column = new TableColumn(tblCertificates, SWT.LEFT);
 		column.setText(Messages.CertificatesPanel_tblCertColLocation);
 		column.setWidth(160);
+
+		certificatesViewer = new CheckboxTableViewer(tblCertificates);
+		certificatesViewer.setContentProvider(new CertContentProvider());
+		certificatesViewer.setLabelProvider(new CertLabelProvider());
 	}
 
 	/**
@@ -113,20 +128,17 @@ public class CertificatesPanel {
 	 */
 	public void initialize(List signUids) {
 		ICertificateDescriptor certificates[] = CertUtils.getCertificates();
+		certificatesViewer.setInput(certificates);
+		boolean foundCert = false;
 		if (certificates == null || certificates.length == 0) {
 			setNoCertificatesAvailable();
-		}
-		tblCertificates.removeAll();
-		boolean foundCert = false;
-		if (certificates != null) {
-			for (int i = 0; i < certificates.length; i++) {
-				TableItem item = new TableItem(tblCertificates, SWT.NONE);
-				item.setText(0, certificates[i].getAlias());
-				item.setText(1, certificates[i].getStoreLocation());
-				item.setData(certificates[i].getUid());
-				if (signUids != null && signUids.contains(certificates[i].getUid())) {
-					item.setChecked(true);
-					foundCert = true;
+		} else {
+			if (signUids != null) {
+				for (int i = 0; i < certificates.length; i++) {
+					if (signUids.contains(certificates[i].getUid())) {
+						certificatesViewer.setChecked(certificates[i], true);
+						foundCert = true;
+					}
 				}
 			}
 		}
@@ -137,11 +149,9 @@ public class CertificatesPanel {
 	public List getSignCertificateUids() {
 		List signUids = new ArrayList();
 		if (chkSignContent.getSelection()) {
-			TableItem items[] = tblCertificates.getItems();
-			for (int i = 0; i < items.length; i++) {
-				if (items[i].getChecked()) {
-					signUids.add(items[i].getData());
-				}
+			Object[] checkedCerts = certificatesViewer.getCheckedElements();
+			for (int i = 0; i < checkedCerts.length; i++) {
+				signUids.add(((ICertificateDescriptor) checkedCerts[i]).getUid());
 			}
 		}
 		return signUids;
@@ -233,6 +243,67 @@ public class CertificatesPanel {
 
 		if (signContentGroup.getParent() != null) {
 			signContentGroup.getParent().layout();
+		}
+	}
+
+	private class CertLabelProvider extends LabelProvider implements ITableLabelProvider {
+		private Image iconCertMissing;
+
+		public CertLabelProvider() {
+			super();
+
+			Image iconCert = UIResources.getImage(UIResources.CERTIFICATE_ICON);
+			ImageDescriptor overlay = UIResources.getImageDescriptor(UIResources.OVR_ERROR_ICON);
+			iconCertMissing = new DecorationOverlayIcon(iconCert, overlay, IDecoration.BOTTOM_LEFT).createImage();
+		}
+
+		public Image getColumnImage(Object element, int columnIndex) {
+			if (!(element instanceof ICertificateDescriptor) || columnIndex > 0) {
+				return null;
+			}
+			ICertificateDescriptor cert = (ICertificateDescriptor) element;
+			File keystore = new File(cert.getStoreLocation());
+			if (!keystore.exists() || !keystore.isFile()) {
+				return iconCertMissing;
+			}
+			return UIResources.getImage(UIResources.CERTIFICATE_ICON);
+		}
+
+		public String getColumnText(Object element, int columnIndex) {
+			if (!(element instanceof ICertificateDescriptor)) {
+				return null;
+			}
+			ICertificateDescriptor cert = (ICertificateDescriptor) element;
+			String columnText = null;
+			switch (columnIndex) {
+			case 0:
+				columnText = cert.getAlias();
+				break;
+			case 1:
+				columnText = cert.getStoreLocation();
+				break;
+			}
+			return columnText;
+		}
+
+		public void dispose() {
+			iconCertMissing.dispose();
+		}
+	}
+
+	private class CertContentProvider implements IStructuredContentProvider {
+
+		public Object[] getElements(Object inputElement) {
+			if (inputElement instanceof Object[]) {
+				return ((Object[]) inputElement);
+			}
+			return new Object[0];
+		}
+
+		public void dispose() {
+		}
+
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
 }
