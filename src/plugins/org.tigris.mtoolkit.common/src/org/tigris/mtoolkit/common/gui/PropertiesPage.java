@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.gui;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -72,9 +73,14 @@ public class PropertiesPage extends PropertyPage {
 				if (p.getData() instanceof Map) {
 					Vector children = getData((Map) p.getData());
 					return children.toArray(new Object[children.size()]);
-				}
-				if (p.getData() instanceof Dictionary) {
+				} else if (p.getData() instanceof Dictionary) {
 					Vector children = getData((Dictionary) p.getData());
+					return children.toArray(new Object[children.size()]);
+				} else if (p.getData() instanceof Object[]) {
+					Vector children = getData(p.getName(), (Object[]) p.getData());
+					return children.toArray(new Object[children.size()]);
+				} else if (p.getData() instanceof Collection) {
+					Vector children = getData(p.getName(), (Collection) p.getData());
 					return children.toArray(new Object[children.size()]);
 				}
 			}
@@ -88,7 +94,8 @@ public class PropertiesPage extends PropertyPage {
 		public boolean hasChildren(Object element) {
 			if (element instanceof PropertyObject) {
 				PropertyObject p = (PropertyObject) element;
-				return p.getData() instanceof Map || p.getData() instanceof Dictionary;
+				Object d = p.getData();
+				return d instanceof Map || d instanceof Dictionary || d instanceof Object[] || d instanceof Collection;
 			}
 			return false;
 		}
@@ -208,23 +215,27 @@ public class PropertiesPage extends PropertyPage {
 		return dataVector;
 	}
 
+	private Vector getData(String key, Object[] data) {
+		Vector dataVector = new Vector();
+		for (int i = 0; i < data.length; i++) {
+			dataVector.addAll(getElements(key + "[" + i + "]", data[i]));
+		}
+		return dataVector;
+	}
+
+	private Vector getData(String key, Collection data) {
+		Vector dataVector = new Vector();
+		int i = 0;
+		for (Iterator it = data.iterator(); it.hasNext(); i++) {
+			dataVector.addAll(getElements(key + "[" + i + "]", it.next()));
+		}
+		return dataVector;
+	}
+
 	private Vector getElements(Object key, Object value) {
 		Vector elements = new Vector();
-		if (value instanceof String[]) {
-			String[] values = (String[]) value;
-			if (values.length == 1) {
-				PropertyObject object = new PropertyObject(key.toString(), values[0]);
-				elements.add(object);
-			} else {
-				for (int j = 0; j < values.length; j++) {
-					StringBuffer buff = new StringBuffer();
-					buff.append(key).append("[").append(String.valueOf(j + 1)).append("]");
-					String key2 = buff.toString();
-					PropertyObject object = new PropertyObject(key2, values[j]);
-					elements.add(object);
-				}
-			}
-		} else if (value instanceof Map || value instanceof Dictionary) {
+		if (value instanceof Map || value instanceof Dictionary || value instanceof Object[]
+				|| value instanceof Collection) {
 			PropertyObject object = new PropertyObject(key.toString(), "");
 			object.setData(value);
 			elements.add(object);
@@ -238,7 +249,6 @@ public class PropertiesPage extends PropertyPage {
 
 	public void setGroupName(String tableTitle) {
 		groupName = tableTitle;
-		
 	}
 
 	private void createActions(Shell shell) {
