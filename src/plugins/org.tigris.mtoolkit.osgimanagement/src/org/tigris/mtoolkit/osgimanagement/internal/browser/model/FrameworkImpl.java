@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -1341,6 +1342,22 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 						objClass.addElement(node);
 					}
 				}
+			} else if (value instanceof Collection) {
+				Collection col = (Collection) value;
+				StringBuilder sb = new StringBuilder();
+				sb.append("{ ");
+				boolean first = true;
+				for (Iterator it = col.iterator(); it.hasNext();) {
+					if (!first) {
+						sb.append(", ");
+					} else {
+						first = false;
+					}
+					sb.append(it.next());
+				}
+				sb.append(" }");
+				ServiceProperty node = new ServiceProperty(key + ": " + sb.toString());
+				objClass.addElement(node);
 			} else {
 				ServiceProperty node = new ServiceProperty(key + ": " + value.toString());
 				objClass.addElement(node);
