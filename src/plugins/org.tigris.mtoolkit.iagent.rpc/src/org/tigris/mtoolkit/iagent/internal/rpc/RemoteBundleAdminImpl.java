@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -232,7 +233,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				bundle.start();
 			}
 		} catch (BundleException e) {
-			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to start bundle: " + e.getMessage());
+			Error error = new Error(getBundleErrorCode(e), "Failed to start bundle: " + e.getMessage());
 			info("[startBundle] Bundle cannot be started: " + error, e);
 			return error;
 		} catch (IllegalStateException e) {
@@ -259,7 +260,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				bundle.stop();
 			}
 		} catch (BundleException e) {
-			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to stop bundle: " + e.getMessage());
+			Error error = new Error(getBundleErrorCode(e), "Failed to stop bundle: " + e.getMessage());
 			info("[stopBundle] Unable to stop bundle: " + error, e);
 			return error;
 		} catch (IllegalStateException e) {
@@ -728,5 +729,40 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	
 	public String getSystemProperty(String name) {
 		return System.getProperty(name);
+	}
+
+	public static int getBundleErrorCode(BundleException e) {
+		int code;
+		try {
+			Method getType = BundleException.class.getMethod("getType", null);
+			code = ((Integer) getType.invoke(e, null)).intValue();
+		} catch (Exception e1) {
+			return IAgentErrors.ERROR_BUNDLE_UNKNOWN;
+		}
+
+		switch (code) {
+		case BundleException.ACTIVATOR_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_ACTIVATOR;
+		case BundleException.DUPLICATE_BUNDLE_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_DUPLICATE;
+		case BundleException.INVALID_OPERATION:
+			return IAgentErrors.ERROR_BUNDLE_INVALID_OPERATION;
+		case BundleException.MANIFEST_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_MANIFEST;
+		case BundleException.NATIVECODE_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_NATIVECODE;
+		case BundleException.RESOLVE_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_RESOLVE;
+		case BundleException.SECURITY_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_SECURITY;
+		case BundleException.START_TRANSIENT_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_START_TRANSIENT;
+		case BundleException.STATECHANGE_ERROR:
+			return IAgentErrors.ERROR_BUNDLE_STATECHANGE;
+		case BundleException.UNSUPPORTED_OPERATION:
+			return IAgentErrors.ERROR_BUNDLE_UNSUPPORTED_OPERATION;
+		default:
+			return IAgentErrors.ERROR_BUNDLE_UNKNOWN;
+		}
 	}
 }

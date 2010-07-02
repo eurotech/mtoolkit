@@ -8,7 +8,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.tigris.mtoolkit.iagent.Error;
-import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
@@ -29,7 +28,8 @@ public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 			Bundle bundle = bc.installBundle(name, in);
 			return bundle;
 		} catch (BundleException e) {
-			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to install bundle: " + e.getMessage());
+			int code = RemoteBundleAdminImpl.getBundleErrorCode(e);
+			Error error = new Error(code, "Failed to install bundle: " + e.getMessage());
 			return error;
 		}
 	}
@@ -43,7 +43,8 @@ public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 			bundle.uninstall();
 			return null;
 		} catch (BundleException e) {
-			return new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to uninstall bundle: " + DebugUtils.toString(e));
+			int code = RemoteBundleAdminImpl.getBundleErrorCode(e);
+			return new Error(code, "Failed to uninstall bundle: " + DebugUtils.toString(e));
 		} catch (IllegalStateException e) {
 			return null;	// everything is OK
 		}
@@ -54,7 +55,8 @@ public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 			bundle.update(in);
 			return null;
 		} catch (BundleException e) {
-			return new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to update bundle: " + DebugUtils.toString(e));
+			int code = RemoteBundleAdminImpl.getBundleErrorCode(e);
+			return new Error(code, "Failed to update bundle: " + DebugUtils.toString(e));
 		} catch (IllegalStateException e) {
 			return new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + bundle.getBundleId() + " has been uninstalled");
 		} finally {

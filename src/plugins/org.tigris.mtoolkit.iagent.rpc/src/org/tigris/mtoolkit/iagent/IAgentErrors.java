@@ -39,9 +39,8 @@ import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
  * </tr>
  * <tr>
  * <td>-6000</td>
- * <td>Bundle related errors. Currently all bundle exceptions has value {@value
- * #ERROR_BUNDLE_UNKNOWN}. More information about the exception can be found in
- * the exception message</td>
+ * <td>Bundle related errors. More information about the exception can be found
+ * in the exception message</td>
  * </tr>
  * <tr>
  * <td>-7000</td>
@@ -162,21 +161,76 @@ public class IAgentErrors {
 	 * Code indicating that a required remote service is not available.
 	 */
 	public static final int ERROR_REMOTE_ADMIN_NOT_AVAILABLE = -5010;
+
 	/**
-	 * Code error indicating that bundle exception was thrown on the remote
-	 * site.<br>
-	 * 
+	 * Error code indicating unknown bundle error.
 	 */
 	public static final int ERROR_BUNDLE_UNKNOWN = -6000;
 
 	/**
-	 * Code error indicating that the requested operation was denied, because
+	 * Error code indicating that bundle activator was in error.
+	 */
+	public static final int ERROR_BUNDLE_ACTIVATOR = -6001;
+
+	/**
+	 * Error code indicating that the install or update operation failed because
+	 * another already installed bundle has the same symbolic name and version.
+	 */
+	public static final int ERROR_BUNDLE_DUPLICATE = -6002;
+
+	/**
+	 * Error code indicating that the operation was invalid.
+	 */
+	public static final int ERROR_BUNDLE_INVALID_OPERATION = -6003;
+
+	/**
+	 * Error code indicating that the bundle manifest was in error.
+	 */
+	public static final int ERROR_BUNDLE_MANIFEST = -6004;
+
+	/**
+	 * Error code indicating that the bundle could not be resolved due to an
+	 * error with the Bundle-NativeCode header.
+	 */
+	public static final int ERROR_BUNDLE_NATIVECODE = -6005;
+
+	/**
+	 * Error code indicating that the bundle was not resolved.
+	 */
+	public static final int ERROR_BUNDLE_RESOLVE = -6006;
+
+	/**
+	 * Error code indicating that the operation failed due to insufficient
+	 * permissions.
+	 */
+	public static final int ERROR_BUNDLE_SECURITY = -6007;
+
+	/**
+	 * Error code indicating that the start transient operation failed because
+	 * the start level of the bundle is greater than the current framework start
+	 * level
+	 */
+	public static final int ERROR_BUNDLE_START_TRANSIENT = -6008;
+
+	/**
+	 * Error code indicating that the operation failed to complete the requested
+	 * lifecycle state change.
+	 */
+	public static final int ERROR_BUNDLE_STATECHANGE = -6009;
+
+	/**
+	 * Error code indicating that the operation was unsupported.
+	 */
+	public static final int ERROR_BUNDLE_UNSUPPORTED_OPERATION = -6010;
+
+	/**
+	 * Error code indicating that the requested operation was denied, because
 	 * the target bundle is system and protected.
 	 */
 	public static final int ERROR_BUNDLE_SYSTEM = -6901;
-  
+
 	/**
-	 * Code error indicating that the bundle has been uninstalled.
+	 * Error code indicating that the bundle has been uninstalled.
 	 */
 	public static final int ERROR_BUNDLE_UNINSTALLED = -6999;
 
