@@ -62,6 +62,7 @@ public class RemoteConsole extends IOConsole implements IConsole {
 		this.process = iProcess;
 		timestamp = new Date();
 		DeviceConnector.addDeviceConnectionListener(listener);
+	    setAttribute("mtoolkit.console.connector", connector);
 	}
 	
 	protected void init() {
