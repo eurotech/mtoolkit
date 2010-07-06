@@ -76,7 +76,6 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 		commonActions.put(PROPERTIES_ACTION, applicationPropertiesAction);
 	}
 	
-    @Override
 	public Map getCommonActions() {
 		return commonActions;
 	}
@@ -141,7 +140,6 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 		return null;
 	}
 
-    @Override
 	public void updateEnabledState(final DeviceConnector connector) {
        Job job = new Job("Update state") {
             protected IStatus run(IProgressMonitor monitor) {
