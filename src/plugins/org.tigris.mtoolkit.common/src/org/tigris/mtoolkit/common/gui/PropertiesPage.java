@@ -48,6 +48,9 @@ import org.eclipse.ui.dialogs.PropertyPage;
  */
 public class PropertiesPage extends PropertyPage {
 
+	/**
+	 * @since 6.0
+	 */
 	protected TreeViewer viewer;
 	protected Group propertiesGroup;
 	private String groupName = "Headers";
@@ -67,6 +70,9 @@ public class PropertiesPage extends PropertyPage {
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
+		/**
+		 * @since 6.0
+		 */
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof PropertyObject) {
 				PropertyObject p = (PropertyObject) parentElement;
@@ -87,10 +93,16 @@ public class PropertiesPage extends PropertyPage {
 			return new Object[0];
 		}
 
+		/**
+		 * @since 6.0
+		 */
 		public Object getParent(Object element) {
 			return null;
 		}
 
+		/**
+		 * @since 6.0
+		 */
 		public boolean hasChildren(Object element) {
 			if (element instanceof PropertyObject) {
 				PropertyObject p = (PropertyObject) element;
@@ -256,7 +268,7 @@ public class PropertiesPage extends PropertyPage {
 	}
 
 	/**
-	 * @since 5.1
+	 * @since 6.0
 	 */
 	protected void fillContextMenu(IMenuManager manager) {
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();

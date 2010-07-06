@@ -29,7 +29,13 @@ public class UIResources {
 	public static final String SMALL_ERROR_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_error_icon";
 	public static final String SMALL_WARNING_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_warning_icon";
 	public static final String SMALL_INFO_ICON = UtilitiesPlugin.PLUGIN_ID + ".small_info_icon";
+	/**
+	 * @since 6.0
+	 */
 	public static final String CERTIFICATE_ICON = UtilitiesPlugin.PLUGIN_ID + ".certificate_icon";
+	/**
+	 * @since 6.0
+	 */
 	public static final String OVR_ERROR_ICON = UtilitiesPlugin.PLUGIN_ID + ".ovr_error_icon";
 	public static final String SSL_INTERACTION_WIZBAN_ICON = UtilitiesPlugin.PLUGIN_ID + "ssl_interaction_wizban_icon";
 
