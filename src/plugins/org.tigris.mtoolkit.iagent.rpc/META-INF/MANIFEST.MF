@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.tigris.mtoolkit.iagent.rpc;singleton:=true
 Bundle-Name: mToolkit Instrumentation Agent RPC Bundle
 Bundle-Activator: org.tigris.mtoolkit.iagent.internal.rpc.Activator
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-Vendor: Tigris.org
 Bundle-Description: Instrumentation Agent Remote API.
 Export-Package: org.tigris.mtoolkit.iagent;rpc=split;version="2.0.0";mandatory:=rpc,

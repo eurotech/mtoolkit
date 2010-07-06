@@ -34,7 +34,7 @@ import org.eclipse.ui.PlatformUI;
  * </p>
  * 
  * @noextend This class is not intended to be subclassed by clients.
- * @since 5.1
+ * @since 6.0
  */
 public class ErrorPanel extends Composite {
 

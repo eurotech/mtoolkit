@@ -169,39 +169,46 @@ public class IAgentErrors {
 
 	/**
 	 * Error code indicating that bundle activator was in error.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_ACTIVATOR = -6001;
 
 	/**
 	 * Error code indicating that the install or update operation failed because
 	 * another already installed bundle has the same symbolic name and version.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_DUPLICATE = -6002;
 
 	/**
 	 * Error code indicating that the operation was invalid.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_INVALID_OPERATION = -6003;
 
 	/**
 	 * Error code indicating that the bundle manifest was in error.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_MANIFEST = -6004;
 
 	/**
 	 * Error code indicating that the bundle could not be resolved due to an
 	 * error with the Bundle-NativeCode header.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_NATIVECODE = -6005;
 
 	/**
 	 * Error code indicating that the bundle was not resolved.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_RESOLVE = -6006;
 
 	/**
 	 * Error code indicating that the operation failed due to insufficient
 	 * permissions.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_SECURITY = -6007;
 
@@ -209,17 +216,20 @@ public class IAgentErrors {
 	 * Error code indicating that the start transient operation failed because
 	 * the start level of the bundle is greater than the current framework start
 	 * level
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_START_TRANSIENT = -6008;
 
 	/**
 	 * Error code indicating that the operation failed to complete the requested
 	 * lifecycle state change.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_STATECHANGE = -6009;
 
 	/**
 	 * Error code indicating that the operation was unsupported.
+	 * @since 3.1
 	 */
 	public static final int ERROR_BUNDLE_UNSUPPORTED_OPERATION = -6010;
 

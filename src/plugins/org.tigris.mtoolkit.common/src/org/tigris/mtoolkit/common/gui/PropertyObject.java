@@ -43,10 +43,16 @@ public class PropertyObject implements Cloneable {
 		return value;
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public void setData(Object data) {
 		this.data = data;
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public Object getData() {
 		return data;
 	}
