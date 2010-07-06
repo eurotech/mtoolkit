@@ -17,8 +17,10 @@ import org.tigris.mtoolkit.iagent.rpc.Remote;
 
 public class RemoteInputStream implements Remote {
 
+	private static final int BUF_SIZE = 2048;
+
 	private InputStream is;
-	private byte[] buff = new byte[2048];
+	private byte[] buff = new byte[BUF_SIZE];
 	private int off = 0;
 	private int len = 0;
 	private boolean eof = false;
@@ -53,7 +55,7 @@ public class RemoteInputStream implements Remote {
 			sbuffer = new StringBuffer(new String(buff, off, i - off));
 		else
 			sbuffer.append(new String(buff, off, i - off));
-		if (i == 2048) {
+		if (i == BUF_SIZE) {
 			fill();
 			return readln(sbuffer);
 		}
@@ -68,7 +70,7 @@ public class RemoteInputStream implements Remote {
 			fill();
 			return read(size);
 		}
-		int s = size < len - off ? len - off : size;
+		int s = size > len - off ? len - off : size;
 		byte[] toReturn = new byte[s];
 		System.arraycopy(buff, off, toReturn, 0, s);
 		off += s;
@@ -80,7 +82,7 @@ public class RemoteInputStream implements Remote {
 		do {
 			int read = 0;
 			try {
-				read = is.read(buff, len, 2048 - len);
+				read = is.read(buff, len, BUF_SIZE - len);
 			} catch (IOException ioExc) {
 				close();
 				throw ioExc;
@@ -89,7 +91,7 @@ public class RemoteInputStream implements Remote {
 				eof = true;
 			else {
 				len += read;
-				if (len == 2048)
+				if (len == BUF_SIZE)
 					break;
 			}
 		} while (!eof);
