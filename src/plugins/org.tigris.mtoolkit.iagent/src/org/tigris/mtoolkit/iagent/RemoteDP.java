@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent;
 
+import java.io.InputStream;
 import java.util.Dictionary;
 
 /**
@@ -99,5 +100,13 @@ public interface RemoteDP {
 	 * @throws IAgentException
 	 */
 	public boolean isStale() throws IAgentException;
+
+	/**
+	 * Returns icon of the remote deployment package.
+	 * 
+	 * @return InputStream for reading the icon or null if there is no icon
+	 * @throws IAgentException
+	 */
+	public InputStream getIcon() throws IAgentException;
 
 }

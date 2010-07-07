@@ -243,4 +243,16 @@ public interface RemoteBundle {
 	 * @throws IAgentException
 	 */
 	public int getBundleStartLevel() throws IAgentException;
+
+	/**
+	 * Returns resource from the remote bundle.
+	 * 
+	 * @param name
+	 *            the name of the resource
+	 * 
+	 * @return InputStream for reading the resource or null if there is no such
+	 *         resource
+	 * @throws IAgentException
+	 */
+	public InputStream getResource(String name) throws IAgentException;
 }

@@ -10,27 +10,36 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.dp.model;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
+import org.tigris.mtoolkit.osgimanagement.IconProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class DeploymentPackage extends Model {
+public class DeploymentPackage extends Model implements IconProvider {
 
 	private Framework framework;
 	private RemoteDP dp;
 	private final String DP_STALE_NAME = "stale"; //$NON-NLS-1$
 	private final String DP_STALE_VALUE_TRUE = "true"; //$NON-NLS-1$
 	private final String DP_STALE_VALUE_FALSE = "false"; //$NON-NLS-1$
+	private ImageData iconData;
+	private Image icon;
 
 	public DeploymentPackage(RemoteDP dp, Framework fw) throws IAgentException {
 		super(dp.getName());
@@ -93,4 +102,47 @@ public class DeploymentPackage extends Model {
 		return false;
 	}
 
+	public Image getIcon() {
+		if (icon != null) {
+			return icon;
+		}
+		// TODO add support for big icons by scaling them
+		if (iconData == null || iconData.height > 16 || iconData.width > 16) {
+			return null;
+		}
+		icon = new Image(Display.getDefault(), iconData);
+		return icon;
+	}
+
+	public ImageData fetchIconData() {
+		if (iconData != null) {
+			return iconData;
+		}
+		InputStream is = null;
+		try {
+			is = dp.getIcon();
+			if (is == null) {
+				return null;
+			}
+			is = new BufferedInputStream(is);
+			iconData = new ImageData(is);
+			return iconData;
+		} catch (IAgentException e) {
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		return null;
+	}
+
+	public void finalize() {
+		if (icon != null) {
+			icon.dispose();
+			icon = null;
+		}
+	}
 }

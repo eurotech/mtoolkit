@@ -217,4 +217,17 @@ public interface RemoteBundleAdmin {
 	public int getFrameworkStartLevel();
 	
 	public String getSystemProperty(String property);
+
+	/**
+	 * Returns resource with given name.
+	 * 
+	 * @param id
+	 * @param name
+	 *            the name of the resource
+	 * @param properties
+	 *            additional properties or null
+	 * @return InputStream for getting the resource, null if there is no such
+	 *         resource or Error object in case of error
+	 */
+	public Object getBundleResource(long id, String name, Dictionary properties);
 }

@@ -10,17 +10,34 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
+import org.osgi.framework.BundleException;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
+import org.tigris.mtoolkit.osgimanagement.IconProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
+import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class Bundle extends Model {
+public class Bundle extends Model implements IconProvider {
+
+	public static final String OVR_ACTIVE_ICON = "ovr_active.gif"; //$NON-NLS-1$
+	public static final String OVR_RESOLVED_ICON = "ovr_resolved.gif"; //$NON-NLS-1$
 
 	private long id;
 	private boolean needsUpdate;
@@ -34,6 +51,8 @@ public class Bundle extends Model {
 	private int type = -1;
 	private final RemoteBundle rBundle;
 	private String category;
+	private ImageData iconData;
+	private Image icon;
 
 	public Bundle(String name, RemoteBundle rBundle, int state, int type, String category, String version)
 			throws IAgentException {
@@ -137,6 +156,11 @@ public class Bundle extends Model {
 				refreshStateFromRemote();
 				RemoteBundle rBundle = getRemoteBundle();
 				version = rBundle.getVersion();
+				iconData = null;
+				if (icon != null) {
+					icon.dispose();
+					icon = null;
+				}
 			} finally {
 				// always update the viewers
 				updateElement();
@@ -222,5 +246,95 @@ public class Bundle extends Model {
 			}
 		}
 		return label;
+	}
+
+	public Image getIcon() {
+		if (icon != null) {
+			return icon;
+		}
+		if (iconData == null) {
+			return null;
+		}
+
+		ImageDescriptor overlay;
+		switch (state) {
+		case org.osgi.framework.Bundle.RESOLVED:
+			overlay = ImageHolder.getImageDescriptor(OVR_RESOLVED_ICON);
+			break;
+		case org.osgi.framework.Bundle.ACTIVE:
+			overlay = ImageHolder.getImageDescriptor(OVR_ACTIVE_ICON);
+			break;
+		default:
+			return null;
+		}
+		Image baseIcon = new Image(Display.getDefault(), iconData);
+		icon = new DecorationOverlayIcon(baseIcon, overlay, IDecoration.TOP_RIGHT).createImage();
+		baseIcon.dispose();
+		return icon;
+	}
+
+	public ImageData fetchIconData() {
+		if (iconData != null) {
+			return iconData;
+		}
+		InputStream is = null;
+		try {
+			String iconPath = getIconPath();
+			if (iconPath == null) {
+				return null;
+			}
+			is = rBundle.getResource(iconPath);
+			if (is == null) {
+				return null;
+			}
+			is = new BufferedInputStream(is);
+			iconData = new ImageData(is);
+			return iconData;
+		} catch (IAgentException e) {
+		} catch (BundleException e) {
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		return null;
+	}
+
+	private String getIconPath() throws IAgentException, BundleException {
+		// TODO add support for big icons by scaling them
+		String iconHeader = rBundle.getHeader("Bundle-Icon", null);
+		ManifestElement[] elements = null;
+		if (iconHeader != null) {
+			elements = ManifestElement.parseHeader("Bundle-Icon", iconHeader);
+		}
+		if (elements == null) {
+			return null;
+		}
+		for (int i = 0; i < elements.length; i++) {
+			String sizeAttr = elements[i].getAttribute("size");
+			if (sizeAttr == null) {
+				continue;
+			}
+			int size;
+			try {
+				size = Integer.parseInt(sizeAttr);
+			} catch (NumberFormatException e) {
+				continue;
+			}
+			if (size == 16) {
+				return elements[i].getValue();
+			}
+		}
+		return null;
+	}
+
+	public void finalize() {
+		if (icon != null) {
+			icon.dispose();
+			icon = null;
+		}
 	}
 }

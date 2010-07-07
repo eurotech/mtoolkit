@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal;
 
+import java.io.InputStream;
 import java.util.Dictionary;
 
 import org.tigris.mtoolkit.iagent.Error;
@@ -31,6 +32,8 @@ public class RemoteDPImpl implements RemoteDP {
 	private static MethodSignature UNINSTALL_DP_METHOD = new MethodSignature("uninstallDeploymentPackage", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE, "boolean" },
 			true);
 	private static MethodSignature IS_DP_STALE_METHOD = new MethodSignature("isDeploymentPackageStale", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE }, true);
+	// should not serialize because resource could be big and sending will block the communication
+	private static MethodSignature GET_DP_ICON_METHOD = new MethodSignature("getDeploymentPackageIcon", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE, Dictionary.class.getName() }, false);
 
 	private String symbolicName;
 	private String version;
@@ -164,6 +167,27 @@ public class RemoteDPImpl implements RemoteDP {
 			throw new IAgentException("Unknown response from remote method invocation: " + result,
 				IAgentErrors.ERROR_INTERNAL_ERROR);
 		}
+	}
+
+	public InputStream getIcon() throws IAgentException {
+		if (!GET_DP_ICON_METHOD.isDefined(getDeploymentAdmin())) {
+			return null;
+		}
+		Object res = GET_DP_ICON_METHOD.call(getDeploymentAdmin(), new Object[] { symbolicName, version, null });
+		if (res instanceof Error) {
+			Error err = (Error) res;
+			if (err.getCode() == Error.DEPLOYMENT_UNINSTALLED_CODE) {
+				stale = true;
+				checkState();
+			} else {
+				throw new IAgentException(err);
+			}
+		} else if (res instanceof InputStream) {
+			return (InputStream) res;
+		} else if (res instanceof RemoteObject) {
+			return new RemoteReader((RemoteObject) res);
+		}
+		return null;
 	}
 
 	private RemoteObject getDeploymentAdmin() throws IAgentException {

@@ -37,4 +37,17 @@ public interface RemoteDeploymentAdmin {
 	Object installDeploymentPackage(InputStream in);
 
 	public long getRemoteServiceID();
+
+	/**
+	 * Returns deployment package's icon.
+	 * 
+	 * @param dpName
+	 * @param version
+	 * @param properties
+	 *            additional properties or null
+	 * @return InputStream for getting the icon, null if there is no icon or
+	 *         Error object in case of error
+	 */
+	public Object getDeploymentPackageIcon(String dpName, String version, Dictionary properties);
+
 }

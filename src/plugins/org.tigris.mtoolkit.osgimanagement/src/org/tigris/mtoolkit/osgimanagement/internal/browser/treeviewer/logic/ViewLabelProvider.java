@@ -21,6 +21,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
+import org.tigris.mtoolkit.osgimanagement.IconFetcher;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView.ActionsProviderElement;
@@ -34,6 +35,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServiceProperty
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
@@ -72,6 +74,11 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		if (element instanceof Bundle) {
 			Bundle bundle = (Bundle) element;
 			int state = bundle.getState();
+
+			Image icon = getBundleIcon(bundle);
+			if (icon != null) {
+				return icon;
+			}
 
 			if (state == org.osgi.framework.Bundle.INSTALLED) {
 				if (bundle.getType() != 0) {
@@ -169,4 +176,17 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		super.update(cell);
 	}
 
+	private Image getBundleIcon(Bundle bundle) {
+		Image icon = bundle.getIcon();
+		if (icon != null) {
+			return icon;
+		}
+		String name = null;
+		Framework fw = (Framework) bundle.findFramework();
+		if (fw != null) {
+			name = fw.getName();
+		}
+		IconFetcher.getInstance(name).enqueue(bundle);
+		return null;
+	}
 }

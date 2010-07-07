@@ -731,6 +731,26 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		return System.getProperty(name);
 	}
 
+	public Object getBundleResource(long id, String name, Dictionary properties) {
+		debug("[getBundleResource] id: " + id);
+		if (name == null)
+			throw new IllegalArgumentException("getBundleResource requires non-null name");
+		Bundle bundle = bc.getBundle(id);
+		if (bundle == null) {
+			return new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
+		}
+		URL resource = bundle.getResource(name);
+		if (resource == null) {
+			return null;
+		}
+
+		try {
+			return resource.openStream();
+		} catch (IOException e) {
+			return new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to get resource: " + e.getMessage());
+		}
+	}
+
 	public static int getBundleErrorCode(BundleException e) {
 		int code;
 		try {

@@ -27,6 +27,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
+import org.tigris.mtoolkit.osgimanagement.IconFetcher;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.DPPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.InstallDPAction;
@@ -109,7 +110,8 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 
 	public Image getImage(Model node) {
 		if (node instanceof DeploymentPackage) {
-			return ImageHolder.getImage(DP_ICON_PATH);
+			Image icon = getDPIcon((DeploymentPackage) node);
+			return (icon != null) ? icon : ImageHolder.getImage(DP_ICON_PATH);
 		} else if (node instanceof SimpleNode && 
 						"Deployment Packages".equals(node.getName())) {
 			return ImageHolder.getImage(DP_PACKAGE_PATH);
@@ -133,4 +135,17 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
         job.schedule();
 	}
 
+	private Image getDPIcon(DeploymentPackage dp) {
+		Image icon = dp.getIcon();
+		if (icon != null) {
+			return icon;
+		}
+		String name = null;
+		Framework fw = (Framework) dp.findFramework();
+		if (fw != null) {
+			name = fw.getName();
+		}
+		IconFetcher.getInstance(name).enqueue(dp);
+		return null;
+	}
 }

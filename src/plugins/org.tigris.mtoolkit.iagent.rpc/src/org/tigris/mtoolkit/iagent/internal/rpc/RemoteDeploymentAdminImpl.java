@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -25,6 +28,7 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.tigris.mtoolkit.iagent.Error;
+import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
@@ -277,7 +281,30 @@ public class RemoteDeploymentAdminImpl implements Remote, RemoteDeploymentAdmin 
 		debug("[installDeploymentPackage] deployment package installation successful: " + name + "_" + version);
 		return new String[] { name, version };
 	}
-	
+
+	public Object getDeploymentPackageIcon(String dpName, String version, Dictionary properties) {
+		DeploymentPackage dp = internalGetDeploymentPackage(dpName, version);
+		if (dp == null) {
+			return new Error(Error.DEPLOYMENT_UNINSTALLED_CODE, "Deployment package has been uninstalled");
+		}
+		URL iconUrl;
+		try {
+			Method getIconMethod = DeploymentPackage.class.getMethod("getIcon", null); //$NON-NLS-1$
+			iconUrl = (URL) getIconMethod.invoke(dp, null);
+		} catch (Exception e) {
+			return null;
+		}
+		if (iconUrl == null) {
+			return null;
+		}
+
+		try {
+			return iconUrl.openStream();
+		} catch (IOException e) {
+			return new Error(IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN, "Failed to get icon: " + e.getMessage());
+		}
+	}
+
 	private DeploymentManagerDelegate getDelegate() {
 		DeploymentManagerDelegate delegate = (DeploymentManagerDelegate) delegatesTrack.getService();
 		if (delegate != null)

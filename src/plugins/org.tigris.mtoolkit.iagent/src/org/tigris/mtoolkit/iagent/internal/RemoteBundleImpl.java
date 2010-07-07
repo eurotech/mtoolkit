@@ -41,6 +41,8 @@ public class RemoteBundleImpl implements RemoteBundle {
 	private static MethodSignature GET_BUNDLE_TYPE_METHOD = new MethodSignature("getBundleType", MethodSignature.BID_ARGS, true);
 	private static MethodSignature GET_BUNDLE_HEADER_METHOD = new MethodSignature("getBundleHeader", new String[] { "long", MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE }, true);
 	private static MethodSignature GET_BUNDLE_START_LEVEL_METHOD = new MethodSignature("getBundleStartLevel", new String[] { "long" }, true);
+	// should not serialize because resource could be big and sending will block the communication
+	private static MethodSignature GET_BUNDLE_RESOURCE_METHOD = new MethodSignature("getBundleResource", new String[] { "long", MethodSignature.STRING_TYPE, Dictionary.class.getName() }, false);
 
 	private Long id;
 	private String location;
@@ -365,6 +367,24 @@ public class RemoteBundleImpl implements RemoteBundle {
 		Integer bundleStartLevel = (Integer) GET_BUNDLE_START_LEVEL_METHOD.call(getBundleAdmin(),
 			new Object[] { id });
 		return bundleStartLevel.intValue();
+	}
+
+	public InputStream getResource(String name) throws IAgentException {
+		if (name == null) {
+			throw new IllegalArgumentException();
+		}
+		if (!GET_BUNDLE_RESOURCE_METHOD.isDefined(getBundleAdmin())) {
+			return null;
+		}
+		Object res = GET_BUNDLE_RESOURCE_METHOD.call(getBundleAdmin(), new Object[] { id, name, null });
+		if (res instanceof Error) {
+			checkBundleErrorResult((Error) res);
+		} else if (res instanceof InputStream) {
+			return (InputStream) res;
+		} else if (res instanceof RemoteObject) {
+			return new RemoteReader((RemoteObject) res);
+		}
+		return null;
 	}
 
 }
