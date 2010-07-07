@@ -13,6 +13,9 @@ package org.tigris.mtoolkit.osgimanagement;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 
+/**
+ * @since 6.0
+ */
 public interface IconProvider {
 
 	/**

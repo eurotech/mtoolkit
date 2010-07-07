@@ -253,6 +253,7 @@ public interface RemoteBundle {
 	 * @return InputStream for reading the resource or null if there is no such
 	 *         resource
 	 * @throws IAgentException
+	 * @since 4.0
 	 */
 	public InputStream getResource(String name) throws IAgentException;
 }
