@@ -129,7 +129,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 			// just check if address is correct
 			InetAddress.getByName(ip);
 		} catch (Exception e) {
-			return "Invalid address\n"+e.getMessage();
+			return "Invalid address: " + e.getMessage();
 		}
 		return null;
 	}
