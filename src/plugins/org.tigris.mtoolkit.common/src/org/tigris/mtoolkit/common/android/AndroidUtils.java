@@ -223,7 +223,14 @@ public class AndroidUtils {
 		}
 	}
 
-	private static String getAndroidSdkLocation() {
+	/**
+	 * Returns Android SDK location or null if location is not set in
+	 * preferences.
+	 * 
+	 * @return
+	 * @since 6.0
+	 */
+	public static String getAndroidSdkLocation() {
 		ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
 				"com.android.ide.eclipse.adt");
 		return preferenceStore.getString("com.android.ide.eclipse.adt.sdk");
