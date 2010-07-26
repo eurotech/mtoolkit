@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.installation;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
@@ -47,5 +50,9 @@ public class FrameworkTarget implements InstallationTarget {
 
 	public boolean isMimeTypeSupported(String type) {
 		return true;
+	}
+
+	public IStatus processInstallationItem(InstallationItem item, IProgressMonitor monitor) {
+		return FrameworkProcessor.getDefault().processInstallationItem(item, this, monitor);
 	}
 }

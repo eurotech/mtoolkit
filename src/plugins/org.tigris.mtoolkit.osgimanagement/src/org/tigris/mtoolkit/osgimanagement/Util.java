@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -45,6 +46,14 @@ public class Util {
 
 	public static IStatus newStatus(int severity, String message, Throwable t) {
 		return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
+	}
+	
+	public static void throwException(int severity, String message, Throwable t) throws CoreException {
+        throw newException(severity, message, t);
+	}
+
+	public static CoreException newException(int severity, String message, Throwable t) {
+		return new CoreException(newStatus(severity, message, t));
 	}
 	
 	/**

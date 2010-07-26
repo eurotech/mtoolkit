@@ -309,8 +309,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 		return file;
 	}
-
-
 	
 	public String getName() {
 		return "Bundles processor";
@@ -344,5 +342,14 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 	}
 
+	public InstallationTarget getInstallationTarget(Object target) {
+		if (target instanceof Framework) {
+			return new FrameworkTarget((Framework) target);
+		}
+		return null;
+	}
 
+	public boolean isSupported(Object target) {
+		return (target instanceof Framework);
+	}
 }
