@@ -67,7 +67,18 @@ public interface InstallationItemProcessor {
 	 *            the progress monitor to display current progress
 	 * 
 	 * @return the status of installation
+	 * @deprecated
 	 */
 	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, IProgressMonitor monitor);
+
+	/**
+	 * @since 6.0
+	 */
+	public InstallationTarget getInstallationTarget(Object target);
 	
+	/**
+	 * @since 6.0
+	 */
+	public boolean isSupported(Object target);
+
 }

@@ -47,6 +47,13 @@ public interface InstallationItem extends IAdaptable {
 	public InputStream getInputStream() throws IOException;
 
 	/**
+	 * Returns the location of the item.
+	 * 
+	 * @return the location
+	 */
+	public String getLocation();
+
+	/**
 	 * Returns the MIME type of this item.
 	 * 
 	 * @return the MIME type

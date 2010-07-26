@@ -10,8 +10,13 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
 /**
  * Providers of {@link InstallationItem} should implement this interface. It
@@ -43,6 +48,19 @@ public interface InstallationItemProvider {
 	 *         capable to handle the passed resource
 	 */
 	public InstallationItem getInstallationItem(Object resource);
+
+	/**
+	 * Prepares a group of {@link InstallationItem}s at once. The list of items
+	 * is not filtered in any way, so the implementation must properly select,
+	 * which items to prepare, ignoring unrecognized once.
+	 * 
+	 * @param items
+	 * @param properties
+	 * @param monitor
+	 * @return
+	 * @since 6.0
+	 */
+	public IStatus prepareItems(List/*<InstallationItem>*/items, Map properties, IProgressMonitor monitor);
 
 	/**
 	 * Initializes the provider with given extension registry configuration

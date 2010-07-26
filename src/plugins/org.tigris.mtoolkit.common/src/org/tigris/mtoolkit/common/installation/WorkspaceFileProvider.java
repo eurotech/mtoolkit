@@ -10,14 +10,17 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
-import org.tigris.mtoolkit.common.installation.InstallationItem;
-import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 
 /**
  * Generic implementation of the {@link InstallationItemProvider}, which
@@ -78,6 +81,18 @@ public class WorkspaceFileProvider implements InstallationItemProvider {
 			return (IFile) ((IAdaptable) resource).getAdapter(IFile.class);
 		}
 		return null;
+	}
+
+	public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
+		if (items != null) {
+			for (int i = 0; i < items.size(); i++) {
+				Object item = items.get(i);
+				if (item instanceof WorkspaceFileItem) {
+					((WorkspaceFileItem) item).prepare(monitor, properties);
+				}
+			}
+		}
+		return Status.OK_STATUS;
 	}
 
 }

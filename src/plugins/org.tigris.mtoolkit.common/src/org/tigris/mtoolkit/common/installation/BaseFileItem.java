@@ -26,87 +26,95 @@ import org.tigris.mtoolkit.common.certificates.CertUtils;
 
 public class BaseFileItem implements InstallationItem {
 
-  protected File baseFile;
-  protected String mimeType;
-  protected File preparedFile;
+	protected InstallationItemProvider provider;
+	protected File baseFile;
+	protected String mimeType;
+	protected File preparedFile;
 
-  public BaseFileItem(File file, String mimeType) {
-    this.baseFile = file;
-    this.mimeType = mimeType;
-  }
+	public BaseFileItem(File file, String mimeType) {
+		this.baseFile = file;
+		this.mimeType = mimeType;
+	}
 
-  public InputStream getInputStream() throws IOException {
-    if (preparedFile != null) {
-      return new FileInputStream(preparedFile);
-    }
-    return new FileInputStream(baseFile);
-  }
+	public InputStream getInputStream() throws IOException {
+		if (preparedFile != null) {
+			return new FileInputStream(preparedFile);
+		}
+		return new FileInputStream(baseFile);
+	}
 
-  public String getMimeType() {
-    return mimeType;
-  }
+	public String getLocation() {
+		if (preparedFile != null) {
+			return preparedFile.getAbsolutePath();
+		}
+		return null;
+	}
 
-  public String getName() {
-    return baseFile.getName();
-  }
+	public String getMimeType() {
+		return mimeType;
+	}
 
-  public IStatus prepare(IProgressMonitor monitor, Map properties) {
-    try {
-	if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
-		!AndroidUtils.isConvertedToDex(baseFile)) {
-        File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + getName());
-        convertedFile.getParentFile().mkdirs();
-        if (FileUtils.getFileExtension(baseFile).equals("dp")) {
-          if (!AndroidUtils.isDpConvertedToDex(baseFile)) {
-            AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
-            preparedFile = convertedFile;
-          }
-        } else if (AndroidUtils.isDexCompatible(baseFile) && !AndroidUtils.isConvertedToDex(baseFile)) {
-          AndroidUtils.convertToDex(baseFile, convertedFile, monitor);
-          preparedFile = convertedFile;
-        }
-      }
+	public String getName() {
+		return baseFile.getName();
+	}
 
-      File signedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/signed/" + getName());
-      signedFile.getParentFile().mkdirs();
-      if (signedFile.exists()) {
-        signedFile.delete();
-      }
-      try {
-        File fileToSign = preparedFile != null ? preparedFile : baseFile;
-        if (FileUtils.getFileExtension(baseFile).equals("dp")) {
-          CertUtils.signDp(fileToSign, signedFile, monitor, properties);
-        } else {
-          CertUtils.signJar(fileToSign, signedFile, monitor, properties);
-        }
-      } catch (IOException ioe) {
-         if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
-           signedFile.delete();
-         } else {
-           throw ioe;
-         }
-      }
+	public IStatus prepare(IProgressMonitor monitor, Map properties) {
+		try {
+			if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
+							!AndroidUtils.isConvertedToDex(baseFile)) {
+				File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + getName());
+				convertedFile.getParentFile().mkdirs();
+				if (FileUtils.getFileExtension(baseFile).equals("dp")) {
+					if (!AndroidUtils.isDpConvertedToDex(baseFile)) {
+						AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
+						preparedFile = convertedFile;
+					}
+				} else if (AndroidUtils.isDexCompatible(baseFile) && !AndroidUtils.isConvertedToDex(baseFile)) {
+					AndroidUtils.convertToDex(baseFile, convertedFile, monitor);
+					preparedFile = convertedFile;
+				}
+			}
 
-      if (signedFile.exists()) {
-        if (preparedFile != null) {
-          preparedFile.delete();
-        }
-        preparedFile = signedFile;
-      }
-    } catch (IOException ioe) {
-      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", ioe);
-    }
-    return Status.OK_STATUS;
-  }
+			File signedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/signed/" + getName());
+			signedFile.getParentFile().mkdirs();
+			if (signedFile.exists()) {
+				signedFile.delete();
+			}
+			try {
+				File fileToSign = preparedFile != null ? preparedFile : baseFile;
+				if (FileUtils.getFileExtension(baseFile).equals("dp")) {
+					CertUtils.signDp(fileToSign, signedFile, monitor, properties);
+				} else {
+					CertUtils.signJar(fileToSign, signedFile, monitor, properties);
+				}
+			} catch (IOException ioe) {
+				if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
+					signedFile.delete();
+				} else {
+					throw ioe;
+				}
+			}
 
-  public void dispose() {
-    if (preparedFile != null) {
-      preparedFile.delete();
-      preparedFile = null;
-    }
-  }
+			if (signedFile.exists()) {
+				if (preparedFile != null) {
+					preparedFile.delete();
+				}
+				preparedFile = signedFile;
+			}
+		} catch (IOException ioe) {
+			return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", ioe);
+		}
+		return Status.OK_STATUS;
+	}
 
-  public Object getAdapter(Class adapter) {
-    return null;
-  }
+	public void dispose() {
+		if (preparedFile != null) {
+			preparedFile.delete();
+			preparedFile = null;
+		}
+	}
+
+	public Object getAdapter(Class adapter) {
+		return null;
+	}
 }
