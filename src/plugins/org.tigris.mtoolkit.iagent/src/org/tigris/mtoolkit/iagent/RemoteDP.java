@@ -106,6 +106,7 @@ public interface RemoteDP {
 	 * 
 	 * @return InputStream for reading the icon or null if there is no icon
 	 * @throws IAgentException
+	 * @since 4.0
 	 */
 	public InputStream getIcon() throws IAgentException;
 

@@ -26,6 +26,9 @@ import org.tigris.mtoolkit.common.certificates.CertUtils;
 
 public class BaseFileItem implements InstallationItem {
 
+	/**
+	 * @since 6.0
+	 */
 	protected InstallationItemProvider provider;
 	protected File baseFile;
 	protected String mimeType;

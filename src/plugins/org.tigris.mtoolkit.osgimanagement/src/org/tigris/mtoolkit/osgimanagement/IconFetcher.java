@@ -16,6 +16,9 @@ import java.util.List;
 
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
+/**
+ * @since 6.0
+ */
 public class IconFetcher {
 
 	private static HashMap instances = new HashMap();

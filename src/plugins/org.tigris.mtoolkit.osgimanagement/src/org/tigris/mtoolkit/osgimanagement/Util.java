@@ -48,10 +48,16 @@ public class Util {
 		return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
 	}
 	
+	/**
+	 * @since 6.0
+	 */
 	public static void throwException(int severity, String message, Throwable t) throws CoreException {
         throw newException(severity, message, t);
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public static CoreException newException(int severity, String message, Throwable t) {
 		return new CoreException(newStatus(severity, message, t));
 	}

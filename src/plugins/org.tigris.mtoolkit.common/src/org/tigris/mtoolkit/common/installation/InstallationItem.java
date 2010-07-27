@@ -50,6 +50,7 @@ public interface InstallationItem extends IAdaptable {
 	 * Returns the location of the item.
 	 * 
 	 * @return the location
+	 * @since 6.0
 	 */
 	public String getLocation();
 

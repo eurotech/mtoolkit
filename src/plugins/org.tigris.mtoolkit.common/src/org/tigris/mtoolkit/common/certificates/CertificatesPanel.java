@@ -68,6 +68,9 @@ public class CertificatesPanel {
 		this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style) {
 		// Signing content group
 		signContentGroup = new Group(parent, SWT.NONE);
