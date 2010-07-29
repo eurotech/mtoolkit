@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.utils;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,22 @@ public class ThreadPool {
 
 	private static final int MAX_WORKERS = 5;
 
+	private static ThreadPool instance;
+	private static int clientsCount = 0;
+
+	public static final int OPTION_AGGRESSIVE = 0x00001;
+	public static final int OPTION_NONE = 0;
+	
+	private static Constructor tssConstructor;
+	
+	static {
+		try {
+			tssConstructor = Thread.class.getConstructor(new Class[] { ThreadGroup.class, Runnable.class, String.class, long.class });
+		} catch (Throwable t) {
+			DebugUtils.info(ThreadPool.class, "VM doesn't support controlling the threads stack size", t);
+		}
+	}
+	
 	private volatile boolean running = true;
 	private volatile int workers = 0;
 	private volatile int working = 0;
@@ -31,16 +48,20 @@ public class ThreadPool {
 
 	private int maxWorkers;
 
-	private static ThreadPool instance;
-	private static int clientsCount = 0;
-
-	public static final int OPTION_AGGRESSIVE = 0x00001;
-
-	public static final int OPTION_NONE = 0;
+	private Long threadStackSize = new Long(0);
 
 	public ThreadPool(int maxWorkers, int options) {
 		this.maxWorkers = maxWorkers;
 		this.options = options;
+		
+		String stackSizeOption = System.getProperty("iagent.threads.stackSize");
+		if (stackSizeOption != null) {
+			try {
+				threadStackSize = new Long(stackSizeOption);
+			} catch (NumberFormatException e) {
+				DebugUtils.error(ThreadPool.class, "Thread stack option has invalid value: " + threadStackSize + ". It will be ignored.");
+			}
+		}
 	}
 
 	public void stop() {
@@ -97,23 +118,38 @@ public class ThreadPool {
 			if (workers == (isAggressive ? working + spawned : working) && workers < maxWorkers) {
 				// spawn new worker
 				spawned++;
-				new Worker();
+				Worker worker = new Worker();
+				Thread th = createThread(worker, threadStackSize);
+				worker.start(th);
 			}
 		}
 	}
+	
+	private static Thread createThread(Runnable runnable, Long threadStackSize) {
+		if (tssConstructor != null)
+			try {
+				return (Thread) tssConstructor.newInstance(new Object[] { null, runnable, "Uninitialized mToolkit Worker", threadStackSize });
+			} catch (Throwable t) {
+				DebugUtils.error(ThreadPool.class, "Failed to create thread with specified stack size", t);
+				// ignore the request if failed
+			}
+		return new Thread(runnable);
+	}
 
-	private class Worker extends Thread {
+	private class Worker implements Runnable {
 		private final int workerId;
 		private boolean initialized;
 
 		public Worker() {
-			super();
 			synchronized (lock) {
 				workerId = workers++;
 			}
-			setName("mToolkit Worker #" + workerId);
-			setDaemon(true);
-			start();
+		}
+		
+		public void start(Thread thread) {
+			thread.setName("mToolkit Worker #" + workerId);
+			thread.setDaemon(true);
+			thread.start();
 		}
 
 		public void run() {
