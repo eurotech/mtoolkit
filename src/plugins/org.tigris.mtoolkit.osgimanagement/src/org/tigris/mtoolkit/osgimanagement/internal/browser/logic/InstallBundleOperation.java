@@ -71,7 +71,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			}
 			zis = zip.getInputStream(entry);
 			Manifest mf = new Manifest(zis);
-			symbolicName = (String) mf.getMainAttributes().getValue("Bundle-SymbolicName");
+			symbolicName = getBundleName(mf);
 			version = (String) mf.getMainAttributes().getValue("Bundle-Version");
 
 			// check if already installd
@@ -236,6 +236,16 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			}
 		}
 		return Status.OK_STATUS;
+	}
+	
+	private String getBundleName(Manifest mf) {
+		String symbolicName;
+		symbolicName = (String) mf.getMainAttributes().getValue("Bundle-SymbolicName");
+		int index = symbolicName.indexOf(';');
+		if (index > 0) {
+			symbolicName = symbolicName.substring(0, index);
+		}
+		return symbolicName;
 	}
 
 	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");
