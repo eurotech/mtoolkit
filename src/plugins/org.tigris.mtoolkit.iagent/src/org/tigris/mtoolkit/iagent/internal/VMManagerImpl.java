@@ -40,8 +40,6 @@ public class VMManagerImpl implements VMManager {
 
 	private DeviceConnectorImpl connector;
 
-	private RemoteObject lastKnownRemoteConsole;
-
 	private LightServiceRegistry extensionsRegistry;
 
 	/**
@@ -72,9 +70,6 @@ public class VMManagerImpl implements VMManager {
 		if (os != null) {
 			RemoteObject parser = connection.getRemoteParserService();
 			Utils.callRemoteMethod(parser, Utils.REGISTER_METHOD, new Object[] { os });
-			if (lastKnownRemoteConsole != parser) {
-				lastKnownRemoteConsole = parser;
-			}
 		} else {
 			connection.releaseRemoteParserService();
 		}
