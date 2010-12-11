@@ -53,7 +53,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 		try {
 			Integer port= (Integer) conProperties.get(DeviceConnector.PROP_PMP_PORT);
 			if (port == null) {
-				getPmpPort(connManager);
+				port = getPmpPort(connManager);
 			}
 			if (port != null && port.intValue() == 0)
 				throw new IAgentException("Cannot determine PMP port", IAgentErrors.ERROR_CANNOT_CONNECT);
