@@ -342,6 +342,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public InstallationTarget getInstallationTarget(Object target) {
 		if (target instanceof Framework) {
 			return new FrameworkTarget((Framework) target);
@@ -349,6 +352,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return null;
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public boolean isSupported(Object target) {
 		return (target instanceof Framework);
 	}

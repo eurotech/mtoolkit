@@ -5,13 +5,15 @@
 <title>Installing/Uninstalling Deployment Packages</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link href="book.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="../../mtmtrack.js"></script>
+
 </head>
 
 <body>
 <h1>Installing/Uninstalling Deployment Packages</h1>
 <h2>Installing a Deployment Package</h2>
 <h3>Installing a Deployment Package from the Workspace </h3>
-<p>Using mToolkit you can install directly from within Eclipse the deployment packages you are keeping in the workspace - package might be defined as deployment package project files (<b>.dpp</b> files containing a set of special properties) or might be present as  ready deployment package archives (<b>.dp</b> files). </p>
+<p>Using mToolkit you can install directly from within Eclipse the deployment packages you are keeping in the workspace - package might be defined as deployment package project files  (<b>.dpp</b> files are deployment package descriptions created with the Deployment Package Editor) or might be present as  ready deployment package archives (<b>.dp</b> files). </p>
 <p>To install a deployment package from your Eclipse workspace, in one of the Eclipse navigation views (e.g. Package Explorer) right-click the deployment package project <b>.dpp</b> file node or the <b>.dp</b> file node and select the target  OSGi framework from the <b>Install to</b> menu. If you are installing the deployment package from a project, the project will be built and exported to a <b>.dp</b> archive file. Then, the <b>.dp</b> file will be transferred to the framework and installed. In case you are installing the package by using a ready archive file, the file will be directly deployed on the framework.</p>
 <p>On success, the installed deployment package will appear under the <b>Deployment packages </b> node of the framework-specific tree. </p>
 <h3>Installing a Deployment Package from outside the Workspace</h3>

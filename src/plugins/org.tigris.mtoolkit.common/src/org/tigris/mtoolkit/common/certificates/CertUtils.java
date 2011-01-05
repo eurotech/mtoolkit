@@ -261,6 +261,7 @@ public class CertUtils {
    * @param monitor the progress monitor.
    * @param properties
    * @throws IOException in case of signing error
+   * @since 5.1
    */
   public static void signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
     if (properties == null) {

@@ -46,6 +46,9 @@ public class BaseFileItem implements InstallationItem {
 		return new FileInputStream(baseFile);
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public String getLocation() {
 		if (preparedFile != null) {
 			return preparedFile.getAbsolutePath();

@@ -60,6 +60,9 @@ public class PluginProvider implements InstallationItemProvider {
 		private InstallationItemProvider provider;
 		private PluginExportManager exportManager;
 
+		/**
+		 * @since 6.0
+		 */
 		public PluginItem(IPluginModelBase pluginBase, InstallationItemProvider provider) {
 			this.pluginBase = pluginBase;
 			this.provider = provider;
@@ -83,10 +86,16 @@ public class PluginProvider implements InstallationItemProvider {
 
 		}
 		
+		/**
+		 * @since 6.0
+		 */
 		protected void setExportManager(PluginExportManager exportManager) {
 			this.exportManager = exportManager;
 		}
 		
+		/**
+		 * @since 6.0
+		 */
 		public String getLocation() {
 			if (exportManager != null) {
 				return exportManager.getLocation(pluginBase);
@@ -200,6 +209,9 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 		}
 
+		/**
+		 * @since 6.0
+		 */
 		public IPluginModelBase getPlugin() {
 			return pluginBase;
 		}
@@ -239,6 +251,9 @@ public class PluginProvider implements InstallationItemProvider {
 	public void init(IConfigurationElement element) throws CoreException {
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
 		try {
 			IStatus result = export(items, monitor);

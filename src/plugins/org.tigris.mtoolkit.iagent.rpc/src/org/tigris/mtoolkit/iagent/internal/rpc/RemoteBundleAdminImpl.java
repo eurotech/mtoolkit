@@ -240,6 +240,10 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
 			info("[startBundle] No such bundle: " + error);
 			return error;
+		} catch (Throwable t) {
+			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to start bundle: " + (t.getMessage() != null ? t.getMessage() : t.toString()));
+			info("[startBundle] Bundle cannot be started: " + error, t);
+			return error;
 		}
 		debug("[startBundle] Bundle started successfully");
 		return null;
@@ -266,6 +270,10 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		} catch (IllegalStateException e) {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
 			info("[stopBundle] No such bundle: " + error);
+			return error;
+		} catch (Throwable t) {
+			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to stop bundle: " + (t.getMessage() != null ? t.getMessage() : t.toString()));
+			info("[stopBundle] Unable to stop bundle: " + error, t);
 			return error;
 		}
 		debug("[stopBundle] Successfully stopped");
