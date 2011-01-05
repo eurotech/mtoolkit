@@ -58,7 +58,7 @@ public abstract class DeviceConnector {
 	public static final String TRANSPORT_ID = "transport-id";
 
 	/**
-	 * @since 3.0
+	 * @since 3.1
 	 */
 	public static final String PROP_PMP_PORT = ConnectionManager.PROP_PMP_PORT;
 
