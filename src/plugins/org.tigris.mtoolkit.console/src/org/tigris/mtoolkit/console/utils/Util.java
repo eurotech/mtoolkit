@@ -21,7 +21,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 public class Util {
 
 	public static IStatus handleIAgentException(IAgentException e) {
-		return Util.newStatus(IStatus.ERROR, e.getMessage(), e.getCauseException());
+		return Util.newStatus(IStatus.ERROR, getErrorMessage(e), e.getCauseException());
 	}
 
 	public static IStatus newStatus(String message, IStatus e) {
@@ -30,5 +30,17 @@ public class Util {
 
 	public static IStatus newStatus(int severity, String message, Throwable t) {
 		return new Status(severity, OSGiConsolePlugin.PLUGIN_ID, message, t);
+	}
+
+	private static String getErrorMessage(IAgentException e) {
+		String msg = e.getMessage();
+		if (msg == null) {
+			msg = "Operation failed.";
+			Throwable cause = e.getCauseException();
+			if (cause != null && cause.getMessage() != null) {
+				msg += " " + cause.getMessage(); //$NON-NLS-1$
+			}
+		}
+		return msg;
 	}
 }
