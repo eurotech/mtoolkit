@@ -37,4 +37,4 @@ Import-Package: org.eclipse.jdt.internal.debug.ui.console,
  org.tigris.mtoolkit.iagent,
  org.tigris.mtoolkit.iagent.spi
 DynamicImport-Package: com.prosyst.tools.iagent.ext.config
-Bundle-RequiredExecutionEnvironment: J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
