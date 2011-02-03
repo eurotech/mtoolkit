@@ -40,20 +40,22 @@ public class BaseFileItem implements InstallationItem {
 	}
 
 	public InputStream getInputStream() throws IOException {
-		if (preparedFile != null) {
+		if (preparedFile != null)
 			return new FileInputStream(preparedFile);
-		}
-		return new FileInputStream(baseFile);
+		if (baseFile != null)
+			return new FileInputStream(baseFile);
+		throw new IllegalStateException("Installation item is not initialized properly with the generated artifact location");
 	}
 
 	/**
 	 * @since 6.0
 	 */
 	public String getLocation() {
-		if (preparedFile != null) {
+		if (preparedFile != null)
 			return preparedFile.getAbsolutePath();
-		}
-		return null;
+		if (baseFile != null)
+			return baseFile.getAbsolutePath();
+		throw new IllegalStateException("Installation item wasn't initialized correctly, missing location to base file");
 	}
 
 	public String getMimeType() {

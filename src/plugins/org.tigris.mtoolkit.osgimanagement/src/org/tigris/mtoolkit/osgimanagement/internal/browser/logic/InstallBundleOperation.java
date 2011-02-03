@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -34,9 +33,9 @@ import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class InstallBundleOperation extends RemoteBundleOperation {
@@ -231,6 +230,8 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 	private String getBundleName(Manifest mf) {
 		String symbolicName;
 		symbolicName = (String) mf.getMainAttributes().getValue("Bundle-SymbolicName");
+		if (symbolicName == null)
+			return null;
 		int index = symbolicName.indexOf(';');
 		if (index > 0) {
 			symbolicName = symbolicName.substring(0, index);

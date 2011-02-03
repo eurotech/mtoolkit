@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 /**
  * @since 6.0
@@ -48,17 +49,11 @@ public class InstallationRegistry {
 
 	public List/*<InstallationItem>*/getItems(Object source) {
 		List items = new ArrayList();
-		Iterator providersIterator = getProviders().iterator();
 		boolean hasCapableProvider = false;
-		while (providersIterator.hasNext()) {
-			ProviderElement providerElement = (ProviderElement) providersIterator.next();
-			try {
-				providerElement.getProvider().init(providerElement.getConfigurationElement());
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-			if (providerElement.getProvider().isCapable(source)) {
-				items.add(providerElement.getProvider().getInstallationItem(source));
+		for (Iterator it = getProviders().iterator(); it.hasNext();) {
+			InstallationItemProvider provider = (InstallationItemProvider) it.next();
+			if (provider.isCapable(source)) {
+				items.add(provider.getInstallationItem(source));
 				hasCapableProvider = true;
 			}
 		}
@@ -66,6 +61,16 @@ public class InstallationRegistry {
 			return null;
 		}
 		return items;
+	}
+
+	public InstallationItem getItem(Object source, String mimeType) {
+		List items = getItems(source);
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			InstallationItem item = (InstallationItem) it.next();
+			if (item.getMimeType().equals(mimeType))
+				return item;
+		}
+		return null;
 	}
 
 	public List/*<InstallationItemProviders>*/getProviders() {
@@ -119,23 +124,21 @@ public class InstallationRegistry {
 				continue;
 			}
 			String clazz = elements[i].getAttribute("class");
-			if (clazz == null) {
-				continue;
-			}
-
-			ProviderElement providerElement = new ProviderElement(elements[i]);
-			if (providers.contains(providerElement))
+			if (clazz == null)
 				continue;
 
 			try {
 				Object provider = elements[i].createExecutableExtension("class");
 
 				if (provider instanceof InstallationItemProvider) {
-					providerElement.setProvider(((InstallationItemProvider) provider));
-					providers.add(providerElement);
+					((InstallationItemProvider) provider).init(elements[i]);
+					providers.add(provider);
 				}
 			} catch (CoreException e) {
-				e.printStackTrace();
+				UtilitiesPlugin.error("Failed to initialize installation provider from "
+								+ elements[i].getNamespaceIdentifier()
+								+ " namespace",
+					e);
 			}
 		}
 	}
@@ -199,37 +202,6 @@ public class InstallationRegistry {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-
-	public class ProviderElement {
-		private String extension;
-		private String clazz;
-		private InstallationItemProvider provider;
-		private IConfigurationElement confElement;
-
-		public ProviderElement(IConfigurationElement configurationElement) {
-			confElement = configurationElement;
-			extension = configurationElement.getAttribute("extension");
-			clazz = configurationElement.getAttribute("class");
-		}
-
-		public void setProvider(InstallationItemProvider provider) {
-			this.provider = provider;
-		}
-
-		public IConfigurationElement getConfigurationElement() {
-			return confElement;
-		}
-
-		public InstallationItemProvider getProvider() {
-			return provider;
-		}
-
-		public boolean equals(ProviderElement otherElement) {
-			if (this.clazz.equals(otherElement.clazz) && this.extension.equals(otherElement.extension))
-				return true;
-			return false;
 		}
 	}
 }

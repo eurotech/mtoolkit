@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
@@ -31,7 +30,6 @@ import org.eclipse.ui.services.IServiceLocator;
 import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
-import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.common.installation.InstallationRegistry;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 
@@ -181,36 +179,5 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
 
 	public void initialize(IServiceLocator serviceLocator) {
 		selectionService = ((ISelectionService) serviceLocator.getService(ISelectionService.class));
-	}
-
-	public class ProviderElement {
-		private String extension;
-		private String clazz;
-		private InstallationItemProvider provider;
-		private IConfigurationElement confElement;
-
-		public ProviderElement(IConfigurationElement configurationElement) {
-			confElement = configurationElement;
-			extension = configurationElement.getAttribute("extension");
-			clazz = configurationElement.getAttribute("class");
-		}
-
-		public void setProvider(InstallationItemProvider provider) {
-			this.provider = provider;
-		}
-
-		public IConfigurationElement getConfigurationElement() {
-			return confElement;
-		}
-
-		public InstallationItemProvider getProvider() {
-			return provider;
-		}
-
-		public boolean equals(ProviderElement otherElement) {
-			if (this.clazz.equals(otherElement.clazz) && this.extension.equals(otherElement.extension))
-				return true;
-			return false;
-		}
 	}
 }

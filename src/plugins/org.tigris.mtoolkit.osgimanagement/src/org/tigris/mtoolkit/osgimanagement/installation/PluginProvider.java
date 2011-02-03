@@ -290,6 +290,10 @@ public class PluginProvider implements InstallationItemProvider {
     				pluginsToBeExported.add(((PluginItem) item).getPlugin());
     			}
     		}
+    		
+    		if (pluginsToBeExported.isEmpty())
+    			// shortcut if we don't have anything for export
+    			return Status.OK_STATUS;
 
             final IPluginExporter exporter = PluginExporter.getInstance();
             if (exporter == null) {
@@ -324,11 +328,6 @@ public class PluginProvider implements InstallationItemProvider {
 	private PluginExportManager initExportManager(IPluginExporter exporter, List pluginsToBeExported) {
         PluginExportManager exportManager = PluginExportManager.create(exporter);
 
-        // find out which bundles should be exported
-		//        pluginsToBeExported = getBundlesToBeExported();
-        if (pluginsToBeExported == null || pluginsToBeExported.size() == 0) {
-            return null;
-        }
         for (int i = 0; i < pluginsToBeExported.size(); i++) {
             IPluginModelBase iPluginModelBase = (IPluginModelBase) pluginsToBeExported.get(i);
             exportManager.addBundle(iPluginModelBase);
@@ -376,115 +375,4 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 		return Status.OK_STATUS;
 	}
-		
-//		public IStatus prepare(IProgressMonitor monitor, Map properties) {
-//			if (pluginBase == null) {
-//				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Can not parse the manifest file for the plugin");
-//			}
-//			
-//			BundleDescription descr = pluginBase.getBundleDescription();
-//			String name = null;
-//			String version = "1.0.0";
-//			if (descr != null) {
-//				Object ver = descr.getVersion();
-//				if (ver != null) {
-//					version = ver.toString();
-//				}
-//				name = descr.getSymbolicName();
-//			} else {
-//				name = pluginBase.toString();
-//			}
-//			
-//			monitor.beginTask("Exporting plugin: " + name, 1);
-//
-//			final boolean[] saveResult = new boolean[1];
-//			saveResult[0] = true;
-//			Display.getDefault().syncExec(new Runnable() {
-//				public void run() {
-//					saveResult[0] = PlatformUI.getWorkbench().saveAllEditors(true);
-//				}
-//			});
-//			if (!saveResult[0]) {
-//				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Could not prepare plugin. Saving of modified files was cancelled.");
-//			}
-//
-//			FeatureExportInfo exportInfo = new FeatureExportInfo();
-//			exportInfo.toDirectory = true;
-//			exportInfo.useJarFormat = true;
-//			exportInfo.exportSource = false;
-//			exportInfo.destinationDirectory = FrameworkPlugin.getDefault().getStateLocation() + "";
-//			exportInfo.zipFileName = null;
-//			exportInfo.qualifier = null;
-//
-//			IPluginExporter exporter = PluginExporter.getInstance();
-//			
-////			PluginExportManager exportManager =   
-//
-//			if (exporter == null) {
-//				monitor.done();
-//				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not export plugin: "
-//						+ name);
-//			}
-//
-//			if (version.endsWith("qualifier")) {
-//				exportInfo.qualifier = "qualifier";//exporter.getQualifier();
-////				version = version.replaceAll("qualifier", exportInfo.qualifier);
-//			}
-//
-//			exportInfo.items = new Object[] { pluginBase };
-//			exportInfo.signingInfo = null;
-//			exportInfo.jnlpInfo = null;
-//			exportInfo.targets = null;
-//
-//			final String path = exportInfo.destinationDirectory + "/plugins/" + name + "_" + version + ".jar";
-//			IStatus result = exporter.syncExportPlugins(exportInfo, monitor);
-//			File file = new File(path);
-//			if (result.isOK() && file.exists()) {
-//				try {
-//					if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
-//							!AndroidUtils.isConvertedToDex(file)) {
-//						File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/" + file.getName());
-//						convertedFile.getParentFile().mkdirs();
-//						AndroidUtils.convertToDex(file, convertedFile, monitor);
-//						file.delete();
-//						file = convertedFile;
-//					}
-//
-//					File signedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/signed/" + file.getName());
-//					signedFile.getParentFile().mkdirs();
-//					if (signedFile.exists()) {
-//						signedFile.delete();
-//					}
-//					try {
-//						CertUtils.signJar(file, signedFile, monitor, properties);
-//					} catch (IOException ioe) {
-//						if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
-//							signedFile.delete();
-//						} else {
-//							throw ioe;
-//						}
-//					}
-//					if (signedFile.exists()) {
-//						file.delete();
-//						file = signedFile;
-//					}
-//				} catch (IOException ioe) {
-//					monitor.done();
-//					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not prepare plugin: "
-//							+ name, ioe);
-//				}
-//				monitor.done();
-//				return Status.OK_STATUS;
-//			}
-//
-//			monitor.done();
-//			Throwable t = exporter.getResult().getException();
-//			if (t != null) {
-//				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), t.getMessage(), t);
-//			} else {
-//				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not export plugin: "
-//						+ name);
-//			}
-//		}
-			
 }
