@@ -52,6 +52,9 @@ public class FrameworkTarget implements InstallationTarget {
 		return true;
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public IStatus processInstallationItem(InstallationItem item, IProgressMonitor monitor) {
 		return FrameworkProcessor.getDefault().processInstallationItem(item, this, monitor);
 	}

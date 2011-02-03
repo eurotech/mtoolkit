@@ -83,6 +83,9 @@ public class WorkspaceFileProvider implements InstallationItemProvider {
 		return null;
 	}
 
+	/**
+	 * @since 6.0
+	 */
 	public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
 		if (items != null) {
 			for (int i = 0; i < items.size(); i++) {
