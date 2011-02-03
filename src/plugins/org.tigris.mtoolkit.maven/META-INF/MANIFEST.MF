@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Maven Integration Core Plugin
+Bundle-SymbolicName: org.tigris.mtoolkit.maven;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.prosyst.tools.maven.internal.MavenCorePlugin
+Bundle-Vendor: ProSyst Software GmbH
+Require-Bundle: org.eclipse.ui;bundle-version="3.5.0",
+ org.eclipse.core.runtime;bundle-version="3.5.0",
+ org.tigris.mtoolkit.common;bundle-version="6.0.0",
+ org.eclipse.core.resources;bundle-version="3.5.0"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Import-Package: org.apache.maven.model,
+ org.apache.maven.project,
+ org.maven.ide.eclipse,
+ org.maven.ide.eclipse.embedder,
+ org.maven.ide.eclipse.project
+Export-Package: com.prosyst.tools.maven;version="1.0.0",
+ org.tigris.mtoolkit.maven.launching;version="1.0.0"
