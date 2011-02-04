@@ -73,6 +73,7 @@
 	<!-- Steps to do after setup but before starting the build proper -->
 	<!-- ===================================================================== -->
 	<target name="postSetup">
+		<antcall target="prepareDependencies"/>
 		<antcall target="prepareSources" />
 		<antcall target="getBaseComponents" />
 	</target>
@@ -175,10 +176,15 @@
 			<fileset dir="${buildDirectory}">
 				<!-- archive file format -->
 				<include name="${buildLabel}/**/*"/>
-				<!-- p2 repository -->
-				<include name="${p2.repository.folder}/**/*"/>
 			</fileset>
 		</copy>
+		<p2.mirror destination="file:/${distDirectory}/p2-repository">
+			<source>
+				<repository location="file:/${buildDirectory}/${p2.repository.folder}/"/>
+			</source>
+			<iu id="org.tigris.mtoolkit.sdk.feature.group"/>
+			<iu id="org.tigris.mtoolkit.maven.sdk.feature.group"/>
+		</p2.mirror>
 		<!-- move the build zip to the top level dist/ folder -->
 		<move todir="${distDirectory}">
 			<fileset dir="${distDirectory}/${buildLabel}" includes="*.zip"/>
@@ -204,4 +210,15 @@
 		<echo message="You must specify a target when invoking this file" />
 	</target>
 
+	<target name="prepareDependencies" description="Extract dependencies in externals">
+		<!-- TODO: Add ability to stop fetching the depedencies each time -->
+		
+		<!-- Fetch Externals -->
+		<delete dir="${base.ext}"/>
+		<mkdir dir="${base.ext}"/>
+		<unzip dest="${base.ext}">
+			<filelist dir="${extDirectory}" files="${externals}"/>
+		</unzip>
+	</target>
+	
 </project>

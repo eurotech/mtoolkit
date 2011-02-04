@@ -3,10 +3,16 @@
    <description name="mToolkit Update Site">
 	  mToolkit Update Site
    </description>
-   <feature url="features/org.tigris.mtoolkit_3.0.0.qualifier.jar" id="org.tigris.mtoolkit" version="3.0.0.qualifier">
+   <feature url="features/org.tigris.mtoolkit_3.2.0.qualifier.jar" id="org.tigris.mtoolkit" version="3.2.0.qualifier">
       <category name="mtoolkit"/>
    </feature>
-   <feature url="features/org.tigris.mtoolkit.sdk_3.0.0.qualifier.jar" id="org.tigris.mtoolkit.sdk" version="3.0.0.qualifier">
+   <feature url="features/org.tigris.mtoolkit.sdk_3.2.0.qualifier.jar" id="org.tigris.mtoolkit.sdk" version="3.2.0.qualifier">
+      <category name="mtoolkit"/>
+   </feature>
+   <feature url="features/org.tigris.mtoolkit.maven_1.0.0.qualifier.jar" id="org.tigris.mtoolkit.maven" version="1.0.0.qualifier">
+      <category name="mtoolkit"/>
+   </feature>
+   <feature url="features/org.tigris.mtoolkit.maven.sdk_1.0.0.qualifier.jar" id="org.tigris.mtoolkit.maven.sdk" version="1.0.0.qualifier">
       <category name="mtoolkit"/>
    </feature>
    <category-def name="mtoolkit" label="mToolkit"/>

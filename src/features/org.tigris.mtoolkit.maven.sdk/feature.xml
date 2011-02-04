@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.tigris.mtoolkit.maven.sdk"
+      label="%featureName"
+      version="1.0.0.qualifier"
+      provider-name="%featureProvider">
+
+   <description>
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license>
+      %license
+   </license>
+
+   <includes
+         id="org.tigris.mtoolkit.maven"
+         version="0.0.0"/>
+
+   <includes
+         id="org.tigris.mtoolkit.maven.source"
+         version="0.0.0"/>
+</feature>

@@ -2,4 +2,62 @@
 	<target name="buildAll" if="eclipse.pdebuild.scripts">
 		<ant antfile="build.xml" dir="${eclipse.pdebuild.scripts}"/>
 	</target>
+
+	<target name="fetchm2eclipse">
+		<property file="${builder}/build.properties"/>
+		<delete dir="${extDirectory}/m2eclipse"/>
+		<p2.mirror destination="file:/${extDirectory}/m2eclipse">
+			<source>
+				<repository location="${m2eclipse.repo}"/>
+				<repository location="${eclipse.repo}"/>
+				<repository location="http://download.eclipse.org/tools/gef/updates/releases/"/>
+				<repository location="http://download.eclipse.org/modeling/emf/updates/releases/"/>
+				<repository location="http://download.eclipse.org/tools/ve/updates/1.5.0/"/>
+				<repository location="http://download.eclipse.org/webtools/repository/helios/"/>
+			</source>
+			
+			<iu id="org.maven.ide.eclipse.feature.feature.group"/>
+			
+			<!--iu id="org.eclipse.jem.util"/-->
+			<iu id="javax.xml"/>
+			<iu id="org.apache.xerces"/>
+			<iu id="org.apache.xml.resolver"/>
+			<iu id="org.apache.xml.serializer"/>
+			<iu id="org.eclipse.draw2d"/>
+			<iu id="org.eclipse.emf.common"/>
+			<iu id="org.eclipse.emf.ecore"/>
+			<iu id="org.eclipse.emf.ecore.edit"/>
+			<iu id="org.eclipse.emf.ecore.xmi"/>
+			<iu id="org.eclipse.emf.edit"/>
+			<iu id="org.eclipse.wst.common.core"/>
+			<iu id="org.eclipse.wst.common.emf"/>
+			<iu id="org.eclipse.wst.common.emfworkbench.integration"/>
+			<iu id="org.eclipse.wst.common.environment"/>
+			<iu id="org.eclipse.wst.common.frameworks"/>
+			<iu id="org.eclipse.wst.common.project.facet.core"/>
+			<iu id="org.eclipse.wst.common.ui"/>
+			<iu id="org.eclipse.wst.common.uriresolver"/>
+			<iu id="org.eclipse.wst.sse.core"/>
+			<iu id="org.eclipse.wst.sse.ui"/>
+			<iu id="org.eclipse.wst.validation"/>
+			<iu id="org.eclipse.wst.xml.core"/>
+			<iu id="org.eclipse.wst.xml.ui"/>
+			<iu id="org.eclipse.wst.xsd.core"/>
+			<iu id="org.eclipse.xsd"/>
+			<iu id="org.eclipse.zest.core"/>
+			<iu id="org.eclipse.zest.layouts"/>
+			
+			
+			<slicingOptions followStrict="true"/>
+		</p2.mirror>
+		<p2.repo2runnable>
+			<repository location="file:/${extDirectory}/m2eclipse/exploded"/>
+			<source>
+				<repository location="file:/${extDirectory}/m2eclipse"/>
+			</source>
+		</p2.repo2runnable>
+		<zip destfile="${extDirectory}/externals-m2eclipse.zip">
+			<fileset dir="${extDirectory}/m2eclipse/exploded" includes="features/**, plugins/**"/>
+		</zip>
+	</target>
 </project>
