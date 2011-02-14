@@ -229,7 +229,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			if (sMonitor.isCanceled())
 				return false;
 
-			int modelTotal = FrameworkConnectorFactory.CONNECT_PROGRESS_ADDITIONAL / modelProviders.size();
+			int modelTotal = 0;
+			if (modelProviders.size() > 0) {
+				modelTotal = FrameworkConnectorFactory.CONNECT_PROGRESS_ADDITIONAL / modelProviders.size();
+			}
 
 			for (int i = 0; i < modelProviders.size(); i++) {
 				SubMonitor monitor = sMonitor.newChild(modelTotal);
