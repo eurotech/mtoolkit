@@ -73,7 +73,11 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 		
 		public InputStream getInputStream() throws IOException {
-			return new FileInputStream(getLocation());
+			String location = getLocation();
+			if (location == null) {
+				throw new IOException("Installation item is not prepared.");
+			}
+			return new FileInputStream(location);
 		}
 		
 		public IStatus prepare(IProgressMonitor monitor, Map properties) {
@@ -108,11 +112,12 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 
 		public void dispose() {
-			File file = new File(getLocation());
-			if (file != null) {
-				file.delete();
-				file = null;
-		    }
+			String location = getLocation();
+			if (location == null) {
+				return;
+			}
+			File file = new File(location);
+			file.delete();
 		}
 
 		/**
