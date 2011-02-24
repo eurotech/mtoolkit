@@ -35,6 +35,7 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.natures.PDE;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
@@ -172,7 +173,7 @@ public class PluginProvider implements InstallationItemProvider {
 			// ask user which dependencies to install
 			if (dependencies.size() > 0) {
 				final boolean result[] = new boolean[1];
-				Display.getDefault().syncExec(new Runnable() {
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						DependenciesSelectionDialog dependenciesDialog = new DependenciesSelectionDialog(Display
 								.getDefault().getActiveShell(), dependencies);

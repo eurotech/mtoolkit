@@ -26,8 +26,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -113,7 +113,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				}
 				final Object rBundles[] = rBundle;
 				final int selected[] = new int[] { 0 };
-				Display.getDefault().syncExec(new Runnable() {
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						TitleAreaDialog updateDialog = new TitleAreaDialog(FrameWorkView.getShell()) {
 							private Button updateButton;

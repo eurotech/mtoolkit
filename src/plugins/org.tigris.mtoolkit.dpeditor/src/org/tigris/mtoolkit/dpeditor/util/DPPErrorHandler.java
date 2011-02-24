@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.PluginUtilities;
 
 /**
@@ -146,7 +147,7 @@ public class DPPErrorHandler {
 	 *            otherwise does not shows the dialog
 	 */
 	public static void processInfo(final String text, final boolean showDialog) {
-		Display.getDefault().syncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				Shell shell = getAnyShell();
 				if (shell != null && showDialog) {
@@ -189,7 +190,7 @@ public class DPPErrorHandler {
 	 *            does not shows the dialog
 	 */
 	public static void processError(final String message, final boolean showDialog) {
-		Display.getDefault().syncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				Shell shell = getAnyShell();
 				if (shell != null && showDialog) {
@@ -203,7 +204,7 @@ public class DPPErrorHandler {
 	}
 
 	public static void processError(final String message, final String details) {
-		Display.getDefault().syncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				Shell shell = getAnyShell();
 				if (shell != null) {
@@ -227,7 +228,7 @@ public class DPPErrorHandler {
 	 *            otherwise does not shows the dialog
 	 */
 	public static void processWarning(final String text, final boolean showDialog) {
-		Display.getDefault().syncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				Shell shell = getAnyShell();
 				if (shell != null && showDialog) {
@@ -286,7 +287,7 @@ public class DPPErrorHandler {
 		final boolean result[] = new boolean[1];
 		result[0] = false;
 
-		Display.getDefault().syncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				Shell shell = getAnyShell();
 				if (shell != null && showDialog) {
@@ -326,12 +327,8 @@ public class DPPErrorHandler {
 	 * @return the active display shell
 	 */
 	public static Shell getShell() {
-		Display display = Display.getCurrent();
-		if (display == null) {
-			display = Display.getDefault();
-		}
-
-		if (display == null) {
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (display.isDisposed()) {
 			return null;
 		}
 		final Display displ = display;
@@ -354,10 +351,7 @@ public class DPPErrorHandler {
 	 * @return the active shell
 	 */
 	public static Shell getAnyShell() {
-		Display display = Display.getCurrent();
-		if (display == null) {
-			display = Display.getDefault();
-		}
+		Display display = PlatformUI.getWorkbench().getDisplay();
 		Shell shell = display.getActiveShell();
 		if (shell == null) {
 			Shell shells[] = display.getShells();
@@ -374,7 +368,7 @@ public class DPPErrorHandler {
 	 *            the message of the error dialog
 	 */
 	public static void showErrorTableDialog(final String message) {
-		Display.getDefault().asyncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				MessageDialog.openError(DPPErrorHandler.getAnyShell(), ResourceManager.getString(ERROR_MSG, ""), message);
 			}

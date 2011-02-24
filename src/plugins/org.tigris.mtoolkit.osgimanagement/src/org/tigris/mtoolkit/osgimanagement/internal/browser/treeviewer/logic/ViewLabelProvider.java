@@ -19,7 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.IconFetcher;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
@@ -165,9 +165,9 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 
 		if (element instanceof ServiceProperty) {
 			TextStyle style = new TextStyle();
-			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+			style.foreground = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
 			styles.add(new StyleRange(0, text.indexOf(":"), style.foreground, style.background));
-			style.foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
+			style.foreground = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
 			styles.add(new StyleRange(text.indexOf(":") + 1, text.length(), style.foreground, style.background));
 		}
 		cell.setText(text);

@@ -149,7 +149,7 @@ class SSLConfirmationDialog extends TitleAreaDialog {
 		this.explanations = problemDescriptions;
 		this.technicalDetails = technicalMessage;
 		this.certChain = chain;
-		resolveJob = new ResolveHostnameJob(host, Display.getCurrent());
+		resolveJob = new ResolveHostnameJob(host, PlatformUI.getWorkbench().getDisplay());
 		resolveJob.schedule();
 	}
 

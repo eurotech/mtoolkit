@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.IconFetcher;
@@ -123,12 +124,14 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 	    Job job = new Job("Update state") {
             protected IStatus run(IProgressMonitor monitor) {
                 final boolean isSupported = DPModelProvider.isDpSupported(connector);
-                Display.getDefault().asyncExec(new Runnable() {
-                    
-                    public void run() {
-                        dpTB.setEnabled(isSupported);
-                    }
-                });
+                Display display = PlatformUI.getWorkbench().getDisplay();
+                if (!display.isDisposed()) {
+                	display.asyncExec(new Runnable() {
+	                    public void run() {
+	                        dpTB.setEnabled(isSupported);
+	                    }
+	                });
+                }
                 return Status.OK_STATUS;
             }
         };

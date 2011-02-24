@@ -156,7 +156,7 @@ public class ConnectFrameworkJob extends Job {
 	}
 
 	protected void handleConnectionFailure(final IAgentException e) {
-		final Display display = Display.getDefault();
+		final Display display = PlatformUI.getWorkbench().getDisplay();
 		display.asyncExec(new Runnable() {
 			public void run() {
 				String[] buttons = { Messages.close_button_label, Messages.get_iagent_button_label };

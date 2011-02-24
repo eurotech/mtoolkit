@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
@@ -32,7 +33,11 @@ public class UninstallDPAction extends SelectionProviderAction implements IState
 	// run method
 	public void run() {
 		final int result[] = new int[1];
-		Display.getDefault().syncExec(new Runnable() {
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (display.isDisposed()) {
+			return;
+		}
+		display.syncExec(new Runnable() {
 			public void run() {
 				int count = getStructuredSelection().size();
 				String msg = "Are you sure you want to uninstall ";

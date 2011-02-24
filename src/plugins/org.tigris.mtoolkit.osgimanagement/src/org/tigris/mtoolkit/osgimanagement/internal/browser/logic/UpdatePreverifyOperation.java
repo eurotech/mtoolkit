@@ -14,6 +14,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleException;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -54,7 +55,7 @@ public class UpdatePreverifyOperation extends RemoteBundleOperation {
 			correctNullElements(versions, "unknown");
 			if (nameDiff) {
 				final int confirm[] = new int[SWT.CANCEL];
-				Display.getDefault().syncExec(new Runnable() {
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						String message = "The new and old versions of the bundle have different symbolic names:\n"
 								+ "Existing: " + symbNames[1] + " (" + versions[1] + ")\n"
@@ -69,7 +70,7 @@ public class UpdatePreverifyOperation extends RemoteBundleOperation {
 				}
 			} else if (versionsDiff) {
 				final int confirm[] = new int[SWT.CANCEL];
-				Display.getDefault().syncExec(new Runnable() {
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 					public void run() {
 						String message = "The new and old bundles have different versions:\n"
 								+ "Existing: " + versions[1] + "\n"

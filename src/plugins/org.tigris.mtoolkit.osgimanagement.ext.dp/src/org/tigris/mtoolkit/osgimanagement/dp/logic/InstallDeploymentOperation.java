@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -102,7 +103,7 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 	}
 
 	private boolean askUserToUninstallRemotePackage(final String symbolicName) {
-		Display display = Display.getDefault();
+		Display display = PlatformUI.getWorkbench().getDisplay();
 		final int[] result = new int[1];
 		display.syncExec(new Runnable() {
 			public void run() {

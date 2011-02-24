@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
@@ -144,17 +145,19 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
        Job job = new Job("Update state") {
             protected IStatus run(IProgressMonitor monitor) {
                 final boolean enabled = ApplicationModelProvider.isApplicationsSupported(connector);
-                Display.getDefault().asyncExec(new Runnable() {
-                    
-                    public void run() {
-                        boolean enabledState = false;
-                        if (enabled) {
-                            applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
-                            enabledState  = applicationPropertiesAction.isEnabled();
-                        }
-                        applicationTB.setEnabled(enabledState);
-                    }
-                });
+                Display display = PlatformUI.getWorkbench().getDisplay();
+                if (!display.isDisposed()) {
+	                display.asyncExec(new Runnable() {
+	                    public void run() {
+	                        boolean enabledState = false;
+	                        if (enabled) {
+	                            applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
+	                            enabledState  = applicationPropertiesAction.isEnabled();
+	                        }
+	                        applicationTB.setEnabled(enabledState);
+	                    }
+	                });
+                }
                 return Status.OK_STATUS;
             }
         };

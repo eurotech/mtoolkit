@@ -938,15 +938,18 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			System.out.println("Filtered: lastRun: " + lastRunSelectedElementsCount + "; now: " + treeRoot.getSelectedChildren() + "(" + allSelectedElements.length + "); revealed: " + lastRunIdx);
 			this.lastRunSelectedElementsCount = treeRoot.getSelectedChildren();
 			final int lastRunRevealedCount = lastRunIdx;
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					BusyIndicator.showWhile(null, new Runnable() {
-						public void run() {
-							refreshTree(allSelectedElements, unrevealedElements, lastRunRevealedCount);
-						}
-					});
-				}
-			});
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			if (!display.isDisposed()) {
+				display.syncExec(new Runnable() {
+					public void run() {
+						BusyIndicator.showWhile(null, new Runnable() {
+							public void run() {
+								refreshTree(allSelectedElements, unrevealedElements, lastRunRevealedCount);
+							}
+						});
+					}
+				});
+			}
 			return Status.OK_STATUS;
 		}
 		

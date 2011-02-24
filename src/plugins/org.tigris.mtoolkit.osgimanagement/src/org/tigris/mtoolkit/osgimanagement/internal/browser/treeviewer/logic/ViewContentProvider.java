@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
@@ -26,7 +27,6 @@ public class ViewContentProvider implements ITreeContentProvider, ContentChangeL
 
 	private TreeViewer viewer;
 	private boolean canUpdate;
-	private Display display;
 
 	public ViewContentProvider() {
 		canUpdate = true;
@@ -75,47 +75,47 @@ public class ViewContentProvider implements ITreeContentProvider, ContentChangeL
 
 	public void elementAdded(final ContentChangeEvent event) {
 		if (canUpdate) {
-			display = Display.getCurrent();
-			if (display == null)
-				display = Display.getDefault();
-			display.asyncExec(new Runnable() {
-				public void run() {
-					if (event.getTarget().getParent() != null) {
-						viewer.add(event.getTarget().getParent(), event.getTarget());
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			if (!display.isDisposed()) {
+				display.asyncExec(new Runnable() {
+					public void run() {
+						if (event.getTarget().getParent() != null) {
+							viewer.add(event.getTarget().getParent(), event.getTarget());
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 
 	public void elementChanged(final ContentChangeEvent event) {
 		if (canUpdate) {
-			display = Display.getCurrent();
-			if (display == null)
-				display = Display.getDefault();
-			display.asyncExec(new Runnable() {
-				public void run() {
-					viewer.refresh(event.getTarget());
-					if (event.getTarget() instanceof FrameworkImpl) {
-						FrameworkImpl fw = (FrameworkImpl) event.getTarget();
-						ConsoleManager.setName(fw.getConnector(), fw.getName());
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			if (!display.isDisposed()) {
+				display.asyncExec(new Runnable() {
+					public void run() {
+						viewer.refresh(event.getTarget());
+						if (event.getTarget() instanceof FrameworkImpl) {
+							FrameworkImpl fw = (FrameworkImpl) event.getTarget();
+							ConsoleManager.setName(fw.getConnector(), fw.getName());
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	}
 
 	public void elementRemoved(ContentChangeEvent event) {
 		if (canUpdate) {
 			final Model target = event.getTarget();
-			display = Display.getCurrent();
-			if (display == null)
-				display = Display.getDefault();
-			display.asyncExec(new Runnable() {
-				public void run() {
-					viewer.remove(target);
-				}
-			});
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			if (!display.isDisposed()) {
+				display.asyncExec(new Runnable() {
+					public void run() {
+						viewer.remove(target);
+					}
+				});
+			}
 		}
 	}
 }

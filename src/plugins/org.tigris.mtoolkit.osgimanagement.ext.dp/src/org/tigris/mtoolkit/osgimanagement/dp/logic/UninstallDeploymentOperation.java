@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -56,7 +57,7 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
 	}
 
 	private boolean askUserToForceUninstallation(final IStatus status) {
-		Display display = Display.getDefault();
+		Display display = PlatformUI.getWorkbench().getDisplay();
 		final int[] result = new int[1];
 		display.syncExec(new Runnable() {
 			public void run() {

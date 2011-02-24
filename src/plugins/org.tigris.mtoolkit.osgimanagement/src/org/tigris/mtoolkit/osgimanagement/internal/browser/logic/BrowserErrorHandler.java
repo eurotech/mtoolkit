@@ -11,14 +11,12 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
 import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -44,17 +42,20 @@ public class BrowserErrorHandler {
 
 	public static void processError(final String message, boolean showDialog) {
 		if (showDialog) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					shell = getShell();
-					if (shell != null) {
-						if (!shell.isDisposed()) {
-							MessageDialog.openError(shell, Messages.standard_error_title, message);
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			if (!display.isDisposed()) {
+				display.asyncExec(new Runnable() {
+					public void run() {
+						shell = getShell();
+						if (shell != null) {
+							if (!shell.isDisposed()) {
+								MessageDialog.openError(shell, Messages.standard_error_title, message);
+							}
+							manageShell(shell);
 						}
-						manageShell(shell);
 					}
-				}
-			});
+				});
+			}
 		}
 		dumpToLog(IStatus.ERROR, message, null);
 	}
@@ -123,21 +124,24 @@ public class BrowserErrorHandler {
 					}
 				}
 				final String trueMessage = info;
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						shell = getShell();
-						if (shell != null) {
-							if (!shell.isDisposed()) {
-								PluginUtilities.showErrorDialog(shell,
-										Messages.standard_error_title,
-										trueMessage,
-										reason[0],
-										t);
+				Display disp = PlatformUI.getWorkbench().getDisplay();
+				if (!disp.isDisposed()) {
+					disp.asyncExec(new Runnable() {
+						public void run() {
+							shell = getShell();
+							if (shell != null) {
+								if (!shell.isDisposed()) {
+									PluginUtilities.showErrorDialog(shell,
+											Messages.standard_error_title,
+											trueMessage,
+											reason[0],
+											t);
+								}
+								manageShell(shell);
 							}
-							manageShell(shell);
 						}
-					}
-				});
+					});
+				}
 			} else {
 				processError(info, display);
 			}
@@ -152,17 +156,20 @@ public class BrowserErrorHandler {
 
 	public static void processWarning(final String info, boolean display) {
 		if (display) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					shell = getShell();
-					if (shell != null) {
-						if (!shell.isDisposed()) {
-							PluginUtilities.showWarningDialog(shell, Messages.standard_error_title, info, null);
+			Display disp = PlatformUI.getWorkbench().getDisplay();
+			if (!disp.isDisposed()) {
+				disp.asyncExec(new Runnable() {
+					public void run() {
+						shell = getShell();
+						if (shell != null) {
+							if (!shell.isDisposed()) {
+								PluginUtilities.showWarningDialog(shell, Messages.standard_error_title, info, null);
+							}
+							manageShell(shell);
 						}
-						manageShell(shell);
 					}
-				}
-			});
+				});
+			}
 		}
 
 		dumpToLog(IStatus.WARNING, info, null);
@@ -184,20 +191,23 @@ public class BrowserErrorHandler {
 					info = Messages.get(String.valueOf(errorCode).replace('-', '_'));
 				}
 				final String trueMessage = info;
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						shell = getShell();
-						if (shell != null) {
-							if (!shell.isDisposed()) {
-								PluginUtilities.showWarningDialog(shell,
-										Messages.standard_error_title,
-										trueMessage,
-										reason);
+				Display disp = PlatformUI.getWorkbench().getDisplay();
+				if (!disp.isDisposed()) {
+					disp.asyncExec(new Runnable() {
+						public void run() {
+							shell = getShell();
+							if (shell != null) {
+								if (!shell.isDisposed()) {
+									PluginUtilities.showWarningDialog(shell,
+											Messages.standard_error_title,
+											trueMessage,
+											reason);
+								}
+								manageShell(shell);
 							}
-							manageShell(shell);
 						}
-					}
-				});
+					});
+				}
 			}
 		}
 
@@ -213,17 +223,20 @@ public class BrowserErrorHandler {
 	}
 
 	public static void showInfoDialog(final String text) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				shell = getShell();
-				if (shell != null) {
-					if (!shell.isDisposed()) {
-						MessageDialog.openInformation(shell, Messages.standard_info_title, text);
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					shell = getShell();
+					if (shell != null) {
+						if (!shell.isDisposed()) {
+							MessageDialog.openInformation(shell, Messages.standard_info_title, text);
+						}
+						manageShell(shell);
 					}
-					manageShell(shell);
 				}
-			}
-		});
+			});
+		}
 	}
 
 	public static void processInfo(final String text, boolean display) {
@@ -252,11 +265,8 @@ public class BrowserErrorHandler {
 
 	// Get active shell
 	public static Shell getShell() {
-		Display display = Display.getCurrent();
-		if (display == null)
-			display = Display.getDefault();
-
-		if (display == null) {
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (display.isDisposed()) {
 			return null;
 		}
 		final Display displ = display;

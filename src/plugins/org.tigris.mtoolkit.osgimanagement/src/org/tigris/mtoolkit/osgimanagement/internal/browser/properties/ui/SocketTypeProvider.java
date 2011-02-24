@@ -15,10 +15,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
@@ -69,14 +69,14 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 					validateJob = new Job("Validate address") {
 						protected IStatus run(IProgressMonitor monitor) {
 							final String ip[] = new String[1];
-							Display.getDefault().syncExec(new Runnable() {
+							PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 								public void run() {
 									ip[0] = getTransportID();
 								}
 							});
 							final String result = validate(ip[0]);
 							if (validateJob == this) {
-								Display.getDefault().syncExec(new Runnable() {
+								PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 									public void run() {
 										SocketTypeProvider.this.validator.setValidState(result);
 									}

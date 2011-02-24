@@ -24,6 +24,7 @@ import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.pde.internal.ui.PDEPlugin;
 import org.eclipse.pde.internal.ui.PDEPluginImages;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.tigris.mtoolkit.common.ReflectionUtils.InvocationException;
 
@@ -78,9 +79,7 @@ public class PluginExporter_35 extends BasePluginExporter implements IPluginExpo
 			if (errors) {
 				final File logLocation = new File(info.destinationDirectory, "logs.zip"); //$NON-NLS-1$
 				if (logLocation.exists()) {
-					Display display = Display.getCurrent();
-					if (display == null)
-						display = Display.getDefault();
+					Display display = PlatformUI.getWorkbench().getDisplay();
 					display.syncExec(new Runnable() {
 						public void run() {
 							ExportErrorDialog dialog = new ExportErrorDialog("Problem during export", logLocation); //$NON-NLS-1$

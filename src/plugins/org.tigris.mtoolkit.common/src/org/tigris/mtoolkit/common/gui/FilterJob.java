@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * @since 6.0
@@ -20,14 +21,17 @@ public class FilterJob extends Job {
 	}
 
 	protected IStatus run(IProgressMonitor monitor) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				if (viewer.getControl().isDisposed()) {
-					return;
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					if (viewer.getControl().isDisposed()) {
+						return;
+					}
+					viewer.refresh();
 				}
-				viewer.refresh();
-			}
-		});
+			});
+		}
 		return Status.OK_STATUS;
 	}
 

@@ -23,10 +23,11 @@ import org.eclipse.debug.core.model.IStreamMonitor;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.ui.console.IConsole;
 import org.eclipse.debug.ui.console.IConsoleHyperlink;
-import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.console.IOConsole;
@@ -136,11 +137,15 @@ public class RemoteConsole extends IOConsole implements IConsole {
 	
 	public void disconnect() {
 		DeviceConnector.removeDeviceConnectionListener(listener);
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				setName(computeName());
-			}
-		});
+
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					setName(computeName());
+				}
+			});
+		}
 		if (reader != null)
 			reader.dispose();
 		if (output != null) {

@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -110,7 +110,7 @@ public class DeploymentPackage extends Model implements IconProvider {
 		if (iconData == null || iconData.height > 16 || iconData.width > 16) {
 			return null;
 		}
-		icon = new Image(Display.getDefault(), iconData);
+		icon = new Image(PlatformUI.getWorkbench().getDisplay(), iconData);
 		return icon;
 	}
 

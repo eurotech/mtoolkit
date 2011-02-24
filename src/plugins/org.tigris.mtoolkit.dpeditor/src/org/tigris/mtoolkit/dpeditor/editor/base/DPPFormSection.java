@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.dpeditor.editor.forms.FormSection;
 import org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedListener;
@@ -228,11 +229,14 @@ public abstract class DPPFormSection extends FormSection implements
 	 *            the message
 	 */
 	public static void showWarningTableDialog(final String message) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				MessageDialog.openWarning(DPPErrorHandler.getAnyShell(), WARNING_MSG, message);
-			}
-		});
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					MessageDialog.openWarning(DPPErrorHandler.getAnyShell(), WARNING_MSG, message);
+				}
+			});
+		}
 	}
 
 	/**
@@ -243,11 +247,14 @@ public abstract class DPPFormSection extends FormSection implements
 	 *            the message
 	 */
 	public static void showErrorTableDialog(final String message) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				MessageDialog.openError(DPPErrorHandler.getAnyShell(), ERROR_MSG, message);
-			}
-		});
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					MessageDialog.openError(DPPErrorHandler.getAnyShell(), ERROR_MSG, message);
+				}
+			});
+		}
 	}
 
 	/**
@@ -259,10 +266,13 @@ public abstract class DPPFormSection extends FormSection implements
 	 *            the message
 	 */
 	public static void syncShowErrorTableDialog(final String message) {
-		Display.getDefault().syncExec(new Runnable() {
-			public void run() {
-				MessageDialog.openError(DPPErrorHandler.getAnyShell(), ERROR_MSG, message);
-			}
-		});
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.syncExec(new Runnable() {
+				public void run() {
+					MessageDialog.openError(DPPErrorHandler.getAnyShell(), ERROR_MSG, message);
+				}
+			});
+		}
 	}
 }

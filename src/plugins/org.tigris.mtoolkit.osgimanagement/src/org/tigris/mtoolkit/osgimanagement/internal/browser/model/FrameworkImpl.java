@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchAdapter;
@@ -83,8 +84,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public Vector servicesViewVector;
 
 	private Model bundles;
-
-	private Display display;
 
 	// public IProgressMonitor monitor;
 	private boolean refreshing = false;
@@ -780,9 +779,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	private void updateContextMenuStates() {
-		display = Display.getCurrent();
-		if (display == null)
-			display = Display.getDefault();
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (display.isDisposed()) {
+			return;
+		}
 		display.asyncExec(new Runnable() {
 			public void run() {
 				FrameWorkView.updateContextMenuStates();

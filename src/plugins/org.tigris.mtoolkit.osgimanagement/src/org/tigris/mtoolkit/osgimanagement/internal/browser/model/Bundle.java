@@ -22,7 +22,7 @@ import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleException;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -267,7 +267,7 @@ public class Bundle extends Model implements IconProvider {
 		default:
 			return null;
 		}
-		Image baseIcon = new Image(Display.getDefault(), iconData);
+		Image baseIcon = new Image(PlatformUI.getWorkbench().getDisplay(), iconData);
 		icon = new DecorationOverlayIcon(baseIcon, overlay, IDecoration.TOP_RIGHT).createImage();
 		baseIcon.dispose();
 		return icon;

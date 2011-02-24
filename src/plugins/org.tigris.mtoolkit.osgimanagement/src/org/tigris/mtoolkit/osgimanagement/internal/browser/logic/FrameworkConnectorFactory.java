@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -80,7 +80,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 	public static void connectFramework(final DeviceConnector connector, String frameworkName) {
 		// wrap the connector
-		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, Display.getDefault());
+		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, PlatformUI.getWorkbench().getDisplay());
 		Dictionary connProps = fConnector.getProperties();
 		Boolean temporary = (Boolean) connProps.get("framework-connection-temporary");
 		if (temporary != null && temporary.booleanValue())

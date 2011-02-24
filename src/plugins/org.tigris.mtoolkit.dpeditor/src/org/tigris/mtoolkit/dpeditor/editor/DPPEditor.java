@@ -167,7 +167,7 @@ public class DPPEditor extends DPPMultiPageEditor implements
 	 */
 	public void init(final IEditorSite site, final IEditorInput input) throws PartInitException {
 		super.init(site, input);
-		Display.getDefault().asyncExec(new Runnable() {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				try {
 					init0(site, input);
@@ -1066,11 +1066,14 @@ public class DPPEditor extends DPPMultiPageEditor implements
 	 *            the message
 	 */
 	public static void showErrorDialog(final String message) {
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run() {
-				MessageDialog.openError(DPPErrorHandler.getAnyShell(), ResourceManager.getString(ERROR_MSG, ""), message);
-			}
-		});
+		Display display = PlatformUI.getWorkbench().getDisplay();
+		if (!display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					MessageDialog.openError(DPPErrorHandler.getAnyShell(), ResourceManager.getString(ERROR_MSG, ""), message);
+				}
+			});
+		}
 	}
 
 	/*

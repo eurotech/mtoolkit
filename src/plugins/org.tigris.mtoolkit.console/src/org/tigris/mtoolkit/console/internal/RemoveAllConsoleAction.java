@@ -15,6 +15,7 @@ import org.eclipse.debug.internal.ui.IInternalDebugUIConstants;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
@@ -72,11 +73,14 @@ public class RemoveAllConsoleAction extends Action implements IConsoleListener {
 	public void consolesRemoved(IConsole[] consoles) {
 		for (int i = 0; i < consoles.length; i++) {
 			if (consoles[i] instanceof RemoteConsole) {
-				Display.getDefault().syncExec(new Runnable() {
-					public void run() {
-						updateState();
-					}
-				});
+				Display display = PlatformUI.getWorkbench().getDisplay();
+				if (!display.isDisposed()) {
+					display.syncExec(new Runnable() {
+						public void run() {
+							updateState();
+						}
+					});
+				}
 				break;
 			}
 		}
