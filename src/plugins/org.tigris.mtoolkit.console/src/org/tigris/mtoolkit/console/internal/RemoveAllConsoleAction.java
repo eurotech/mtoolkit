@@ -21,16 +21,6 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
 
 public class RemoveAllConsoleAction extends Action implements IConsoleListener {
-
-	private static RemoveAllConsoleAction instance;
-	
-	public static RemoveAllConsoleAction getSingleton() {
-		if (instance == null) {
-			instance = new RemoveAllConsoleAction();
-			ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(instance);
-		}
-		return instance;
-	}
 	
 	public RemoveAllConsoleAction() {
 		super("Remove All Disconnected");
@@ -39,9 +29,11 @@ public class RemoveAllConsoleAction extends Action implements IConsoleListener {
 		setDisabledImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_DLCL_REMOVE_ALL));
 		setHoverImageDescriptor(DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_LCL_REMOVE_ALL));
 		
+		ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(this);
+
 		updateState();
 	}
-	
+
 	public void run() {
 		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
 		for (int i = 0; i < consoles.length; i++) {
@@ -75,7 +67,7 @@ public class RemoveAllConsoleAction extends Action implements IConsoleListener {
 			if (consoles[i] instanceof RemoteConsole) {
 				Display display = PlatformUI.getWorkbench().getDisplay();
 				if (!display.isDisposed()) {
-					display.syncExec(new Runnable() {
+					display.asyncExec(new Runnable() {
 						public void run() {
 							updateState();
 						}
@@ -85,5 +77,9 @@ public class RemoveAllConsoleAction extends Action implements IConsoleListener {
 			}
 		}
 	}
-	
+
+	public void dispose() {
+		ConsolePlugin.getDefault().getConsoleManager().removeConsoleListener(this);
+	}
+
 }

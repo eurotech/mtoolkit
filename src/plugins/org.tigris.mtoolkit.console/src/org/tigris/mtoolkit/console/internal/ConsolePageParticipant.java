@@ -32,6 +32,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant, IPropert
 
 	public void dispose() {
 		this.console.removePropertyChangeListener(this);
+		removeAllAction.dispose();
 	}
 
 	public void init(IPageBookViewPage page, IConsole console) {
@@ -41,7 +42,7 @@ public class ConsolePageParticipant implements IConsolePageParticipant, IPropert
 		this.console.addPropertyChangeListener(this);
 
 		removeAction = new RemoveConsoleAction(this.console);
-		removeAllAction = RemoveAllConsoleAction.getSingleton();
+		removeAllAction = new RemoveAllConsoleAction();
 
 		configureToolBar(page.getSite().getActionBars().getToolBarManager());
 	}
