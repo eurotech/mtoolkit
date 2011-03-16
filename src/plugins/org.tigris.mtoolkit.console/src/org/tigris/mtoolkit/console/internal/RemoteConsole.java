@@ -161,7 +161,11 @@ public class RemoteConsole extends IOConsole implements IConsole {
 			}
 		}
 		firePropertyChange(this, P_DISCONNECTED, Boolean.FALSE, Boolean.TRUE);
-		super.dispose();
+
+		// Do not call dispose here because console remains in the view (disconnected).
+		// Some IOConsole operations run in jobs and if the the console is disposed, 
+		// they may not be scheduled. E.g. making console read only may not be executed
+		// when the console is disposed. The console will be disposed when it is removed.
 	}
 	
 	public boolean isDisconnected() {
