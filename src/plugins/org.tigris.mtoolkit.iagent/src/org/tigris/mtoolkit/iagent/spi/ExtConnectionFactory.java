@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.iagent.spi;
 
 import java.util.Dictionary;
 
+import org.tigris.mtoolkit.iagent.IAProgressMonitor;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
@@ -42,10 +43,11 @@ public interface ExtConnectionFactory {
 	 * @param transport
 	 * @param connProperties
 	 * @param connManager
+	 * @param monitor
 	 * @throws IAgentException
 	 *             if connection cannot be established
 	 */
 	public AbstractConnection createConnection(Transport transport, Dictionary connProperties,
-			ConnectionManager connManager) throws IAgentException;
+			ConnectionManager connManager, IAProgressMonitor monitor) throws IAgentException;
 
 }

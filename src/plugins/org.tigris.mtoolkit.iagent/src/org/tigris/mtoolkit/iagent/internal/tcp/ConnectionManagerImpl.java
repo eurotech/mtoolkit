@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.tigris.mtoolkit.iagent.IAProgressMonitor;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
@@ -49,6 +50,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 	}
 
 	public AbstractConnection createConnection(int type) throws IAgentException {
+		return createConnection(type, null);
+	}
+
+	public AbstractConnection createConnection(int type, IAProgressMonitor monitor) throws IAgentException {
 		debug("[createConnection] >>> type: " + type);
 		AbstractConnection connection = null;
 		AbstractConnection staleConnection = null;
@@ -99,7 +104,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 						info("[createConnection] Unknown connection type passed: " + type);
 						throw new IllegalArgumentException("Unknown connection type passed: " + type);
 					}
-					connection = factory.createConnection(transport, conProperties, this);
+					connection = factory.createConnection(transport, conProperties, this, monitor);
 				}
 				connections.put(key, connection);
 			}

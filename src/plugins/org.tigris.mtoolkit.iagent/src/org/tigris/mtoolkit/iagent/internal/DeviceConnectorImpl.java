@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal;
 
-import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.iagent.IAProgressMonitor;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.ServiceManager;
@@ -44,7 +44,6 @@ import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.transport.Transport;
-import org.tigris.mtoolkit.iagent.transport.TransportsHub;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 /**
@@ -76,41 +75,13 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 	/**
 	 * Creates new DeviceConnector with specified transport object
 	 * 
+	 * @param transport
 	 * @param aConManager
+	 * @param monitor
+	 *            progress monitor. Can be null.
 	 * @throws IAgentException
 	 */
-	// TODO: remove this method. It is remained for backward compatibility.
-	public DeviceConnectorImpl(Dictionary props) throws IAgentException {
-		debug("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
-		if (props == null)
-			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
-		this.connectionProperties = props;
-
-		String targetIP = (String) props.get(DeviceConnector.KEY_DEVICE_IP);
-		if (targetIP == null)
-			throw new IllegalArgumentException("Connection properties hashtable does not contain device IP value with key DeviceConnector.KEY_DEVICE_IP!");
-		Transport transport;
-		try {
-			transport = TransportsHub.openTransport("socket", targetIP);
-			setTransportProps(transport);
-		} catch (IOException e) {
-			throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
-		}
-		if (transport == null) {
-			throw new IAgentException("Unable to find compatible transport provider.", IAgentErrors.ERROR_CANNOT_CONNECT);
-		}
-		connectionManager = new ConnectionManagerImpl(transport, props);
-		connectionManager.addConnectionListener(this);
-		connect(props);
-	}
-
-	/**
-	 * Creates new DeviceConnector with specified transport object
-	 * 
-	 * @param aConManager
-	 * @throws IAgentException
-	 */
-	public DeviceConnectorImpl(Transport transport, Dictionary props) throws IAgentException {
+	public DeviceConnectorImpl(Transport transport, Dictionary props, IAProgressMonitor monitor) throws IAgentException {
 		debug("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
 		if (props == null)
 			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
@@ -119,7 +90,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		
 		connectionManager = new ConnectionManagerImpl(transport, props);
 		connectionManager.addConnectionListener(this);
-		connect(props);
+		connect(props, monitor);
 	}
 
 	public void connectionChanged(ConnectionEvent event) {
@@ -144,14 +115,14 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		}
 	}
 
-	private void connect(Dictionary props) throws IAgentException {
+	private void connect(Dictionary props, IAProgressMonitor monitor) throws IAgentException {
 		Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate");
 		if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
 			StringBuffer errCause = new StringBuffer();
 			// Trying controller connections
 			try {
 				debug("[connect] Trying to connect to device which support MBSA");
-				connect0(ConnectionManager.MBSA_CONNECTION);
+				connect0(ConnectionManager.MBSA_CONNECTION, monitor);
 				return;
 			} catch (IAgentException e) {
 				debug("[connect] Failed: " + e);
@@ -160,9 +131,10 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			// Trying ext controller connections
 			int[] extControllerTypes = connectionManager.getExtControllerConnectionTypes();
 			for (int i = 0; i < extControllerTypes.length; i++) {
+				checkCancel(monitor);
 				try {
 					debug("[connect] Trying to connect to controller of type: " + extControllerTypes[i]);
-					connect0(extControllerTypes[i]);
+					connect0(extControllerTypes[i], monitor);
 					return;
 				} catch (IAgentException e) {
 					debug("[connect] Failed: " + e);
@@ -170,27 +142,34 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				}
 			}
 
+			checkCancel(monitor);
 			IAgentException e = new IAgentException(errCause.toString(), IAgentErrors.ERROR_CANNOT_CONNECT);
 			debug("[connect] Unable to create controller connection");
 			throw new IAgentException("Unable to create controller connection", IAgentErrors.ERROR_CANNOT_CONNECT, e);
 		} else { // connect directly to PMP
 			debug("[connect] Connect directly to PMP");
-			connect0(ConnectionManager.PMP_CONNECTION);
+			connect0(ConnectionManager.PMP_CONNECTION, monitor);
 		}
 	}
 
-	private void connect0(int connectionType) throws IAgentException {
+	private void connect0(int connectionType, IAProgressMonitor monitor) throws IAgentException {
 		debug("[connect] >>> connectionType: " + connectionType);
 		AbstractConnection connection = connectionManager.getActiveConnection(connectionType);
 		if (connection == null) {
 			debug("[connect] No active connection with type: " + connectionType + ". Create new...");
-			connection = connectionManager.createConnection(connectionType);
+			connection = connectionManager.createConnection(connectionType, monitor);
 			if (connection == null) {
 				info("[connect] Failed to create connection of type: " + connectionType);
 				throw new IAgentException("Unable to create connection", IAgentErrors.ERROR_CANNOT_CONNECT);
 			}
 		}
 		debug("[connect] connection: " + connection);
+	}
+
+	private void checkCancel(IAProgressMonitor monitor) throws IAgentException {
+		if (monitor != null && monitor.isCanceled()) {
+	    	throw new IAgentException("Operation canceled", IAgentErrors.OPERATION_CANCELED);
+	    }
 	}
 
 	public void closeConnection() throws IAgentException {

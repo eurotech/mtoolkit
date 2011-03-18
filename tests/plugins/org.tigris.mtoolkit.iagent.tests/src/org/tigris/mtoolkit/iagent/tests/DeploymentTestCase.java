@@ -41,7 +41,7 @@ public class DeploymentTestCase extends TestCase {
 		Hashtable props = new Hashtable();
 		props.put(DeviceConnector.KEY_DEVICE_IP, "127.0.0.1");
 		props.put("framework-connection-immediate", Boolean.FALSE);
-		connector = DeviceConnector.openClientConnection(DeviceConnector.TYPE_TCP, props);
+		connector = DeviceConnector.connect("socket", "127.0.0.1", props, null);
 		// use the fact that the same class implements both the connector and
 		// its spi
 		connectorSpi = (DeviceConnectorSpi) connector;

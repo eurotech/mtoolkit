@@ -93,58 +93,41 @@ public abstract class DeviceConnector {
 	 * Provides DeviceConnector connected to specified remote OSGi framework
 	 * over client connection.
 	 * 
-	 * @param aConnetionType
-	 *            specifies the type of the connection
+	 * @param transport
+	 *            specifies the transport of this connection
 	 * @param aConProps
 	 *            the properties needed to establish connection. At least it
 	 *            must contain the host property. They must be mapped with
 	 *            specified keys - {@link DeviceConnector#KEY_DEVICE_IP}. The
 	 *            value for the host must be String.
+	 * @param monitor
+	 *            progress monitor. Can be null.
 	 * @return DeviceConnector object which is connected to the specified remote
 	 *         OSGi framework
 	 * @throws IAgentException
 	 *             thrown if connection could not be established
 	 */
-	public final static DeviceConnector openClientConnection(int aConnetionType, Dictionary aConProps)
-					throws IAgentException {
-		if (factories != null) {
-			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] aConnetionType: " + aConnetionType);
-			DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(aConnetionType));
-			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] factory: " + factory);
-			if (factory != null) {
-				DeviceConnector connector = factory.createClientConnection(aConProps);
-				fireConnectionEvent(CONNECTED, connector);
-				return connector;
-			}
-		}
-		throw new IAgentException("No available factory for connection type: " + aConnetionType,
-			IAgentErrors.ERROR_INTERNAL_ERROR);
-	}
-	
-	public final static DeviceConnector connect(Transport transport, Dictionary aConProps) throws IAgentException {
-		// TODO: get proper connectionType for this transport
-		int aConnetionType = 0;
-		if (factories != null) {
-			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] aConnetionType: " + aConnetionType);
-			DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(aConnetionType));
-			DebugUtils.debug(DeviceConnector.class, "[openClientConnection] factory: " + factory);
-			if (factory != null) {
-				DeviceConnector connector = factory.createClientConnection(transport, aConProps);
-				fireConnectionEvent(CONNECTED, connector);
-				return connector;
-			}
-		}
-		throw new IAgentException("No available factory for connection type: " + aConnetionType,
-			IAgentErrors.ERROR_INTERNAL_ERROR);
+	public final static DeviceConnector openClientConnection(Transport transport, Dictionary aConProps,
+			IAProgressMonitor monitor) throws IAgentException {
+		DeviceConnectorFactory factory = getConnectorFactory(transport);
+		DeviceConnector connector = factory.createClientConnection(transport, aConProps, monitor);
+		fireConnectionEvent(CONNECTED, connector);
+		return connector;
 	}
 
-	public final static DeviceConnector connect(String transportType, String id, Dictionary aConProps) throws IAgentException {
-		try {
+	public final static DeviceConnector connect(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
+			throws IAgentException {
+		return openClientConnection(transport, aConProps, monitor);
+	}
+
+	public final static DeviceConnector connect(String transportType, String id, Dictionary aConProps,
+			IAProgressMonitor monitor) throws IAgentException {
+	try {
 			Transport transport = TransportsHub.openTransport(transportType, id);
 			if (transport == null) {
 				throw new IAgentException("Unable to find compatible transport provider.", IAgentErrors.ERROR_CANNOT_CONNECT);
 			}
-			return connect(transport, aConProps);
+			return connect(transport, aConProps, monitor);
 		} catch (IOException e) {
 			throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
 		}
@@ -156,8 +139,8 @@ public abstract class DeviceConnector {
 	 * framework is accepted. After connection acceptance it returns
 	 * DeviceConnector associated to the remote OSGi framework.
 	 * 
-	 * @param aConnetionType
-	 *            the type of the connection which should be used as a transport
+	 * @param transport
+	 *            specifies the transport of this connection
 	 * @param aConProps
 	 *            connection properties containing the details of the connection
 	 *            which should be established (port, connection acceptance
@@ -167,20 +150,29 @@ public abstract class DeviceConnector {
 	 *            Integer object. If passed the timeout property must be mapped
 	 *            to {@link DeviceConnector#KEY_TIMEOUT} and the value also
 	 *            should be an Integer object.
+	 * @param monitor
+	 *            progress monitor. Can be null.
 	 * @return DeviceConnector associated with the accepted client connection
 	 * @throws IAgentException
 	 *             thrown when some general error occurs or if specified timeout
 	 *             is reached before any client acceptance
 	 */
-	public final static DeviceConnector openServerConnection(int aConnetionType, Dictionary aConProps)
-					throws IAgentException {
+	public final static DeviceConnector openServerConnection(Transport transport, Dictionary aConProps,
+			IAProgressMonitor monitor) throws IAgentException {
+		DeviceConnectorFactory factory = getConnectorFactory(transport);
+		return factory.createServerConnection(transport, aConProps, monitor);
+	}
+
+	private static DeviceConnectorFactory getConnectorFactory(Transport transport) throws IAgentException {
+		int conType = DeviceConnector.TYPE_TCP;
+		// TODO: get proper connectionType for this transport
 		if (factories != null) {
-			DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(aConnetionType));
+			DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(conType));
 			if (factory != null) {
-				return factory.createServerConnection(aConProps);
+				return factory;
 			}
 		}
-		throw new IAgentException("No available factory for connection type: " + aConnetionType,
+		throw new IAgentException("No available factory for transport type: " + conType,
 			IAgentErrors.ERROR_INTERNAL_ERROR);
 	}
 

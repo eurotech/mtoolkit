@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
+import org.tigris.mtoolkit.iagent.IAProgressMonitor;
 import org.tigris.mtoolkit.iagent.IAgentException;
 
 /**
@@ -48,6 +49,23 @@ public interface ConnectionManager {
 	 * @throws {@link IllegalArgumentException} if the type passed in is unknown
 	 */
 	public AbstractConnection createConnection(int type) throws IAgentException;
+
+	/**
+	 * Create new connection of given type. If the connection is unable to be
+	 * created, exception will be thrown. The method don't return null in any
+	 * case. In case of unknown type, {@link IllegalArgumentException} will be
+	 * thrown.
+	 * 
+	 * @param type
+	 *            the type of the connection.
+	 * @param monitor
+	 *            progress monitor. Can be null.
+	 * @return AbstractConnection object. The client should upcast it to the
+	 *         proper type
+	 * @throws IAgentException
+	 * @throws {@link IllegalArgumentException} if the type passed in is unknown
+	 */
+	public AbstractConnection createConnection(int type, IAProgressMonitor monitor) throws IAgentException;
 
 	/**
 	 * Close all active connections

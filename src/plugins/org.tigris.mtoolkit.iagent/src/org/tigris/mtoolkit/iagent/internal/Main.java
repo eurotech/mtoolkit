@@ -173,14 +173,14 @@ public class Main {
 	private static DeviceConnector connectVM(String ip) throws IAgentException {
 		Hashtable props = new Hashtable();
 		props.put("framework-connection-ip", ip);
-		return DeviceConnector.connect("socket", ip, props);
+		return DeviceConnector.connect("socket", ip, props, null);
 	}
 
 	private static DeviceConnector connectVM(String ip, boolean immediate) throws IAgentException {
 		Hashtable props = new Hashtable();
 		props.put("framework-connection-ip", ip);
 		props.put("framework-connection-immediate", Boolean.valueOf(immediate));
-		return DeviceConnector.connect("socket", ip, props);
+		return DeviceConnector.connect("socket", ip, props, null);
 	}
 	
 	private static void usage() {

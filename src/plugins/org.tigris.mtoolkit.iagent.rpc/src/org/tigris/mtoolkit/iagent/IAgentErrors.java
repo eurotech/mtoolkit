@@ -72,7 +72,9 @@ public class IAgentErrors {
 	public static final int GENERAL_ERROR = -1;
 
 	public static final int UNSUPPORTED_OPERATION = -2;
-	
+
+	public static final int OPERATION_CANCELED = -3;
+
 	/**
 	 * Code indicating that general error occured in VM Manager<br>
 	 * 
