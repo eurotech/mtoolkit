@@ -1,6 +1,7 @@
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -29,7 +30,12 @@ public class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 			return bundle;
 		} catch (BundleException e) {
 			int code = RemoteBundleAdminImpl.getBundleErrorCode(e);
-			Error error = new Error(code, "Failed to install bundle: " + e.getMessage());
+			String msg = "Failed to install bundle: ";
+			if (e.getCause() instanceof FileNotFoundException) {
+				msg += "Probably bundle file path is too long: ";
+			}
+			msg += e.getMessage();
+			Error error = new Error(code, msg);
 			return error;
 		}
 	}
