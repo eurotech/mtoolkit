@@ -85,17 +85,24 @@ public class Util {
 
 	public static Framework addFramework(DeviceConnector connector, String name, IProgressMonitor monitor)
 			throws CoreException {
+		FrameworkImpl fw = null;
+		boolean success = false;
 		try {
-			FrameworkImpl fw = new FrameworkImpl(name, true);
-			FrameWorkView.getTreeRoot().addElement(fw);
+			fw = new FrameworkImpl(name, true);
 			if (!connector.getVMManager().isVMActive()) {
 				String message = Messages.connection_failed + " " + Messages.rcp_bundle_missing_message; //$NON-NLS-1$
 				throw newException(IStatus.ERROR, message, null);
 			}
+			FrameWorkView.getTreeRoot().addElement(fw);
 			fw.connect(connector, SubMonitor.convert(monitor));
+			success = true;
 			return fw;
 		} catch (IAgentException e) {
 			throw newException(IStatus.ERROR, Messages.connection_failed, e);
+		} finally {
+			if (!success && fw != null) {
+				FrameWorkView.getTreeRoot().removeElement(fw);
+			}
 		}
 	}
 
