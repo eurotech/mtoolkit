@@ -12,12 +12,11 @@ package org.tigris.mtoolkit.osgimanagement;
 
 import java.io.File;
 import java.util.Dictionary;
-import java.util.Hashtable;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.SWT;
@@ -28,6 +27,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
@@ -73,47 +73,30 @@ public class Util {
 	public static CoreException newException(int severity, String message, Throwable t) {
 		return new CoreException(newStatus(severity, message, t));
 	}
-	
+
 	/**
 	 * @since 6.0
 	 */
-	public static Framework addFramework(DeviceConnector connector) {
-		Hashtable frameWorkMap = new Hashtable();
-		FrameworkImpl fws[] = FrameWorkView.getFrameworks();
-		if (fws != null) {
-			for (int i = 0; i < fws.length; i++) {
-				frameWorkMap.put(fws[i].getName(), ""); //$NON-NLS-1$
-			}
-		}
-
-		int index = 1;
+	public static Framework addFramework(DeviceConnector connector, IProgressMonitor monitor) throws CoreException {
 		Dictionary connProps = connector.getProperties();
-		Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
-		String defaultFWName = Messages.new_framework_default_name+
-		" ("+connProps.get(DeviceConnector.TRANSPORT_TYPE)+"="+connProps.get(DeviceConnector.TRANSPORT_ID)+")";
-		String frameWorkName = defaultFWName;
-		String suffix = " ";
-		if (ip != null) { 
-			suffix += ip;
-		}
-		if (frameWorkMap.containsKey(frameWorkName)) {
-			do {
-				frameWorkName = defaultFWName
-								+ suffix
-								+ "("
-								+ index
-								+ ")";
-				index++;
-			} while (frameWorkMap.containsKey(frameWorkName));
-		}
-		return addFramework(connector, frameWorkName);
+		String frameWorkName = FrameworkConnectorFactory.generateFrameworkName(connProps);
+		return addFramework(connector, frameWorkName, monitor);
 	}
-	
-	public static Framework addFramework(DeviceConnector connector, String name) {
-		FrameworkImpl fw = new FrameworkImpl(name, true);
-		FrameWorkView.getTreeRoot().addElement(fw);
-		fw.connect(connector, SubMonitor.convert(new NullProgressMonitor()));
-		return fw;
+
+	public static Framework addFramework(DeviceConnector connector, String name, IProgressMonitor monitor)
+			throws CoreException {
+		try {
+			FrameworkImpl fw = new FrameworkImpl(name, true);
+			FrameWorkView.getTreeRoot().addElement(fw);
+			if (!connector.getVMManager().isVMActive()) {
+				String message = Messages.connection_failed + " " + Messages.rcp_bundle_missing_message; //$NON-NLS-1$
+				throw newException(IStatus.ERROR, message, null);
+			}
+			fw.connect(connector, SubMonitor.convert(monitor));
+			return fw;
+		} catch (IAgentException e) {
+			throw newException(IStatus.ERROR, Messages.connection_failed, e);
+		}
 	}
 
 	/**

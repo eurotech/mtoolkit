@@ -103,33 +103,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		if (fw == null) {
 			if (!isAutoConnectEnabled)
 				return;
-			Hashtable frameWorkMap = new Hashtable();
-			if (fws != null) {
-				for (int i = 0; i < fws.length; i++) {
-					frameWorkMap.put(fws[i].getName(), ""); //$NON-NLS-1$
-				}
-			}
-
-			int index = 1;
-			Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
-			String defaultFWName = Messages.new_framework_default_name+
-			" ("+connProps.get(DeviceConnector.TRANSPORT_TYPE)+"="+connProps.get(DeviceConnector.TRANSPORT_ID)+")";
-			String genName = defaultFWName;
-			String suffix = " ";
-			if (ip != null) { 
-				suffix += ip;
-			}
-			if (frameWorkMap.containsKey(genName)) {
-				do {
-					genName = defaultFWName
-									+ suffix
-									+ "("
-									+ index
-									+ ")";
-					index++;
-				} while (frameWorkMap.containsKey(genName));
-			}
-			frameworkName = genName;
+			frameworkName = generateFrameworkName(connProps);
 		}
 
 		if (FrameWorkView.getTreeRoot() != null && fw == null) {
@@ -215,5 +189,31 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			}
 			ActionsManager.disconnectConsole(fw); //$NON-NLS-1$
 		}
+	}
+
+	public static String generateFrameworkName(Dictionary connProps) {
+		Hashtable frameWorkMap = new Hashtable();
+		FrameworkImpl fws[] = FrameWorkView.getFrameworks();
+		if (fws != null) {
+			for (int i = 0; i < fws.length; i++) {
+				frameWorkMap.put(fws[i].getName(), ""); //$NON-NLS-1$
+			}
+		}
+
+		Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
+		String defaultFWName = Messages.new_framework_default_name + " ("
+				+ connProps.get(DeviceConnector.TRANSPORT_TYPE) + "=" + connProps.get(DeviceConnector.TRANSPORT_ID)
+				+ ")";
+		String frameWorkName = defaultFWName;
+		String suffix = " ";
+		if (ip != null) {
+			suffix += ip;
+		}
+		int index = 1;
+		while (frameWorkMap.containsKey(frameWorkName)) {
+			frameWorkName = defaultFWName + suffix + "(" + index + ")";
+			index++;
+		}
+		return frameWorkName;
 	}
 }
