@@ -60,6 +60,7 @@ public class PluginProvider implements InstallationItemProvider {
 		private IPluginModelBase pluginBase;
 		private InstallationItemProvider provider;
 		private PluginExportManager exportManager;
+		private File preparedItem;
 
 		/**
 		 * @since 6.0
@@ -88,7 +89,6 @@ public class PluginProvider implements InstallationItemProvider {
 			List items = new ArrayList();
 			items.add(this);
 			return provider.prepareItems(items, properties, monitor);
-
 		}
 		
 		/**
@@ -101,7 +101,17 @@ public class PluginProvider implements InstallationItemProvider {
 		/**
 		 * @since 6.0
 		 */
+		protected void setPreparedItem(File prepared) {
+			this.preparedItem = prepared;
+		}
+		
+		/**
+		 * @since 6.0
+		 */
 		public String getLocation() {
+			if (preparedItem != null) {
+				return preparedItem.getAbsolutePath();
+			}
 			if (exportManager != null) {
 				return exportManager.getLocation(pluginBase);
 			}
@@ -266,14 +276,13 @@ public class PluginProvider implements InstallationItemProvider {
 			if (!result.isOK())
 				return result;
 
-			//sign exported bundles
+			// post process exported bundles
 			for (int i = 0; i < items.size(); i++) {
 				Object item = items.get(i);
 				if (item instanceof PluginItem) {
-					IPluginModelBase pluginBase = ((PluginItem) item).getPlugin();
-					IStatus signStatus = signExported(pluginBase, ((PluginItem) item).getLocation(), properties, monitor);
-					if (!signStatus.isOK()) {
-						FrameworkPlugin.getDefault().getLog().log(signStatus);
+					IStatus postProcessStatus = postProcess((PluginItem) item, properties, monitor);
+					if (!postProcessStatus.isOK()) {
+						FrameworkPlugin.getDefault().getLog().log(postProcessStatus);
 					}
 				}
 			}
@@ -341,11 +350,13 @@ public class PluginProvider implements InstallationItemProvider {
 
         return exportManager;
     }
-		
-	private IStatus signExported(IPluginModelBase pluginBase, String exportLocation, Map properties, IProgressMonitor monitor) {
-		File file = new File(exportLocation);
-		if (!file.exists())
-			return Status.OK_STATUS;
+
+	private IStatus postProcess(PluginItem item, Map properties, IProgressMonitor monitor) {
+		String exportLocation = item.getLocation();
+		File file;
+		if (exportLocation == null || !(file = new File(exportLocation)).exists()) {
+			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Plugin is not exported properly.");
+		}
 		try {
 			if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
 					!AndroidUtils.isConvertedToDex(file)) {
@@ -374,10 +385,11 @@ public class PluginProvider implements InstallationItemProvider {
 				file.delete();
 				file = signedFile;
 			}
+			item.setPreparedItem(file);
 		} catch (IOException ioe) {
 			monitor.done();
 			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugin: "
-					+ pluginBase.getBundleDescription().getSymbolicName(), ioe);
+					+ item.getPlugin().getBundleDescription().getSymbolicName(), ioe);
 		}
 		return Status.OK_STATUS;
 	}
