@@ -60,7 +60,7 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 	}
 	
 	private void initModel(IProgressMonitor monitor) {
-		applicationsNode = new ApplicationPackage("Application");
+		applicationsNode = new ApplicationPackage("Applications");
 		if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) { 
 			parent.addElement(applicationsNode);
 		}
