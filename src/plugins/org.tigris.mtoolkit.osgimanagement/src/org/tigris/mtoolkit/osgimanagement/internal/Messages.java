@@ -93,6 +93,7 @@ public final class Messages extends NLS {
 	public static String show_bundle_categories;
 	public static String enable_info_log;
 	public static String autostart_bundles_on_install;
+	public static String use_activation_policy;
 	public static String connect_error_message;
 	public static String pmp_connect_error_message;
 	public static String duplicate_framework_name_message;

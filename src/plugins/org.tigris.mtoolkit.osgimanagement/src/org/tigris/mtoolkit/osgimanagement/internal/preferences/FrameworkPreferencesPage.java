@@ -44,6 +44,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	private Button enableAutoConnectButton;
 	private Button enableInfoLogButton;
 	private Button enableAutoStartButton;
+	private Button enableActivationPolicyButton;
 	private Button enableBundleCategoriesButton;
 
 	// TODO: Move these defaults to PreferencesInitializer, which is more
@@ -51,6 +52,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	public static final boolean autoConnectDefault = true;
 	public static final boolean infoLogDefault = true;
 	public static final boolean autoStartAfterInstall = true;
+	public static final boolean useActivationPolicy = true;
 	public static final boolean showBundleCategories = true;
 
 	public Control createContents(Composite parent) {
@@ -76,6 +78,10 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		enableAutoStartButton.setText(Messages.autostart_bundles_on_install);
 		enableAutoStartButton.setSelection(FrameworkConnectorFactory.isAutoStartBundlesEnabled);
 
+		enableActivationPolicyButton = new Button(composite, SWT.CHECK);
+		enableActivationPolicyButton.setText(Messages.use_activation_policy);
+		enableActivationPolicyButton.setSelection(FrameworkConnectorFactory.isActivationPolicyEnabled);
+
 		enableBundleCategoriesButton = new Button(composite, SWT.CHECK);
 		enableBundleCategoriesButton.setText(Messages.show_bundle_categories);
 		enableBundleCategoriesButton.setSelection(FrameworkConnectorFactory.isBundlesCategoriesShown);
@@ -95,6 +101,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		enableAutoConnectButton.setSelection(autoConnectDefault);
 		enableInfoLogButton.setSelection(infoLogDefault);
 		enableAutoStartButton.setSelection(autoStartAfterInstall);
+		enableActivationPolicyButton.setSelection(useActivationPolicy);
 		enableBundleCategoriesButton.setSelection(showBundleCategories);
 	}
 
@@ -102,6 +109,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		// TODO: This should change the preferences, no the settings holder
 		FrameworkConnectorFactory.isAutoConnectEnabled = enableAutoConnectButton.getSelection();
 		FrameworkConnectorFactory.isAutoStartBundlesEnabled = enableAutoStartButton.getSelection();
+		FrameworkConnectorFactory.isActivationPolicyEnabled = enableActivationPolicyButton.getSelection();
 		BrowserErrorHandler.isInfoLogEnabled = enableInfoLogButton.getSelection();
 
 		boolean shouldUpdateFrameworks = false;
@@ -142,6 +150,8 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 				FrameworkConnectorFactory.isAutoConnectEnabled);
 			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL,
 				FrameworkConnectorFactory.isAutoStartBundlesEnabled);
+			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY,
+					FrameworkConnectorFactory.isActivationPolicyEnabled);
 			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_INFO_LOG,
 				BrowserErrorHandler.isInfoLogEnabled);
 			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY,
@@ -152,6 +162,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	private void loadSettings() {
 		FrameworkConnectorFactory.isAutoConnectEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT);
 		FrameworkConnectorFactory.isAutoStartBundlesEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
+		FrameworkConnectorFactory.isActivationPolicyEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY);
 		BrowserErrorHandler.isInfoLogEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
 		FrameworkConnectorFactory.isBundlesCategoriesShown = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY);
 	}

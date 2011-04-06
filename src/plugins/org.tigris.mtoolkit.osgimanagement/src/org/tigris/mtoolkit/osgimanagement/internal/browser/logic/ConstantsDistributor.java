@@ -29,6 +29,7 @@ public interface ConstantsDistributor {
 	static final String MEMENTO_AUTOCONNECT = "framework_autoconnect"; //$NON-NLS-1$
 	static final String MEMENTO_INFO_LOG = "info_log"; //$NON-NLS-1$
 	static final String MEMENTO_AUTOSTART_AFTER_INSTALL = "autostart_after_install"; //$NON-NLS-1$
+	static final String MEMENTO_USE_ACTIVATION_POLICY = "use_activation_policy"; //$NON-NLS-1$
 	static final String MEMENTO_SHOW_BUNDLE_CATEGORY = "show_bundle_categories";
 
 	static final String STORAGE_FILE_NAME = "ModelStorage.xml"; //$NON-NLS-1$

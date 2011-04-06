@@ -23,6 +23,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(ConstantsDistributor.MEMENTO_INFO_LOG, FrameworkPreferencesPage.infoLogDefault);
 		store.setDefault(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL,
 			FrameworkPreferencesPage.autoStartAfterInstall);
+		store.setDefault(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY,
+				FrameworkPreferencesPage.useActivationPolicy);
 	}
 
 }

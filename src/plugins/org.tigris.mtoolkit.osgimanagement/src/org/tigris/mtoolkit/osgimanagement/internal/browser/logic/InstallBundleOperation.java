@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -217,7 +218,8 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 		if (FrameworkConnectorFactory.isAutoStartBundlesEnabled && rBundle != null && rBundle[0].getType() != RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
 			try {
 				monitor.setTaskName("Starting bundle "+symbolicName+" ("+version+")");
-				rBundle[0].start(0);
+				int flags = FrameworkConnectorFactory.isActivationPolicyEnabled ? Bundle.START_ACTIVATION_POLICY : 0;
+				rBundle[0].start(flags);
 			} catch (IAgentException e) {
 				// only log this exception, because the user requested install
 				// bundle, which succeeded

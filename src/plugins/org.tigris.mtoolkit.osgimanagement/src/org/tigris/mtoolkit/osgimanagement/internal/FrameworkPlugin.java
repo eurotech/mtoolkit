@@ -67,6 +67,7 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		// needs to listen for changes in these settings
 		FrameworkConnectorFactory.isAutoConnectEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT);
 		FrameworkConnectorFactory.isAutoStartBundlesEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
+		FrameworkConnectorFactory.isActivationPolicyEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY);
 		BrowserErrorHandler.isInfoLogEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
 		FrameworkConnectorFactory.isBundlesCategoriesShown = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY);
 
