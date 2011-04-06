@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
@@ -94,4 +95,6 @@ public abstract class Framework extends Model {
 		}
 		return lockObj;
 	}
+	
+	public abstract IMemento getConfig();
 }
