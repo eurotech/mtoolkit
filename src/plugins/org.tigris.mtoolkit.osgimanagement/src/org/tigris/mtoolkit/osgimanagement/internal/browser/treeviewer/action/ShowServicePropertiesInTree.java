@@ -28,7 +28,10 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 
 		if (newState) {
 			for (int i = 0; i < frameworks.size(); i++) {
-				((FrameworkImpl) frameworks.get(i)).refreshAction();
+				FrameworkImpl framework = (FrameworkImpl) frameworks.get(i);
+				if (framework.isConnected()) {
+					framework.refreshAction();
+				}
 			}
 		} else {
 			for (int i = 0; i < frameworks.size(); i++) {

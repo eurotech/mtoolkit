@@ -803,6 +803,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 	
 	public void refreshAction(final Composite tree) {
+		if (!isConnected()) { 
+			return;
+		}
 		Job job = new Job(Messages.refresh_framework_info) {
 			protected IStatus run(IProgressMonitor monitor) {
 				synchronized (Framework.getLockObject(connector)) {
