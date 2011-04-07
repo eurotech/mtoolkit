@@ -68,6 +68,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnec
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
+import org.tigris.mtoolkit.osgimanagement.model.FrameworkConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
@@ -166,6 +167,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		boolean success = initModel(monitor);
 		if (!success) {
 			ActionsManager.disconnectFrameworkAction(FrameworkImpl.this);
+		}
+		
+		for (int i=0; i<listeners.size(); i++) {
+			((FrameworkConnectionListener)listeners.get(i)).connected();
 		}
 	}
 
@@ -304,6 +309,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			updateElement();
 			updateContextMenuStates();
 			BrowserErrorHandler.processInfo(name + " successfully " + "disconnected", false); //$NON-NLS-1$
+		}
+		for (int i=0; i<listeners.size(); i++) {
+			((FrameworkConnectionListener)listeners.get(i)).disconnected();
 		}
 	}
 

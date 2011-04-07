@@ -38,6 +38,7 @@ public abstract class Framework extends Model {
 	protected List modelProviders = new ArrayList();
 	// framework IP or other ID
 	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
+	protected final List listeners = new ArrayList();
 
 	/**
 	 * @since 6.0
@@ -97,4 +98,12 @@ public abstract class Framework extends Model {
 	}
 	
 	public abstract IMemento getConfig();
+	
+	public void addConnectionListener(FrameworkConnectionListener l) {
+		listeners.add(l);
+	}
+
+	public void removeConnectionListener(FrameworkConnectionListener l) {
+		listeners.remove(l);
+	}
 }

@@ -160,6 +160,7 @@ public class RemoteConsole extends IOConsole implements IConsole {
 			} catch (IOException e) {
 			}
 		}
+		connector = null;
 		firePropertyChange(this, P_DISCONNECTED, Boolean.FALSE, Boolean.TRUE);
 
 		// Do not call dispose here because console remains in the view (disconnected).
