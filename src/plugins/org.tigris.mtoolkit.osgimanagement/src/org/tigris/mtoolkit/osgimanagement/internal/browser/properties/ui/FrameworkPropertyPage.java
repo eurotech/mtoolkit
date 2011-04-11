@@ -43,7 +43,7 @@ public class FrameworkPropertyPage extends PropertyPage implements ConstantsDist
 	}
 
 	protected void performDefaults() {
-
+		fwPanel.initialize(fw.getConfig());
 	}
 
 	public boolean performOk() {
