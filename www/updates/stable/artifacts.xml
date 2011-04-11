@@ -1,161 +1,189 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <?artifactRepository version='1.1.0'?>
-<repository name='mToolkit Artifacts' type='org.eclipse.equinox.p2.artifact.repository.simpleRepository' version='1'>
-  <properties size='3'>
+<repository name='mToolkit Artifacts' type='org.eclipse.equinox.p2.artifact.repository.simpleRepository' version='1.0.0'>
+  <properties size='2'>
+    <property name='p2.timestamp' value='1302513552013'/>
     <property name='p2.compressed' value='false'/>
-    <property name='p2.timestamp' value='1262683924546'/>
-    <property name='download.contentType' value='application/zip'/>
   </properties>
   <mappings size='3'>
     <rule filter='(&amp; (classifier=osgi.bundle))' output='${repoUrl}/plugins/${id}_${version}.jar'/>
     <rule filter='(&amp; (classifier=binary))' output='${repoUrl}/binary/${id}_${version}'/>
     <rule filter='(&amp; (classifier=org.eclipse.update.feature))' output='${repoUrl}/features/${id}_${version}.jar'/>
   </mappings>
-  <artifacts size='19'>
-    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit' version='3.0.0.20100105-0900-7H017VFNFFNFs7GMFF'>
-      <properties size='2'>
-        <property name='artifact.size' value='0'/>
-        <property name='download.size' value='5141'/>
+  <artifacts size='25'>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.dp' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='34275'/>
+        <property name='download.size' value='34275'/>
+        <property name='download.md5' value='77e9427f09c48648ea37219867c5620e'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.userdoc.source' version='1.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='653'/>
-        <property name='download.size' value='653'/>
-        <property name='download.md5' value='76578ad3d14e19f749e0eeea60fe681a'/>
-        <property name='download.contentType' value='application/zip'/>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.application.source' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='15180'/>
+        <property name='download.size' value='15180'/>
+        <property name='download.md5' value='8b85bee4ace0208e6024174ae9d4c5db'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.source' version='4.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='147651'/>
-        <property name='download.size' value='147651'/>
-        <property name='download.md5' value='3d14e551a25c5bc5ccdf82ffc6fd1ac6'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.dpeditor' version='1.1.2.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='352191'/>
-        <property name='download.size' value='352191'/>
-        <property name='download.md5' value='5d9056d8ae0b5e900a3a5f0681a8feaf'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit.sdk' version='3.0.0.20100105-0900-77--7CK44AZIVHIZIv9QfIJ8WGOG'>
-      <properties size='2'>
+    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit.sdk' version='3.1.0.20110411-0918-771-7CR73AnP_YPC_gCXHcj8hMXX'>
+      <properties size='3'>
         <property name='artifact.size' value='0'/>
         <property name='download.size' value='5039'/>
+        <property name='download.contentType' value='application/zip'/>
       </properties>
     </artifact>
-    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit.source' version='3.0.0.20100105-0900-7H017VFNFFNFs7GMFF'>
-      <properties size='2'>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.dpeditor.userdoc.source' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='673'/>
+        <property name='download.size' value='673'/>
+        <property name='download.md5' value='0d9e6f3b44d43bcaa83006bf031b025f'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement' version='5.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='289069'/>
+        <property name='download.size' value='289069'/>
+        <property name='download.md5' value='0a2e1c1789ca6860d358803365c8e6ba'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.application' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='27089'/>
+        <property name='download.size' value='27089'/>
+        <property name='download.md5' value='3b489f20202a28d34453d0b512f44c0e'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.userdoc' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='303241'/>
+        <property name='download.size' value='303241'/>
+        <property name='download.md5' value='163131ce67dcb6b20c0c954475d98169'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent' version='3.1.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='107620'/>
+        <property name='download.size' value='107620'/>
+        <property name='download.md5' value='33b110733f351f285f8c6245c41337b7'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.common.source' version='5.1.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='83195'/>
+        <property name='download.size' value='83195'/>
+        <property name='download.md5' value='ca6089999232de90cff84d6ab2b0f8dd'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.dpeditor.source' version='1.2.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='218103'/>
+        <property name='download.size' value='218103'/>
+        <property name='download.md5' value='d769d76b42e5d42832731afc7641cb7a'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.dpeditor' version='1.2.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='352888'/>
+        <property name='download.size' value='352888'/>
+        <property name='download.md5' value='0b336d8ffa26c4e53e409a60510441b2'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.rpc.source' version='3.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='131291'/>
+        <property name='download.size' value='131291'/>
+        <property name='download.md5' value='e419b87b6ede6ec20b7af1b864113a74'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.certmanager.source' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='14830'/>
+        <property name='download.size' value='14830'/>
+        <property name='download.md5' value='60ae174a3b896a55b551821e8c8e9d1c'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.dp.source' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='19554'/>
+        <property name='download.size' value='19554'/>
+        <property name='download.md5' value='dcc729032508cb80a9415374bec4ba84'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.dpeditor.userdoc' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='187300'/>
+        <property name='download.size' value='187300'/>
+        <property name='download.md5' value='53f1d840cc9fad6823f8a55f599d9d85'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.source' version='3.1.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='86186'/>
+        <property name='download.size' value='86186'/>
+        <property name='download.md5' value='98ccce6eb5202ce4f423e95ccaf83af1'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.rpc' version='3.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='197947'/>
+        <property name='download.size' value='197947'/>
+        <property name='download.md5' value='4a5cc1807253acb7ae7809864e846763'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.dp.userdoc' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='29676'/>
+        <property name='download.size' value='29676'/>
+        <property name='download.md5' value='0b2ee26e466660554620b54277052b45'/>
+      </properties>
+    </artifact>
+    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit' version='3.1.0.20110411-0918-7O3-7gLWWM0WWAMsXh'>
+      <properties size='3'>
         <property name='artifact.size' value='0'/>
-        <property name='download.size' value='5101'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.userdoc' version='1.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='403312'/>
-        <property name='download.size' value='403312'/>
-        <property name='download.md5' value='96e744da13f2f8848b0498ae2fe355d2'/>
+        <property name='download.size' value='5162'/>
         <property name='download.contentType' value='application/zip'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.common.source' version='4.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='69019'/>
-        <property name='download.size' value='69019'/>
-        <property name='download.md5' value='0c38d54d276848b2ad135698f52c04da'/>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.common' version='5.1.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='393440'/>
+        <property name='download.size' value='393440'/>
+        <property name='download.md5' value='fe91af5e767b5cd02c9ddd3bae102431'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.certmanager' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='27429'/>
+        <property name='download.size' value='27429'/>
+        <property name='download.md5' value='1654b0eb6300fc9cdd66a851dd0e264a'/>
+      </properties>
+    </artifact>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.dp.userdoc.source' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='28543'/>
+        <property name='download.size' value='28543'/>
+        <property name='download.md5' value='d69346086100741785d6ac10f27e9657'/>
+      </properties>
+    </artifact>
+    <artifact classifier='org.eclipse.update.feature' id='org.tigris.mtoolkit.source' version='3.1.0.20110411-0918-7O3-7gLWWM0WWAMsXh'>
+      <properties size='3'>
+        <property name='artifact.size' value='0'/>
+        <property name='download.size' value='5127'/>
         <property name='download.contentType' value='application/zip'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.common' version='4.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='361871'/>
-        <property name='download.size' value='361871'/>
-        <property name='download.md5' value='db1cc808016827d3fd296b24604a86b8'/>
-        <property name='download.contentType' value='application/zip'/>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.userdoc.source' version='1.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='655'/>
+        <property name='download.size' value='655'/>
+        <property name='download.md5' value='a2e8673f2c7f3823fd35082845dac4cf'/>
       </properties>
     </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.rpc' version='2.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='181765'/>
-        <property name='download.size' value='181765'/>
-        <property name='download.md5' value='bf3f4d62501ed4cb621ae900a92d0e50'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.source' version='2.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='81984'/>
-        <property name='download.size' value='81984'/>
-        <property name='download.md5' value='dd9198209f6ef36eceff7cea4bfc98ef'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement' version='4.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='303331'/>
-        <property name='download.size' value='303331'/>
-        <property name='download.md5' value='6774ed30dbc99e696789c340827eb061'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.certmanager.source' version='1.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='14827'/>
-        <property name='download.size' value='14827'/>
-        <property name='download.md5' value='49e4dac273a69318e07424bc9340b19f'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.dpeditor.source' version='1.1.2.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='218021'/>
-        <property name='download.size' value='218021'/>
-        <property name='download.md5' value='a5f9a3459ae0cd8fd7b35e2bd898ec89'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent.rpc.source' version='2.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='119596'/>
-        <property name='download.size' value='119596'/>
-        <property name='download.md5' value='739fa82c49e20b20d95bdc39bb0af2f2'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.iagent' version='2.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='102911'/>
-        <property name='download.size' value='102911'/>
-        <property name='download.md5' value='84f4b1721eb7cb5c51fe80a18c52c70d'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.application' version='1.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='24942'/>
-        <property name='download.size' value='24942'/>
-        <property name='download.md5' value='a58bf079cca05a0f0b26c1ddc4a35fdc'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.ext.application.source' version='1.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='14482'/>
-        <property name='download.size' value='14482'/>
-        <property name='download.md5' value='57491a292547e16750535fddf345b7a1'/>
-        <property name='download.contentType' value='application/zip'/>
-      </properties>
-    </artifact>
-    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.certmanager' version='1.0.0.20100105-0900'>
-      <properties size='4'>
-        <property name='artifact.size' value='26624'/>
-        <property name='download.size' value='26624'/>
-        <property name='download.md5' value='c79d40c2dc3e247c53e4cd6c20d2eb26'/>
-        <property name='download.contentType' value='application/zip'/>
+    <artifact classifier='osgi.bundle' id='org.tigris.mtoolkit.osgimanagement.source' version='5.0.0.20110411-0918'>
+      <properties size='3'>
+        <property name='artifact.size' value='136067'/>
+        <property name='download.size' value='136067'/>
+        <property name='download.md5' value='0e677ff822f3ef22872b5e6978e86b2e'/>
       </properties>
     </artifact>
   </artifacts>
