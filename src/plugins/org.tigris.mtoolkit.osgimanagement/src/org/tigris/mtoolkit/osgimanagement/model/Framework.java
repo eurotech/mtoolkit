@@ -79,22 +79,7 @@ public abstract class Framework extends Model {
 	public abstract Model createModel(String mimeType, String id, String version);
 
 	public static Object getLockObject(DeviceConnector connector) {
-		Object lockObj = FrameworkConnectorFactory.lockObjHash.get(connector);
-		if (lockObj == null && !(connector instanceof DeviceConnectorSWTWrapper)) {
-			Enumeration connectors = FrameworkConnectorFactory.lockObjHash.keys();
-			while (connectors.hasMoreElements()) {
-				DeviceConnector connKey = (DeviceConnector) connectors.nextElement();
-				if (connKey.equals(connector)) {
-					lockObj = FrameworkConnectorFactory.lockObjHash.get(connKey);
-					break;
-				}
-			}
-		}
-		if (lockObj == null) {
-			lockObj = new Object();
-			FrameworkConnectorFactory.lockObjHash.put(connector, lockObj);
-		}
-		return lockObj;
+		return connector.lockObj;
 	}
 	
 	public abstract IMemento getConfig();

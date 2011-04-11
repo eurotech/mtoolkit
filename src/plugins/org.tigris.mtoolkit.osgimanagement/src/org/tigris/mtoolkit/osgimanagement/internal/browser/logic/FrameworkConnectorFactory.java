@@ -45,8 +45,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	 */
 	private static FrameworkConnectorFactory factory = new FrameworkConnectorFactory();
 
-	public static Hashtable lockObjHash = new Hashtable();
-
 	public static boolean isAutoConnectEnabled = FrameworkPreferencesPage.autoConnectDefault;
 	public static boolean isAutoStartBundlesEnabled = FrameworkPreferencesPage.autoStartAfterInstall;
 	public static boolean isActivationPolicyEnabled = FrameworkPreferencesPage.useActivationPolicy;

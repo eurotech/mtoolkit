@@ -75,6 +75,8 @@ public abstract class DeviceConnector {
 	private static List listeners = new ArrayList();
 
 	private static Map factories;
+	
+	public final Object lockObj = new Object();
 
 	static {
 		factories = new HashMap();
