@@ -174,7 +174,16 @@ public class RemoteConsole extends IOConsole implements IConsole {
 	}
 	
 	protected void dispose() {
-		disconnect();
+		Job disconnectJob = new Job("Disconnecting console...") {
+			protected IStatus run(IProgressMonitor monitor) {
+				disconnect();
+				if (monitor.isCanceled())
+					return Status.CANCEL_STATUS;
+				return Status.OK_STATUS;
+			}
+		};
+		disconnectJob.setSystem(true);
+		disconnectJob.schedule();
 		super.dispose();
 	}
 
