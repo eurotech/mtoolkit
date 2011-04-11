@@ -293,6 +293,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void disconnect() {
 		if (!isConnected()) return;
 		synchronized (Framework.getLockObject(connector)) {
+			connectedFlag = false;
 			if (connector != null) {
 				removeRemoteListeners();
 			}
@@ -305,7 +306,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			if (!autoConnected) {
 				connector = null;
 			}
-			connectedFlag = false;
 			updateElement();
 			updateContextMenuStates();
 			BrowserErrorHandler.processInfo(name + " successfully " + "disconnected", false); //$NON-NLS-1$
@@ -594,13 +594,11 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	public void bundleChanged(RemoteBundleEvent e) {
 		BrowserErrorHandler.debug(getDebugBundleChangedMsg(e));
-
-		if (!isConnected())
-			return;
-
-		final int type = e.getType();
-
 		synchronized ((Framework.getLockObject(connector))) {
+			if (!isConnected())
+				return;
+
+			final int type = e.getType();
 			final RemoteBundle rBundle = e.getBundle();
 			long id = rBundle.getBundleId();
 			try {
