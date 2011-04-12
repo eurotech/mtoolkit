@@ -164,29 +164,32 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	}
 
 	public void disconnected(DeviceConnector connector) {
-		FrameworkImpl fw = FrameWorkView.findFramework(connector);
+		FrameworkImpl fwArr[] = FrameWorkView.findFramework(connector);
 
-		if (fw == null /* || !fw.isConnected() */)
+		if (fwArr == null /* || !fw.isConnected() */)
 			return;
 
-		BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
-		synchronized (Framework.getLockObject(connector)) {
+		for (int j = 0; j < fwArr.length; j++) {
+			FrameworkImpl fw = fwArr[j];
+			BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
+			synchronized (Framework.getLockObject(connector)) {
 
-			FrameworkImpl fws[] = FrameWorkView.getFrameworks();
-			if (fws != null) {
-				for (int i = 0; i < fws.length; i++) {
-					fw = fws[i];
-					if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
-						fw.disconnect();
-						fw.setPMPConnectionListener(null);
-						if (fw.autoConnected) {
-							FrameWorkView.treeRoot.removeElement(fw);
+				FrameworkImpl fws[] = FrameWorkView.getFrameworks();
+				if (fws != null) {
+					for (int i = 0; i < fws.length; i++) {
+						fw = fws[i];
+						if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
+							fw.disconnect();
+							fw.setPMPConnectionListener(null);
+							if (fw.autoConnected) {
+								FrameWorkView.treeRoot.removeElement(fw);
+							}
+							break;
 						}
-						break;
 					}
 				}
+				ActionsManager.disconnectConsole(fw); //$NON-NLS-1$
 			}
-			ActionsManager.disconnectConsole(fw); //$NON-NLS-1$
 		}
 	}
 
