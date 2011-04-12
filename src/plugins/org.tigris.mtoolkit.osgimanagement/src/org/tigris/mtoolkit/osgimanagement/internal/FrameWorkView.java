@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.Command;
@@ -841,17 +842,20 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		return null;
 	}
 	
-	public static FrameworkImpl findFramework(DeviceConnector connector) {
+	public static FrameworkImpl[] findFramework(DeviceConnector connector) {
 		if (connector == null) return null;
 		if (treeRoot == null)
 			return null;
 		Model fws[] = treeRoot.getChildren();
+		Vector fwVector = new Vector();
 		for (int i = 0; i < fws.length; i++) {
 			if (((FrameworkImpl)fws[i]).getConnector() != null && ((FrameworkImpl)fws[i]).getConnector().equals(connector)) {
-				return (FrameworkImpl) fws[i];
+				fwVector.addElement(fws[i]);
 			}
 		}
-		return null;
+		
+		FrameworkImpl fwArr[] = (FrameworkImpl[])fwVector.toArray(new FrameworkImpl[0]);
+		return fwArr;
 	}
 
 	private static List actionProviders = new ArrayList();
