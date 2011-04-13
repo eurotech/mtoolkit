@@ -2,6 +2,8 @@ package org.tigris.mtoolkit.common.gui;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -36,6 +38,7 @@ public class SelectionPanel extends Composite {
 	private CheckboxTableViewer list;
 	private Text filterText;
 	private ListItem[] listItems = new ListItem[0];
+	private ListenerList checkStateListeners = new ListenerList();
 
 	public SelectionPanel(Composite parent, int style) {
 		super(parent, style);
@@ -141,6 +144,7 @@ public class SelectionPanel extends Composite {
 		list.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				((ListItem) event.getElement()).checked = event.getChecked();
+				fireCheckStateChanged(event);
 			}
 		});
 		final FilterJob filterJob = new FilterJob("", list);
@@ -164,6 +168,7 @@ public class SelectionPanel extends Composite {
 		btnSelect.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				selectAll(true);
+				fireCheckStateChanged(new CheckStateChangedEvent2(list, listItems, true));
 			}
 		});
 		GridData gridData = new GridData();
@@ -175,6 +180,7 @@ public class SelectionPanel extends Composite {
 		btnDeselect.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				selectAll(false);
+				fireCheckStateChanged(new CheckStateChangedEvent2(list, listItems, false));
 			}
 		});
 		gridData = new GridData();
@@ -182,7 +188,13 @@ public class SelectionPanel extends Composite {
 		btnDeselect.setLayoutData(gridData);
 	}
 
-	private void selectAll(boolean state) {
+	/**
+	 * Sets to the given value the checked state for all elements. Does not fire
+	 * events to check state listeners.
+	 * 
+	 * @param state
+	 */
+	public void selectAll(boolean state) {
 		list.setAllChecked(state);
 		for (int i = 0; i < listItems.length; i++) {
 			listItems[i].checked = state;
@@ -223,5 +235,42 @@ public class SelectionPanel extends Composite {
 
 	public ListItem[] getListItems() {
 		return listItems;
+	}
+
+	/**
+	 * Adds a listener for changes to the checked state of elements in this
+	 * panel. Has no effect if an identical listener is already registered. This
+	 * panel supports sending events with multiple check changes at once (i.e.
+	 * from Select All/Deselect All buttons)
+	 * 
+	 * @param listener
+	 *            a check state listener
+	 * @see CheckStateChangedEvent2
+	 */
+	public void addCheckStateListener(ICheckStateListener listener) {
+		checkStateListeners.add(listener);
+	}
+
+	/**
+	 * Removes the given check state listener. Has no effect if an identical
+	 * listener is not registered.
+	 * 
+	 * @param listener
+	 *            a check state listener
+	 */
+	public void removeCheckStateListener(ICheckStateListener listener) {
+		checkStateListeners.remove(listener);
+	}
+
+	protected void fireCheckStateChanged(final CheckStateChangedEvent event) {
+		Object[] array = checkStateListeners.getListeners();
+		for (int i = 0; i < array.length; i++) {
+			final ICheckStateListener l = (ICheckStateListener) array[i];
+			SafeRunnable.run(new SafeRunnable() {
+				public void run() {
+					l.checkStateChanged(event);
+				}
+			});
+		}
 	}
 }
