@@ -180,12 +180,16 @@
 				<include name="${buildLabel}/**/*"/>
 			</fileset>
 		</copy>
-		<p2.mirror destination="file:/${distDirectory}/p2-repository">
+		<delete file="${base}/artifacts.xml"/>
+		<p2.mirror destination="file:/${distDirectory}/${p2.repository.folder}">
 			<source>
 				<repository location="file:/${buildDirectory}/${p2.repository.folder}/"/>
+				<repository location="file:/${base}/"/>
+				<repository location="file:/${base.ext}/"/>
 			</source>
 			<iu id="org.tigris.mtoolkit.sdk.feature.group"/>
 			<iu id="org.tigris.mtoolkit.maven.sdk.feature.group"/>
+      <slicingOptions platformFilter="true" includeOptional="false" includeNonGreedy="false" followStrict="true" />
 		</p2.mirror>
 		<!-- move the build zip to the top level dist/ folder -->
 		<move todir="${distDirectory}">
