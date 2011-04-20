@@ -8,7 +8,7 @@ set BUILDER=%~dp0
 
 set LAUNCHER_JAR=org.eclipse.equinox.launcher.jar
 
-if exist %BASEBUILDER_DIR%\plugins\%LAUNCHER_JAR% goto buildOK
+if exist %BASEBUILDER_DIR%\org.eclipse.releng.basebuilder\plugins\%LAUNCHER_JAR% goto buildOK
 
 :fetchBaseBuilder
 md %BASEBUILDER_DIR%
