@@ -41,8 +41,9 @@ public class PluginExportManager {
 		if (model.getUnderlyingResource() == null) {
 			// target platform bundle -> directly set the location
 			bundlesToExport.put(model, model.getInstallLocation());
+		} else {
+			bundlesToExport.put(model, NOT_EXPORTED);
 		}
-		bundlesToExport.put(model, NOT_EXPORTED);
 	}
 	
 	public void addBundle(String symbolicName, String version) throws CoreException {
