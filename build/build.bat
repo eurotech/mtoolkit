@@ -18,7 +18,7 @@ cd %~dp0
 
 :buildOK
 for /f "tokens=*" %%i in ('%~dp0bin\date.exe -u +%%Y%%m%%d-%%H%%M') do set TIMESTAMP=%%i
-java -jar %BASEBUILDER_DIR%\org.eclipse.releng.basebuilder\plugins\%LAUNCHER_JAR% -application org.eclipse.ant.core.antRunner -buildfile %~dp0\build.xml -Dbuilder=%BUILDER% -Dtimestamp=%TIMESTAMP% %BUILDER_ARGUMENTS%
+java -jar -Xmx512m %BASEBUILDER_DIR%\org.eclipse.releng.basebuilder\plugins\%LAUNCHER_JAR% -application org.eclipse.ant.core.antRunner -buildfile %~dp0\build.xml -Dbuilder=%BUILDER% -Dtimestamp=%TIMESTAMP% %BUILDER_ARGUMENTS%
 
 if not defined DONT_PAUSE pause
 endlocal
