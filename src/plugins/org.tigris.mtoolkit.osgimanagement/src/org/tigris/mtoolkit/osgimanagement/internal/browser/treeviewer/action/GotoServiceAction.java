@@ -93,7 +93,7 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 			if ((oClass.getParent() instanceof FrameworkImpl))
 				return;
 			ServicesCategory category = (ServicesCategory) oClass.getParent();
-			if (category.getType() == ServicesCategory.REGISTERED_SERVICES) {
+			if (category == null || category.getType() == ServicesCategory.REGISTERED_SERVICES) {
 				this.setEnabled(false);
 			} else {
 				this.setEnabled(true);
