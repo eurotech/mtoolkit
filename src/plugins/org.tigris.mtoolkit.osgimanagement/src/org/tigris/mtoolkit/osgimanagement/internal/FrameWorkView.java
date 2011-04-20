@@ -381,6 +381,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public static String getFilter() {
 		return filterField.getText();
 	}
+	
+	public static void setFilter(String text) {
+		filterField.setText(text);
+	}
 
 	private void createToolbarAndMenu() {
 		MenuManager mainMenu = (MenuManager) getViewSite().getActionBars().getMenuManager();

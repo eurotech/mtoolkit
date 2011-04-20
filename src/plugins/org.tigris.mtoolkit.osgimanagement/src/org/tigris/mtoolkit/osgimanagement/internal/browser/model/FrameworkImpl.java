@@ -838,6 +838,11 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					} finally {
 						refreshing = false;
 						sMonitor.done();
+						Display.getDefault().asyncExec(new Runnable() {
+							public void run() {
+								FrameWorkView.setFilter(FrameWorkView.getFilter());
+							}
+						});
 					}
 				}
 				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
