@@ -16,75 +16,79 @@ import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 
 public class ResourcePropertyTester extends PropertyTester {
 
-	private IExtensionRegistry registry = null;
-	private InstallationItem installationItem;
+  private IExtensionRegistry registry = null;
+  private InstallationItem installationItem;
 
-	public ResourcePropertyTester() {
-		super();
-		registry = Platform.getExtensionRegistry();
-	}
+  public ResourcePropertyTester() {
+    super();
+    registry = Platform.getExtensionRegistry();
+  }
 
-	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
-		IResource resource = (IResource) receiver;
-		if (isResourceProviderAvailable(resource) && isResourceProcessorAvailable(resource)) {
-			return true;
-		}
-		return false;
+  public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+    IResource resource = (IResource) receiver;
+    if (isResourceProviderAvailable(resource) && isResourceProcessorAvailable(resource)) {
+      return true;
+    }
+    return false;
 
-	}
+  }
 
-	private boolean isResourceProcessorAvailable(IResource resource) {
+  private boolean isResourceProcessorAvailable(IResource resource) {
 
-		IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProcessors");
-		IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			if (!elements[i].getName().equals("processor")) {
-				continue;
-			}
-			List mimeTypes = new ArrayList();
-			try {
-				Object processor = elements[i].createExecutableExtension("class");
-				if (processor == null)
-					return false;
+    IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProcessors");
+    IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
+    for (int i = 0; i < elements.length; i++) {
+      if (!elements[i].getName().equals("processor")) {
+        continue;
+      }
+      List mimeTypes = new ArrayList();
+      try {
+        Object processor = elements[i].createExecutableExtension("class");
+        if (processor == null)
+          return false;
 
-				String[] types = ((InstallationItemProcessor) processor).getSupportedMimeTypes();
-				if (types == null)
-					continue;
-				for (int j = 0; j < types.length; j++) {
-					if (!mimeTypes.contains(types[j]))
-						mimeTypes.add(types[j]);
-				}
+        String[] types = ((InstallationItemProcessor) processor).getSupportedMimeTypes();
+        if (types == null)
+          continue;
+        for (int j = 0; j < types.length; j++) {
+          if (!mimeTypes.contains(types[j]))
+            mimeTypes.add(types[j]);
+        }
 
-				String curItemMimeType = installationItem.getMimeType();
-				if (mimeTypes.contains(curItemMimeType))
-					return true;
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-		}
-		return false;
-	}
+        String curItemMimeType = installationItem.getMimeType();
+        if (mimeTypes.contains(curItemMimeType))
+          return true;
+      } catch (CoreException e) {
+        e.printStackTrace();
+      }
+    }
+    return false;
+  }
 
-	private boolean isResourceProviderAvailable(IResource resource) {
-		IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProviders");
-		IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
-		for (int i = 0; i < elements.length; i++) {
-			if (!elements[i].getName().equals("provider")) {
-				continue;
-			}
-			try {
-				Object provider = elements[i].createExecutableExtension("class");
-				((InstallationItemProvider) provider).init(elements[i]);
-				if (provider != null && ((InstallationItemProvider) provider).isCapable(resource)) {
-					installationItem = ((InstallationItemProvider) provider).getInstallationItem(resource);
-					return true;
-				}
+  private boolean isResourceProviderAvailable(IResource resource) {
+    IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProviders");
+    IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
+    for (int i = 0; i < elements.length; i++) {
+      if (!elements[i].getName().equals("provider")) {
+        continue;
+      }
+      try {
+        Object provider = elements[i].createExecutableExtension("class");
+        if (provider != null) {
+          ((InstallationItemProvider) provider).init(elements[i]);
+          if (((InstallationItemProvider) provider).isCapable(resource)) {
+            installationItem = ((InstallationItemProvider) provider).getInstallationItem(resource);
+            if (installationItem != null) {
+              return true;
+            }
+          }
+        }
 
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
-		}
-		return false;
-	}
+      } catch (CoreException e) {
+        e.printStackTrace();
+      }
+    }
+    return false;
+  }
 
 }
