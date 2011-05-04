@@ -21,187 +21,190 @@ import org.tigris.mtoolkit.common.UtilitiesPlugin;
  * @since 6.0
  */
 public class InstallationRegistry {
-	private static InstallationRegistry registry = null;
-	private List itemProviders = new ArrayList();
-	private List itemProcessors = new ArrayList();
-	private Map selectionDialogs = new HashMap();
+  private static InstallationRegistry registry = null;
+  private List itemProviders = new ArrayList();
+  private List itemProcessors = new ArrayList();
+  private Map selectionDialogs = new HashMap();
 
-	public static InstallationRegistry getInstance() {
-		if (registry == null) {
-			registry = new InstallationRegistry();
-		}
-		return registry;
-	}
+  public static InstallationRegistry getInstance() {
+    if (registry == null) {
+      registry = new InstallationRegistry();
+    }
+    return registry;
+  }
 
-	public InstallationTarget findTarget(Object target) {
-		InstallationTarget result = null;
+  public InstallationTarget findTarget(Object target) {
+    InstallationTarget result = null;
 
-		Iterator processorsIterator = getProcessors().iterator();
-		while (processorsIterator.hasNext()) {
-			InstallationItemProcessor element = (InstallationItemProcessor) processorsIterator.next();
-			result = element.getInstallationTarget(target);
-			if (result != null) {
-				return result;
-			}
-		}
-		return result;
-	}
+    Iterator processorsIterator = getProcessors().iterator();
+    while (processorsIterator.hasNext()) {
+      InstallationItemProcessor element = (InstallationItemProcessor) processorsIterator.next();
+      result = element.getInstallationTarget(target);
+      if (result != null) {
+        return result;
+      }
+    }
+    return result;
+  }
 
-	public List/*<InstallationItem>*/getItems(Object source) {
-		List items = new ArrayList();
-		boolean hasCapableProvider = false;
-		for (Iterator it = getProviders().iterator(); it.hasNext();) {
-			InstallationItemProvider provider = (InstallationItemProvider) it.next();
-			if (provider.isCapable(source)) {
-				items.add(provider.getInstallationItem(source));
-				hasCapableProvider = true;
-			}
-		}
-		if (!hasCapableProvider) {
-			return null;
-		}
-		return items;
-	}
+  public List/*<InstallationItem>*/getItems(Object source) {
+    List items = new ArrayList();
+    boolean hasCapableProvider = false;
+    for (Iterator it = getProviders().iterator(); it.hasNext();) {
+      InstallationItemProvider provider = (InstallationItemProvider) it.next();
+      if (provider.isCapable(source)) {
+        InstallationItem item = provider.getInstallationItem(source);
+        if (item != null) {
+          items.add(item);
+          hasCapableProvider = true;
+        }
+      }
+    }
+    if (!hasCapableProvider) {
+      return null;
+    }
+    return items;
+  }
 
-	public InstallationItem getItem(Object source, String mimeType) {
-		List items = getItems(source);
-		for (Iterator it = items.iterator(); it.hasNext();) {
-			InstallationItem item = (InstallationItem) it.next();
-			if (item.getMimeType().equals(mimeType))
-				return item;
-		}
-		return null;
-	}
+  public InstallationItem getItem(Object source, String mimeType) {
+    List items = getItems(source);
+    for (Iterator it = items.iterator(); it.hasNext();) {
+      InstallationItem item = (InstallationItem) it.next();
+      if (item.getMimeType().equals(mimeType))
+        return item;
+    }
+    return null;
+  }
 
-	public List/*<InstallationItemProviders>*/getProviders() {
-		if (itemProviders.isEmpty()) {
-			obtainInstallationProviders();
-		}
-		return itemProviders;
-	}
+  public List/*<InstallationItemProviders>*/getProviders() {
+    if (itemProviders.isEmpty()) {
+      obtainInstallationProviders();
+    }
+    return itemProviders;
+  }
 
-	public List/*<InstallationItemProcessors>*/getProcessors() {
-		if (itemProcessors.isEmpty()) {
-			obtainInstallationProcessors();
-		}
-		return itemProcessors;
-	}
-	
-	public Class getSelectionDialog(InstallationItemProcessor itemProcessor) {
-		return (Class) selectionDialogs.get(itemProcessor);
-	}
+  public List/*<InstallationItemProcessors>*/getProcessors() {
+    if (itemProcessors.isEmpty()) {
+      obtainInstallationProcessors();
+    }
+    return itemProcessors;
+  }
 
-	private void obtainInstallationProviders() {
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProviders");
+  public Class getSelectionDialog(InstallationItemProcessor itemProcessor) {
+    return (Class) selectionDialogs.get(itemProcessor);
+  }
 
-		obtainProviderElements(extensionPoint.getConfigurationElements(), itemProviders);
-	}
+  private void obtainInstallationProviders() {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProviders");
 
-	// getSelectionDialog
+    obtainProviderElements(extensionPoint.getConfigurationElements(), itemProviders);
+  }
 
-	private void obtainInstallationProcessors() {
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProcessors");
+  // getSelectionDialog
 
-		obtainProcessorElements(extensionPoint.getConfigurationElements(), itemProcessors, selectionDialogs);
-	}
+  private void obtainInstallationProcessors() {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProcessors");
 
-	/**
-	 * Creates instances of item providers for given configuration elements and
-	 * adds them to a passed hash table with existing item providers (if a
-	 * provider already exists in the table, it is not re-created). For keys are
-	 * used the class names of item providers as String objects.
-	 * 
-	 * @param elements
-	 *            array of configuration elements
-	 * @param providers
-	 *            table with current providers (cannot be null)
-	 */
-	private void obtainProviderElements(IConfigurationElement[] elements, List providers) {
-		for (int i = 0; i < elements.length; i++) {
-			if (!elements[i].getName().equals("provider")) {
-				continue;
-			}
-			String clazz = elements[i].getAttribute("class");
-			if (clazz == null)
-				continue;
+    obtainProcessorElements(extensionPoint.getConfigurationElements(), itemProcessors, selectionDialogs);
+  }
 
-			try {
-				Object provider = elements[i].createExecutableExtension("class");
+  /**
+   * Creates instances of item providers for given configuration elements and
+   * adds them to a passed hash table with existing item providers (if a
+   * provider already exists in the table, it is not re-created). For keys are
+   * used the class names of item providers as String objects.
+   * 
+   * @param elements
+   *            array of configuration elements
+   * @param providers
+   *            table with current providers (cannot be null)
+   */
+  private void obtainProviderElements(IConfigurationElement[] elements, List providers) {
+    for (int i = 0; i < elements.length; i++) {
+      if (!elements[i].getName().equals("provider")) {
+        continue;
+      }
+      String clazz = elements[i].getAttribute("class");
+      if (clazz == null)
+        continue;
 
-				if (provider instanceof InstallationItemProvider) {
-					((InstallationItemProvider) provider).init(elements[i]);
-					providers.add(provider);
-				}
-			} catch (CoreException e) {
-				UtilitiesPlugin.error("Failed to initialize installation provider from "
-								+ elements[i].getNamespaceIdentifier()
-								+ " namespace",
-					e);
-			}
-		}
-	}
+      try {
+        Object provider = elements[i].createExecutableExtension("class");
 
-	/**
-	 * Creates instances of item processors for given configuration elements and
-	 * adds them to a passed hash table with existing item processors (if a
-	 * processor already exists in the table, it is not re-created). Class
-	 * objects of selection dialogs for each processor are also obtained. Keys
-	 * for processors table are class names of item processors as String
-	 * objects. Keys for dialogs table are the instances of item processors.
-	 * 
-	 * @param elements
-	 *            array of configuration elements
-	 * @param processors
-	 *            table with current processors (cannot be null)
-	 * @param dialogs
-	 * @param dialogs
-	 *            table with Class objects of current dialogs (cannot be null)
-	 */
-	private void obtainProcessorElements(IConfigurationElement[] elements, List processors, Map dialogs) {
-		for (int i = 0; i < elements.length; i++) {
-			if (!elements[i].getName().equals("processor")) {
-				continue;
-			}
-			//			String clazz = elements[i].getAttribute("class");
-			String dlgClassName = elements[i].getAttribute("selectionDialog");
-			try {
-				Object processor = elements[i].createExecutableExtension("class");
+        if (provider instanceof InstallationItemProvider) {
+          ((InstallationItemProvider) provider).init(elements[i]);
+          providers.add(provider);
+        }
+      } catch (CoreException e) {
+        UtilitiesPlugin.error("Failed to initialize installation provider from "
+            + elements[i].getNamespaceIdentifier()
+            + " namespace",
+      e);
+      }
+    }
+  }
 
-				Class dlgClass = null;
-				String classPackageName = dlgClassName.substring(0, dlgClassName.lastIndexOf('.'));
-				BundleContext bc = ResourcesPlugin.getPlugin().getBundle().getBundleContext();
-				Bundle[] bundles = bc.getBundles();
+  /**
+   * Creates instances of item processors for given configuration elements and
+   * adds them to a passed hash table with existing item processors (if a
+   * processor already exists in the table, it is not re-created). Class
+   * objects of selection dialogs for each processor are also obtained. Keys
+   * for processors table are class names of item processors as String
+   * objects. Keys for dialogs table are the instances of item processors.
+   * 
+   * @param elements
+   *            array of configuration elements
+   * @param processors
+   *            table with current processors (cannot be null)
+   * @param dialogs
+   * @param dialogs
+   *            table with Class objects of current dialogs (cannot be null)
+   */
+  private void obtainProcessorElements(IConfigurationElement[] elements, List processors, Map dialogs) {
+    for (int i = 0; i < elements.length; i++) {
+      if (!elements[i].getName().equals("processor")) {
+        continue;
+      }
+      //      String clazz = elements[i].getAttribute("class");
+      String dlgClassName = elements[i].getAttribute("selectionDialog");
+      try {
+        Object processor = elements[i].createExecutableExtension("class");
 
-				for (int index = 0; index < bundles.length; index++) {
-					Dictionary dictionary = bundles[index].getHeaders();
+        Class dlgClass = null;
+        String classPackageName = dlgClassName.substring(0, dlgClassName.lastIndexOf('.'));
+        BundleContext bc = ResourcesPlugin.getPlugin().getBundle().getBundleContext();
+        Bundle[] bundles = bc.getBundles();
 
-					String exportedPackages = (String) dictionary.get("Export-Package");
-					if (exportedPackages != null) {
-						if (exportedPackages.indexOf(classPackageName) != -1) {
-							dlgClass = bundles[index].loadClass(dlgClassName);
-						}
-					}
-				}
-				if (dlgClass == null)
-					continue;
+        for (int index = 0; index < bundles.length; index++) {
+          Dictionary dictionary = bundles[index].getHeaders();
 
-				if (processor instanceof InstallationItemProcessor
-								&& TargetSelectionDialog.class.isAssignableFrom((Class) dlgClass)) {
-					processors.add(processor);
-					try {
-						dialogs.put(processor, dlgClass);
-					} catch (AbstractMethodError e) {
-						// TODO: handle exception
-					}
-				}
-				dlgClass = null;
-			} catch (CoreException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+          String exportedPackages = (String) dictionary.get("Export-Package");
+          if (exportedPackages != null) {
+            if (exportedPackages.indexOf(classPackageName) != -1) {
+              dlgClass = bundles[index].loadClass(dlgClassName);
+            }
+          }
+        }
+        if (dlgClass == null)
+          continue;
+
+        if (processor instanceof InstallationItemProcessor
+            && TargetSelectionDialog.class.isAssignableFrom((Class) dlgClass)) {
+          processors.add(processor);
+          try {
+            dialogs.put(processor, dlgClass);
+          } catch (AbstractMethodError e) {
+            // TODO: handle exception
+          }
+        }
+        dlgClass = null;
+      } catch (CoreException e) {
+        e.printStackTrace();
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+      }
+    }
+  }
 }
