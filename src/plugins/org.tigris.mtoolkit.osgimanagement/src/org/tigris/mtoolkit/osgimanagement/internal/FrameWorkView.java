@@ -197,6 +197,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private FilterJob filterJob = new FilterJob();
 	private MyViewerFilter filter = new MyViewerFilter();
 
+	private static ToolbarIMenuCreator bundlesTB;
+
 	private static String notFoundText = null;
 
 	// Get current shell
@@ -417,7 +419,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				new ActionContributionItem(deinstallBundleAction),
 				new Separator(), 
 				new ActionContributionItem(installBundleAction) };
-		ToolbarIMenuCreator bundlesTB = new ToolbarIMenuCreator(items, tree);
+		bundlesTB = new ToolbarIMenuCreator(items, tree);
 		bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 		bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, bundlesTB);
@@ -616,7 +618,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		stopAction.updateState(selection);
 		updateBundleAction.updateState(selection);
 		deinstallBundleAction.updateState(selection);
-		commonPropertiesAction.updateState(selection);
+//		commonPropertiesAction.updateState(selection);
 
 		installBundleAction.updateState(selection);
 
@@ -644,6 +646,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			provider.updateEnabledState(connector);
 		}
 
+		bundlesTB.setEnabled(installBundleAction.isEnabled());
 	}
 
 	// Fill context menu Actions when menu is about to show
