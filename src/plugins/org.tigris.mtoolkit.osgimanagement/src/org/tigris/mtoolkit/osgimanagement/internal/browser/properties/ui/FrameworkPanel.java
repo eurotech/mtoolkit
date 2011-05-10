@@ -371,7 +371,9 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 
 	public void setValidState(String error) {
 		if (errorMonitor != null) {
-			errorMonitor.setErrorMessage(error);
+			if (!composite.isDisposed()) {
+				errorMonitor.setErrorMessage(error);
+			}
 		}
 	}
 
