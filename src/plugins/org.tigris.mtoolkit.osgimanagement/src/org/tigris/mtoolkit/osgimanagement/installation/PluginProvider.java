@@ -248,7 +248,7 @@ public class PluginProvider implements InstallationItemProvider {
 			return null;
 		return new PluginItem(model, this);
 	}
-
+ 
 	public boolean isCapable(Object resource) {
 		if (resource instanceof IProject || resource instanceof IJavaProject) {
 			IProject project = null;
@@ -257,7 +257,9 @@ public class PluginProvider implements InstallationItemProvider {
 			} else {
 				project = ((IProject) resource).getProject();
 			}
-			return PDE.hasPluginNature(project);
+			if (project.isOpen()) {
+			  return PDE.hasPluginNature(project);
+			}
 		} else if (resource instanceof IPluginModelBase) {
 			return true;
 		}
