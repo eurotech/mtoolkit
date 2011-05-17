@@ -23,7 +23,7 @@ public class CommonPropertiesAction extends SelectionProviderAction implements I
 		super(provider, text);
 		this.parentView = (TreeViewer) provider;
 		this.setEnabled(false);
-		this.setText(text + "@Ctrl+Enter");
+		this.setText(text + "@Alt+Enter");
 		actions = new Vector();
 	}
 
