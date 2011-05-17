@@ -44,19 +44,33 @@ public class VMCommander {
 	private UDPListener udpListener;
 	private PMPServer pmpServer;
 	private boolean shutdownOnDisconnect;
+	private volatile boolean closed;
 
 	public VMCommander(BundleContext bc, PMPServer pmpServer, boolean shutdownOnDisconnect) {
 		this.bc = bc;
 		this.pmpServer = pmpServer;
 		this.shutdownOnDisconnect = shutdownOnDisconnect;
 		startUDPListener();
-		startServer();
+		startServerAsync();
 	}
 
-	public void close() {
+	public synchronized void close() {
 		stopServer();
 		if (udpListener != null)
 			udpListener.dispose();
+		closed = true;
+	}
+
+	private void startServerAsync() {
+		new Thread("IAgent controller connection...") {
+			public void run() {
+				startServer();
+				if (closed) {
+					// if VMCommander is closed during connection 
+					stopServer();
+				}
+			}
+		}.start();
 	}
 
 	private synchronized void startServer() {
