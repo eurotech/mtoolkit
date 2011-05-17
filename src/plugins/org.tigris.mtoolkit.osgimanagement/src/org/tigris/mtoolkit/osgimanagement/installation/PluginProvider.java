@@ -156,7 +156,16 @@ public class PluginProvider implements InstallationItemProvider {
 			
 			// find missing bundle dependencies
 			BundleDescription descr = pluginBase.getBundleDescription();
-			BundleDescription[] required = descr.getResolvedRequires();
+			if (descr == null) {
+				String path = "";
+				try {
+					path = " for: " + pluginBase.getUnderlyingResource().getProject().getName();
+				} catch (Throwable t) {
+				}
+				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
+						"Missing bundle description"+path);
+			}
+			BundleDescription[] required = descr == null ? new BundleDescription[0] : descr.getResolvedRequires();
 			final Vector dependencies = new Vector();
 			for (int i = 0; i < required.length; i++) {
 				String symbName = required[i].getSymbolicName();

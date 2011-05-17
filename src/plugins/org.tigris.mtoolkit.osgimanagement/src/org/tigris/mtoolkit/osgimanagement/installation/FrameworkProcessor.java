@@ -187,6 +187,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				monitor.setCanceled(true);
 				return status;
 			}
+			if (status.getSeverity() == IStatus.ERROR) {
+				return status;
+			}
 		}
 
 		InputStream input = null;
