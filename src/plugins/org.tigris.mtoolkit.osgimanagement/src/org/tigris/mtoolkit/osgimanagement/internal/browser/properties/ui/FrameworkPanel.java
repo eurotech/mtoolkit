@@ -31,6 +31,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.PageBook;
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -107,6 +108,28 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 
 		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(index);
 		showDeviceTypePanel(selectedProvider);
+		
+		DeviceConnector connector = fw.getConnector();
+		if (connector != null) {
+			String transportType = (String) connector.getProperties().get(DeviceConnector.TRANSPORT_TYPE);
+			if (transportType != null) {
+				List providers = FrameworkPanel.obtainDeviceTypeProviders(null);
+				for (int i=0; i<providers.size(); i++) {
+					DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);
+					try {
+						String pTransportType = provider.getProvider().getTransportType();
+						if (transportType.equals(pTransportType)) {
+							String id = provider.getTypeId();
+							fw.getConfig().putString(TRANSPORT_PROVIDER_ID, id);
+							break;
+						}
+					} catch (CoreException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 
 	private void createDeviceTypeCombo(Composite parent) {
