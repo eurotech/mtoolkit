@@ -22,7 +22,8 @@ public class StartBundleOperation extends RemoteBundleOperation {
 
 	protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
 		RemoteBundle rBundle = getBundle().getRemoteBundle();
-		rBundle.start(0);
+		int flags = FrameworkConnectorFactory.isActivationPolicyEnabled ? org.osgi.framework.Bundle.START_ACTIVATION_POLICY : 0;
+		rBundle.start(flags);
 		if (rBundle.getState() == org.osgi.framework.Bundle.RESOLVED) {
 			// the bundle failed to start, most probably because its
 			// start level is too high
