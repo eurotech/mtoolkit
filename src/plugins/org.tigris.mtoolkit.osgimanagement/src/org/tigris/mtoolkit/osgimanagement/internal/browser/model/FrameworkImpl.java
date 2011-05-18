@@ -815,7 +815,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 						refreshing = true;
 						try {
 							if (tree != null) {
-								tree.getDisplay().syncExec(new Runnable() {
+								tree.getDisplay().asyncExec(new Runnable() {
 									public void run() {
 										tree.setRedraw(false);
 									}
@@ -824,7 +824,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 							clearModel();
 						} finally {
 							if (tree != null) {
-								tree.getDisplay().syncExec(new Runnable() {
+								tree.getDisplay().asyncExec(new Runnable() {
 									public void run() {
 										tree.setRedraw(true);
 									}
