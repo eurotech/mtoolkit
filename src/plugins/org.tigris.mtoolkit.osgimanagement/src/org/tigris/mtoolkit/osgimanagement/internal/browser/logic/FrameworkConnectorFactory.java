@@ -173,7 +173,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 			FrameworkImpl fw = fwArr[j];
 			BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
 			synchronized (Framework.getLockObject(connector)) {
-
+				ActionsManager.disconnectConsole(fw); //$NON-NLS-1$
 				FrameworkImpl fws[] = FrameWorkView.getFrameworks();
 				if (fws != null) {
 					for (int i = 0; i < fws.length; i++) {
@@ -188,7 +188,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 						}
 					}
 				}
-				ActionsManager.disconnectConsole(fw); //$NON-NLS-1$
 			}
 		}
 	}
