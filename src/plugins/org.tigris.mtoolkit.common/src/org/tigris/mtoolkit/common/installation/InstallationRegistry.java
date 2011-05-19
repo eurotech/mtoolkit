@@ -68,10 +68,13 @@ public class InstallationRegistry {
 
   public InstallationItem getItem(Object source, String mimeType) {
     List items = getItems(source);
-    for (Iterator it = items.iterator(); it.hasNext();) {
-      InstallationItem item = (InstallationItem) it.next();
-      if (item.getMimeType().equals(mimeType))
-        return item;
+    if (items != null) {
+      for (Iterator it = items.iterator(); it.hasNext();) {
+        InstallationItem item = (InstallationItem) it.next();
+        if (item.getMimeType().equals(mimeType)) {
+          return item;
+        }
+      }
     }
     return null;
   }
