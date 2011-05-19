@@ -10,4 +10,7 @@
             primary="true">
       </toc>
    </extension>
+   <extension point="org.eclipse.help.contexts"> 
+      <contexts file="contexts_mtoolkit.xml" plugin="org.tigris.mtoolkit"/> 
+   </extension>
 </plugin>

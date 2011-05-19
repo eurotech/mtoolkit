@@ -7,8 +7,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -26,6 +28,7 @@ public class FrameworkPropertyPage extends PropertyPage implements ConstantsDist
 	 * @see PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PROPERTY_FRAMEWORK);
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = 0;
