@@ -79,6 +79,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -111,7 +112,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AddAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.BundlePropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.CommonPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ConnectAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DeInstallBundleAction;
@@ -119,10 +119,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Dis
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.FindAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.GotoServiceAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallBundleAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.PropertyAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RefreshAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RemoveAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ServicePropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowBundleIDAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowBundleVersionAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowFrameworkConsole;
@@ -826,6 +824,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
 	public void setFocus() {
+	    Control c = tree == null ? null : tree.getTree();
+	    if (c != null && !c.isDisposed() && !c.isFocusControl()) {
+	      c.setFocus();
+	    }
 	}
 
 	public static FrameworkImpl[] getFrameworks() {
