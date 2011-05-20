@@ -160,7 +160,7 @@ public class SelectionPanel extends Composite {
 		});
 
 		Composite buttonsPanel = new Composite(this, SWT.NONE);
-		buttonsPanel.setLayout(new GridLayout(2, false));
+		buttonsPanel.setLayout(new GridLayout(2, true));
 		buttonsPanel.setLayoutData(new GridData());
 
 		Button btnSelect = new Button(buttonsPanel, SWT.PUSH);
@@ -171,8 +171,7 @@ public class SelectionPanel extends Composite {
 				fireCheckStateChanged(new CheckStateChangedEvent2(list, listItems, true));
 			}
 		});
-		GridData gridData = new GridData();
-		gridData.widthHint = 80;
+		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		btnSelect.setLayoutData(gridData);
 
 		Button btnDeselect = new Button(buttonsPanel, SWT.PUSH);
@@ -183,8 +182,7 @@ public class SelectionPanel extends Composite {
 				fireCheckStateChanged(new CheckStateChangedEvent2(list, listItems, false));
 			}
 		});
-		gridData = new GridData();
-		gridData.widthHint = 80;
+		gridData = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		btnDeselect.setLayoutData(gridData);
 	}
 
