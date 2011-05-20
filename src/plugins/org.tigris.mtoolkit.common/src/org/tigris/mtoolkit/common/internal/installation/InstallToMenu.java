@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.common.internal.installation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -34,150 +35,128 @@ import org.tigris.mtoolkit.common.installation.InstallationRegistry;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 
 public class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
-	private ISelectionService selectionService = null;
+  private ISelectionService selectionService = null;
 
-	public InstallToMenu() {
-		super();
-	}
+  public InstallToMenu() {
+    super();
+  }
 
-	public InstallToMenu(String id) {
-		super(id);
-	}
+  public InstallToMenu(String id) {
+    super(id);
+  }
 
-	protected IContributionItem[] getContributionItems() {
-		List installationItems = getInstallationItems();
-		if (installationItems == null || installationItems.size() == 0) {
-			return new IContributionItem[0];
-		}
+  protected IContributionItem[] getContributionItems() {
+    List mappings = getInstallationMappings();
+    if (mappings == null || mappings.size() == 0) {
+      return new IContributionItem[0];
+    }
 
-		List capableProcessors = getCapableProcessors(installationItems);
-		if (capableProcessors == null || capableProcessors.size() == 0) {
-			return new IContributionItem[0];
-		}
-		installationItems = removeUnsupportedFromTarget(installationItems, capableProcessors);
-		if (installationItems.isEmpty())
-			return new IContributionItem[0];
+    List capableProcessors = getCapableProcessors(mappings);
+    if (capableProcessors == null || capableProcessors.size() == 0) {
+      return new IContributionItem[0];
+    }
 
-		MenuManager menuManager = new MenuManager(Messages.install_to_menu_label); //$NON-NLS-1$
+    MenuManager menuManager = new MenuManager(Messages.install_to_menu_label); //$NON-NLS-1$
 
-		Iterator iterator = capableProcessors.iterator();
-		boolean first = true;
-		while (iterator.hasNext()) {
-			if (!first) {
-				menuManager.add(new Separator());
-			}
-			createActions((InstallationItemProcessor) iterator.next(), installationItems, menuManager);
-			first = false;
-		}
+    Iterator iterator = capableProcessors.iterator();
+    boolean first = true;
+    while (iterator.hasNext()) {
+      if (!first) {
+        menuManager.add(new Separator());
+      }
+      createActions((InstallationItemProcessor) iterator.next(), mappings, menuManager);
+      first = false;
+    }
 
-		menuManager.setVisible(true);
-		return new IContributionItem[] { menuManager };
-	}
+    menuManager.setVisible(true);
+    return new IContributionItem[] { menuManager };
+  }
 
-	private List removeUnsupportedFromTarget(List installationItems, List capableProcessors) {
-		Iterator iter = installationItems.iterator();
-		List temp = new ArrayList();
-		while (iter.hasNext()) {
-			InstallationItem item = (InstallationItem) iter.next();
-			String mimeType = item.getMimeType();
-			boolean supported = false;
-			for (int j = 0; j < capableProcessors.size(); j++) {
-				InstallationItemProcessor processor = (InstallationItemProcessor) capableProcessors.get(j);
-				String[] procMimeTypes = processor.getSupportedMimeTypes();
-				for (int k = 0; k < procMimeTypes.length; k++) {
-					if (procMimeTypes[k].equals(mimeType)) {
-						supported = true;
-						break;
-					}
-				}
-				if (supported) {
-					temp.add(item);
-					break;
-				}
-			}
-		}
-		return temp;
-	}
+  private void createActions(InstallationItemProcessor processor, List mappings, final MenuManager menuManager) {
+    InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
 
-	private void createActions(InstallationItemProcessor processor, List items, final MenuManager menuManager) {
-		InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
+    for (int i = 0; i < targets.length; i++) {
+      Action action = new InstallToAction(processor, targets[i], mappings);
+      action.setId("Install_to_" + processor.hashCode() + targets[i].getName().hashCode()); //$NON-NLS-1$
+      action.setImageDescriptor(targets[i].getIcon());
+      menuManager.add(new ActionContributionItem(action));
+    }
 
-		for (int i = 0; i < targets.length; i++) {
-			Action action = new InstallToAction(processor, targets[i], items);
-			action.setId("Install_to_" + processor.hashCode() + targets[i].getName().hashCode()); //$NON-NLS-1$
-			action.setImageDescriptor(targets[i].getIcon());
-			menuManager.add(new ActionContributionItem(action));
-		}
+    Action action = new InstallToSelectionDlgAction(processor, mappings, InstallationRegistry.getInstance()
+        .getSelectionDialog(processor), new IShellProvider() {
+      public Shell getShell() {
+        return menuManager.getMenu().getShell();
+      }
+    });
+    action.setId("Install_to_" + processor.hashCode() + "selection_dlg"); //$NON-NLS-1$
+    action.setImageDescriptor(processor.getGeneralTargetImageDescriptor());
+    menuManager.add(new ActionContributionItem(action));
+  }
 
-		Action action = new InstallToSelectionDlgAction(processor,
-			items,
-			InstallationRegistry.getInstance().getSelectionDialog(processor),
-			new IShellProvider() {
-				public Shell getShell() {
-					return menuManager.getMenu().getShell();
-				}
-			});
-		action.setId("Install_to_" + processor.hashCode() + "selection_dlg"); //$NON-NLS-1$
-		action.setImageDescriptor(processor.getGeneralTargetImageDescriptor());
-		menuManager.add(new ActionContributionItem(action));
-	}
+  private List/*<Mapping>*/getInstallationMappings() {
+    ISelection selection = selectionService.getSelection();
+    if (selection == null) {
+      return null;
+    }
+    if (!(selection instanceof IStructuredSelection))
+      return null;
+    IStructuredSelection sel = (IStructuredSelection) selection;
+    List resources = sel.toList();
 
-	private List getInstallationItems() {
-		ISelection selection = selectionService.getSelection();
-		if (selection == null) {
-			return null;
-		}
-		if (!(selection instanceof IStructuredSelection))
-			return null;
-		IStructuredSelection sel = (IStructuredSelection) selection;
-		List resources = sel.toList();
-		
-		List items = new ArrayList();
-		Iterator resIterator = resources.iterator();
-		while (resIterator.hasNext()) {
-			Object res = resIterator.next();
-			List resItems = InstallationRegistry.getInstance().getItems(res);
-			if (resItems != null && resItems.size() > 0 ) {
-				items.addAll(resItems);
-				}
-			}
+    List mappings = new ArrayList();
+    Iterator resIterator = resources.iterator();
+    while (resIterator.hasNext()) {
+      Object res = resIterator.next();
+      Map resItems = InstallationRegistry.getInstance().getItems(res);
+      if (resItems != null && resItems.size() > 0) {
+        mappings.add(new InstallToAction.Mapping(res, resItems));
+      }
+    }
 
-		return items;
-	}
+    return mappings;
+  }
 
-	private List getCapableProcessors(List installationItems) {
-		List capableProcessors = new ArrayList();
+  private List getCapableProcessors(List/*<Mapping>*/installationMappings) {
+    List capableProcessors = new ArrayList();
 
-		Iterator processorsIterator = InstallationRegistry.getInstance().getProcessors().iterator();
-		while (processorsIterator.hasNext()) {
-			InstallationItemProcessor processor = (InstallationItemProcessor) processorsIterator.next();
-			Iterator itemsIterator = installationItems.iterator();
-			boolean isCapable = true;
-			String[] supportedTypes = processor.getSupportedMimeTypes();
-			while (itemsIterator.hasNext()) {
-				InstallationItem item = (InstallationItem) itemsIterator.next();
-				if (!hasMatch(item.getMimeType(), supportedTypes)) {
-					isCapable = false;
-					break;
-				}
-			}
-			if (isCapable) {
-				capableProcessors.add(processor);
-			}
-		}
-		return capableProcessors;
-	}
+    Iterator processorsIterator = InstallationRegistry.getInstance().getProcessors().iterator();
+    while (processorsIterator.hasNext()) {
+      InstallationItemProcessor processor = (InstallationItemProcessor) processorsIterator.next();
+      Iterator mappingsIterator = installationMappings.iterator();
+      boolean isCapable = true;
+      String[] supportedTypes = processor.getSupportedMimeTypes();
+      while (mappingsIterator.hasNext()) {
+        Map items = ((InstallToAction.Mapping) mappingsIterator.next()).providerSpecificItems;
+        boolean supportedResource = false;
+        for (Iterator it = items.values().iterator(); it.hasNext();) {
+          InstallationItem item = (InstallationItem) it.next();
+          if (hasMatch(item.getMimeType(), supportedTypes)) {
+            supportedResource = true;
+            break;
+          }
+        }
+        if (!supportedResource) {
+          isCapable = false;
+          break;
+        }
+      }
+      if (isCapable) {
+        capableProcessors.add(processor);
+      }
+    }
+    return capableProcessors;
+  }
 
-	private static boolean hasMatch(String type, String[] supported) {
-		for (int i = 0; i < supported.length; i++) {
-			if (supported[i].equals(type)) {
-				return true;
-			}
-		}
-		return false;
-	}
+  private static boolean hasMatch(String type, String[] supported) {
+    for (int i = 0; i < supported.length; i++) {
+      if (supported[i].equals(type)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	public void initialize(IServiceLocator serviceLocator) {
-		selectionService = ((ISelectionService) serviceLocator.getService(ISelectionService.class));
-	}
+  public void initialize(IServiceLocator serviceLocator) {
+    selectionService = ((ISelectionService) serviceLocator.getService(ISelectionService.class));
+  }
 }

@@ -3,6 +3,7 @@ package org.tigris.mtoolkit.common.installation;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,33 +48,41 @@ public class InstallationRegistry {
     return result;
   }
 
-  public List/*<InstallationItem>*/getItems(Object source) {
-    List items = new ArrayList();
-    boolean hasCapableProvider = false;
+  /**
+   * Returns map containing capable providers (as keys) and installation items
+   * (as values) for the given source element.
+   * 
+   * @param source
+   * @return map with provider-item pairs or empty map
+   */
+  public Map/*<InstallationItemProvider, InstallationItem>*/getItems(Object source) {
+    Map items = new Hashtable();
     for (Iterator it = getProviders().iterator(); it.hasNext();) {
       InstallationItemProvider provider = (InstallationItemProvider) it.next();
       if (provider.isCapable(source)) {
         InstallationItem item = provider.getInstallationItem(source);
         if (item != null) {
-          items.add(item);
-          hasCapableProvider = true;
+          items.put(provider, item);
         }
       }
-    }
-    if (!hasCapableProvider) {
-      return null;
     }
     return items;
   }
 
+  /**
+   * Returns the first found installation item for given source with specified
+   * mimeType.
+   * 
+   * @param source
+   * @param mimeType
+   * @return installation item or null if no item is found
+   */
   public InstallationItem getItem(Object source, String mimeType) {
-    List items = getItems(source);
-    if (items != null) {
-      for (Iterator it = items.iterator(); it.hasNext();) {
-        InstallationItem item = (InstallationItem) it.next();
-        if (item.getMimeType().equals(mimeType)) {
-          return item;
-        }
+    Map items = getItems(source);
+    for (Iterator it = items.values().iterator(); it.hasNext();) {
+      InstallationItem item = (InstallationItem) it.next();
+      if (item.getMimeType().equals(mimeType)) {
+        return item;
       }
     }
     return null;

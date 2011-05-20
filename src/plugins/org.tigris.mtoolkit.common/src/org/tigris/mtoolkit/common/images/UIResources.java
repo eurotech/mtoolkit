@@ -38,6 +38,8 @@ public class UIResources {
 	 */
 	public static final String OVR_ERROR_ICON = UtilitiesPlugin.PLUGIN_ID + ".ovr_error_icon";
 	public static final String SSL_INTERACTION_WIZBAN_ICON = UtilitiesPlugin.PLUGIN_ID + "ssl_interaction_wizban_icon";
+  public static final String WORKSPACE_FILE_ICON = UtilitiesPlugin.PLUGIN_ID + ".ws_file_icon";
+  public static final String PLUGIN_ICON = UtilitiesPlugin.PLUGIN_ID + ".plugin_icon";
 
 	private static final String OBJECT_PATH = "/icons/obj16/";
 	private static final String OVERLAY_PATH = "/icons/ovr16/";
@@ -52,6 +54,8 @@ public class UIResources {
 		registry.put(CERTIFICATE_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "signed_yes_tbl.gif"));
 		registry.put(OVR_ERROR_ICON, UtilitiesPlugin.getImageDescriptor(OVERLAY_PATH + "error_co.gif"));
 		registry.put(SSL_INTERACTION_WIZBAN_ICON, UtilitiesPlugin.getImageDescriptor(WIZBAN_PATH + "ssl.dialog.wiz.warning.gif"));
+    registry.put(WORKSPACE_FILE_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "ws_file.gif"));
+    registry.put(PLUGIN_ICON, UtilitiesPlugin.getImageDescriptor(OBJECT_PATH + "plugin.gif"));
 	}
 
 	private static ImageRegistry getImageRegistry() {

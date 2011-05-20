@@ -20,7 +20,9 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
+import org.tigris.mtoolkit.common.images.UIResources;
 
 /**
  * Generic implementation of the {@link InstallationItemProvider}, which
@@ -39,63 +41,67 @@ import org.tigris.mtoolkit.common.UtilitiesPlugin;
  */
 public class WorkspaceFileProvider implements InstallationItemProvider {
 
-	protected String extension;
-	protected String mimeType;
-	protected String name;
+  protected String extension;
+  protected String mimeType;
+  protected String name;
 
-	public InstallationItem getInstallationItem(Object resource) {
-		return new WorkspaceFileItem(getFileFromGeneric(resource), mimeType);
-	}
-	
-	public void init(IConfigurationElement element) throws CoreException {
-		extension = element.getAttribute("extension");
-		if (extension == null)
-			throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
-				"Installation item provider must specify 'extension' attribute",
-				null));
-		mimeType = element.getAttribute("type");
-		if (mimeType == null)
-			throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
-				"Installation item provider must specify 'type' attribute",
-				null));
-		name = element.getAttribute("name");
-		if (name == null)
-			throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
-				"Installation item provider must specify 'name' attribute",
-				null));
-		// successful
-	}
+  public InstallationItem getInstallationItem(Object resource) {
+    return new WorkspaceFileItem(getFileFromGeneric(resource), mimeType);
+  }
 
-	public boolean isCapable(Object resource) {
-		IFile file = getFileFromGeneric(resource);
-		if (file != null && extension.equals(file.getFileExtension())) {
-			return true;
-		}
-		return false;
-	}
+  public void init(IConfigurationElement element) throws CoreException {
+    extension = element.getAttribute("extension");
+    if (extension == null)
+      throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
+          "Installation item provider must specify 'extension' attribute", null));
+    mimeType = element.getAttribute("type");
+    if (mimeType == null)
+      throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
+          "Installation item provider must specify 'type' attribute", null));
+    name = element.getAttribute("name");
+    if (name == null)
+      throw new CoreException(UtilitiesPlugin.newStatus(IStatus.ERROR,
+          "Installation item provider must specify 'name' attribute", null));
+    // successful
+  }
 
-	protected IFile getFileFromGeneric(Object resource) {
-		if (resource instanceof IFile) {
-			return (IFile) resource;
-		} else if (resource instanceof IAdaptable) {
-			return (IFile) ((IAdaptable) resource).getAdapter(IFile.class);
-		}
-		return null;
-	}
+  public boolean isCapable(Object resource) {
+    IFile file = getFileFromGeneric(resource);
+    if (file != null && extension.equals(file.getFileExtension())) {
+      return true;
+    }
+    return false;
+  }
 
-	/**
-	 * @since 6.0
-	 */
-	public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
-		if (items != null) {
-			for (int i = 0; i < items.size(); i++) {
-				Object item = items.get(i);
-				if (item instanceof WorkspaceFileItem) {
-					((WorkspaceFileItem) item).prepare(monitor, properties);
-				}
-			}
-		}
-		return Status.OK_STATUS;
-	}
+  protected IFile getFileFromGeneric(Object resource) {
+    if (resource instanceof IFile) {
+      return (IFile) resource;
+    } else if (resource instanceof IAdaptable) {
+      return (IFile) ((IAdaptable) resource).getAdapter(IFile.class);
+    }
+    return null;
+  }
 
+  /**
+   * @since 6.0
+   */
+  public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
+    if (items != null) {
+      for (int i = 0; i < items.size(); i++) {
+        Object item = items.get(i);
+        if (item instanceof WorkspaceFileItem) {
+          ((WorkspaceFileItem) item).prepare(monitor, properties);
+        }
+      }
+    }
+    return Status.OK_STATUS;
+  }
+
+  public String getName() {
+    return "Workspace files provider";
+  }
+
+  public ImageDescriptor getImageDescriptor() {
+    return UIResources.getImageDescriptor(UIResources.WORKSPACE_FILE_ICON);
+  }
 }

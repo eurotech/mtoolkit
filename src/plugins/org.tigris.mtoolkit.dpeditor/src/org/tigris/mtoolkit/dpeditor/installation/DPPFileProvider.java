@@ -109,4 +109,8 @@ public class DPPFileProvider extends WorkspaceFileProvider {
 	public InstallationItem getInstallationItem(Object resource) {
 		return new DPPFileItem(getFileFromGeneric(resource), mimeType);
 	}
+
+	public String getName() {
+		return "Deployment packages provider";
+	}
 }

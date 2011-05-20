@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
  * Providers of {@link InstallationItem} should implement this interface. It
@@ -79,4 +80,21 @@ public interface InstallationItemProvider {
 	 *            the configuration element of the item provider
 	 */
 	public void init(IConfigurationElement element) throws CoreException;
+
+	/**
+	 * Returns human readable name of this item provider.
+	 * 
+	 * @return the provider name
+	 * @since 6.1
+	 */
+	public String getName();
+
+  /**
+   * Returns image descriptor for this provider.
+   * 
+   * @return the image descriptor or null
+   * @since 6.1
+   */
+  public ImageDescriptor getImageDescriptor();
+
 }

@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.IBaseModel;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
@@ -42,14 +43,17 @@ import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.export.PluginExportManager;
+import org.tigris.mtoolkit.common.images.UIResources;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 /**
  * @since 5.0
@@ -304,7 +308,15 @@ public class PluginProvider implements InstallationItemProvider {
 		monitor.done();
 		return Status.OK_STATUS;
 	}
-		
+
+	public String getName() {
+		return "Plug-ins provider";
+	}
+
+	public ImageDescriptor getImageDescriptor() {
+		return UIResources.getImageDescriptor(UIResources.PLUGIN_ICON);
+	}
+
 	private IStatus export(List items, final IProgressMonitor monitor) {//throws CoreException {
         try {
             monitor.beginTask("Exporting...", 10);
