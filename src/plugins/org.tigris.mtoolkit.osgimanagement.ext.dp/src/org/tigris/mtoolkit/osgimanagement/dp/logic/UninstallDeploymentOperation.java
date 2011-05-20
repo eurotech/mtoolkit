@@ -50,7 +50,7 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
 		return Status.OK_STATUS;
 	}
 
-	private IStatus uninstallDeploymentPackage(boolean forced) throws IAgentException {
+	protected IStatus uninstallDeploymentPackage(boolean forced) throws IAgentException {
 		RemoteDP rPackage = getDeploymentPackage().getRemoteDP();
 		rPackage.uninstall(forced);
 		return Status.OK_STATUS;

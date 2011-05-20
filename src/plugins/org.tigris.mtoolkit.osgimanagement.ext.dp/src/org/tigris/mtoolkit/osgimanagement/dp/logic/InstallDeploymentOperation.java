@@ -84,15 +84,13 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 							return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
 								"Local representation of the remote OSGi framework is stale. Refresh and try again.",
 								null);
-						Job uninstallJob = new UninstallDeploymentOperation(packageNode);
-						uninstallJob.schedule();
-						try {
-							uninstallJob.join();
-						} catch (InterruptedException e) {
-							return new Status(IStatus.WARNING, Activator.PLUGIN_ID,
-								"Unable to finish deployment package installation",
-								e);
+						UninstallDeploymentOperation uninstallJob = new UninstallDeploymentOperation(packageNode);
+						monitor.subTask(uninstallJob.getName());
+						IStatus status = uninstallJob.uninstallDeploymentPackage(false);
+						if (!status.equals(Status.OK_STATUS)) {
+							return status;
 						}
+						monitor.subTask(getName());
 					}
 				}
 			}
