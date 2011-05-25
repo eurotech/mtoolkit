@@ -55,7 +55,7 @@ public class ConnectFrameworkJob extends Job {
 		this.fw = framework;
 	}
 
-	public IStatus run(IProgressMonitor monitor) {
+	public IStatus run(final IProgressMonitor monitor) {
 		monitor.beginTask(NLS.bind(Messages.connect_framework, fw.getName()), 1);
 
 		synchronized (connectingFrameworks) {
@@ -85,6 +85,7 @@ public class ConnectFrameworkJob extends Job {
 		}
 
 		DeviceConnector connector = fw.getConnector();
+		final boolean canceled[] = new boolean[] {false};
 		try {
 			if (connector != null && connector.isActive()) {
 				FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl)fw, fw.getName(), ((FrameworkImpl)fw).autoConnected);
@@ -115,17 +116,51 @@ public class ConnectFrameworkJob extends Job {
 					if (aConnProps == null) {
 						aConnProps = new Hashtable();
 					}
-					connector = DeviceConnector.connect(transportType, id, aConnProps, null);
-					FrameworkConnectorFactory.connectFramework(connector, fw.getName());
+					final DeviceConnector conn[] = new DeviceConnector[1];
+					final String rTransportType = transportType;
+					final String rID = id;
+					final Dictionary rConnProps = aConnProps;
+					final IStatus rStatus[] = new IStatus[1];
+					new Thread() {
+						public void run() {
+							try {
+								conn[0] = DeviceConnector.connect(rTransportType, rID, rConnProps, null);
+								FrameworkConnectorFactory.connectFramework(conn[0], fw.getName());
+							} catch (IAgentException e) {
+								if (monitor.isCanceled() || canceled[0]) {
+									return;
+								}
+								if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT) {
+									handleConnectionFailure(e);
+									monitor.setCanceled(true);
+								} else {
+									rStatus[0] = Util.handleIAgentException(e);
+								}
+							} catch (IllegalStateException e) {
+								rStatus[0] = Util.handleIAgentException(new IAgentException(e.getMessage(), IAgentErrors.ERROR_CANNOT_CONNECT, e));
+							}
+						}
+					}.start();
+					while (conn[0] == null && rStatus[0] == null) {
+						try {
+							Thread.currentThread().sleep(50);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						if (monitor.isCanceled()) {
+							monitor.done();
+							canceled[0] = true;
+							return Status.CANCEL_STATUS;
+						}
+					}
+					if (rStatus[0] != null) {
+						monitor.done();
+						return rStatus[0];
+					}
 				} else {
 					errorProviderNotFound();
 				}
 			}
-		} catch (IAgentException e) {
-			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT)
-				handleConnectionFailure(e);
-			else
-				return Util.handleIAgentException(e);
 		} finally {
 			// remove the framework in any case
 			synchronized (connectingFrameworks) {
@@ -133,7 +168,6 @@ public class ConnectFrameworkJob extends Job {
 				connectingFrameworks.notifyAll();
 			}
 		}
-
 		monitor.done();
 		return Status.OK_STATUS;
 	}

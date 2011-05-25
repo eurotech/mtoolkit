@@ -102,6 +102,7 @@ public class PMPConnectionListener implements ConnectionListener {
 									instrumenting = true;
 									connector.getVMManager().instrumentVM();
 								} catch (IAgentException iae) {
+									if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 									return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Unable to instrument VM.", iae);
 								} finally {
 									instrumenting = false;
