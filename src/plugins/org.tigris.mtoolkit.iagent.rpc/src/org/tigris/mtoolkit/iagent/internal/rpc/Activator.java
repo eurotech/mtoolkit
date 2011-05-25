@@ -45,7 +45,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	private PMPServer pmpServer;
 	private ServiceRegistration pmpServiceReg;
 	private ServiceRegistration pmpServerReg;
-	private BundleContext context;
+	private static BundleContext context;
 	private static Activator instance;
 	private EventSynchronizerImpl synchronizer;
 	private VMCommander vmCommander;
@@ -281,5 +281,9 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	public void frameworkEvent(FrameworkEvent event) {
 		if (event.getType() == FrameworkEvent.STARTED)
 			startController(context);
+	}
+	
+	public static BundleContext getBundleContext() {
+		return context;
 	}
 }

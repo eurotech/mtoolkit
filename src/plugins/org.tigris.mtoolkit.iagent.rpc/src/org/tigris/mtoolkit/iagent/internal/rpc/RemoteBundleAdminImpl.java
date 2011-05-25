@@ -736,7 +736,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	}
 	
 	public String getSystemProperty(String name) {
-		return System.getProperty(name);
+		return Activator.getBundleContext().getProperty(name);
 	}
 
 	public Object getBundleResource(long id, String name, Dictionary properties) {
