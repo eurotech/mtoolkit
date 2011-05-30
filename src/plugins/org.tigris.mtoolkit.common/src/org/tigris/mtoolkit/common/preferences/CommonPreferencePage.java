@@ -34,11 +34,16 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 public class CommonPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private List preferencePages;
+
+	public static final String PREFIX = "org.tigris.mtoolkit.";
+	public static final String PROPERTY_PREFERENCES = PREFIX
+			+ "property_preferences_context"; //$NON-NLS-1$
 
 	private static class PreferencePageWrapper implements Comparable {
 		private IConfigurationElement element;
@@ -178,6 +183,9 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 			if (result != null)
 				result.setLayoutData(new GridData(GridData.FILL_BOTH));
 		}
+		PlatformUI.getWorkbench().getHelpSystem()
+				.setHelp(parent, PROPERTY_PREFERENCES);
+
 		return prefPane;
 	}
 

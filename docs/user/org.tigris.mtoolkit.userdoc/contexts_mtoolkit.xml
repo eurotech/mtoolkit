@@ -22,5 +22,9 @@
      <description>TODO</description>
      <topic href="doc/mbserver/reference/fw_menu.html" label="Service Properties"/>
   </context>
+  <context id="property_preferences_context">
+     <description>TODO</description>
+     <topic href="doc/mbserver/tasks/fw_preferences.html" label="mToolkit Preferences"/>
+  </context>
 
 </contexts>
