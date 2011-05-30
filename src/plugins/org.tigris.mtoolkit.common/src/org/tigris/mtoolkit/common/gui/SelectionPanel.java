@@ -87,7 +87,7 @@ public class SelectionPanel extends Composite {
 
 		list.addFilter(new ViewerFilter() {
 			public Object[] filter(Viewer viewer, Object parent, Object[] elements) {
-				String filter = filterText.getText().trim();
+				String filter = filterText.getText().trim().toLowerCase();
 				if ("".equals(filter)) {
 					return elements;
 				}
@@ -101,7 +101,7 @@ public class SelectionPanel extends Composite {
 			}
 
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				String filter = filterText.getText().trim();
+				String filter = filterText.getText().trim().toLowerCase();
 				return match(element, filter, viewer);
 			}
 
