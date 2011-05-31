@@ -16,6 +16,7 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -46,6 +47,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	private Button enableAutoStartButton;
 	private Button enableActivationPolicyButton;
 	private Button enableBundleCategoriesButton;
+	private Button showSkippedSystemBundlesButton;
 
 	// TODO: Move these defaults to PreferencesInitializer, which is more
 	// suitable for them
@@ -54,6 +56,9 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	public static final boolean autoStartAfterInstall = true;
 	public static final boolean useActivationPolicy = true;
 	public static final boolean showBundleCategories = true;
+	public static final boolean showSkippedSystemBundlesDefault = true;
+
+	private boolean showSkippedSystemBundles;
 
 	public Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -86,6 +91,10 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		enableBundleCategoriesButton.setText(Messages.show_bundle_categories);
 		enableBundleCategoriesButton.setSelection(FrameworkConnectorFactory.isBundlesCategoriesShown);
 
+		showSkippedSystemBundlesButton = new Button(composite, SWT.CHECK);
+		showSkippedSystemBundlesButton.setText(Messages.show_skipped_system_bundles);
+		showSkippedSystemBundlesButton.setSelection(showSkippedSystemBundles);
+
 		return composite;
 	}
 
@@ -103,6 +112,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		enableAutoStartButton.setSelection(autoStartAfterInstall);
 		enableActivationPolicyButton.setSelection(useActivationPolicy);
 		enableBundleCategoriesButton.setSelection(showBundleCategories);
+		showSkippedSystemBundlesButton.setSelection(showSkippedSystemBundlesDefault);
 	}
 
 	public boolean performOk() {
@@ -111,6 +121,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		FrameworkConnectorFactory.isAutoStartBundlesEnabled = enableAutoStartButton.getSelection();
 		FrameworkConnectorFactory.isActivationPolicyEnabled = enableActivationPolicyButton.getSelection();
 		BrowserErrorHandler.isInfoLogEnabled = enableInfoLogButton.getSelection();
+		showSkippedSystemBundles = showSkippedSystemBundlesButton.getSelection();
 
 		boolean shouldUpdateFrameworks = false;
 		if (FrameworkConnectorFactory.isBundlesCategoriesShown != enableBundleCategoriesButton.getSelection())
@@ -146,25 +157,31 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	private void saveSettings() {
 		FrameworkPlugin framework = FrameworkPlugin.getDefault();
 		if (framework != null) {
-			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_AUTOCONNECT,
+			IPreferenceStore store = framework.getPreferenceStore();
+			store.setValue(ConstantsDistributor.MEMENTO_AUTOCONNECT,
 				FrameworkConnectorFactory.isAutoConnectEnabled);
-			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL,
+			store.setValue(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL,
 				FrameworkConnectorFactory.isAutoStartBundlesEnabled);
-			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY,
+			store.setValue(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY,
 					FrameworkConnectorFactory.isActivationPolicyEnabled);
-			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_INFO_LOG,
+			store.setValue(ConstantsDistributor.MEMENTO_INFO_LOG,
 				BrowserErrorHandler.isInfoLogEnabled);
-			framework.getPreferenceStore().setValue(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY,
+			store.setValue(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY,
 				FrameworkConnectorFactory.isBundlesCategoriesShown);
+			store.setValue(ConstantsDistributor.MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES,
+					showSkippedSystemBundles);
 		}
 	}
 
 	private void loadSettings() {
-		FrameworkConnectorFactory.isAutoConnectEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT);
-		FrameworkConnectorFactory.isAutoStartBundlesEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
-		FrameworkConnectorFactory.isActivationPolicyEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY);
-		BrowserErrorHandler.isInfoLogEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
-		FrameworkConnectorFactory.isBundlesCategoriesShown = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY);
+		IPreferenceStore prefStore = getPreferenceStore();
+
+		FrameworkConnectorFactory.isAutoConnectEnabled = prefStore.getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT);
+		FrameworkConnectorFactory.isAutoStartBundlesEnabled = prefStore.getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
+		FrameworkConnectorFactory.isActivationPolicyEnabled = prefStore.getBoolean(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY);
+		BrowserErrorHandler.isInfoLogEnabled = prefStore.getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
+		FrameworkConnectorFactory.isBundlesCategoriesShown = prefStore.getBoolean(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY);
+		showSkippedSystemBundles = prefStore.getBoolean(ConstantsDistributor.MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES);
 	}
 
 }

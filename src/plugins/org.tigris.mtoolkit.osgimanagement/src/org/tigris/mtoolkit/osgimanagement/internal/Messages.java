@@ -91,6 +91,7 @@ public final class Messages extends NLS {
 	public static String connect_button_label;
 	public static String enable_frameworks_autoconnect;
 	public static String show_bundle_categories;
+	public static String show_skipped_system_bundles;
 	public static String enable_info_log;
 	public static String autostart_bundles_on_install;
 	public static String use_activation_policy;
