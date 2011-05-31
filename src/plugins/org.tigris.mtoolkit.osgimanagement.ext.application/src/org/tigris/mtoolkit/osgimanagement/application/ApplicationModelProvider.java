@@ -26,6 +26,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -195,7 +196,7 @@ public class ApplicationModelProvider implements ContentTypeModelProvider, Remot
 		if (connector == null) {
 			return true;
 		}
-		Dictionary connectorProperties = connector.getProperties();
+		Dictionary connectorProperties = Util.findFramework(connector).getConnectorProperties();
 		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
 		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
 			return true;

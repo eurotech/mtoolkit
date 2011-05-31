@@ -27,6 +27,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -78,6 +79,9 @@ public class Util {
 	 * @since 6.0
 	 */
 	public static Framework addFramework(DeviceConnector connector, IProgressMonitor monitor) throws CoreException {
+		if (!FrameworkPlugin.getDefault().getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT)) {
+			return null;
+		}
 		Dictionary connProps = connector.getProperties();
 		String frameWorkName = FrameworkConnectorFactory.generateFrameworkName(connProps);
 		return addFramework(connector, frameWorkName, monitor);
@@ -85,6 +89,9 @@ public class Util {
 
 	public static Framework addFramework(DeviceConnector connector, String name, IProgressMonitor monitor)
 			throws CoreException {
+		if (!FrameworkPlugin.getDefault().getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT)) {
+			return null;
+		}
 		FrameworkImpl fw = null;
 		boolean success = false;
 		try {
@@ -135,4 +142,11 @@ public class Util {
 		return null;
 	}
 
+	public static Framework findFramework(DeviceConnector connector) {
+		FrameworkImpl[] fws = FrameWorkView.findFramework(connector);
+		if (fws != null && fws.length > 0) {
+			return fws[0];
+		}
+		return null;
+	}
 }

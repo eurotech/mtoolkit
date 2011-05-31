@@ -30,6 +30,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
@@ -228,7 +229,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 		if (connector == null) {
 			return false;
 		}
-		Dictionary connectorProperties = connector.getProperties();
+		Dictionary connectorProperties = Util.findFramework(connector).getConnectorProperties();
 		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
 		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
 			return true;

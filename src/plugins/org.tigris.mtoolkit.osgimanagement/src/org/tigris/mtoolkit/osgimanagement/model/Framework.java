@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.model;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,10 @@ public abstract class Framework extends Model {
 	// framework IP or other ID
 	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
 	protected final List listeners = new ArrayList();
+	
+	private Dictionary connectorProperties = null;
+	private long timeStamp;
+	
 
 	/**
 	 * @since 6.0
@@ -50,6 +55,14 @@ public abstract class Framework extends Model {
 
 	public DeviceConnector getConnector() {
 		return connector;
+	}
+	
+	public synchronized Dictionary getConnectorProperties() {
+		if (connectorProperties == null || System.currentTimeMillis() - timeStamp > 30 * 1000) {
+			connectorProperties = connector.getProperties();
+			timeStamp = System.currentTimeMillis();
+		}
+		return connectorProperties;
 	}
 
 	public boolean isConnected() {
