@@ -251,6 +251,44 @@ public class CertUtils {
     signJar0(file, signedFile, properties, new ArrayList(), monitor);
   }
 
+	/**
+	 * Convenient method for signing jar files with information provided in
+	 * passed properties. If no signing information is provided then this
+	 * function does nothing. Multiple signing is allowed. If no password is
+	 * provided for given certificate, a dialog for entering password is
+	 * displayed.
+	 * 
+	 * @param files
+	 *            the files to be signed.
+	 * @param signedFiles
+	 *            the output files.
+	 * @param monitor
+	 *            the progress monitor.
+	 * @param properties
+	 * @throws IOException
+	 *             in case of signing error
+	 * @since 6.1
+	 */
+	public static void signJars(File files[], File signedFiles[],
+			IProgressMonitor monitor, Map properties)
+			throws IOException {
+		if (properties == null || files == null || signedFiles == null
+				|| files.length != signedFiles.length) {
+			return;
+		}
+		int count = getCertificatesCount(properties);
+		if (count <= 0) {
+			return;
+		}
+		List passwords = new ArrayList();
+		for (int i = 0; i < files.length; i++) {
+			boolean shouldContinue = signJar0(files[i], signedFiles[i],
+					properties, passwords, monitor);
+			if (!shouldContinue)
+				return;
+		}
+	}
+
   /**
    * Convenient method for signing DP file with information provided in passed properties. 
    * If no signing information is provided then this function does nothing.
