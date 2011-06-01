@@ -82,7 +82,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		debug("[getBundles] >>> symbolicName: " + symbolicName + "; version: " + version);
 		if (symbolicName == null)
 			throw new IllegalArgumentException("Symbolic name parameter cannot be null");
-		long[] bids = (long[]) GET_BUNDLES_METHOD.call(getBundleAdmin(), new Object[] { symbolicName, version });
+		long[] bids = (long[]) GET_BUNDLES_METHOD.call(getBundleAdmin(), new Object[] { symbolicName, "[" + version + "," + version + "]" });
 		if (bids == null) {
 			final String msg = "PackageAdmin service is unavailable on the remote site";
 			info("[getBundles] " + msg);

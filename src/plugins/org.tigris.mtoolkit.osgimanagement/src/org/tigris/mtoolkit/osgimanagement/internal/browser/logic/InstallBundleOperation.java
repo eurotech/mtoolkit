@@ -78,7 +78,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			final boolean update[] = new boolean[] { false };
 			final boolean install[] = new boolean[] { false };
 			if (symbolicName != null) {
-				rBundle = connector.getDeploymentManager().getBundles(symbolicName, "[" + version + "," + version + "]");
+				rBundle = connector.getDeploymentManager().getBundles(symbolicName, version);
 				if (rBundle != null) {
 					update[0] = true;
 				} else {
