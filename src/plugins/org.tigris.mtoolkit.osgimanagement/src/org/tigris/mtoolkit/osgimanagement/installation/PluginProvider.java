@@ -380,16 +380,11 @@ public class PluginProvider implements InstallationItemProvider {
     }
 
 	private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
-
 		File signedFile[] = new File[items.size()];
 		File file[] = new File[items.size()];
-
 		try {
-
 			for (int i=0; i<items.size(); i++) {
 				PluginItem item = items.get(i);
-
-
 				String exportLocation = item.getLocation();
 				if (exportLocation == null || !(file[i] = new File(exportLocation)).exists()) {
 					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Plugin is not exported properly.");
@@ -419,7 +414,7 @@ public class PluginProvider implements InstallationItemProvider {
 						signedFile[i].delete();
 					}
 				} else {
-					return new Status(Status.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins ", ioe);
+					return new Status(Status.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
 				}
 			}
 			for (int i=0; i<signedFile.length; i++) {
@@ -429,15 +424,9 @@ public class PluginProvider implements InstallationItemProvider {
 				}
 				items.get(i).setPreparedItem(file[i]);
 			}
-
-
-
-
-
-
 		} catch (IOException ioe) {
 			monitor.done();
-			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins ", ioe);
+			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
 		}
 		return Status.OK_STATUS;
 	}
