@@ -48,12 +48,10 @@ import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
-import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 /**
  * @since 5.0
@@ -65,6 +63,7 @@ public class PluginProvider implements InstallationItemProvider {
 		private InstallationItemProvider provider;
 		private PluginExportManager exportManager;
 		private File preparedItem;
+		
 
 		/**
 		 * @since 6.0
@@ -291,15 +290,21 @@ public class PluginProvider implements InstallationItemProvider {
 			if (!result.isOK())
 				return result;
 
+			List pluginItems = new ArrayList<PluginItem>();
 			// post process exported bundles
 			for (int i = 0; i < items.size(); i++) {
 				Object item = items.get(i);
 				if (item instanceof PluginItem) {
-					IStatus postProcessStatus = postProcess((PluginItem) item, properties, monitor);
-					if (!postProcessStatus.isOK()) {
-						FrameworkPlugin.getDefault().getLog().log(postProcessStatus);
-					}
+					pluginItems.add(item);
 				}
+			}
+			
+			IStatus postProcessStatus = postProcess(pluginItems, properties, monitor);
+			if (!postProcessStatus.isOK()) {
+				FrameworkPlugin.getDefault().getLog().log(postProcessStatus);
+			}
+			if (postProcessStatus.matches(IStatus.CANCEL)) {
+				return postProcessStatus;
 			}
 		} finally {
 			monitor.done();
@@ -374,45 +379,65 @@ public class PluginProvider implements InstallationItemProvider {
         return exportManager;
     }
 
-	private IStatus postProcess(PluginItem item, Map properties, IProgressMonitor monitor) {
-		String exportLocation = item.getLocation();
-		File file;
-		if (exportLocation == null || !(file = new File(exportLocation)).exists()) {
-			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Plugin is not exported properly.");
-		}
-		try {
-			if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
-					!AndroidUtils.isConvertedToDex(file)) {
-				File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/" + file.getName());
-				convertedFile.getParentFile().mkdirs();
-				AndroidUtils.convertToDex(file, convertedFile, monitor);
-				file.delete();
-				file = convertedFile;
-			}
+	private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
 
-			File signedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/signed/" + file.getName());
-			signedFile.getParentFile().mkdirs();
-			if (signedFile.exists()) {
-				signedFile.delete();
-			}
-			try {
-				CertUtils.signJar(file, signedFile, monitor, properties);
-			} catch (IOException ioe) {
-				if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
-					signedFile.delete();
-				} else {
-					throw ioe;
+		File signedFile[] = new File[items.size()];
+		File file[] = new File[items.size()];
+
+		try {
+
+			for (int i=0; i<items.size(); i++) {
+				PluginItem item = items.get(i);
+
+
+				String exportLocation = item.getLocation();
+				if (exportLocation == null || !(file[i] = new File(exportLocation)).exists()) {
+					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Plugin is not exported properly.");
+				}
+				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
+						!AndroidUtils.isConvertedToDex(file[i])) {
+					File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/" + file[i].getName());
+					convertedFile.getParentFile().mkdirs();
+					AndroidUtils.convertToDex(file[i], convertedFile, monitor);
+					file[i].delete();
+					file[i] = convertedFile;
+				}
+
+				signedFile[i] = new File(FrameworkPlugin.getDefault().getStateLocation() + "/signed/" + file[i].getName());
+				signedFile[i].getParentFile().mkdirs();
+				if (signedFile[i].exists()) {
+					signedFile[i].delete();
 				}
 			}
-			if (signedFile.exists()) {
-				file.delete();
-				file = signedFile;
+
+			try {
+				CertUtils.signJars(file, signedFile, monitor, properties);
+			} catch (IOException ioe) {
+				boolean shouldContinue = CertUtils.continueWithoutSigning(ioe.getMessage());
+				if (shouldContinue) {
+					for (int i=0; i<signedFile.length; i++) {
+						signedFile[i].delete();
+					}
+				} else {
+					return new Status(Status.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins ", ioe);
+				}
 			}
-			item.setPreparedItem(file);
+			for (int i=0; i<signedFile.length; i++) {
+				if (signedFile[i].exists()) {
+					file[i].delete();
+					file[i] = signedFile[i];
+				}
+				items.get(i).setPreparedItem(file[i]);
+			}
+
+
+
+
+
+
 		} catch (IOException ioe) {
 			monitor.done();
-			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugin: "
-					+ item.getPlugin().getBundleDescription().getSymbolicName(), ioe);
+			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins ", ioe);
 		}
 		return Status.OK_STATUS;
 	}
