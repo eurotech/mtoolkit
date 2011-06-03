@@ -229,7 +229,11 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
 		if (connector == null) {
 			return false;
 		}
-		Dictionary connectorProperties = Util.findFramework(connector).getConnectorProperties();
+		Framework fw = Util.findFramework(connector);
+		if (fw == null) {
+			return false;
+		}
+		Dictionary connectorProperties = fw.getConnectorProperties();
 		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
 		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
 			return true;
