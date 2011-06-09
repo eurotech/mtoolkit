@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.certmanager.internal.Messages;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 
@@ -83,6 +84,7 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
+	      PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.CERT_MNG_DIALOG);
 		final Composite parentComposite = (Composite) super.createDialogArea(parent);
 		Composite composite = new Composite(parentComposite, SWT.NONE);
 		GridLayout layout = new GridLayout(3, false);
