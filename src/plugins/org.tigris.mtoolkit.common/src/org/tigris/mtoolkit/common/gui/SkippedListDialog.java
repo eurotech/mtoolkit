@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.tigris.mtoolkit.common.images.UIResources;
 
@@ -44,6 +45,7 @@ public class SkippedListDialog extends ListDialog {
   }
 
   protected Control createDialogArea(Composite container) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.SKIP_LIST_DIALOG);
     Composite dialogArea = (Composite) super.createDialogArea(container);
 
     btnSkipDialog = new Button(dialogArea, SWT.CHECK);

@@ -27,7 +27,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 
@@ -109,6 +111,7 @@ public class InstallDialog extends TrayDialog implements ConstantsDistributor {
 	}
 
 	protected Control createDialogArea(Composite comp) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(comp, IHelpContextIds.INSTALL_DIALOG);
 		Composite parent = (Composite) super.createDialogArea(comp);
 		
 		setBlockOnOpen(true);

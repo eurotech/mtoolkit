@@ -163,6 +163,7 @@ class SSLConfirmationDialog extends TitleAreaDialog {
 	}
 
 	protected Control createContents(Composite parent) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.SSL_CONFIRM_DIALOG);
 		Control contents = super.createContents(parent);
 
 		setTitle("The server digital signature cannot be verified.\nDo you still want to connect?");

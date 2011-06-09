@@ -14,10 +14,14 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.gui.PropertiesPage;
 import org.tigris.mtoolkit.common.gui.PropertyObject;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 
@@ -68,5 +72,10 @@ public class ServicePropertiesPage extends PropertiesPage {
 		} catch (Throwable t) {
 			BrowserErrorHandler.processError(t, true);
 		}
+	}
+	
+	public Control createContents(Composite parent) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PROPERTY_FRAMEWORK);
+		return super.createContents(parent);
 	}
 }

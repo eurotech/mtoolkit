@@ -44,6 +44,7 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.installation.TargetSelectionDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
@@ -71,6 +72,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 	}
 
 	protected Control createContents(Composite parent) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_SELECT_DIALOG);
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(FrameWorkView.VIEW_ID);
 		} catch (PartInitException e) {
@@ -228,7 +230,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 						frameworks.add(elements[i]);
 					}
 				}
-				return (Object[]) frameworks.toArray(new Object[frameworks.size()]);
+				return frameworks.toArray(new Object[frameworks.size()]);
 			}
 			return null;
 		}

@@ -1,6 +1,5 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
-import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;

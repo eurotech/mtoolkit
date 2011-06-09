@@ -19,7 +19,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 
@@ -43,6 +45,7 @@ public class ListDialog extends SelectionDialog implements ConstantsDistributor 
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.LIST_DIALOG);
 		Composite main = (Composite) super.createDialogArea(parent);
 
 		Label messageLabel = createMessageArea(main);

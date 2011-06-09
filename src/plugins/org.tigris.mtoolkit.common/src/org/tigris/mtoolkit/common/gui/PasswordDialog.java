@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.Messages;
 
 public class PasswordDialog extends TrayDialog {
@@ -41,6 +42,7 @@ public class PasswordDialog extends TrayDialog {
   }
 
   protected Control createDialogArea(Composite parent) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PASSWORD_DIALOG);
     Composite composite = (Composite) super.createDialogArea(parent);
 
     GridLayout layout = (GridLayout) composite.getLayout();

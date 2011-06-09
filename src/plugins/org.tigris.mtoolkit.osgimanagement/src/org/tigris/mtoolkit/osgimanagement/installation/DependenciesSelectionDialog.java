@@ -28,13 +28,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 
 /**
  * @since 5.0
  */
 public class DependenciesSelectionDialog extends TitleAreaDialog {
 
-	private Shell shell;
 	private CheckboxTableViewer bundlesViewer;
 	private Vector bundles;
 	private Object[] selected;
@@ -44,11 +44,11 @@ public class DependenciesSelectionDialog extends TitleAreaDialog {
 
 	public DependenciesSelectionDialog(Shell shell, Vector bundles) {
 		super(shell);
-		this.shell = shell;
 		this.bundles = bundles;
 	}
 	
 	protected Control createContents(Composite parent) {
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.DEPEND_SELECT_DIALOG);
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(FrameWorkView.VIEW_ID);
 		} catch (PartInitException e) {

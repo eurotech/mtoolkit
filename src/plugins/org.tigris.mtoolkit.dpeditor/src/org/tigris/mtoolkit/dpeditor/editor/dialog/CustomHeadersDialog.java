@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.dpeditor.IHelpContextIds;
 import org.tigris.mtoolkit.dpeditor.editor.DPPConstants;
 import org.tigris.mtoolkit.dpeditor.editor.event.EventConstants;
 import org.tigris.mtoolkit.dpeditor.editor.event.TableControlListener;
@@ -414,6 +416,7 @@ public class CustomHeadersDialog extends Dialog implements SelectionListener,
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.CUSTOM_HEADER_DIALOG);
 		// create a composite with standard margins and spacing
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();

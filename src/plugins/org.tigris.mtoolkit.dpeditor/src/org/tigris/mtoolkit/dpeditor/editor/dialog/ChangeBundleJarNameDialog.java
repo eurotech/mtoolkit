@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.dpeditor.IHelpContextIds;
 import org.tigris.mtoolkit.dpeditor.editor.event.EventConstants;
 import org.tigris.mtoolkit.dpeditor.editor.event.TableControlListener;
 import org.tigris.mtoolkit.dpeditor.editor.forms.FormWidgetFactory;
@@ -311,6 +313,7 @@ public class ChangeBundleJarNameDialog extends Dialog implements
 	}
 
 	protected Control createContents(Composite parent) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.CHANGE_BUNDLE_DIALOG);
 		// create the top level composite for the dialog
 		Composite composite = new Composite(parent, 0);
 		GridLayout layout = new GridLayout();
