@@ -271,7 +271,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		filterField.addSelectionListener(new SelectionAdapter() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				tree.getTree().forceFocus();
-				findItem(filterField.getText().trim(), tree);
+				findItem(filterField.getText().toLowerCase().trim(), tree);
 			}
 		});
 		
@@ -310,7 +310,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				boolean doSearch = e.character == Character.LINE_SEPARATOR && !filterField.getText().trim().equals("");
 				if (doSearch) {
 					e.doit = false;
-					findItem(filterField.getText().trim(), tree);
+					findItem(filterField.getText().toLowerCase().trim(), tree);
 				}
 				super.keyPressed(e);
 			}
@@ -1059,7 +1059,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				int startIndex = parent.indexOf(node) + 1;
 				for (int i = startIndex; i < parent.getSize(); i++) {
 					node = parent.getChildren()[i];
-					if (isTextFound(node.getLabel(), text)) {
+					if (isTextFound(node.getLabel().toLowerCase(), text)) {
 						foundNode = node;
 						break;
 					}
@@ -1105,7 +1105,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				return child;
 			}
 			String text = child.getLabel();
-			if (isTextFound(text, searching)) {
+			if (isTextFound(text.toLowerCase(), searching)) {
 				return child;
 			}
 			Model grandChild = findItem(child, searching, startNode);
