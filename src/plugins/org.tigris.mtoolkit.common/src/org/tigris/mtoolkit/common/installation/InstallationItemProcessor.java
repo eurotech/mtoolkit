@@ -67,9 +67,28 @@ public interface InstallationItemProcessor {
 	 *            the progress monitor to display current progress
 	 * 
 	 * @return the status of installation
-	 * @deprecated
 	 */
 	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, IProgressMonitor monitor);
+
+  /**
+   * Installs passed items to specified target.
+   * <p>
+   * The Install to menu driver must check the supported MIME types of this
+   * processor and make sure that it doesn't pass for processing an
+   * {@link InstallationItem} with unsupported MIME type.
+   * </p>
+   * 
+   * @param items
+   *          the items to install
+   * @param target
+   *          the target where to install the passed items
+   * @param monitor
+   *          the progress monitor to display current progress
+   * 
+   * @return the status of installation
+   * @since 6.1
+   */
+  public IStatus processInstallationItems(InstallationItem[] items, InstallationTarget target, IProgressMonitor monitor);
 
 	/**
 	 * @since 6.0

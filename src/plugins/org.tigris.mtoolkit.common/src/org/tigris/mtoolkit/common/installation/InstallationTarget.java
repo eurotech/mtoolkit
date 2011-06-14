@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
@@ -43,8 +41,4 @@ public interface InstallationTarget {
 	
 	public boolean isMimeTypeSupported(String type);
 
-	/**
-	 * @since 6.0
-	 */
-	public IStatus processInstallationItem(InstallationItem item, IProgressMonitor monitor);
 }

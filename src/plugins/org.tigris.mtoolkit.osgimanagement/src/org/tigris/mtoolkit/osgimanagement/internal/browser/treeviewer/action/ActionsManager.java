@@ -11,13 +11,14 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -125,15 +126,16 @@ public class ActionsManager {
 				InstallationTarget target = new FrameworkTarget(framework);
 
 				IStatus status = Status.OK_STATUS;
-				SubMonitor subMonitor = SubMonitor.convert(monitor, files.length);
+				List items = new ArrayList();
 				for (int i = 0; i < files.length; i++) {
-					SubMonitor mon = subMonitor.newChild(1);
 					InstallationItem item = new BaseFileItem(files[i], MIME_JAR);
-					status = processor.processInstallationItem(item, target, mon);
+					items.add(item);
 					if (monitor.isCanceled()) {
 						break;
 					}
 				}
+				status = processor.processInstallationItems((InstallationItem[]) items.toArray(new InstallationItem[items.size()]), target, monitor);
+
 				monitor.done();
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;

@@ -330,43 +330,46 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 	public Map getPlatformProperties() throws IAgentException {
 		debug("[getPlatformProperties] >>>");
 		try {
-			MBSAConnection connection = getMBSAConnection();
-			if (!connection.isConnected()) {
-				info("[getPlatformProperties] Device is disconnected!");
-				throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-			}
-			MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GETPLATFORMPROPERTIES, null, false);
-			int rspStatus = tCallBack.getRspStatus();
-			if (rspStatus >= 0) {
-				byte rspData[] = tCallBack.getRspData();
-				if (rspData != null) {
-					ByteArrayInputStream bis = null;
-					try {
-						bis = new ByteArrayInputStream(rspData);
-						String[] props = DataFormater.readStringArray(bis);
-						debug("[getPlatformProperties] Raw properties list: " + DebugUtils.convertForDebug(props));
-						return convertStringArrayToMap(props);
-					} catch (IOException e) {
-						info("[getPlatformProperties] Error formatting response data!", e);
-						throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
-					} finally {
-						DataFormater.closeInputStream(bis);
-					}
-				} else {
-					debug("[listRawArgs] no properties available");
-					return new HashMap();
-				}
-			} else {
-				info("[getPlatformProperties] Command failure: " + rspStatus);
-				throw new IAgentException("Failed to get platform properties: " + rspStatus, rspStatus);
-			}
-		} catch (IAgentException e) {
-			// try ext managers
 			ExtVMManager extMan = (ExtVMManager) connector.getManager(ExtVMManager.class.getName());
 			if (extMan != null) {
 				return extMan.getPlatformProperties();
 			}
-			throw e;
+		} catch (IAgentException e) {
+			// continue trying another method
+		}
+		return fallbackGetPlatformProperties();
+	}
+
+	private Map fallbackGetPlatformProperties() throws IAgentException {
+		MBSAConnection connection = getMBSAConnection();
+		if (!connection.isConnected()) {
+			info("[getPlatformProperties] Device is disconnected!");
+			throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
+		}
+		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GETPLATFORMPROPERTIES, null, false);
+		int rspStatus = tCallBack.getRspStatus();
+		if (rspStatus >= 0) {
+			byte rspData[] = tCallBack.getRspData();
+			if (rspData != null) {
+				ByteArrayInputStream bis = null;
+				try {
+					bis = new ByteArrayInputStream(rspData);
+					String[] props = DataFormater.readStringArray(bis);
+					debug("[getPlatformProperties] Raw properties list: " + DebugUtils.convertForDebug(props));
+					return convertStringArrayToMap(props);
+				} catch (IOException e) {
+					info("[getPlatformProperties] Error formatting response data!", e);
+					throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
+				} finally {
+					DataFormater.closeInputStream(bis);
+				}
+			} else {
+				debug("[listRawArgs] no properties available");
+				return new HashMap();
+			}
+		} else {
+			info("[getPlatformProperties] Command failure: " + rspStatus);
+			throw new IAgentException("Failed to get platform properties: " + rspStatus, rspStatus);
 		}
 	}
 
@@ -396,6 +399,18 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 	public String[] getSystemBundlesNames() throws IAgentException {
 		debug("[getSystemBundlesNames] >>>");
 		try {
+			ExtVMManager extMan = (ExtVMManager) connector.getManager(ExtVMManager.class.getName());
+			if (extMan != null) {
+				return extMan.getSystemBundlesNames();
+			}
+		} catch(IAgentException e) {
+			// continue trying another method
+		}
+		return fallbackGetSystemBundlesNames();
+	}
+
+	private String[] fallbackGetSystemBundlesNames() throws IAgentException {
+		try {
 			MBSAConnection connection = getMBSAConnection();
 			if (!connection.isConnected()) {
 				info("[getSystemBundlesNames] Device is disconnected!");
@@ -423,27 +438,11 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 					return new String[0];
 				}
 			} else {
-				debug("[getSystemBundlesNames] Command failure: " + rspStatus);
-				// try fallback mechanism
-				return fallbackGetSystemBundlesNames();
-			}
-		} catch(IAgentException e) {
-			if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT || e.getErrorCode() == IAgentErrors.ERROR_INTERNAL_ERROR) {
-				return fallbackGetSystemBundlesNames();
-			} else {
-				throw e;
-			}
-		}
-	}
-	
-	private String[] fallbackGetSystemBundlesNames() throws IAgentException {
-		try {
-			ExtVMManager extMan = (ExtVMManager) connector.getManager(ExtVMManager.class.getName());
-			if (extMan != null) {
-				return extMan.getSystemBundlesNames();
+				debug("[getSystemBundlesNames] Getting system bundles command failed: " + rspStatus);
+				throw new IAgentException("Getting system bundles command failed!", IAgentErrors.ERROR_INTERNAL_ERROR);
 			}
 		} catch (IAgentException e) {
-			// no Ext managers, try another method
+			// continue trying another method
 		}
 		return ((DeploymentManagerImpl) connector.getDeploymentManager()).getSystemBundlesNames();
 	}

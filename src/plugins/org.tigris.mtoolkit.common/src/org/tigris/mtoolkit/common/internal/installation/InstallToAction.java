@@ -20,13 +20,10 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.tigris.mtoolkit.common.CMultiStatus;
-import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
@@ -61,23 +58,22 @@ public class InstallToAction extends Action {
         InstallationHistory.getDefault().promoteHistory(target, processor);
         InstallationHistory.getDefault().saveHistory();
 
-        CMultiStatus status = new CMultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.OK, null);
-        SubMonitor subMonitor = SubMonitor.convert(monitor, items.size());
         Iterator iterator = items.iterator();
+        List instItems = new ArrayList();
         while (iterator.hasNext()) {
-          SubMonitor mon = subMonitor.newChild(1);
           Mapping mapping = (Mapping) iterator.next();
           InstallationItem item = selectInstallationItem(mapping.resource, mapping.providerSpecificItems);
           if (item == null) {
             return Status.CANCEL_STATUS;
           }
 
-          IStatus s = processor.processInstallationItem(item, target, mon);
-          status.add(s);
+          instItems.add(item);
           if (monitor.isCanceled()) {
-            break;
+            return Status.CANCEL_STATUS;
           }
         }
+        IStatus status = processor.processInstallationItems(
+            (InstallationItem[]) instItems.toArray(new InstallationItem[instItems.size()]), target, monitor);
 
         monitor.done();
         if (monitor.isCanceled()) {

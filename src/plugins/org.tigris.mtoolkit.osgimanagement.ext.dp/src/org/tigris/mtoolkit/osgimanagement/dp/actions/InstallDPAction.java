@@ -11,7 +11,9 @@
 package org.tigris.mtoolkit.osgimanagement.dp.actions;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -68,15 +70,16 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
 				InstallationTarget target = new FrameworkTarget(framework);
 
 				IStatus status = Status.OK_STATUS;
-				SubMonitor subMonitor = SubMonitor.convert(monitor, files.length);
+				List items = new ArrayList();
 				for (int i = 0; i < files.length; i++) {
-					SubMonitor mon = subMonitor.newChild(1);
 					InstallationItem item = new BaseFileItem(files[i], DPProcessor.MIME_DP);
-					status = processor.processInstallationItem(item, target, mon);
+					items.add(item);
 					if (monitor.isCanceled()) {
 						break;
 					}
 				}
+				status = processor.processInstallationItems((InstallationItem[]) items.toArray(new InstallationItem[items.size()]), target, monitor);
+
 				monitor.done();
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;

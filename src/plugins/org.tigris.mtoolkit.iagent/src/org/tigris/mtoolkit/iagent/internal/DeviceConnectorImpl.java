@@ -120,15 +120,6 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 		if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
 			StringBuffer errCause = new StringBuffer();
 			// Trying controller connections
-			try {
-				debug("[connect] Trying to connect to device which support MBSA");
-				connect0(ConnectionManager.MBSA_CONNECTION, monitor);
-				return;
-			} catch (IAgentException e) {
-				debug("[connect] Failed: " + e);
-				errCause.append("\n >>> Trying connection of type MBSA (compatible) ... failed: " + e);
-			}
-			// Trying ext controller connections
 			int[] extControllerTypes = connectionManager.getExtControllerConnectionTypes();
 			for (int i = 0; i < extControllerTypes.length; i++) {
 				checkCancel(monitor);
@@ -140,6 +131,18 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 					debug("[connect] Failed: " + e);
 					errCause.append("\n >>> Trying connection of type " + extControllerTypes[i] + " ... failed: " + e);
 				}
+			}
+
+			checkCancel(monitor);
+
+			// Trying compatible controller connection
+			try {
+				debug("[connect] Trying to connect to device which support MBSA");
+				connect0(ConnectionManager.MBSA_CONNECTION, monitor);
+				return;
+			} catch (IAgentException e) {
+				debug("[connect] Failed: " + e);
+				errCause.append("\n >>> Trying connection of type MBSA (compatible) ... failed: " + e);
 			}
 
 			checkCancel(monitor);
