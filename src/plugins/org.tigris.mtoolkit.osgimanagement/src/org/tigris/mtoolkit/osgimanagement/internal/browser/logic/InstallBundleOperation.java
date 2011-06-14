@@ -8,8 +8,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
+import org.tigris.mtoolkit.common.ManifestUtils;
 import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -70,9 +71,9 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				return Util.newStatus(IStatus.ERROR, "Invalid bundle content", null);
 			}
 			zis = zip.getInputStream(entry);
-			Manifest mf = new Manifest(zis);
-			symbolicName = getBundleName(mf);
-			version = (String) mf.getMainAttributes().getValue("Bundle-Version");
+			Map headers = ManifestUtils.getManifestHeaders(zis);
+			symbolicName =  ManifestUtils.getBundleSymbolicName(headers);
+			version = ManifestUtils.getBundleVersion(headers);
 
 			// check if already installd
 			final boolean update[] = new boolean[] { false };
@@ -227,18 +228,6 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			}
 		}
 		return Status.OK_STATUS;
-	}
-
-	private String getBundleName(Manifest mf) {
-		String symbolicName;
-		symbolicName = (String) mf.getMainAttributes().getValue("Bundle-SymbolicName");
-		if (symbolicName == null)
-			return null;
-		int index = symbolicName.indexOf(';');
-		if (index > 0) {
-			symbolicName = symbolicName.substring(0, index);
-		}
-		return symbolicName;
 	}
 
 	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");

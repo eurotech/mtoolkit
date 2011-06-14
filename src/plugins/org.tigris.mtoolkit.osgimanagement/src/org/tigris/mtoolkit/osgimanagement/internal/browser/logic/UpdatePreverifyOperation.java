@@ -2,7 +2,6 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -10,12 +9,10 @@ import java.util.zip.ZipFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.BundleException;
+import org.tigris.mtoolkit.common.ManifestUtils;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -43,10 +40,10 @@ public class UpdatePreverifyOperation extends RemoteBundleOperation {
 			final String symbNames[] = new String[] { "", rBundle.getSymbolicName() };
 			final String versions[] = new String[] { "", rBundle.getVersion() };
 			if (mf != null) {
-				Map headers = getManifestHeaders(zip.getInputStream(mf));
+				Map headers = ManifestUtils.getManifestHeaders(zip.getInputStream(mf));
 				if (headers != null) {
-					symbNames[0] = (String) headers.get("Bundle-SymbolicName");
-					versions[0] = (String) headers.get("Bundle-Version");
+					symbNames[0] = ManifestUtils.getBundleSymbolicName(headers);
+					versions[0] = ManifestUtils.getBundleVersion(headers);
 				}
 				nameDiff = symbNames[1] != null && !symbNames[1].equals(symbNames[0]);
 				versionsDiff = versions[1] != null && !versions[1].equals(versions[0]);
@@ -92,16 +89,6 @@ public class UpdatePreverifyOperation extends RemoteBundleOperation {
 
 	protected String getMessage(IStatus operationStatus) {
 		return NLS.bind(Messages.bundle_update_failure, operationStatus);
-	}
-
-	private static Map getManifestHeaders(InputStream stream) throws IOException {
-		try {
-			return ManifestElement.parseBundleManifest(stream, null);
-		} catch (BundleException e) {
-			IOException ioe = new IOException("JAR Manifest is invalid: " + e.toString());
-			ioe.initCause(e);
-			throw ioe;
-		}
 	}
 
 	private static void correctNullElements(String[] arr, String def) {
