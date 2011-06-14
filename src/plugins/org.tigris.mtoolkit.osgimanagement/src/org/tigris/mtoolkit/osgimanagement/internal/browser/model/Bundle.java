@@ -211,7 +211,10 @@ public class Bundle extends Model implements IconProvider {
 	}
 
 	public void refreshTypeFromRemote() throws IAgentException {
-		type = ((FrameworkImpl) findFramework()).getRemoteBundleType(rBundle, rBundle.getHeaders(null));
+		FrameworkImpl fw = (FrameworkImpl)findFramework();
+		if (fw != null) {
+			type = fw.getRemoteBundleType(rBundle, rBundle.getHeaders(null));
+		}
 	}
 	
 	public String getCategory() {
