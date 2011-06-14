@@ -177,6 +177,7 @@ public class CertPreferencesPage extends PreferencePage implements
 			cert.setStoreLocation(dialog.storeLocation);
 			cert.setStoreType(dialog.storeType);
 			cert.setStorePass(dialog.storePass);
+			cert.setKeyPass(dialog.keyPass);
 			CertStorage.getDefault().addCertificate(cert);
 		}
 	}
@@ -195,6 +196,7 @@ public class CertPreferencesPage extends PreferencePage implements
 			cert.setStoreLocation(dialog.storeLocation);
 			cert.setStoreType(dialog.storeType);
 			cert.setStorePass(dialog.storePass);
+			cert.setKeyPass(dialog.keyPass);
 		}
 	}
 

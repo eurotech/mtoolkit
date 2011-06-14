@@ -19,6 +19,9 @@ public interface ICertificateDescriptor {
 	public String getStoreType();
 
 	public String getStorePass();
-	
+
+	public String getKeyPass();
+
 	public String getUid();
+
 }

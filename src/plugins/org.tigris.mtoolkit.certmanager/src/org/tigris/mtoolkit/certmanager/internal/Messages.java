@@ -30,6 +30,7 @@ public class Messages extends NLS {
 	public static String dlgCertMan_labelLocation;
 	public static String dlgCertMan_labelType;
 	public static String dlgCertMan_labelPass;
+	public static String dlgCertMan_labelKeyPass;
 	public static String dlgCertMan_verifyAliasEmpty;
 	public static String dlgCertMan_verifyLocationEmpty;
 	public static String dlgCertMan_verifyLocationNotExist;

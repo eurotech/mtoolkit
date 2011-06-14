@@ -47,11 +47,13 @@ import org.tigris.mtoolkit.common.installation.InstallationConstants;
 public class CertUtils {
   private static ServiceTracker certProviderTracker;
 
-  private static final String   DT = ".";           //$NON-NLS-1$
+  private static final String DT = "."; //$NON-NLS-1$
 
   /**
-   * A convenient method which delegates to ICertificateProvider.getCertificates() 
-   * method if ICertificateProvider service is registered. Otherwise returns null. 
+   * A convenient method which delegates to
+   * ICertificateProvider.getCertificates() method if ICertificateProvider
+   * service is registered. Otherwise returns null.
+   * 
    * @return the certificates provided or null
    * @see ICertificateProvider
    */
@@ -64,9 +66,12 @@ public class CertUtils {
   }
 
   /**
-   * A convenient method which delegates to ICertificateProvider.getCertificate() 
-   * method if ICertificateProvider service is registered. Otherwise returns null. 
-   * @param uid the uid of certificate to find
+   * A convenient method which delegates to
+   * ICertificateProvider.getCertificate() method if ICertificateProvider
+   * service is registered. Otherwise returns null.
+   * 
+   * @param uid
+   *          the uid of certificate to find
    * @return the certificate or null
    * @see ICertificateProvider
    */
@@ -89,9 +94,13 @@ public class CertUtils {
 
   /**
    * Adds certificate data for signing content to provided properties.
-   * @param properties the Map to push in certificate data
-   * @param cert the certificate to push
-   * @param id the id to append to each key that is inserted to properties
+   * 
+   * @param properties
+   *          the Map to push in certificate data
+   * @param cert
+   *          the certificate to push
+   * @param id
+   *          the id to append to each key that is inserted to properties
    */
   public static void pushCertificate(Map properties, ICertificateDescriptor cert, int id) {
     if (cert.getAlias() != null) {
@@ -105,6 +114,9 @@ public class CertUtils {
     }
     if (cert.getStorePass() != null) {
       properties.put(InstallationConstants.CERT_STORE_PASS + DT + id, cert.getStorePass());
+    }
+    if (cert.getKeyPass() != null) {
+      properties.put(InstallationConstants.CERT_KEY_PASS + DT + id, cert.getKeyPass());
     }
   }
 
@@ -137,19 +149,35 @@ public class CertUtils {
     return (String) properties.get(InstallationConstants.CERT_STORE_PASS + DT + id);
   }
 
+  public static String getCertificateKeyPass(Map properties, int id) {
+    return (String) properties.get(InstallationConstants.CERT_KEY_PASS + DT + id);
+  }
+
   /**
    * Signs provided file with passed information for signing.
-   * @param jarName the file to sign
-   * @param signedJar the path to the new signed file or null. If this is null changes will be made directly to 'jarName' file.
-   * @param monitor the progress monitor. Cannot be null.
-   * @param alias the alias. Cannot be null.
-   * @param storeLocation the key store location. Cannot be null.
-   * @param storeType the key store type. Cannot be null.
-   * @param storePass the key store pass. Cannot be null.
+   * 
+   * @param jarName
+   *          the file to sign
+   * @param signedJar
+   *          the path to the new signed file or null. If this is null changes
+   *          will be made directly to 'jarName' file.
+   * @param monitor
+   *          the progress monitor. Cannot be null.
+   * @param alias
+   *          the alias. Cannot be null.
+   * @param storeLocation
+   *          the key store location. Cannot be null.
+   * @param storeType
+   *          the key store type. Cannot be null.
+   * @param storePass
+   *          the key store pass. Cannot be null.
+   * @param keyPass
+   *          the key store pass. If null then the same pass as store pass will
+   *          be used.
    * @throws IOException
    */
   public static void signJar(String jarName, String signedJar, IProgressMonitor monitor, String alias,
-      String storeLocation, String storeType, String storePass) throws IOException {
+      String storeLocation, String storeType, String storePass, String keyPass) throws IOException {
     String jarSigner = getJarsignerLocation();
     if (jarSigner == null) {
       throw new IOException("The location of jarsigner tool was not correctly specified in Preferences.");
@@ -162,7 +190,7 @@ public class CertUtils {
     list.add(jarSigner);
     addOption(list, "-keystore", storeLocation, false);
     addOption(list, "-storepass", storePass, true);
-    //addOption(list, "-keypass", keypass, false);
+    addOption(list, "-keypass", keyPass, false);
     addOption(list, "-storetype", storeType, false);
     addOption(list, "-signedjar", signedJar, false);
     list.add(jarName);
@@ -212,8 +240,8 @@ public class CertUtils {
       if (retries == 0) {
         throw new IOException("Cannot sign provided content. Operation timed out.");
       } else {
-        throw new IOException("Cannot sign provided content. Jarsigner return code: " + result
-            + ". Jarsigner output: " + outputReader.getOutput());
+        throw new IOException("Cannot sign provided content. Jarsigner return code: " + result + ". Jarsigner output: "
+            + outputReader.getOutput());
       }
     }
   }
@@ -230,15 +258,20 @@ public class CertUtils {
   }
 
   /**
-   * Convenient method for signing jar file with information provided in passed properties. 
-   * If no signing information is provided then this function does nothing.
-   * Multiple signing is allowed. If no password is provided for given certificate, 
-   * a dialog for entering password is displayed.
-   * @param file the file to be signed.
-   * @param signedFile the output file.
-   * @param monitor the progress monitor.
+   * Convenient method for signing jar file with information provided in passed
+   * properties. If no signing information is provided then this function does
+   * nothing. Multiple signing is allowed. If no password is provided for given
+   * certificate, a dialog for entering password is displayed.
+   * 
+   * @param file
+   *          the file to be signed.
+   * @param signedFile
+   *          the output file.
+   * @param monitor
+   *          the progress monitor.
    * @param properties
-   * @throws IOException in case of signing error
+   * @throws IOException
+   *           in case of signing error
    */
   public static void signJar(File file, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
     if (properties == null) {
@@ -248,57 +281,59 @@ public class CertUtils {
     if (count <= 0) {
       return;
     }
-    signJar0(file, signedFile, properties, new ArrayList(), monitor);
+    signJar0(file, signedFile, properties, new ArrayList(), new ArrayList(), monitor);
   }
 
-	/**
-	 * Convenient method for signing jar files with information provided in
-	 * passed properties. If no signing information is provided then this
-	 * function does nothing. Multiple signing is allowed. If no password is
-	 * provided for given certificate, a dialog for entering password is
-	 * displayed.
-	 * 
-	 * @param files
-	 *            the files to be signed.
-	 * @param signedFiles
-	 *            the output files.
-	 * @param monitor
-	 *            the progress monitor.
-	 * @param properties
-	 * @throws IOException
-	 *             in case of signing error
-	 * @since 6.1
-	 */
-	public static void signJars(File files[], File signedFiles[],
-			IProgressMonitor monitor, Map properties)
-			throws IOException {
-		if (properties == null || files == null || signedFiles == null
-				|| files.length != signedFiles.length) {
-			return;
-		}
-		int count = getCertificatesCount(properties);
-		if (count <= 0) {
-			return;
-		}
-		List passwords = new ArrayList();
-		for (int i = 0; i < files.length; i++) {
-			boolean shouldContinue = signJar0(files[i], signedFiles[i],
-					properties, passwords, monitor);
-			if (!shouldContinue)
-				return;
-		}
-	}
+  /**
+   * Convenient method for signing jar files with information provided in passed
+   * properties. If no signing information is provided then this function does
+   * nothing. Multiple signing is allowed. If no password is provided for given
+   * certificate, a dialog for entering password is displayed.
+   * 
+   * @param files
+   *          the files to be signed.
+   * @param signedFiles
+   *          the output files.
+   * @param monitor
+   *          the progress monitor.
+   * @param properties
+   * @throws IOException
+   *           in case of signing error
+   * @since 6.1
+   */
+  public static void signJars(File files[], File signedFiles[], IProgressMonitor monitor, Map properties)
+      throws IOException {
+    if (properties == null || files == null || signedFiles == null || files.length != signedFiles.length) {
+      return;
+    }
+    int count = getCertificatesCount(properties);
+    if (count <= 0) {
+      return;
+    }
+    List storePasswords = new ArrayList();
+    List keyPasswords = new ArrayList();
+    for (int i = 0; i < files.length; i++) {
+      boolean shouldContinue = signJar0(files[i], signedFiles[i], properties, storePasswords, keyPasswords, monitor);
+      if (!shouldContinue)
+        return;
+    }
+  }
 
   /**
-   * Convenient method for signing DP file with information provided in passed properties. 
-   * If no signing information is provided then this function does nothing.
-   * Multiple signing is allowed. If no password is provided for given certificate, 
-   * a dialog for entering password is displayed.
-   * @param dpFile the file to be signed.
-   * @param signedFile the output file.
-   * @param monitor the progress monitor.
+   * Convenient method for signing DP file with information provided in passed
+   * properties. If no signing information is provided then this function does
+   * nothing. Multiple signing is allowed. If no password is provided for given
+   * certificate, a dialog for entering password is displayed.
+   * 
+   * @param dpFile
+   *          the file to be signed.
+   * @param signedFile
+   *          the output file.
+   * @param monitor
+   *          the progress monitor.
    * @param properties
-   * @throws IOException in case of signing error
+   * @throws IOException
+   *           in case of signing error
    * @since 5.1
    */
   public static void signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
@@ -324,7 +359,8 @@ public class CertUtils {
       }
       jos = new JarOutputStream(new FileOutputStream(signedFile), manifest);
 
-      List passwords = new ArrayList();
+      List storePasswords = new ArrayList();
+      List keyPasswords = new ArrayList();
       JarEntry jarEntry;
       while ((jarEntry = jis.getNextJarEntry()) != null && !monitor.isCanceled()) {
         JarEntry newEntry = new JarEntry(jarEntry.getName());
@@ -341,7 +377,7 @@ public class CertUtils {
           file.getParentFile().mkdirs();
 
           copyBytes(jis, new FileOutputStream(file), false, true);
-          if (!signJar0(file, null, properties, passwords, subMonitor.newChild(1))) {
+          if (!signJar0(file, null, properties, storePasswords, keyPasswords, subMonitor.newChild(1))) {
             // operation is cancelled
             return;
           }
@@ -355,7 +391,7 @@ public class CertUtils {
       }
       jis.close();
       jos.close();
-      signJar0(signedFile, null, properties, passwords, subMonitor.newChild(1));
+      signJar0(signedFile, null, properties, storePasswords, keyPasswords, subMonitor.newChild(1));
     } finally {
       if (jis != null) {
         try {
@@ -394,42 +430,60 @@ public class CertUtils {
     }
   }
 
-  private static boolean signJar0(File file, File signedFile, Map properties, List passwords, IProgressMonitor monitor)
-      throws IOException {
+  private static boolean signJar0(File file, File signedFile, Map properties, List storePasswords, List keyPasswords,
+      IProgressMonitor monitor) throws IOException {
     int count = getCertificatesCount(properties);
     for (int i = 0; i < count && !monitor.isCanceled(); i++) {
       String alias = getCertificateAlias(properties, i);
       String location = getCertificateStoreLocation(properties, i);
       String type = getCertificateStoreType(properties, i);
-      String pass = getCertificateStorePass(properties, i);
+      String storePass = getCertificateStorePass(properties, i);
+      String keyPass = getCertificateKeyPass(properties, i);
       if (alias == null || location == null || type == null) {
         throw new IOException("Not enough information is specified for signing content.");
       }
-      if (pass == null || pass.length() == 0) {
-        if (passwords.size() > i) {
-          pass = (String) passwords.get(i);
+      if (storePass == null || storePass.length() == 0) {
+        if (storePasswords.size() > i) {
+          storePass = (String) storePasswords.get(i);
         } else {
-          pass = getKeystorePassword(location);
-          if (pass == null) {
+          storePass = getKeystorePassword(location);
+          if (storePass == null) {
             return false;
           }
-          passwords.add(pass);
         }
+      }
+      if (storePasswords.size() <= i) {
+        storePasswords.add(storePass);
+      }
+      if (keyPass == null || keyPass.length() == 0) {
+        if (keyPasswords.size() > i) {
+          keyPass = (String) keyPasswords.get(i);
+        } else {
+          keyPass = getPrivateKeyPassword(location, alias);
+          if (keyPass == null) {
+            return false;
+          }
+        }
+      }
+      if (keyPasswords.size() <= i) {
+        keyPasswords.add(keyPass);
       }
       String inFileName = (signedFile != null && i > 0) ? signedFile.getAbsolutePath() : file.getAbsolutePath();
       String outFileName = (signedFile != null && i == 0) ? signedFile.getAbsolutePath() : null;
-      signJar(inFileName, outFileName, monitor, alias, location, type, pass);
+      signJar(inFileName, outFileName, monitor, alias, location, type, storePass, keyPass);
     }
     return !monitor.isCanceled();
   }
 
   /**
-   * Returns location of jarsigner tool or null if the location
-   * cannot be determined.
+   * Returns location of jarsigner tool or null if the location cannot be
+   * determined.
+   * 
    * @return the jarsigner location
    */
   public static String getJarsignerLocation() {
-    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(), "org.tigris.mtoolkit.certmanager");
+    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
+        "org.tigris.mtoolkit.certmanager");
     String location = preferenceStore.getString("jarsigner.location");
     if (location == null || location.length() == 0) {
       location = getDefaultJarsignerLocation();
@@ -458,7 +512,9 @@ public class CertUtils {
 
   /**
    * Opens "Continue without signing" dialog. Returns true if user selects Yes.
-   * @param error error to be displayed
+   * 
+   * @param error
+   *          error to be displayed
    * @return
    */
   public static boolean continueWithoutSigning(final String error) {
@@ -468,10 +524,8 @@ public class CertUtils {
       public void run() {
         Shell shell = display.getActiveShell();
         String nl = System.getProperty("line.separator");
-        MessageDialog dialog = new MessageDialog(shell, "Warning", null, 
-                "The signing operation failed. Reason:" + nl + error + nl + 
-                "Continue without signing?",
-                MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
+        MessageDialog dialog = new MessageDialog(shell, "Warning", null, "The signing operation failed. Reason:" + nl
+            + error + nl + "Continue without signing?", MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
         if (dialog.open() == Dialog.OK) {
           result[0] = new Boolean(true);
         }
@@ -482,6 +536,7 @@ public class CertUtils {
 
   /**
    * Opens password dialog for getting keystore password.
+   * 
    * @param keystoreLocation
    * @return the password entered or null if dialog is canceled
    */
@@ -492,7 +547,30 @@ public class CertUtils {
       public void run() {
         Shell shell = display.getActiveShell();
         PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
-        dialog.setMessage("Enter password for key store: \"" + keystoreLocation + "\"");
+        dialog.setMessage("Enter password for keystore: \"" + keystoreLocation + "\"");
+        if (dialog.open() == Dialog.OK) {
+          result[0] = dialog.getPassword();
+        }
+      }
+    });
+    return result[0];
+  }
+
+  /**
+   * Opens password dialog for getting private key password.
+   * 
+   * @param keystoreLocation
+   * @return the password entered or null if dialog is canceled
+   */
+  public static String getPrivateKeyPassword(final String keystoreLocation, final String alias) {
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    final String result[] = new String[1];
+    display.syncExec(new Runnable() {
+      public void run() {
+        Shell shell = display.getActiveShell();
+        PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
+        dialog.setMessage("Enter private key password for alias \"" + alias + "\" in keystore \"" + keystoreLocation
+            + "\" or leave the field empty to use the keystore password.");
         if (dialog.open() == Dialog.OK) {
           result[0] = dialog.getPassword();
         }

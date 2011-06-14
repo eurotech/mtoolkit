@@ -28,6 +28,7 @@ public class CertStorage implements ICertificateModifyListener {
 	private static final String ATTR_CERT_LOCATION = "cert_location"; //$NON-NLS-1$
 	private static final String ATTR_CERT_TYPE = "cert_type"; //$NON-NLS-1$
 	private static final String ATTR_CERT_PASS = "cert_pass"; //$NON-NLS-1$
+	private static final String ATTR_CERT_KEY_PASS = "cert_key_pass"; //$NON-NLS-1$
 	private static final String ATTR_CERT_UID = "cert_uid"; //$NON-NLS-1$
 	private static final String SECURE_STORAGE_NODE = "org.tigris.mtoolkit.certmanager"; //$NON-NLS-1$
 
@@ -194,6 +195,7 @@ public class CertStorage implements ICertificateModifyListener {
 		if (secureStore != null) {
 			try {
 				secureStore.put(ATTR_CERT_PASS + id, getNonNullValue(cert.getStorePass()), true);
+				secureStore.put(ATTR_CERT_KEY_PASS + id, getNonNullValue(cert.getKeyPass()), true);
 			} catch (StorageException e) {
 				CertManagerPlugin.error("Secure storage error", e); //$NON-NLS-1$
 			}
@@ -209,6 +211,7 @@ public class CertStorage implements ICertificateModifyListener {
 		if (secureStore != null) {
 			try {
 				cert.setStorePass(secureStore.get(ATTR_CERT_PASS + id, null));
+				cert.setKeyPass(secureStore.get(ATTR_CERT_KEY_PASS + id, null));
 			} catch (StorageException e) {
 				CertManagerPlugin.error("Secure storage error", e); //$NON-NLS-1$
 			}
@@ -223,6 +226,7 @@ public class CertStorage implements ICertificateModifyListener {
 		store.setToDefault(ATTR_CERT_UID + id);
 		if (secureStore != null) {
 			secureStore.remove(ATTR_CERT_PASS + id);
+			secureStore.remove(ATTR_CERT_KEY_PASS + id);
 		}
 	}
 

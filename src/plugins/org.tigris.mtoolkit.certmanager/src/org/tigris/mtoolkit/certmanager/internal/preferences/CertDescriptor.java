@@ -18,6 +18,7 @@ public class CertDescriptor implements ICertificateDescriptor {
 	private String storeLocation;
 	private String storeType;
 	private String storePass;
+	private String keyPass;
 	private String uid;
 	private ICertificateModifyListener listener;
 
@@ -42,6 +43,10 @@ public class CertDescriptor implements ICertificateDescriptor {
 		return storePass;
 	}
 
+	public String getKeyPass() {
+		return keyPass;
+	}
+
 	public String getUid() {
 		return uid;
 	}
@@ -63,6 +68,11 @@ public class CertDescriptor implements ICertificateDescriptor {
 
 	public void setStorePass(String storePass) {
 		this.storePass = storePass;
+		fireModified();
+	}
+
+	public void setKeyPass(String keyPass) {
+		this.keyPass = keyPass;
 		fireModified();
 	}
 

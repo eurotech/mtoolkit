@@ -40,7 +40,8 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 
 	private Text txtAlias;
 	private Text txtLocation;
-	private Text txtPass;
+	private Text txtStorePass;
+	private Text txtKeyPass;
 	private Button btnBrowse;
 	private Combo comboType;
 
@@ -48,6 +49,7 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 	public String storeLocation;
 	public String storeType;
 	public String storePass;
+	public String keyPass;
 
 	private static final String storeTypes[] = { "JKS", //$NON-NLS-1$
 	"JCEKS", //$NON-NLS-1$
@@ -72,6 +74,7 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 		storeLocation = init.getStoreLocation();
 		storeType = init.getStoreType();
 		storePass = init.getStorePass();
+		keyPass = init.getKeyPass();
 	}
 
 	protected void configureShell(Shell shell) {
@@ -151,12 +154,24 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 		lblPass.setText(Messages.dlgCertMan_labelPass);
 		lblPass.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 
-		txtPass = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+		txtStorePass = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gridData.horizontalSpan = 2;
-		txtPass.setLayoutData(gridData);
+		txtStorePass.setLayoutData(gridData);
 		if (storePass != null) {
-			txtPass.setText(storePass);
+			txtStorePass.setText(storePass);
+		}
+
+		Label lblKeyPass = new Label(composite, SWT.LEFT);
+		lblKeyPass.setText(Messages.dlgCertMan_labelKeyPass);
+		lblKeyPass.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+
+		txtKeyPass = new Text(composite, SWT.BORDER | SWT.PASSWORD);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gridData.horizontalSpan = 2;
+		txtKeyPass.setLayoutData(gridData);
+		if (keyPass != null) {
+			txtKeyPass.setText(keyPass);
 		}
 
 		return composite;
@@ -169,7 +184,8 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 		alias = txtAlias.getText().trim();
 		storeLocation = txtLocation.getText().trim();
 		storeType = comboType.getText();
-		storePass = txtPass.getText();
+		storePass = txtStorePass.getText();
+		keyPass = txtKeyPass.getText();
 		super.okPressed();
 	}
 

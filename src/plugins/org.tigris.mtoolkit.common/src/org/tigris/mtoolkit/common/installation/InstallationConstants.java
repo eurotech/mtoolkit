@@ -17,6 +17,7 @@ public final class InstallationConstants {
   public static final String CERT_STORE_LOCATION = "certificate-store-location"; //$NON-NLS-1$
   public static final String CERT_STORE_TYPE = "certificate-store-type"; //$NON-NLS-1$
   public static final String CERT_STORE_PASS = "certificate-store-pass"; //$NON-NLS-1$
+  public static final String CERT_KEY_PASS = "certificate-key-pass"; //$NON-NLS-1$
 
   private InstallationConstants() {
   }
