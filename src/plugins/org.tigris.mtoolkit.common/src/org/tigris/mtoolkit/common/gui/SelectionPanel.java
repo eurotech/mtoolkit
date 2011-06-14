@@ -116,14 +116,15 @@ public class SelectionPanel extends Composite {
 					}
 					for (int i = 0; i < numCols; i++) {
 						String txt = tlp.getColumnText(element, i);
-						if (txt != null && txt.indexOf(filter) != -1) {
+						if (txt != null
+								&& txt.toLowerCase().indexOf(filter) != -1) {
 							return true;
 						}
 					}
 				} else if (labelProvider instanceof ILabelProvider) {
 					ILabelProvider lp = (ILabelProvider) labelProvider;
 					String txt = lp.getText(element);
-					if (txt != null && txt.indexOf(filter) != -1) {
+					if (txt != null && txt.toLowerCase().indexOf(filter) != -1) {
 						return true;
 					}
 				}
