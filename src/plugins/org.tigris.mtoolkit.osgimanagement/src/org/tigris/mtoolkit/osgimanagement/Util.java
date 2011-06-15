@@ -149,4 +149,11 @@ public class Util {
 		}
 		return null;
 	}
+
+	/**
+	 * @since 6.1
+	 */
+	public static void connectFramework(Framework fw) {
+		FrameworkConnectorFactory.connectFrameWork((FrameworkImpl) fw);
+	}
 }
