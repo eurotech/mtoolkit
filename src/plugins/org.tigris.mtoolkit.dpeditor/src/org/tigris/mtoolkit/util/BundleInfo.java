@@ -78,7 +78,12 @@ public class BundleInfo {
 				bunVersion = "";
 			}
 			setBundleVersion(bunVersion);
-			setName("bundles" + "/" + bundlePath.substring(bundlePath.lastIndexOf(File.separator) + 1));
+			
+			String prefix = DPPUtilities.getPath(getName());
+			if (prefix == null) {
+				prefix = "bundles/";
+			}
+			setName(prefix + bundlePath.substring(bundlePath.lastIndexOf(File.separator) + 1));
 		} catch (IOException e) {
 		}
 	}

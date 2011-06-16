@@ -295,7 +295,7 @@ public class BundlesSection extends DPPFormSection implements
 				if (item.getText(1).equals("")) {
 					bundlesCustomPath = getUpperPath(object);
 				} else {
-					String tempSTR = getPath(item.getText(1));
+					String tempSTR = DPPUtilities.getPath(item.getText(1));
 					bundlesCustomPath = (tempSTR == null) ? "" : tempSTR;
 				}
 				if (DPPUtil.isAlreadyInTheTable(bundlesCustomPath + bundleName, item)) {
@@ -338,7 +338,7 @@ public class BundlesSection extends DPPFormSection implements
 						DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_NOT_ENDS_WITH_JAR));
 						return;
 					}
-					String currentPath = getPath(newValue);
+					String currentPath = DPPUtilities.getPath(newValue);
 					bundlesCustomPath = (currentPath == null) ? "" : currentPath;
 				}
 				if (DPPUtil.isAlreadyInTheTable(bundlesCustomPath + bundleName, currentItem)) {
@@ -428,7 +428,7 @@ public class BundlesSection extends DPPFormSection implements
 					if (i == 0)
 						return "bundles/";
 					TableItem upper = table.getItem(i - 1);
-					String upperPath = getPath(upper.getText(1));
+					String upperPath = DPPUtilities.getPath(upper.getText(1));
 					return (upperPath == null) ? "bundles/" : upperPath;
 				}
 			}
@@ -873,7 +873,7 @@ public class BundlesSection extends DPPFormSection implements
 		if (size != 0) {
 			TableItem beforeLastTableItem = table.getItem(table.getItems().length - 1);
 			String colonNameValue = beforeLastTableItem.getText(1);
-			String colonNamePath = getPath(colonNameValue);
+			String colonNamePath = DPPUtilities.getPath(colonNameValue);
 			if (colonNamePath == null) {
 				bundlesCustomPath = "bundles/";
 			} else {
@@ -902,42 +902,6 @@ public class BundlesSection extends DPPFormSection implements
 		removeButton.setEnabled(false);
 		upButton.setEnabled(false);
 		downButton.setEnabled(false);
-	}
-
-	private String getPath(String str) {
-
-		if (str == null)
-			return null;
-		if (str.equals(""))
-			return "";
-		// remove separators and white spaces in the begining
-		int i = 0;
-		while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
-
-			++i;
-			if (i == (str.length()))
-				break;
-		}
-		if (i < str.length()) {
-			str = str.substring(i);
-		} else {
-			str = "";
-		}
-
-		int indexofSlash = str.lastIndexOf("/");
-		int indexofbackSlash = str.lastIndexOf("\\");
-		if ((indexofSlash == -1) && (indexofbackSlash == -1)) {
-			return null;
-		} else {
-
-			if (indexofbackSlash > indexofSlash) {
-				return str.substring(0, indexofbackSlash + 1);
-			} else {
-				return str.substring(0, indexofSlash + 1);
-			}
-
-		}
-
 	}
 
 	private String getName(String str) {

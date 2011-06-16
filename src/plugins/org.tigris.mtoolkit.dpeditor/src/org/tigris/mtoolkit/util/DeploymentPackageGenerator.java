@@ -19,6 +19,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
+import java.util.zip.ZipException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
@@ -108,13 +109,14 @@ public class DeploymentPackageGenerator {
 		String manifest = generateManifest(dppFile);
 		String dpName = null;
 		FileInputStream fis = null;
+		JarOutputStream jos = null;
 		try {
 			if (dppFile.getBuildInfo().getDpFileName().indexOf(File.separatorChar) >= 0) {
 				dpName = dppFile.getBuildInfo().getDpFileName();
 			} else {
 				dpName = dppFile.getBuildInfo().getBuildLocation() + File.separator + dppFile.getBuildInfo().getDpFileName();
 			}
-			JarOutputStream jos = new JarOutputStream(new FileOutputStream(dpName));
+			jos = new JarOutputStream(new FileOutputStream(dpName));
 			JarEntry je = new JarEntry("META-INF/MANIFEST.MF");
 			jos.putNextEntry(je);
 			jos.write(manifest.getBytes());
@@ -197,16 +199,39 @@ public class DeploymentPackageGenerator {
 				fis.close();
 				fis = null;
 			}
-			jos.close();
 		} catch (FileNotFoundException e) {
 			DPPUtilities.debug("Deployment package generator : ", e);
 			error = "Deployment package was not created - some files were not found.";
+			if (jos != null) {
+				try {
+					jos.close();
+				} catch (IOException e1) {
+				}
+			}
+			if (dpName != null) {
+				new File(dpName).delete();
+			}
+		} catch (ZipException e) {
+			DPPUtilities.debug("Deployment package generator : ", e);
+			error = "Deployment package was not created due to unexpected error.\n"+e.getMessage();
+			if (jos != null) {
+				try {
+					jos.close();
+				} catch (IOException e1) {
+				}
+			}
 			if (dpName != null) {
 				new File(dpName).delete();
 			}
 		} catch (IOException e) {
 			DPPUtilities.debug("Deployment package generator : ", e);
 			error = "Problem writing files while constructing the deployment package.\nMaybe the disk is full.\n The generated deployment package is not in consistent state.";
+			if (jos != null) {
+				try {
+					jos.close();
+				} catch (IOException e1) {
+				}
+			}
 			if (dpName != null) {
 				new File(dpName).delete();
 			}
@@ -218,6 +243,12 @@ public class DeploymentPackageGenerator {
 					fis = null;
 				}
 			} catch (IOException e) {
+			}
+			if (jos != null) {
+				try {
+					jos.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 	}

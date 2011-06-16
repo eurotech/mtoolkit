@@ -795,4 +795,41 @@ public class DPPUtilities {
 		return isValid;
 	}
 
+	public static String getPath(String str) {
+
+		if (str == null)
+			return null;
+		if (str.equals(""))
+			return "";
+		// remove separators and white spaces in the begining
+		int i = 0;
+		while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
+
+			++i;
+			if (i == (str.length()))
+				break;
+		}
+		if (i < str.length()) {
+			str = str.substring(i);
+		} else {
+			str = "";
+		}
+
+		int indexofSlash = str.lastIndexOf("/");
+		int indexofbackSlash = str.lastIndexOf("\\");
+		if ((indexofSlash == -1) && (indexofbackSlash == -1)) {
+			return null;
+		} else {
+
+			if (indexofbackSlash > indexofSlash) {
+				return str.substring(0, indexofbackSlash + 1);
+			} else {
+				return str.substring(0, indexofSlash + 1);
+			}
+
+		}
+
+	}
+
+
 }
