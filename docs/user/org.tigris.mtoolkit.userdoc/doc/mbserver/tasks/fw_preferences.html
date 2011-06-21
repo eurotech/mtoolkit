@@ -15,25 +15,29 @@
 <ol>
   <li>Select <b>Window &gt; Preferences </b>.
   <li>Browse the <b>Preferences </b> dialog and locate the <b> mToolkit </b>preference page. </li>
-  <li> Under the <b>Remote Management</b> preference category if needed use the following options: </li>
+  <li> Under the <b>Remote Management</b> preference category if needed use the following options: 
   <ul>
       <li>Activate
         automatic connection to OSGi framework instances when a third party
         plug-in opens such a connection - check the <b>Enable OSGi Frameworks automatic connection</b> option.</li>
     <li>Activate logging of events in the <b>Error Log</b> view  - check the <b>Enable extended logging</b> option. </li>
     <li>To have a bundle automatically started upon install, select <b>Autostart bundles on install</b>.</li>
+    <li>To have the bundles started on the connected framework with regard to the activation policy in their manifests, select <b>Use activation policy to start bundles</b>. </li>
     <li>To view the bundles of a connected framework in the <b>Frameworks </b>view grouped by category, select <b>Group bundles in categories</b>.</li>
-  </ul>
-  <li>Under <b>Certificates</b> specify the own certificates (certificate and private/public key pair) which can be used to sign bundles and deployment packages upon deployment on a connected OSGi framework. Signing is activated individually for each OSGi framework in the relevant connection settings (see &quot;<a href="add_fw.html">Adding/Removing an OSGi Framework</a>&quot;).
+    <li>To view which bundles on a connected framework are system ones and skip their installation from Eclipse, select <b>Show skipped system bundles dialog</b>.</li>
+  </ul></li>
+  <li>Under <b>Certificates</b> specify the own certificates (certificate and private/public key pair) which can be used to sign bundles and deployment packages upon deployment on a connected OSGi framework. Signing is activated individually for each OSGi framework in the relevant settings (see &quot;<a href="add_fw.html">Adding/Removing an OSGi Framework</a>&quot;).
     <p>Use the <b>Add</b> button to specify a signer by keystore type and location, and  signer alias within the keystore.</p>
-    <p class="Note"> Note: To be able to use the alias for signing, the passwords protecting the keystore and the private key associated with the alias must be the same.</p>
   </li>
-  <li>To save the changes:</li>
+  <li>To save the changes:
   <ul>
       <li>To apply the changes and exit the <b>Preferences</b> dialog, click <b>OK</b>.</li>
     <li>To apply the changes and to continue using the <b>Preferences</b> dialog for setting specific preferences, click <b>Apply</b>.</li>
-  </ul>
+  </ul></li>
 </ol>
+<p><img src="img/preferences.gif" width="627" height="840"><br>
+  Figure 1: OSGi Runtime management preferences
+</p>
 <p><img src="../../ngrelc00.gif" width="159" height="27"></p>
 <p><a href="../concepts/fw_overview.html">OSGi Management Overview</a><br>
     <a href="../concepts/fw_tree.html">OSGi Frameworks  Tree</a><br>
@@ -54,6 +58,5 @@
 <p><a href="../reference/fw_views.html">Frameworks View</a><br>
   <a href="../reference/fw_tree.html">Frameworks View  Tree Icons</a><br>
   <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
-<p><img src="../../copyright.gif" width="398" height="23"></p>
 </body>
 </html>

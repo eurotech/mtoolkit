@@ -12,7 +12,7 @@
 <body>
 <h1> Frameworks View   Menus and Toolbar</h1>
 <h2><a name="pop"></a>Frameworks View Popup Menu</h2>
-<p>The tree of a connected  OSGi framework, displayed in the <b>Frameworks</b> view, has a  popup menu, activated upon right-click, with different items depending on the currently selected node as well as on the mToolkit extensions installed in Eclipse. </p>
+<p>The tree of a connected  OSGi framework, displayed in the <b><a href="fw_views.html">Frameworks</a></b> view, has a  popup menu, activated upon right-click, with different items depending on the currently selected node as well as on the mToolkit extensions installed in Eclipse. </p>
 <p><img src="img/ctx_menu.gif" width="502" height="404"><br>
 Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
 <table width="95%" border="1" cellspacing="0" cellpadding="3">
@@ -68,6 +68,14 @@ Figure 1: The popup menu of the <b>Frameworks</b> view.</p>
   <tr>
     <td nowrap><b>Install Deployment Package </b></td>
     <td>Install a deployment package on the selected framework. Available if a specific mToolkit extension is installed. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Restart In</b></td>
+    <td>Restarts the framework remotely and if needed the framework can be re-launched in a mode that allows remote profiling and debugging. Requires framework start through the runtime management agent. Available if a specific mToolkit extension is installed. </td>
+  </tr>
+  <tr>
+    <td nowrap><b>Create Image Description</b></td>
+    <td>Generates an Image Description file reflecting the structure and content of the connected runtime. The description file can be then used to create an image for a specific target device platform. Supported if a specific mToolkit extension is installed.</td>
   </tr>
   <tr>
     <td nowrap><b>Add  Server</b></td>
@@ -376,8 +384,5 @@ Figure 4: <b>Frameworks</b> view toolbar. </p>
 <p><img src="../../ngrelr00.gif" width="159" height="27"> </p>
 <p><a href="fw_views.html">Frameworks View</a><br>
     <a href="fw_tree.html">Frameworks View Tree Icons</a></p>
-<p><br>
-</p>
-<p><img src="../../copyright.gif" width="398" height="23"></p>
 </body>
 </html>

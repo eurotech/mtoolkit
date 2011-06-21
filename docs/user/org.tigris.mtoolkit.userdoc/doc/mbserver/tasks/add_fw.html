@@ -12,26 +12,28 @@
 <body>
 <h1>Adding/Removing an OSGi Runtime </h1>
 <h2>Adding an  OSGi  Runtime </h2>
-<p>To add an OSGi Runtime to the list of the <b>Frameworks</b> view:</p>
+<p>To add an OSGi Runtime to the list of the <b><a href="../reference/fw_views.html">Frameworks</a></b> view:</p>
 <ol>
   <li>Click the <img src="../reference/img/add_action.gif" width="16" height="16"> button from the view's toolbar. The <b>Framework Properties</b> dialog appears prompting you to specify the connection properties of  the  OSGi framework. </li>
   <li>From <b>Connection Type </b>select <b>Plain Socket</b>.</li>
   <li>Fill in the connection settings for the framework:
     <ul>
-      <li> IP Address - You have to provide the friendly name of the framework and the IP address of its host. </li>
+      <li>Name - Type the friendly name of the runtime. </li>
+      <li>IP Address - Specify the IP address of the runtime host. </li>
+      <li>Port - Specify the port for connection to the runtime. By default, it is <b>1450</b>.</li>
       <li>Automatic signing upon install - If you want to have  bundles and deployment packages automatically signed when installed on this OSGi framework:
         <ol>
-          <li>Add signer settings such as keystores and aliases within them under the <b>Certificates</b> section of the mToolkit preference page (Window &gt; Preferences &gt; mToolkit). </li>
+          <li>Add signer settings such as keystores and aliases within them under the <b>Certificates</b> section of the mToolkit preference page (<b>Window</b> &gt; <b>Preferences</b> &gt; <b>mToolkit</b>). </li>
           <li>Check the <b>Sign content before deployment</b> box.</li>
           <li>In the <b>Available Certificates</b> list select those signers from mToolkit certificate preferences which are needed for this OSGi framework.</li>
         </ol>
       </li>
       <li>Connect automatically after completing the framework registration in Eclipse - Select <b>Auto connect to the remote framework after its creation</b>. mToolkit will try to connect the framework after you click the <b>OK</b> button.</li>
     </ul>
-    <p><img src="img/add_fw_win_mobile.gif" width="422" height="476"><br>
+    <p><img src="img/add_fw_win_mobile.gif" width="438" height="506"><br>
       Figure 1: Setting up connection properties for an OSGi Runtime</p>
   </li>
-  <li>Select <b>OK</b> to complete adding the OSGi framework. </li>
+  <li>Select <b>OK</b> to complete adding the OSGi runtime. </li>
 </ol>
 <h2>Removing an  OSGi Runtime </h2>
 <p>To remove an OSGi Runtime from the frameworks list,  and select the framework node and click the <img src="../reference/img/remove_action.gif" width="16" height="16"> button from the view's toolbar.</p>
@@ -54,6 +56,5 @@
 <p><a href="../reference/fw_views.html">Frameworks View</a><br>
   <a href="../reference/fw_tree.html">Frameworks View  Tree Icons</a><br>
   <a href="../reference/fw_menu.html">Frameworks View Menus and Toolbar</a></p>
-<p><img src="../../copyright.gif" width="398" height="23"></p>
 </body>
 </html>
