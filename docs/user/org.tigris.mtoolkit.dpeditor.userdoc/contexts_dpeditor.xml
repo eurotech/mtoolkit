@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.contexts"?>
+<contexts>
+<!-- Views -->
+  <context id="cert_pass_dialog">
+    <description>TODO</description>
+    <topic label="Certificate Passwords" href="docs/tasks/generate_dp.html"/> 
+  </context>
+  <context id="change_bundle_dialog">
+    <description>TODO</description>
+    <topic label="Change Bundles" href="doc/tasks/model_dp_content/add_bundles.html"/> 
+  </context>
+  <context id="custom_header_dialog">
+    <description>TODO</description>
+    <topic label="Custom headers" href="doc/tasks/model_dp_content/edit_headers.html"/> 
+  </context>
+  <context id="ant_wizard">
+    <description>TODO</description>
+    <topic label="Ant Export Wizard" href="doc/tasks/export_build_files.html"/> 
+  </context>
+  <context id="build_wizard">
+    <description>TODO</description>
+    <topic label="Build Wizard" href="doc/tasks/generate_dp.html"/> 
+  </context>
+</contexts>

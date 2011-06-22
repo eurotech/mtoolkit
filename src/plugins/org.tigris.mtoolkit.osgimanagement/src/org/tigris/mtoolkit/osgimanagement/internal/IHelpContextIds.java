@@ -21,7 +21,4 @@ public interface IHelpContextIds {
 
 	public static final String DEPEND_SELECT_DIALOG = PREFIX + "depend_select_dialog"; //$NON-NLS-1$
 	public static final String FW_SELECT_DIALOG = PREFIX + "fw_select_dialog"; //$NON-NLS-1$
-
-	public static final String INSTALL_DIALOG = PREFIX + "install_dialog"; //$NON-NLS-1$
-	public static final String LIST_DIALOG = PREFIX + "list_dialog"; //$NON-NLS-1$
 }

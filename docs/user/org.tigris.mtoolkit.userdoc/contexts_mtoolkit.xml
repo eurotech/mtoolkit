@@ -26,5 +26,25 @@
      <description>TODO</description>
      <topic href="doc/mbserver/tasks/fw_preferences.html" label="mToolkit Preferences"/>
   </context>
+  <context id="fw_select_dialog">
+     <description>TODO</description>
+     <topic label="Select Framework" href=".html"/>
+  </context>
+  <context id="password_dialog">
+     <description>TODO</description>
+     <topic label="Password dialog" href=".html"/>
+  </context>
+   <context id="skip_list_dialog">
+     <description>TODO</description>
+     <topic label="Skip system bundles" href=".html"/>
+  </context>
+   <context id="ssl_confirm_dialog">
+     <description>TODO</description>
+     <topic label="SSL Confirm Dialog" href=".html"/>
+  </context>
+   <context id="cert_mng_dialog">
+     <description>TODO</description>
+     <topic label="Certificate Management" href=".html"/>
+  </context>
 
 </contexts>

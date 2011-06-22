@@ -8,5 +8,8 @@
             file="toc.xml">
       </toc>
    </extension>
+   <extension point="org.eclipse.help.contexts"> 
+      <contexts file="contexts_dpeditor.xml" plugin="org.tigris.mtoolkit.dpeditor"/> 
+   </extension>
 
 </plugin>

@@ -12,7 +12,7 @@ package org.tigris.mtoolkit.certmanager.internal.dialogs;
 
 public interface IHelpContextIds {
 
-	public static final String PREFIX = "org.tigris.mtoolkit.certmanager.";
+	public static final String PREFIX = "org.tigris.mtoolkit.";
 
 	public static final String CERT_MNG_DIALOG = PREFIX + "cert_mng_dialog"; //$NON-NLS-1$
 }
