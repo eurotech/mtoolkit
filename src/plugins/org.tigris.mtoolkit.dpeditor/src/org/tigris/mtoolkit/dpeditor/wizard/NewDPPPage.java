@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.osgi.framework.Version;
+import org.tigris.mtoolkit.dpeditor.IHelpContextIds;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
@@ -151,11 +152,11 @@ public class NewDPPPage extends WizardPage implements ModifyListener,
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.NEW_DPP);
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		composite.setLayout(layout);
 		createFields(composite);
-
 		setControl(composite);
 	}
 

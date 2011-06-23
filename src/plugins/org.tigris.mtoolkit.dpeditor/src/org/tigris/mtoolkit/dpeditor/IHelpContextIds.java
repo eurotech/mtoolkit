@@ -16,12 +16,13 @@ package org.tigris.mtoolkit.dpeditor;
  */
 public interface IHelpContextIds {
 
-  public static final String PREFIX               = "org.tigris.mtoolkit.dpeditor."; //$NON-NLS-1$
+  public static final String PREFIX = "org.tigris.mtoolkit.dpeditor."; //$NON-NLS-1$
 
-  public static final String CERT_PASS_DIALOG     = PREFIX + "cert_pass_dialog";    //$NON-NLS-1$
+  public static final String CERT_PASS_DIALOG = PREFIX + "cert_pass_dialog"; //$NON-NLS-1$
   public static final String CHANGE_BUNDLE_DIALOG = PREFIX + "change_bundle_dialog"; //$NON-NLS-1$
   public static final String CUSTOM_HEADER_DIALOG = PREFIX + "custom_header_dialog"; //$NON-NLS-1$
 
-  public static final String ANT_WIZARD           = PREFIX + "ant_wizard";          //$NON-NLS-1$
-  public static final String BUILD_WIZARD         = PREFIX + "build_wizard";        //$NON-NLS-1$
+  public static final String ANT_WIZARD = PREFIX + "ant_wizard"; //$NON-NLS-1$
+  public static final String BUILD_WIZARD = PREFIX + "build_wizard"; //$NON-NLS-1$
+  public static final String NEW_DPP = PREFIX + "new_dpp_wizard"; //$NON-NLS-1$
 }

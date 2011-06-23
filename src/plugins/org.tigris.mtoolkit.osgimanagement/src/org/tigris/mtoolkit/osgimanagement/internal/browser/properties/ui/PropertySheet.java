@@ -87,7 +87,7 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 
 		init();
 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PROPERTY_FRAMEWORK);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_ADD_REMOVE);
 
 		return mainContent;
 	}

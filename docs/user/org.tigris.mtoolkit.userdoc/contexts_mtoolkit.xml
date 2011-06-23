@@ -14,6 +14,10 @@
      <description>TODO</description>
      <topic href="doc/mbserver/tasks/fw_props.html" label="Framework Properties"/>
   </context>
+   <context id="fw_add_remove">
+     <description>TODO</description>
+     <topic href="doc/mbserver/tasks/add_fw.html" label="Adding/Removing an OSGi Runtime"/>
+  </context>
   <context id="property_bundle_context">
      <description>TODO</description>
      <topic href="doc/mbserver/tasks/bundles/mf_bundle.html" label="Bundle Properties"/>
