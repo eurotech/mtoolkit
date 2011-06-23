@@ -22,4 +22,8 @@
     <description>TODO</description>
     <topic label="Build Wizard" href="doc/tasks/generate_dp.html"/> 
   </context>
+  <context id="new_dpp_wizard">
+    <description>TODO</description>
+    <topic label="Creating a Deployment Package Project File" href="doc/tasks/create_dpp.html"/> 
+  </context>
 </contexts>
