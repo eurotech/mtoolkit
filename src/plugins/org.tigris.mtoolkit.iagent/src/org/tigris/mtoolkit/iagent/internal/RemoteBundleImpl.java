@@ -167,7 +167,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 		checkBundleState();
 		String headerValue = getHeader("Bundle-Version", "");
 		debug("[getVersion] bundle version: " + headerValue);
-		return headerValue;
+		return headerValue != null ? headerValue.trim() : null;
 	}
 
 	public boolean resolve() throws IAgentException {
