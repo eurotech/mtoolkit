@@ -274,6 +274,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				findItem(filterField.getText().toLowerCase().trim(), tree);
 			}
 		});
+		setFilter("");
 		
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
