@@ -20,6 +20,7 @@ import java.util.Arrays;
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.iagent.internal.mbsa.DataFormater;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAConstants;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAException;
 import org.tigris.mtoolkit.iagent.mbsa.MBSARequest;
@@ -62,7 +63,7 @@ public class VMCommander {
 	}
 
 	private void startServerAsync() {
-		new Thread("IAgent controller connection...") {
+		ThreadUtils.createThread(new Runnable() {
 			public void run() {
 				startServer();
 				if (closed) {
@@ -70,7 +71,7 @@ public class VMCommander {
 					stopServer();
 				}
 			}
-		}.start();
+		}, "IAgent controller connection...").start();
 	}
 
 	private synchronized void startServer() {
@@ -117,7 +118,6 @@ public class VMCommander {
 
 	private void startUDPListener() {
 		udpListener = new UDPListener();
-		udpListener.setName("UDPListener Thread");
 		udpListener.start();
 	}
 
@@ -169,21 +169,22 @@ public class VMCommander {
 		DebugUtils.error(this, message, t);
 	}
 
-	private class UDPListener extends Thread {
+	private class UDPListener implements Runnable {
+		private Thread listenerThread;
 		private volatile boolean listenerRunning;
 
 		public UDPListener() {
-			super("IAgent UDP Listener");
+			listenerThread = ThreadUtils.createThread(this, "IAgent UDP Listener");
 		}
 
 		public void start() {
 			listenerRunning = true;
-			super.start();
+			listenerThread.start();
 		}
 
 		public void dispose() {
 			listenerRunning = false;
-			interrupt();
+			listenerThread.interrupt();
 		}
 
 		public void run() {

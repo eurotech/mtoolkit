@@ -23,9 +23,10 @@ import java.util.Vector;
 
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadPool;
+import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 
-public class PMPSessionThread extends Thread {
+public class PMPSessionThread implements Runnable {
 
 	protected PMPOutputStream os;
 	protected PMPInputStream is;
@@ -129,9 +130,10 @@ public class PMPSessionThread extends Thread {
 	private static final String DSCMSG2 = "Error Disconnect Received: ";
 	
 	protected ThreadPool pool;
+	private Thread sessionThread;
 
 	public PMPSessionThread(PMPPeerImpl peer, Socket socket, String sessionID, String host) throws IOException {
-		super("PMP " + peer.getRole() + " Thread [" + host + "]"); //$NON-NLS-1$
+		sessionThread = ThreadUtils.createThread(this, "PMP " + peer.getRole() + " Thread [" + host + "]"); //$NON-NLS-1$
 		this.url = host;
 		this.socket = socket;
 		this.sessionID = sessionID;
@@ -146,11 +148,11 @@ public class PMPSessionThread extends Thread {
 		this.pool = peer.pool;
 		maxS = peer.maxStringLength;
 		maxA = peer.maxArrayLength;
-		start();
+		sessionThread.start();
 	}
 
 	public PMPSessionThread(PMPPeerImpl peer, TransportConnection tc, String sessionID) throws IOException {
-		super("PMP " + peer.getRole() + " Thread [" + tc + "]"); //$NON-NLS-1$
+		sessionThread = ThreadUtils.createThread(this, "PMP " + peer.getRole() + " Thread [" + tc + "]"); //$NON-NLS-1$
 		this.transportConnection = tc;
 		this.sessionID = sessionID;
 
@@ -164,7 +166,7 @@ public class PMPSessionThread extends Thread {
 		this.pool = peer.pool;
 		maxS = peer.maxStringLength;
 		maxA = peer.maxArrayLength;
-		start();
+		sessionThread.start();
 	}
 
 	public void run() {
@@ -311,7 +313,7 @@ public class PMPSessionThread extends Thread {
 		if (!running)
 			return;
 		running = false;
-		this.interrupt();
+		sessionThread.interrupt();
 		connection.disconnected(errMsg);
 		peer.removeElement(this);
 		debug("Disconnecting Client " + ((url != null) ? url : transportConnection.toString()));

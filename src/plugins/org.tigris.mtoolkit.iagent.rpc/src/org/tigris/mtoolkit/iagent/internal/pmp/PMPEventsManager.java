@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
@@ -20,22 +21,27 @@ import org.tigris.mtoolkit.iagent.pmp.PMPException;
 /**
  * This implementation uses the PMP Service to receive remote events.
  */
-class PMPEventsManager extends Thread {
+class PMPEventsManager implements Runnable {
 
 	private PMPOutputStream os;
 	private PMPEvent first;
 	private PMPEvent last = null;
 	private boolean waiting = false;
+	private Thread pmpEventsThread;
 
 	PMPSessionThread session;
 
 	public PMPEventsManager(PMPSessionThread session) {
-		super("PMP Events Manager Thread [" + session.sessionID + "]"); //$NON-NLS-1$
+		pmpEventsThread = ThreadUtils.createThread(this, "PMP Events Manager Thread [" + session.sessionID + "]"); //$NON-NLS-1$
 		this.session = session;
 		this.os = session.os;
 	}
 
 	private boolean go = true;
+
+	public void start() {
+		pmpEventsThread.start();
+	}
 
 	public void run() {
 		while (go || first != null) {

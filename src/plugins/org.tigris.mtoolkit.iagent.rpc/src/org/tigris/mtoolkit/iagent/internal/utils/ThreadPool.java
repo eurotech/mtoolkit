@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.utils;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,17 +22,7 @@ public class ThreadPool {
 
 	public static final int OPTION_AGGRESSIVE = 0x00001;
 	public static final int OPTION_NONE = 0;
-	
-	private static Constructor tssConstructor;
-	
-	static {
-		try {
-			tssConstructor = Thread.class.getConstructor(new Class[] { ThreadGroup.class, Runnable.class, String.class, long.class });
-		} catch (Throwable t) {
-			DebugUtils.info(ThreadPool.class, "VM doesn't support controlling the threads stack size", t);
-		}
-	}
-	
+
 	private volatile boolean running = true;
 	private volatile int workers = 0;
 	private volatile int working = 0;
@@ -48,20 +37,9 @@ public class ThreadPool {
 
 	private int maxWorkers;
 
-	private Long threadStackSize = new Long(0);
-
 	public ThreadPool(int maxWorkers, int options) {
 		this.maxWorkers = maxWorkers;
 		this.options = options;
-		
-		String stackSizeOption = System.getProperty("iagent.threads.stackSize");
-		if (stackSizeOption != null) {
-			try {
-				threadStackSize = new Long(stackSizeOption);
-			} catch (NumberFormatException e) {
-				DebugUtils.error(ThreadPool.class, "Thread stack option has invalid value: " + threadStackSize + ". It will be ignored.");
-			}
-		}
 	}
 
 	public void stop() {
@@ -119,21 +97,10 @@ public class ThreadPool {
 				// spawn new worker
 				spawned++;
 				Worker worker = new Worker();
-				Thread th = createThread(worker, threadStackSize);
+				Thread th = ThreadUtils.createThread(worker);
 				worker.start(th);
 			}
 		}
-	}
-
-	private static Thread createThread(Runnable runnable, Long threadStackSize) {
-		if (tssConstructor != null)
-			try {
-				return (Thread) tssConstructor.newInstance(new Object[] { null, runnable, "Uninitialized mToolkit Worker", threadStackSize });
-			} catch (Throwable t) {
-				DebugUtils.error(ThreadPool.class, "Failed to create thread with specified stack size", t);
-				// ignore the request if failed
-			}
-		return new Thread(runnable);
 	}
 
 	private class Worker implements Runnable {

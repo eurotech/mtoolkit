@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -26,6 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.log.Log;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
@@ -135,7 +135,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 			}
 		}
 		socket.setSoTimeout(1000);
-		new Thread(this, "IAgent Server Thread").start();
+		ThreadUtils.createThread(this, "IAgent Server Thread").start();
 	}
 
 	public void run() {

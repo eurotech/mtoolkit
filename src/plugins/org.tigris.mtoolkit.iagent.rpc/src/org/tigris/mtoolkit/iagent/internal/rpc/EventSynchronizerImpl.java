@@ -18,20 +18,22 @@ import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 
-public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
+public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
 
 	private List eventQueue = new LinkedList();
 	private volatile boolean running;
 	private PMPServer server;
 	private ServiceRegistration registration;
 	private BundleContext bc;
+	private Thread eventsThread;
 
 	EventSynchronizerImpl(BundleContext bc) {
-		super("IAgent RPC Event Thread");
+		eventsThread = ThreadUtils.createThread(this, "IAgent RPC Event Thread");
 		this.bc = bc;
-		setDaemon(true);
+		eventsThread.setDaemon(true);
 
 		registration = bc.registerService(EventSynchronizer.class.getName(), this, null);
 	}
@@ -49,7 +51,7 @@ public class EventSynchronizerImpl extends Thread implements EventSynchronizer {
 		if (server == null)
 			throw new IllegalStateException("Event synchronizer is not fully initialized");
 		running = true;
-		super.start();
+		eventsThread.start();
 	}
 
 	public void run() {

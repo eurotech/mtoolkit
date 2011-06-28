@@ -12,10 +12,11 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 
 import java.util.Vector;
 
+import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener;
 
-class PMPConnectionDispatcher extends Thread {
+class PMPConnectionDispatcher implements Runnable {
 
 	private boolean go;
 	private ConnectionEvent first;
@@ -24,11 +25,11 @@ class PMPConnectionDispatcher extends Thread {
 	private PMPPeerImpl pmp;
 
 	PMPConnectionDispatcher(PMPPeerImpl pmp) {
-		super("PMPConnDispatcher Thread");
+		Thread th = ThreadUtils.createThread(this, "PMPConnDispatcher Thread");
 		this.pmp = pmp;
 		waiting = false;
 		go = true;
-		start();
+		th.start();
 	}
 
 	public void run() {

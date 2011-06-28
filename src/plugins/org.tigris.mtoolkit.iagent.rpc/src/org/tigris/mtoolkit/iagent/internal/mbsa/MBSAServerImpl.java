@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAConstants;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAException;
 import org.tigris.mtoolkit.iagent.mbsa.MBSARequest;
@@ -31,8 +32,7 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 		this.input = input;
 		this.output = output;
 
-		serverThread = new Thread(this);
-		serverThread.setName("MBSA Session");
+		serverThread = ThreadUtils.createThread(this, "MBSA Session");
 		start();
 	}
 
