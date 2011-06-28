@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
@@ -165,7 +167,13 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 
 			Label pageName = new Label(prefPane, SWT.NONE);
 			pageName.setText(page.getName());
-			pageName.setFont(getBoldFont(pageName.getFont()));
+			final Font bold = getBoldFont(pageName.getFont());
+			pageName.setFont(bold);
+			parent.addDisposeListener(new DisposeListener() {
+				public void widgetDisposed(DisposeEvent e) {
+					bold.dispose();
+				}
+			});
 			gd = new GridData(GridData.FILL_HORIZONTAL);
 			pageName.setLayoutData(gd);
 
