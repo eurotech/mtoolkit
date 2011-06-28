@@ -17,7 +17,8 @@ import java.lang.reflect.Constructor;
  */
 public class ThreadUtils {
 
-	private static final String PROP_THREADS_STACK_SIZE = "iagent.threads.stackSize";
+	private static final String PROP_IA_THREADS_STACK_SIZE = "iagent.threads.stackSize"; //$NON-NLS-1$
+	private static final String PROP_MBS_THREADS_STACK_SIZE = "mbs.threads.stacksize"; //$NON-NLS-1$
 
 	private static Constructor tssConstructor;
 
@@ -53,7 +54,16 @@ public class ThreadUtils {
 	}
 
 	private static long getThreadsStackSize() {
-		String stackSizeOption = System.getProperty(PROP_THREADS_STACK_SIZE);
+		String stackSizeOption = System.getProperty(PROP_IA_THREADS_STACK_SIZE);
+		if (stackSizeOption != null) {
+			try {
+				return new Long(stackSizeOption).longValue();
+			} catch (NumberFormatException e) {
+				DebugUtils.error(ThreadPool.class, "Thread stack option has invalid value: " + stackSizeOption
+						+ ". It will be ignored.");
+			}
+		}
+		stackSizeOption = System.getProperty(PROP_MBS_THREADS_STACK_SIZE);
 		if (stackSizeOption != null) {
 			try {
 				return new Long(stackSizeOption).longValue();
