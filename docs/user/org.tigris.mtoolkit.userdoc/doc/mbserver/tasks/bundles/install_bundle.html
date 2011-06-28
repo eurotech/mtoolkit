@@ -23,14 +23,12 @@
 <ol>
   <li>If more than one OSGi framework is connected, locate the target one. </li>
   <li>To install the bundle JAR, right-click the device node or the <b>Bundles</b> node and use  <b>Install Bundle</b>.</li>
-  <li>In the <b>Install bundle</b> dialog, indicate the location in the file system of the bundle JAR to install and click <b>OK</b>.
-  <p>    <img src="img/b_install.gif" width="347" height="130"><br>
-  Figure 1: Choosing the bundle to install </p></li>
+  <li>Indicate the location in the file system of the bundle JAR to install and click <b>OK</b>.</li>
 </ol>
 <p>On success, the installed  bundle will appear under the <b>Bundles</b> node of the device-specific tree. </p>
 <h2>Uninstalling a Bundle from an OSGi Runtime </h2>
 <p>To uninstall an installed bundle from the target  OSGi framework, in the <b>Frameworks</b> view select the bundle from the framework's tree, right-click it and use <b>Uninstall Bundle</b>. To uninstall several bundles with a single operation, simply select all of them in the framework's tree before selecting<b> Uninstall Bundle</b>.</p>
-<p class="Note"><b>Note</b>: You are not allowed to uninstall bundles providing vital system functionality - uninstalling one of them might lead to loss of important OSGi framework capabilities.</p>
+<p class="Note"><b>Note</b>: If  the OSGi Runtime is configured with a list of system bundles providing vital system functionality, e.g. if it is emulated or is created with the help of the Image Builder, you are not allowed to uninstall such bundles  - uninstalling one of them might lead to loss of important OSGi framework capabilities.</p>
 <p><img src="../../../ngrelc00.gif" width="159" height="27"></p>
 <p><a href="../../concepts/fw_overview.html">OSGi Management Overview</a><br>
 <a href="../../concepts/fw_tree.html">OSGi Framework Tree</a></p>
