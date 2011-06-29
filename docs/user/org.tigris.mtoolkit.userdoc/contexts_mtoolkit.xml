@@ -1,54 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?NLS TYPE="org.eclipse.help.contexts"?>
 <contexts>
-
 <!-- Views -->
-
   <context id="frameworks_view_context">
-    <description>This view provides the means for administration of remote OSGi frameworks</description>
+    <description>This view provides means for administration of remote OSGi frameworks.</description>
     <topic label="Frameworks View" href="doc/mbserver/reference/fw_views.html"/> 
   </context>
   
 <!-- Dialogs -->
   <context id="property_framework_context">
-     <description>TODO</description>
+     <description>This page allows you to edit the connection and signing settings for the framework.</description>
      <topic href="doc/mbserver/tasks/fw_props.html" label="Framework Properties"/>
   </context>
    <context id="fw_add_remove">
-     <description>TODO</description>
+     <description>This dialog allows you to add an OSGi runtime definition.</description>
      <topic href="doc/mbserver/tasks/add_fw.html" label="Adding/Removing an OSGi Runtime"/>
   </context>
   <context id="property_bundle_context">
-     <description>TODO</description>
+     <description>This dialog shows bundle properties.</description>
      <topic href="doc/mbserver/tasks/bundles/mf_bundle.html" label="Bundle Properties"/>
   </context>
   <context id="property_service_context">
-     <description>TODO</description>
+     <description>This dialog shows service properties.</description>
      <topic href="doc/mbserver/reference/fw_menu.html" label="Service Properties"/>
   </context>
   <context id="property_preferences_context">
-     <description>TODO</description>
+     <description>This page allows you to configure the mToolkit.</description>
      <topic href="doc/mbserver/tasks/fw_preferences.html" label="mToolkit Preferences"/>
   </context>
   <context id="fw_select_dialog">
-     <description>TODO</description>
+     <description>This dialog is to select OSGi framework</description>
      <topic label="Select Framework" href=".html"/>
   </context>
   <context id="password_dialog">
-     <description>TODO</description>
+     <description>This dialog is used to fill your missing passwords</description>
      <topic label="Password dialog" href=".html"/>
   </context>
    <context id="skip_list_dialog">
-     <description>TODO</description>
+     <description>This dialog shows the list of bundles which conflict with system bundles of the framework.</description>
      <topic label="Skip system bundles" href=".html"/>
+  </context>
+  <context id="cert_mng_dialog">
+     <description>This dialog is used to edit signer certificate properties like keystore type and location, signer alias and key password within the store.</description>
+     <topic label="Certificate Management" href=".html"/>
   </context>
    <context id="ssl_confirm_dialog">
      <description>TODO</description>
      <topic label="SSL Confirm Dialog" href=".html"/>
   </context>
-   <context id="cert_mng_dialog">
-     <description>TODO</description>
-     <topic label="Certificate Management" href=".html"/>
-  </context>
-
 </contexts>
