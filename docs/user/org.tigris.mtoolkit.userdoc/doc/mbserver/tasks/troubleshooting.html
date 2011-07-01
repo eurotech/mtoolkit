@@ -22,16 +22,16 @@
   <li><b>What do I have to do if I change my bundle after I have installed it on the framework? </b>
       <p>To reflect the changes to your bundle on the target  OSGi framework, you need to update that bundle. </p>
   </li>
-  <li><b>What do I do if the  OSGi framework refuses to accept and install my bundle?</b>
-      <ul>
-        <li>A possible reason might be incorrect bundle  - missing native libraries, incorrect manifest  etc. </li>
-      </ul>
-  </li>
+  <li><b>What do I do if the  OSGi framework refuses to accept and install my bundle?</b>  </li>
+<p>A possible reason might be incorrect bundle  - missing native libraries, incorrect manifest  etc. </p>
+  
   <li><b>What do I do if my bundle does not perform any action on the  OSGi framework? </b>
-      <p>Perhaps you have forgotten to start it. Installing a bundle is not enough to make it handle its tasks within the OSGi framework. The installation only enables the framework to resolve the bundle's packages and make them available to the rest of the bundles. You must start it after installing it to observe any other results. </p>
+    <p>Perhaps you have forgotten to start it. Installing a bundle is not enough to make it handle its tasks within the OSGi framework. The installation only enables the framework to resolve the bundle's packages and make them available to the rest of the bundles. You must start it after installing it to observe any other results. </p>
   </li>
+</ul>
+<ul>
   <li><b>What do I do if the framework refuses to start my bundle? </b>
-      <p>This problem may be due to errors in the bundle activator or the bundle's services. Another possible reason is missing import packages or services. In any case, the error dialog that appears gives a hint on the exact reason. </p>
+    <p>This problem may be due to errors in the bundle activator or the bundle's services. Another possible reason is missing import packages or services. In any case, the error dialog that appears gives a hint on the exact reason. </p>
     <p>If the problem is determined by the behavior of the activator or services, you may view the ERROR and EXCEPTION levels of the Log Service. To do this, enter the <b>Console </b> view and locate the console of the target framework. Use the relevant console command for getting generated logs.</p>
   </li>
 </ul>
