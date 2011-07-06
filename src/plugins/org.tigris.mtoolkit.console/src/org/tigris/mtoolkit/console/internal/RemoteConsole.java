@@ -41,6 +41,7 @@ import org.tigris.mtoolkit.console.utils.images.ImageHolder;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.iagent.VMManager;
 
 public final class RemoteConsole extends IOConsole implements IConsole {
 
@@ -128,7 +129,10 @@ public final class RemoteConsole extends IOConsole implements IConsole {
 			if (output != null) {
 				if (connector != null && connector.isActive()) {
 					try {
-						connector.getVMManager().redirectFrameworkOutput(null);
+						VMManager vmManager = connector.getVMManager();
+						if (vmManager.isVMActive()) {
+							vmManager.redirectFrameworkOutput(null);
+						}
 					} catch (IAgentException e) {
 						OSGiConsolePlugin.error("Failed to reset framework output", e);
 					}
