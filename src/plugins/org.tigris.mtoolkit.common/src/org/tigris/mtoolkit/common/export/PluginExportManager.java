@@ -78,7 +78,8 @@ public class PluginExportManager {
 	}
 
 	private static void pluginModelNotFound(String symbolicName, String version) {
-		UtilitiesPlugin.warning("Cannot find bundle " + symbolicName + (version != null ? "_" + version : "") + " in current target platform.", new Throwable("<from here>"));
+    UtilitiesPlugin.warning("Cannot find bundle " + symbolicName + (version != null ? "_" + version : "")
+        + " in current target platform.", null);
 	}
 	
 	public String getLocation(IPluginModelBase model) {
