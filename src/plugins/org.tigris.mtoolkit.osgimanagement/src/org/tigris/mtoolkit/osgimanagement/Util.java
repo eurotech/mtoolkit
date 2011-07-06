@@ -97,7 +97,7 @@ public class Util {
 		try {
 			fw = new FrameworkImpl(name, true);
 			if (!connector.getVMManager().isVMActive()) {
-				String message = Messages.connection_failed + " " + Messages.rcp_bundle_missing_message; //$NON-NLS-1$
+				String message = Messages.connection_failed;
 				throw newException(IStatus.ERROR, message, null);
 			}
 			FrameWorkView.getTreeRoot().addElement(fw);
