@@ -17,6 +17,7 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.ModelEntry;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
+import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
@@ -70,7 +71,7 @@ public class PluginExportManager {
 		IPluginModelBase[] activeModels = entry.getActiveModels();
 		for (int i = 0; i < activeModels.length; i++) {
 			IPluginModelBase model = activeModels[i];
-			if (version.equals(model.getPluginBase().getVersion()))
+      if (new Version(version).compareTo(new Version(model.getPluginBase().getVersion())) == 0)
 				return model;
 		}
 		pluginModelNotFound(symbolicName, version);
