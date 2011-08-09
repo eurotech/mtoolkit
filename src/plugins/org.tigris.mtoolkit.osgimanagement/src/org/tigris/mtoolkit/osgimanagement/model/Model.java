@@ -192,8 +192,20 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		}
 	}
 
+	// When name of a element is changed at elementList node is removed and
+	// added
+	// with its new name.
 	public void setName(String name) {
+		boolean removed = false;
+		Model parent = this.getParent();
+		if (parent != null && parent.elementList != null && parent.elementList.remove(this)) {
+			removed = true;
+		}
+		parent.elementList.remove(this);
 		this.name = name;
+		if (removed) {
+			parent.elementList.add(this);
+		}
 	}
 
 	public String getName() {
