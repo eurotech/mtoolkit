@@ -94,10 +94,12 @@ public class ViewContentProvider implements ITreeContentProvider, ContentChangeL
 			if (!display.isDisposed()) {
 				display.asyncExec(new Runnable() {
 					public void run() {
-						viewer.refresh(event.getTarget());
 						if (event.getTarget() instanceof FrameworkImpl) {
 							FrameworkImpl fw = (FrameworkImpl) event.getTarget();
 							ConsoleManager.setName(fw.getConnector(), fw.getName());
+							viewer.refresh();
+						} else {
+							viewer.refresh(event.getTarget());
 						}
 					}
 				});
