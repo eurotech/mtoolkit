@@ -200,8 +200,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		Model parent = this.getParent();
 		if (parent != null && parent.elementList != null && parent.elementList.remove(this)) {
 			removed = true;
+			parent.elementList.remove(this);
 		}
-		parent.elementList.remove(this);
 		this.name = name;
 		if (removed) {
 			parent.elementList.add(this);
