@@ -100,6 +100,7 @@ public class SelectionPanel extends Composite {
         return out.toArray();
       }
 
+
       public boolean select(Viewer viewer, Object parentElement, Object element) {
         String filter = filterText.getText().trim().toLowerCase();
         return match(element, filter, viewer);
@@ -152,10 +153,6 @@ public class SelectionPanel extends Composite {
       public void modifyText(ModifyEvent e) {
         filterJob.cancel();
         filterJob.schedule(300);
-        TableItem[] items = ((Table) list.getControl()).getItems();
-        for (int i = 0; i < items.length; i++) {
-          list.setChecked(items[i].getData(), ((ListItem) items[i].getData()).checked);
-        }
       }
     });
 
@@ -197,9 +194,10 @@ public class SelectionPanel extends Composite {
    * @param state
    */
   public void selectAll(boolean state) {
-    list.setAllChecked(state);
-    for (int i = 0; i < listItems.length; i++) {
-      listItems[i].checked = state;
+    TableItem[] items = ((Table) list.getControl()).getItems();
+    for (int i = 0; i < items.length; i++) {
+      items[i].setChecked(state);
+      ((ListItem) items[i].getData()).checked = state;
     }
   }
 
