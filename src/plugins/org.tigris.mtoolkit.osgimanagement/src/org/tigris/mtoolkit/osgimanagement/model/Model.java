@@ -39,7 +39,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		this.name = name;
 		elementList = new TreeSet();
 	}
-	
+
 	public Model(String name, Model master) {
 		this(name);
 		if (master != null) {
@@ -50,35 +50,37 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 			master.slaves.addElement(this);
 		}
 	}
-	
+
 	public Vector getSlaves() {
 		return slaves;
 	}
-	
+
 	public Model getMaster() {
 		return master;
 	}
 
 	public void addElement(Model element) {
 		if (element.getParent() != null)
-			throw new IllegalArgumentException("Cannot change the parent of model object without removing it from the old one");
+			throw new IllegalArgumentException(
+					"Cannot change the parent of model object without removing it from the old one");
 		if (elementList.contains(element)) {
-			System.out.println("WARNING: Tried to add a model object twice to the same parent: " + this + "; child: " + element);
+			System.out.println("WARNING: Tried to add a model object twice to the same parent: " + this + "; child: "
+					+ element);
 			return;
 		}
-		
+
 		if (element.selectedChilds != 0)
-		fireChildSelected(element.selectedChilds);
-		
+			fireChildSelected(element.selectedChilds);
+
 		element.setParent(this);
-		
+
 		filterRecursively(element);
 
 		if (elementList.add(element)) {
 			fireElementAdded(element);
 		}
 	}
-	
+
 	private void filterRecursively(Model element) {
 		element.filter();
 		Model[] children = element.getChildren();
@@ -87,7 +89,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 				filterRecursively(children[i]);
 			}
 	}
-	
+
 	private void fireChildSelected(int delta) {
 		synchronized (this) {
 			selectedChilds += delta;
@@ -105,6 +107,9 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		if (elementList.remove(element)) {
 			fireChildSelected(-element.selectedChilds);
 			fireElementRemoved(element);
+			if (element instanceof Framework) {
+				((Framework) element).listeners.clear();
+			}
 		}
 	}
 
@@ -116,7 +121,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		resultArray = (Model[]) elementList.toArray(resultArray);
 		return resultArray;
 	}
-	
+
 	public Model[] getSelectedChildrenRecursively() {
 		if (elementList == null) {
 			return new Model[0];
@@ -125,8 +130,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		internalGetSelectedChildrenRecursively(children);
 		return (Model[]) children.toArray(new Model[children.size()]);
 	}
-	
-	protected void internalGetSelectedChildrenRecursively(List result) { 
+
+	protected void internalGetSelectedChildrenRecursively(List result) {
 		if (elementList == null)
 			return;
 		for (Iterator it = elementList.iterator(); it.hasNext();) {
@@ -214,6 +219,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 
 	/**
 	 * Returns human-readable text for using in UI.
+	 * 
 	 * @return the label
 	 */
 	public String getLabel() {
@@ -240,8 +246,8 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 			removeElement(elements[i]);
 			elements[i].removeChildren();
 		}
-		for (int i=0; i<getSlaves().size(); i++) {
-			((Model)getSlaves().elementAt(i)).removeChildren();
+		for (int i = 0; i < getSlaves().size(); i++) {
+			((Model) getSlaves().elementAt(i)).removeChildren();
 		}
 	}
 
@@ -257,21 +263,21 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		}
 		return false;
 	}
-	
+
 	public boolean isVisible() {
 		return selected || (selectedChilds > 0);
 	}
-	
+
 	public boolean containSelectedChilds() {
 		return selectedChilds - (selected ? 1 : 0) > 0;
 	}
-	
+
 	protected boolean select(Model model) {
 		if (getParent() != null)
 			return getParent().select(model);
 		return false;
 	}
-	
+
 	public void filter() {
 		boolean selected = select(this);
 		int selectedDelta;
@@ -284,7 +290,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		}
 		fireChildSelected(selectedDelta);
 	}
-	
+
 	public Framework findFramework() {
 		Framework fw = null;
 		Model model = this;
