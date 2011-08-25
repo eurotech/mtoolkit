@@ -20,6 +20,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -86,6 +88,14 @@ public class CertPreferencesPage extends PreferencePage implements
 		certificatesViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateButtonsState();
+			}
+		});
+
+		certificatesViewer.getControl().addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.DEL) {
+					removeCertificate();
+				}
 			}
 		});
 
