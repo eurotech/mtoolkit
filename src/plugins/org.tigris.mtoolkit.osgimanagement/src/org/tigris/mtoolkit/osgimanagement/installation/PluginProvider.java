@@ -63,7 +63,6 @@ public class PluginProvider implements InstallationItemProvider {
 		private InstallationItemProvider provider;
 		private PluginExportManager exportManager;
 		private File preparedItem;
-		
 
 		/**
 		 * @since 6.0
@@ -76,7 +75,7 @@ public class PluginProvider implements InstallationItemProvider {
 		public String getMimeType() {
 			return "application/java-archive";
 		}
-		
+
 		public InputStream getInputStream() throws IOException {
 			String location = getLocation();
 			if (location == null) {
@@ -84,30 +83,35 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			return new FileInputStream(location);
 		}
-		
+
 		public IStatus prepare(IProgressMonitor monitor, Map properties) {
 			if (pluginBase == null) {
-				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Can not parse the manifest file for the plugin");
+				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+						"Can not parse the manifest file for the plugin");
+			}
+			BundleDescription description = pluginBase.getBundleDescription();
+			if (description == null) {
+				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "This is not valid OSGI plug-in project.");
 			}
 			List items = new ArrayList();
 			items.add(this);
 			return provider.prepareItems(items, properties, monitor);
 		}
-		
+
 		/**
 		 * @since 6.0
 		 */
 		protected void setExportManager(PluginExportManager exportManager) {
 			this.exportManager = exportManager;
 		}
-		
+
 		/**
 		 * @since 6.0
 		 */
 		protected void setPreparedItem(File prepared) {
 			this.preparedItem = prepared;
 		}
-		
+
 		/**
 		 * @since 6.0
 		 */
@@ -120,9 +124,10 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			return null;
 		}
-		
+
 		public String getName() {
-			return pluginBase.getBundleDescription().getName();
+			BundleDescription description = pluginBase.getBundleDescription();
+			return (description != null) ? description.getName() : null;
 		}
 
 		public void dispose() {
@@ -148,7 +153,7 @@ public class PluginProvider implements InstallationItemProvider {
 			// retrieved
 			while ((!framework.isConnected() || framework.isConnecting()) && !monitor.isCanceled()) {
 				try {
-					Thread.currentThread().sleep(50);
+					Thread.sleep(50);
 				} catch (InterruptedException e) {
 				}
 			}
@@ -156,7 +161,7 @@ public class PluginProvider implements InstallationItemProvider {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
-			
+
 			// find missing bundle dependencies
 			BundleDescription descr = pluginBase.getBundleDescription();
 			if (descr == null) {
@@ -165,8 +170,8 @@ public class PluginProvider implements InstallationItemProvider {
 					path = " for: " + pluginBase.getUnderlyingResource().getProject().getName();
 				} catch (Throwable t) {
 				}
-				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
-						"Missing bundle description"+path);
+				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Missing bundle description"
+						+ path);
 			}
 			BundleDescription[] required = descr == null ? new BundleDescription[0] : descr.getResolvedRequires();
 			final Vector dependencies = new Vector();
@@ -228,8 +233,8 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 
 		public Object getAdapter(Class adapter) {
-//			if (adapter.equals(IResource.class)) {
-//				return project;
+			// if (adapter.equals(IResource.class)) {
+			// return project;
 			if (adapter.equals(IBaseModel.class)) {
 				return pluginBase;
 			} else {
@@ -250,7 +255,7 @@ public class PluginProvider implements InstallationItemProvider {
 		if (resource instanceof IJavaProject) {
 			IProject project = ((IJavaProject) resource).getProject();
 			model = PluginRegistry.findModel(project);
-		} else if (resource instanceof IProject){
+		} else if (resource instanceof IProject) {
 			IProject project = ((IProject) resource).getProject();
 			model = PluginRegistry.findModel(project);
 		} else {
@@ -260,7 +265,7 @@ public class PluginProvider implements InstallationItemProvider {
 			return null;
 		return new PluginItem(model, this);
 	}
- 
+
 	public boolean isCapable(Object resource) {
 		if (resource instanceof IProject || resource instanceof IJavaProject) {
 			IProject project = null;
@@ -270,7 +275,7 @@ public class PluginProvider implements InstallationItemProvider {
 				project = ((IProject) resource).getProject();
 			}
 			if (project.isOpen()) {
-			  return PDE.hasPluginNature(project);
+				return PDE.hasPluginNature(project);
 			}
 		} else if (resource instanceof IPluginModelBase) {
 			return true;
@@ -298,7 +303,7 @@ public class PluginProvider implements InstallationItemProvider {
 					pluginItems.add(item);
 				}
 			}
-			
+
 			IStatus postProcessStatus = postProcess(pluginItems, properties, monitor);
 			if (!postProcessStatus.isOK()) {
 				FrameworkPlugin.getDefault().getLog().log(postProcessStatus);
@@ -322,83 +327,86 @@ public class PluginProvider implements InstallationItemProvider {
 		return UIResources.getImageDescriptor(UIResources.PLUGIN_ICON);
 	}
 
-	private IStatus export(List items, final IProgressMonitor monitor) {//throws CoreException {
-        try {
-            monitor.beginTask("Exporting...", 10);
-            
-    		ArrayList pluginsToBeExported = new ArrayList();
-    		for (int i = 0; i < items.size(); i++) {
-    			Object item = items.get(i);
-    			if (item instanceof PluginItem) {
-    				pluginsToBeExported.add(((PluginItem) item).getPlugin());
-    			}
-    		}
-    		
-    		if (pluginsToBeExported.isEmpty())
-    			// shortcut if we don't have anything for export
-    			return Status.OK_STATUS;
+	private IStatus export(List items, final IProgressMonitor monitor) {
+		try {
+			monitor.beginTask("Exporting...", 10);
 
-            final IPluginExporter exporter = PluginExporter.getInstance();
-            if (exporter == null) {
-            	monitor.done();
-				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Plugins could no be exported by "
-						+ this.getClass());
-            }
+			ArrayList pluginsToBeExported = new ArrayList();
+			for (int i = 0; i < items.size(); i++) {
+				Object item = items.get(i);
+				if (item instanceof PluginItem) {
+					pluginsToBeExported.add(((PluginItem) item).getPlugin());
+				}
+			}
 
-            //cleanOutputFolder();
-            monitor.worked(2);
-            
-            IPath destinationPath = FrameworkPlugin.getDefault().getStateLocation();//.append("plugins");
-            
-            PluginExportManager exportManager = initExportManager(exporter, pluginsToBeExported );
-            IStatus result = exportManager.export(destinationPath.toString(), monitor);
-            if (!result.isOK())
-            	return result;
-            
-            //set the export manager of PluginItem-s
-            for (int i = 0; i < items.size(); i++) {
-    			Object item = items.get(i);
-    			if (item instanceof PluginItem) {
-    				((PluginItem) item).setExportManager(exportManager);
-    			}
-    		}
-        } finally {
-            monitor.done();
-        }
-        return Status.OK_STATUS;
+			if (pluginsToBeExported.isEmpty())
+				// shortcut if we don't have anything for export
+				return Status.OK_STATUS;
+
+			final IPluginExporter exporter = PluginExporter.getInstance();
+			if (exporter == null) {
+				monitor.done();
+				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(),
+						"Plugins could no be exported by " + this.getClass());
+			}
+
+			// cleanOutputFolder();
+			monitor.worked(2);
+
+			IPath destinationPath = FrameworkPlugin.getDefault().getStateLocation();// .append("plugins");
+
+			PluginExportManager exportManager = initExportManager(exporter, pluginsToBeExported);
+			IStatus result = exportManager.export(destinationPath.toString(), monitor);
+			if (!result.isOK())
+				return result;
+
+			// set the export manager of PluginItem-s
+			for (int i = 0; i < items.size(); i++) {
+				Object item = items.get(i);
+				if (item instanceof PluginItem) {
+					((PluginItem) item).setExportManager(exportManager);
+				}
+			}
+		} finally {
+			monitor.done();
+		}
+		return Status.OK_STATUS;
 	}
-	
+
 	private PluginExportManager initExportManager(IPluginExporter exporter, List pluginsToBeExported) {
-        PluginExportManager exportManager = PluginExportManager.create(exporter);
+		PluginExportManager exportManager = PluginExportManager.create(exporter);
 
-        for (int i = 0; i < pluginsToBeExported.size(); i++) {
-            IPluginModelBase iPluginModelBase = (IPluginModelBase) pluginsToBeExported.get(i);
-            exportManager.addBundle(iPluginModelBase);
-        }
+		for (int i = 0; i < pluginsToBeExported.size(); i++) {
+			IPluginModelBase iPluginModelBase = (IPluginModelBase) pluginsToBeExported.get(i);
+			exportManager.addBundle(iPluginModelBase);
+		}
 
-        return exportManager;
-    }
+		return exportManager;
+	}
 
 	private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
 		File signedFile[] = new File[items.size()];
 		File file[] = new File[items.size()];
 		try {
-			for (int i=0; i<items.size(); i++) {
+			for (int i = 0; i < items.size(); i++) {
 				PluginItem item = items.get(i);
 				String exportLocation = item.getLocation();
 				if (exportLocation == null || !(file[i] = new File(exportLocation)).exists()) {
-					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Plugin is not exported properly.");
+					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(),
+							"Plugin is not exported properly.");
 				}
-				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
-						!AndroidUtils.isConvertedToDex(file[i])) {
-					File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/" + file[i].getName());
+				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))
+						&& !AndroidUtils.isConvertedToDex(file[i])) {
+					File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/"
+							+ file[i].getName());
 					convertedFile.getParentFile().mkdirs();
 					AndroidUtils.convertToDex(file[i], convertedFile, monitor);
 					file[i].delete();
 					file[i] = convertedFile;
 				}
 
-				signedFile[i] = new File(FrameworkPlugin.getDefault().getStateLocation() + "/signed/" + file[i].getName());
+				signedFile[i] = new File(FrameworkPlugin.getDefault().getStateLocation() + "/signed/"
+						+ file[i].getName());
 				signedFile[i].getParentFile().mkdirs();
 				if (signedFile[i].exists()) {
 					signedFile[i].delete();
@@ -410,14 +418,15 @@ public class PluginProvider implements InstallationItemProvider {
 			} catch (IOException ioe) {
 				boolean shouldContinue = CertUtils.continueWithoutSigning(ioe.getMessage());
 				if (shouldContinue) {
-					for (int i=0; i<signedFile.length; i++) {
+					for (int i = 0; i < signedFile.length; i++) {
 						signedFile[i].delete();
 					}
 				} else {
-					return new Status(Status.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
+					return new Status(Status.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins",
+							ioe);
 				}
 			}
-			for (int i=0; i<signedFile.length; i++) {
+			for (int i = 0; i < signedFile.length; i++) {
 				if (signedFile[i].exists()) {
 					file[i].delete();
 					file[i] = signedFile[i];
