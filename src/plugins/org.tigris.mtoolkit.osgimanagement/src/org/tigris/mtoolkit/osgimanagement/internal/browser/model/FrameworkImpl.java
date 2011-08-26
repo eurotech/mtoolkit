@@ -72,7 +72,8 @@ import org.tigris.mtoolkit.osgimanagement.model.FrameworkConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
-public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener, RemoteDevicePropertyListener, IAdaptable {
+public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener,
+		RemoteDevicePropertyListener, IAdaptable {
 
 	private boolean showServicePropertiesInTree = false;
 
@@ -94,13 +95,12 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	// flag indicates user has forced disconnect action
 	public boolean userDisconnect = false;
-	
+
 	private boolean supportBundles = false;
 	private boolean supportServices = false;
 	private IMemento configs;
 	public HashSet systemBundles;
 
-	
 	public FrameworkImpl(String name, boolean autoConnected) {
 		super(name, autoConnected);
 		configs = XMLMemento.createWriteRoot(MEMENTO_TYPE);
@@ -136,29 +136,29 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		return connecting;
 	}
 
-//	private void refreshViewers() {
-//		display = Display.getDefault();
-//		if (display == null)
-//			display = Display.getCurrent();
-//		display.asyncExec(new Runnable() {
-//			public void run() {
-//				TreeViewer[] all = FrameWorkView.getTreeViewers();
-//				if (all != null) {
-//					for (int i = 0; i < all.length; i++) {
-//						if (!all[i].getControl().isDisposed()) {
-//							all[i].refresh();
-//						}
-//					}
-//				}
-//			}
-//		});
-//	}
+	// private void refreshViewers() {
+	// display = Display.getDefault();
+	// if (display == null)
+	// display = Display.getCurrent();
+	// display.asyncExec(new Runnable() {
+	// public void run() {
+	// TreeViewer[] all = FrameWorkView.getTreeViewers();
+	// if (all != null) {
+	// for (int i = 0; i < all.length; i++) {
+	// if (!all[i].getControl().isDisposed()) {
+	// all[i].refresh();
+	// }
+	// }
+	// }
+	// }
+	// });
+	// }
 
 	public void setConnector(DeviceConnector connector) {
 		this.connector = connector;
-//		if (connector == null) {
-//			connectedFlag = false;
-//		}
+		// if (connector == null) {
+		// connectedFlag = false;
+		// }
 	}
 
 	public void connect(final DeviceConnector connector, SubMonitor monitor) {
@@ -168,9 +168,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		if (!success) {
 			ActionsManager.disconnectFrameworkAction(FrameworkImpl.this);
 		}
-		
-		for (int i=0; i<listeners.size(); i++) {
-			((FrameworkConnectionListener)listeners.get(i)).connected();
+
+		for (int i = 0; i < listeners.size(); i++) {
+			((FrameworkConnectionListener) listeners.get(i)).connected();
 		}
 	}
 
@@ -188,7 +188,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			BrowserErrorHandler.processError(e, connector, userDisconnect);
 		}
 	}
-	
+
 	private void updateSupportedModels() {
 		Dictionary connectorProperties = connector.getProperties();
 		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
@@ -291,7 +291,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	public void disconnect() {
-		if (!isConnected()) return;
+		if (!isConnected())
+			return;
 		synchronized (Framework.getLockObject(connector)) {
 			connectedFlag = false;
 			if (connector != null) {
@@ -310,8 +311,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			updateContextMenuStates();
 			BrowserErrorHandler.processInfo(name + " successfully " + "disconnected", false); //$NON-NLS-1$
 		}
-		for (int i=0; i<listeners.size(); i++) {
-			((FrameworkConnectionListener)listeners.get(i)).disconnected();
+		for (int i = 0; i < listeners.size(); i++) {
+			((FrameworkConnectionListener) listeners.get(i)).disconnected();
 		}
 	}
 
@@ -352,7 +353,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		for (int i = 0; i < bundles.length; i++) {
 			Model serviceCategories[] = ((Bundle) bundles[i]).getChildren();
 			if (serviceCategories != null && serviceCategories.length > 0) {
-				if (((ServicesCategory)serviceCategories[0]).getType() == ServicesCategory.REGISTERED_SERVICES) {
+				if (((ServicesCategory) serviceCategories[0]).getType() == ServicesCategory.REGISTERED_SERVICES) {
 					Object services[] = serviceCategories[0].getChildren();
 					if (services != null) {
 						for (int j = 0; j < services.length; j++) {
@@ -399,7 +400,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			return;
 		synchronized (Framework.getLockObject(connector)) {
 		}
-		
+
 		this.viewType = viewType;
 
 		Model[] children = getChildren();
@@ -442,10 +443,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void setShowServicePropertiesInTree(boolean state) {
 		showServicePropertiesInTree = state;
 	}
-	
+
 	public void clearServicePropertiesNodes(Model parent) {
 		Model children[] = parent.getChildren();
-		for (int i=0; i<children.length; i++) {
+		for (int i = 0; i < children.length; i++) {
 			if (children[i] instanceof ServiceProperty) {
 				parent.removeElement(children[i]);
 			} else {
@@ -453,13 +454,13 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			}
 		}
 	}
-	
 
 	public boolean isShownServicePropertiss() {
 		return showServicePropertiesInTree;
 	}
 
-	// find and update nodes for bundle in "Bundles" and corresponding "slave" nodes
+	// find and update nodes for bundle in "Bundles" and corresponding "slave"
+	// nodes
 	private void updateBundleNodes(RemoteBundle rBundle) throws IAgentException {
 		long id = rBundle.getBundleId();
 		Bundle node = findBundle(id);
@@ -467,8 +468,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			node.update();
 			Vector slaves = node.getSlaves();
 			if (slaves != null) {
-				for (int i=0; i<slaves.size(); i++) {
-					((Bundle)slaves.elementAt(i)).update();
+				for (int i = 0; i < slaves.size(); i++) {
+					((Bundle) slaves.elementAt(i)).update();
 				}
 			}
 		}
@@ -496,8 +497,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	private void removeBundle(long id) throws IAgentException {
 		// remove bundle and empty category
 		Bundle bundle = findBundle(id);
-		for (int i=0; i<bundle.getSlaves().size(); i++) {
-			Model parent = ((Model)bundle.getSlaves().elementAt(i)).getParent();
+		for (int i = 0; i < bundle.getSlaves().size(); i++) {
+			Model parent = ((Model) bundle.getSlaves().elementAt(i)).getParent();
 			if (parent != null) {
 				parent.removeElement((Model) bundle.getSlaves().elementAt(i));
 			}
@@ -603,7 +604,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			long id = rBundle.getBundleId();
 			try {
 				if (!bundleHash.containsKey(new Long(id)) && type != RemoteBundleEvent.UNINSTALLED) {
-					// add this bundle - apparently, we have missed the INSTALLED
+					// add this bundle - apparently, we have missed the
+					// INSTALLED
 					// event
 					addBundle(rBundle);
 				} else if (type == RemoteBundleEvent.UPDATED) {
@@ -629,14 +631,16 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					RemoteService usedServ[] = bundle.getRemoteBundle().getServicesInUse();
 					if (usedServ.length > 0) {
 						for (int i = 0; i < usedServ.length; i++) {
-							Model bundleUsedInCategory = getServiceCategoryNode(bundle, ServicesCategory.USED_SERVICES, true);
-							addObjectClassNodes(bundleUsedInCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
-							                                                                                          .getServiceId()), usedServ[i]);
-							
-							for (int j=0; j<bundle.getSlaves().size(); j++) {
-								Model slaveUsedInCategory = getServiceCategoryNode((Bundle) bundle.getSlaves().elementAt(j), ServicesCategory.USED_SERVICES, true);
-								addObjectClassNodes(slaveUsedInCategory, usedServ[i].getObjectClass(), new Long(usedServ[i]
-								                                                                                          .getServiceId()), usedServ[i]);
+							Model bundleUsedInCategory = getServiceCategoryNode(bundle, ServicesCategory.USED_SERVICES,
+									true);
+							addObjectClassNodes(bundleUsedInCategory, usedServ[i].getObjectClass(), new Long(
+									usedServ[i].getServiceId()), usedServ[i]);
+
+							for (int j = 0; j < bundle.getSlaves().size(); j++) {
+								Model slaveUsedInCategory = getServiceCategoryNode((Bundle) bundle.getSlaves()
+										.elementAt(j), ServicesCategory.USED_SERVICES, true);
+								addObjectClassNodes(slaveUsedInCategory, usedServ[i].getObjectClass(), new Long(
+										usedServ[i].getServiceId()), usedServ[i]);
 							}
 
 							for (int j = 0; j < servicesViewVector.size(); j++) {
@@ -669,18 +673,19 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					updateBundleNodes(rBundle);
 				}
 			} catch (IAgentException ex) {
-				// ignore bundle installed exceptions, we will receive uninstalled
+				// ignore bundle installed exceptions, we will receive
+				// uninstalled
 				// event shortly
-				if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED &&
-						ex.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED && 
-						ex.getErrorCode() != IAgentErrors.ERROR_CANNOT_CONNECT) {
+				if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED
+						&& ex.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED
+						&& ex.getErrorCode() != IAgentErrors.ERROR_CANNOT_CONNECT) {
 					BrowserErrorHandler.processError(ex, connector, userDisconnect);
 				}
 			}
 		}
 		updateContextMenuStates();
 	}
-	
+
 	private void removeServiceNode(Model bundle, long id) {
 		Model children[] = bundle.getChildren();
 		for (int i = 0; i < children.length; i++) {
@@ -700,7 +705,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				Object key = bundlesKeys.nextElement();
 				Bundle bundle = (Bundle) bundleHash.get(key);
 				removeServiceNode(bundle, id);
-				for (int i=0; i<bundle.getSlaves().size(); i++) {
+				for (int i = 0; i < bundle.getSlaves().size(); i++) {
 					removeServiceNode((Model) bundle.getSlaves().elementAt(i), id);
 				}
 			}
@@ -775,7 +780,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			} catch (IAgentException e1) {
 				BrowserErrorHandler.processError(e1, connector, userDisconnect);
 			} catch (IllegalStateException ex) {
-				// ignore illegal states, they are usually due to working with stale
+				// ignore illegal states, they are usually due to working with
+				// stale
 				// data
 				BrowserErrorHandler.debug(ex);
 			} catch (Throwable t) {
@@ -799,9 +805,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void refreshAction() {
 		refreshAction(null);
 	}
-	
+
 	public void refreshAction(final Composite tree) {
-		if (!isConnected()) { 
+		if (!isConnected()) {
 			return;
 		}
 		Job job = new Job(Messages.refresh_framework_info) {
@@ -810,7 +816,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					SubMonitor sMonitor = SubMonitor.convert(monitor, FrameworkConnectorFactory.CONNECT_PROGRESS);
 					sMonitor.setTaskName("Refreshing " + FrameworkImpl.this.getName());
 					try {
-						SubMonitor connectMonitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
+						SubMonitor connectMonitor = sMonitor
+								.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
 						connectMonitor.setTaskName("Refreshing " + FrameworkImpl.this.getName());
 						refreshing = true;
 						try {
@@ -871,7 +878,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 					Bundle bundle = findBundle(id);
 					updateBundleServices(bundle, regServ, usedServ);
-					for (int i=0; i<bundle.getSlaves().size(); i++) {
+					for (int i = 0; i < bundle.getSlaves().size(); i++) {
 						updateBundleServices((Bundle) bundle.getSlaves().elementAt(i), regServ, usedServ);
 					}
 
@@ -1009,11 +1016,12 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			addBundlesBySnapshot(sMonitor);
 			return;
 		} catch (Exception e) {
-			// getting bundles snapshot is not supported, retrieve info in standard way
+			// getting bundles snapshot is not supported, retrieve info in
+			// standard way
 		}
 
 		RemoteBundle rBundlesArray[] = null;
-		
+
 		rBundlesArray = connector.getDeploymentManager().listBundles();
 
 		SubMonitor monitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES);
@@ -1159,31 +1167,31 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				}
 			}
 			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
-				for (int i=0; i<categoriesNames.size(); i++) {
+				for (int i = 0; i < categoriesNames.size(); i++) {
 					if (!categoryHash.containsKey(categoriesNames.elementAt(i))) {
 						Category category = new Category((String) categoriesNames.elementAt(i));
 						getBundlesNode().addElement(category);
 						categoryHash.put(categoriesNames.elementAt(i), category);
 					}
 				}
-				Bundle bundleMaster = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers), (String) categoriesNames.elementAt(0),
-						bundleVersion);
+				Bundle bundleMaster = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers),
+						(String) categoriesNames.elementAt(0), bundleVersion);
 				Model category = (Model) categoryHash.get(categoriesNames.elementAt(0));
 				category.addElement(bundleMaster);
 				bundleHash.put(new Long(bundleMaster.getID()), bundleMaster);
 				if (rBundle.isSystemBundle()) {
 					systemBundles.add(new Long(rBundle.getBundleId()));
 				}
-				for (int i=1; i<categoriesNames.size(); i++) {
+				for (int i = 1; i < categoriesNames.size(); i++) {
 					category = (Category) categoryHash.get(categoriesNames.elementAt(i));
 					Bundle bundle = new Bundle(bundleMaster, (String) categoriesNames.elementAt(i));
 					category.addElement(bundle);
 				}
 			} else {
 				Model bundleParentModel = getBundlesNode();
-				
-				Bundle bundle = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers), (String) categoriesNames.elementAt(0),
-						bundleVersion);
+
+				Bundle bundle = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers),
+						(String) categoriesNames.elementAt(0), bundleVersion);
 				bundleParentModel.addElement(bundle);
 				bundleHash.put(new Long(bundle.getID()), bundle);
 				if (rBundle.isSystemBundle()) {
@@ -1247,21 +1255,25 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	private void addServiceNodes(ServiceObject servObj) throws IAgentException {
 		Bundle bundle = findBundle(servObj.getRegisteredIn().getBundleId());
-		addServiceNodes(servObj, bundle/*, true*/);
+		addServiceNodes(servObj, bundle/* , true */);
 	}
 
-	private void addServiceNodes(ServiceObject servObj, Bundle bundle/*, boolean first*/) throws IAgentException {
+	private void addServiceNodes(ServiceObject servObj, Bundle bundle/*
+																	 * , boolean
+																	 * first
+																	 */) throws IAgentException {
 		if (bundle.getState() == org.osgi.framework.Bundle.ACTIVE
 				|| bundle.getState() == org.osgi.framework.Bundle.STARTING
 				|| bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.ACTIVE
 				|| bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.STARTING) {
 			try {
 				Model registeredCategory = getServiceCategoryNode(bundle, ServicesCategory.REGISTERED_SERVICES, true);
-				addObjectClassNodes(registeredCategory, servObj.getObjectClass(), new Long(servObj
-						.getRemoteService().getServiceId()), servObj.getRemoteService());
-				
-				for (int i=0; i<bundle.getSlaves().size(); i++) {
-					Model registeredCategoryS = getServiceCategoryNode((Bundle) bundle.getSlaves().elementAt(i), ServicesCategory.REGISTERED_SERVICES, true);
+				addObjectClassNodes(registeredCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
+						.getServiceId()), servObj.getRemoteService());
+
+				for (int i = 0; i < bundle.getSlaves().size(); i++) {
+					Model registeredCategoryS = getServiceCategoryNode((Bundle) bundle.getSlaves().elementAt(i),
+							ServicesCategory.REGISTERED_SERVICES, true);
 					addObjectClassNodes(registeredCategoryS, servObj.getObjectClass(), new Long(servObj
 							.getRemoteService().getServiceId()), servObj.getRemoteService());
 				}
@@ -1316,8 +1328,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				Model usedCategory = getServiceCategoryNode(usedInBundle, ServicesCategory.USED_SERVICES, true);
 				addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
 						.getServiceId()), servObj.getRemoteService());
-				for (int i=0; i<usedInBundle.getSlaves().size(); i++) {
-					usedCategory = getServiceCategoryNode((Bundle) usedInBundle.getSlaves().elementAt(i), ServicesCategory.USED_SERVICES, true);
+				for (int i = 0; i < usedInBundle.getSlaves().size(); i++) {
+					usedCategory = getServiceCategoryNode((Bundle) usedInBundle.getSlaves().elementAt(i),
+							ServicesCategory.USED_SERVICES, true);
 					addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
 							.getServiceId()), servObj.getRemoteService());
 				}
@@ -1331,8 +1344,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			ObjectClass objClass = new ObjectClass(objClasses[i] + " [Service " + service.getServiceId() + "]", nameID,
 					service);
 			parent.addElement(objClass);
-			FrameworkImpl fw = (FrameworkImpl) objClass.findFramework();
-			if (fw != null && fw.isShownServicePropertiss()) {
+			if (isShownServicePropertiss()) {
 				addServicePropertiesNodes(objClass);
 			}
 		}
@@ -1435,21 +1447,22 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					addJob.schedule();
 				} else {
 					connector.getServiceManager().removeRemoteServiceListener(this);
-					//TODO remove services nodes
+					// TODO remove services nodes
 					supportServices = false;
 				}
 			}
 		}
 	}
-	
+
 	public IMemento getConfig() {
 		return configs;
 	}
 
 	/**
-	 * Returns map, containing information for certificates which shall be 
-	 * used for signing the content, installed to this framework. If no signing
-	 * is required, then empty Map is returned.
+	 * Returns map, containing information for certificates which shall be used
+	 * for signing the content, installed to this framework. If no signing is
+	 * required, then empty Map is returned.
+	 * 
 	 * @return the map with certificate properties
 	 */
 	public Map getSigningProperties() {
@@ -1534,8 +1547,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			num++;
 		}
 	}
-	
-	
+
 	public Model createModel(String mimeType, String id, String version) {
 		Model model = null;
 		if (ContentTypeModelProvider.MIME_TYPE_BUNDLE.equals(mimeType)) {
@@ -1543,14 +1555,14 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				model = getResource(id, version);
 			} catch (IAgentException e) {
 				e.printStackTrace();
-			} 
+			}
 		} else {
 			List providers = getModelProviders();
-			for (int i=0; i<providers.size(); i++) {
-				ModelProviderElement providerElement = ((ModelProviderElement)providers.get(i));
+			for (int i = 0; i < providers.size(); i++) {
+				ModelProviderElement providerElement = ((ModelProviderElement) providers.get(i));
 				ContentTypeModelProvider provider = providerElement.getProvider();
 				String types[] = provider.getSupportedMimeTypes();
-				for (int j=0; j<types.length; j++) {
+				for (int j = 0; j < types.length; j++) {
 					if (mimeType.equals(types[j])) {
 						try {
 							model = provider.getResource(id, version, this);
@@ -1564,15 +1576,15 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 		return model;
 	}
-	
+
 	private Model getResource(String id, String version) throws IAgentException {
 		Bundle master = findBundle(new Long(id));
 		Bundle slave = new Bundle(master);
-		
+
 		Model children[] = master.getChildren();
 		if (children != null && children.length > 0) {
-			for (int i=0; i<children.length; i++) {
-				if (((ServicesCategory)children[i]).getType() == ServicesCategory.REGISTERED_SERVICES) {
+			for (int i = 0; i < children.length; i++) {
+				if (((ServicesCategory) children[i]).getType() == ServicesCategory.REGISTERED_SERVICES) {
 					addRegisteredServices(children[i].getChildren(), slave);
 				} else {
 					addUsedServices(children[i].getChildren(), slave);
@@ -1581,14 +1593,13 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 		return slave;
 	}
-		
+
 	private void addRegisteredServices(Model regServ[], Bundle slave) throws IAgentException {
 		if (regServ != null) {
 			Model servCategory = getServiceCategoryNode(slave, ServicesCategory.REGISTERED_SERVICES, true);
 			for (int i = 0; i < regServ.length; i++) {
-				ObjectClass oc = new ObjectClass(regServ[i].getName(),
-						new Long(((ObjectClass) regServ[i]).getService().getServiceId()),
-						((ObjectClass) regServ[i]).getService());
+				ObjectClass oc = new ObjectClass(regServ[i].getName(), new Long(((ObjectClass) regServ[i]).getService()
+						.getServiceId()), ((ObjectClass) regServ[i]).getService());
 				servCategory.addElement(oc);
 				if (isShownServicePropertiss()) {
 					try {
@@ -1605,9 +1616,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		if (usedServ != null) {
 			Model servCategory = getServiceCategoryNode(slave, ServicesCategory.USED_SERVICES, true);
 			for (int i = 0; i < usedServ.length; i++) {
-				ObjectClass oc = new ObjectClass(usedServ[i].getName(),
-						new Long(((ObjectClass) usedServ[i]).getService().getServiceId()),
-						((ObjectClass) usedServ[i]).getService());
+				ObjectClass oc = new ObjectClass(usedServ[i].getName(), new Long(((ObjectClass) usedServ[i])
+						.getService().getServiceId()), ((ObjectClass) usedServ[i]).getService());
 				servCategory.addElement(oc);
 				if (isShownServicePropertiss()) {
 					try {
@@ -1620,7 +1630,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class adapter) {
