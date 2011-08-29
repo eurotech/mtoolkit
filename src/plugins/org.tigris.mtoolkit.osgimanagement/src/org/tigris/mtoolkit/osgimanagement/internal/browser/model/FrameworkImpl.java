@@ -866,7 +866,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		return connectionListener;
 	}
 
-	// TODO
 	public void refreshBundleAction(final Bundle sourceBundle) {
 		Job job = new Job(Messages.refresh_bundles_info) {
 
@@ -943,7 +942,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 		};
 		job.schedule();
-
 	}
 
 	private void updateBundleServices(Bundle bundle, RemoteService regServ[], RemoteService usedServ[])
