@@ -152,7 +152,7 @@ public class ApplicationActionsProvider implements ContentTypeActionsProvider {
 	                        boolean enabledState = false;
 	                        if (enabled) {
 	                            applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
-	                            enabledState  = applicationPropertiesAction.isEnabled();
+                              enabledState = startApplicationAction.isEnabled();
 	                        }
 	                        applicationTB.setEnabled(enabledState);
 	                    }
