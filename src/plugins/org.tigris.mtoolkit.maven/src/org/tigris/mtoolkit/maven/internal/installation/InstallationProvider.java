@@ -41,8 +41,8 @@ public class InstallationProvider implements InstallationItemProvider {
 
   public boolean isCapable(Object resource) {
     resource = adaptItem(resource);
-    if (resource instanceof IFile)
-      return isFileSupported((IFile) resource);
+    if (resource instanceof File)
+      return isFileSupported((File) resource);
     if (resource instanceof IMavenProjectFacade)
       return isMavenProjectSupported((IMavenProjectFacade) resource);
     return false;
@@ -76,8 +76,9 @@ public class InstallationProvider implements InstallationItemProvider {
     }
     if (resource.getType() == IResource.FOLDER)
       resource = getPomFileFromContainer((IContainer) resource);
-    if (resource.getType() == IResource.FILE)
-      return resource;
+    if (resource.getType() == IResource.FILE) {
+      return ((IFile) resource).getLocation().toFile();
+    }
     return null;
   }
 
@@ -86,8 +87,8 @@ public class InstallationProvider implements InstallationItemProvider {
     return pomFile;
   }
 
-  private boolean isFileSupported(IFile file) {
-    if (!file.isAccessible())
+  private boolean isFileSupported(File file) {
+    if (!file.exists())
       return false;
     return file.getName().equals("pom.xml");
   }
@@ -100,8 +101,8 @@ public class InstallationProvider implements InstallationItemProvider {
 
   public InstallationItem getInstallationItem(Object resource) {
     resource = adaptItem(resource);
-    if (resource instanceof IFile)
-      return new FileItem(this, (IFile) resource);
+    if (resource instanceof File)
+      return new FileItem(this, (File) resource);
     else if (resource instanceof IMavenProjectFacade)
       return new ProjectItem(this, (IMavenProjectFacade) resource);
     else
