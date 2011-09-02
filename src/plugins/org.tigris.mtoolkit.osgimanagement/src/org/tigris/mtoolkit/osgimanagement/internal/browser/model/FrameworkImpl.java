@@ -636,13 +636,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 							addObjectClassNodes(bundleUsedInCategory, usedServ[i].getObjectClass(), new Long(
 									usedServ[i].getServiceId()), usedServ[i]);
 
-							for (int j = 0; j < bundle.getSlaves().size(); j++) {
-								Model slaveUsedInCategory = getServiceCategoryNode((Bundle) bundle.getSlaves()
-										.elementAt(j), ServicesCategory.USED_SERVICES, true);
-								addObjectClassNodes(slaveUsedInCategory, usedServ[i].getObjectClass(), new Long(
-										usedServ[i].getServiceId()), usedServ[i]);
-							}
-
 							for (int j = 0; j < servicesViewVector.size(); j++) {
 								ObjectClass oc = (ObjectClass) servicesViewVector.elementAt(j);
 								if (oc.getNameID().longValue() == usedServ[i].getServiceId()) {
@@ -693,6 +686,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			for (int j = 0; j < services.length; j++) {
 				if (((ObjectClass) services[j]).getNameID().longValue() == id) {
 					children[i].removeElement(services[j]);
+				}
+				if (children[i].getChildren().length == 0) {
+					bundle.removeElement(children[i]);
 				}
 			}
 		}
@@ -1269,13 +1265,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				addObjectClassNodes(registeredCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
 						.getServiceId()), servObj.getRemoteService());
 
-				for (int i = 0; i < bundle.getSlaves().size(); i++) {
-					Model registeredCategoryS = getServiceCategoryNode((Bundle) bundle.getSlaves().elementAt(i),
-							ServicesCategory.REGISTERED_SERVICES, true);
-					addObjectClassNodes(registeredCategoryS, servObj.getObjectClass(), new Long(servObj
-							.getRemoteService().getServiceId()), servObj.getRemoteService());
-				}
-
 				for (int i = 0; i < servObj.getObjectClass().length; i++) {
 					ObjectClass hashService = new ObjectClass(servObj.getObjectClass()[i] + " [Service "
 							+ servObj.getRemoteService().getServiceId() + "]", new Long(servObj.getRemoteService()
@@ -1326,12 +1315,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				Model usedCategory = getServiceCategoryNode(usedInBundle, ServicesCategory.USED_SERVICES, true);
 				addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
 						.getServiceId()), servObj.getRemoteService());
-				for (int i = 0; i < usedInBundle.getSlaves().size(); i++) {
-					usedCategory = getServiceCategoryNode((Bundle) usedInBundle.getSlaves().elementAt(i),
-							ServicesCategory.USED_SERVICES, true);
-					addObjectClassNodes(usedCategory, servObj.getObjectClass(), new Long(servObj.getRemoteService()
-							.getServiceId()), servObj.getRemoteService());
-				}
 			}
 		}
 	}
