@@ -139,7 +139,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			try {
 				connectJob.join();
 			} catch (InterruptedException e1) {
-				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), e1.getMessage(), e1);
+				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), e1.getMessage(), e1);
 			}
 			if (!connectJob.getResult().isOK()) {
 				return connectJob.getResult();
@@ -170,7 +170,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 
 		if (framework.getConnector() == null) {
-			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to " + framework);
+			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to " + framework);
 		}
 
 		if (!preparationProps.containsKey(PROP_JVM_NAME)) {
@@ -198,7 +198,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				}
 			}
 
-			InputStream input = null;
+			InputStream[] inputs = null;
 			try {
 				String mimeType = item.getMimeType();
 				Vector processors = new Vector();
@@ -252,14 +252,21 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 					}
 				}
 
-				input = item.getInputStream();
-				processor[0].install(input, item, framework, subMonitor.newChild(1));
+				inputs = item.getInputStreams();
+				String[] names = item.getNames();
+				for (int i = 0; i < inputs.length; i++) {
+				    InputStream input = inputs[i];
+				    String name = names[i];
+					processor[0].install(input, name, framework, subMonitor.newChild(1));
+				}
 			} catch (Exception e) {
 				return Util.newStatus(IStatus.ERROR, "Remote content installation failed", e);
 			} finally {
-				if (input != null) {
+				if (inputs != null) {
 					try {
-						input.close();
+						for (InputStream input : inputs) {
+						  input.close();
+						}
 					} catch (IOException e) {
 					}
 				}
@@ -281,11 +288,11 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}
 
-	public void install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
+	public void install(InputStream input, String name, Framework framework, IProgressMonitor monitor)
 			throws Exception {
 		// TODO: Make methods, which are called from inside jobs to do
 		// the real job
-		installBundle(input, item.getName(), (FrameworkImpl) framework);
+		installBundle(input, name, (FrameworkImpl) framework);
 	}
 
 	private void installBundle(InputStream input, String name, FrameworkImpl framework) {

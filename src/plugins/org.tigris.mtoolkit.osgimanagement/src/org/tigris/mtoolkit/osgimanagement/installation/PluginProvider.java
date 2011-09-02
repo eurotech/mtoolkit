@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.IBaseModel;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
@@ -76,7 +77,14 @@ public class PluginProvider implements InstallationItemProvider {
 			return "application/java-archive";
 		}
 
-		public InputStream getInputStream() throws IOException {
+		  public InputStream[] getInputStreams() throws IOException {
+		    return new InputStream[] {
+		      getInputStream(),
+		    };
+		  }
+
+
+		private InputStream getInputStream() throws IOException {
 			String location = getLocation();
 			if (location == null) {
 				throw new IOException("Installation item is not prepared.");
@@ -123,6 +131,10 @@ public class PluginProvider implements InstallationItemProvider {
 				return exportManager.getLocation(pluginBase);
 			}
 			return null;
+		}
+
+		public String[] getNames() {
+			return new String[] { getName() };
 		}
 
 		public String getName() {
@@ -182,7 +194,7 @@ public class PluginProvider implements InstallationItemProvider {
 				Iterator iter = ids.iterator();
 				boolean found = false;
 				while (iter.hasNext()) {
-					Bundle bundle = (Bundle) framework.findBundle(iter.next());
+					Bundle bundle = framework.findBundle(iter.next());
 					try {
 						if (bundle.getName().equals(symbName) && bundle.getVersion().compareTo(ver.toString()) >= 0) {
 							found = true;
@@ -205,7 +217,7 @@ public class PluginProvider implements InstallationItemProvider {
 						DependenciesSelectionDialog dependenciesDialog = new DependenciesSelectionDialog(Display
 								.getDefault().getActiveShell(), dependencies);
 						dependenciesDialog.open();
-						if (dependenciesDialog.getReturnCode() == DependenciesSelectionDialog.OK) {
+						if (dependenciesDialog.getReturnCode() == Window.OK) {
 							Object[] selected = dependenciesDialog.getSelected();
 							dependencies.removeAllElements();
 							for (int i = 0; i < selected.length; i++) {
@@ -346,7 +358,7 @@ public class PluginProvider implements InstallationItemProvider {
 			final IPluginExporter exporter = PluginExporter.getInstance();
 			if (exporter == null) {
 				monitor.done();
-				return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(),
+				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
 						"Plugins could no be exported by " + this.getClass());
 			}
 
@@ -392,7 +404,7 @@ public class PluginProvider implements InstallationItemProvider {
 				PluginItem item = items.get(i);
 				String exportLocation = item.getLocation();
 				if (exportLocation == null || !(file[i] = new File(exportLocation)).exists()) {
-					return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(),
+					return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
 							"Plugin is not exported properly.");
 				}
 				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))
@@ -422,7 +434,7 @@ public class PluginProvider implements InstallationItemProvider {
 						signedFile[i].delete();
 					}
 				} else {
-					return new Status(Status.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins",
+					return new Status(IStatus.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins",
 							ioe);
 				}
 			}
@@ -435,7 +447,7 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 		} catch (IOException ioe) {
 			monitor.done();
-			return new Status(Status.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
+			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
 		}
 		return Status.OK_STATUS;
 	}

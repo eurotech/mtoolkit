@@ -39,7 +39,13 @@ public class BaseFileItem implements InstallationItem {
 		this.mimeType = mimeType;
 	}
 
-	public InputStream getInputStream() throws IOException {
+  public InputStream[] getInputStreams() throws IOException {
+    return new InputStream[] {
+      getInputStream(),
+    };
+  }
+
+  private InputStream getInputStream() throws IOException {
 		if (preparedFile != null)
 			return new FileInputStream(preparedFile);
 		if (baseFile != null)
@@ -50,7 +56,7 @@ public class BaseFileItem implements InstallationItem {
 	/**
 	 * @since 6.0
 	 */
-	public String getLocation() {
+  public String getLocation() {
 		if (preparedFile != null)
 			return preparedFile.getAbsolutePath();
 		if (baseFile != null)
@@ -62,7 +68,13 @@ public class BaseFileItem implements InstallationItem {
 		return mimeType;
 	}
 
-	public String getName() {
+  public String[] getNames() {
+    return new String[] {
+      getName(),
+    };
+  }
+
+  public String getName() {
 		return baseFile.getName();
 	}
 
