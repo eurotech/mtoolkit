@@ -44,7 +44,7 @@ public interface InstallationItem extends IAdaptable {
 	 * 
 	 * @return the output stream
 	 */
-  public InputStream[] getInputStreams() throws IOException;
+  public InputStream getInputStream() throws IOException;
 
 	/**
 	 * Returns the location of the item.
@@ -62,13 +62,6 @@ public interface InstallationItem extends IAdaptable {
 	public String getMimeType();
 
   /**
-   * Returns the names of this item.
-   * 
-   * @return the item names
-   */
-  public String[] getNames();
-
-  /**
    * Returns the name of this item.
    * 
    * @return the item name
@@ -79,4 +72,11 @@ public interface InstallationItem extends IAdaptable {
 	 * Disposes this item and used resources
 	 */
 	public void dispose();
+
+  /**
+   * Returns nested installation items if this item is a container.
+   *
+   * @return
+   */
+  public InstallationItem[] getChildren();
 }

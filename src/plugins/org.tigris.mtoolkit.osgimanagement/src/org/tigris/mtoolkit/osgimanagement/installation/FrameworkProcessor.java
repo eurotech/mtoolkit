@@ -198,80 +198,23 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				}
 			}
 
-			InputStream[] inputs = null;
-			try {
-				String mimeType = item.getMimeType();
-				Vector processors = new Vector();
-				if (mimeType.equals(MIME_JAR) || mimeType.equals(MIME_ZIP)) {
-					processors.addElement(this);
+			InstallationItem[] children = item.getChildren();
+			if (children == null) {
+				IStatus childStatus = processInstallationItem(item, framework, monitor, subMonitor);
+				if (childStatus != null) {
+					item.dispose();
+					return childStatus;
 				}
-				for (int i = 0; useAdditionalProcessors && i < additionalProcessors.size(); i++) {
-					String procMimeTypes[] = ((InstallationItemProcessor) additionalProcessors.elementAt(i))
-							.getSupportedMimeTypes();
-					for (int j = 0; j < procMimeTypes.length; j++) {
-						if (mimeType.equals(procMimeTypes[j])) {
-							processors.addElement(additionalProcessors.elementAt(i));
-							break;
-						}
+			} else {
+		        for (InstallationItem childItem : children) {
+					IStatus childStatus = processInstallationItem(childItem, framework, monitor, subMonitor);
+					if (childStatus != null) {
+						item.dispose();
+						return childStatus;
 					}
-				}
-
-				final FrameworkProcessor processor[] = new FrameworkProcessor[] { (FrameworkProcessor) processors
-						.elementAt(0) };
-				if (processors.size() > 1) {
-					final FrameworkProcessor prArr[] = new FrameworkProcessor[processors.size()];
-					for (int i = 0; i < prArr.length; i++) {
-						FrameworkProcessor pr = (FrameworkProcessor) processors.elementAt(i);
-						prArr[i] = pr;
-					}
-					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-						public void run() {
-							ListDialog dialog = new ListDialog(FrameWorkView.getShell());
-
-							dialog.setTitle("Select processor");
-							dialog.setLabelProvider(new LabelProvider() {
-								public Image getImage(Object element) {
-									return ((FrameworkProcessor) element).getImage();
-								}
-							});
-							dialog.setMessage("Select installation processor for " + item.getName());
-							dialog.setContentProvider(new ArrayContentProvider());
-							dialog.setInput(Arrays.asList(prArr));
-							dialog.setInitialSelections(new Object[] { prArr[0] });
-
-							int result = dialog.open();
-							if (result == Window.CANCEL) {
-								monitor.setCanceled(true);
-							} else {
-								processor[0] = (FrameworkProcessor) dialog.getResult()[0];
-							}
-						}
-					});
-					if (monitor.isCanceled()) {
-						return Status.CANCEL_STATUS;
-					}
-				}
-
-				inputs = item.getInputStreams();
-				String[] names = item.getNames();
-				for (int i = 0; i < inputs.length; i++) {
-				    InputStream input = inputs[i];
-				    String name = names[i];
-					processor[0].install(input, name, framework, subMonitor.newChild(1));
-				}
-			} catch (Exception e) {
-				return Util.newStatus(IStatus.ERROR, "Remote content installation failed", e);
-			} finally {
-				if (inputs != null) {
-					try {
-						for (InputStream input : inputs) {
-						  input.close();
-						}
-					} catch (IOException e) {
-					}
-				}
-				item.dispose();
+		        }
 			}
+			item.dispose();
 		}
 
 		monitor.done();
@@ -279,6 +222,78 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			return Status.CANCEL_STATUS;
 		}
 		return Status.OK_STATUS;
+	}
+
+	private IStatus processInstallationItem(final InstallationItem item, Framework framework, final IProgressMonitor monitor,
+			SubMonitor subMonitor) {
+		InputStream input = null;
+		try {
+			String mimeType = item.getMimeType();
+			Vector processors = new Vector();
+			if (mimeType.equals(MIME_JAR) || mimeType.equals(MIME_ZIP)) {
+				processors.addElement(this);
+			}
+			for (int i = 0; useAdditionalProcessors && i < additionalProcessors.size(); i++) {
+				String procMimeTypes[] = ((InstallationItemProcessor) additionalProcessors.elementAt(i))
+						.getSupportedMimeTypes();
+				for (int j = 0; j < procMimeTypes.length; j++) {
+					if (mimeType.equals(procMimeTypes[j])) {
+						processors.addElement(additionalProcessors.elementAt(i));
+						break;
+					}
+				}
+			}
+
+			final FrameworkProcessor processor[] = new FrameworkProcessor[] { (FrameworkProcessor) processors
+					.elementAt(0) };
+			if (processors.size() > 1) {
+				final FrameworkProcessor prArr[] = new FrameworkProcessor[processors.size()];
+				for (int i = 0; i < prArr.length; i++) {
+					FrameworkProcessor pr = (FrameworkProcessor) processors.elementAt(i);
+					prArr[i] = pr;
+				}
+				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+					public void run() {
+						ListDialog dialog = new ListDialog(FrameWorkView.getShell());
+
+						dialog.setTitle("Select processor");
+						dialog.setLabelProvider(new LabelProvider() {
+							public Image getImage(Object element) {
+								return ((FrameworkProcessor) element).getImage();
+							}
+						});
+						dialog.setMessage("Select installation processor for " + item.getName());
+						dialog.setContentProvider(new ArrayContentProvider());
+						dialog.setInput(Arrays.asList(prArr));
+						dialog.setInitialSelections(new Object[] { prArr[0] });
+
+						int result = dialog.open();
+						if (result == Window.CANCEL) {
+							monitor.setCanceled(true);
+						} else {
+							processor[0] = (FrameworkProcessor) dialog.getResult()[0];
+						}
+					}
+				});
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+			}
+
+			input = item.getInputStream();
+			String name = item.getName();
+			processor[0].install(input, name, framework, subMonitor.newChild(1));
+		} catch (Exception e) {
+			return Util.newStatus(IStatus.ERROR, "Remote content installation failed", e);
+		} finally {
+			if (input != null) {
+				try {
+				  input.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

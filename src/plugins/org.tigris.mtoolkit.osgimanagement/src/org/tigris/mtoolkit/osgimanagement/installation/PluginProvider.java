@@ -77,14 +77,7 @@ public class PluginProvider implements InstallationItemProvider {
 			return "application/java-archive";
 		}
 
-		  public InputStream[] getInputStreams() throws IOException {
-		    return new InputStream[] {
-		      getInputStream(),
-		    };
-		  }
-
-
-		private InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() throws IOException {
 			String location = getLocation();
 			if (location == null) {
 				throw new IOException("Installation item is not prepared.");
@@ -133,10 +126,6 @@ public class PluginProvider implements InstallationItemProvider {
 			return null;
 		}
 
-		public String[] getNames() {
-			return new String[] { getName() };
-		}
-
 		public String getName() {
 			BundleDescription description = pluginBase.getBundleDescription();
 			return (description != null) ? description.getName() : null;
@@ -149,6 +138,10 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			File file = new File(location);
 			file.delete();
+		}
+		
+		public InstallationItem[] getChildren() {
+			return null;
 		}
 
 		/**

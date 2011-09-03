@@ -39,13 +39,7 @@ public class BaseFileItem implements InstallationItem {
 		this.mimeType = mimeType;
 	}
 
-  public InputStream[] getInputStreams() throws IOException {
-    return new InputStream[] {
-      getInputStream(),
-    };
-  }
-
-  private InputStream getInputStream() throws IOException {
+  public InputStream getInputStream() throws IOException {
 		if (preparedFile != null)
 			return new FileInputStream(preparedFile);
 		if (baseFile != null)
@@ -68,15 +62,13 @@ public class BaseFileItem implements InstallationItem {
 		return mimeType;
 	}
 
-  public String[] getNames() {
-    return new String[] {
-      getName(),
-    };
-  }
-
   public String getName() {
 		return baseFile.getName();
 	}
+
+  public InstallationItem[] getChildren() {
+    return null;
+  }
 
 	public IStatus prepare(IProgressMonitor monitor, Map properties) {
 		try {
