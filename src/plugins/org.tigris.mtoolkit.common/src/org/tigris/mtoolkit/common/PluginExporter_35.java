@@ -35,112 +35,112 @@ import org.tigris.mtoolkit.common.ReflectionUtils.InvocationException;
  */
 public class PluginExporter_35 extends BasePluginExporter implements IPluginExporter {
 
-	/**
-	 * @since 5.0
-	 */
-	public void asyncExportPlugins(Object info) {
-		try {
-			final FeatureExportInfo fInfo = (FeatureExportInfo) info;
-			
-			final Object op = createExportOperation(fInfo);
+  /**
+   * @since 5.0
+   */
+  public void asyncExportPlugins(Object info) {
+    try {
+      final FeatureExportInfo fInfo = (FeatureExportInfo) info;
 
-			((Job) op).addJobChangeListener(new JobChangeAdapter() {
-				public void done(IJobChangeEvent event) {
-					setResult(handleOperationResult(fInfo, op, event.getResult()));
-				}
-			});
+      final Object op = createExportOperation(fInfo);
 
-			((Job) op).schedule();
-		} catch (ReflectionUtils.InvocationException e) {
-			setResult(new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, Messages.plugin_exporter_not_compatible, e));
-		}
-	}
+      ((Job) op).addJobChangeListener(new JobChangeAdapter() {
+        public void done(IJobChangeEvent event) {
+          setResult(handleOperationResult(fInfo, op, event.getResult()));
+        }
+      });
 
-	private Object createExportOperation(final FeatureExportInfo fInfo) throws InvocationException {
-		// always allow binary cucles
-		ReflectionUtils.setField(fInfo, "allowBinaryCycles", Boolean.TRUE);
-		
-		final Object op = ReflectionUtils.newInstance("org.eclipse.pde.internal.core.exports.PluginExportOperation", new Class[] { //$NON-NLS-1$
-			FeatureExportInfo.class, String.class },
-			new Object[] { fInfo, "" });
+      ((Job) op).schedule();
+    } catch (ReflectionUtils.InvocationException e) {
+      setResult(new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, Messages.plugin_exporter_not_compatible, e));
+    }
+  }
 
-		((Job) op).setUser(true);
+  private Object createExportOperation(final FeatureExportInfo fInfo) throws InvocationException {
+    // always allow binary cucles
+    ReflectionUtils.setField(fInfo, "allowBinaryCycles", Boolean.TRUE);
 
-		((Job) op).setRule(ResourcesPlugin.getWorkspace().getRoot());
+    final Object op = ReflectionUtils.newInstance(
+        "org.eclipse.pde.internal.core.exports.PluginExportOperation", new Class[] { //$NON-NLS-1$
+        FeatureExportInfo.class, String.class }, new Object[] { fInfo, "" });
 
-		((Job) op).setProperty(IProgressConstants.ICON_PROPERTY, PDEPluginImages.DESC_PLUGIN_OBJ);
-		return op;
-	}
-	
-	private IStatus handleOperationResult(final FeatureExportInfo info, Object operation, IStatus result) {
-		boolean errors = false;
-		try {
-			errors = ((Boolean) ReflectionUtils.invokeMethod(operation, "hasAntErrors")).booleanValue(); //$NON-NLS-1$
-			if (errors) {
-				final File logLocation = new File(info.destinationDirectory, "logs.zip"); //$NON-NLS-1$
-				if (logLocation.exists()) {
-					Display display = PlatformUI.getWorkbench().getDisplay();
-					display.syncExec(new Runnable() {
-						public void run() {
-							ExportErrorDialog dialog = new ExportErrorDialog("Problem during export", logLocation); //$NON-NLS-1$
-							dialog.open();
-						}
-					});
-				}
-			}
-		} catch (ReflectionUtils.InvocationException t) {
-			UtilitiesPlugin.error("Failed to get export plugins status", t); //$NON-NLS-1$
-		} finally {
-			if (errors && result.isOK()) {
-				// if the job finished correctly, but there are ant errors
-				return new Status(IStatus.ERROR,
-					PDEPlugin.getPluginId(),
-					NLS.bind("Errors occurred during the export operation. The ant tasks generated log files which can be found at {0}",
-						info.destinationDirectory));
-			} else {
-				return result;
-			}
-		}
-	}
+    ((Job) op).setUser(true);
 
-	public static boolean isCompatible() {
-		return PluginUtilities.compareVersion("org.eclipse.pde.ui", PluginUtilities.VERSION_3_5_0); //$NON-NLS-1$
-	}
-	
-	public String getQualifier() {
-		try {
-			return (String) ReflectionUtils.invokeStaticMethod("org.eclipse.pde.internal.build.site.QualifierReplacer", //$NON-NLS-1$
-				"getDateQualifier"); //$NON-NLS-1$
-		} catch (Throwable t) {
-			return "qualifier"; //$NON-NLS-1$
-		}
-	}
+    ((Job) op).setRule(ResourcesPlugin.getWorkspace().getRoot());
 
-	/**
-	 * @since 5.0
-	 */
-	public IStatus syncExportPlugins(Object info, IProgressMonitor monitor) {
-		try {
-			final FeatureExportInfo fInfo = (FeatureExportInfo) info;
-			
-			final Object op = createExportOperation(fInfo);
+    ((Job) op).setProperty(IProgressConstants.ICON_PROPERTY, PDEPluginImages.DESC_PLUGIN_OBJ);
+    return op;
+  }
 
-			IStatus result;
-			try {
-				Job.getJobManager().beginRule(((Job)op).getRule(), monitor);
-				result = (IStatus) ReflectionUtils.invokeProtectedMethod(op, "run", new Class[] { IProgressMonitor.class }, new Object[] { monitor });
-			} catch (ReflectionUtils.InvocationException e) {
-				result = UtilitiesPlugin.newStatus(IStatus.ERROR, Messages.plugin_exporter_not_compatible, e);
-			} catch (ThreadDeath e) {
-				throw e;
-			} catch (Throwable t) {
-				result = UtilitiesPlugin.newStatus(IStatus.ERROR, "An internal error ocurred during: " + ((Job)op).getName(), t);
-			} finally {
-				Job.getJobManager().endRule(((Job)op).getRule());
-			}
-			return handleOperationResult(fInfo, op, result);
-		} catch (ReflectionUtils.InvocationException e) {
-			return new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, Messages.plugin_exporter_not_compatible, e);
-		}
-	}
+  private IStatus handleOperationResult(final FeatureExportInfo info, Object operation, IStatus result) {
+    boolean errors = false;
+    try {
+      errors = ((Boolean) ReflectionUtils.invokeMethod(operation, "hasAntErrors")).booleanValue(); //$NON-NLS-1$
+      if (errors) {
+        final File logLocation = new File(info.destinationDirectory, "logs.zip"); //$NON-NLS-1$
+        if (logLocation.exists()) {
+          Display display = PlatformUI.getWorkbench().getDisplay();
+          display.syncExec(new Runnable() {
+            public void run() {
+              ExportErrorDialog dialog = new ExportErrorDialog("Problem during export", logLocation); //$NON-NLS-1$
+              dialog.open();
+            }
+          });
+        }
+      }
+    } catch (ReflectionUtils.InvocationException t) {
+      UtilitiesPlugin.error("Failed to get export plugins status", t); //$NON-NLS-1$
+    } finally {
+      if (errors && result.isOK()) {
+        // if the job finished correctly, but there are ant errors
+        return new Status(IStatus.ERROR, PDEPlugin.getPluginId(), NLS.bind(
+            "Errors occurred during the export operation. The ant tasks generated log files which can be found at {0}",
+            info.destinationDirectory));
+      }
+    }
+    return result;
+  }
+
+  public static boolean isCompatible() {
+    return PluginUtilities.compareVersion("org.eclipse.pde.ui", PluginUtilities.VERSION_3_5_0); //$NON-NLS-1$
+  }
+
+  public String getQualifier() {
+    try {
+      return (String) ReflectionUtils.invokeStaticMethod("org.eclipse.pde.internal.build.site.QualifierReplacer", //$NON-NLS-1$
+          "getDateQualifier"); //$NON-NLS-1$
+    } catch (Throwable t) {
+      return "qualifier"; //$NON-NLS-1$
+    }
+  }
+
+  /**
+   * @since 5.0
+   */
+  public IStatus syncExportPlugins(Object info, IProgressMonitor monitor) {
+    try {
+      final FeatureExportInfo fInfo = (FeatureExportInfo) info;
+
+      final Object op = createExportOperation(fInfo);
+
+      IStatus result;
+      try {
+        Job.getJobManager().beginRule(((Job) op).getRule(), monitor);
+        result = (IStatus) ReflectionUtils.invokeProtectedMethod(op, "run", new Class[] { IProgressMonitor.class },
+            new Object[] { monitor });
+      } catch (ReflectionUtils.InvocationException e) {
+        result = UtilitiesPlugin.newStatus(IStatus.ERROR, Messages.plugin_exporter_not_compatible, e);
+      } catch (ThreadDeath e) {
+        throw e;
+      } catch (Throwable t) {
+        result = UtilitiesPlugin.newStatus(IStatus.ERROR, "An internal error ocurred during: " + ((Job) op).getName(),
+            t);
+      } finally {
+        Job.getJobManager().endRule(((Job) op).getRule());
+      }
+      return handleOperationResult(fInfo, op, result);
+    } catch (ReflectionUtils.InvocationException e) {
+      return new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, Messages.plugin_exporter_not_compatible, e);
+    }
+  }
 }
