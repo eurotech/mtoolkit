@@ -51,7 +51,8 @@ public class DeploymentPackageGenerator {
 	 * @param projectRootPath
 	 *            the root path to the project. all paths are relative to it.
 	 */
-	public void generateDeploymentPackage(DPPFile dppFile, String projectRootPath) {
+	public void generateDeploymentPackage(DPPFile dppFile,
+			String projectRootPath) {
 		error = "";
 		outputStream = "";
 		errorStream = "";
@@ -65,30 +66,47 @@ public class DeploymentPackageGenerator {
 		if (!tmpParentFile.exists()) {
 			tmpParentFile.mkdirs();
 		}
-		dppFile.getBuildInfo().setDpFileName(getPath(projectRootPath, dppFile.getBuildInfo().getDpFileName()));
-		dppFile.getBuildInfo().setBuildLocation(getPath(projectRootPath, dppFile.getBuildInfo().getBuildLocation()));
+		dppFile.getBuildInfo()
+				.setDpFileName(
+						getPath(projectRootPath, dppFile.getBuildInfo()
+								.getDpFileName()));
+		dppFile.getBuildInfo().setBuildLocation(
+				getPath(projectRootPath, dppFile.getBuildInfo()
+						.getBuildLocation()));
 		if (dppFile.getBuildInfo().getDpFileName().indexOf(File.separatorChar) >= 0) {
 			String tempName = dppFile.getBuildInfo().getDpFileName();
-			dppFile.getBuildInfo().setDpFileName(tempName.substring(tempName.lastIndexOf(File.separator) + 1));
-			dppFile.getBuildInfo().setBuildLocation(tempName.substring(0, tempName.lastIndexOf(File.separator)));
+			dppFile.getBuildInfo()
+					.setDpFileName(
+							tempName.substring(tempName
+									.lastIndexOf(File.separator) + 1));
+			dppFile.getBuildInfo()
+					.setBuildLocation(
+							tempName.substring(0,
+									tempName.lastIndexOf(File.separator)));
 		}
-		boolean fixpack = dppFile.getPackageHeaders().getFixPack() != null && dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
+		boolean fixpack = dppFile.getPackageHeaders().getFixPack() != null
+				&& dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
 		boolean signBundles = dppFile.getSignBundles();
 		for (int i = 0; i < dppFile.getBundleInfos().size(); i++) {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos().elementAt(i);
+			BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos().elementAt(
+					i);
 			if (bInfo.isMissing() && fixpack) {
 				continue;
 			}
 			if (bInfo.getBundlePath() == null) {
-				error = "The bundle " + bInfo.getBundleSymbolicName() + " does not exist.\n The Deployment Packages was not created";
+				error = "The bundle "
+						+ bInfo.getBundleSymbolicName()
+						+ " does not exist.\n The Deployment Packages was not created";
 				return;
 			}
 			File f = new File(getPath(projectRootPath, bInfo.getBundlePath()));
 			if (!f.exists()) {
-				error = "The bundle " + f.getAbsolutePath() + " does not exist.\n The Deployment Packages was not created";
+				error = "The bundle "
+						+ f.getAbsolutePath()
+						+ " does not exist.\n The Deployment Packages was not created";
 				return;
 			}
 		}
@@ -96,13 +114,16 @@ public class DeploymentPackageGenerator {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos().elementAt(i);
+			ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos()
+					.elementAt(i);
 			if ((rInfo.isMissing()) && fixpack) {
 				continue;
 			}
 			File f = new File(getPath(projectRootPath, rInfo.getResourcePath()));
 			if (!f.exists()) {
-				error = "The resource " + f.getAbsolutePath() + " does not exist.\n The Deployment Packages was not created";
+				error = "The resource "
+						+ f.getAbsolutePath()
+						+ " does not exist.\n The Deployment Packages was not created";
 				return;
 			}
 		}
@@ -111,10 +132,13 @@ public class DeploymentPackageGenerator {
 		FileInputStream fis = null;
 		JarOutputStream jos = null;
 		try {
-			if (dppFile.getBuildInfo().getDpFileName().indexOf(File.separatorChar) >= 0) {
+			if (dppFile.getBuildInfo().getDpFileName()
+					.indexOf(File.separatorChar) >= 0) {
 				dpName = dppFile.getBuildInfo().getDpFileName();
 			} else {
-				dpName = dppFile.getBuildInfo().getBuildLocation() + File.separator + dppFile.getBuildInfo().getDpFileName();
+				dpName = dppFile.getBuildInfo().getBuildLocation()
+						+ File.separator
+						+ dppFile.getBuildInfo().getDpFileName();
 			}
 			jos = new JarOutputStream(new FileOutputStream(dpName));
 			JarEntry je = new JarEntry("META-INF/MANIFEST.MF");
@@ -127,7 +151,8 @@ public class DeploymentPackageGenerator {
 					jos.close();
 					return;
 				}
-				BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos().elementAt(i);
+				BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos()
+						.elementAt(i);
 				DPPUtilities.debug("Adding bundle : " + bInfo.getBundlePath());
 				if (bInfo.isMissing() && fixpack) {
 					continue;
@@ -137,19 +162,24 @@ public class DeploymentPackageGenerator {
 
 				String signedBundlePath = null;
 				if (signBundles && dppFile.getCertificateInfos().size() != 0) {
-					String bundle = getPath(projectRootPath, bInfo.getBundlePath());
+					String bundle = getPath(projectRootPath,
+							bInfo.getBundlePath());
 					for (int j = 0; j < dppFile.getCertificateInfos().size(); j++) {
 						if (monitor.isCanceled()) {
 							if (j > 0)
 								new File(bundle).delete();
 							return;
 						}
-						final CertificateInfo ci = (CertificateInfo) dppFile.getCertificateInfos().elementAt(j);
-						File tmpFile = File.createTempFile("dpgenerator", ".jar");
+						final CertificateInfo ci = (CertificateInfo) dppFile
+								.getCertificateInfos().elementAt(j);
+						File tmpFile = File.createTempFile("dpgenerator",
+								".jar");
 						if (!signJar(bundle, tmpFile.getAbsolutePath(), ci)) {
 							String signJarError = error;
-							error = "DP file cannot be created, because bundle " + bInfo.getName() + " cannot be signed.\n";
-							if (signJarError != null && signJarError.trim().length() > 0)
+							error = "DP file cannot be created, because bundle "
+									+ bInfo.getName() + " cannot be signed.\n";
+							if (signJarError != null
+									&& signJarError.trim().length() > 0)
 								error += "Reason: " + signJarError;
 							tmpFile.delete();
 							if (j > 0)
@@ -163,7 +193,8 @@ public class DeploymentPackageGenerator {
 					signedBundlePath = bundle;
 					fis = new FileInputStream(bundle);
 				} else {
-					fis = new FileInputStream(getPath(projectRootPath, bInfo.getBundlePath()));
+					fis = new FileInputStream(getPath(projectRootPath,
+							bInfo.getBundlePath()));
 				}
 				do {
 					bLen = fis.read(buffer);
@@ -182,14 +213,17 @@ public class DeploymentPackageGenerator {
 					jos.close();
 					return;
 				}
-				ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos().elementAt(i);
+				ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos()
+						.elementAt(i);
 				if (rInfo.isMissing() && fixpack) {
 					continue;
 				}
-				DPPUtilities.debug("Adding resource : " + rInfo.getResourcePath());
+				DPPUtilities.debug("Adding resource : "
+						+ rInfo.getResourcePath());
 				je = new JarEntry(rInfo.getName());
 				jos.putNextEntry(je);
-				fis = new FileInputStream(getPath(projectRootPath, rInfo.getResourcePath()));
+				fis = new FileInputStream(getPath(projectRootPath,
+						rInfo.getResourcePath()));
 				do {
 					bLen = fis.read(buffer);
 					if (bLen > 0) {
@@ -213,7 +247,8 @@ public class DeploymentPackageGenerator {
 			}
 		} catch (ZipException e) {
 			DPPUtilities.debug("Deployment package generator : ", e);
-			error = "Deployment package was not created due to unexpected error.\n"+e.getMessage();
+			error = "Deployment package was not created due to unexpected error.\n"
+					+ e.getMessage();
 			if (jos != null) {
 				try {
 					jos.close();
@@ -263,8 +298,10 @@ public class DeploymentPackageGenerator {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			final CertificateInfo ci = (CertificateInfo) dppFile.getCertificateInfos().elementAt(i);
-			DPPUtilities.debug("Signing with alias : " + ci.getAlias() + " keystore : " + ci.getKeystore());
+			final CertificateInfo ci = (CertificateInfo) dppFile
+					.getCertificateInfos().elementAt(i);
+			DPPUtilities.debug("Signing with alias : " + ci.getAlias()
+					+ " keystore : " + ci.getKeystore());
 			String dpName = dppFile.getBuildInfo().getDpFileName();
 			String buildLocation = dppFile.getBuildInfo().getBuildLocation();
 			if (!"".equals(buildLocation)) {
@@ -298,7 +335,8 @@ public class DeploymentPackageGenerator {
 		v.addElement(ci.getAlias());
 		try {
 
-			final Process ps = Runtime.getRuntime().exec((String[]) v.toArray(new String[0]));
+			final Process ps = Runtime.getRuntime().exec(
+					(String[]) v.toArray(new String[0]));
 			int result = -1;
 			Thread errorReader = new Thread() {
 				public void run() {
@@ -309,7 +347,8 @@ public class DeploymentPackageGenerator {
 						while (len != -1 && !timeout) {
 							len = ps.getErrorStream().read(buf);
 							if (len > 0)
-								errorStream = errorStream + new String(buf, 0, len);
+								errorStream = errorStream
+										+ new String(buf, 0, len);
 							len = ps.getErrorStream().available();
 						}
 					} catch (IOException io) {
@@ -320,14 +359,16 @@ public class DeploymentPackageGenerator {
 
 			Thread outputReader = new Thread() {
 				public void run() {
-					Thread.currentThread().setName("[Jar Signer] Output Reader");
+					Thread.currentThread()
+							.setName("[Jar Signer] Output Reader");
 					try {
 						byte[] buf = new byte[4096];
 						int len = ps.getInputStream().available();
 						while (len != -1 && !timeout) {
 							len = ps.getInputStream().read(buf);
 							if (len > 0)
-								outputStream = outputStream + new String(buf, 0, len);
+								outputStream = outputStream
+										+ new String(buf, 0, len);
 							len = ps.getInputStream().available();
 						}
 					} catch (IOException io) {
@@ -354,12 +395,15 @@ public class DeploymentPackageGenerator {
 				if (result != 0) {// the ps can finish during the 100ms in the
 					// while
 					// loop
-					error = ResourceManager.getString("BuildExportWizard.errorSigningCanceled");
+					error = ResourceManager
+							.getString("BuildExportWizard.errorSigningCanceled");
 				}
 				return false;
 			}
 			if (result != 0) {
-				error = "Could not sign deployment package using the '" + ci.getAlias() + "' alias.\nCheck that your settings are correct and that the jar signer preference is correctly set.\nThe package was successfully created but was not signed.";
+				error = "Could not sign deployment package using the '"
+						+ ci.getAlias()
+						+ "' alias.\nCheck that your settings are correct and that the jar signer preference is correctly set.\nThe package was successfully created but was not signed.";
 				System.out.println(error);
 				try {
 					ps.getOutputStream().write("a\na\na\n".getBytes());
@@ -381,7 +425,8 @@ public class DeploymentPackageGenerator {
 		BuildInfo buildInfo = dppFile.getBuildInfo();
 		String dppFileName = dppFile.getFile().getAbsolutePath();
 		if (dppFileName.endsWith(".dpp")) {
-			dppFileName = dppFileName.substring(0, dppFileName.lastIndexOf('.'));
+			dppFileName = dppFileName
+					.substring(0, dppFileName.lastIndexOf('.'));
 		}
 		buildInfo.setBuildLocation("");
 		String value = buildInfo.getDpFileName();
@@ -409,19 +454,29 @@ public class DeploymentPackageGenerator {
 	 */
 	public String generateManifest(DPPFile dppFile) {
 		DPPUtilities.debug("Generating manifest");
-		boolean fixpack = dppFile.getPackageHeaders().getFixPack() != null && dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
+		boolean fixpack = dppFile.getPackageHeaders().getFixPack() != null
+				&& dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
 		StringBuffer manifest = new StringBuffer();
 		manifest.append("Manifest-Version: 1.0" + nl);
-		manifest.append(getManifestLine("DeploymentPackage-SymbolicName", dppFile.getPackageHeaders().getSymbolicName()));
-		manifest.append(getManifestLine("DeploymentPackage-Version", dppFile.getPackageHeaders().getVersion()));
+		manifest.append(getManifestLine("DeploymentPackage-SymbolicName",
+				dppFile.getPackageHeaders().getSymbolicName()));
+		manifest.append(getManifestLine("DeploymentPackage-Version", dppFile
+				.getPackageHeaders().getVersion()));
 		if (fixpack)
-			manifest.append(getManifestLine("DeploymentPackage-FixPack", dppFile.getPackageHeaders().getFixPack()));
-		manifest.append(getManifestLine("DeploymentPackage-Copyright", dppFile.getPackageHeaders().getCopyRight()));
-		manifest.append(getManifestLine("DeploymentPackage-ContactAddress", dppFile.getPackageHeaders().getContactAddress()));
-		manifest.append(getManifestLine("DeploymentPackage-Description", dppFile.getPackageHeaders().getDescription()));
-		manifest.append(getManifestLine("DeploymentPackage-DocURL", dppFile.getPackageHeaders().getDocURL()));
-		manifest.append(getManifestLine("DeploymentPackage-Vendor", dppFile.getPackageHeaders().getVendor()));
-		manifest.append(getManifestLine("DeploymentPackage-License", dppFile.getPackageHeaders().getLicense()));
+			manifest.append(getManifestLine("DeploymentPackage-FixPack",
+					dppFile.getPackageHeaders().getFixPack()));
+		manifest.append(getManifestLine("DeploymentPackage-Copyright", dppFile
+				.getPackageHeaders().getCopyRight()));
+		manifest.append(getManifestLine("DeploymentPackage-ContactAddress",
+				dppFile.getPackageHeaders().getContactAddress()));
+		manifest.append(getManifestLine("DeploymentPackage-Description",
+				dppFile.getPackageHeaders().getDescription()));
+		manifest.append(getManifestLine("DeploymentPackage-DocURL", dppFile
+				.getPackageHeaders().getDocURL()));
+		manifest.append(getManifestLine("DeploymentPackage-Vendor", dppFile
+				.getPackageHeaders().getVendor()));
+		manifest.append(getManifestLine("DeploymentPackage-License", dppFile
+				.getPackageHeaders().getLicense()));
 		Vector otherHeaders = dppFile.getPackageHeaders().getOtherHeaders();
 		for (int i = 0; i < otherHeaders.size(); i++) {
 			Header header = (Header) otherHeaders.elementAt(i);
@@ -430,35 +485,45 @@ public class DeploymentPackageGenerator {
 
 		for (int i = 0; i < dppFile.getBundleInfos().size(); i++) {
 			manifest.append(nl);
-			BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos().elementAt(i);
+			BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos().elementAt(
+					i);
 			manifest.append(getManifestLine("Name", bInfo.getName()));
-			manifest.append(getManifestLine("Bundle-SymbolicName", bInfo.getBundleSymbolicName()));
-			manifest.append(getManifestLine("Bundle-Version", bInfo.getBundleVersion()));
+			manifest.append(getManifestLine("Bundle-SymbolicName",
+					bInfo.getBundleSymbolicName()));
+			manifest.append(getManifestLine("Bundle-Version",
+					bInfo.getBundleVersion()));
 			if (fixpack && bInfo.isMissing()) {
-				manifest.append(getManifestLine("DeploymentPackage-Missing", "true"));
+				manifest.append(getManifestLine("DeploymentPackage-Missing",
+						"true"));
 			}
 			if (bInfo.isCustomizer()) {
-				manifest.append(getManifestLine("DeploymentPackage-Customizer", "true"));
+				manifest.append(getManifestLine("DeploymentPackage-Customizer",
+						"true"));
 			}
 			Vector others = bInfo.getOtherHeaders();
 			for (int j = 0; j < others.size(); j++) {
 				Header header = (Header) others.elementAt(j);
-				manifest.append(getManifestLine(header.getKey(), header.getValue()));
+				manifest.append(getManifestLine(header.getKey(),
+						header.getValue()));
 			}
 		}
 
 		for (int i = 0; i < dppFile.getResourceInfos().size(); i++) {
 			manifest.append(nl);
-			ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos().elementAt(i);
+			ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos()
+					.elementAt(i);
 			manifest.append(getManifestLine("Name", rInfo.getName()));
-			manifest.append(getManifestLine("Resource-Processor", rInfo.getResourceProcessor()));
+			manifest.append(getManifestLine("Resource-Processor",
+					rInfo.getResourceProcessor()));
 			if (fixpack && rInfo.isMissing()) {
-				manifest.append(getManifestLine("DeploymentPackage-Missing", "true"));
+				manifest.append(getManifestLine("DeploymentPackage-Missing",
+						"true"));
 			}
 			Vector others = rInfo.getOtherHeaders();
 			for (int j = 0; j < others.size(); j++) {
 				Header header = (Header) others.elementAt(j);
-				manifest.append(getManifestLine(header.getKey(), header.getValue()));
+				manifest.append(getManifestLine(header.getKey(),
+						header.getValue()));
 			}
 		}
 
@@ -496,12 +561,22 @@ public class DeploymentPackageGenerator {
 	 * @param projectRootPath
 	 *            the root path to the project. all paths are relative to it.
 	 */
-	public void generateDeploymentPackage(File file, String projectRootPath) throws IOException {
+	public void generateDeploymentPackage(File file, String projectRootPath)
+			throws IOException {
 		DPPFile dppFile = new DPPFile(file, projectRootPath);
 		generateDeploymentPackage(dppFile, projectRootPath);
 		if (error.equals("") && !monitor.isCanceled()) {
 			signDP(dppFile);
 		}
+	}
+
+	private String substituteSpecialXMLCharacters(String strToParse) {
+		strToParse = strToParse.replaceAll("&", "&amp;");
+		strToParse = strToParse.replaceAll("'", "&apos;");
+		strToParse = strToParse.replaceAll("<", "&lt;");
+		strToParse = strToParse.replaceAll(">", "&lt;");
+		strToParse = strToParse.replaceAll("\"", "&quot;");
+		return strToParse;
 	}
 
 	/**
@@ -518,23 +593,47 @@ public class DeploymentPackageGenerator {
 	 *            relative to the ant script if this flag is set. Still not
 	 *            working(the last flag only)
 	 */
-	public void generateAntFile(DPPFile dppFile, String projectRootPath, boolean makeAllPathsRelative) throws IOException {
+	public void generateAntFile(DPPFile dppFile, String projectRootPath,
+			boolean makeAllPathsRelative) throws IOException {
 		DPPUtilities.debug("Generating ant script");
 		if (dppFile.getBuildInfo().getAntFileName() == null) {
 			genereateDefaultBuildProperties(dppFile);
 		}
-		dppFile.getBuildInfo().setDpFileName(getPath(projectRootPath, dppFile.getBuildInfo().getDpFileName()));
-		dppFile.getBuildInfo().setBuildLocation(getPath(projectRootPath, dppFile.getBuildInfo().getBuildLocation()));
-		String antPath = getPath(projectRootPath, dppFile.getBuildInfo().getAntFileName());
+		dppFile.getBuildInfo()
+				.setDpFileName(
+						getPath(projectRootPath, dppFile.getBuildInfo()
+								.getDpFileName()));
+		dppFile.getBuildInfo().setBuildLocation(
+				getPath(projectRootPath, dppFile.getBuildInfo()
+						.getBuildLocation()));
+		String antPath = getPath(projectRootPath, dppFile.getBuildInfo()
+				.getAntFileName());
 		antPath = new File(antPath).getParentFile().getAbsolutePath();
-		boolean fixPack = dppFile.getPackageHeaders().getFixPack() != null && dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
+		boolean fixPack = dppFile.getPackageHeaders().getFixPack() != null
+				&& dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
 		if (dppFile.getBuildInfo().getDpFileName().indexOf(File.separatorChar) >= 0) {
 			String tempName = dppFile.getBuildInfo().getDpFileName();
-			dppFile.getBuildInfo().setDpFileName(tempName.substring(tempName.lastIndexOf(File.separator) + 1));
-			dppFile.getBuildInfo().setBuildLocation(tempName.substring(0, tempName.lastIndexOf(File.separator)));
+			dppFile.getBuildInfo()
+					.setDpFileName(
+							tempName.substring(tempName
+									.lastIndexOf(File.separator) + 1));
+			dppFile.getBuildInfo()
+					.setBuildLocation(
+							tempName.substring(0,
+									tempName.lastIndexOf(File.separator)));
 		}
+
+		// XML
 		StringBuffer antFile = new StringBuffer();
-		antFile.append("<?xml version=\"1.0\" ?>" + nl + "<project name=\"build_" + dppFile.getBuildInfo().getDpFileName() + "\" default=\"all\" basedir=\"" + calculateBaseDir(dppFile.getBuildInfo().getAntFileName(), projectRootPath) + "\" >" + nl + "");
+		antFile.append("<?xml version=\"1.0\" ?>"
+				+ nl
+				+ "<project name=\"build_"
+				+ substituteSpecialXMLCharacters(dppFile.getBuildInfo()
+						.getDpFileName())
+				+ "\" default=\"all\" basedir=\""
+				+ substituteSpecialXMLCharacters(calculateBaseDir(dppFile
+						.getBuildInfo().getAntFileName(), projectRootPath))
+				+ "\" >" + nl + "");
 
 		Vector bundleInfos = dppFile.getBundleInfos();
 		for (int i = 0; i < bundleInfos.size(); i++) {
@@ -543,13 +642,21 @@ public class DeploymentPackageGenerator {
 			}
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
 			if (!fixPack || !bInfo.isMissing()) {
-				String path = calculateRelative(getPath(projectRootPath, (bInfo.getBundlePath())));
-				antFile.append("<available property=\"file.exists.").append(path);
-				antFile.append("\" file=\"").append(path).append("\"/>").append(nl);
+				String path = substituteSpecialXMLCharacters(calculateRelative(getPath(
+						projectRootPath, (bInfo.getBundlePath()))));
+
+				antFile.append("<available property=\"file.exists.").append(
+						path);
+				antFile.append("\" file=\"").append(path).append("\"/>")
+						.append(nl);
 				;
-				antFile.append("<target name=\"check.file.exists ").append(path);
-				antFile.append("\" unless=\"file.exists.").append(path).append("\">").append(nl);
-				antFile.append("  <fail message=\"Can not find file " + path + "\"/>").append(nl);
+				antFile.append("<target name=\"check.file.exists ")
+						.append(path);
+				antFile.append("\" unless=\"file.exists.").append(path)
+						.append("\">").append(nl);
+				antFile.append(
+						"  <fail message=\"Can not find file " + path + "\"/>")
+						.append(nl);
 				antFile.append("</target>").append(nl);
 			}
 		}
@@ -560,20 +667,30 @@ public class DeploymentPackageGenerator {
 				return;
 			}
 			ResourceInfo rInfo = (ResourceInfo) resourceInfos.elementAt(i);
+
 			if (!fixPack || !rInfo.isMissing()) {
-				String path = calculateRelative(getPath(projectRootPath, (rInfo.getResourcePath())));
-				antFile.append("<available property=\"file.exists.").append(path);
-				antFile.append("\" file=\"").append(path).append("\"/>").append(nl);
+				String path = substituteSpecialXMLCharacters(calculateRelative(getPath(
+						projectRootPath, (rInfo.getResourcePath()))));
+				antFile.append("<available property=\"file.exists.").append(
+						path);
+				antFile.append("\" file=\"").append(path).append("\"/>")
+						.append(nl);
 				;
-				antFile.append("<target name=\"check.file.exists ").append(path);
-				antFile.append("\" unless=\"file.exists.").append(path).append("\">").append(nl);
-				antFile.append("  <fail message=\"Can not find file " + path + "\"/>").append(nl);
+				antFile.append("<target name=\"check.file.exists ")
+						.append(path);
+				antFile.append("\" unless=\"file.exists.").append(path)
+						.append("\">").append(nl);
+				antFile.append(
+						"  <fail message=\"Can not find file " + path + "\"/>")
+						.append(nl);
 				antFile.append("</target>").append(nl);
 			}
 		}
 
 		antFile.append("<target name=\"all\">" + nl);
-		String path = getPath(projectRootPath, (dppFile.getBuildInfo().getBuildLocation()));
+		String path = substituteSpecialXMLCharacters(getPath(projectRootPath,
+				(dppFile.getBuildInfo().getBuildLocation())));
+
 		antFile.append("  <mkdir dir=\"" + path + "\"/>" + nl);
 
 		for (int i = 0; i < bundleInfos.size(); i++) {
@@ -582,7 +699,10 @@ public class DeploymentPackageGenerator {
 			}
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
 			if (!fixPack || !bInfo.isMissing()) {
-				antFile.append("  <antcall target=\"check.file.exists ").append(calculateRelative(getPath(projectRootPath, (bInfo.getBundlePath())))).append("\"/>").append(nl);
+				antFile.append("  <antcall target=\"check.file.exists ")
+						.append(substituteSpecialXMLCharacters(calculateRelative(getPath(
+								projectRootPath, (bInfo.getBundlePath())))))
+						.append("\"/>").append(nl);
 			}
 		}
 		for (int i = 0; i < resourceInfos.size(); i++) {
@@ -591,15 +711,32 @@ public class DeploymentPackageGenerator {
 			}
 			ResourceInfo rInfo = (ResourceInfo) resourceInfos.elementAt(i);
 			if (!fixPack || !rInfo.isMissing()) {
-				antFile.append("  <antcall target=\"check.file.exists ").append(calculateRelative(getPath(projectRootPath, (rInfo.getResourcePath())))).append("\"/>").append(nl);
+				antFile.append("  <antcall target=\"check.file.exists ")
+						.append(substituteSpecialXMLCharacters(calculateRelative(getPath(
+								projectRootPath, (rInfo.getResourcePath())))))
+						.append("\"/>").append(nl);
 			}
 		}
 
-		antFile.append("  <jar destfile=\"" + calculateRelative(getPath(projectRootPath, (dppFile.getBuildInfo().getBuildLocation() + File.separator + dppFile.getBuildInfo().getDpFileName()))) + "\" manifest=\"" + calculateRelative(antPath + File.separator + stripDP(dppFile.getBuildInfo().getDpFileName()) + "_manifest.mf") + "\">" + nl);
+		antFile.append("  <jar destfile=\""
+				+ substituteSpecialXMLCharacters(calculateRelative(getPath(
+						projectRootPath, (dppFile.getBuildInfo()
+								.getBuildLocation() + File.separator + dppFile
+								.getBuildInfo().getDpFileName()))))
+				+ "\" manifest=\""
+				+ substituteSpecialXMLCharacters(calculateRelative(antPath
+						+ File.separator
+						+ stripDP(dppFile.getBuildInfo().getDpFileName())
+						+ "_manifest.mf")) + "\">" + nl);
 		for (int i = 0; i < bundleInfos.size(); i++) {
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
 			if (!fixPack || !bInfo.isMissing()) {
-				antFile.append("    <zipfileset file=\"" + calculateRelative(getPath(projectRootPath, (bInfo.getBundlePath()))) + "\" fullpath=\"" + bInfo.getName() + "\" />" + nl);
+				antFile.append("    <zipfileset file=\""
+						+ substituteSpecialXMLCharacters(calculateRelative(getPath(
+								projectRootPath, (bInfo.getBundlePath()))))
+						+ "\" fullpath=\""
+						+ substituteSpecialXMLCharacters(bInfo.getName())
+						+ "\" />" + nl);
 			}
 		}
 		for (int i = 0; i < resourceInfos.size(); i++) {
@@ -608,7 +745,12 @@ public class DeploymentPackageGenerator {
 			}
 			ResourceInfo rInfo = (ResourceInfo) resourceInfos.elementAt(i);
 			if (!fixPack || !rInfo.isMissing()) {
-				antFile.append("    <zipfileset file=\"" + calculateRelative(getPath(projectRootPath, (rInfo.getResourcePath()))) + "\" fullpath=\"" + rInfo.getName() + "\" />" + nl);
+				antFile.append("    <zipfileset file=\""
+						+ substituteSpecialXMLCharacters(calculateRelative(getPath(
+								projectRootPath, (rInfo.getResourcePath()))))
+						+ "\" fullpath=\""
+						+ substituteSpecialXMLCharacters(rInfo.getName())
+						+ "\" />" + nl);
 			}
 		}
 		antFile.append("  </jar>" + nl + "");
@@ -616,20 +758,45 @@ public class DeploymentPackageGenerator {
 			if (monitor.isCanceled()) {
 				return;
 			}
-			CertificateInfo ci = (CertificateInfo) dppFile.getCertificateInfos().elementAt(i);
-			antFile.append("  <signjar jar=\"" + calculateRelative(getPath(projectRootPath, (dppFile.getBuildInfo().getBuildLocation() + File.separator + dppFile.getBuildInfo().getDpFileName()))) + "\" " + getAntOptionsLine("alias", ci.getAlias()) + "storepass=\"" + (ci.getStorepass() == null ? "" : ci.getStorepass()) + "\" " + getAntOptionsLine("keystore", ci.getKeystore()) + getAntOptionsLine("keypass", ci.getKeypass()) + getAntOptionsLine("storetype", ci.getStoreType()) + "/>" + nl + "");
+			CertificateInfo ci = (CertificateInfo) dppFile
+					.getCertificateInfos().elementAt(i);
+			antFile.append("  <signjar jar=\""
+					+ substituteSpecialXMLCharacters(calculateRelative(getPath(
+							projectRootPath,
+							(dppFile.getBuildInfo().getBuildLocation()
+									+ File.separator + dppFile.getBuildInfo()
+									.getDpFileName()))))
+					+ "\" "
+					+ substituteSpecialXMLCharacters(getAntOptionsLine("alias",
+							ci.getAlias()))
+					+ "storepass=\""
+					+ (ci.getStorepass() == null ? ""
+							: substituteSpecialXMLCharacters(ci.getStorepass()))
+					+ "\" "
+					+ substituteSpecialXMLCharacters(getAntOptionsLine(
+							"keystore", ci.getKeystore()))
+					+ substituteSpecialXMLCharacters(getAntOptionsLine(
+							"keypass", ci.getKeypass()))
+					+ substituteSpecialXMLCharacters(getAntOptionsLine(
+							"storetype", ci.getStoreType())) + "/>" + nl + "");
 		}
 		antFile.append("</target>" + nl + "" + nl + "</project>" + nl + "");
+
 		String antFileName = dppFile.getBuildInfo().getAntFileName();
 		File tmpAntFile = new File(antFileName);
 		File tmpParentFile = tmpAntFile.getParentFile();
 		if (!tmpParentFile.exists()) {
 			tmpParentFile.mkdirs();
 		}
-		FileOutputStream fos = new FileOutputStream(dppFile.getBuildInfo().getAntFileName());
-		fos.write(antFile.toString().getBytes());
+
+		FileOutputStream fos = new FileOutputStream(dppFile.getBuildInfo()
+				.getAntFileName());
+		fos.write(antFile
+				.toString().getBytes());
 		fos.close();
-		fos = new FileOutputStream(antPath + File.separator + stripDP(dppFile.getBuildInfo().getDpFileName()) + "_manifest.mf");
+		fos = new FileOutputStream(antPath + File.separator
+				+ stripDP(dppFile.getBuildInfo().getDpFileName())
+				+ "_manifest.mf");
 		fos.write(generateManifest(dppFile).getBytes());
 		fos.close();
 	}
@@ -684,7 +851,8 @@ public class DeploymentPackageGenerator {
 		String antPath = f.getAbsolutePath();
 		String projectPath = new File(projectRootPath).getAbsolutePath();
 		String result = "";
-		if (antPath.startsWith(projectPath) && antPath.length() != projectPath.length()) {
+		if (antPath.startsWith(projectPath)
+				&& antPath.length() != projectPath.length()) {
 			// the ant file should be in the project
 			antPath = antPath.substring(projectPath.length());
 			StringTokenizer tok = new StringTokenizer(antPath, File.separator);
