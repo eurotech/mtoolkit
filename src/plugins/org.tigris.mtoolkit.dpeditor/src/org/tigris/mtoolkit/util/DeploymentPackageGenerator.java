@@ -574,7 +574,7 @@ public class DeploymentPackageGenerator {
 		strToParse = strToParse.replaceAll("&", "&amp;");
 		strToParse = strToParse.replaceAll("'", "&apos;");
 		strToParse = strToParse.replaceAll("<", "&lt;");
-		strToParse = strToParse.replaceAll(">", "&lt;");
+		strToParse = strToParse.replaceAll(">", "&gt;");
 		strToParse = strToParse.replaceAll("\"", "&quot;");
 		return strToParse;
 	}
