@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.DPActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.images.ImageHolder;
