@@ -35,9 +35,9 @@ public class DPProcessor extends FrameworkProcessor {
 		return new String[] {MIME_DP};
 	}
 
-	public void install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor) {
+	public void install(InputStream input, String name, Framework framework, IProgressMonitor monitor) {
 		try {
-			final File packageFile = saveFile(input, item.getName());
+			final File packageFile = saveFile(input, name);
 			InstallDeploymentOperation job = new InstallDeploymentOperation(packageFile, framework);
 			job.schedule();
 			job.addJobChangeListener(new DeleteWhenDoneListener(packageFile));
