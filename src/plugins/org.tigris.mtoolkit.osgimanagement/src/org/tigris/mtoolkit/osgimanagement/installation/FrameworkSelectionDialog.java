@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -181,8 +182,8 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		int selected = frameworkViewer.getTable().getSelectionIndex();
 
 		btnEdit.setEnabled(selected != -1);
-		btnRem.setEnabled(selected != -1 &&
-				!((FrameworkImpl)frameworkViewer.getTable().getSelection()[0].getData()).autoConnected);
+		btnRem.setEnabled(selected != -1
+				&& !((FrameworkImpl) frameworkViewer.getTable().getSelection()[0].getData()).autoConnected);
 
 		Button btnOK = getButton(IDialogConstants.OK_ID);
 		if (btnOK != null) {
@@ -213,11 +214,11 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 		Object element = selection.getFirstElement();
 		if (element instanceof FrameworkImpl) {
 			FrameworkImpl framework = (FrameworkImpl) element;
-			ActionsManager.frameworkPropertiesAction(framework, FrameWorkView.tree);
+			ActionsManager.frameworkPropertiesAction(framework, frameworkViewer);
 		}
 	}
 
-	protected class FrameworkContentProvider implements IStructuredContentProvider, ContentChangeListener {
+	private class FrameworkContentProvider implements IStructuredContentProvider, ContentChangeListener {
 		private Viewer viewer;
 
 		public Object[] getElements(Object inputElement) {
@@ -257,6 +258,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 				shell.getDisplay().asyncExec(new Runnable() {
 					public void run() {
 						((TableViewer) viewer).add(event.getTarget());
+						viewer.setSelection(new StructuredSelection(event.getTarget()));
 					}
 				});
 			}

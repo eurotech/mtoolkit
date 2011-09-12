@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.osgi.util.NLS;
@@ -78,7 +79,7 @@ public class ActionsManager {
 		int index = 1;
 		String frameWorkName;
 		do {
-			frameWorkName = Messages.new_framework_default_name + " (" + index+")";
+			frameWorkName = Messages.new_framework_default_name + " (" + index + ")";
 			index++;
 		} while (frameWorkMap.containsKey(frameWorkName));
 
@@ -91,10 +92,9 @@ public class ActionsManager {
 			Shell shell = parentView.getTree().getShell();
 			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
 				protected void attachHelp(Composite container) {
-					PlatformUI.getWorkbench().getHelpSystem().setHelp(container,
-							IHelpContextIds.PROPERTY_BUNDLE);
+					PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_BUNDLE);
 				}
-				
+
 			};
 			Dictionary headers = rBundle.getHeaders(null);
 			propertiesDialog.create();
@@ -134,7 +134,8 @@ public class ActionsManager {
 						break;
 					}
 				}
-				status = processor.processInstallationItems((InstallationItem[]) items.toArray(new InstallationItem[items.size()]), target, monitor);
+				status = processor.processInstallationItems(
+						(InstallationItem[]) items.toArray(new InstallationItem[items.size()]), target, monitor);
 
 				monitor.done();
 				if (monitor.isCanceled()) {
@@ -146,7 +147,7 @@ public class ActionsManager {
 		job.schedule();
 	}
 
-	public static void frameworkPropertiesAction(FrameworkImpl framework, TreeViewer parentView) {
+	public static void frameworkPropertiesAction(FrameworkImpl framework, ColumnViewer parentView) {
 		PropertyDialogAction action = new PropertyDialogAction(new SameShellProvider(parentView.getControl()),
 				parentView);
 		action.run();
@@ -159,7 +160,7 @@ public class ActionsManager {
 				return Status.OK_STATUS;
 			}
 		};
-		// When disconnect action is scheduled before this action, we need 
+		// When disconnect action is scheduled before this action, we need
 		// to be sure that it is completed before we dispose the framework
 		removeJob.setRule(new FwMutexRule(framework));
 		removeJob.schedule();
@@ -169,7 +170,7 @@ public class ActionsManager {
 	public static void startBundleAction(Bundle bundle) {
 		String name = bundle.getName();
 		try {
-			name = name + " ("+bundle.getVersion()+")";
+			name = name + " (" + bundle.getVersion() + ")";
 		} catch (IAgentException e) {
 		}
 		RemoteBundleOperation job = new StartBundleOperation(name, bundle);
@@ -178,13 +179,9 @@ public class ActionsManager {
 
 	public static void stopBundleAction(Bundle bundle) {
 		if (bundle.getID() == 0) {
-			MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(),
-					"Stop bundle",
-					null,
-					NLS.bind(Messages.stop_system_bundle, bundle.getName()),
-					MessageDialog.QUESTION,
-					new String[] { "Continue", "Cancel" },
-					0);
+			MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), "Stop bundle", null, NLS.bind(
+					Messages.stop_system_bundle, bundle.getName()), MessageDialog.QUESTION, new String[] { "Continue",
+					"Cancel" }, 0);
 			int statusCode = UIHelper.openWindow(dialog);
 			if (statusCode == 1)
 				return;
@@ -231,11 +228,10 @@ public class ActionsManager {
 		disconnectJob.setRule(new FwMutexRule(fw));
 		disconnectJob.schedule();
 	}
-	
+
 	public static void disconnectConsole(FrameworkImpl fw) {
 		ConsoleManager.disconnectConsole(fw.getConnector());
 	}
-
 
 	private static void disconnectFramework0(FrameworkImpl fw) {
 		try {
@@ -243,18 +239,20 @@ public class ActionsManager {
 			if (fw.autoConnected) {
 				fw.disconnect();
 			} else {
-//				if (fw.monitor != null) {
-//					fw.monitor.setCanceled(true);
-//				}
+				// if (fw.monitor != null) {
+				// fw.monitor.setCanceled(true);
+				// }
 				// wait if connect operation is still active
 				DeviceConnector connector;
 				if ((connector = fw.getConnector()) != null) {
 					// framework connects synchronously, while holding a lock
-					// wait until the lock is released to know when the connect op has finished
+					// wait until the lock is released to know when the connect
+					// op has finished
 					synchronized (Framework.getLockObject(connector)) {
 					}
 				}
-				// if the connection fails, connector will be null, so we need to recheck the condition
+				// if the connection fails, connector will be null, so we need
+				// to recheck the condition
 				if ((connector = fw.getConnector()) != null) {
 					connector.closeConnection();
 				}
@@ -264,7 +262,6 @@ public class ActionsManager {
 			e.printStackTrace();
 		}
 	}
-
 
 	public static void connectFrameworkAction(FrameworkImpl framework) {
 		FrameworkConnectorFactory.connectFrameWork(framework);
