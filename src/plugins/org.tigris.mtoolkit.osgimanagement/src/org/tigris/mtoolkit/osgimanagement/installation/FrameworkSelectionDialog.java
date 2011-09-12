@@ -132,6 +132,21 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 			}
 		});
 
+		frameworkViewer.getTable().addFocusListener(new FocusAdapter() {
+			public void focusGained(FocusEvent e) {
+				Table table = frameworkViewer.getTable();
+				if (table.getItemCount() > 0) {
+					int i = table.getSelectionIndex();
+					if (i != -1) {
+						table.setSelection(i);
+					} else {
+						table.setSelection(0);
+					}
+				}
+				updateButtonsState();
+			}
+		});
+
 		frameworkViewer.setInput(FrameWorkView.getTreeRoot());
 
 		btnAdd = new Button(composite, SWT.PUSH);
