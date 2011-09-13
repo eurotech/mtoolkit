@@ -14,8 +14,8 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.IShellProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.TargetSelectionDialog;
@@ -41,7 +41,7 @@ public class InstallToSelectionDlgAction extends Action {
 		try {
 			Constructor constructor = dlgClass.getConstructor(new Class[] { Shell.class });
 			TargetSelectionDialog dialog = (TargetSelectionDialog) constructor.newInstance(new Object[] { shellProvider.getShell() });
-			if (dialog.open() == Dialog.OK) {
+      if (dialog.open() == Window.OK) {
 				new InstallToAction(processor, dialog.getSelectedTarget(), items).run();
 			}
 		} catch (Exception e) {

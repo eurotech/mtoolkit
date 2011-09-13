@@ -232,7 +232,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
 		connectionClosed(connection, true);
 	}
 
-	public void removeListeners() throws IAgentException {
+	public void removeListeners() {
 		debug("[removeListeners] >>>");
 		synchronized (listeners) {
 			listeners.clear();

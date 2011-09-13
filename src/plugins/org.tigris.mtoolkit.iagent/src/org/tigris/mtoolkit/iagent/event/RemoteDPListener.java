@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
-import org.tigris.mtoolkit.iagent.DeploymentManager;
-
 /**
  * Clients interested in remote deployment package events must implement this
  * interface. The listeners must be added to the listeners list via

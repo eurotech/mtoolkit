@@ -299,7 +299,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			result = new String[c.size()];
 			int i = 0;
 			for (Iterator it = c.iterator(); it.hasNext() && i < result.length; i++) {
-				Object next = (Object) it.next();
+				Object next = it.next();
 				result[i] = (next != null ? next.toString() : null);
 			}
 		} else {

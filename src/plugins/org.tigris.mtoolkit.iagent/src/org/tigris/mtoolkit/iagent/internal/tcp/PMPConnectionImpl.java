@@ -288,8 +288,7 @@ public class PMPConnectionImpl implements PMPConnection, EventListener {
 						}
 					}
 				};
-				if (admin != null)
-					remoteObjects.put(adminClassName, admin);
+				remoteObjects.put(adminClassName, admin);
 			} catch (PMPException e) {
 				info("[getRemoteAdmin] Remote admin [" + adminClassName + "] isn't available", e);
 				throw new IAgentException("Unable to retrieve reference to remote administration service ["

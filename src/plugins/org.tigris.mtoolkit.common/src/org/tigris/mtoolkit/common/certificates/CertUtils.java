@@ -30,8 +30,8 @@ import java.util.jar.Manifest;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -526,7 +526,7 @@ public class CertUtils {
         String nl = System.getProperty("line.separator");
         MessageDialog dialog = new MessageDialog(shell, "Warning", null, "The signing operation failed. Reason:" + nl
             + error + nl + "Continue without signing?", MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
-        if (dialog.open() == Dialog.OK) {
+        if (dialog.open() == Window.OK) {
           result[0] = new Boolean(true);
         }
       }
@@ -548,7 +548,7 @@ public class CertUtils {
         Shell shell = display.getActiveShell();
         PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
         dialog.setMessage("Enter password for keystore: \"" + keystoreLocation + "\"");
-        if (dialog.open() == Dialog.OK) {
+        if (dialog.open() == Window.OK) {
           result[0] = dialog.getPassword();
         }
       }
@@ -571,7 +571,7 @@ public class CertUtils {
         PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
         dialog.setMessage("Enter private key password for alias \"" + alias + "\" in keystore \"" + keystoreLocation
             + "\" or leave the field empty to use the keystore password.");
-        if (dialog.open() == Dialog.OK) {
+        if (dialog.open() == Window.OK) {
           result[0] = dialog.getPassword();
         }
       }

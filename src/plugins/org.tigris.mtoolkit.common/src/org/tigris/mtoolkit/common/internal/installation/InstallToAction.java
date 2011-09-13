@@ -132,7 +132,7 @@ public class InstallToAction extends Action {
     } else if (resource instanceof IAdaptable) {
       IProject project = (IProject) ((IAdaptable) resource).getAdapter(IProject.class);
       if (project != null) {
-        return ((IProject) project).getName();
+        return project.getName();
       }
     }
     return resource.toString();

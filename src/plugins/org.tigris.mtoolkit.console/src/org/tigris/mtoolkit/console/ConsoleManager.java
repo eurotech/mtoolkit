@@ -80,7 +80,7 @@ public class ConsoleManager {
 	public static void showConsole(DeviceConnector dc, String consoleName) {
 		Object obj;
 		synchronized (consoles) {
-			obj = (IOConsole) consoles.get(dc);
+			obj = consoles.get(dc);
 			if (obj == CREATING_CONSOLE) {
 				consoles.put(dc, SHOW_CONSOLE);
 				return;

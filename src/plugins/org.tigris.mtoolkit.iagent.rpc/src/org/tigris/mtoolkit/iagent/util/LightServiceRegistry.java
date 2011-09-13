@@ -236,7 +236,7 @@ public class LightServiceRegistry {
 					result.add(extender);
 				handle = handle.next;
 			}
-			return (Object[]) result.toArray(new Object[result.size()]);
+			return result.toArray(new Object[result.size()]);
 		}
 	}
 

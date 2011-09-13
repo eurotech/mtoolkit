@@ -13,9 +13,7 @@ package org.tigris.mtoolkit.iagent;
 import java.io.InputStream;
 import java.util.Dictionary;
 
-import org.tigris.mtoolkit.iagent.event.RemoteBundleEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
-import org.tigris.mtoolkit.iagent.event.RemoteDPEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDPListener;
 
 /**

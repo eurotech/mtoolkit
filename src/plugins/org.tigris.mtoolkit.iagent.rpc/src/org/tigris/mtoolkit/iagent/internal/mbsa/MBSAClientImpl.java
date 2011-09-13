@@ -89,6 +89,7 @@ public class MBSAClientImpl implements MBSAClient {
 			if (req.getId() == msgId)
 				break; // everything is OK
 			// fall through the protocol version 2
+			//$FALL-THROUGH$
 		case 2:
 		default:
 			if ((req.getId() & (~MBSAConstants.IAGENT_FLAGS_RESULT)) != msgId)

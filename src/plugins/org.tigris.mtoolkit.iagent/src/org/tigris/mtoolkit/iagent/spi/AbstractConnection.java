@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.iagent.spi;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.tcp.ConnectionManagerImpl;
 
 public interface AbstractConnection {
 	public int getType();

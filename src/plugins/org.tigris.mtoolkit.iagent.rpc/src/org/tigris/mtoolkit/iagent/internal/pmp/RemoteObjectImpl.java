@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
-import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;

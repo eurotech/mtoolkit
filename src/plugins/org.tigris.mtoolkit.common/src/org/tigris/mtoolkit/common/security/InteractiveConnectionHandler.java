@@ -213,11 +213,11 @@ public class InteractiveConnectionHandler extends SSLSocketFactory implements Ho
 		return ctx.getSocketFactory();
 	}
 
-	private static InteractiveTrustManager getTrustManager(String host) throws GeneralSecurityException {
+  private static InteractiveTrustManager getTrustManager(String host) {
 		return new InteractiveTrustManager(null, interactionWrapper, tempStore, host);
 	}
 
-	private static InteractiveHostnameVerifier getHostnameVerifier() throws GeneralSecurityException {
+  private static InteractiveHostnameVerifier getHostnameVerifier() {
 		return new InteractiveHostnameVerifier(interactionWrapper, tempStore);
 	}
 

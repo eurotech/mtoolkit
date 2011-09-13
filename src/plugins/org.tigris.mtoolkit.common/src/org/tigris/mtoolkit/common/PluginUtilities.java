@@ -95,7 +95,7 @@ public class PluginUtilities {
       // filesystem.
       chars = new char[] { '\0', '/', ':', '\\' };
     }
-    INVALID_RESOURCE_CHARACTERS = chars == null ? new char[0] : chars;
+    INVALID_RESOURCE_CHARACTERS = chars;
     INVALID_RESOURCE_NAMES = names == null ? new String[0] : names;
   }
 

@@ -90,7 +90,7 @@ public class PluginExportManager {
     return (String) bundlesToExport.get(model);
   }
 
-  public String getLocation(String symbolicName, String version) throws CoreException {
+  public String getLocation(String symbolicName, String version) {
     IPluginModelBase bundleModel = findModel(symbolicName, version);
     if (bundleModel == null)
       return null;

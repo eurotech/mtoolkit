@@ -203,7 +203,7 @@ public class InstallationRegistry {
           continue;
 
         if (processor instanceof InstallationItemProcessor
-            && TargetSelectionDialog.class.isAssignableFrom((Class) dlgClass)) {
+ && TargetSelectionDialog.class.isAssignableFrom(dlgClass)) {
           processors.add(processor);
           try {
             dialogs.put(processor, dlgClass);

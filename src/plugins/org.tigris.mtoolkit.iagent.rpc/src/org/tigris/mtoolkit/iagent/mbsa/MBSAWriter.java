@@ -216,7 +216,7 @@ public abstract class MBSAWriter {
 		os.write(data);
 	}
 	
-	public byte[] getData() throws MBSAException {
+	public byte[] getData() {
 		validate();
 		byte[] copy = new byte[data.length];
 		System.arraycopy(data, 0, copy, 0, data.length);

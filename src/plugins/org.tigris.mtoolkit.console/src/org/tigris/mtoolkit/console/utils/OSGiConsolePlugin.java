@@ -53,7 +53,7 @@ public class OSGiConsolePlugin extends AbstractUIPlugin {
 		instance = null;
 	}
 
-	// Initialize perespectives
+	// Initialize perspectives
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
@@ -108,7 +108,6 @@ public class OSGiConsolePlugin extends AbstractUIPlugin {
 						// if the iagent don't have a version
 						// use the bundle with highest ID
 						selectedIAgent = bundle;
-						selectedVersion = version;
 					}
 				} else {
 					if (selectedVersion == null || version.compareTo(selectedVersion) >= 0) {

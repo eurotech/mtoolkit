@@ -222,8 +222,7 @@ class Connection implements PMPConnection {
 		} catch (Exception exc) {
 			if (msgID >= 100)
 				os.unlock();
-			if (answer != null)
-				answer.free();
+			answer.free();
 			throw new PMPException(exc.toString(), exc);
 		}
 		if (answer.errMsg != null) {

@@ -114,15 +114,15 @@ class PMPEventsManager implements Runnable {
 			ListenerEvent levent = (ListenerEvent) event;
 			switch (levent.op) {
 			case ListenerEvent.ADD_LISTENER_OP:
-				addEventListener0(((PMPEvent) event).eventType);
+				addEventListener0(event.eventType);
 				break;
 			case ListenerEvent.REMOVE_LISTENER_OP:
-				removeEventListener0((EventListener) ((PMPEvent) event).data, ((PMPEvent) event).eventType);
+				removeEventListener0((EventListener) event.data, event.eventType);
 				break;
 			}
 		} else {
 			Vector cloned = null;
-			PMPEvent pmpEvent = (PMPEvent) event;
+			PMPEvent pmpEvent = event;
 			synchronized (listeners) {
 				Vector ls = (Vector) listeners.get(pmpEvent.eventType);
 				if (ls == null || ls.size() == 0)

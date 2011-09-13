@@ -51,8 +51,6 @@ public class ReflectionUtils {
 			return result;
 		} catch (SecurityException e) {
 			throw new InvocationException(e);
-		} catch (NoSuchMethodException e) {
-			throw new InvocationException(e);
 		} catch (IllegalArgumentException e) {
 			throw new InvocationException(e);
 		} catch (IllegalAccessException e) {
@@ -73,7 +71,7 @@ public class ReflectionUtils {
 		return doInvokeMethod(obj, methodName, parameterTypes, parameterValues, true);
 	}
 	
-	private static Method findMethod(Class clazz, String methodName, Class[] parameterTypes, boolean searchProtected) throws NoSuchMethodException {
+  private static Method findMethod(Class clazz, String methodName, Class[] parameterTypes, boolean searchProtected) {
 		Method m = null;
 			do {
 				try {
@@ -107,8 +105,6 @@ public class ReflectionUtils {
 		} catch (ClassNotFoundException e) {
 			throw new InvocationException(e);
 		} catch (SecurityException e) {
-			throw new InvocationException(e);
-		} catch (NoSuchMethodException e) {
 			throw new InvocationException(e);
 		} catch (IllegalArgumentException e) {
 			throw new InvocationException(e);

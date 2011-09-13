@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
-import org.tigris.mtoolkit.iagent.ServiceManager;
-
 /**
  * Clients which are interested in remote service events must implement this
  * interface and add itself as interested parties in listeners list via

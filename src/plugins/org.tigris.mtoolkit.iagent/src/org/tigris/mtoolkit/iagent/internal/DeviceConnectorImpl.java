@@ -190,7 +190,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 			if (serviceManager != null)
 				serviceManager.removeListeners();
 			if (connectionManager != null)
-				((ConnectionManagerImpl) connectionManager).removeListeners();
+				connectionManager.removeListeners();
 			if (managers != null)
 				managers = null;
 			debug("[closeConnection] Closing underlying connections...");

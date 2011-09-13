@@ -46,7 +46,7 @@ public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Re
 	public void executeCommand(String line) {
 		PMPConnection conn = InvocationThread.getContext().getConnection();
 		ProSystWriteDispatcher disp = (ProSystWriteDispatcher) getDispatcher(conn);
-		ParserService parser = ((ProSystWriteDispatcher) disp).getParser();
+		ParserService parser = disp.getParser();
 		parser.parseCommand(line);
 	}
 

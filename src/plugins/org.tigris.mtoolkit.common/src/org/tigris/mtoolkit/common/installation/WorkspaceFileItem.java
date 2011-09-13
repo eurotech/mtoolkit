@@ -50,7 +50,7 @@ public class WorkspaceFileItem extends BaseFileItem {
 
   public IStatus prepare(IProgressMonitor monitor, Map properties) {
     try {
-      file.refreshLocal(IFile.DEPTH_ZERO, monitor);
+      file.refreshLocal(IResource.DEPTH_ZERO, monitor);
       baseFile = file.getLocation().toFile();
       return super.prepare(monitor, properties);
     } catch (CoreException e) {

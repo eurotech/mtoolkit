@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.pmp.RemoteInputStream;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;

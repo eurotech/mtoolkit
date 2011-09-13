@@ -78,13 +78,11 @@ public class MBSASessionFactory {
 			DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Cannot connect: ssocket = " + ssocket);
 			throw new MBSAException(MBSAException.CODE_CANNOT_CONNECT, e);
 		} finally {
-			if (ssocket != null) {
-				DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Close socket: ssocket = " + ssocket);
-				try {
-					ssocket.close();
-					DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Socket closed: ssocket = " + ssocket);
-				} catch (IOException e) {
-				}
+			DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Close socket: ssocket = " + ssocket);
+			try {
+				ssocket.close();
+				DebugUtils.debug(MBSASessionFactory.class, "[clientListen] Socket closed: ssocket = " + ssocket);
+			} catch (IOException e) {
 			}
 		}
 	}

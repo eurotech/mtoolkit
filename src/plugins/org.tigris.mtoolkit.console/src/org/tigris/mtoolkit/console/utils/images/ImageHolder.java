@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.console.utils.images;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.tigris.mtoolkit.console.utils.OSGiConsolePlugin;
 
 public class ImageHolder {
@@ -37,9 +38,9 @@ public class ImageHolder {
 	}
 
 	private static ImageDescriptor createImage(String key, ImageRegistry imgRegistry) {
-		ImageDescriptor descriptor = OSGiConsolePlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, key);
+		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, key);
 		if (descriptor == null)
-			descriptor = OSGiConsolePlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, IMAGES_PATH + key);
+			descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, IMAGES_PATH + key);
 		imgRegistry.put(key, descriptor);
 		return descriptor;
 	}

@@ -13,8 +13,6 @@ package org.tigris.mtoolkit.iagent.rpc;
 import java.io.InputStream;
 import java.util.Dictionary;
 
-import org.tigris.mtoolkit.iagent.Error;
-
 public interface RemoteBundleAdmin {
 
 	public static final int INCLUDE_BUNDLE_HEADERS = 0x01;

@@ -1,6 +1,5 @@
 package org.tigris.mtoolkit.iagent.event;
 
-import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 
 /**

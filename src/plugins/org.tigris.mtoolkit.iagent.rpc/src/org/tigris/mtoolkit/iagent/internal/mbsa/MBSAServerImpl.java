@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAConstants;
-import org.tigris.mtoolkit.iagent.mbsa.MBSAException;
 import org.tigris.mtoolkit.iagent.mbsa.MBSARequest;
 import org.tigris.mtoolkit.iagent.mbsa.MBSARequestHandler;
 import org.tigris.mtoolkit.iagent.mbsa.MBSAResponse;
@@ -25,7 +24,7 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 	private volatile boolean closed;
 	private byte protocolVersion = 1;
 
-	public MBSAServerImpl(MBSARequestHandler handler, InputStream input, OutputStream output) throws MBSAException {
+	public MBSAServerImpl(MBSARequestHandler handler, InputStream input, OutputStream output) {
 		if (handler == null || input == null || output == null)
 			throw new NullPointerException("one of the arguments is null");
 		this.handler = handler;
@@ -36,7 +35,7 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 		start();
 	}
 
-	private void start() throws MBSAException {
+	private void start() {
 		if (running || closed)
 			// if we are already running || session is closed
 			return;
@@ -115,15 +114,8 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 	private void sendRsp(MBSAResponse rsp, OutputStream os) throws IOException {
 		debug("[sendRsp] Send response >>> " + rsp);
 		if (protocolVersion > 1)
-			try {
-				rsp = new MBSAResponse(rsp.getId() | MBSAConstants.IAGENT_FLAGS_RESULT, rsp.getStatus(), rsp.getData())
-						.done();
-			} catch (MBSAException e) {
-				info("[sendRsp] Failed to send response", e);
-				rsp = new MBSAResponse(rsp.getId(), MBSAConstants.IAGENT_RES_INTERNAL_ERROR);
-				rsp.writeString(e.toString());
-				rsp.done();
-			}
+			rsp = new MBSAResponse(rsp.getId() | MBSAConstants.IAGENT_FLAGS_RESULT, rsp.getStatus(), rsp.getData())
+					.done();
 		rsp.writeTo(os);
 		os.flush();
 	}
@@ -148,10 +140,6 @@ public class MBSAServerImpl implements MBSAServer, Runnable {
 
 	private final void debug(String message) {
 		DebugUtils.debug(this, message);
-	}
-
-	private final void info(String message, Throwable t) {
-		DebugUtils.info(this, message, t);
 	}
 
 	public boolean isClosed() {

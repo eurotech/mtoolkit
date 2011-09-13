@@ -714,9 +714,7 @@ public class PMPSessionThread implements Runnable {
 				if (info != null && context.equals(info.context)) {
 					it.remove();
 					peer.ungetService(info);
-					if (info != null) {
-						info.freeInfo();
-					}
+					info.freeInfo();
 				}
 			}
 		}

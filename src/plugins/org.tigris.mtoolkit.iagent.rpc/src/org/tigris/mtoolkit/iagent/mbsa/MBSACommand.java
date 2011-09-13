@@ -22,7 +22,7 @@ public class MBSACommand extends MBSAWriter {
 		return cmdId;
 	}
 	
-	public MBSACommand done() throws MBSAException {
+	public MBSACommand done() {
 		flush();
 		return this;
 	}
@@ -38,8 +38,6 @@ public class MBSACommand extends MBSAWriter {
 		try {
 			dataLength = Integer.toString(getData().length);
 		} catch (IllegalStateException e) {
-			dataLength = "(not flushed)";
-		} catch (MBSAException e) {
 			dataLength = "(not flushed)";
 		}
 		return "MBSACommand[cmdId=" + cmdId + ";data.length=" + dataLength + "]";

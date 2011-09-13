@@ -42,12 +42,7 @@ public class MBSAResponse extends MBSAWriter {
 	}
 
 	public String toString() {
-		String dataLength;
-		try {
-			dataLength = Integer.toString(getData().length);
-		} catch (MBSAException e) {
-			dataLength = "(not flushed)";
-		}
+		String dataLength = Integer.toString(getData().length);
 		return "MBSAResponse[msgId=" + msgId + ";status=" + status + ";data.length=" + dataLength + "]";
 	}
 }

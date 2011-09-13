@@ -129,43 +129,43 @@ public class InteractiveTrustManager implements X509TrustManager {
 	}
 
 	private int validateCertificate(X509Certificate[] certChain) throws CertificateException {
-		if (tempStore.containsCertificate(certChain[0]))
+    if (certChain == null || certChain.length == 0) {
+      throw new IllegalArgumentException("Certificate chain is required"); //$NON-NLS-1$
+    }
+    if (tempStore.containsCertificate(certChain[0])) {
 			// the certificate is already confirmed by the user
 			return 0;
-		if (certChain == null || certChain.length == 0)
-			throw new IllegalArgumentException("Certificate chain is required"); //$NON-NLS-1$
+    }
 
 		try {
 			Certificate rootCert = null;
 
 			KeyStore store = getKeyStore();
 			for (int i = 0; i < certChain.length; i++) {
-				if (certChain[i] instanceof X509Certificate) {
-					certChain[i].checkValidity();
-					if (i == certChain.length - 1) {
-						// this is the last certificate in the chain
-						X509Certificate cert = (X509Certificate) certChain[i];
-						if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
-							certChain[i].verify(certChain[i].getPublicKey());
-							rootCert = certChain[i]; // this is a self-signed certificate
-						} else {
-							// try to find a parent, we have an incomplete chain
-							synchronized (store) {
-								for (Enumeration e = store.aliases(); e.hasMoreElements();) {
-									Certificate nextCert = store.getCertificate((String) e.nextElement());
-									if (nextCert instanceof X509Certificate
-													&& ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
-										cert.verify(nextCert.getPublicKey());
-										rootCert = nextCert;
-										break;
-									}
+        certChain[i].checkValidity();
+        if (i == certChain.length - 1) {
+          // this is the last certificate in the chain
+          X509Certificate cert = certChain[i];
+          if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
+            certChain[i].verify(certChain[i].getPublicKey());
+            rootCert = certChain[i]; // this is a self-signed certificate
+          } else {
+            // try to find a parent, we have an incomplete chain
+            synchronized (store) {
+              for (Enumeration e = store.aliases(); e.hasMoreElements();) {
+                Certificate nextCert = store.getCertificate((String) e.nextElement());
+                if (nextCert instanceof X509Certificate
+                    && ((X509Certificate) nextCert).getSubjectDN().equals(cert.getIssuerDN())) {
+                  cert.verify(nextCert.getPublicKey());
+                  rootCert = nextCert;
+                  break;
 								}
 							}
 						}
-					} else {
-						X509Certificate nextX509Cert = (X509Certificate) certChain[i + 1];
-						certChain[i].verify(nextX509Cert.getPublicKey());
 					}
+        } else {
+          X509Certificate nextX509Cert = certChain[i + 1];
+          certChain[i].verify(nextX509Cert.getPublicKey());
 				}
 
 				synchronized (store) {
