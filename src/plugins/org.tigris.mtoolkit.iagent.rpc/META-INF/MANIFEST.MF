@@ -40,3 +40,4 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.4,
  OSGi/Minimum-1.1,
  CDC-1.1/Foundation-1.1
 Eclipse-ExtensibleAPI: true
+Bundle-Category: tools
