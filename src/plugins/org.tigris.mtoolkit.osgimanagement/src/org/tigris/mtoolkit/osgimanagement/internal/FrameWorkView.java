@@ -102,6 +102,8 @@ import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ListUtil;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
@@ -274,6 +276,43 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				findItem(filterField.getText().toLowerCase().trim(), tree);
 			}
 		});
+		
+		treeRoot.addListener(new ContentChangeListener() {
+			
+			public void elementRemoved(ContentChangeEvent event) {
+				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						treeRoot.setFilter(filterField.getText());
+					}
+				});
+
+				filterJob.cancel();
+				filterJob.schedule(300);
+			}
+			
+			public void elementChanged(ContentChangeEvent event) {
+				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						treeRoot.setFilter(filterField.getText());
+					}
+				});
+
+				filterJob.cancel();
+				filterJob.schedule(300);
+			}
+			
+			public void elementAdded(ContentChangeEvent event) {
+				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						treeRoot.setFilter(filterField.getText());
+					}
+				});
+
+				filterJob.cancel();
+				filterJob.schedule(300);
+			}
+		});
+
 		setFilter("");
 		
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
