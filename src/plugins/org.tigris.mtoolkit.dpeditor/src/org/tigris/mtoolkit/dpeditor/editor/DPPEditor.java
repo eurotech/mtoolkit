@@ -212,6 +212,7 @@ public class DPPEditor extends DPPMultiPageEditor implements
 					if (needToSave) {
 						try {
 							((DPPFileModel) model).setDirty(true);
+							fireSaveNeeded();
 						} catch (Exception e) {
 							DPPErrorHandler.processError(e, false);
 						}
