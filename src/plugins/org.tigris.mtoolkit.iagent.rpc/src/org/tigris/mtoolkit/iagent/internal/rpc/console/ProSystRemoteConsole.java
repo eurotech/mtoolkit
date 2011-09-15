@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.tigris.mtoolkit.iagent.internal.pmp.InvocationThread;
 import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
@@ -18,6 +19,9 @@ import com.prosyst.util.parser.ParserService;
 
 public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Remote {
 	private ServiceTracker parserServiceTrack;
+	private ServiceReference parserServiceReference;
+	private ParserService parserInstance;
+	private Object parserServiceLock = new Object();
 
 	public Class[] remoteInterfaces() {
 		return new Class[] { RemoteConsole.class };
@@ -27,14 +31,44 @@ public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Re
 		// check we are on mBS
 		ParserService.class.getName();
 
-		parserServiceTrack = new ServiceTracker(bundleContext, ParserService.class.getName(), null);
+		parserServiceTrack = new ServiceTracker(bundleContext, ParserService.class.getName(), null) {
+
+			public void removedService(ServiceReference reference, Object service) {
+				super.removedService(reference, service);
+				if (reference.equals(parserServiceReference)) {
+					parserServiceReference = null;
+					releaseParserService();
+				}
+			}
+
+		};
 		parserServiceTrack.open();
 
 		super.register(bundleContext);
 	}
 
+	private void initParserInstance(WriteDispatcher writeDispatcher) {
+		parserServiceReference = parserServiceTrack.getServiceReference();
+		if (parserServiceReference != null) {
+			ParserService rootParserService = (ParserService) parserServiceTrack.getService(parserServiceReference);
+			if (rootParserService != null) {
+				parserInstance = rootParserService.getInstance();
+				parserInstance.setOutputStream(new PrintStream(new DispatcherOutput(writeDispatcher)));
+			}
+		}
+	}
+
+	private void releaseParserService() {
+		synchronized (parserServiceLock) {
+			if (parserInstance != null) {
+				parserInstance.release();
+				parserInstance = null;
+			}
+		}
+	}
+
 	protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
-					throws PMPException {
+			throws PMPException {
 		return new ProSystWriteDispatcher(conn, buffer, remoteObject);
 	}
 
@@ -47,39 +81,32 @@ public class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Re
 		PMPConnection conn = InvocationThread.getContext().getConnection();
 		ProSystWriteDispatcher disp = (ProSystWriteDispatcher) getDispatcher(conn);
 		ParserService parser = disp.getParser();
-		parser.parseCommand(line);
+		if (parser != null) {
+			parser.parseCommand(line);
+		}
 	}
 
 	private class ProSystWriteDispatcher extends WriteDispatcher {
 
-		private ParserService parserInstance;
-
 		public ProSystWriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object)
-						throws PMPException {
+				throws PMPException {
 			super(conn, buffer, object);
-		}
-
-		private void initParserInstance() {
-			ParserService rootParserService = (ParserService) parserServiceTrack.getService();
-			if (rootParserService != null) {
-				parserInstance = rootParserService.getInstance();
-				parserInstance.setOutputStream(new PrintStream(new DispatcherOutput(this)));
-			}
 		}
 
 		public void run() {
 			super.run();
-			if (parserInstance != null) {
-				parserInstance.release();
+			releaseParserService();
+		}
+
+		public ParserService getParser() {
+			synchronized (parserServiceLock) {
+				if (parserInstance == null) {
+					initParserInstance(this);
+				}
+				return parserInstance;
 			}
 		}
 
-		public synchronized ParserService getParser() {
-			if (parserInstance == null) {
-				initParserInstance();
-			}
-			return parserInstance;
-		}
 	}
 
 	private class DispatcherOutput extends OutputStream {
