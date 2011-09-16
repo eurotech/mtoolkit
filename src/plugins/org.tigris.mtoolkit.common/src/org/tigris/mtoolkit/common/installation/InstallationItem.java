@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,7 +38,7 @@ public interface InstallationItem extends IAdaptable {
 	 *            (such as signing etc.)
 	 * @return status, describing the result of prepare operation
 	 */
-	public IStatus prepare(IProgressMonitor monitor, Map properties);
+  public IStatus prepare(IProgressMonitor monitor, Map properties);
 
 	/**
 	 * Returns open {@link InputStream} which provides the installation data.
@@ -53,6 +55,11 @@ public interface InstallationItem extends IAdaptable {
 	 * @since 6.0
 	 */
   public String getLocation();
+  /**
+   * Sets location of the item's file 
+   * 
+   */
+  public void setLocation(File file);
 
 	/**
 	 * Returns the MIME type of this item.

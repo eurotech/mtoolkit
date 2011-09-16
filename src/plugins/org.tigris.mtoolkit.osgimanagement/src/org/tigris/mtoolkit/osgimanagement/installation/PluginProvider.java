@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,6 @@ import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
-import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.export.PluginExportManager;
 import org.tigris.mtoolkit.common.images.UIResources;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
@@ -87,15 +88,20 @@ public class PluginProvider implements InstallationItemProvider {
 
 		public IStatus prepare(IProgressMonitor monitor, Map properties) {
 			if (pluginBase == null) {
-				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+			  return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
 						"Can not parse the manifest file for the plugin");
 			}
 			BundleDescription description = pluginBase.getBundleDescription();
 			if (description == null) {
-				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "This is not valid OSGI plug-in project.");
+				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+						"This is not valid OSGI plug-in project.");
 			}
 			List items = new ArrayList();
 			items.add(this);
+			if (monitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			}
+		
 			return provider.prepareItems(items, properties, monitor);
 		}
 
@@ -104,13 +110,6 @@ public class PluginProvider implements InstallationItemProvider {
 		 */
 		protected void setExportManager(PluginExportManager exportManager) {
 			this.exportManager = exportManager;
-		}
-
-		/**
-		 * @since 6.0
-		 */
-		protected void setPreparedItem(File prepared) {
-			this.preparedItem = prepared;
 		}
 
 		/**
@@ -138,10 +137,6 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 			File file = new File(location);
 			file.delete();
-		}
-		
-		public InstallationItem[] getChildren() {
-			return null;
 		}
 
 		/**
@@ -253,6 +248,15 @@ public class PluginProvider implements InstallationItemProvider {
 		public IPluginModelBase getPlugin() {
 			return pluginBase;
 		}
+
+		public InstallationItem[] getChildren() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		public void setLocation(File file) {
+			preparedItem = file;
+		}
 	}
 
 	public InstallationItem getInstallationItem(Object resource) {
@@ -292,13 +296,14 @@ public class PluginProvider implements InstallationItemProvider {
 	}
 
 	/**
+	 * @throws CoreException
 	 * @since 6.0
 	 */
-	public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
+	public IStatus prepareItems(List/* <InstallationItem> */items, Map properties, IProgressMonitor monitor) {
 		try {
 			IStatus result = export(items, monitor);
 			if (!result.isOK())
-				return result;
+			  return result;
 
 			List pluginItems = new ArrayList<PluginItem>();
 			// post process exported bundles
@@ -306,6 +311,9 @@ public class PluginProvider implements InstallationItemProvider {
 				Object item = items.get(i);
 				if (item instanceof PluginItem) {
 					pluginItems.add(item);
+				}
+				if (monitor.isCanceled()) {
+					return Status.CANCEL_STATUS;
 				}
 			}
 
@@ -319,10 +327,18 @@ public class PluginProvider implements InstallationItemProvider {
 		} finally {
 			monitor.done();
 		}
-
 		monitor.done();
 		return Status.OK_STATUS;
 	}
+
+	/*
+	 * public File prepareItem(InstallationItem item, Map properties,
+	 * IProgressMonitor monitor) throws CoreException { List itemList = new
+	 * ArrayList(1); itemList.add(item); List preparedFiles =
+	 * prepareItems(itemList, properties, monitor); if (preparedFiles != null &&
+	 * !preparedFiles.isEmpty()) { return (File) preparedFiles.get(0); } return
+	 * null; }
+	 */
 
 	public String getName() {
 		return "Plug-ins provider";
@@ -390,7 +406,7 @@ public class PluginProvider implements InstallationItemProvider {
 	}
 
 	private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
-		File signedFile[] = new File[items.size()];
+		// File signedFile[] = new File[items.size()];
 		File file[] = new File[items.size()];
 		try {
 			for (int i = 0; i < items.size(); i++) {
@@ -409,35 +425,9 @@ public class PluginProvider implements InstallationItemProvider {
 					file[i].delete();
 					file[i] = convertedFile;
 				}
+			}
+		
 
-				signedFile[i] = new File(FrameworkPlugin.getDefault().getStateLocation() + "/signed/"
-						+ file[i].getName());
-				signedFile[i].getParentFile().mkdirs();
-				if (signedFile[i].exists()) {
-					signedFile[i].delete();
-				}
-			}
-
-			try {
-				CertUtils.signJars(file, signedFile, monitor, properties);
-			} catch (IOException ioe) {
-				boolean shouldContinue = CertUtils.continueWithoutSigning(ioe.getMessage());
-				if (shouldContinue) {
-					for (int i = 0; i < signedFile.length; i++) {
-						signedFile[i].delete();
-					}
-				} else {
-					return new Status(IStatus.CANCEL, FrameworkPlugin.getDefault().getId(), "Could not sign plugins",
-							ioe);
-				}
-			}
-			for (int i = 0; i < signedFile.length; i++) {
-				if (signedFile[i].exists()) {
-					file[i].delete();
-					file[i] = signedFile[i];
-				}
-				items.get(i).setPreparedItem(file[i]);
-			}
 		} catch (IOException ioe) {
 			monitor.done();
 			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);

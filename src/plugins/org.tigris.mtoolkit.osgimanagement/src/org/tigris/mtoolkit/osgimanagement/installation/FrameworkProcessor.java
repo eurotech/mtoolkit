@@ -38,6 +38,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -65,7 +66,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	private static final String PROP_JVM_NAME = "jvm.name";
 
 	private static Vector additionalProcessors = new Vector();
-	
+
 	private boolean useAdditionalProcessors = true;
 
 	public static FrameworkProcessor getDefault() {
@@ -120,13 +121,13 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return result;
 	}
 
-	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target,
-			IProgressMonitor monitor) {
+	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, IProgressMonitor monitor) {
 		return processInstallationItems(new InstallationItem[] { item }, target, monitor);
 	}
 
 	public IStatus processInstallationItems(final InstallationItem[] items, InstallationTarget target,
 			final IProgressMonitor monitor) {
+
 		SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
 
 		Framework framework = ((FrameworkTarget) target).getFramework();
@@ -162,7 +163,8 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		// Platform properties
 		try {
 			DeviceConnector connector = framework.getConnector();
-			if (connector == null) return Util.newStatus(IStatus.ERROR, "Connection lost", null);
+			if (connector == null)
+				return Util.newStatus(IStatus.ERROR, "Connection lost", null);
 			Map platformProps = connector.getVMManager().getPlatformProperties();
 			preparationProps.putAll(platformProps);
 		} catch (IAgentException iae) {
@@ -170,22 +172,30 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 
 		if (framework.getConnector() == null) {
-			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to " + framework);
+			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to "
+					+ framework);
 		}
 
 		if (!preparationProps.containsKey(PROP_JVM_NAME)) {
-			String transportType = (String) framework.getConnector().getProperties().get(DeviceConnector.TRANSPORT_TYPE);
+			String transportType = (String) framework.getConnector().getProperties()
+					.get(DeviceConnector.TRANSPORT_TYPE);
 			if ("android".equals(transportType)) {
 				preparationProps.put(PROP_JVM_NAME, "Dalvik");
 			}
 		}
-
-		for (final InstallationItem item : items) {
-			IStatus preparationStatus = item.prepare(subMonitor.newChild(1), preparationProps);
-
+		for (int i = 0; i < items.length; i++) {
+			IStatus preparationStatus = items[i].prepare(subMonitor.newChild(1), preparationProps);
 			if (preparationStatus.getSeverity() == IStatus.ERROR || preparationStatus.getSeverity() == IStatus.CANCEL) {
 				return preparationStatus;
 			}
+		}
+
+		IStatus signStatus = CertUtils.signItems(items, subMonitor.newChild(1), preparationProps);
+		if (signStatus.matches(IStatus.CANCEL | IStatus.ERROR)) {
+			return signStatus;
+		}
+
+		for (final InstallationItem item : items) {
 
 			if (item instanceof PluginItem) {
 				IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, monitor);
@@ -206,13 +216,13 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 					return childStatus;
 				}
 			} else {
-		        for (InstallationItem childItem : children) {
+				for (InstallationItem childItem : children) {
 					IStatus childStatus = processInstallationItem(childItem, framework, monitor, subMonitor);
 					if (childStatus != null) {
 						item.dispose();
 						return childStatus;
 					}
-		        }
+				}
 			}
 			item.dispose();
 		}
@@ -224,8 +234,8 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return Status.OK_STATUS;
 	}
 
-	private IStatus processInstallationItem(final InstallationItem item, Framework framework, final IProgressMonitor monitor,
-			SubMonitor subMonitor) {
+	private IStatus processInstallationItem(final InstallationItem item, Framework framework,
+			final IProgressMonitor monitor, SubMonitor subMonitor) {
 		InputStream input = null;
 		try {
 			String mimeType = item.getMimeType();
@@ -288,7 +298,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		} finally {
 			if (input != null) {
 				try {
-				  input.close();
+					input.close();
 				} catch (IOException e) {
 				}
 			}
@@ -303,8 +313,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}
 
-	public void install(InputStream input, String name, Framework framework, IProgressMonitor monitor)
-			throws Exception {
+	public void install(InputStream input, String name, Framework framework, IProgressMonitor monitor) throws Exception {
 		// TODO: Make methods, which are called from inside jobs to do
 		// the real job
 		installBundle(input, name, (FrameworkImpl) framework);
@@ -318,7 +327,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			installBundleJob.schedule();
 		} catch (IOException e) {
 			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e),
-				StatusManager.SHOW | StatusManager.LOG);
+					StatusManager.SHOW | StatusManager.LOG);
 		}
 	}
 
@@ -341,7 +350,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 		return file;
 	}
-	
+
 	public String getName() {
 		return "Bundles processor";
 	}
@@ -361,7 +370,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	public void setUseAdditionalProcessors(boolean enable) {
 		this.useAdditionalProcessors = enable;
 	}
-	
+
 	protected static class DeleteWhenDoneListener extends JobChangeAdapter {
 		private final File packageFile;
 

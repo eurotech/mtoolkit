@@ -38,7 +38,7 @@ import com.prosyst.tools.maven.MavenUtils;
 import com.prosyst.tools.maven.internal.MavenCorePlugin;
 
 public class InstallationProvider implements InstallationItemProvider {
-
+  
   public boolean isCapable(Object resource) {
     resource = adaptItem(resource);
     if (resource instanceof File)
@@ -47,7 +47,7 @@ public class InstallationProvider implements InstallationItemProvider {
       return isMavenProjectSupported((IMavenProjectFacade) resource);
     return false;
   }
-
+  
   private Object adaptItem(Object resource) {
     if (resource instanceof IMavenProjectFacade)
       return resource;
@@ -65,7 +65,7 @@ public class InstallationProvider implements InstallationItemProvider {
     }
     return resource;
   }
-
+  
   private Object adaptResource(IResource resource) {
     if (resource.getType() == IResource.PROJECT) {
       IProject project = (IProject) resource;
@@ -81,24 +81,24 @@ public class InstallationProvider implements InstallationItemProvider {
     }
     return null;
   }
-
+  
   private IFile getPomFileFromContainer(IContainer project) {
     IFile pomFile = project.getFile(new Path("pom.xml"));
     return pomFile;
   }
-
+  
   private boolean isFileSupported(File file) {
     if (!file.exists())
       return false;
     return file.getName().equals("pom.xml");
   }
-
+  
   private boolean isMavenProjectSupported(IMavenProjectFacade facade) {
     if (!facade.getPackaging().equals("pom"))
       return true;
     return false;
   }
-
+  
   public InstallationItem getInstallationItem(Object resource) {
     resource = adaptItem(resource);
     if (resource instanceof File)
@@ -108,40 +108,59 @@ public class InstallationProvider implements InstallationItemProvider {
     else
       return null;
   }
-
+  
   @SuppressWarnings("rawtypes")
-  public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
+  public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor){
     @SuppressWarnings("unchecked")
     List<InstallationItem> castedItems = items;
     if (monitor == null)
       monitor = new NullProgressMonitor();
     monitor.beginTask("Preparing installation items...", items.size());
-    try {
+    try{
       for (InstallationItem item : castedItems) {
         if (item instanceof BaseItem) {
           monitor.subTask(((BaseItem) item).getDisplayName());
           IStatus status = prepareItem((BaseItem) item, properties, monitor);
-          if (status.matches(IStatus.ERROR))
+          if (status.matches(IStatus.ERROR |IStatus.CANCEL))
             return status;
         }
-        monitor.worked(1);
-      }
-    } finally {
+          monitor.worked(1);
+        }
+    }finally{
       monitor.done();
     }
     return Status.OK_STATUS;
   }
-
-  private IStatus prepareItem(BaseItem item, Map properties, IProgressMonitor monitor) {
+  
+  
+  
+  public void init(IConfigurationElement element) throws CoreException {
+  }
+  
+  public String getName() {
+    return "Maven projects provider";
+  }
+  
+  public ImageDescriptor getImageDescriptor() {
+    return ImageHolder.getImageDescriptor(ImageHolder.POM_ICON);
+  }
+  
+  public IStatus prepareItem(BaseItem item, Map properties,
+      IProgressMonitor monitor){
     File pomFile = item.getPomLocationAtFilesystem();
     if (pomFile == null || !pomFile.exists())
-      return MavenCorePlugin.newStatus(IStatus.ERROR, "Cannot find pom.xml for " + item.getDisplayName(), null);
+      return MavenCorePlugin.newStatus(IStatus.ERROR,
+          "Cannot find pom.xml for " + item.getDisplayName(), null);
     try {
       MavenProcess.launchDefaultBuild(pomFile.getParentFile(), monitor);
       File artifact = MavenUtils.locateMavenArtifact(pomFile);
       if (!artifact.exists())
-        return MavenCorePlugin.newStatus(IStatus.ERROR, "Unable to find Maven artifact at expected location: "
-            + artifact.getAbsolutePath(), null);
+        return MavenCorePlugin.newStatus(IStatus.ERROR,
+            "Unable to find Maven artifact at expected location: " + artifact
+            .getAbsolutePath(), null);
+      if (monitor.isCanceled()) {
+        return Status.CANCEL_STATUS;
+      }
       item.setGeneratedArtifact(artifact);
       IStatus status = item.completePrepare(monitor, properties);
       if (status.matches(IStatus.ERROR))
@@ -154,14 +173,5 @@ public class InstallationProvider implements InstallationItemProvider {
     }
   }
 
-  public void init(IConfigurationElement element) throws CoreException {
-  }
-
-  public String getName() {
-    return "Maven projects provider";
-  }
-
-  public ImageDescriptor getImageDescriptor() {
-    return ImageHolder.getImageDescriptor(ImageHolder.POM_ICON);
-  }
+  
 }

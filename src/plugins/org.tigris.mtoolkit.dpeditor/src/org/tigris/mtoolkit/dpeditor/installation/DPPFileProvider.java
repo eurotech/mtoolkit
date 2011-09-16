@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
-import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileProvider;
@@ -32,85 +31,63 @@ import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.util.DPPFile;
 
 public class DPPFileProvider extends WorkspaceFileProvider {
-
-	public class DPPFileItem extends WorkspaceFileItem {
-
-		public File dpFile;
-		private boolean delete = false;
-
-		public DPPFileItem(IFile file, String mimeType) {
-			super(file, mimeType);
-		}
-
-		public void dispose() {
-			super.dispose();
-			if (delete) {
-				dpFile.delete();
-				try {
-					file.getParent().refreshLocal(IResource.DEPTH_ONE, null);
-				} catch (CoreException e) {
-					// do nothing
-				}
-			}
-		}
-
-		public InputStream getInputStream() throws IOException {
-			if (preparedFile != null) {
-				return new FileInputStream(preparedFile);
-			}
-			return new FileInputStream(dpFile);
-		}
-
-		public IStatus prepare(IProgressMonitor monitor, Map properties) {
-			try {
-				DPPFile dppFile = new DPPFile(file.getLocation().toFile(), file.getProject().getLocation().toOSString());
-				dpFile = new File(dppFile.getBuildInfo().getBuildLocation() + "/"
-						+ dppFile.getBuildInfo().getDpFileName());
-				delete = !dpFile.exists();
-				DPPUtil.generateDeploymentPackage(dppFile, monitor, file.getProject(), DPPUtil.TYPE_QUICK_BUILD_DPP);
-
-				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) && !AndroidUtils.isDpConvertedToDex(dpFile)) {
-					File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + dpFile.getName());
-					convertedFile.getParentFile().mkdirs();
-					AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
-					preparedFile = convertedFile;
-				}
-
-				// sign file if properties contain signing info
-				File signedFile = new File(DPActivator.getDefault().getStateLocation() + "/signed/" + dpFile.getName());
-				signedFile.getParentFile().mkdirs();
-				if (signedFile.exists()) {
-					signedFile.delete();
-				}
-				try {
-					CertUtils.signDp(preparedFile != null ? preparedFile : dpFile, signedFile, monitor, properties);
-				} catch (IOException ioe) {
-					if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
-						signedFile.delete();
-					} else {
-						throw ioe;
-					}
-				}
-
-				if (signedFile.exists()) {
-					if (preparedFile != null) {
-						preparedFile.delete();
-					}
-					preparedFile = signedFile;
-				}
-			} catch (Exception e) {
-				return new Status(Status.ERROR, DPActivator.PLUGIN_ID, "Failed to prepare file for installation", e);
-			}
-
-			return Status.OK_STATUS;
-		}
-	}
-
-	public InstallationItem getInstallationItem(Object resource) {
-		return new DPPFileItem(getFileFromGeneric(resource), mimeType);
-	}
-
-	public String getName() {
-		return "Deployment packages provider";
-	}
+  
+  public class DPPFileItem extends WorkspaceFileItem {
+    
+    public File dpFile;
+    private boolean delete = false;
+    
+    public DPPFileItem(IFile file, String mimeType) {
+      super(file, mimeType);
+    }
+    
+    public void dispose() {
+      super.dispose();
+      if (delete) {
+        dpFile.delete();
+        try {
+          file.getParent().refreshLocal(IResource.DEPTH_ONE, null);
+        } catch (CoreException e) {
+          // do nothing
+        }
+      }
+    }
+    
+    public InputStream getInputStream() throws IOException {
+      if (preparedFile != null) {
+        return new FileInputStream(preparedFile);
+      }
+      return new FileInputStream(dpFile);
+    }
+    
+    public IStatus prepare(IProgressMonitor monitor, Map properties) {
+      try {
+        DPPFile dppFile = new DPPFile(file.getLocation().toFile(), file.getProject().getLocation().toOSString());
+        dpFile = new File(dppFile.getBuildInfo().getBuildLocation() + "/" + dppFile.getBuildInfo().getDpFileName());
+        delete = !dpFile.exists();
+        DPPUtil.generateDeploymentPackage(dppFile, monitor, file.getProject(), DPPUtil.TYPE_QUICK_BUILD_DPP);
+        
+        if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) && !AndroidUtils.isDpConvertedToDex(dpFile)) {
+          File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + dpFile.getName());
+          convertedFile.getParentFile().mkdirs();
+          AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
+          preparedFile = convertedFile;
+        }
+        if (monitor.isCanceled()) {
+          return Status.CANCEL_STATUS;
+        }
+      } catch (Exception e) {
+        return new Status(Status.ERROR, DPActivator.PLUGIN_ID, "Failed to prepare file for installation");
+      }
+      return Status.OK_STATUS;
+    }
+    
+    public InstallationItem getInstallationItem(Object resource) {
+      return new DPPFileItem(getFileFromGeneric(resource), mimeType);
+    }
+    
+    public String getName() {
+      return "Deployment packages provider";
+    }
+  }
 }
