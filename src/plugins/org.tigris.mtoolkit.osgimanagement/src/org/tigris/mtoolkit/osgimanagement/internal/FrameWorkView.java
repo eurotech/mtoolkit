@@ -161,7 +161,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private static final String FIND_COMMAND_ID = FindAction.class.getName();
 	private static final String REFRESH_COMMAND_ID = RefreshAction.class.getName();
 	private static final String REMOVE_COMMAND_ID = RemoveAction.class.getName();
-	
+
 	private static final String PROPERTIES_COMMAND_ID = CommonPropertiesAction.class.getName();
 
 	private static AddAction addFrameworkAction;
@@ -170,7 +170,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private static DisconnectAction disconnectAction;
 	private static InstallBundleAction installBundleAction;
 	private static DeInstallBundleAction deinstallBundleAction;
-	
+
 	private static StartAction startAction;
 	private static StopAction stopAction;
 	private static UpdateBundleAction updateBundleAction;
@@ -193,7 +193,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 	private static HashMap activeInstances;
 	private MenuManager mgr;
-	
+
 	private FilterJob filterJob = new FilterJob();
 	private MyViewerFilter filter = new MyViewerFilter();
 
@@ -259,7 +259,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		filterLayout.marginHeight = 2;
 		filterLayout.marginWidth = 2;
 		filterPanel.setLayout(filterLayout);
-		
+
 		filterField = new Text(filterPanel, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
 		filterField.setMessage("type filter here");
 
@@ -276,37 +276,46 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				findItem(filterField.getText().toLowerCase().trim(), tree);
 			}
 		});
-		
+
 		treeRoot.addListener(new ContentChangeListener() {
-			
+
 			public void elementRemoved(ContentChangeEvent event) {
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						treeRoot.setFilter(filterField.getText());
-					}
-				});
+				Display display = PlatformUI.getWorkbench().getDisplay();
+				if (display != null && !display.isDisposed()) {
+					display.asyncExec(new Runnable() {
+						public void run() {
+							treeRoot.setFilter(filterField.getText());
+						}
+					});
+				}
 
 				filterJob.cancel();
 				filterJob.schedule(300);
 			}
-			
+
 			public void elementChanged(ContentChangeEvent event) {
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						treeRoot.setFilter(filterField.getText());
-					}
-				});
+				Display display = PlatformUI.getWorkbench().getDisplay();
+				if (display != null && !display.isDisposed()) {
+					display.asyncExec(new Runnable() {
+						public void run() {
+							treeRoot.setFilter(filterField.getText());
+						}
+					});
+				}
 
 				filterJob.cancel();
 				filterJob.schedule(300);
 			}
-			
+
 			public void elementAdded(ContentChangeEvent event) {
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						treeRoot.setFilter(filterField.getText());
-					}
-				});
+				Display display = PlatformUI.getWorkbench().getDisplay();
+				if (display != null && !display.isDisposed()) {
+					display.asyncExec(new Runnable() {
+						public void run() {
+							treeRoot.setFilter(filterField.getText());
+						}
+					});
+				}
 
 				filterJob.cancel();
 				filterJob.schedule(300);
@@ -314,7 +323,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		});
 
 		setFilter("");
-		
+
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
 		tree.getTree().setLayoutData(gridDataTree);
@@ -338,13 +347,13 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 						if (!((FrameworkImpl) node).isConnected()) {
 							FrameworkConnectorFactory.connectFrameWork((FrameworkImpl) node);
 						}
-					}	
+					}
 					boolean expand = !tree.getExpandedState(node);
 					tree.setExpandedState(node, expand);
 				}
 			}
 		});
-		
+
 		tree.getTree().addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				boolean doSearch = e.character == Character.LINE_SEPARATOR && !filterField.getText().trim().equals("");
@@ -355,7 +364,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				super.keyPressed(e);
 			}
 		});
-		
+
 		activePage = getSite().getPage();
 
 		if (activeInstances == null)
@@ -421,7 +430,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public static String getFilter() {
 		return filterField.getText();
 	}
-	
+
 	public static void setFilter(String text) {
 		filterField.setText(text);
 	}
@@ -446,16 +455,12 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		toolBar.add(new Separator(ContentTypeActionsProvider.GROUP_FRAMEWORK));
 		toolBar.add(new Separator(ContentTypeActionsProvider.GROUP_ACTIONS));
 
-		
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, connectAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_CONNECT, disconnectAction);
 
-		ContributionItem items[] = new ContributionItem[] {
-				new ActionContributionItem(startAction), 
-				new ActionContributionItem(stopAction), 
-				new ActionContributionItem(updateBundleAction), 
-				new ActionContributionItem(deinstallBundleAction),
-				new Separator(), 
+		ContributionItem items[] = new ContributionItem[] { new ActionContributionItem(startAction),
+				new ActionContributionItem(stopAction), new ActionContributionItem(updateBundleAction),
+				new ActionContributionItem(deinstallBundleAction), new Separator(),
 				new ActionContributionItem(installBundleAction) };
 		bundlesTB = new ToolbarIMenuCreator(items, tree);
 		bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
@@ -477,8 +482,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, addFrameworkAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, removeFrameworkAction);
 		commonPropertiesAction.setToolTipText(Messages.property_action_label);
-//		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, commonPropertiesAction);
-//		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, frameworkPropertiesAction);
+		// toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK,
+		// commonPropertiesAction);
+		// toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK,
+		// frameworkPropertiesAction);
 
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewServicesAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewBundlesAction);
@@ -581,7 +588,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 		disconnectAction = new DisconnectAction(tree, Messages.disconnect_action_label);
 		disconnectAction.setImageDescriptor(ImageHolder.getImageDescriptor(DISCONNECT_ACTION_IMAGE_PATH));
-		
+
 		installBundleAction = new InstallBundleAction(tree, Messages.install_action_label);
 		installBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(INSTALL_BUNDLE_IMAGE_PATH));
 
@@ -598,13 +605,15 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		updateBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(UPDATE_BUNDLE_IMAGE_PATH));
 
 		gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
-		viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameworkImpl.SERVICES_VIEW);
+		viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree,
+				FrameworkImpl.SERVICES_VIEW);
 		viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ViewLabelProvider.SERVICES_CATEGORY_ICON));
 		viewBundlesAction = new ViewAction(tree, Messages.bundles_view_action_label, tree, FrameworkImpl.BUNDLES_VIEW);
 		viewBundlesAction.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
 
 		showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label, tree, getTreeRoot());
-		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree, getTreeRoot());
+		showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree,
+				getTreeRoot());
 
 		showServPropsInTreeAction = new ShowServicePropertiesInTree(tree, Messages.show_service_properties_in_tree);
 
@@ -618,8 +627,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		showConsoleAction = new ShowFrameworkConsole(tree, Messages.show_framework_console, tree);
 		showConsoleAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONSOLE_IMAGE_PATH));
 
-		refreshAction = new RefreshAction(tree, Messages.refresh_action_label,
-				Messages.refresh_action_label, tree);
+		refreshAction = new RefreshAction(tree, Messages.refresh_action_label, Messages.refresh_action_label, tree);
 		refreshAction.setAccelerator(SWT.F5);
 		refreshAction.setImageDescriptor(ImageHolder.getImageDescriptor(REFRESH_IMAGE_PATH));
 
@@ -656,18 +664,18 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		stopAction.updateState(selection);
 		updateBundleAction.updateState(selection);
 		deinstallBundleAction.updateState(selection);
-//		commonPropertiesAction.updateState(selection);
+		// commonPropertiesAction.updateState(selection);
 
 		installBundleAction.updateState(selection);
 
 		addFrameworkAction.setEnabled(true);
 		removeFrameworkAction.updateState(selection);
 		commonPropertiesAction.updateState(selection);
-		
+
 		viewBundlesAction.updateState(selection);
 		viewServicesAction.updateState(selection);
 		showConsoleAction.updateState(selection);
-		
+
 		DeviceConnector connector = null;
 		if (selection != null) {
 			Model model = (Model) selection.getFirstElement();
@@ -678,7 +686,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				}
 			}
 		}
-		
+
 		for (int i = 0; i < actionProviders.size(); i++) {
 			ContentTypeActionsProvider provider = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
 			provider.updateEnabledState(connector);
@@ -738,7 +746,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showBundleIDAction);
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_OPTIONS, showBundleVersionAction);
 				}
-				
+
 				if (element instanceof Category) {
 					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, installBundleAction);
 				}
@@ -767,9 +775,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		manager.appendToGroup(ContentTypeActionsProvider.GROUP_DEFAULT, showConsoleAction);
 		if (selection.size() > 0 && homogen) {
 			Model element = (Model) selection.getFirstElement();
-			if (element instanceof FrameworkImpl
-					|| element instanceof Bundle
-					|| element instanceof ObjectClass)
+			if (element instanceof FrameworkImpl || element instanceof Bundle || element instanceof ObjectClass)
 				manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, commonPropertiesAction);
 		}
 	}
@@ -864,10 +870,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
 	public void setFocus() {
-	    Control c = tree == null ? null : tree.getTree();
-	    if (c != null && !c.isDisposed() && !c.isFocusControl()) {
-	      c.setFocus();
-	    }
+		Control c = tree == null ? null : tree.getTree();
+		if (c != null && !c.isDisposed() && !c.isFocusControl()) {
+			c.setFocus();
+		}
 	}
 
 	public static FrameworkImpl[] getFrameworks() {
@@ -890,20 +896,22 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		}
 		return null;
 	}
-	
+
 	public static FrameworkImpl[] findFramework(DeviceConnector connector) {
-		if (connector == null) return null;
+		if (connector == null)
+			return null;
 		if (treeRoot == null)
 			return null;
 		Model fws[] = treeRoot.getChildren();
 		Vector fwVector = new Vector();
 		for (int i = 0; i < fws.length; i++) {
-			if (((FrameworkImpl)fws[i]).getConnector() != null && ((FrameworkImpl)fws[i]).getConnector().equals(connector)) {
+			if (((FrameworkImpl) fws[i]).getConnector() != null
+					&& ((FrameworkImpl) fws[i]).getConnector().equals(connector)) {
 				fwVector.addElement(fws[i]);
 			}
 		}
-		
-		FrameworkImpl fwArr[] = (FrameworkImpl[])fwVector.toArray(new FrameworkImpl[0]);
+
+		FrameworkImpl fwArr[] = (FrameworkImpl[]) fwVector.toArray(new FrameworkImpl[0]);
 		return fwArr;
 	}
 
@@ -912,7 +920,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public static List getActionsProviders() {
 		return actionProviders;
 	}
-	
+
 	private void obtainActionProviders() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint extensionPoint = registry
@@ -963,9 +971,11 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			setSystem(true);
 		}
 
-		// TODO: Add a status line explaining how much elements are there and how much are filtered
+		// TODO: Add a status line explaining how much elements are there and
+		// how much are filtered
 		// TODO: Add a text when there are no elements in the filter
-		// TODO: Add a text in the filter to explain the purpose of the text line
+		// TODO: Add a text in the filter to explain the purpose of the text
+		// line
 		protected IStatus run(final IProgressMonitor monitor) {
 			tree.addSelectionChangedListener(this);
 			filterRecursively(treeRoot);
@@ -979,7 +989,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			int lastRunIdx = 0;
 			if (lastRunRevealedElements != null) {
 				for (int i = 0; i < unrevealedElements.length; i++) {
-					if (lastRunIdx < lastRunRevealedElements.length && lastRunRevealedElements[lastRunIdx] == unrevealedElements[i]) {
+					if (lastRunIdx < lastRunRevealedElements.length
+							&& lastRunRevealedElements[lastRunIdx] == unrevealedElements[i]) {
 						// remove elements which have already been expanded
 						unrevealedElements[i] = null;
 						lastRunIdx++;
@@ -988,7 +999,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			}
 			if (monitor.isCanceled())
 				return Status.CANCEL_STATUS;
-			System.out.println("Filtered: lastRun: " + lastRunSelectedElementsCount + "; now: " + treeRoot.getSelectedChildren() + "(" + allSelectedElements.length + "); revealed: " + lastRunIdx);
+			System.out.println("Filtered: lastRun: " + lastRunSelectedElementsCount + "; now: "
+					+ treeRoot.getSelectedChildren() + "(" + allSelectedElements.length + "); revealed: " + lastRunIdx);
 			this.lastRunSelectedElementsCount = treeRoot.getSelectedChildren();
 			final int lastRunRevealedCount = lastRunIdx;
 			Display display = PlatformUI.getWorkbench().getDisplay();
@@ -1005,13 +1017,17 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			}
 			return Status.OK_STATUS;
 		}
-		
-		private void refreshTree(Model[] allSelectedElements, Model[] unrevealedElements, int alreadyRevealedElementsCount) {
+
+		private void refreshTree(Model[] allSelectedElements, Model[] unrevealedElements,
+				int alreadyRevealedElementsCount) {
 			if (selection == null)
 				selection = tree.getSelection();
-			int itemsToReveal = lastRunRevealedElements != null ? (allSelectedElements.length - alreadyRevealedElementsCount) : allSelectedElements.length;
+			int itemsToReveal = lastRunRevealedElements != null ? (allSelectedElements.length - alreadyRevealedElementsCount)
+					: allSelectedElements.length;
 			boolean autoExpand = itemsToReveal < MAX_ITEMS_TO_AUTOEXPAND;
-			System.out.println("all: " + allSelectedElements.length + "; previous: " + (lastRunRevealedElements != null) + "; expanded: " + alreadyRevealedElementsCount + "; items: " + itemsToReveal + "; auto: " + autoExpand);
+			System.out.println("all: " + allSelectedElements.length + "; previous: "
+					+ (lastRunRevealedElements != null) + "; expanded: " + alreadyRevealedElementsCount + "; items: "
+					+ itemsToReveal + "; auto: " + autoExpand);
 			if (savedExpansionState == null) {
 				savedExpansionState = tree.getExpandedElements();
 			}
@@ -1033,8 +1049,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 						for (int i = 0; i < unrevealedElements.length; i++) {
 							if (unrevealedElements[i] != null) {
 								if (!unrevealedElements[i].containSelectedChilds()) {
-									// expand the element if it doesn't contain selected children
-									// otherwise we will duplicate the work, which we will do for the children
+									// expand the element if it doesn't contain
+									// selected children
+									// otherwise we will duplicate the work,
+									// which we will do for the children
 									tree.expandToLevel(unrevealedElements[i], 0);
 								}
 							}
@@ -1052,7 +1070,8 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				savedExpansionState = null;
 				lastRunRevealedElements = null;
 			} finally {
-				// TODO: Change this to not set the selection on elements which are out of the filter
+				// TODO: Change this to not set the selection on elements which
+				// are out of the filter
 				tree.setSelection(selection, true);
 				tree.getTree().setRedraw(true);
 				ignoreSelectionEvents = false;
@@ -1073,7 +1092,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			selection = event.getSelection();
 		}
 	}
-	
+
 	private static void findItem(String text, TreeViewer parentView) {
 		if (text.equals(""))return; //$NON-NLS-1$
 		if (notFoundText != null && text.indexOf(notFoundText) != -1) {
@@ -1120,15 +1139,15 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 		boolean itemFound = false;
 		if (foundNode == startNode) {
-//			if (foundNode.getName().indexOf(text) == -1) {
-//				findText.setForeground(red);
-//			}
+			// if (foundNode.getName().indexOf(text) == -1) {
+			// findText.setForeground(red);
+			// }
 		} else if (foundNode != null) {
 			parentView.setSelection(new StructuredSelection(foundNode));
-//			findText.setForeground(black);
+			// findText.setForeground(black);
 			itemFound = true;
 		} else {
-//			findText.setForeground(red);
+			// findText.setForeground(red);
 		}
 
 		if (!itemFound)
@@ -1157,9 +1176,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	}
 
 	private static boolean isTextFound(String text, String searchFor) {
-		return (text.indexOf(searchFor) != -1 && !text.equals(ServicesCategory.nodes[0]) && !text.equals(ServicesCategory.nodes[1]));
+		return (text.indexOf(searchFor) != -1 && !text.equals(ServicesCategory.nodes[0]) && !text
+				.equals(ServicesCategory.nodes[1]));
 	}
-
 
 	public class ActionsProviderElement {
 		private String extension;
