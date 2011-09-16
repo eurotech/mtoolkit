@@ -190,19 +190,21 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	private void updateSupportedModels() {
-		Dictionary connectorProperties = connector.getProperties();
-		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
-			supportBundles = true;
-			supportServices = true;
-		} else {
-			support = connectorProperties.get(Capabilities.BUNDLE_SUPPORT);
-			if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+		if (connector != null) {
+			Dictionary connectorProperties = connector.getProperties();
+			Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+			if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
 				supportBundles = true;
-			}
-			support = connectorProperties.get(Capabilities.SERVICE_SUPPORT);
-			if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
 				supportServices = true;
+			} else {
+				support = connectorProperties.get(Capabilities.BUNDLE_SUPPORT);
+				if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+					supportBundles = true;
+				}
+				support = connectorProperties.get(Capabilities.SERVICE_SUPPORT);
+				if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+					supportServices = true;
+				}
 			}
 		}
 	}
