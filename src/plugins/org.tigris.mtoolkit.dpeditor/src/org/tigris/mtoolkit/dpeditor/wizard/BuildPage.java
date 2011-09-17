@@ -289,8 +289,15 @@ public class BuildPage extends WizardPage implements ModifyListener,
 	}
 
 	private boolean isValidExportDestination(File exportDest) {
-		String path = exportDest.getAbsolutePath();
-		if (!path.endsWith(".dp")) {
+		boolean isValidFile;
+		try {
+			String path = exportDest.getCanonicalPath();
+			isValidFile = path.endsWith(".dp");
+		} catch (IOException ex) {
+			isValidFile = false;
+		}
+
+		if (!isValidFile) {
 			setPageComplete(false);
 			String newMessage = ResourceManager
 					.getString("BuildExportWizard.errorInvalidExportDestination");

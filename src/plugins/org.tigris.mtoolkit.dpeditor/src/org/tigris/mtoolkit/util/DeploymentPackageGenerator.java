@@ -60,29 +60,17 @@ public class DeploymentPackageGenerator {
 		if (dppFile.getBuildInfo().getDpFileName() == null) {
 			genereateDefaultBuildProperties(dppFile);
 		}
-		String dpFileName = dppFile.getBuildInfo().getDpFileName();
+		String dpFileName = getPath(projectRootPath, dppFile.getBuildInfo()
+				.getDpFileName());
 		File tmpDpFile = new File(dpFileName);
 		File tmpParentFile = tmpDpFile.getParentFile();
-		if (!tmpParentFile.exists()) {
-			tmpParentFile.mkdirs();
-		}
-		dppFile.getBuildInfo()
-				.setDpFileName(
-						getPath(projectRootPath, dppFile.getBuildInfo()
-								.getDpFileName()));
-		dppFile.getBuildInfo().setBuildLocation(
-				getPath(projectRootPath, dppFile.getBuildInfo()
-						.getBuildLocation()));
-		if (dppFile.getBuildInfo().getDpFileName().indexOf(File.separatorChar) >= 0) {
-			String tempName = dppFile.getBuildInfo().getDpFileName();
-			dppFile.getBuildInfo()
-					.setDpFileName(
-							tempName.substring(tempName
-									.lastIndexOf(File.separator) + 1));
-			dppFile.getBuildInfo()
-					.setBuildLocation(
-							tempName.substring(0,
-									tempName.lastIndexOf(File.separator)));
+		if (tmpParentFile != null) {
+			if (!tmpParentFile.exists()) {
+				tmpParentFile.mkdirs();
+			}
+			dppFile.getBuildInfo().setDpFileName(tmpDpFile.getName());
+			dppFile.getBuildInfo().setBuildLocation(
+					tmpParentFile.getAbsolutePath());
 		}
 		boolean fixpack = dppFile.getPackageHeaders().getFixPack() != null
 				&& dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
@@ -791,8 +779,7 @@ public class DeploymentPackageGenerator {
 
 		FileOutputStream fos = new FileOutputStream(dppFile.getBuildInfo()
 				.getAntFileName());
-		fos.write(antFile
-				.toString().getBytes());
+		fos.write(antFile.toString().getBytes());
 		fos.close();
 		fos = new FileOutputStream(antPath + File.separator
 				+ stripDP(dppFile.getBuildInfo().getDpFileName())

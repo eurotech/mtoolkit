@@ -288,8 +288,15 @@ public class AntPage extends WizardPage implements ModifyListener, KeyListener,
 	}
 
 	private boolean isValidExportDestination(File exportDest) {
-		String path = exportDest.getAbsolutePath();
-		if (!path.endsWith(".xml")) {
+		boolean isValidFile;
+		try {
+			String path = exportDest.getCanonicalPath();
+			isValidFile = path.endsWith(".xml");
+		} catch (IOException ex) {
+			isValidFile = false;
+		}
+
+		if (!isValidFile) {
 			setPageComplete(false);
 			String newMessage = ResourceManager
 					.getString("BuildExportWizard.errorInvalidExportDestination");
