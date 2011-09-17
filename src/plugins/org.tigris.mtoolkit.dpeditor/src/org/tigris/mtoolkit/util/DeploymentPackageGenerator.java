@@ -596,6 +596,7 @@ public class DeploymentPackageGenerator {
 						.getBuildLocation()));
 		String antPath = getPath(projectRootPath, dppFile.getBuildInfo()
 				.getAntFileName());
+		dppFile.getBuildInfo().setAntFileName(antPath);
 		antPath = new File(antPath).getParentFile().getAbsolutePath();
 		boolean fixPack = dppFile.getPackageHeaders().getFixPack() != null
 				&& dppFile.getPackageHeaders().getFixPack().trim().length() != 0;
