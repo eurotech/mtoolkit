@@ -49,6 +49,7 @@ import org.tigris.mtoolkit.dpeditor.IHelpContextIds;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 import org.tigris.mtoolkit.util.DPPFile;
+import org.tigris.mtoolkit.util.DPPUtilities;
 
 /**
  * Create the page of the <code>AntExportWizard</code>
@@ -261,7 +262,8 @@ public class AntPage extends WizardPage implements ModifyListener, KeyListener,
 			} catch (IOException e1) {
 				// nothing fatal will happen
 			}
-			File exportDestination = new File(antFileText.getText());
+			File exportDestination = new File(DPPUtilities.replaceString(
+					antFileText.getText(), "<.>", dppFile.getProjectLocation()));
 			boolean valid = isValidExportDestination(exportDestination);
 			// refresh warning meassage
 			if (valid) {
@@ -272,7 +274,8 @@ public class AntPage extends WizardPage implements ModifyListener, KeyListener,
 		}
 		if (e.getSource().equals(antFileText)) {
 			String value = antFileText.getText();
-			File exportDestination = new File(value);
+			File exportDestination = new File(DPPUtilities.replaceString(value,
+					"<.>", dppFile.getProjectLocation()));
 			if (!isValidExportDestination(exportDestination)) {
 				return;
 			} else {

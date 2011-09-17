@@ -50,6 +50,7 @@ import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 import org.tigris.mtoolkit.util.BuildInfo;
 import org.tigris.mtoolkit.util.DPPFile;
+import org.tigris.mtoolkit.util.DPPUtilities;
 
 /**
  * Create the page of the <code>BuildExportWizard</code>
@@ -252,7 +253,8 @@ public class BuildPage extends WizardPage implements ModifyListener,
 			} catch (IOException e1) {
 			}
 			boolean valid = isValidExportDestination(new File(
-					dpFileText.getText()));
+					DPPUtilities.replaceString(dpFileText.getText(), "<.>",
+							dppFile.getProjectLocation())));
 			// refresh warning meassage
 			if (valid) {
 				setErrorMessage(null);
@@ -263,7 +265,8 @@ public class BuildPage extends WizardPage implements ModifyListener,
 
 		if (e.getSource().equals(dpFileText)) {
 			String value = dpFileText.getText();
-			if (!isValidExportDestination(new File(value))) {
+			if (!isValidExportDestination(new File(DPPUtilities.replaceString(
+					value, "<.>", dppFile.getProjectLocation())))) {
 				return;
 			} else {
 				boolean handle = handleDPPFileSelected();
