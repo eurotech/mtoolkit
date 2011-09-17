@@ -52,6 +52,8 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 	/** boolean flag which indicate if OK operation is failed */
 	boolean isOkFailed = false;
 
+	private Button editButton;
+
 	/**
 	 * Constructor of the deployment package editor preference page
 	 */
@@ -80,21 +82,24 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 		composite.setLayoutData(gd);
 
 		acceptCheckBoxButton = new Button(composite, SWT.NONE | SWT.CHECK);
-		acceptCheckBoxButton.setText(ResourceManager.getString("DPPEditor.Accept_Button")); //$NON-NLS-1$
+		acceptCheckBoxButton.setText(ResourceManager
+				.getString("DPPEditor.Accept_Button")); //$NON-NLS-1$
 		acceptCheckBoxButton.addSelectionListener(this);
 		gd = new GridData();
 		gd.verticalAlignment = GridData.BEGINNING;
 		gd.horizontalSpan = 3;
 		acceptCheckBoxButton.setLayoutData(gd);
 		property = System.getProperty("dpeditor.accept");
-		if (property == null || property.equals("") || (!property.equals("true") && !property.equals("false"))) {
+		if (property == null || property.equals("")
+				|| (!property.equals("true") && !property.equals("false"))) {
 			property = "false";
 		}
 		boolean selected = new Boolean(property).booleanValue();
 		acceptCheckBoxButton.setSelection(selected);
 
 		Group rpGroup = new Group(composite, SWT.SHADOW_ETCHED_OUT);
-		rpGroup.setText(ResourceManager.getString("DPPreferencesPage.resources.name"));
+		rpGroup.setText(ResourceManager
+				.getString("DPPreferencesPage.resources.name"));
 		gd = new GridData(GridData.FILL_BOTH);
 		gd.minimumHeight = 100;
 		gd.horizontalSpan = 3;
@@ -131,8 +136,16 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 		addButton.setLayoutData(gd);
 		addButton.addSelectionListener(this);
 
+		editButton = new Button(butComp, SWT.NONE | SWT.PUSH);
+		editButton.setText(ResourceManager.getString("DPPEditor.Edit_Button")); //$NON-NLS-1$
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		editButton.setLayoutData(gd);
+		editButton.addSelectionListener(this);
+		editButton.setEnabled(false);
+
 		removeButton = new Button(butComp, SWT.NONE | SWT.PUSH);
-		removeButton.setText(ResourceManager.getString("DPPEditor.Remove_Button")); //$NON-NLS-1$
+		removeButton.setText(ResourceManager
+				.getString("DPPEditor.Remove_Button")); //$NON-NLS-1$
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		removeButton.setLayoutData(gd);
 		removeButton.addSelectionListener(this);
@@ -162,11 +175,14 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 		Object obj = e.getSource();
 		if (obj == addButton) {
 			addAction();
+		} else if (obj == editButton) {
+			editAction();
 		} else if (obj == removeButton) {
 			removeAction();
 		} else if (obj == resList) {
 			int count = resList.getSelectionCount();
 			removeButton.setEnabled((count != 0));
+			editButton.setEnabled((count == 1));
 		}
 	}
 
@@ -176,21 +192,57 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 	 * of all resource processors.
 	 */
 	private void addAction() {
-		InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), "Add Resource Processor", "Please enter ID for new resource processor", null, new IInputValidator() {
-			public String isValid(String newText) {
-				if (hasTextInList(newText)) {
-					return "Entered resource processor ID is already available";
-				} else {
-					return null;
-				}
-			}
-		});
+		InputDialog dialog = new InputDialog(Display.getCurrent()
+				.getActiveShell(), "Add Resource Processor",
+				"Please enter ID for new resource processor", null,
+				new IInputValidator() {
+					public String isValid(String newText) {
+						if (hasTextInList(newText)) {
+							return "Entered resource processor ID is already available";
+						} else {
+							return null;
+						}
+					}
+				});
 		int result = dialog.open();
 		if (result == InputDialog.OK) {
 			String string = dialog.getValue();
 			boolean hasInList = hasTextInList(string);
 			if (!hasInList) {
 				resList.add(string);
+			}
+		}
+	}
+
+	/**
+	 * Edits selected resource processor.
+	 */
+	private void editAction() {
+		int count = resList.getSelectionCount();
+		if (count == 1) {
+			int index = resList.getSelectionIndex();
+			String oldValue = resList.getItem(index);
+			InputDialog dialog = new InputDialog(Display.getCurrent()
+					.getActiveShell(), "Edit Resource Processor",
+					"Please new ID for selected resource processor", oldValue,
+					new IInputValidator() {
+						public String isValid(String newText) {
+							if (hasTextInList(newText)) {
+								return "Entered resource processor ID is already available";
+							} else {
+								return null;
+							}
+						}
+					});
+			int result = dialog.open();
+			if (result == InputDialog.OK) {
+				String string = dialog.getValue();
+				boolean hasInList = hasTextInList(string);
+				if (!hasInList) {
+					resList.remove(index);
+					resList.add(string, index);
+					resList.setSelection(index);
+				}
 			}
 		}
 	}
@@ -217,6 +269,7 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 				resList.setSelection(index);
 			} else {
 				removeButton.setEnabled(false);
+				editButton.setEnabled(false);
 			}
 		}
 	}
@@ -258,7 +311,8 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 
 	public boolean performOk() {
 		boolean isOk = true;
-		System.setProperty("dpeditor.accept", "" + acceptCheckBoxButton.getSelection());
+		System.setProperty("dpeditor.accept",
+				"" + acceptCheckBoxButton.getSelection());
 
 		String loc2 = createResourceProperty();
 		System.setProperty("dpeditor.resourceprcessors", loc2);
