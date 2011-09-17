@@ -1,12 +1,12 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -22,24 +22,21 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 
 	public void run() {
 		boolean newState = !((FrameworkImpl) frameworks.get(0)).isShownServicePropertiss();
+
 		for (int i = 0; i < frameworks.size(); i++) {
-			((FrameworkImpl) frameworks.get(i)).setShowServicePropertiesInTree(newState);
+			FrameworkImpl framework = (FrameworkImpl) frameworks.get(i);
+			framework.setShowServicePropertiesInTree(newState);
+
+			if (newState) {
+				framework.refreshAction();
+			} else {
+				framework.clearServicePropertiesNodes((Model) frameworks.get(i));
+			}
 		}
 
-		if (newState) {
-			for (int i = 0; i < frameworks.size(); i++) {
-				FrameworkImpl framework = (FrameworkImpl) frameworks.get(i);
-				if (framework.isConnected()) {
-					framework.refreshAction();
-				}
-			}
-		} else {
-			for (int i = 0; i < frameworks.size(); i++) {
-				((FrameworkImpl) frameworks.get(i)).clearServicePropertiesNodes((Model) frameworks.get(i));
-			}
-			((TreeViewer)getSelectionProvider()).refresh();
+		if (!newState) {
+			((TreeViewer) getSelectionProvider()).refresh();
 		}
-		// FrameWorkView.getActiveInstance().addFilter();
 	}
 
 	public void selectionChanged(IStructuredSelection selection) {
@@ -47,37 +44,31 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 	}
 
 	public void updateState(IStructuredSelection selection) {
-		if (selection.isEmpty()) {
-			this.setEnabled(false);
-			return;
+		TreeItem[] items = ((TreeViewer) getSelectionProvider()).getTree().getItems();
+		boolean srvcPropertiesShown = (frameworks.isEmpty()) ? false : ((FrameworkImpl) frameworks.get(0))
+				.isShownServicePropertiss();
+
+		// tree structure has been updated (nodes added/removed )
+		if (items.length != frameworks.size()) {
+			frameworks.clear();
+
+			for (int i = 0; i < items.length; i++) {
+				Object o = items[i].getData();
+
+				if (o instanceof FrameworkImpl) {
+					frameworks.add(o);
+					((FrameworkImpl) o).setShowServicePropertiesInTree(srvcPropertiesShown);
+				}
+			}
 		}
 
-		Iterator iter = selection.iterator();
-		frameworks.clear();
-		while (iter.hasNext()) {
-			Object selElement = iter.next();
-			if (selElement instanceof Model) {
-				FrameworkImpl fw = (FrameworkImpl) ((Model) selElement).findFramework();
-				if (fw != null && !frameworks.contains(fw)) {
-					frameworks.add(fw);
-				}
-			} else if (selElement instanceof FrameworkImpl)
-				if (!frameworks.contains(selElement)) {
-					frameworks.add(selElement);
-				}
-		}
-
+		// all nodes of the tree have been removed
 		if (frameworks.isEmpty()) {
-			this.setEnabled(false);
-			return;
-		}
-
-		this.setEnabled(true);
-
-		boolean show = ((FrameworkImpl) frameworks.get(0)).isShownServicePropertiss();
-		if (show)
-			setChecked(true);
-		else
+			setEnabled(false);
 			setChecked(false);
+		} else {
+			setEnabled(true);
+			setChecked(srvcPropertiesShown);
+		}
 	}
 }
