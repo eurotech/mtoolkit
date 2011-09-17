@@ -28,6 +28,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
@@ -60,6 +61,10 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 	 * any special finish processing for the ant wizard.
 	 */
 	public boolean performFinish() {
+		// Save dirty editors if possible but do not stop if not all are saved
+		boolean save = PlatformUI.getWorkbench().saveAllEditors(true);
+		if (!save)
+			return false;
 		isFinishPerformed = true;
 		boolean res = performFinishDelegate();
 		return res;
@@ -81,7 +86,8 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 	 *            the current object selection
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setWindowTitle(ResourceManager.getString("BuildExportWizard.build_title"));
+		setWindowTitle(ResourceManager
+				.getString("BuildExportWizard.build_title"));
 		setNeedsProgressMonitor(true);
 		Object firstElement = selection.getFirstElement();
 		if (firstElement instanceof DPPFile) {
@@ -94,7 +100,8 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 			String fileExtension = path.getFileExtension();
 			if (fileExtension != null && fileExtension.equals("dpp")) {
 				try {
-					dppFile = new DPPFile(path.toFile(), project.getLocation().toOSString());
+					dppFile = new DPPFile(path.toFile(), project.getLocation()
+							.toOSString());
 				} catch (IOException e) {
 				}
 			}
@@ -109,7 +116,8 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 					return;
 				}
 				IPath path = new Path(file.getLocation().toString());
-				dppFile = new DPPFile(path.toFile(), dpPrj.getLocation().toOSString());
+				dppFile = new DPPFile(path.toFile(), dpPrj.getLocation()
+						.toOSString());
 			} catch (IOException e) {
 			} catch (CoreException e) {
 				e.printStackTrace();
@@ -125,7 +133,11 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 	 */
 	public void addPages() {
 		setDefaultPageImageDescriptor(DPPImageDescriptor.BUILD_DP_IMAGE_WIZARD);
-		WizardPage page = new BuildPage(WIZARD_BUILD_PAGE_NAME, ResourceManager.getString("BuildExportWizard.build_page_title"), ResourceManager.getString("BuildExportWizard.build_page_description"));
+		WizardPage page = new BuildPage(
+				WIZARD_BUILD_PAGE_NAME,
+				ResourceManager.getString("BuildExportWizard.build_page_title"),
+				ResourceManager
+						.getString("BuildExportWizard.build_page_description"));
 		addPage(page);
 		BuildPage buildPage = (BuildPage) getPage(WIZARD_BUILD_PAGE_NAME);
 		buildPage.setDPPFileProject(dppFile, project);
@@ -162,11 +174,14 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 		}
 		DPPFile dppFile = page.getDPPFile();
 		ProgressRun progressRun = new ProgressRun(dppFile);
-		ProgressMonitorDialog progress = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		ProgressMonitorDialog progress = new ProgressMonitorDialog(Display
+				.getCurrent().getActiveShell());
 		try {
 			progress.run(true, true, progressRun);
 		} catch (InvocationTargetException e) {
-			DPPErrorHandler.processError(ResourceManager.getString("BuildExportWizard.errorMessage"), true);
+			DPPErrorHandler
+					.processError(ResourceManager
+							.getString("BuildExportWizard.errorMessage"), true);
 			return false;
 		} catch (InterruptedException e) {
 			DPPErrorHandler.processError(e.toString(), true);
@@ -182,14 +197,17 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 		public ProgressRun(DPPFile file) {
 			this.dppFile = file;
 			IPath path = new Path(dppFile.getFile().getAbsolutePath());
-			IFile[] iFiles = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocation(path);
+			IFile[] iFiles = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocation(path);
 			if (iFiles.length != 0) {
 				iProject = iFiles[0].getProject();
 			}
 		}
 
-		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			DPPUtil.generateDeploymentPackage(dppFile, monitor, this.iProject, DPPUtil.TYPE_EXPORT_DPP);
+		public void run(IProgressMonitor monitor)
+				throws InvocationTargetException, InterruptedException {
+			DPPUtil.generateDeploymentPackage(dppFile, monitor, this.iProject,
+					DPPUtil.TYPE_EXPORT_DPP);
 		}
 	}
 }

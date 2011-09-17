@@ -27,6 +27,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
@@ -66,6 +67,10 @@ public class AntExportWizard extends Wizard implements IExportWizard {
 	 * any special finish processing for the ant wizard.
 	 */
 	public boolean performFinish() {
+		// Save dirty editors if possible but do not stop if not all are saved
+		boolean save = PlatformUI.getWorkbench().saveAllEditors(true);
+		if (!save)
+			return false;
 		isFinishPerformed = true;
 		boolean res = performFinishDelegate();
 		return res;
@@ -87,7 +92,8 @@ public class AntExportWizard extends Wizard implements IExportWizard {
 	 *            the current object selection
 	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		setWindowTitle(ResourceManager.getString("AntExportWizard.ant_wizard_title"));
+		setWindowTitle(ResourceManager
+				.getString("AntExportWizard.ant_wizard_title"));
 		setNeedsProgressMonitor(true);
 		Object firstElement = selection.getFirstElement();
 		if (firstElement instanceof DPPFile) {
@@ -116,7 +122,10 @@ public class AntExportWizard extends Wizard implements IExportWizard {
 	 */
 	public void addPages() {
 		setDefaultPageImageDescriptor(DPPImageDescriptor.ANT_IMAGE_WIZARD);
-		WizardPage page = new AntPage(WIZARD_ANT_PAGE_NAME, ResourceManager.getString("AntExportWizard.ant_page_title"), ResourceManager.getString("AntExportWizard.ant_page_description"));
+		WizardPage page = new AntPage(WIZARD_ANT_PAGE_NAME,
+				ResourceManager.getString("AntExportWizard.ant_page_title"),
+				ResourceManager
+						.getString("AntExportWizard.ant_page_description"));
 		addPage(page);
 		AntPage antPage = (AntPage) getPage(WIZARD_ANT_PAGE_NAME);
 		antPage.setDPPFileProject(dppFile, project);
@@ -153,11 +162,14 @@ public class AntExportWizard extends Wizard implements IExportWizard {
 		}
 		DPPFile dppFile = page.getDPPFile();
 		ProgressRun progressRun = new ProgressRun(dppFile);
-		ProgressMonitorDialog progress = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		ProgressMonitorDialog progress = new ProgressMonitorDialog(Display
+				.getCurrent().getActiveShell());
 		try {
 			progress.run(true, true, progressRun);
 		} catch (InvocationTargetException e) {
-			DPPErrorHandler.processError(ResourceManager.getString("AntExportWizard.errorMessage"), true);
+			DPPErrorHandler.processError(
+					ResourceManager.getString("AntExportWizard.errorMessage"),
+					true);
 			return false;
 		} catch (InterruptedException e) {
 			DPPErrorHandler.processError(e.toString(), true);
@@ -173,15 +185,18 @@ public class AntExportWizard extends Wizard implements IExportWizard {
 		public ProgressRun(DPPFile file) {
 			this.dppFile = file;
 			IPath path = new Path(dppFile.getFile().getAbsolutePath());
-			IFile[] iFiles = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocation(path);
+			IFile[] iFiles = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocation(path);
 			if (iFiles.length != 0) {
 				iProject = iFiles[0].getProject();
 			}
 
 		}
 
-		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			DPPUtil.generateDeploymentPackage(dppFile, monitor, this.iProject, DPPUtil.TYPE_EXPORT_ANT);
+		public void run(IProgressMonitor monitor)
+				throws InvocationTargetException, InterruptedException {
+			DPPUtil.generateDeploymentPackage(dppFile, monitor, this.iProject,
+					DPPUtil.TYPE_EXPORT_ANT);
 		}
 	}
 }

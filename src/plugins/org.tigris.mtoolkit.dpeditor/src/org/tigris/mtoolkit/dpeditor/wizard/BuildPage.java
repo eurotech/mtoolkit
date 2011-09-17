@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.pde.internal.ui.PDEPlugin;
 import org.eclipse.pde.internal.ui.util.FileExtensionFilter;
@@ -101,7 +102,8 @@ public class BuildPage extends WizardPage implements ModifyListener,
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.BUILD_WIZARD);
+		PlatformUI.getWorkbench().getHelpSystem()
+				.setHelp(parent, IHelpContextIds.BUILD_WIZARD);
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
@@ -181,27 +183,36 @@ public class BuildPage extends WizardPage implements ModifyListener,
 	private void createFields(Composite container) {
 		container.setLayout(new GridLayout(3, false));
 		Label selectDPPFilelbl = new Label(container, SWT.NONE);
-		selectDPPFilelbl.setText(ResourceManager.getString("BuildExportWizard.SelectDPPFileLabel"));
+		selectDPPFilelbl.setText(ResourceManager
+				.getString("BuildExportWizard.SelectDPPFileLabel"));
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 3;
 		selectDPPFilelbl.setLayoutData(gd);
 
-		dppFileText = createText(container, ResourceManager.getString(DPP_FILE_LABEL, ""), ResourceManager.getString(DPP_FILE_LABEL, "")); //$NON-NLS-1$
-		dppFileButton = createButton(container, ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
+		dppFileText = createText(
+				container,
+				ResourceManager.getString(DPP_FILE_LABEL, ""), ResourceManager.getString(DPP_FILE_LABEL, "")); //$NON-NLS-1$
+		dppFileButton = createButton(container,
+				ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
 		dppFileButton.addSelectionListener(this);
 
 		Label exportDestinationLabel = new Label(container, SWT.NONE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		exportDestinationLabel.setText(ResourceManager.getString("BuildExportWizard.ExportDestinationLabel"));
+		exportDestinationLabel.setText(ResourceManager
+				.getString("BuildExportWizard.ExportDestinationLabel"));
 		exportDestinationLabel.setLayoutData(gd);
 		gd.horizontalSpan = 3;
 
-		dpFileText = createText(container, ResourceManager.getString(DP_FILE_LABEL, ""), ResourceManager.getString(DP_FILE_LABEL, "")); //$NON-NLS-1$
-		dpFileButton = createButton(container, ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
+		dpFileText = createText(
+				container,
+				ResourceManager.getString(DP_FILE_LABEL, ""), ResourceManager.getString(DP_FILE_LABEL, "")); //$NON-NLS-1$
+		dpFileButton = createButton(container,
+				ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
 		dpFileButton.addSelectionListener(this);
 		if (dppFile != null) {
 			IPath path = new Path(dppFile.getFile().getAbsolutePath());
-			IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocation(path);
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocation(path);
 			if (files.length != 0) {
 				dppFileText.setText(files[0].getFullPath().toString());
 			}
@@ -227,16 +238,21 @@ public class BuildPage extends WizardPage implements ModifyListener,
 			String newBuildLocation = buildInfo.getDpFileName();
 			String dpTextValue = dpFileText.getText();
 			try {
-				String canonicalPathToDPFile = new File(dpTextValue).getCanonicalPath();
-				if (canonicalPathToDPFile.equals(prevBuildLocation) || dpTextValue.equals("")) {
+				String canonicalPathToDPFile = new File(dpTextValue)
+						.getCanonicalPath();
+				if (canonicalPathToDPFile.equals(prevBuildLocation)
+						|| dpTextValue.equals("")) {
 					dpFileText.setText(newBuildLocation);
-					prevBuildLocation = (new File(newBuildLocation)).getCanonicalPath();
+					prevBuildLocation = (new File(newBuildLocation))
+							.getCanonicalPath();
 				} else {
-					prevBuildLocation = (new File(newBuildLocation)).getCanonicalPath();
+					prevBuildLocation = (new File(newBuildLocation))
+							.getCanonicalPath();
 				}
 			} catch (IOException e1) {
 			}
-			boolean valid = isValidExportDestination(new File(dpFileText.getText()));
+			boolean valid = isValidExportDestination(new File(
+					dpFileText.getText()));
 			// refresh warning meassage
 			if (valid) {
 				setErrorMessage(null);
@@ -276,7 +292,8 @@ public class BuildPage extends WizardPage implements ModifyListener,
 		String path = exportDest.getAbsolutePath();
 		if (!path.endsWith(".dp")) {
 			setPageComplete(false);
-			String newMessage = ResourceManager.getString("BuildExportWizard.errorInvalidExportDestination");
+			String newMessage = ResourceManager
+					.getString("BuildExportWizard.errorInvalidExportDestination");
 			setErrorMessage(newMessage);
 			return false;
 		}
@@ -290,13 +307,15 @@ public class BuildPage extends WizardPage implements ModifyListener,
 		// relative location according to project
 		if (dppFileRelativeLocation.equals("")) {
 			setPageComplete(false);
-			String newMessage = ResourceManager.getString("BuildExportWizard.errorDPPFileNotSpecified");
+			String newMessage = ResourceManager
+					.getString("BuildExportWizard.errorDPPFileNotSpecified");
 			setErrorMessage(newMessage);
 			return false;
 		}
 		if (!dppFileRelativeLocation.endsWith(".dpp")) {
 			setPageComplete(false);
-			String newMessage = ResourceManager.getString("BuildExportWizard.errorNotDPPFile");
+			String newMessage = ResourceManager
+					.getString("BuildExportWizard.errorNotDPPFile");
 			setErrorMessage(newMessage);
 			return false;
 		}
@@ -304,14 +323,17 @@ public class BuildPage extends WizardPage implements ModifyListener,
 		boolean exist = ResourcesPlugin.getWorkspace().getRoot().exists(path);
 		if (!exist) {
 			setPageComplete(false);
-			String newMessage = ResourceManager.getString("BuildExportWizard.errorFileNotFoundInWorkspace");
+			String newMessage = ResourceManager
+					.getString("BuildExportWizard.errorFileNotFoundInWorkspace");
 			setErrorMessage(newMessage);
 			return false;
 		}
-		boolean isSync = ResourcesPlugin.getWorkspace().getRoot().getFile(path).isSynchronized(0);
+		boolean isSync = ResourcesPlugin.getWorkspace().getRoot().getFile(path)
+				.isSynchronized(0);
 		if (!isSync) {
 			setPageComplete(false);
-			String newMessage = ResourceManager.getString("BuildExportWizard.errorNotSynchronized");
+			String newMessage = ResourceManager
+					.getString("BuildExportWizard.errorNotSynchronized");
 			setErrorMessage(newMessage);
 			return false;
 		}
@@ -381,12 +403,16 @@ public class BuildPage extends WizardPage implements ModifyListener,
 	}
 
 	private void handleDPPBrowseButtonPressed() {
-		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(getShell(), new WorkbenchLabelProvider(), new WorkbenchContentProvider());
+		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
+				getShell(), new WorkbenchLabelProvider(),
+				new WorkbenchContentProvider());
 
 		dialog.setValidator(new FileValidator());
 		dialog.setAllowMultiple(false);
-		dialog.setTitle(ResourceManager.getString("BuildExportWizard.DPPFileSelectDialog_title"));
-		dialog.setMessage(ResourceManager.getString("BuildExportWizard.DPPFileSelectDialog_message"));
+		dialog.setTitle(ResourceManager
+				.getString("BuildExportWizard.DPPFileSelectDialog_title"));
+		dialog.setMessage(ResourceManager
+				.getString("BuildExportWizard.DPPFileSelectDialog_message"));
 		dialog.addFilter(new FileExtensionFilter("dpp")); //$NON-NLS-1$
 		dialog.setInput(PDEPlugin.getWorkspace().getRoot());
 		setInitialSelection(dialog);
@@ -416,14 +442,17 @@ public class BuildPage extends WizardPage implements ModifyListener,
 			return;
 		}
 		if (path.segmentCount() == 1) { // project
-			dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot().getProject(value));
+			dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot()
+					.getProject(value));
 		}
 		if (path.segmentCount() >= 2) {
 			IFile f = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 			if (f.exists()) { // file
-				dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot().getFile(path));
+				dialog.setInitialSelection(ResourcesPlugin.getWorkspace()
+						.getRoot().getFile(path));
 			} else { // folder
-				dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot().getFolder(path));
+				dialog.setInitialSelection(ResourcesPlugin.getWorkspace()
+						.getRoot().getFolder(path));
 			}
 		}
 	}
@@ -483,18 +512,25 @@ public class BuildPage extends WizardPage implements ModifyListener,
 		File file = new File(customBuildPath);
 		if (file.exists()) {
 			StringBuffer sb = new StringBuffer();
-			sb.append(ResourceManager.getString("BuildExportWizard.errorFileAlreadyExist1"));
+			sb.append(ResourceManager
+					.getString("BuildExportWizard.errorFileAlreadyExist1"));
 			sb.append(" ");
 			sb.append(customBuildPath);
 			sb.append(" ");
-			sb.append(ResourceManager.getString("BuildExportWizard.errorFileAlreadyExist2"));
-			boolean replaceFile = MessageDialog.openQuestion(null, ResourceManager.getString("AntExportWizard.ConfirmReplace"), sb.toString());
+			sb.append(ResourceManager
+					.getString("BuildExportWizard.errorFileAlreadyExist2"));
+			boolean replaceFile = MessageDialog
+					.openQuestion(null, ResourceManager
+							.getString("AntExportWizard.ConfirmReplace"), sb
+							.toString());
 			if (replaceFile) {
+				this.dppFile.restoreFromFile();
 				this.dppFile.getBuildInfo().setDpFileName(customBuildPath);
 				return true;
 			}
 			return false;
 		}
+		this.dppFile.restoreFromFile();
 		this.dppFile.getBuildInfo().setDpFileName(customBuildPath);
 		return true;
 	}
