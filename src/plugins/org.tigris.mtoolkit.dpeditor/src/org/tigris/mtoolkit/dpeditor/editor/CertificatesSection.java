@@ -52,6 +52,7 @@ import org.tigris.mtoolkit.dpeditor.editor.model.DPPFileModel;
 import org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.editor.model.ModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
+import org.tigris.mtoolkit.util.BundleInfo;
 import org.tigris.mtoolkit.util.CertificateInfo;
 import org.tigris.mtoolkit.util.DPPFile;
 import org.tigris.mtoolkit.util.DPPUtilities;
@@ -648,13 +649,31 @@ public class CertificatesSection extends DPPFormSection implements
 	 * Deployment package file, which certificates presents this table.
 	 */
 	private void handleNew() {
+		Table table = certsTable.getTable();
+		int size = table.getItems().length;		
 		CertificateInfo cert = new CertificateInfo();
-		certificateInfoChange(cert, ADD_CERTIFICATE);
-		certsTable.add(cert);
-		certsTable.editElement(cert, 0);
-		setDirty(true);
-		commitChanges(false);
-		removeButton.setEnabled(false);
+		boolean found = false;
+
+		for (int i = 0; i < size; i++) {
+			TableItem currentItem = table.getItem(i);
+			if (currentItem.getText(0).equalsIgnoreCase("")
+					&& !currentItem.getData().equals(cert)) {
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			certificateInfoChange(cert, ADD_CERTIFICATE);
+			certsTable.add(cert);
+			certsTable.editElement(cert, 0);
+			setDirty(true);
+			commitChanges(false);
+			size++;
+		}
+
+		table.setSelection(size - 1);
+		updateEnabledButtons();
 	}
 
 	/**

@@ -59,6 +59,7 @@ import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 import org.tigris.mtoolkit.util.DPPFile;
 import org.tigris.mtoolkit.util.DPPUtilities;
+import org.tigris.mtoolkit.util.Header;
 import org.tigris.mtoolkit.util.ResourceInfo;
 
 /**
@@ -215,24 +216,32 @@ public class ResourcesSection extends DPPFormSection implements
 			String filename = null;
 
 			if (property.equals("resource")) {
-				if (newValue.equals(resource.getResourcePath()) && (!newValue.equals(""))) {
+				if (newValue.equals(resource.getResourcePath())
+						&& (!newValue.equals(""))) {
 					return;
 				}
 				DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
 				IProject project = model.getFile().getProject();
 				String location = project.getLocation().toOSString();
-				if (newValue.toLowerCase().startsWith(location.toLowerCase() + File.separator)) {
+				if (newValue.toLowerCase().startsWith(
+						location.toLowerCase() + File.separator)) {
 					newValue = "<.>" + newValue.substring(location.length());
 				}
 				int itemExists = itemExists(resourcesTable, item, newValue);
-				if (itemExists != -1 && (!newValue.equals("") || newValue.equals(""))) {
-					showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n" + ResourceManager.getString(EQUAL_VALUES_MSG2));
+				if (itemExists != -1
+						&& (!newValue.equals("") || newValue.equals(""))) {
+					showErrorTableDialog(ResourceManager
+							.getString(EQUAL_VALUES_MSG1)
+							+ "\n"
+							+ ResourceManager.getString(EQUAL_VALUES_MSG2));
 					return;
 				}
 				if (newValue == null || newValue.equals(""))
 					return;
-				if ((newValue.charAt(newValue.length() - 1) == '\\') || (newValue.charAt(newValue.length() - 1) == '/')) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_INVALID_FILE_NAME));
+				if ((newValue.charAt(newValue.length() - 1) == '\\')
+						|| (newValue.charAt(newValue.length() - 1) == '/')) {
+					DPPErrorHandler.showErrorTableDialog(ResourceManager
+							.getString(ERROR_INVALID_FILE_NAME));
 					return;
 				}
 				filename = getName(newValue);
@@ -243,7 +252,8 @@ public class ResourcesSection extends DPPFormSection implements
 					customPath = (tempSTR == null) ? "" : tempSTR;
 				}
 				if (DPPUtil.isAlreadyInTheTable(customPath + filename, item)) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
+					DPPErrorHandler.showErrorTableDialog(ResourceManager
+							.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
 					return;
 				}
 				resource.setResourcePath(newValue);
@@ -267,7 +277,8 @@ public class ResourcesSection extends DPPFormSection implements
 					customPath = (currentPath == null) ? "" : currentPath;
 				}
 				if (DPPUtil.isAlreadyInTheTable(customPath + filename, item)) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
+					DPPErrorHandler.showErrorTableDialog(ResourceManager
+							.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
 					return;
 				}
 				String newName = customPath + filename;
@@ -283,7 +294,8 @@ public class ResourcesSection extends DPPFormSection implements
 				} else if (val == 0) {
 					newValue = "true";
 				}
-				if (newValue.equals("" + resource.isMissing()) && (!newValue.equals(""))) {
+				if (newValue.equals("" + resource.isMissing())
+						&& (!newValue.equals(""))) {
 					return;
 				}
 				isSet = true;
@@ -303,7 +315,8 @@ public class ResourcesSection extends DPPFormSection implements
 					newValue = processorsCombo.getText();
 
 				}
-				if (newValue.equals("") || newValue.equals(resource.getResourceProcessor())) {
+				if (newValue.equals("")
+						|| newValue.equals(resource.getResourceProcessor())) {
 					return;
 				}
 				boolean isAlreadyInTheCombo = false;
@@ -339,7 +352,9 @@ public class ResourcesSection extends DPPFormSection implements
 			resourcesTable.update(resource, null);
 			page.updateDocumentIfSource();
 			if (isSet) {
-				model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { resource }, null));
+				model.fireModelChanged(new ModelChangedEvent(
+						IModelChangedEvent.EDIT, new Object[] { resource },
+						null));
 			}
 		}
 
@@ -394,11 +409,13 @@ public class ResourcesSection extends DPPFormSection implements
 		public Object getValue(Object object, String property) {
 			ResourceInfo resource = (ResourceInfo) object;
 			if (property.equals("resource")) {
-				String resPath = DPPUtilities.getStringValue(resource.getResourcePath());
+				String resPath = DPPUtilities.getStringValue(resource
+						.getResourcePath());
 				DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
 				IFile ifile = model.getFile();
 				IProject project = ifile.getProject();
-				String location = project.getLocation().toOSString() + File.separator;
+				String location = project.getLocation().toOSString()
+						+ File.separator;
 				if (resPath.toLowerCase().startsWith(location.toLowerCase())) {
 					resPath = "<.>" + resPath.substring(location.length());
 				}
@@ -411,7 +428,8 @@ public class ResourcesSection extends DPPFormSection implements
 				}
 				return new Integer(1);
 			} else if (property.equals("resource_processor")) {
-				String resProperty = System.getProperty("dpeditor.resourceprcessors");
+				String resProperty = System
+						.getProperty("dpeditor.resourceprcessors");
 				comboValues = new Hashtable();
 				if (items == null || itemsEnteredByUser == null) {
 					// loading file
@@ -434,12 +452,13 @@ public class ResourcesSection extends DPPFormSection implements
 				} else {
 					refreshItems();
 				}
-				String key = DPPUtilities.getStringValue(resource.getResourceProcessor());
+				String key = DPPUtilities.getStringValue(resource
+						.getResourceProcessor());
 				String value = (String) comboValues.get(key);
 				processorsCellEditor.setItems(items);
-				for (int i=0; i<items.length; i++) {
+				for (int i = 0; i < items.length; i++) {
 					if (items[i].equals(key)) {
-						value = ""+i;
+						value = "" + i;
 						break;
 					}
 				}
@@ -467,12 +486,12 @@ public class ResourcesSection extends DPPFormSection implements
 			String rpProp = System.getProperty("dpeditor.resourceprcessors");
 			itemsFromProperty = getItemsFromProperty(rpProp);
 			Vector itemsV = new Vector();
-			for (int i=0; i<itemsFromProperty.length; i++) {
+			for (int i = 0; i < itemsFromProperty.length; i++) {
 				itemsV.addElement(itemsFromProperty[i]);
 			}
-			
+
 			if (itemsEnteredByUser != null) {
-				for (int i=0; i<itemsEnteredByUser.length; i++) {
+				for (int i = 0; i < itemsEnteredByUser.length; i++) {
 					if (itemsV.indexOf(itemsEnteredByUser[i]) == -1) {
 						itemsV.addElement(itemsEnteredByUser[i]);
 					}
@@ -536,19 +555,23 @@ public class ResourcesSection extends DPPFormSection implements
 			if (obj instanceof ResourceInfo) {
 				ResourceInfo resource = (ResourceInfo) obj;
 				if (index == 0) {
-					String resPath = DPPUtilities.getStringValue(resource.getResourcePath());
-					DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
+					String resPath = DPPUtilities.getStringValue(resource
+							.getResourcePath());
+					DPPFileModel model = ((DPPFileModel) getFormPage()
+							.getModel());
 					IFile ifile = model.getFile();
 					IProject project = ifile.getProject();
 					String location = project.getLocation().toOSString();
-					if (resPath.toLowerCase().startsWith(location.toLowerCase() + File.separator)) {
+					if (resPath.toLowerCase().startsWith(
+							location.toLowerCase() + File.separator)) {
 						resPath = "<.>" + resPath.substring(location.length());
 					}
 					return resPath;
 				} else if (index == 1) {
 					return DPPUtilities.getStringValue(resource.getName());
 				} else if (index == 2) {
-					return DPPUtilities.getStringValue(resource.getResourceProcessor());
+					return DPPUtilities.getStringValue(resource
+							.getResourceProcessor());
 				} else if (index == 3) {
 					return new Boolean(resource.isMissing()).toString();
 				} else if (index == 4) {
@@ -622,7 +645,8 @@ public class ResourcesSection extends DPPFormSection implements
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE | SWT.FULL_SELECTION);
+		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE
+				| SWT.FULL_SELECTION);
 		table.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent ev) {
 				if (ev.keyCode == 27) {
@@ -630,9 +654,12 @@ public class ResourcesSection extends DPPFormSection implements
 						Table table = (Table) ev.getSource();
 						if (table.getSelectionIndex() < 0)
 							return;
-						TableItem item = table.getItem(table.getSelectionIndex());
-						final ResourceInfo resource = (ResourceInfo) item.getData();
-						if (DPPUtilities.getStringValue(resource.getResourcePath()).equals("")) {
+						TableItem item = table.getItem(table
+								.getSelectionIndex());
+						final ResourceInfo resource = (ResourceInfo) item
+								.getData();
+						if (DPPUtilities.getStringValue(
+								resource.getResourcePath()).equals("")) {
 							resourceInfoChange(resource, REMOVE_RESOURCE);
 						}
 					}
@@ -644,7 +671,15 @@ public class ResourcesSection extends DPPFormSection implements
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		String[] columnTitles = { ResourceManager.getString("DPPEditor.ResourcesSection.ColPath"), ResourceManager.getString("DPPEditor.ResourcesSection.ColName"), ResourceManager.getString("DPPEditor.ResourcesSection.ColResProcessor"), ResourceManager.getString("DPPEditor.ResourcesSection.ColMissing"), ResourceManager.getString("DPPEditor.ResourcesSection.ColCustomHeaders") };
+		String[] columnTitles = {
+				ResourceManager.getString("DPPEditor.ResourcesSection.ColPath"),
+				ResourceManager.getString("DPPEditor.ResourcesSection.ColName"),
+				ResourceManager
+						.getString("DPPEditor.ResourcesSection.ColResProcessor"),
+				ResourceManager
+						.getString("DPPEditor.ResourcesSection.ColMissing"),
+				ResourceManager
+						.getString("DPPEditor.ResourcesSection.ColCustomHeaders") };
 		for (int i = 0; i < columnTitles.length; i++) {
 			TableColumn tableColumn = new TableColumn(table, SWT.NULL);
 			tableColumn.setText(columnTitles[i]);
@@ -665,8 +700,18 @@ public class ResourcesSection extends DPPFormSection implements
 		comboValues = new Hashtable();
 		items = getItemsFromProperty(property);
 		processorsCellEditor = new ComboBoxCellEditor(table, items, SWT.NULL);
-		CellEditor[] editors = new CellEditor[] { new CustomCellEditor(container, resourcesTable, table, CustomCellEditor.TEXT_BUTTON_TYPE, CustomCellEditor.RESOURCE_PATH), new TextCellEditor(table), processorsCellEditor, cellEditor, new CustomCellEditor(container, resourcesTable, table, CustomCellEditor.DIALOG_TYPE, CustomCellEditor.RESOURCE_HEADER) };
-		String[] properties = { "resource", "name", "resource_processor", "missing", "custom" };
+		CellEditor[] editors = new CellEditor[] {
+				new CustomCellEditor(container, resourcesTable, table,
+						CustomCellEditor.TEXT_BUTTON_TYPE,
+						CustomCellEditor.RESOURCE_PATH),
+				new TextCellEditor(table),
+				processorsCellEditor,
+				cellEditor,
+				new CustomCellEditor(container, resourcesTable, table,
+						CustomCellEditor.DIALOG_TYPE,
+						CustomCellEditor.RESOURCE_HEADER) };
+		String[] properties = { "resource", "name", "resource_processor",
+				"missing", "custom" };
 		resourcesTable.setCellEditors(editors);
 		resourcesTable.setCellModifier(new KeyModifier());
 		resourcesTable.setColumnProperties(properties);
@@ -698,10 +743,14 @@ public class ResourcesSection extends DPPFormSection implements
 		buttonComposite.setLayout(layout);
 		buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		newButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
-		removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
-		upButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(UP_BUTTON, ""), SWT.PUSH);
-		downButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(DOWN_BUTTON, ""), SWT.PUSH);
+		newButton = FormWidgetFactory.createButton(buttonComposite,
+				ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
+		removeButton = FormWidgetFactory.createButton(buttonComposite,
+				ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
+		upButton = FormWidgetFactory.createButton(buttonComposite,
+				ResourceManager.getString(UP_BUTTON, ""), SWT.PUSH);
+		downButton = FormWidgetFactory.createButton(buttonComposite,
+				ResourceManager.getString(DOWN_BUTTON, ""), SWT.PUSH);
 
 		newButton.addSelectionListener(this);
 		GridData gd = new GridData(GridData.FILL_VERTICAL);
@@ -856,27 +905,34 @@ public class ResourcesSection extends DPPFormSection implements
 			if (combo == comboEditor) {
 				int index = combo.getSelectionIndex();
 				String item = combo.getItem(index);
-				Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
+				Object object = ((IStructuredSelection) resourcesTable
+						.getSelection()).getFirstElement();
 				if (object != null && object instanceof ResourceInfo) {
 					ResourceInfo resourceInfo = (ResourceInfo) object;
 					boolean oldMissing = resourceInfo.isMissing();
 					boolean newMissing = item.equals("true");
-					if ((oldMissing && !newMissing) || (!oldMissing && newMissing)) {
+					if ((oldMissing && !newMissing)
+							|| (!oldMissing && newMissing)) {
 						resourceInfo.setMissing(newMissing);
-						model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { resourceInfo }, null));
+						model.fireModelChanged(new ModelChangedEvent(
+								IModelChangedEvent.EDIT,
+								new Object[] { resourceInfo }, null));
 					}
 					resourcesChanged();
 				}
 			} else if (combo == processorsCombo) {
 				int index = combo.getSelectionIndex();
 				String item = combo.getItem(index);
-				Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
+				Object object = ((IStructuredSelection) resourcesTable
+						.getSelection()).getFirstElement();
 				if (object != null && object instanceof ResourceInfo) {
 					ResourceInfo resourceInfo = (ResourceInfo) object;
 					String oldProcessor = resourceInfo.getResourceProcessor();
 					if (oldProcessor == null || !oldProcessor.equals(item)) {
 						resourceInfo.setResourceProcessor(item);
-						model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { resourceInfo }, null));
+						model.fireModelChanged(new ModelChangedEvent(
+								IModelChangedEvent.EDIT,
+								new Object[] { resourceInfo }, null));
 					}
 					resourcesChanged();
 				}
@@ -892,8 +948,9 @@ public class ResourcesSection extends DPPFormSection implements
 	private void handleNew() {
 		Table table = resourcesTable.getTable();
 		int size = table.getItems().length;
+
 		if (size != 0) {
-			TableItem beforeLastTableItem = table.getItem(table.getItems().length - 1);
+			TableItem beforeLastTableItem = table.getItem(size - 1);
 			String colonNameValue = beforeLastTableItem.getText(1);
 			String colonNamePath = getPath(colonNameValue);
 			if (colonNamePath == null) {
@@ -906,23 +963,28 @@ public class ResourcesSection extends DPPFormSection implements
 		}
 
 		ResourceInfo resource = new ResourceInfo();
-		Table parentTable = resourcesTable.getTable();
-		for (int i = 0; i < parentTable.getItemCount(); i++) {
-			TableItem currentItem = parentTable.getItem(i);
-			if (currentItem.getText(0).equalsIgnoreCase("")) {
-				if (!currentItem.getData().equals(resource)) {
-					return;
-				}
+		boolean found = false;
+
+		for (int i = 0; i < size; i++) {
+			TableItem currentItem = table.getItem(i);
+			if (currentItem.getText(0).equalsIgnoreCase("")
+					&& !currentItem.getData().equals(resource)) {
+				found = true;
+				break;
 			}
 		}
-		resourceInfoChange(resource, ADD_RESOURCE);
-		resourcesTable.add(resource);
-		resourcesTable.editElement(resource, 0);
-		setDirty(true);
-		commitChanges(false);
-		removeButton.setEnabled(false);
-		upButton.setEnabled(false);
-		downButton.setEnabled(false);
+
+		if (!found) {
+			resourceInfoChange(resource, ADD_RESOURCE);
+			resourcesTable.add(resource);
+			resourcesTable.editElement(resource, 0);
+			setDirty(true);
+			commitChanges(false);
+			size++;
+		}
+
+		table.setSelection(size - 1);
+		updateEnabledButtons();
 	}
 
 	private String getPath(String str) {
@@ -933,7 +995,8 @@ public class ResourcesSection extends DPPFormSection implements
 			return "";
 		// remove separators and white spaces in the begining
 		int i = 0;
-		while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
+		while (str.charAt(i) == '\\' || str.charAt(i) == '/'
+				|| str.charAt(i) == ' ') {
 
 			++i;
 			if (i == (str.length()))
@@ -968,7 +1031,8 @@ public class ResourcesSection extends DPPFormSection implements
 		if (str.equals(""))
 			return "";
 		int i = 0;
-		while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
+		while (str.charAt(i) == '\\' || str.charAt(i) == '/'
+				|| str.charAt(i) == ' ') {
 			++i;
 			if (i == (str.length()))
 				break;
@@ -1000,7 +1064,8 @@ public class ResourcesSection extends DPPFormSection implements
 	 * resources presents this table.
 	 */
 	private void handleRemove() {
-		Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
+		Object object = ((IStructuredSelection) resourcesTable.getSelection())
+				.getFirstElement();
 		if (object != null && object instanceof ResourceInfo) {
 			ResourceInfo resource = (ResourceInfo) object;
 			resourceInfoChange(resource, REMOVE_RESOURCE);
@@ -1016,7 +1081,8 @@ public class ResourcesSection extends DPPFormSection implements
 	 * Deployment package file, which resources presents this table.
 	 */
 	private void handleUp() {
-		Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
+		Object object = ((IStructuredSelection) resourcesTable.getSelection())
+				.getFirstElement();
 		if (object != null && object instanceof ResourceInfo) {
 			ResourceInfo resource = (ResourceInfo) object;
 			resourceInfoChange(resource, UP_RESOURCE);
@@ -1032,7 +1098,8 @@ public class ResourcesSection extends DPPFormSection implements
 	 * Deployment package file, which resources presents this table.
 	 */
 	private void handleDown() {
-		Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
+		Object object = ((IStructuredSelection) resourcesTable.getSelection())
+				.getFirstElement();
 		if (object != null && object instanceof ResourceInfo) {
 			ResourceInfo resource = (ResourceInfo) object;
 			resourceInfoChange(resource, DOWN_RESOURCE);
@@ -1156,19 +1223,23 @@ public class ResourcesSection extends DPPFormSection implements
 		switch (key) {
 		case ADD_RESOURCE:
 			infos.addElement(info);
-			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.ADD, new Object[] { info }, null));
+			model.fireModelChanged(new ModelChangedEvent(
+					IModelChangedEvent.ADD, new Object[] { info }, null));
 			break;
 		case REMOVE_RESOURCE:
 			infos.removeElement(info);
-			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.REMOVE, new Object[] { info }, null));
+			model.fireModelChanged(new ModelChangedEvent(
+					IModelChangedEvent.REMOVE, new Object[] { info }, null));
 			break;
 		case UP_RESOURCE:
 			DPPUtilities.moveElement(infos, info, true);
-			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] { info }, null));
+			model.fireModelChanged(new ModelChangedEvent(
+					IModelChangedEvent.INSERT, new Object[] { info }, null));
 			break;
 		case DOWN_RESOURCE:
 			DPPUtilities.moveElement(infos, info, false);
-			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] { info }, null));
+			model.fireModelChanged(new ModelChangedEvent(
+					IModelChangedEvent.INSERT, new Object[] { info }, null));
 			break;
 		}
 	}

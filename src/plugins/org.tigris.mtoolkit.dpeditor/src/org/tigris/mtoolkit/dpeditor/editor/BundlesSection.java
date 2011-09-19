@@ -884,6 +884,7 @@ public class BundlesSection extends DPPFormSection implements
 		Table table = bundlesTable.getTable();
 		TableItem[] selection = table.getSelection();
 		boolean hasSelection = selection.length > 0;
+		//
 		removeButton.setEnabled(hasSelection);
 		setMoveEnable();
 	}
@@ -959,14 +960,14 @@ public class BundlesSection extends DPPFormSection implements
 	 * file, which bundles presents this table.
 	 */
 	private void handleNew() {
-
 		Table table = bundlesTable.getTable();
-		int size = table.getItems().length;
+		int size = table.getItemCount();
+
 		if (size != 0) {
-			TableItem beforeLastTableItem = table
-					.getItem(table.getItems().length - 1);
+			TableItem beforeLastTableItem = table.getItem(size - 1);
 			String colonNameValue = beforeLastTableItem.getText(1);
 			String colonNamePath = DPPUtilities.getPath(colonNameValue);
+			
 			if (colonNamePath == null) {
 				bundlesCustomPath = "bundles/";
 			} else {
@@ -977,24 +978,28 @@ public class BundlesSection extends DPPFormSection implements
 		}
 
 		BundleInfo bundle = new BundleInfo();
-		Table parentTable = bundlesTable.getTable();
+		boolean found = false;
 
-		for (int i = 0; i < parentTable.getItemCount(); i++) {
-			TableItem currentItem = parentTable.getItem(i);
-			if (currentItem.getText(0).equalsIgnoreCase("")) {
-				if (!currentItem.getData().equals(bundle)) {
-					return;
-				}
+		for (int i = 0; i < size; i++) {
+			TableItem currentItem = table.getItem(i);			
+			if (currentItem.getText(0).equalsIgnoreCase("")
+					&& !currentItem.getData().equals(bundle)) {
+				found = true;
+				break;
 			}
 		}
-		bundleInfoChange(bundle, ADD_BUNDLE);
-		bundlesTable.add(bundle);
-		bundlesTable.editElement(bundle, 0);
-		setDirty(true);
-		commitChanges(false);
-		removeButton.setEnabled(false);
-		upButton.setEnabled(false);
-		downButton.setEnabled(false);
+
+		if (!found) {
+			bundleInfoChange(bundle, ADD_BUNDLE);
+			bundlesTable.add(bundle);
+			bundlesTable.editElement(bundle, 0);
+			setDirty(true);
+			commitChanges(false);
+			size++;
+		}
+
+		table.setSelection(size - 1);
+		updateEnabledButtons();
 	}
 
 	private String getName(String str) {

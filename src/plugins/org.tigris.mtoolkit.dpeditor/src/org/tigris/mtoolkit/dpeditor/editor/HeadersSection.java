@@ -53,6 +53,7 @@ import org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.editor.model.ModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
+import org.tigris.mtoolkit.util.CertificateInfo;
 import org.tigris.mtoolkit.util.DPPConstants;
 import org.tigris.mtoolkit.util.DPPFile;
 import org.tigris.mtoolkit.util.DPPUtilities;
@@ -134,7 +135,11 @@ public class HeadersSection extends DPPFormSection implements
 								 * DPPConstants.dpSymbolicNameHeader,
 								 * DPPConstants.dpVersionHeader,
 								 */
-	DPPConstants.dpFixPackHeader, DPPConstants.dpCopyrightHeader, DPPConstants.dpAddressHeader, DPPConstants.dpDescriptionHeader, DPPConstants.dpDocURLHeader, DPPConstants.dpVendorHeader, DPPConstants.dpLicenseHeader, DPPConstants.dpIcon, DPPConstants.dpName, DPPConstants.dpRequiredStorage };
+	DPPConstants.dpFixPackHeader, DPPConstants.dpCopyrightHeader,
+			DPPConstants.dpAddressHeader, DPPConstants.dpDescriptionHeader,
+			DPPConstants.dpDocURLHeader, DPPConstants.dpVendorHeader,
+			DPPConstants.dpLicenseHeader, DPPConstants.dpIcon,
+			DPPConstants.dpName, DPPConstants.dpRequiredStorage };
 
 	/** The parent composite in which all components will be added */
 	private Composite container;
@@ -205,7 +210,8 @@ public class HeadersSection extends DPPFormSection implements
 			Header header = (Header) object;
 			String key = header.getKey();
 			if (property.equals("key")) {
-				if (key.equals(DPPConstants.dpSymbolicNameHeader) || key.equals(DPPConstants.dpVersionHeader)) {
+				if (key.equals(DPPConstants.dpSymbolicNameHeader)
+						|| key.equals(DPPConstants.dpVersionHeader)) {
 					return false;
 				}
 			}
@@ -259,28 +265,39 @@ public class HeadersSection extends DPPFormSection implements
 					return;
 				}
 				if (newValue.length() > 0 && newValue.trim().equals("")) {
-					showErrorTableDialog(ResourceManager.getString(ERROR_SPACE_CONTAINT));
+					showErrorTableDialog(ResourceManager
+							.getString(ERROR_SPACE_CONTAINT));
 					DPPEditor.isDialogShown = true;
 					return;
 				}
 				newValue = newValue.trim();
 				if (newValue.indexOf(' ') != -1) {
-					showErrorTableDialog(ResourceManager.getString(ERROR_SPACE_CONTAINT));
+					showErrorTableDialog(ResourceManager
+							.getString(ERROR_SPACE_CONTAINT));
 					DPPEditor.isDialogShown = true;
 					return;
 				}
 				if (!DPPUtilities.isValidManifestHeader(newValue)) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_IVALID_KEY));
+					DPPErrorHandler.showErrorTableDialog(ResourceManager
+							.getString(ERROR_IVALID_KEY));
 					return;
 				}
-				if ((!newValue.equals("")) && (itemExists(headerTable, item, newValue) != -1)) {
-					showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n" + ResourceManager.getString(EQUAL_VALUES_MSG2));
+				if ((!newValue.equals(""))
+						&& (itemExists(headerTable, item, newValue) != -1)) {
+					showErrorTableDialog(ResourceManager
+							.getString(EQUAL_VALUES_MSG1)
+							+ "\n"
+							+ ResourceManager.getString(EQUAL_VALUES_MSG2));
 					DPPEditor.isDialogShown = true;
 					return;
 				}
-				if (headerKey.equals(DPPConstants.dpSymbolicNameHeader) || headerKey.equals(DPPConstants.dpVersionHeader) || newValue.equals(DPPConstants.dpSymbolicNameHeader) || newValue.equals(DPPConstants.dpVersionHeader)) {
+				if (headerKey.equals(DPPConstants.dpSymbolicNameHeader)
+						|| headerKey.equals(DPPConstants.dpVersionHeader)
+						|| newValue.equals(DPPConstants.dpSymbolicNameHeader)
+						|| newValue.equals(DPPConstants.dpVersionHeader)) {
 					if (!headerKey.equals(DPPConstants.dpFixPackHeader)) {
-						showWarningTableDialog(ResourceManager.getString(WARNING_VALUES_MSG));
+						showWarningTableDialog(ResourceManager
+								.getString(WARNING_VALUES_MSG));
 						DPPEditor.isDialogShown = true;
 					}
 					return;
@@ -289,16 +306,19 @@ public class HeadersSection extends DPPFormSection implements
 					try {
 						Version.parseVersion(header.getValue());
 					} catch (IllegalArgumentException ex) {
-						showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
+						showErrorTableDialog(ResourceManager
+								.getString(WRONG_VERSION));
 						DPPEditor.isDialogShown = true;
 						headerTable.editElement(header, 1);
 						return;
 					}
 				} else if (newValue.equals(DPPConstants.dpFixPackHeader)) {
 					String headerValue = header.getValue();
-					if (!headerValue.equals("") && !DPPUtilities.isValidFixPack(headerValue)) {
+					if (!headerValue.equals("")
+							&& !DPPUtilities.isValidFixPack(headerValue)) {
 						if (!DPPUtilities.isValidVersion(headerValue)) {
-							showErrorTableDialog(ResourceManager.getString(WRONG_FIXPACK_HEADER));
+							showErrorTableDialog(ResourceManager
+									.getString(WRONG_FIXPACK_HEADER));
 							DPPEditor.isDialogShown = true;
 							return;
 						}
@@ -309,9 +329,11 @@ public class HeadersSection extends DPPFormSection implements
 				}
 
 				header.setKey(newValue);
-				DPPFile dppFile = ((DPPFileModel) getFormPage().getModel()).getDPPFile();
+				DPPFile dppFile = ((DPPFileModel) getFormPage().getModel())
+						.getDPPFile();
 				PackageHeaders pkgHeaders = dppFile.getPackageHeaders();
-				pkgHeaders.editElement(headerKey, header.getKey(), header.getValue());
+				pkgHeaders.editElement(headerKey, header.getKey(),
+						header.getValue());
 				isSet = true;
 				removeButton.setEnabled(true);
 			} else if (property.equals("value")) {
@@ -321,8 +343,10 @@ public class HeadersSection extends DPPFormSection implements
 				if (header.getKey().equals(DPPConstants.dpVersionHeader)) {
 					int index = newValue.lastIndexOf('.');
 					String verTxt = newValue;
-					if (verTxt.indexOf(" ") != -1 || (index != -1 && (index == newValue.length()))) {
-						showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
+					if (verTxt.indexOf(" ") != -1
+							|| (index != -1 && (index == newValue.length()))) {
+						showErrorTableDialog(ResourceManager
+								.getString(WRONG_VERSION));
 						DPPEditor.isDialogShown = true;
 						return;
 					}
@@ -331,31 +355,41 @@ public class HeadersSection extends DPPFormSection implements
 							Version.parseVersion(verTxt);
 							header.setValue(newValue);
 						} catch (IllegalArgumentException ex) {
-							showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
+							showErrorTableDialog(ResourceManager
+									.getString(WRONG_VERSION));
 							DPPEditor.isDialogShown = true;
 							return;
 						}
 					}
 				} else if (header.getKey().equals(DPPConstants.dpFixPackHeader)) {
-					if ("".equals(newValue) || DPPUtilities.isValidFixPack(newValue)) {
+					if ("".equals(newValue)
+							|| DPPUtilities.isValidFixPack(newValue)) {
 						header.setValue(newValue);
 					} else {
 						if (DPPUtilities.isValidVersion(newValue)) {
 							header.setValue(newValue);
 						} else {
-							showErrorTableDialog(ResourceManager.getString(WRONG_FIXPACK_HEADER));
+							showErrorTableDialog(ResourceManager
+									.getString(WRONG_FIXPACK_HEADER));
 							DPPEditor.isDialogShown = true;
 							return;
 						}
 					}
-				} else if (header.getKey().equals(DPPConstants.dpSymbolicNameHeader)) {
+				} else if (header.getKey().equals(
+						DPPConstants.dpSymbolicNameHeader)) {
 					if (!DPPUtilities.isCorrectPackage(newValue)) {
 						if (newValue.startsWith(".") || newValue.endsWith(".")) {
-							showErrorTableDialog(ResourceManager.format(WRONG_SYMBOLIC_NAME, new Object[] { newValue }));
+							showErrorTableDialog(ResourceManager.format(
+									WRONG_SYMBOLIC_NAME,
+									new Object[] { newValue }));
 						} else if (newValue.indexOf(" ") != -1) {
-							showErrorTableDialog(ResourceManager.format(WRONG_SYMBOLIC_NAME_SPACE, new Object[] { newValue }));
+							showErrorTableDialog(ResourceManager.format(
+									WRONG_SYMBOLIC_NAME_SPACE,
+									new Object[] { newValue }));
 						} else {
-							showErrorTableDialog(ResourceManager.format(WRONG_SYMBOLIC_IDENTIFIER, new Object[] { newValue }));
+							showErrorTableDialog(ResourceManager.format(
+									WRONG_SYMBOLIC_IDENTIFIER,
+									new Object[] { newValue }));
 						}
 						DPPEditor.isDialogShown = true;
 						return;
@@ -370,7 +404,8 @@ public class HeadersSection extends DPPFormSection implements
 			headerTable.update(header, null);
 			page.updateDocumentIfSource();
 			if (isSet) {
-				model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { header }, null));
+				model.fireModelChanged(new ModelChangedEvent(
+						IModelChangedEvent.EDIT, new Object[] { header }, null));
 			}
 			updateNeeded = true;
 		}
@@ -454,7 +489,8 @@ public class HeadersSection extends DPPFormSection implements
 				Object[] result = new Object[pkgHeadersVector.size()];
 				for (int i = 0; i < pkgHeadersVector.size(); i++) {
 					Header header = (Header) pkgHeadersVector.elementAt(i);
-					if (header.getKey().equals(DPPConstants.dpSymbolicNameHeader)) {
+					if (header.getKey().equals(
+							DPPConstants.dpSymbolicNameHeader)) {
 						String value = header.getValue();
 						if (value == null || value.equals("")) {
 							value = dppFile.getFile().getName();
@@ -465,7 +501,8 @@ public class HeadersSection extends DPPFormSection implements
 							pkgHeaders.setSymbolicName(value);
 							header.setValue(value);
 						}
-					} else if (header.getKey().equals(DPPConstants.dpVersionHeader)) {
+					} else if (header.getKey().equals(
+							DPPConstants.dpVersionHeader)) {
 						String value = header.getValue();
 						if (value == null || value.equals("")) {
 							value = "1.0";
@@ -578,7 +615,8 @@ public class HeadersSection extends DPPFormSection implements
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE | SWT.FULL_SELECTION);
+		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE
+				| SWT.FULL_SELECTION);
 		table.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent ev) {
 				if (ev.keyCode == 27) {
@@ -586,7 +624,8 @@ public class HeadersSection extends DPPFormSection implements
 						Table table = (Table) ev.getSource();
 						if (table.getSelectionIndex() < 0)
 							return;
-						TableItem item = table.getItem(table.getSelectionIndex());
+						TableItem item = table.getItem(table
+								.getSelectionIndex());
 						final Header header = (Header) item.getData();
 						if (header.getKey().equals("")) {
 							packageHeadersChange(header, REMOVE_HEADER);
@@ -600,7 +639,9 @@ public class HeadersSection extends DPPFormSection implements
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		String[] columnTitles = { ResourceManager.getString("DPPEditor.HeadersSection.ColKey"), ResourceManager.getString("DPPEditor.HeadersSection.ColValue") };
+		String[] columnTitles = {
+				ResourceManager.getString("DPPEditor.HeadersSection.ColKey"),
+				ResourceManager.getString("DPPEditor.HeadersSection.ColValue") };
 		for (int i = 0; i < columnTitles.length; i++) {
 			TableColumn tableColumn = new TableColumn(table, SWT.NULL);
 			tableColumn.setText(columnTitles[i]);
@@ -626,9 +667,10 @@ public class HeadersSection extends DPPFormSection implements
 		comboValues.put(DPPConstants.dpIcon, "8");
 		comboValues.put(DPPConstants.dpName, "9");
 		comboValues.put(DPPConstants.dpRequiredStorage, "10");
-		
+
 		keyCellEditor = new ComboBoxCellEditor(table, data, SWT.NULL);
-		CellEditor[] editors = new CellEditor[] { keyCellEditor, new TextCellEditor(table) };
+		CellEditor[] editors = new CellEditor[] { keyCellEditor,
+				new TextCellEditor(table) };
 		String[] properties = { "key", "value" };
 		headerTable.setCellEditors(editors);
 		headerTable.setCellModifier(new KeyModifier());
@@ -655,8 +697,10 @@ public class HeadersSection extends DPPFormSection implements
 		buttonComposite.setLayout(layout);
 		buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		newButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
-		removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
+		newButton = FormWidgetFactory.createButton(buttonComposite,
+				ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
+		removeButton = FormWidgetFactory.createButton(buttonComposite,
+				ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
 
 		newButton.addSelectionListener(this);
 		GridData gd = new GridData(GridData.FILL_VERTICAL);
@@ -772,7 +816,8 @@ public class HeadersSection extends DPPFormSection implements
 					DPPEditor.isDialogShown = true;
 					DPPEditor.showErrorDialog(e.getMessage());
 				}
-				model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { header }, null));
+				model.fireModelChanged(new ModelChangedEvent(
+						IModelChangedEvent.EDIT, new Object[] { header }, null));
 			}
 		}
 
@@ -810,7 +855,8 @@ public class HeadersSection extends DPPFormSection implements
 			CCombo combo = (CCombo) obj;
 			int index = combo.getSelectionIndex();
 			String item = combo.getItem(index);
-			Object object = ((IStructuredSelection) headerTable.getSelection()).getFirstElement();
+			Object object = ((IStructuredSelection) headerTable.getSelection())
+					.getFirstElement();
 			if (object != null && object instanceof Header) {
 				Header header = (Header) object;
 				if (combo == keyCombo) {
@@ -828,27 +874,38 @@ public class HeadersSection extends DPPFormSection implements
 							break;
 						}
 					}
-					if (oldKey.equals(DPPConstants.dpSymbolicNameHeader) || oldKey.equals(DPPConstants.dpVersionHeader)) {
-						showWarningTableDialog(ResourceManager.getString(WARNING_VALUES_MSG));
+					if (oldKey.equals(DPPConstants.dpSymbolicNameHeader)
+							|| oldKey.equals(DPPConstants.dpVersionHeader)) {
+						showWarningTableDialog(ResourceManager
+								.getString(WARNING_VALUES_MSG));
 						combo.select(newIndex);
 						return;
 					}
-					TableItem[] selection = headerTable.getTable().getSelection();
+					TableItem[] selection = headerTable.getTable()
+							.getSelection();
 					int itemExists = itemExists(headerTable, selection[0], item);
 					if (itemExists == -1) {
 						String value = header.getValue();
-						if (item.equals(DPPConstants.dpVersionHeader) && !DPPUtilities.isValidVersion(value)) {
-							showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
+						if (item.equals(DPPConstants.dpVersionHeader)
+								&& !DPPUtilities.isValidVersion(value)) {
+							showErrorTableDialog(ResourceManager
+									.getString(WRONG_VERSION));
 							return;
 						}
-						if (item.equals(DPPConstants.dpFixPackHeader) && !value.equals("") && !DPPUtilities.isValidFixPack(value)) {
+						if (item.equals(DPPConstants.dpFixPackHeader)
+								&& !value.equals("")
+								&& !DPPUtilities.isValidFixPack(value)) {
 							if (!DPPUtilities.isValidVersion(value)) {
-								showErrorTableDialog(ResourceManager.getString(WRONG_FIXPACK_HEADER));
+								showErrorTableDialog(ResourceManager
+										.getString(WRONG_FIXPACK_HEADER));
 								return;
 							}
 						}
 					} else {
-						showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n" + ResourceManager.getString(EQUAL_VALUES_MSG2));
+						showErrorTableDialog(ResourceManager
+								.getString(EQUAL_VALUES_MSG1)
+								+ "\n"
+								+ ResourceManager.getString(EQUAL_VALUES_MSG2));
 						combo.removeSelectionListener(this);
 						combo.select(newIndex);
 						combo.addSelectionListener(this);
@@ -866,22 +923,31 @@ public class HeadersSection extends DPPFormSection implements
 	 * which headers presents this table.
 	 */
 	private void handleNew() {
+		Table table = headerTable.getTable();
+		int size = table.getItems().length;
 		Header header = new Header();
-		Table parentTable = headerTable.getTable();
-		for (int i = 0; i < parentTable.getItemCount(); i++) {
-			TableItem currentItem = parentTable.getItem(i);
-			if (currentItem.getText(0).equalsIgnoreCase("")) {
-				if (!currentItem.getData().equals(header)) {
-					return;
-				}
+		boolean found = false;
+
+		for (int i = 0; i < size; i++) {
+			TableItem currentItem = table.getItem(i);
+			if (currentItem.getText(0).equalsIgnoreCase("")
+					&& !currentItem.getData().equals(header)) {
+				found = true;
+				break;
 			}
 		}
-		packageHeadersChange(header, ADD_HEADER);
-		headerTable.add(header);
-		headerTable.editElement(header, 0);
-		setDirty(true);
-		commitChanges(false);
-		removeButton.setEnabled(false);
+
+		if (!found) {
+			packageHeadersChange(header, ADD_HEADER);
+			headerTable.add(header);
+			headerTable.editElement(header, 0);
+			setDirty(true);
+			commitChanges(false);
+			size++;
+		}
+
+		table.setSelection(size - 1);
+		updateEnabledButtons();
 	}
 
 	/**
@@ -890,12 +956,14 @@ public class HeadersSection extends DPPFormSection implements
 	 * presents this table.
 	 */
 	private void handleRemove() {
-		Object object = ((IStructuredSelection) headerTable.getSelection()).getFirstElement();
+		Object object = ((IStructuredSelection) headerTable.getSelection())
+				.getFirstElement();
 		if (object != null && object instanceof Header) {
 			Header header = (Header) object;
 			// deployment package symbolic name ant deployment package version
 			// must not be removed!
-			if (header.getKey().equals(DPPConstants.dpSymbolicNameHeader) || header.getKey().equals(DPPConstants.dpVersionHeader)) {
+			if (header.getKey().equals(DPPConstants.dpSymbolicNameHeader)
+					|| header.getKey().equals(DPPConstants.dpVersionHeader)) {
 				return;
 			}
 			packageHeadersChange(header, REMOVE_HEADER);
@@ -922,7 +990,8 @@ public class HeadersSection extends DPPFormSection implements
 			Object first = selection.getFirstElement();
 			if (first instanceof Header) {
 				String key = ((Header) first).getKey().trim();
-				if (key.equals(DPPConstants.dpSymbolicNameHeader.trim()) || key.equals(DPPConstants.dpVersionHeader.trim())) {
+				if (key.equals(DPPConstants.dpSymbolicNameHeader.trim())
+						|| key.equals(DPPConstants.dpVersionHeader.trim())) {
 					removeButton.setEnabled(false);
 				} else {
 					if (isTableEditable) {
@@ -983,11 +1052,13 @@ public class HeadersSection extends DPPFormSection implements
 		switch (key) {
 		case ADD_HEADER:
 			pkgHeaders.addElement(header.getKey(), header.getValue());
-			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.ADD, new Object[] { header }, null));
+			model.fireModelChanged(new ModelChangedEvent(
+					IModelChangedEvent.ADD, new Object[] { header }, null));
 			break;
 		case REMOVE_HEADER:
 			pkgHeaders.removeElement(header.getKey());
-			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.REMOVE, new Object[] { header }, null));
+			model.fireModelChanged(new ModelChangedEvent(
+					IModelChangedEvent.REMOVE, new Object[] { header }, null));
 			break;
 		case UP_HEADER:
 			Vector vector = new Vector();
