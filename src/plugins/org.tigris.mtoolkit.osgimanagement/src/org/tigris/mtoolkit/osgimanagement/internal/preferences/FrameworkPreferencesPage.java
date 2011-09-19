@@ -48,6 +48,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	private Button enableActivationPolicyButton;
 	private Button enableBundleCategoriesButton;
 	private Button showSkippedSystemBundlesButton;
+	private Button autoUpdateBundlesOnInstallButton;
 
 	// TODO: Move these defaults to PreferencesInitializer, which is more
 	// suitable for them
@@ -57,6 +58,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	public static final boolean useActivationPolicy = true;
 	public static final boolean showBundleCategories = true;
 	public static final boolean showSkippedSystemBundlesDefault = true;
+	public static boolean autoUpdateBundlesOnInstallDefault = false;
 
 	private boolean showSkippedSystemBundles;
 
@@ -94,6 +96,11 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		showSkippedSystemBundlesButton = new Button(composite, SWT.CHECK);
 		showSkippedSystemBundlesButton.setText(Messages.show_skipped_system_bundles);
 		showSkippedSystemBundlesButton.setSelection(showSkippedSystemBundles);
+		
+		autoUpdateBundlesOnInstallButton = new Button(composite, SWT.CHECK);
+		autoUpdateBundlesOnInstallButton.setText(Messages.auto_update_bundles_on_install);
+		autoUpdateBundlesOnInstallButton.setSelection(FrameworkConnectorFactory.isAutoUpdateBundlesOnInstallEnabled);
+		autoUpdateBundlesOnInstallButton.setToolTipText(Messages.auto_update_bundles_on_install_tooltip);
 
 		return composite;
 	}
@@ -113,6 +120,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		enableActivationPolicyButton.setSelection(useActivationPolicy);
 		enableBundleCategoriesButton.setSelection(showBundleCategories);
 		showSkippedSystemBundlesButton.setSelection(showSkippedSystemBundlesDefault);
+		autoUpdateBundlesOnInstallButton.setSelection(autoUpdateBundlesOnInstallDefault);
 	}
 
 	public boolean performOk() {
@@ -122,6 +130,7 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		FrameworkConnectorFactory.isActivationPolicyEnabled = enableActivationPolicyButton.getSelection();
 		BrowserErrorHandler.isInfoLogEnabled = enableInfoLogButton.getSelection();
 		showSkippedSystemBundles = showSkippedSystemBundlesButton.getSelection();
+		FrameworkConnectorFactory.isAutoUpdateBundlesOnInstallEnabled = autoUpdateBundlesOnInstallButton.getSelection();
 
 		boolean shouldUpdateFrameworks = false;
 		if (FrameworkConnectorFactory.isBundlesCategoriesShown != enableBundleCategoriesButton.getSelection())
@@ -170,6 +179,8 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 				FrameworkConnectorFactory.isBundlesCategoriesShown);
 			store.setValue(ConstantsDistributor.MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES,
 					showSkippedSystemBundles);
+			store.setValue(ConstantsDistributor.MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL,
+					FrameworkConnectorFactory.isAutoUpdateBundlesOnInstallEnabled);
 		}
 	}
 
@@ -182,6 +193,8 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 		BrowserErrorHandler.isInfoLogEnabled = prefStore.getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
 		FrameworkConnectorFactory.isBundlesCategoriesShown = prefStore.getBoolean(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY);
 		showSkippedSystemBundles = prefStore.getBoolean(ConstantsDistributor.MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES);
+		FrameworkConnectorFactory.isAutoUpdateBundlesOnInstallEnabled = prefStore
+				.getBoolean(ConstantsDistributor.MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL);
 	}
 
 }

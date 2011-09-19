@@ -32,6 +32,7 @@ public interface ConstantsDistributor {
 	static final String MEMENTO_USE_ACTIVATION_POLICY = "use_activation_policy"; //$NON-NLS-1$
 	static final String MEMENTO_SHOW_BUNDLE_CATEGORY = "show_bundle_categories"; //$NON-NLS-1$
 	static final String MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES = "show_skipped_system_bundles"; //$NON-NLS-1$
+	static final String MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL = "auto_update_bundles_on_install";//$NON-NLS-1$
 
 	static final String STORAGE_FILE_NAME = "ModelStorage.xml"; //$NON-NLS-1$
 

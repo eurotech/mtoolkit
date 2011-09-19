@@ -75,7 +75,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			symbolicName =  ManifestUtils.getBundleSymbolicName(headers);
 			version = ManifestUtils.getBundleVersion(headers);
 
-			// check if already installd
+			// check if already installed
 			final boolean update[] = new boolean[] { false };
 			final boolean install[] = new boolean[] { false };
 			if (symbolicName != null) {
@@ -105,7 +105,6 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 					update[0] = true;
 				}
 			}
-
 			// bundle already exists, in which case, we need to update it
 			if (update[0] || install[0]) {
 				try {
@@ -114,74 +113,12 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				} catch (IOException e) {
 				}
 				final Object rBundles[] = rBundle;
-				final int selected[] = new int[] { 0 };
-				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						TitleAreaDialog updateDialog = new TitleAreaDialog(FrameWorkView.getShell()) {
-							private Button updateButton;
-							private List list;
-
-							protected Control createDialogArea(Composite parent) {
-								Control main = super.createDialogArea(parent);
-								list = new List((Composite) main, SWT.BORDER);
-								try {
-									for (int i = 0; i < rBundles.length; i++) {
-										list.add(symbolicName + " (" + ((RemoteBundle) rBundles[i]).getVersion() + ")");
-									}
-								} catch (IAgentException e) {
-								}
-								if (list.getItemCount() > 0)
-									list.setSelection(0);
-								list.addSelectionListener(new SelectionListener() {
-									public void widgetSelected(SelectionEvent e) {
-										updateButton.setEnabled(list.getSelectionIndex() != -1);
-									}
-
-									public void widgetDefaultSelected(SelectionEvent e) {
-									}
-								});
-								list.setLayoutData(new GridData(GridData.FILL_BOTH));
-								String title = "Bundle \"" + symbolicName + "\" is already installed!";
-								if (install[0]) {
-									title += "\nInstall version " + version + ", or select bundle to update.";
-								}
-								setTitle(title);
-								getShell().setText("Update bundle");
-								return main;
-							}
-
-							protected void createButtonsForButtonBar(Composite parent) {
-								Button installButton = createButton(parent, IDialogConstants.CLIENT_ID + 1, "Install", false);
-								updateButton = createButton(parent, IDialogConstants.CLIENT_ID + 2, "Update", false);
-								updateButton.setEnabled(list.getSelectionIndex() != -1);
-								createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL,
-										true);
-								if (!install[0]) {
-									installButton.setEnabled(false);
-								}
-							}
-
-							protected void buttonPressed(int buttonId) {
-								selected[0] = list.getSelectionIndex();
-								setReturnCode(buttonId);
-								close();
-							}
-
-						};
-						int updateResult = updateDialog.open();
-						if (updateResult == IDialogConstants.CLIENT_ID + 1) {
-							install[0] = true;
-							update[0] = false;
-						} else if (updateResult == IDialogConstants.CLIENT_ID + 2) {
-							update[0] = true;
-							install[0] = false;
-						} else {
-							install[0] = false;
-							update[0] = false;
-						}
-					}
-				});
-
+				int bundleIndex;
+				if (!install[0] && FrameworkConnectorFactory.isAutoUpdateBundlesOnInstallEnabled) {
+					bundleIndex = 0;
+				} else {
+					bundleIndex = showUpdateBundleDialog(update, install, rBundles)[0];
+				}
 				if (install[0]) {
 					monitor.beginTask(Messages.install_bundle, work);
 					rBundle[0] = connector.getDeploymentManager().installBundle(
@@ -190,7 +127,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				} else if (update[0]) {
 					monitor.beginTask(Messages.update_bundle, work);
 					input = new ProgressInputStream(new FileInputStream(bundle), monitor);
-					rBundle[selected[0]].update(input);
+					rBundle[bundleIndex].update(input);
 				}
 			}
 		} catch (IOException e) {
@@ -228,6 +165,76 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 			}
 		}
 		return Status.OK_STATUS;
+	}
+
+	private int[] showUpdateBundleDialog(final boolean[] update, final boolean[] install, final Object[] rBundles) {
+		final int selected[] = new int[] { 0 };
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				TitleAreaDialog updateDialog = new TitleAreaDialog(FrameWorkView.getShell()) {
+					private Button updateButton;
+					private List list;
+
+					protected Control createDialogArea(Composite parent) {
+						Control main = super.createDialogArea(parent);
+						list = new List((Composite) main, SWT.BORDER);
+						try {
+							for (int i = 0; i < rBundles.length; i++) {
+								list.add(symbolicName + " (" + ((RemoteBundle) rBundles[i]).getVersion() + ")");
+							}
+						} catch (IAgentException e) {
+						}
+						if (list.getItemCount() > 0)
+							list.setSelection(0);
+						list.addSelectionListener(new SelectionListener() {
+							public void widgetSelected(SelectionEvent e) {
+								updateButton.setEnabled(list.getSelectionIndex() != -1);
+							}
+
+							public void widgetDefaultSelected(SelectionEvent e) {
+							}
+						});
+						list.setLayoutData(new GridData(GridData.FILL_BOTH));
+						String title = "Bundle \"" + symbolicName + "\" is already installed!";
+						if (install[0]) {
+							title += "\nInstall version " + version + ", or select bundle to update.";
+						}
+						setTitle(title);
+						getShell().setText("Update bundle");
+						return main;
+					}
+
+					protected void createButtonsForButtonBar(Composite parent) {
+						Button installButton = createButton(parent, IDialogConstants.CLIENT_ID + 1, "Install", false);
+						updateButton = createButton(parent, IDialogConstants.CLIENT_ID + 2, "Update", false);
+						updateButton.setEnabled(list.getSelectionIndex() != -1);
+						createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, true);
+						if (!install[0]) {
+							installButton.setEnabled(false);
+						}
+					}
+
+					protected void buttonPressed(int buttonId) {
+						selected[0] = list.getSelectionIndex();
+						setReturnCode(buttonId);
+						close();
+					}
+
+				};
+				int updateResult = updateDialog.open();
+				if (updateResult == IDialogConstants.CLIENT_ID + 1) {
+					install[0] = true;
+					update[0] = false;
+				} else if (updateResult == IDialogConstants.CLIENT_ID + 2) {
+					update[0] = true;
+					install[0] = false;
+				} else {
+					install[0] = false;
+					update[0] = false;
+				}
+			}
+		});
+		return selected;
 	}
 
 	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");

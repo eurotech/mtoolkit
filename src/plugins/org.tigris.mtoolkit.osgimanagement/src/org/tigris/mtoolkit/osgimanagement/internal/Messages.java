@@ -92,6 +92,8 @@ public final class Messages extends NLS {
 	public static String enable_frameworks_autoconnect;
 	public static String show_bundle_categories;
 	public static String show_skipped_system_bundles;
+	public static String auto_update_bundles_on_install;
+	public static String auto_update_bundles_on_install_tooltip;
 	public static String enable_info_log;
 	public static String autostart_bundles_on_install;
 	public static String use_activation_policy;
@@ -105,7 +107,7 @@ public final class Messages extends NLS {
 	public static String file_not_exists;
 	public static String no_reason_message;
 	public static String no_exception_message;
-
+	
 	public static String no_plugin_exporter_available;
 	public static String bundle_deinstalled_message;
 

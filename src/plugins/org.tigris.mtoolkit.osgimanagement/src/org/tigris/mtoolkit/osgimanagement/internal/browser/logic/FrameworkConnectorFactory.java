@@ -49,6 +49,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	public static boolean isAutoStartBundlesEnabled = FrameworkPreferencesPage.autoStartAfterInstall;
 	public static boolean isActivationPolicyEnabled = FrameworkPreferencesPage.useActivationPolicy;
 	public static boolean isBundlesCategoriesShown = FrameworkPreferencesPage.showBundleCategories;
+	public static boolean isAutoUpdateBundlesOnInstallEnabled = FrameworkPreferencesPage.autoUpdateBundlesOnInstallDefault;
 
 	public static final int CONNECT_PROGRESS = 1000;
 	
