@@ -321,6 +321,7 @@ public class DeploymentPackageGenerator {
 		getOptionsLine("-signedjar", signedJar, v);
 		v.addElement(jarName);
 		v.addElement(ci.getAlias());
+		boolean ret = true;
 		try {
 
 			final Process ps = Runtime.getRuntime().exec(
@@ -379,16 +380,14 @@ public class DeploymentPackageGenerator {
 			// signing.
 			if (monitor.isCanceled()) {
 				ps.destroy();
-				timeout = true;
 				if (result != 0) {// the ps can finish during the 100ms in the
 					// while
 					// loop
 					error = ResourceManager
 							.getString("BuildExportWizard.errorSigningCanceled");
 				}
-				return false;
-			}
-			if (result != 0) {
+				ret = false;
+			} else if (result != 0) {
 				error = "Could not sign deployment package using the '"
 						+ ci.getAlias()
 						+ "' alias.\nCheck that your settings are correct and that the jar signer preference is correctly set.\nThe package was successfully created but was not signed.";
@@ -402,11 +401,12 @@ public class DeploymentPackageGenerator {
 				// causes problems sometimes.(infinite wait)
 				System.out.println(errorStream);
 				System.out.println(outputStream);
+				ret = false;
 			}
 			timeout = true;
 		} catch (Throwable t) {
 		}
-		return true;
+		return ret;
 	}
 
 	private void genereateDefaultBuildProperties(DPPFile dppFile) {

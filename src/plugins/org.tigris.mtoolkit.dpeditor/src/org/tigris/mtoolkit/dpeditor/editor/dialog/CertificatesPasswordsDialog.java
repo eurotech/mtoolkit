@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -26,6 +27,7 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.pde.internal.ui.elements.DefaultContentProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
@@ -94,6 +96,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 
 	public int openResult;
 
+	private CLabel errorLabel;
+
 	/**
 	 * Creates the instance of the CertificatesPasswordsDialog in the given
 	 * parent shell, display position and a size of the dialog.
@@ -109,7 +113,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 	public CertificatesPasswordsDialog(Shell parent, Point displayLoc,
 			Point size) {
 		super(parent);
-		this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
+		this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE
+				| SWT.APPLICATION_MODAL);
 		isNewDialog = true;
 		this.displayLoc = displayLoc;
 		areaSize = size;
@@ -131,7 +136,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 	 * @return an old instance of this dialog or created a new one if there are
 	 *         no instance of dialog
 	 */
-	public static CertificatesPasswordsDialog getInstance(Shell parent, Point displayLoc, Point size) {
+	public static CertificatesPasswordsDialog getInstance(Shell parent,
+			Point displayLoc, Point size) {
 		if (dialog == null) {
 			SHELL_WIDTH = 400;
 			SHELL_HEIGHT = 450;
@@ -151,7 +157,9 @@ public class CertificatesPasswordsDialog extends Dialog implements
 		super.configureShell(shell);
 		shell.setSize(SHELL_WIDTH, SHELL_HEIGHT);
 		if (isNewDialog) {
-			shell.setLocation(new Point(displayLoc.x + (areaSize.x / 2 - SHELL_WIDTH / 2), displayLoc.y + (areaSize.y / 2 - SHELL_HEIGHT / 2)));
+			shell.setLocation(new Point(displayLoc.x
+					+ (areaSize.x / 2 - SHELL_WIDTH / 2), displayLoc.y
+					+ (areaSize.y / 2 - SHELL_HEIGHT / 2)));
 			isNewDialog = false;
 		} else {
 			shell.setLocation(location);
@@ -242,7 +250,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 	 * .Composite)
 	 */
 	protected Control createContents(Composite parent) {
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.CERT_PASS_DIALOG);
+		PlatformUI.getWorkbench().getHelpSystem()
+				.setHelp(parent, IHelpContextIds.CERT_PASS_DIALOG);
 		// create the top level composite for the dialog
 		Composite composite = new Composite(parent, 0);
 		GridLayout layout = new GridLayout();
@@ -264,8 +273,12 @@ public class CertificatesPasswordsDialog extends Dialog implements
 
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, ResourceManager.getString("DPPEditor.CertificatesSection.SkipButton"), false);
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL,
+				true);
+		createButton(parent, IDialogConstants.CANCEL_ID,
+				ResourceManager
+						.getString("DPPEditor.CertificatesSection.SkipButton"),
+				false);
 	}
 
 	/**
@@ -291,7 +304,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		applyDialogFont(composite);
 		Label label = new Label(composite, SWT.NONE);
-		label.setText(ResourceManager.getString("DPPEditor.CertificatesPasswordsDialog.Label"));
+		label.setText(ResourceManager
+				.getString("DPPEditor.CertificatesPasswordsDialog.Label"));
 		container = createClient(composite);
 		setTitle(ResourceManager.getString(TITLE, "")); //$NON-NLS-1$
 		return composite;
@@ -324,7 +338,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 	 * @return the index of the TableItem in the given TableViewer or -1 if this
 	 *         TableItem is not exists in the TableViewer
 	 */
-	public static int itemExists(TableViewer table, TableItem item, String newValue, int column) {
+	public static int itemExists(TableViewer table, TableItem item,
+			String newValue, int column) {
 		int n = -1;
 		Table parentTable = table.getTable();
 		for (int i = 0; i < parentTable.getItemCount(); i++) {
@@ -361,25 +376,34 @@ public class CertificatesPasswordsDialog extends Dialog implements
 			} else if (property.equals("keystore")) {
 				return;
 			} else if (property.equals("storepass")) {
-				if (newValue.equals(cert.getStorepass()) && (!newValue.equals(""))) {
+				if (newValue.equals(cert.getStorepass())
+						&& (!newValue.equals(""))) {
 					return;
 				}
 				isSet = true;
 				int index = certsVector.indexOf(cert);
 				cert.setStorepass(newValue);
-				CertificateInfo certInfo = (CertificateInfo) certsVector.elementAt(index);
+				CertificateInfo certInfo = (CertificateInfo) certsVector
+						.elementAt(index);
 				certInfo.setStorepass(newValue);
 			} else if (property.equals("keypass")) {
-				if (newValue.equals(cert.getKeypass()) && (!newValue.equals(""))) {
+				if (newValue.equals(cert.getKeypass())
+						&& (!newValue.equals(""))) {
 					return;
 				}
 				isSet = true;
 				int index = certsVector.indexOf(cert);
 				cert.setKeypass(newValue);
-				CertificateInfo certInfo = (CertificateInfo) certsVector.elementAt(index);
+				CertificateInfo certInfo = (CertificateInfo) certsVector
+						.elementAt(index);
 				certInfo.setKeypass(newValue);
 			}
+
 			certsTable.update(cert, null);
+
+			if (!newValue.equals("") && errorLabel.isVisible()) {
+				errorLabel.setVisible(false);
+			}
 		}
 
 		public Object getValue(Object object, String property) {
@@ -387,7 +411,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 			if (property.equals("alias")) {
 				return DPPUtilities.getStringValue(certificate.getAlias());
 			} else if (property.equals("keystore")) {
-				String keyStore = DPPUtilities.getStringValue(certificate.getKeystore());
+				String keyStore = DPPUtilities.getStringValue(certificate
+						.getKeystore());
 				return getRelativePath(keyStore);
 			} else if (property.equals("storepass")) {
 				return DPPUtilities.getStringValue(certificate.getStorepass());
@@ -415,11 +440,13 @@ public class CertificatesPasswordsDialog extends Dialog implements
 					CertificateInfo info = (CertificateInfo) infos.elementAt(i);
 					String keyPass = info.getKeypass();
 					String storePass = info.getStorepass();
-					if ((keyPass == null || keyPass.equals("")) || (storePass == null || storePass.equals(""))) {
+					if ((keyPass == null || keyPass.equals(""))
+							|| (storePass == null || storePass.equals(""))) {
 						certsVector.addElement(info);
 					}
 				}
-				CertificateInfo[] result = new CertificateInfo[certsVector.size()];
+				CertificateInfo[] result = new CertificateInfo[certsVector
+						.size()];
 				certsVector.copyInto(result);
 				return result;
 			} else if (parent instanceof Vector) {
@@ -444,7 +471,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 				if (index == 0) {
 					return certificate.getAlias();
 				} else if (index == 1) {
-					String keyStore = DPPUtilities.getStringValue(certificate.getKeystore());
+					String keyStore = DPPUtilities.getStringValue(certificate
+							.getKeystore());
 					return getRelativePath(keyStore);
 				} else if (index == 2) {
 					String storePass = certificate.getStorepass();
@@ -484,6 +512,18 @@ public class CertificatesPasswordsDialog extends Dialog implements
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		tableContainer.setLayout(layout);
+
+		errorLabel = new CLabel(tableContainer, SWT.WRAP | SWT.LEFT);
+		errorLabel.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR)
+				.getImage());
+		errorLabel.setVisible(false);
+		errorLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
+		errorLabel.setForeground(getShell().getDisplay().getSystemColor(
+				SWT.COLOR_RED));
+		errorLabel.setText(ResourceManager
+				.getString("DPPEditor.CertificatesPasswordsDialog.ErrorLabel"));
+
 		createTable(tableContainer);
 		tableContainer.pack();
 		return tableContainer;
@@ -501,7 +541,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
+		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE
+				| SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL);
 		table.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent ev) {
 				if (ev.keyCode == 27) {
@@ -509,7 +550,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 						Table table = (Table) ev.getSource();
 						if (table.getSelectionIndex() < 0)
 							return;
-						TableItem item = table.getItem(table.getSelectionIndex());
+						TableItem item = table.getItem(table
+								.getSelectionIndex());
 					}
 				}
 			}
@@ -519,7 +561,15 @@ public class CertificatesPasswordsDialog extends Dialog implements
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		String[] columnTitles = { ResourceManager.getString("DPPEditor.CertificatesSection.ColAlias"), ResourceManager.getString("DPPEditor.CertificatesSection.ColKeystore"), ResourceManager.getString("DPPEditor.CertificatesSection.ColStorePassword"), ResourceManager.getString("DPPEditor.CertificatesSection.ColKeyPassword") };
+		String[] columnTitles = {
+				ResourceManager
+						.getString("DPPEditor.CertificatesSection.ColAlias"),
+				ResourceManager
+						.getString("DPPEditor.CertificatesSection.ColKeystore"),
+				ResourceManager
+						.getString("DPPEditor.CertificatesSection.ColStorePassword"),
+				ResourceManager
+						.getString("DPPEditor.CertificatesSection.ColKeyPassword") };
 
 		for (int i = 0; i < columnTitles.length; i++) {
 			TableColumn tableColumn = new TableColumn(table, SWT.NULL);
@@ -527,7 +577,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 		}
 
 		TableControlListener controlListener = new TableControlListener(table);
-		controlListener.setResizeMode(EventConstants.CERTIFICATES_SECOND_RESIZE_MODE);
+		controlListener
+				.setResizeMode(EventConstants.CERTIFICATES_SECOND_RESIZE_MODE);
 		container.addControlListener(controlListener);
 
 		certsTable = new TableViewer(table);
@@ -535,7 +586,10 @@ public class CertificatesPasswordsDialog extends Dialog implements
 		certsTable.setLabelProvider(new TableLabelProvider());
 		certsTable.addSelectionChangedListener(this);
 
-		CellEditor[] editors = new CellEditor[] { new TextCellEditor(table), new TextCellEditor(table), new TextCellEditor(table, SWT.PASSWORD), new TextCellEditor(table, SWT.PASSWORD) };
+		CellEditor[] editors = new CellEditor[] { new TextCellEditor(table),
+				new TextCellEditor(table),
+				new TextCellEditor(table, SWT.PASSWORD),
+				new TextCellEditor(table, SWT.PASSWORD) };
 		String[] properties = { "alias", "keystore", "storepass", "keypass" };
 		certsTable.setCellEditors(editors);
 		certsTable.setCellModifier(new KeyModifier());
@@ -614,7 +668,8 @@ public class CertificatesPasswordsDialog extends Dialog implements
 				CertificateInfo info = (CertificateInfo) infos.elementAt(i);
 				String keyPass = info.getKeypass();
 				String storePass = info.getStorepass();
-				if ((keyPass == null || keyPass.equals("")) || (storePass == null || storePass.equals(""))) {
+				if ((keyPass == null || keyPass.equals(""))
+						|| (storePass == null || storePass.equals(""))) {
 					CertificateInfo copyInfo = new CertificateInfo();
 					copyInfo.setAlias(info.getAlias());
 					copyInfo.setKeypass(info.getKeypass());
@@ -666,5 +721,33 @@ public class CertificatesPasswordsDialog extends Dialog implements
 			value = "<.>" + value.substring(prjLocation.length());
 		}
 		return value;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
+	 */
+	protected void okPressed() {
+
+		if (!errorLabel.isVisible()) {
+			boolean hasErrors = false;
+			int certLength = certsVector.size();
+			for (int i = 0; i < certLength; ++i) {
+				String storePass = ((CertificateInfo) certsVector.get(i))
+						.getStorepass();
+				if (storePass == null || "".equals(storePass)) {
+					errorLabel.setVisible(true);
+
+					hasErrors = true;
+					break;
+				}
+			}
+
+			if (!hasErrors) {
+				super.okPressed();
+			}
+		}
+
 	}
 }
