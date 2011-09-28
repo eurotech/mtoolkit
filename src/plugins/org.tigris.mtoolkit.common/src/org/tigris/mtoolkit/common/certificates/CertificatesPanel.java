@@ -32,7 +32,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
@@ -51,8 +50,7 @@ public class CertificatesPanel {
 
 	private static final String MTOOLKIT_PAGE_ID = "org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"; //$NON-NLS-1$
 
-	private Group signContentGroup;
-	private Button chkSignContent;
+  private Composite signContentGroup;
 	private Label lblCertificates;
 	private Table tblCertificates;
 	private CheckboxTableViewer certificatesViewer;
@@ -62,100 +60,105 @@ public class CertificatesPanel {
 	/**
 	 * @since 5.0
 	 */
-	public static final int EVENT_CONTENT_MODIFIED = 1;
+  public static final int EVENT_CONTENT_MODIFIED = 1;
 
 	public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan) {
 		this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
 	}
-
 	/**
 	 * @since 6.0
 	 */
+  public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, boolean isComposite) {
+    this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH, isComposite);
+  }
+
+  public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style, boolean isComposite) {
+    if (isComposite) {
+      signContentGroup = new Composite(parent, SWT.NONE);
+    } else {
+      signContentGroup = new Group(parent, SWT.NONE);
+      ((Group) signContentGroup).setText(Messages.CertificatesPanel_signContentGroup);
+    }
+    initContent(horizontalSpan, verticalSpan, style);
+  }
+
 	public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style) {
-		// Signing content group
-		signContentGroup = new Group(parent, SWT.NONE);
-		signContentGroup.setText(Messages.CertificatesPanel_signContentGroup);
-		GridData gridData = new GridData(style);
-		gridData.horizontalSpan = horizontalSpan;
-		gridData.verticalSpan = verticalSpan;
-		signContentGroup.setLayoutData(gridData);
-		signContentGroup.setLayout(new GridLayout());
+    signContentGroup = new Group(parent, SWT.NONE);
+    ((Group) signContentGroup).setText(Messages.CertificatesPanel_signContentGroup);
+    initContent(horizontalSpan, verticalSpan, style);
+  }
+  
+  private void initContent(int horizontalSpan, int verticalSpan, int style) {
+    GridData gridData = new GridData(style);
+    gridData.horizontalSpan = horizontalSpan;
+    gridData.verticalSpan = verticalSpan;
+    signContentGroup.setLayoutData(gridData);
+    signContentGroup.setLayout(new GridLayout());
 
-		chkSignContent = new Button(signContentGroup, SWT.CHECK);
-		chkSignContent.setLayoutData(new GridData());
-		chkSignContent.setText(Messages.CertificatesPanel_chkSignContent);
-		chkSignContent.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				tblCertificates.setEnabled(chkSignContent.getSelection());
-				fireModifyEvent();
-			}
-		});
+    lblCertificates = new Label(signContentGroup, SWT.NONE);
+    lblCertificates.setText(Messages.CertificatesPanel_lblCertificates);
+    lblCertificates.setLayoutData(new GridData());
 
-		lblCertificates = new Label(signContentGroup, SWT.NONE);
-		lblCertificates.setText(Messages.CertificatesPanel_lblCertificates);
-		lblCertificates.setLayoutData(new GridData());
+    // Certificates table
+    int stl = SWT.SINGLE | SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
+    tblCertificates = new Table(signContentGroup, stl);
+    gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+    gridData.heightHint = 60;
+    tblCertificates.setLayoutData(gridData);
+    tblCertificates.setLinesVisible(true);
+    tblCertificates.setHeaderVisible(true);
+    tblCertificates.addSelectionListener(new SelectionAdapter() {
+      public void widgetSelected(SelectionEvent e) {
+        if (e.detail == SWT.CHECK) {
+          fireModifyEvent();
+        }
+      }
+    });
+    TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
+    column.setText(Messages.CertificatesPanel_tblCertColAlias);
+    column.setWidth(100);
+    column = new TableColumn(tblCertificates, SWT.LEFT);
+    column.setText(Messages.CertificatesPanel_tblCertColLocation);
+    column.setWidth(160);
 
-		// Certificates table
-		int stl = SWT.SINGLE | SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
-		tblCertificates = new Table(signContentGroup, stl);
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.heightHint = 60;
-		tblCertificates.setLayoutData(gridData);
-		tblCertificates.setLinesVisible(true);
-		tblCertificates.setHeaderVisible(true);
-		tblCertificates.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				if (e.detail == SWT.CHECK) {
-					fireModifyEvent();
-				}
-			}
-		});
-		TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
-		column.setText(Messages.CertificatesPanel_tblCertColAlias);
-		column.setWidth(100);
-		column = new TableColumn(tblCertificates, SWT.LEFT);
-		column.setText(Messages.CertificatesPanel_tblCertColLocation);
-		column.setWidth(160);
+    certificatesViewer = new CheckboxTableViewer(tblCertificates);
+    certificatesViewer.setContentProvider(new CertContentProvider());
+    certificatesViewer.setLabelProvider(new CertLabelProvider());
+    
+  }
 
-		certificatesViewer = new CheckboxTableViewer(tblCertificates);
-		certificatesViewer.setContentProvider(new CertContentProvider());
-		certificatesViewer.setLabelProvider(new CertLabelProvider());
-	}
-
-	/**
-	 * Initializes the signing certificates with the given list of certificate
-	 * ids (of type String). This method could be called multiple times.
-	 * 
-	 * @param signUids
-	 *            list with certificate ids or <code>null</code>
-	 */
-	public void initialize(List signUids) {
+  /**
+   * Initializes the signing certificates with the given list of certificate
+   * ids (of type String). This method could be called multiple times.
+   * 
+   * @param signUids
+   *            list with certificate ids or <code>null</code>
+   */
+  public void initialize(List signUids) {
 		ICertificateDescriptor certificates[] = CertUtils.getCertificates();
+    certificatesViewer.setAllChecked(false);
 		certificatesViewer.setInput(certificates);
-		boolean foundCert = false;
 		if (certificates == null || certificates.length == 0) {
 			setNoCertificatesAvailable();
 		} else {
+     if (link != null) {
+        disposeNoCertificatesAvailableState();
+      }
 			if (signUids != null) {
 				for (int i = 0; i < certificates.length; i++) {
 					if (signUids.contains(certificates[i].getUid())) {
 						certificatesViewer.setChecked(certificates[i], true);
-						foundCert = true;
-					}
-				}
+          }
 			}
-		}
-		tblCertificates.setEnabled(foundCert);
-		chkSignContent.setSelection(foundCert);
-	}
+      }
+    }
+  }
 
 	public List getSignCertificateUids() {
 		List signUids = new ArrayList();
-		if (chkSignContent.getSelection()) {
 			Object[] checkedCerts = certificatesViewer.getCheckedElements();
 			for (int i = 0; i < checkedCerts.length; i++) {
 				signUids.add(((ICertificateDescriptor) checkedCerts[i]).getUid());
-			}
 		}
 		return signUids;
 	}
@@ -205,22 +208,22 @@ public class CertificatesPanel {
 					if (certificates == null || certificates.length == 0) {
 						return;
 					}
-					link.dispose();
-					link = null;
-					setCertificateControlsVisible(true);
-					layoutControls();
-					initialize(null);
+          initialize(null);
 				}
 			});
 		}
 
 		signContentGroup.layout();
 	}
+  
+  private void disposeNoCertificatesAvailableState() {
+    link.dispose();
+    link = null;
+    setCertificateControlsVisible(true);
+    layoutControls();
+  }
 
 	private void setCertificateControlsVisible(boolean visible) {
-		chkSignContent.setSelection(visible);
-		chkSignContent.setEnabled(visible);
-
 		lblCertificates.setVisible(visible);
 		((GridData) lblCertificates.getLayoutData()).exclude = !visible;
 
