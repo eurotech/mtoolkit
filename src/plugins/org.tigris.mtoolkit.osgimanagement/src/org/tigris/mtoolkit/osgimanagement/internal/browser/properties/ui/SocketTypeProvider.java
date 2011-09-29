@@ -38,7 +38,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 	public void setProperties(IMemento config) {
 		if (config == null) return;
 		String idString = config.getString(Framework.FRAMEWORK_ID);
-		if (idString == null) {
+		if (idString == null || idString.length() == 0) {
 			idString = "127.0.0.1";
 		}
 		idText.setText(idString);
@@ -104,7 +104,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 						Integer.parseInt(result);
 						result = null;
 					} catch (NumberFormatException ex) {
-						result = "Invalid port: "+result;
+						result = "Invalid port: " + result;
 					}
 					SocketTypeProvider.this.validator.setValidState(result);
 				}
@@ -116,9 +116,11 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 
 	private Job validateJob;
 	
+
 	public String validate() {
 		String ip = getTransportID();
-		return validate(ip);
+		String result = validate(ip);
+		return result == null ? validatePort(portText.getText()) : result;
 	}
 	
 	public String validate(String ip) {
@@ -134,6 +136,17 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		return null;
 	}
 
+	public String validatePort(String port) {
+		if (port.trim().equals("")) {
+			return "Type port number";
+		}
+		try {
+			int intPort = Integer.parseInt(port);
+		} catch (NumberFormatException ex) {
+			return "Invalid port: " + port;
+		}
+		return null;
+	}
 	
 	
 	public String getTransportID() {
@@ -167,5 +180,4 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		idText.setEditable(editable);
 		portText.setEditable(editable);
 	}
-
 }

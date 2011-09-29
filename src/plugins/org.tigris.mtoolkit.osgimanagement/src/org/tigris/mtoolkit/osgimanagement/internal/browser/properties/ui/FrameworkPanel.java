@@ -56,6 +56,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 	private FrameworkImpl fw;
 	private Model parent;
 	private ErrorMonitor errorMonitor;
+	private IMemento defaultConfig;
 
 	public FrameworkPanel(Composite composite, FrameworkImpl fw, Model parent) {
 		this(composite, fw, parent, GridData.FILL_BOTH);
@@ -304,11 +305,18 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 						if (selectedProvider.props == null) {
 							selectedProvider.props = cloneMemento(fw.getConfig());
 						}
-						selectedProvider.getProvider().save(selectedProvider.props);
+						if (selectedProvider.getProvider().validate() == null) {
+							selectedProvider.getProvider().save(selectedProvider.props);
+						} else {
+							selectedProvider.props = cloneMemento(defaultConfig);
+						}
 					} catch (CoreException ex) {
 						FrameworkPlugin.error("Failed to initialize device type provider", ex);
 					}
-					// switching to the new provider
+					if (newProvider.props == null) {
+						newProvider.props = cloneMemento(defaultConfig); 
+					}
+					// switching to the new provider		
 					selectedProvider = newProvider;
 					showDeviceTypePanel(selectedProvider);
 				}
@@ -317,6 +325,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 	}
 
 	public void initialize(IMemento config) {
+		defaultConfig = cloneMemento(config);
 		String providerId = config.getString(TRANSPORT_PROVIDER_ID);
 		boolean providerFound = false;
 		if (providerId != null) {
@@ -337,7 +346,6 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 		if (providerId != null && !providerFound) {
 			warningProviderNotFound();
 		}
-
 		try {
 			selectedProvider.props = cloneMemento(config);
 			selectedProvider.getProvider().setProperties(selectedProvider.props);
@@ -411,15 +419,16 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 		boolean connChanged = false;
 		try {
 			IMemento initialConfig = cloneMemento(config);
+			if (selectedProvider.getProvider().validate() != null) {
+				config = cloneMemento(defaultConfig);
+			}
 			selectedProvider.getProvider().save(config);
 			config.putString(TRANSPORT_PROVIDER_ID, selectedProvider.getTypeId());
 			connChanged = !mementoEquals(initialConfig, config);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-
 		FrameworkPlugin.getDefault().getPreferenceStore().setValue(DEFAULT_DEVICE_TYPE, selectedProvider.getTypeId());
-
 		return connChanged;
 	}
 
