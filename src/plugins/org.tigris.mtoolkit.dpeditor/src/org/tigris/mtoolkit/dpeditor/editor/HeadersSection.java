@@ -805,19 +805,26 @@ public class HeadersSection extends DPPFormSection implements
 			return;
 		}
 		DPPFile dppFile = model.getDPPFile();
-		headerTable.refresh();
+		// headerTable.refresh(); //tozi red moje da natyp4e prazniq header ot therHeaders v modela!
+		boolean isPageConsistent = true;
+
 		if (!DPPEditor.isDialogShown) {
 			DPPEditor.isDialogShown = false;
 			try {
 				dppFile.checkConsistency();
 			} catch (InconsistentDataException e) {
 				DPPErrorHandler.processError(e);
+				isPageConsistent = false;
+				
 				if (!DPPEditor.isDialogShown) {
 					DPPEditor.isDialogShown = true;
 					DPPEditor.showErrorDialog(e.getMessage());
 				}
-				model.fireModelChanged(new ModelChangedEvent(
-						IModelChangedEvent.EDIT, new Object[] { header }, null));
+			}
+
+			if (isPageConsistent) {				
+				headerTable.refresh(); // mestq go tuk! uslovieto e da e minal consitency check-a pyrvo.
+				model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { header }, null));
 			}
 		}
 
