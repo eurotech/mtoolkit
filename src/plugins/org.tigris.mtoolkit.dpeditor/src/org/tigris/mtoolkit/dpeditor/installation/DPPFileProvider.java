@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -33,7 +34,7 @@ import org.tigris.mtoolkit.util.DPPFile;
 public class DPPFileProvider extends WorkspaceFileProvider {
   
   public class DPPFileItem extends WorkspaceFileItem {
-    
+
     public File dpFile;
     private boolean delete = false;
     
@@ -61,33 +62,49 @@ public class DPPFileProvider extends WorkspaceFileProvider {
     }
     
     public IStatus prepare(IProgressMonitor monitor, Map properties) {
+
       try {
+        file.refreshLocal(IResource.DEPTH_ZERO, monitor);
         DPPFile dppFile = new DPPFile(file.getLocation().toFile(), file.getProject().getLocation().toOSString());
         dpFile = new File(dppFile.getBuildInfo().getBuildLocation() + "/" + dppFile.getBuildInfo().getDpFileName());
         delete = !dpFile.exists();
         DPPUtil.generateDeploymentPackage(dppFile, monitor, file.getProject(), DPPUtil.TYPE_QUICK_BUILD_DPP);
-        
-        if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) && !AndroidUtils.isDpConvertedToDex(dpFile)) {
-          File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + dpFile.getName());
-          convertedFile.getParentFile().mkdirs();
-          AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
-          preparedFile = convertedFile;
-        }
-        if (monitor.isCanceled()) {
-          return Status.CANCEL_STATUS;
+        preparedFile = dpFile;
+          if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) && !AndroidUtils.isDpConvertedToDex(dpFile)) {
+            File convertedFile = new File(DPActivator.getDefault().getStateLocation() + "/dex/" + dpFile.getName());
+            convertedFile.getParentFile().mkdirs();
+            AndroidUtils.convertDpToDex(dpFile, convertedFile, monitor);
+            preparedFile = convertedFile;
+          }
+          if (monitor.isCanceled()) {
+            return Status.CANCEL_STATUS;
         }
       } catch (Exception e) {
         return new Status(Status.ERROR, DPActivator.PLUGIN_ID, "Failed to prepare file for installation");
       }
+      
       return Status.OK_STATUS;
     }
     
-    public InstallationItem getInstallationItem(Object resource) {
-      return new DPPFileItem(getFileFromGeneric(resource), mimeType);
+  } // end of DPPFileItem
+  
+  public IStatus prepareItems(List items, Map properties, IProgressMonitor monitor) {
+    if (items != null) {
+      for (int i = 0; i < items.size(); i++) {
+        Object item = items.get(i);
+        if (item instanceof DPPFileItem) {
+          ((DPPFileItem) item).prepare(monitor, properties);
+        }
+      }
     }
-    
-    public String getName() {
-      return "Deployment packages provider";
-    }
+    return Status.OK_STATUS;
+  }
+  
+  public String getName() {
+    return "Deployment packages provider";
+  }
+  
+  public InstallationItem getInstallationItem(Object resource) {
+    return new DPPFileItem(getFileFromGeneric(resource), mimeType);
   }
 }
