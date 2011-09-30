@@ -50,15 +50,15 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 			JarFile jar = new JarFile(sourceFile);
 			Manifest manifest = jar.getManifest();
 			if (manifest == null)
-				return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file {0} doesn't have valid manifest",
+        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file \"{0}\" doesn't have valid manifest",
 					sourceFile), null);
 			String symbolicName = manifest.getMainAttributes().getValue("DeploymentPackage-SymbolicName");
 			if (symbolicName == null)
-				return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file {0} doesn't have valid manifest",
+        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file \"{0}\" doesn't have valid manifest",
 					sourceFile), null);
 			String version = manifest.getMainAttributes().getValue("DeploymentPackage-Version");
 			if (version == null)
-				return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file {0} doesn't have valid manifest",
+        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file \"{0}\" doesn't have valid manifest",
 					sourceFile), null);
 			DeviceConnector connector = framework.getConnector();
 			if (connector == null) return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Connection lost", null);
@@ -93,8 +93,9 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 					}
 				}
 			}
-			framework.getConnector().getDeploymentManager().installDeploymentPackage(new FileInputStream(sourceFile));
+			 framework.getConnector().getDeploymentManager().installDeploymentPackage(new FileInputStream(sourceFile));
 		} catch (IOException e) {
+      return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Failed to prepare file \"{0}\" Cause:", sourceFile.getName(), e.getMessage()), e);
 		}
 		return Status.OK_STATUS;
 	}
@@ -107,7 +108,7 @@ public class InstallDeploymentOperation extends RemoteDeploymentOperation {
 				dialog = new MessageDialog(PluginUtilities.getActiveWorkbenchShell(),
 						"Uninstall Existing Deployment Package",
 						null,
-						NLS.bind("The deployment package {0} exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",
+ NLS.bind("The deployment package \"{0}\" exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",
 							symbolicName),
 						MessageDialog.QUESTION,
 						new String[] { "Uninstall Remote Version", "Cancel" },
