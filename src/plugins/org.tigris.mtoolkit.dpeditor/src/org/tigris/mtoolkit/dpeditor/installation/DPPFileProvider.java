@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileItem;
@@ -62,9 +64,13 @@ public class DPPFileProvider extends WorkspaceFileProvider {
     }
     
     public IStatus prepare(IProgressMonitor monitor, Map properties) {
-
       try {
-        file.refreshLocal(IResource.DEPTH_ZERO, monitor);
+        Display dis = PlatformUI.getWorkbench().getDisplay();
+        dis.syncExec(new Thread() {
+          public void run() {
+            PlatformUI.getWorkbench().saveAllEditors(true);
+          }
+        });
         DPPFile dppFile = new DPPFile(file.getLocation().toFile(), file.getProject().getLocation().toOSString());
         dpFile = new File(dppFile.getBuildInfo().getBuildLocation() + "/" + dppFile.getBuildInfo().getDpFileName());
         delete = !dpFile.exists();
