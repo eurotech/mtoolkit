@@ -15,8 +15,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +61,6 @@ public class PluginProvider implements InstallationItemProvider {
 	public class PluginItem implements InstallationItem {
 		private IPluginModelBase pluginBase;
 		private InstallationItemProvider provider;
-		private PluginExportManager exportManager;
 		private File preparedItem;
 
 		/**
@@ -108,19 +105,13 @@ public class PluginProvider implements InstallationItemProvider {
 		/**
 		 * @since 6.0
 		 */
-		protected void setExportManager(PluginExportManager exportManager) {
-			this.exportManager = exportManager;
-		}
-
-		/**
-		 * @since 6.0
-		 */
 		public String getLocation() {
 			if (preparedItem != null) {
 				return preparedItem.getAbsolutePath();
 			}
-			if (exportManager != null) {
-				return exportManager.getLocation(pluginBase);
+			if (pluginBase.getUnderlyingResource() == null) {
+				// target platform bundle -> directly get the location
+				return pluginBase.getInstallLocation();
 			}
 			return null;
 		}
@@ -131,12 +122,10 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 
 		public void dispose() {
-			String location = getLocation();
-			if (location == null) {
-				return;
+			if (preparedItem != null) {
+				preparedItem.delete();
+				preparedItem = null;
 			}
-			File file = new File(location);
-			file.delete();
 		}
 
 		/**
@@ -255,6 +244,10 @@ public class PluginProvider implements InstallationItemProvider {
 		}
 
 		public void setLocation(File file) {
+			if (preparedItem != null && !preparedItem.equals(file)) {
+				// delete the previous prepared item
+				preparedItem.delete();
+			}
 			preparedItem = file;
 		}
 	}
@@ -305,12 +298,12 @@ public class PluginProvider implements InstallationItemProvider {
 			if (!result.isOK())
 			  return result;
 
-			List pluginItems = new ArrayList<PluginItem>();
+			List<PluginItem> pluginItems = new ArrayList<PluginItem>();
 			// post process exported bundles
 			for (int i = 0; i < items.size(); i++) {
 				Object item = items.get(i);
 				if (item instanceof PluginItem) {
-					pluginItems.add(item);
+					pluginItems.add((PluginItem) item);
 				}
 				if (monitor.isCanceled()) {
 					return Status.CANCEL_STATUS;
@@ -330,15 +323,6 @@ public class PluginProvider implements InstallationItemProvider {
 		monitor.done();
 		return Status.OK_STATUS;
 	}
-
-	/*
-	 * public File prepareItem(InstallationItem item, Map properties,
-	 * IProgressMonitor monitor) throws CoreException { List itemList = new
-	 * ArrayList(1); itemList.add(item); List preparedFiles =
-	 * prepareItems(itemList, properties, monitor); if (preparedFiles != null &&
-	 * !preparedFiles.isEmpty()) { return (File) preparedFiles.get(0); } return
-	 * null; }
-	 */
 
 	public String getName() {
 		return "Plug-ins provider";
@@ -381,11 +365,15 @@ public class PluginProvider implements InstallationItemProvider {
 			if (!result.isOK())
 				return result;
 
-			// set the export manager of PluginItem-s
+			// set the exported location of PluginItem-s
 			for (int i = 0; i < items.size(); i++) {
 				Object item = items.get(i);
 				if (item instanceof PluginItem) {
-					((PluginItem) item).setExportManager(exportManager);
+					PluginItem pluginItem = (PluginItem) item;
+					if (pluginItem.getPlugin().getUnderlyingResource() != null) {
+						// Set location only for exported plug-ins. Plug-ins from TP will not be exported.
+						pluginItem.setLocation(new File(exportManager.getLocation(pluginItem.getPlugin())));
+					}
 				}
 			}
 		} finally {
@@ -422,12 +410,9 @@ public class PluginProvider implements InstallationItemProvider {
 							+ file[i].getName());
 					convertedFile.getParentFile().mkdirs();
 					AndroidUtils.convertToDex(file[i], convertedFile, monitor);
-					file[i].delete();
-					file[i] = convertedFile;
+					item.setLocation(convertedFile);
 				}
 			}
-		
-
 		} catch (IOException ioe) {
 			monitor.done();
 			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
