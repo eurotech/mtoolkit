@@ -63,8 +63,7 @@ import org.tigris.mtoolkit.util.DPPUtilities;
  * package file. This section gives possibility to add, remove and edit the
  * created <code>CertificateInfo</code>s.
  */
-public class CertificatesSection extends DPPFormSection implements
-		SelectionListener, ISelectionChangedListener {
+public class CertificatesSection extends DPPFormSection implements SelectionListener, ISelectionChangedListener {
 
 	/** Holds the title of the section */
 	public static final String SECTION_TITLE = "DPPEditor.CertificatesSection.title";
@@ -200,17 +199,28 @@ public class CertificatesSection extends DPPFormSection implements
 				if (newValue.equals(cert.getAlias()) && (!newValue.equals(""))) {
 					return;
 				}
-				if ((!newValue.equals("")) && (itemExists(certsTable, item, newValue) != -1)) {
-					showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n" + ResourceManager.getString(EQUAL_VALUES_MSG2));
-					certificateInfoChange(cert, REMOVE_CERTIFICATE);
-					return;
+
+				if (!newValue.equals("") && itemWithSpecifiedAliasAndKeystoreExists(certsTable, newValue, item.getText(1)) != -1) {
+						showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n"
+								+ ResourceManager.getString(EQUAL_VALUES_MSG2));
+						// certificateInfoChange(cert, REMOVE_CERTIFICATE);
+						return;
 				}
+
 				isSet = true;
 				cert.setAlias(newValue);
 			} else if (property.equals("keystore")) {
 				if (newValue.equals(cert.getKeystore()) && (!newValue.equals(""))) {
 					return;
 				}
+
+				if (!newValue.equals("") && itemWithSpecifiedAliasAndKeystoreExists(certsTable, item.getText(0), newValue) != -1) {
+					showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n"
+							+ ResourceManager.getString(EQUAL_VALUES_MSG2));
+					// certificateInfoChange(cert, REMOVE_CERTIFICATE);
+					return;
+				}
+
 				isSet = true;
 				cert.setKeystore(newValue);
 			} else if (property.equals("storepass")) {
@@ -246,6 +256,27 @@ public class CertificatesSection extends DPPFormSection implements
 			if (isSet) {
 				model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { cert }, null));
 			}
+		}
+		
+		/**
+		 * Checks if a second item with the given porerties exists.
+		 * 
+		 * @param table
+		 *            TableViewer, whose TableItems will be checked
+		 * @param alias
+		 *            alias, forming the identity criteria
+		 * @param keystore 
+		 *            keystore, forming the identity criteria
+		 * @return TableItem index in the given TableViewer or -1 if nothing was found
+		 */
+		private int itemWithSpecifiedAliasAndKeystoreExists(TableViewer table, String alias, String keystore) {
+			for (int i = 0; i < table.getTable().getItemCount(); i++) {
+				if (table.getTable().getItem(i).getText(0).equals(alias)
+						&& table.getTable().getItem(i).getText(1).equals(keystore)) {
+					return i;
+				}
+			}
+			return -1;
 		}
 
 		/**
@@ -302,8 +333,7 @@ public class CertificatesSection extends DPPFormSection implements
 	 * A content provider mediates between the viewer's model and the viewer
 	 * itself.
 	 */
-	class TableContentProvider extends DefaultContentProvider implements
-			IStructuredContentProvider {
+	class TableContentProvider extends DefaultContentProvider implements IStructuredContentProvider {
 		/**
 		 * Returns the elements to display in the viewer when its input is set
 		 * to the given element.
@@ -332,8 +362,7 @@ public class CertificatesSection extends DPPFormSection implements
 	 * A label provider sets for the value of the given column index the value
 	 * of the element, that corresponding with this index.
 	 */
-	class TableLabelProvider extends LabelProvider implements
-			ITableLabelProvider {
+	class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
 		/**
 		 * Returns the label text for the given column of the given element.
 		 * 
@@ -467,7 +496,11 @@ public class CertificatesSection extends DPPFormSection implements
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		String[] columnTitles = { ResourceManager.getString("DPPEditor.CertificatesSection.ColAlias"), ResourceManager.getString("DPPEditor.CertificatesSection.ColKeystore"), ResourceManager.getString("DPPEditor.CertificatesSection.ColStorePassword"), ResourceManager.getString("DPPEditor.CertificatesSection.ColKeyPassword"), ResourceManager.getString("DPPEditor.CertificatesSection.ColStoreType") };
+		String[] columnTitles = { ResourceManager.getString("DPPEditor.CertificatesSection.ColAlias"),
+				ResourceManager.getString("DPPEditor.CertificatesSection.ColKeystore"),
+				ResourceManager.getString("DPPEditor.CertificatesSection.ColStorePassword"),
+				ResourceManager.getString("DPPEditor.CertificatesSection.ColKeyPassword"),
+				ResourceManager.getString("DPPEditor.CertificatesSection.ColStoreType") };
 		for (int i = 0; i < columnTitles.length; i++) {
 			TableColumn tableColumn = new TableColumn(table, SWT.NULL);
 			tableColumn.setText(columnTitles[i]);
@@ -483,7 +516,11 @@ public class CertificatesSection extends DPPFormSection implements
 		certsTable.addSelectionChangedListener(this);
 
 		cellEditor = new ComboBoxCellEditor(table, sData);
-		CellEditor[] editors = new CellEditor[] { new TextCellEditor(table), new CustomCellEditor(container, certsTable, table, CustomCellEditor.TEXT_BUTTON_TYPE, CustomCellEditor.CERT_KEYSTORE), new TextCellEditor(table, SWT.PASSWORD), new TextCellEditor(table, SWT.PASSWORD), cellEditor };
+		CellEditor[] editors = new CellEditor[] {
+				new TextCellEditor(table),
+				new CustomCellEditor(container, certsTable, table, CustomCellEditor.TEXT_BUTTON_TYPE,
+						CustomCellEditor.CERT_KEYSTORE), new TextCellEditor(table, SWT.PASSWORD),
+				new TextCellEditor(table, SWT.PASSWORD), cellEditor };
 		comboValues.put("", "0");
 		comboValues.put("jks", "1");
 		comboValues.put("pkcs11", "2");
@@ -514,9 +551,12 @@ public class CertificatesSection extends DPPFormSection implements
 		buttonComposite.setLayout(layout);
 		buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		newButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
-		removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
-		signBundlesButton = FormWidgetFactory.createButton(buttonComposite, "Also sign bundles included in the package", SWT.CHECK);
+		newButton = FormWidgetFactory
+				.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
+		removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""),
+				SWT.PUSH);
+		signBundlesButton = FormWidgetFactory.createButton(buttonComposite,
+				"Also sign bundles included in the package", SWT.CHECK);
 
 		newButton.addSelectionListener(this);
 		GridData gd = new GridData(GridData.FILL_VERTICAL);
@@ -636,7 +676,8 @@ public class CertificatesSection extends DPPFormSection implements
 					String oldType = certInfo.getStoreType();
 					oldType = oldType == null ? "" : oldType;
 					if (!oldType.equals(item)) {
-						model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { certInfo }, null));
+						model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT,
+								new Object[] { certInfo }, null));
 					}
 				}
 			}
@@ -650,14 +691,13 @@ public class CertificatesSection extends DPPFormSection implements
 	 */
 	private void handleNew() {
 		Table table = certsTable.getTable();
-		int size = table.getItems().length;		
+		int size = table.getItems().length;
 		CertificateInfo cert = new CertificateInfo();
 		boolean found = false;
 
 		for (int i = 0; i < size; i++) {
 			TableItem currentItem = table.getItem(i);
-			if (currentItem.getText(0).equalsIgnoreCase("")
-					&& !currentItem.getData().equals(cert)) {
+			if (currentItem.getText(0).equalsIgnoreCase("") && !currentItem.getData().equals(cert)) {
 				found = true;
 				break;
 			}
