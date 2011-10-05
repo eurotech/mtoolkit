@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
@@ -179,9 +180,9 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 		try {
 			progress.run(true, true, progressRun);
 		} catch (InvocationTargetException e) {
-			DPPErrorHandler
-					.processError(ResourceManager
-							.getString("BuildExportWizard.errorMessage"), true);
+			String msg = ResourceManager.getString("BuildExportWizard.errorMessage")
+					+ ((e.getTargetException().getMessage() != null) ? ": " + e.getTargetException().getMessage() : "");
+			DPPErrorHandler.processError(msg, true);
 			return false;
 		} catch (InterruptedException e) {
 			DPPErrorHandler.processError(e.toString(), true);

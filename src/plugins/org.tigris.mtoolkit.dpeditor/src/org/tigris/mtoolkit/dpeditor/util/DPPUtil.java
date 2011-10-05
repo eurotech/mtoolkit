@@ -201,6 +201,7 @@ public class DPPUtil {
 		monitor.subTask(ResourceManager.getString("DPPEditor.BuildProjectsTask"));
 		monitor.worked(1200);
 		try {
+			@SuppressWarnings("rawtypes")
 			Hashtable prjJars = buildProjectsInWorkspace(projectPaths);
 			for (int i = 0; i < prjInfos.size(); i++) {
 				if (monitor.isCanceled()) {
@@ -215,6 +216,7 @@ public class DPPUtil {
 			}
 		} catch (Throwable t) {
 			throw new InvocationTargetException(t);
+			
 		}
 
 		monitor.subTask(ResourceManager.getString("DPPEditor.CheckCertsPassTask"));
@@ -391,9 +393,8 @@ public class DPPUtil {
 				String prjLocation = project.getLocation().toOSString() + File.separator + ".project";
 				if (prjInfo.equals(prjLocation)) {
 					try {
-						if (!project.isOpen()) {
-							DPPErrorHandler.showErrorTableDialog("Can not export closed project \"" + project.getName() + "\" to .jar file!");
-							continue;
+						if (!project.isOpen()) {						
+							throw new Exception("Can not export closed project \"" + project.getName() + "\" to .jar file!");
 						}
 						boolean isPlugin = isPluginProject(project);
 						if (isPlugin) {

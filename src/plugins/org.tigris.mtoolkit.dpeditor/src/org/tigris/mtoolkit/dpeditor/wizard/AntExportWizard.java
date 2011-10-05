@@ -167,11 +167,11 @@ public class AntExportWizard extends Wizard implements IExportWizard {
 		try {
 			progress.run(true, true, progressRun);
 		} catch (InvocationTargetException e) {
-			DPPErrorHandler.processError(
-					ResourceManager.getString("AntExportWizard.errorMessage"),
-					true);
+			String msg = ResourceManager.getString("AntExportWizard.errorMessage")
+			+ ((e.getTargetException().getMessage() != null) ? ": " + e.getTargetException().getMessage() : "");
+			DPPErrorHandler.processError(msg, true);
 			return false;
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e) {			
 			DPPErrorHandler.processError(e.toString(), true);
 			return false;
 		}

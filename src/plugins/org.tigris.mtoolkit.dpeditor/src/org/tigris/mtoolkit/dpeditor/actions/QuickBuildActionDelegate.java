@@ -138,7 +138,7 @@ public class QuickBuildActionDelegate extends Action implements
 		try {
 			progress.run(true, true, progressRun);
 		} catch (InvocationTargetException e) {
-			DPPErrorHandler.processError(e.getCause().toString(), true);
+			DPPErrorHandler.processError(e.getTargetException().getMessage(), true);
 		} catch (InterruptedException e) {
 			DPPErrorHandler.processError(e.toString(), true);
 		}
