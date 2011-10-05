@@ -520,7 +520,6 @@ public class DPPUtil {
 				}
 			}
 			if (!hasJavaNature || !hasPluginNature) {
-				DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.WrongProject"), true);
 				return false;
 			}
 		}
