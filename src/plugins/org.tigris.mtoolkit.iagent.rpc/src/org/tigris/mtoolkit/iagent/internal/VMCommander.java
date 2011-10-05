@@ -194,7 +194,7 @@ public class VMCommander {
 			try {
 				socket = new DatagramSocket(UDP_LISTENER_PORT);
 			} catch (SocketException se) {
-				error("[startUDPListener] Cannot open socket for UDP notifications.", se);
+				error("[startUDPListener] Cannot open socket for UDP notifications on port " + UDP_LISTENER_PORT, se);
 				return;
 			}
 			while (listenerRunning) {
