@@ -45,6 +45,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.dpeditor.IHelpContextIds;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
@@ -231,54 +232,42 @@ public class BuildPage extends WizardPage implements ModifyListener,
 		if (e.getSource().equals(dppFileText)) {
 			if (!handleDPPFileSelected()) {
 				return;
+			}else{
+				setErrorMessage(null);
+				setPageComplete(true);
 			}
+
 			BuildInfo buildInfo = this.dppFile.getBuildInfo();
 			if (buildInfo == null) {
 				return;
 			}
+
 			String newBuildLocation = buildInfo.getDpFileName();
 			String dpTextValue = dpFileText.getText();
 			try {
-				String canonicalPathToDPFile = new File(dpTextValue)
-						.getCanonicalPath();
-				if (canonicalPathToDPFile.equals(prevBuildLocation)
-						|| dpTextValue.equals("")) {
+				String canonicalPathToDPFile = new File(dpTextValue).getCanonicalPath();
+				if (canonicalPathToDPFile.equals(prevBuildLocation) || dpTextValue.equals("")) {
 					dpFileText.setText(newBuildLocation);
-					prevBuildLocation = (new File(newBuildLocation))
-							.getCanonicalPath();
-				} else {
-					prevBuildLocation = (new File(newBuildLocation))
-							.getCanonicalPath();
 				}
+
+				prevBuildLocation = (new File(newBuildLocation)).getCanonicalPath();
 			} catch (IOException e1) {
+				;
 			}
-			boolean valid = isValidExportDestination(new File(
-					DPPUtilities.replaceString(dpFileText.getText(), "<.>",
-							dppFile.getProjectLocation())));
-			// refresh warning meassage
-			if (valid) {
-				setErrorMessage(null);
-				setPageComplete(true);
-			}
-			return;
 		}
 
 		if (e.getSource().equals(dpFileText)) {
-			String value = dpFileText.getText();
-			if (!isValidExportDestination(new File(DPPUtilities.replaceString(
-					value, "<.>", dppFile.getProjectLocation())))) {
-				return;
+			File exportFile = new File(DPPUtilities.replaceString(dpFileText.getText(), "<.>",
+					dppFile.getProjectLocation()));
+			// refresh warning meassage
+			if (DPPUtil.isValidExportDestination(exportFile)) {
+				setErrorMessage(null);
+				setPageComplete(true);
 			} else {
-				boolean handle = handleDPPFileSelected();
-				// refresh warning message
-				if (handle) {
-					setErrorMessage(null);
-					setPageComplete(true);
-				}
+				setPageComplete(false);
+				setErrorMessage(ResourceManager.getString("BuildExportWizard.errorInvalidExportDestination"));
 			}
-			return;
 		}
-
 	}
 
 	/*
@@ -289,26 +278,6 @@ public class BuildPage extends WizardPage implements ModifyListener,
 	 * KeyEvent )
 	 */
 	public void keyPressed(KeyEvent e) {
-	}
-
-	private boolean isValidExportDestination(File exportDest) {
-		boolean isValidFile;
-		try {
-			String path = exportDest.getCanonicalPath();
-			isValidFile = path.endsWith(".dp");
-		} catch (IOException ex) {
-			isValidFile = false;
-		}
-
-		if (!isValidFile) {
-			setPageComplete(false);
-			String newMessage = ResourceManager
-					.getString("BuildExportWizard.errorInvalidExportDestination");
-			setErrorMessage(newMessage);
-			return false;
-		}
-		setErrorMessage(null);
-		return true;
 	}
 
 	private boolean handleDPPFileSelected() {
