@@ -192,14 +192,14 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 	 * of all resource processors.
 	 */
 	private void addAction() {
-		InputDialog dialog = new InputDialog(Display.getCurrent()
-				.getActiveShell(), "Add Resource Processor",
-				"Please enter ID for new resource processor", null,
-				new IInputValidator() {
+		InputDialog dialog = new InputDialog(Display.getCurrent().getActiveShell(), "Add Resource Processor",
+				"Please enter ID for new resource processor", null, new IInputValidator() {
 					public String isValid(String newText) {
 						if (hasTextInList(newText)) {
 							return "Entered resource processor ID is already available";
-						} else {
+						}else if(newText.isEmpty()){ 
+							return ResourceManager.getString("DPPreferencesPage.addResourceProcessorWarning");
+						}else {
 							return null;
 						}
 					}
