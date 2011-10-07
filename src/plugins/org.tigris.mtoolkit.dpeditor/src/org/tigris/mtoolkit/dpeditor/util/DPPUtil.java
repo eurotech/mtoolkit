@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.window.Window;
@@ -54,6 +55,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.editor.dialog.CertificatesPasswordsDialog;
 import org.tigris.mtoolkit.dpeditor.editor.dialog.ChangeBundleJarNameDialog;
@@ -294,6 +296,27 @@ public class DPPUtil {
 			ex.printStackTrace();
 			throw new InvocationTargetException(ex);
 		}
+	}
+	
+	public static boolean isValidExportDestination(File exportDest) {
+		boolean isValidFile = false;
+
+		try {
+			String path = exportDest.getAbsolutePath();
+
+			if (path.equals(exportDest.getCanonicalPath()) && PluginUtilities.isValidPath(path)) {
+				IPath filePath = new Path(path);
+				String fileName = filePath.lastSegment();
+
+				if (!fileName.startsWith(".") && fileName.endsWith(".dp")) {
+					isValidFile = true;
+				}		
+			}
+		} catch (IOException ex) {
+			isValidFile = false;
+		}
+
+		return isValidFile;
 	}
 
 	public static void updateBundlePath(BundleInfo info, String path) {
