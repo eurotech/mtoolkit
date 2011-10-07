@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 //import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -38,7 +39,9 @@ import org.tigris.mtoolkit.common.ReflectionUtils;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
+import org.tigris.mtoolkit.util.BuildInfo;
 import org.tigris.mtoolkit.util.DPPFile;
+import org.tigris.mtoolkit.util.DPPUtilities;
 import org.tigris.mtoolkit.util.InconsistentDataException;
 
 public class QuickBuildActionDelegate extends Action implements
@@ -133,10 +136,39 @@ public class QuickBuildActionDelegate extends Action implements
 			e.printStackTrace();
 			return;
 		}
-		ProgressRun progressRun = new ProgressRun(dppFile);
+		
+		BuildInfo buildInfo = dppFile.getBuildInfo();
+		if (buildInfo != null) {
+			String dpFileName = dppFile.getBuildInfo().getDpFileName();
+
+			if (dpFileName != null) {
+				File dpBuildFile = new File(dpFileName);
+
+				if (!DPPUtil.isValidExportDestination(dpBuildFile)) {
+					DPPErrorHandler.processError(
+							ResourceManager.getString("BuildExportWizard.errorInvalidExportDestination"), true);
+					return;
+				}
+
+				if (dpBuildFile.exists()) {
+					StringBuffer sb = new StringBuffer();
+					sb.append(ResourceManager.getString("BuildExportWizard.errorFileAlreadyExist1"));
+					sb.append(" ");
+					sb.append(dpBuildFile);
+					sb.append(" ");
+					sb.append(ResourceManager.getString("BuildExportWizard.errorFileAlreadyExist2"));
+					boolean replaceFile = MessageDialog.openQuestion(null,
+							ResourceManager.getString("AntExportWizard.ConfirmReplace"), sb.toString());
+					if(!replaceFile){
+						return;
+					}
+				}
+			}
+		}
+
 		ProgressMonitorDialog progress = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 		try {
-			progress.run(true, true, progressRun);
+			progress.run(true, true, new ProgressRun(dppFile));
 		} catch (InvocationTargetException e) {
 			DPPErrorHandler.processError(e.getTargetException().getMessage(), true);
 		} catch (InterruptedException e) {
