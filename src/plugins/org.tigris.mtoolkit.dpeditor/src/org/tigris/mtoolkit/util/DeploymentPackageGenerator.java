@@ -743,33 +743,8 @@ public class DeploymentPackageGenerator {
 			}
 		}
 		antFile.append("  </jar>" + nl + "");
-		for (int i = 0; i < dppFile.getCertificateInfos().size(); i++) {
-			if (monitor.isCanceled()) {
-				return;
-			}
-			CertificateInfo ci = (CertificateInfo) dppFile
-					.getCertificateInfos().elementAt(i);
-			antFile.append("  <signjar jar=\""
-					+ substituteSpecialXMLCharacters(calculateRelative(getPath(
-							projectRootPath,
-							(dppFile.getBuildInfo().getBuildLocation()
-									+ File.separator + dppFile.getBuildInfo()
-									.getDpFileName()))))
-					+ "\" "
-					+ substituteSpecialXMLCharacters(getAntOptionsLine("alias",
-							ci.getAlias()))
-					+ "storepass=\""
-					+ (ci.getStorepass() == null ? ""
-							: substituteSpecialXMLCharacters(ci.getStorepass()))
-					+ "\" "
-					+ substituteSpecialXMLCharacters(getAntOptionsLine(
-							"keystore", ci.getKeystore()))
-					+ substituteSpecialXMLCharacters(getAntOptionsLine(
-							"keypass", ci.getKeypass()))
-					+ substituteSpecialXMLCharacters(getAntOptionsLine(
-							"storetype", ci.getStoreType())) + "/>" + nl + "");
-		}
-		antFile.append("</target>" + nl + "" + nl + "</project>" + nl + "");
+    appendSigningData(antFile, dppFile, projectRootPath);
+    antFile.append("</target>" + nl + "</project>" + nl + "");
 
 		String antFileName = dppFile.getBuildInfo().getAntFileName();
 		File tmpAntFile = new File(antFileName);
@@ -788,6 +763,36 @@ public class DeploymentPackageGenerator {
 		fos.write(generateManifest(dppFile).getBytes());
 		fos.close();
 	}
+  
+  private void appendSignJarTag(StringBuffer antFile, DPPFile dppFile, String jarPath) {
+    for (int i = 0; i < dppFile.getCertificateInfos().size(); i++) {
+      if (monitor.isCanceled()) {
+        return;
+      }
+      CertificateInfo ci = (CertificateInfo) dppFile.getCertificateInfos().elementAt(i);
+      antFile.append("<signjar jar=\"" + substituteSpecialXMLCharacters(jarPath) + "\" " +
+          getAntOptionsLine("keystore", substituteSpecialXMLCharacters(ci.getKeystore())) +
+          getAntOptionsLine("alias", substituteSpecialXMLCharacters(ci.getAlias())) +
+          "storepass=\"" + (ci.getStorepass() == null ? "" : substituteSpecialXMLCharacters(ci.getStorepass())) + "\" " +
+          getAntOptionsLine("keypass", substituteSpecialXMLCharacters(ci.getKeypass())) +
+          getAntOptionsLine("storetype", substituteSpecialXMLCharacters(ci.getStoreType())) + "/>" + nl + "");
+    }
+  }
+  
+  private void appendSigningData(StringBuffer antFile, DPPFile dppFile, String projectRootPath) {
+    appendSignJarTag(antFile, dppFile, calculateRelative(getPath(projectRootPath, (dppFile.getBuildInfo().getBuildLocation() +
+        File.separator + dppFile.getBuildInfo().getDpFileName()))));
+    if (!dppFile.getSignBundles()) {
+      return;
+    }
+    Vector<BundleInfo> bundleInfos = dppFile.getBundleInfos();
+    for (int i = 0; i < bundleInfos.size(); i++) {
+      if (monitor.isCanceled()) {
+        return;
+      }
+      appendSignJarTag(antFile, dppFile, calculateRelative(getPath(projectRootPath, ((bundleInfos.get(i)).getBundlePath()))));
+    }
+  }
 
 	private String calculateRelative(String path) {
 		if (baseDirPaths == null) {
