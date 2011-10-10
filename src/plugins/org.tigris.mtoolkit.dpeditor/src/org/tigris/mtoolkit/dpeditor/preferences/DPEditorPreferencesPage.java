@@ -197,7 +197,7 @@ public class DPEditorPreferencesPage extends PreferencePage implements
 					public String isValid(String newText) {
 						if (hasTextInList(newText)) {
 							return "Entered resource processor ID is already available";
-						}else if(newText.isEmpty()){ 
+						}else if(newText.length()==0){ 
 							return ResourceManager.getString("DPPreferencesPage.addResourceProcessorWarning");
 						}else {
 							return null;
