@@ -785,12 +785,12 @@ public class DeploymentPackageGenerator {
     if (!dppFile.getSignBundles()) {
       return;
     }
-    Vector<BundleInfo> bundleInfos = dppFile.getBundleInfos();
+    Vector bundleInfos = dppFile.getBundleInfos();
     for (int i = 0; i < bundleInfos.size(); i++) {
       if (monitor.isCanceled()) {
         return;
       }
-      appendSignJarTag(antFile, dppFile, calculateRelative(getPath(projectRootPath, ((bundleInfos.get(i)).getBundlePath()))));
+      appendSignJarTag(antFile, dppFile, calculateRelative(getPath(projectRootPath, (((BundleInfo)(bundleInfos.get(i))).getBundlePath()))));
     }
   }
 
