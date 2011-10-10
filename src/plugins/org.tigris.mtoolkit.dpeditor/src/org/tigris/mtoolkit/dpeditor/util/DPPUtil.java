@@ -203,7 +203,6 @@ public class DPPUtil {
 		monitor.subTask(ResourceManager.getString("DPPEditor.BuildProjectsTask"));
 		monitor.worked(1200);
 		try {
-			@SuppressWarnings("rawtypes")
 			Hashtable prjJars = buildProjectsInWorkspace(projectPaths);
 			for (int i = 0; i < prjInfos.size(); i++) {
 				if (monitor.isCanceled()) {
