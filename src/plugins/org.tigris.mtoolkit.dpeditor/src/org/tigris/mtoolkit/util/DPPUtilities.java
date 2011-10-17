@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.tigris.mtoolkit.common.PluginUtilities;
+
 public class DPPUtilities {
 
 	private static final String POINT_STRING = "."; //$NON-NLS-1$
@@ -796,40 +800,10 @@ public class DPPUtilities {
 	}
 
 	public static String getPath(String str) {
-
-		if (str == null)
+		if (PluginUtilities.isValidPath(str)) {
+			IPath path = new Path(str);
+			return path.segmentCount() > 1 ? path.removeLastSegments(1).toString() + File.separator : "";
+		} else
 			return null;
-		if (str.equals(""))
-			return "";
-		// remove separators and white spaces in the begining
-		int i = 0;
-		while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
-
-			++i;
-			if (i == (str.length()))
-				break;
-		}
-		if (i < str.length()) {
-			str = str.substring(i);
-		} else {
-			str = "";
-		}
-
-		int indexofSlash = str.lastIndexOf("/");
-		int indexofbackSlash = str.lastIndexOf("\\");
-		if ((indexofSlash == -1) && (indexofbackSlash == -1)) {
-			return null;
-		} else {
-
-			if (indexofbackSlash > indexofSlash) {
-				return str.substring(0, indexofbackSlash + 1);
-			} else {
-				return str.substring(0, indexofSlash + 1);
-			}
-
-		}
-
 	}
-
-
 }

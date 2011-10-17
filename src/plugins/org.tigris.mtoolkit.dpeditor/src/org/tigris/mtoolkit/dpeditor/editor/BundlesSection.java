@@ -44,15 +44,19 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Version;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.dpeditor.editor.base.CustomCellEditor;
 import org.tigris.mtoolkit.dpeditor.editor.base.DPPFormSection;
 import org.tigris.mtoolkit.dpeditor.editor.event.EventConstants;
@@ -207,197 +211,159 @@ public class BundlesSection extends DPPFormSection implements
 		 *            the property
 		 * @param value
 		 *            the new property value
+		 * @return 
 		 * 
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
 		 *      java.lang.String, java.lang.Object)
 		 */
+		
+		private boolean modifyBundleColumn(String newValue, TableItem item) {
+			if(newValue.equals("")){
+				return true;
+			} else if (!PluginUtilities.isValidPath(newValue)) {
+				showErrorTableDialog(ResourceManager.getString(WRONG_BUNDLE_PATH));
+				bundlesTable.getTable().setFocus();
+				return false;
+			} else if (!newValue.endsWith(".jar") && !newValue.endsWith(".project")) {
+				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_INVALID_BUNDLE_NAME));
+				bundlesTable.getTable().setFocus();
+				return false;
+			}		
+			
+			BundleInfo bundle = (BundleInfo) item.getData();
+			String bundlePath = bundle.getBundlePath();
+			String loc = ((DPPFileModel) getFormPage().getModel()).getFile().getProject().getLocation().toOSString();
+
+			// The verifications about "<.>" are made only because of a "feature" in the class TableLabelProvier
+			// and should be reconsidered are they worth it at all!
+			if (newValue.startsWith("<.>")) {
+				newValue = loc + newValue.substring("<.>".length());
+			}
+
+			if ((itemExists(bundlesTable, item, newValue) != -1)) {
+				showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1));
+				bundlesTable.getTable().setFocus();
+				return false;
+			}
+			
+			if (bundlePath != null && bundlePath.startsWith("<.>")) {
+				bundlePath = loc + bundlePath.substring("<.>".length());
+			}
+
+			if (bundlePath != null && newValue.equals(bundlePath) && !newValue.equals("")) {
+				return false;
+			}
+			
+			IProject selProject = null;
+			if (newValue.endsWith(".project")) {
+				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+
+				for (int j = 0; j < projects.length; j++) {
+					if (newValue.startsWith(projects[j].getLocation().toOSString() + File.separator)) {
+						selProject = projects[j];
+						break;
+					}
+				}
+
+				if (selProject == null) {
+					DPPErrorHandler.processError(
+							ResourceManager.format("DPPEditor.ProjectError", new String[] { newValue }), true);
+					bundlesTable.getTable().setFocus();
+					return false;
+				} else if (!DPPUtil.isPluginProject(selProject)) {
+					DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.WrongProject"),
+							true);
+					bundlesTable.getTable().setFocus();
+					return false;
+				}
+			}
+
+			bundle.setBundlePath(newValue);
+			// Currently the formation of the new Name is not 100% correct logically, 
+			// but this issue should concern future improvements, according to I. Karabashev
+			String tempSTR = DPPUtilities.getPath(item.getText(1));
+			bundlesCustomPath = item.getText(1).equals("") ? getUpperPath(item) : (tempSTR == null) ? "" : tempSTR;
+			String bundleName = bundlesCustomPath + getName(newValue);
+			bundle.setName(bundleName);
+
+			if (DPPUtil.isAlreadyInTheTable(bundleName, item)) {
+				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
+				bundlesTable.getTable().setFocus();
+				return false;				
+			}
+			
+			
+			IPluginModelBase findModel = PluginRegistry.findModel(selProject);			
+			if (findModel != null) {
+				BundleDescription bundleDescr = findModel.getBundleDescription();				
+				
+				if (bundleDescr != null) {
+					bundle.setBundleSymbolicName(bundleDescr.getSymbolicName());
+					bundle.setBundleVersion(bundleDescr.getVersion().toString());
+				} else {
+					try {
+						IBundleModel bundleModel = (IBundleModel) ((IBundlePluginModelBase) findModel).getBundleModel();
+						bundle.setBundleSymbolicName(bundleModel.getBundle().getManifestHeader("Bundle-SymbolicName").getValue());
+						bundle.setBundleVersion(bundleModel.getBundle().getManifestHeader("Bundle-Version").getValue());
+					} catch (Throwable t) {
+						t.printStackTrace();
+					}
+				}
+			}					
+			return true;
+		}
+
+		private boolean modifyNameColumn(String newValue, TableItem item) {
+			BundleInfo bundle = (BundleInfo) item.getData();
+
+			if (newValue.equals("") || newValue.equals(bundle.getName())) {
+				return true;
+			}
+
+			if (!PluginUtilities.isValidPath(newValue) || newValue.contains(":")) {
+				DPPErrorHandler.showErrorTableDialog(ResourceManager
+						.getString("DPPEditor.BundlesSection.InvalidBundleName"));
+				bundlesTable.getTable().setFocus();
+				return false;
+			}
+			
+			if (!newValue.endsWith(".jar")) {
+				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_NOT_ENDS_WITH_JAR));
+				bundlesTable.getTable().setFocus();
+				return false;
+			}
+			bundle.setName(newValue);
+			
+			if (DPPUtil.isAlreadyInTheTable(newValue, item)) {
+				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
+				bundlesTable.getTable().setFocus();
+				return false;
+			}			
+			return true;
+		}
+
 		public void modify(Object object, String property, Object value) {
 			TableItem item = (TableItem) object;
-			String bundleName = null;
-			if (item == null)
+			if (item == null) {
 				return;
+			}
+
 			BundleInfo bundle = (BundleInfo) item.getData();
-			String newValue = value.toString();
+			String newValue = value.toString().trim();
 			boolean isSet = false;
 
 			if (property.equals("bundle")) {
-				newValue = newValue.trim();
-				String bundlePath = bundle.getBundlePath();
-				DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
-				IProject project = model.getFile().getProject();
-				String loc = project.getLocation().toOSString();
-
-				if (newValue.startsWith("<.>")
-						|| (bundlePath != null && bundlePath.startsWith("<.>"))) {
-					if (newValue.startsWith("<.>")) {
-						newValue = loc + newValue.substring("<.>".length());
-					}
-					if (bundlePath != null && bundlePath.startsWith("<.>")) {
-						bundlePath = loc + bundlePath.substring("<.>".length());
-					}
-				}
-				if (bundlePath != null && newValue.equals(bundlePath)
-						&& !newValue.equals("")) {
-					return;
-				}
-
-				String relValue = newValue;
-				if (relValue.startsWith(loc + File.separator)) {
-					relValue = relValue.substring(loc.length());
-					relValue = "<.>" + relValue;
-				}
-
-				if ((!newValue.equals(""))
-						&& (itemExists(bundlesTable, item, relValue) != -1)) {
-					showErrorTableDialog(ResourceManager
-							.getString(EQUAL_VALUES_MSG1));
-					return;
-				}
-				if (!newValue.equals("") && !newValue.endsWith(".jar")
-						&& !newValue.endsWith(".project")) {
-					showErrorTableDialog(ResourceManager
-							.getString(WRONG_BUNDLE_PATH));
-					return;
-				}
-				IProject selProject = null;
-				IPluginModelBase findModel = null;
-				if (newValue.endsWith(".project")) {
-					IWorkspaceRoot root = ResourcesPlugin.getWorkspace()
-							.getRoot();
-					IProject[] projects = root.getProjects();
-					boolean isFromWorkspace = false;
-					boolean isOpen = true;
-					for (int j = 0; j < projects.length; j++) {
-						IProject prj = projects[j];
-						String location = prj.getLocation().toOSString();
-						if (newValue.startsWith(location + File.separator)) {
-							selProject = prj;
-							isOpen = selProject.isOpen();
-							isFromWorkspace = true;
-							break;
-						}
-					}
-					if (!isFromWorkspace) {
-						DPPErrorHandler.processError(ResourceManager.format(
-								"DPPEditor.ProjectError",
-								new String[] { newValue }), true);
-						return;
-					}
-					if (selProject != null
-							&& !DPPUtil.isPluginProject(selProject)) {
-						DPPErrorHandler
-								.processError(
-										ResourceManager
-												.getString("DPPEditor.BundlesSection.WrongProject"),
-										true);
-						return;
-					}
-				}
-
-				isSet = true;
-				if (newValue == null || newValue.equals(""))
-					return;
-				if ((newValue.charAt(newValue.length() - 1) == '\\')
-						|| (newValue.charAt(newValue.length() - 1) == '/')) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager
-							.getString(ERROR_INVALID_BUNDLE_NAME));
-					return;
-				}
-
-				bundleName = getName(newValue);
-				bundle.setBundlePath(newValue);
-				if (item.getText(1).equals("")) {
-					bundlesCustomPath = getUpperPath(object);
-				} else {
-					String tempSTR = DPPUtilities.getPath(item.getText(1));
-					bundlesCustomPath = (tempSTR == null) ? "" : tempSTR;
-				}
-				if (DPPUtil.isAlreadyInTheTable(bundlesCustomPath + bundleName,
-						item)) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager
-							.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
-					bundle.setName("");
-					return;
-				}
-				bundle.setName(bundlesCustomPath + bundleName);
-
-				findModel = PluginRegistry.findModel(selProject);
-				if (findModel != null) {
-					BundleDescription bundleDescr = findModel
-							.getBundleDescription();
-					String name = null;
-					String version = null;
-					if (bundleDescr != null) {
-						name = bundleDescr.getSymbolicName();
-						version = bundleDescr.getVersion().toString();
-					} else {
-						try {
-							IBundleModel bundleModel = (IBundleModel) ((IBundlePluginModelBase) findModel)
-									.getBundleModel();
-							name = bundleModel.getBundle()
-									.getManifestHeader("Bundle-SymbolicName")
-									.getValue();
-							version = bundleModel.getBundle()
-									.getManifestHeader("Bundle-Version")
-									.getValue();
-						} catch (Throwable t) {
-							t.printStackTrace();
-						}
-					}
-
-					bundle.setBundleSymbolicName(name);
-					bundle.setBundleVersion(version);
-
-					if (name != null) {
-						bundle.setName(bundlesCustomPath + name + ".jar");
-					}
-				}
+				isSet = modifyBundleColumn(newValue, item);
 			} else if (property.equals("name")) {
-				TableItem currentItem = (TableItem) object;
-				if (newValue.equals("")) { // delete or New
-					String resourceFileSystemPath = currentItem.getText(0);
-					if (resourceFileSystemPath.equals("")) {
-						return;
-					}
-					bundleName = getName(currentItem.getText(0));
-					bundlesCustomPath = getUpperPath(object);
-				} else { // modify
-					bundleName = getName(newValue);
-					if (bundleName.equals("")) {
-						bundleName = getName(item.getText(0));
-					}
-					if (!bundleName.endsWith(".jar")) {
-						DPPErrorHandler
-								.showErrorTableDialog(ResourceManager
-										.getString(ERROR_BUNDLE_NAME_NOT_ENDS_WITH_JAR));
-						return;
-					}
-					String currentPath = DPPUtilities.getPath(newValue);
-					bundlesCustomPath = (currentPath == null) ? ""
-							: currentPath;
-				}
-				if (DPPUtil.isAlreadyInTheTable(bundlesCustomPath + bundleName,
-						currentItem)) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager
-							.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
-					return;
-				}
-				String newName = bundlesCustomPath + bundleName;
-				if (newName.equals(bundle.getName()))
-					return;
-				bundle.setName(newName);
-				isSet = true;
-
+				isSet = modifyNameColumn(newValue, item);
 			} else if (property.equals("version")) {
-				if (newValue.equals(bundle.getBundleVersion())
-						&& (!newValue.equals(""))) {
+				if (newValue.equals(bundle.getBundleVersion()) && (!newValue.equals(""))) {
 					return;
 				}
 				try {
 					Version.parseVersion(newValue);
 				} catch (IllegalArgumentException ex) {
-					showErrorTableDialog(ResourceManager
-							.getString(WRONG_BUNDLE_VERSION));
+					showErrorTableDialog(ResourceManager.getString(WRONG_BUNDLE_VERSION));
 					return;
 				}
 				isSet = true;
@@ -410,8 +376,7 @@ public class BundlesSection extends DPPFormSection implements
 				} else if (val == 0) {
 					newValue = "true";
 				}
-				if (newValue.equals("" + bundle.isCustomizer())
-						&& (!newValue.equals(""))) {
+				if (newValue.equals("" + bundle.isCustomizer()) && (!newValue.equals(""))) {
 					return;
 				}
 				String lower = newValue.toLowerCase();
@@ -428,8 +393,7 @@ public class BundlesSection extends DPPFormSection implements
 				} else if (val == 0) {
 					newValue = "true";
 				}
-				if (newValue.equals("" + bundle.isMissing())
-						&& (!newValue.equals(""))) {
+				if (newValue.equals("" + bundle.isMissing()) && (!newValue.equals(""))) {
 					return;
 				}
 				isSet = true;
@@ -441,8 +405,7 @@ public class BundlesSection extends DPPFormSection implements
 				bundle.setOtherHeaders(newValue);
 				isSet = true;
 			} else if (property.equals("bundle_name")) {
-				if (newValue.equals(bundle.getBundleSymbolicName())
-						&& (!newValue.equals(""))) {
+				if (newValue.equals(bundle.getBundleSymbolicName()) && (!newValue.equals(""))) {
 					return;
 				}
 				isSet = true;
@@ -455,27 +418,26 @@ public class BundlesSection extends DPPFormSection implements
 			bundlesTable.update(bundle, null);
 			page.updateDocumentIfSource();
 			if (isSet) {
-				model.fireModelChanged(new ModelChangedEvent(
-						IModelChangedEvent.EDIT, new Object[] { bundle }, null));
+				model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { bundle }, null));
 			}
 		}
 
 		private String getUpperPath(Object object) {
-			TableItem currentItem = (TableItem) object;
+			String path = "bundles" + File.separator;
 			Table table = bundlesTable.getTable();
-			int size = table.getItems().length;
-			if (size == 0)
-				return "bundles/";
-			for (int i = 0; i < size; i++) {
-				if (currentItem == table.getItem(i)) {
-					if (i == 0)
-						return "bundles/";
-					TableItem upper = table.getItem(i - 1);
-					String upperPath = DPPUtilities.getPath(upper.getText(1));
-					return (upperPath == null) ? "bundles/" : upperPath;
+
+			for (int i = 0; i < table.getItems().length; i++) {
+				if (object.equals(table.getItem(i))) {
+					if (i != 0) {
+						String upperPath = DPPUtilities.getPath(table.getItem(i - 1).getText(1));
+						if (upperPath != null) {
+							path = upperPath;
+						}
+					}
+					break;
 				}
 			}
-			return "bundles/";
+			return path;
 		}
 
 		/**
@@ -1025,6 +987,7 @@ public class BundlesSection extends DPPFormSection implements
 			if (i == (str.length()))
 				break;
 		}
+		
 		if (i < str.length()) {
 			str = str.substring(i);
 		} else {

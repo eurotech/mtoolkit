@@ -21,6 +21,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
+
 /**
  * This class contains all the information needed to build a Deployment Package.
  * This includes info on bundles, resources, where to build the DP, certificates
@@ -276,6 +278,16 @@ public class DPPFile {
 		}
 		props.setProperty(key, value);
 	}
+	
+	private boolean isBundleNameDuplicated(String bundleName, int index) {
+		for (int i = 0; i < bundleInfos.size(); i++) {
+			if (bundleName != null && bundleName.equals(((BundleInfo) bundleInfos.elementAt(i)).getName())
+					&& index != i) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * This method should be called each time when a tab is switched and the dp
@@ -289,27 +301,32 @@ public class DPPFile {
 		for (int i = 0; i < bundleInfos.size(); i++) {
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
 			String bundlePath = bInfo.getBundlePath();
-			if (isEmptyOrNull(bundlePath) || (!bundlePath.endsWith(".project") && (isEmptyOrNull(bInfo.getName()) || isEmptyOrNull(bInfo.getBundleSymbolicName()) || isEmptyOrNull(bInfo.getBundleVersion())))) {
-				String message = "";
-				if (isEmptyOrNull(bundlePath)) {
-					message = "Bundle Path is empty";
-				} else if (!bundlePath.endsWith(".project")) {
-					if (isEmptyOrNull(bInfo.getName())) {
-						message += !message.equals("") ? "\n" : message;
-						message += "Bundle Name is empty";
-					}
-					if (isEmptyOrNull(bInfo.getBundleSymbolicName())) {
-						message += !message.equals("") ? "\n" : message;
-						message += "Bundle Symbolic Name is empty";
-					}
-					if (isEmptyOrNull(bInfo.getBundleVersion())) {
-						message += !message.equals("") ? "\n" : message;
-						message += "Bundle Version is empty";
-					}
+			String bName = bInfo.getName();
+			StringBuilder strBuilder = new StringBuilder();
+
+			if (isEmptyOrNull(bundlePath)) {
+				strBuilder.append("Bundle Path is empty!");
+			} else if (isBundleNameDuplicated(bName, i)) {
+				strBuilder.append((strBuilder.length() != 0 ? "\n" : "")
+						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists1") + bName
+						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists2"));
+			} else if (!bundlePath.endsWith(".project")) {
+				if (isEmptyOrNull(bName)) {
+					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Name is empty!");
 				}
-				throw new InconsistentDataException(message);
+				if (isEmptyOrNull(bInfo.getBundleSymbolicName())) {
+					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Symbolic Name is empty!");
+				}
+				if (isEmptyOrNull(bInfo.getBundleVersion())) {
+					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Version is empty!");
+				}
 			}
-		}
+			
+			if (strBuilder.length() > 0) {
+				throw new InconsistentDataException(strBuilder.toString());
+			}
+		}		
+		
 		for (int i = 0; i < resourceInfos.size(); i++) {
 			ResourceInfo rInfo = (ResourceInfo) resourceInfos.elementAt(i);
 			if (isEmptyOrNull(rInfo.getResourcePath()) || isEmptyOrNull(rInfo.getName())) {
