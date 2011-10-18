@@ -1128,17 +1128,18 @@ public class DPPEditor extends DPPMultiPageEditor implements
 			delta.accept(new IResourceDeltaVisitor() {
 				public boolean visit(IResourceDelta delta) {
 					try {
-						IResource res = delta.getResource();
+						final IResource res = delta.getResource();
+						
 						if (delta.getKind() == IResourceDelta.ADDED && delta.getFlags() == IResourceDelta.MOVED_FROM) {
 							IPath movedFrom = delta.getMovedFromPath();
 							if (!(delta.getResource() instanceof IFile) || !((IFile) delta.getResource()).getName().endsWith(".dpp") || delta.getMovedFromPath() == null) {
 								return true;
 							}
 
-							IFile iFile = (IFile) delta.getResource();
+							final IFile iFile = (IFile) delta.getResource();
 							Vector allEditors = getAllDPPEditors();
 							for (int i = 0; i < allEditors.size(); i++) {
-								DPPEditor editor = (DPPEditor) allEditors.elementAt(i);
+								final DPPEditor editor = (DPPEditor) allEditors.elementAt(i);
 								String editorFileName = editor.getFile().getLocation().toOSString();
 								String loc = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
 								if (editorFileName.startsWith(loc)) {
@@ -1159,8 +1160,13 @@ public class DPPEditor extends DPPMultiPageEditor implements
 									((DPPFileModel) editor.getModel()).setFile((IFile) iFile);
 									FileEditorInput newEditorInput = new FileEditorInput(iFile);
 									editor.setInput(newEditorInput);
-									editor.setTitleToolTip(res.getFullPath().toOSString());
-									editor.setPartName(iFile.getName());
+									PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+										public void run() {
+											editor.setTitleToolTip(res.getFullPath().toOSString());
+											editor.setPartName(iFile.getName());
+										}
+									});
+
 									addDPPEditor(editor);
 									try {
 										editor.getDocumentProvider().connect(newEditorInput);
