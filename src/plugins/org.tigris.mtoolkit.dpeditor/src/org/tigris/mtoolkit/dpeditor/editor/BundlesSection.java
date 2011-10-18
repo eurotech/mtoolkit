@@ -220,11 +220,9 @@ public class BundlesSection extends DPPFormSection implements
 		private boolean modifyBundleColumn(String newValue, TableItem item) {
 			if(newValue.equals("")){
 				return true;
-			} else if (!PluginUtilities.isValidPath(newValue)) {
-				showErrorTableDialog(ResourceManager.getString(WRONG_BUNDLE_PATH));
-				bundlesTable.getTable().setFocus();
-				return false;
-			} else if (!newValue.endsWith(".jar") && !newValue.endsWith(".project")) {
+			}
+			
+			if (!newValue.endsWith(".jar") && !newValue.endsWith(".project")) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_INVALID_BUNDLE_NAME));
 				bundlesTable.getTable().setFocus();
 				return false;
@@ -245,6 +243,12 @@ public class BundlesSection extends DPPFormSection implements
 				bundlesTable.getTable().setFocus();
 				return false;
 			}
+			
+			if (!PluginUtilities.isValidPath(newValue)) {
+				showErrorTableDialog(ResourceManager.getString(WRONG_BUNDLE_PATH));
+				bundlesTable.getTable().setFocus();
+				return false;
+			} 
 			
 			if (bundlePath != null && bundlePath.startsWith("<.>")) {
 				bundlePath = loc + bundlePath.substring("<.>".length());
