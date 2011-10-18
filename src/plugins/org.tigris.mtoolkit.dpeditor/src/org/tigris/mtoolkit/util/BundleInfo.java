@@ -17,6 +17,8 @@ import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
+
 /**
  * This class contains all the info for a single bundle, needed when embedding
  * the bundle in a deployment package.
@@ -71,7 +73,7 @@ public class BundleInfo {
 				value = mf.getMainAttributes().getValue("Bundle-SymbolicName");
 				bunVersion = "" + mf.getMainAttributes().getValue("Bundle-Version");
 			}
-			setBundleSymbolicName(value);
+			setBundleSymbolicName(DPPUtil.parseSymbolicName(value));
 			isSymbolicNameFromJar = !(value == null || value.equals("") || value.equals("null"));
 			isVersionFromJar = !(bunVersion == null || bunVersion.equals("") || bunVersion.equals("null"));
 			if (bunVersion == null || bunVersion.equals("null")) {

@@ -384,7 +384,7 @@ public class DPPUtil {
 		}
 		if (mf == null)
 			return;
-		String value = mf.getMainAttributes().getValue("Bundle-SymbolicName");
+		String value = DPPUtil.parseSymbolicName(mf.getMainAttributes().getValue("Bundle-SymbolicName"));
 		if (value != null) {
 			info.setBundleSymbolicName(value);
 		}
@@ -392,6 +392,10 @@ public class DPPUtil {
 		if (bunVersion != null) {
 			info.setBundleVersion(bunVersion);
 		}
+	}
+
+	public static String parseSymbolicName(String symbolicName) {
+		return symbolicName.contains(";") ? symbolicName.substring(0, symbolicName.indexOf(';')) : symbolicName;
 	}
 
 	// wait flag

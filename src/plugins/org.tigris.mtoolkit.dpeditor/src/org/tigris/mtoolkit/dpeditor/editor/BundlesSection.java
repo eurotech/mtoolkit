@@ -78,8 +78,8 @@ import org.tigris.mtoolkit.util.DPPUtilities;
  * file. This section gives possibility to add, remove, edit and move the
  * created <code>BundleInfo</code>s.
  */
-public class BundlesSection extends DPPFormSection implements
-		SelectionListener, ISelectionChangedListener, ICheckStateListener {
+public class BundlesSection extends DPPFormSection implements SelectionListener, ISelectionChangedListener,
+		ICheckStateListener {
 
 	/** Holds the title of this section */
 	public static final String SECTION_TITLE = "DPPEditor.BundlesSection.title";
@@ -211,28 +211,29 @@ public class BundlesSection extends DPPFormSection implements
 		 *            the property
 		 * @param value
 		 *            the new property value
-		 * @return 
+		 * @return
 		 * 
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
 		 *      java.lang.String, java.lang.Object)
 		 */
-		
+
 		private boolean modifyBundleColumn(String newValue, TableItem item) {
-			if(newValue.equals("")){
+			if (newValue.equals("")) {
 				return true;
 			}
-			
+
 			if (!newValue.endsWith(".jar") && !newValue.endsWith(".project")) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_INVALID_BUNDLE_NAME));
 				bundlesTable.getTable().setFocus();
 				return false;
-			}		
-			
+			}
+
 			BundleInfo bundle = (BundleInfo) item.getData();
 			String bundlePath = bundle.getBundlePath();
 			String loc = ((DPPFileModel) getFormPage().getModel()).getFile().getProject().getLocation().toOSString();
 
-			// The verifications about "<.>" are made only because of a "feature" in the class TableLabelProvier
+			// The verifications about "<.>" are made only because of a
+			// "feature" in the class TableLabelProvier
 			// and should be reconsidered are they worth it at all!
 			if (newValue.startsWith("<.>")) {
 				newValue = loc + newValue.substring("<.>".length());
@@ -243,13 +244,13 @@ public class BundlesSection extends DPPFormSection implements
 				bundlesTable.getTable().setFocus();
 				return false;
 			}
-			
+
 			if (!PluginUtilities.isValidPath(newValue)) {
 				showErrorTableDialog(ResourceManager.getString(WRONG_BUNDLE_PATH));
 				bundlesTable.getTable().setFocus();
 				return false;
-			} 
-			
+			}
+
 			if (bundlePath != null && bundlePath.startsWith("<.>")) {
 				bundlePath = loc + bundlePath.substring("<.>".length());
 			}
@@ -257,7 +258,7 @@ public class BundlesSection extends DPPFormSection implements
 			if (bundlePath != null && newValue.equals(bundlePath) && !newValue.equals("")) {
 				return false;
 			}
-			
+
 			IProject selProject = null;
 			if (newValue.endsWith(".project")) {
 				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
@@ -283,8 +284,10 @@ public class BundlesSection extends DPPFormSection implements
 			}
 
 			bundle.setBundlePath(newValue);
-			// Currently the formation of the new Name is not 100% correct logically, 
-			// but this issue should concern future improvements, according to I. Karabashev
+			// Currently the formation of the new Name is not 100% correct
+			// logically,
+			// but this issue should concern future improvements, according to
+			// I. Karabashev
 			String tempSTR = DPPUtilities.getPath(item.getText(1));
 			bundlesCustomPath = item.getText(1).equals("") ? getUpperPath(item) : (tempSTR == null) ? "" : tempSTR;
 			String bundleName = bundlesCustomPath + getName(newValue);
@@ -293,27 +296,27 @@ public class BundlesSection extends DPPFormSection implements
 			if (DPPUtil.isAlreadyInTheTable(bundleName, item)) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
 				bundlesTable.getTable().setFocus();
-				return false;				
+				return false;
 			}
-			
-			
-			IPluginModelBase findModel = PluginRegistry.findModel(selProject);			
+
+			IPluginModelBase findModel = PluginRegistry.findModel(selProject);
 			if (findModel != null) {
-				BundleDescription bundleDescr = findModel.getBundleDescription();				
-				
+				BundleDescription bundleDescr = findModel.getBundleDescription();
+
 				if (bundleDescr != null) {
-					bundle.setBundleSymbolicName(bundleDescr.getSymbolicName());
+					bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(bundleDescr.getSymbolicName()));
 					bundle.setBundleVersion(bundleDescr.getVersion().toString());
 				} else {
 					try {
 						IBundleModel bundleModel = (IBundleModel) ((IBundlePluginModelBase) findModel).getBundleModel();
-						bundle.setBundleSymbolicName(bundleModel.getBundle().getManifestHeader("Bundle-SymbolicName").getValue());
+						bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(bundleModel.getBundle()
+								.getManifestHeader("Bundle-SymbolicName").getValue()));
 						bundle.setBundleVersion(bundleModel.getBundle().getManifestHeader("Bundle-Version").getValue());
 					} catch (Throwable t) {
 						t.printStackTrace();
 					}
 				}
-			}					
+			}
 			return true;
 		}
 
@@ -330,19 +333,19 @@ public class BundlesSection extends DPPFormSection implements
 				bundlesTable.getTable().setFocus();
 				return false;
 			}
-			
+
 			if (!newValue.endsWith(".jar")) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_NOT_ENDS_WITH_JAR));
 				bundlesTable.getTable().setFocus();
 				return false;
 			}
 			bundle.setName(newValue);
-			
+
 			if (DPPUtil.isAlreadyInTheTable(newValue, item)) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
 				bundlesTable.getTable().setFocus();
 				return false;
-			}			
+			}
 			return true;
 		}
 
@@ -413,7 +416,7 @@ public class BundlesSection extends DPPFormSection implements
 					return;
 				}
 				isSet = true;
-				bundle.setBundleSymbolicName(newValue);
+				bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(newValue));
 			}
 			removeButton.setEnabled(true);
 			setMoveEnable();
@@ -462,16 +465,13 @@ public class BundlesSection extends DPPFormSection implements
 		public Object getValue(Object object, String property) {
 			BundleInfo bundle = (BundleInfo) object;
 			if (property.equals("bundle")) {
-				String bundlePath = DPPUtilities.getStringValue(bundle
-						.getBundlePath());
+				String bundlePath = DPPUtilities.getStringValue(bundle.getBundlePath());
 				DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
 				IFile ifile = model.getFile();
 				IProject project = ifile.getProject();
 				String location = project.getLocation().toOSString();
-				if (bundlePath.toLowerCase().startsWith(
-						location.toLowerCase() + File.separator)) {
-					bundlePath = "<.>"
-							+ bundlePath.substring(location.length());
+				if (bundlePath.toLowerCase().startsWith(location.toLowerCase() + File.separator)) {
+					bundlePath = "<.>" + bundlePath.substring(location.length());
 				}
 				return bundlePath;
 			} else if (property.equals("name")) {
@@ -479,8 +479,7 @@ public class BundlesSection extends DPPFormSection implements
 			} else if (property.equals("version")) {
 				return DPPUtilities.getStringValue(bundle.getBundleVersion());
 			} else if (property.equals("bundle_name")) {
-				return DPPUtilities.getStringValue(bundle
-						.getBundleSymbolicName());
+				return DPPUtilities.getStringValue(bundle.getBundleSymbolicName());
 			} else if (property.equals("missing")) {
 				if (bundle.isMissing()) {
 					return new Integer(0);
@@ -502,8 +501,7 @@ public class BundlesSection extends DPPFormSection implements
 	 * A content provider mediates between the viewer's model and the viewer
 	 * itself.
 	 */
-	class TableContentProvider extends DefaultContentProvider implements
-			IStructuredContentProvider {
+	class TableContentProvider extends DefaultContentProvider implements IStructuredContentProvider {
 		/**
 		 * Returns the elements to display in the viewer when its input is set
 		 * to the given element.
@@ -532,8 +530,7 @@ public class BundlesSection extends DPPFormSection implements
 	 * A label provider sets for the value of the given column index the value
 	 * of the element, that corresponding with this index.
 	 */
-	class TableLabelProvider extends LabelProvider implements
-			ITableLabelProvider {
+	class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
 		/**
 		 * Returns the label text for the given column of the given element.
 		 * 
@@ -552,26 +549,21 @@ public class BundlesSection extends DPPFormSection implements
 			if (obj instanceof BundleInfo) {
 				BundleInfo bundle = (BundleInfo) obj;
 				if (index == 0) {
-					String bundlePath = DPPUtilities.getStringValue(bundle
-							.getBundlePath());
-					DPPFileModel model = ((DPPFileModel) getFormPage()
-							.getModel());
+					String bundlePath = DPPUtilities.getStringValue(bundle.getBundlePath());
+					DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
 					IFile ifile = model.getFile();
 					IProject project = ifile.getProject();
 					String location = project.getLocation().toOSString();
 					if (bundlePath.startsWith(location + File.separator)) {
-						bundlePath = "<.>"
-								+ bundlePath.substring(location.length());
+						bundlePath = "<.>" + bundlePath.substring(location.length());
 					}
 					return bundlePath;
 				} else if (index == 1) {
 					return DPPUtilities.getStringValue(bundle.getName());
 				} else if (index == 2) {
-					return DPPUtilities.getStringValue(bundle
-							.getBundleSymbolicName());
+					return DPPUtilities.getStringValue(bundle.getBundleSymbolicName());
 				} else if (index == 3) {
-					return DPPUtilities.getStringValue(bundle
-							.getBundleVersion());
+					return DPPUtilities.getStringValue(bundle.getBundleVersion());
 				} else if (index == 4) {
 					return new Boolean(bundle.isCustomizer()).toString();
 				} else if (index == 5) {
@@ -647,8 +639,7 @@ public class BundlesSection extends DPPFormSection implements
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE
-				| SWT.FULL_SELECTION);
+		Table table = FormWidgetFactory.createTable(container, SWT.SINGLE | SWT.FULL_SELECTION);
 		table.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent ev) {
 				if (ev.keyCode == 27) {
@@ -656,12 +647,10 @@ public class BundlesSection extends DPPFormSection implements
 						Table table = (Table) ev.getSource();
 						if (table.getSelectionIndex() < 0)
 							return;
-						TableItem item = table.getItem(table
-								.getSelectionIndex());
+						TableItem item = table.getItem(table.getSelectionIndex());
 						final BundleInfo bundle = (BundleInfo) item.getData();
 						item.setChecked(bundle.isCustomizer());
-						if (DPPUtilities.getStringValue(bundle.getBundlePath())
-								.equals("")) {
+						if (DPPUtilities.getStringValue(bundle.getBundlePath()).equals("")) {
 							bundleInfoChange(bundle, REMOVE_BUNDLE);
 						}
 					}
@@ -673,19 +662,13 @@ public class BundlesSection extends DPPFormSection implements
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		String[] columnTitles = {
-				ResourceManager.getString("DPPEditor.BundlesSection.ColPath"),
+		String[] columnTitles = { ResourceManager.getString("DPPEditor.BundlesSection.ColPath"),
 				ResourceManager.getString("DPPEditor.BundlesSection.ColName"),
-				ResourceManager
-						.getString("DPPEditor.BundlesSection.ColSymbolicName"),
-				ResourceManager
-						.getString("DPPEditor.BundlesSection.ColVersion"),
-				ResourceManager
-						.getString("DPPEditor.BundlesSection.ColCustomizer"),
-				ResourceManager
-						.getString("DPPEditor.BundlesSection.ColMissing"),
-				ResourceManager
-						.getString("DPPEditor.BundlesSection.ColCustomHeaders") };
+				ResourceManager.getString("DPPEditor.BundlesSection.ColSymbolicName"),
+				ResourceManager.getString("DPPEditor.BundlesSection.ColVersion"),
+				ResourceManager.getString("DPPEditor.BundlesSection.ColCustomizer"),
+				ResourceManager.getString("DPPEditor.BundlesSection.ColMissing"),
+				ResourceManager.getString("DPPEditor.BundlesSection.ColCustomHeaders") };
 		for (int i = 0; i < columnTitles.length; i++) {
 			TableColumn tableColumn = new TableColumn(table, SWT.NULL);
 			tableColumn.setText(columnTitles[i]);
@@ -701,23 +684,19 @@ public class BundlesSection extends DPPFormSection implements
 		bundlesTable.addSelectionChangedListener(this);
 
 		String[] data = { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
-		customizerCellEditor = new ComboBoxCellEditor(table, data,
-				SWT.READ_ONLY);
+		customizerCellEditor = new ComboBoxCellEditor(table, data, SWT.READ_ONLY);
 		missingCellEditor = new ComboBoxCellEditor(table, data, SWT.READ_ONLY);
-		String[] properties = { "bundle", "name", "bundle_name", "version",
-				"customizer", "missing", "custom" };
+		String[] properties = { "bundle", "name", "bundle_name", "version", "customizer", "missing", "custom" };
 		bundlesTable.setColumnProperties(properties);
 		CellEditor[] editors = new CellEditor[] {
-				new CustomCellEditor(container, bundlesTable, table,
-						CustomCellEditor.TEXT_BUTTON_TYPE,
-						CustomCellEditor.BUNDLE_PATH),
-				new TextCellEditor(table), new TextCellEditor(table),
+				new CustomCellEditor(container, bundlesTable, table, CustomCellEditor.TEXT_BUTTON_TYPE,
+						CustomCellEditor.BUNDLE_PATH), new TextCellEditor(table),
+				new TextCellEditor(table),
 				new TextCellEditor(table),
 				customizerCellEditor,
 				missingCellEditor,
 				// customizer, missing,
-				new CustomCellEditor(container, bundlesTable, table,
-						CustomCellEditor.DIALOG_TYPE,
+				new CustomCellEditor(container, bundlesTable, table, CustomCellEditor.DIALOG_TYPE,
 						CustomCellEditor.BUNDLE_HEADER) };
 		bundlesTable.setCellEditors(editors);
 		bundlesTable.setCellModifier(new KeyModifier());
@@ -749,14 +728,13 @@ public class BundlesSection extends DPPFormSection implements
 		buttonComposite.setLayout(layout);
 		buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		newButton = FormWidgetFactory.createButton(buttonComposite,
-				ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
-		removeButton = FormWidgetFactory.createButton(buttonComposite,
-				ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
-		upButton = FormWidgetFactory.createButton(buttonComposite,
-				ResourceManager.getString(UP_BUTTON, ""), SWT.PUSH);
-		downButton = FormWidgetFactory.createButton(buttonComposite,
-				ResourceManager.getString(DOWN_BUTTON, ""), SWT.PUSH);
+		newButton = FormWidgetFactory
+				.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
+		removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""),
+				SWT.PUSH);
+		upButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(UP_BUTTON, ""), SWT.PUSH);
+		downButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(DOWN_BUTTON, ""),
+				SWT.PUSH);
 
 		newButton.addSelectionListener(this);
 		GridData gd = new GridData(GridData.FILL_VERTICAL);
@@ -819,13 +797,10 @@ public class BundlesSection extends DPPFormSection implements
 		TableItem[] items = bundlesTable.getTable().getItems();
 		for (int i = 0; i < items.length; i++) {
 			BundleInfo info = (BundleInfo) items[i].getData();
-			String bundlePath = DPPUtilities.getStringValue(info
-					.getBundlePath());
-			String symName = DPPUtilities.getStringValue(info
-					.getBundleSymbolicName());
+			String bundlePath = DPPUtilities.getStringValue(info.getBundlePath());
+			String symName = DPPUtilities.getStringValue(info.getBundleSymbolicName());
 			String name = DPPUtilities.getStringValue(info.getName());
-			String version = DPPUtilities.getStringValue(info
-					.getBundleVersion());
+			String version = DPPUtilities.getStringValue(info.getBundleVersion());
 			if (bundlePath.equals("")) {
 				bundlesTable.editElement(info, 0);
 				break;
@@ -890,28 +865,23 @@ public class BundlesSection extends DPPFormSection implements
 			CCombo combo = (CCombo) obj;
 			int index = combo.getSelectionIndex();
 			String item = combo.getItem(index);
-			Object object = ((IStructuredSelection) bundlesTable.getSelection())
-					.getFirstElement();
+			Object object = ((IStructuredSelection) bundlesTable.getSelection()).getFirstElement();
 			if (object != null && object instanceof BundleInfo) {
 				BundleInfo bundleInfo = (BundleInfo) object;
 				if (combo == customizerCombo) {
 					boolean oldCustomizer = bundleInfo.isCustomizer();
 					boolean newCustomizer = item.equals("true");
-					if ((oldCustomizer && !newCustomizer)
-							|| (!oldCustomizer && newCustomizer)) {
+					if ((oldCustomizer && !newCustomizer) || (!oldCustomizer && newCustomizer)) {
 						bundleInfo.setCustomizer(newCustomizer);
-						model.fireModelChanged(new ModelChangedEvent(
-								IModelChangedEvent.EDIT,
+						model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT,
 								new Object[] { bundleInfo }, null));
 					}
 				} else if (combo == missingCombo) {
 					boolean oldMissing = bundleInfo.isMissing();
 					boolean newMissing = item.equals("true");
-					if ((oldMissing && !newMissing)
-							|| (!oldMissing && newMissing)) {
+					if ((oldMissing && !newMissing) || (!oldMissing && newMissing)) {
 						bundleInfo.setMissing(newMissing);
-						model.fireModelChanged(new ModelChangedEvent(
-								IModelChangedEvent.EDIT,
+						model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT,
 								new Object[] { bundleInfo }, null));
 					}
 				}
@@ -933,7 +903,7 @@ public class BundlesSection extends DPPFormSection implements
 			TableItem beforeLastTableItem = table.getItem(size - 1);
 			String colonNameValue = beforeLastTableItem.getText(1);
 			String colonNamePath = DPPUtilities.getPath(colonNameValue);
-			
+
 			if (colonNamePath == null) {
 				bundlesCustomPath = "bundles/";
 			} else {
@@ -947,9 +917,8 @@ public class BundlesSection extends DPPFormSection implements
 		boolean found = false;
 
 		for (int i = 0; i < size; i++) {
-			TableItem currentItem = table.getItem(i);			
-			if (currentItem.getText(0).equalsIgnoreCase("")
-					&& !currentItem.getData().equals(bundle)) {
+			TableItem currentItem = table.getItem(i);
+			if (currentItem.getText(0).equalsIgnoreCase("") && !currentItem.getData().equals(bundle)) {
 				found = true;
 				break;
 			}
@@ -975,23 +944,19 @@ public class BundlesSection extends DPPFormSection implements
 		if (str.equals(""))
 			return "";
 		if (str.endsWith(".project")) {
-			if (Math.max(str.lastIndexOf('\\'), str.lastIndexOf('/')) != Math
-					.max(str.indexOf('\\'), str.indexOf('/'))) {
-				str = str.substring(0,
-						Math.max(str.lastIndexOf('\\'), str.lastIndexOf('/')));
-				str = str.substring(Math.max(str.lastIndexOf('\\'),
-						str.lastIndexOf('/')) + 1);
+			if (Math.max(str.lastIndexOf('\\'), str.lastIndexOf('/')) != Math.max(str.indexOf('\\'), str.indexOf('/'))) {
+				str = str.substring(0, Math.max(str.lastIndexOf('\\'), str.lastIndexOf('/')));
+				str = str.substring(Math.max(str.lastIndexOf('\\'), str.lastIndexOf('/')) + 1);
 				str = str + ".jar";
 			}
 		}
 		int i = 0;
-		while (str.charAt(i) == '\\' || str.charAt(i) == '/'
-				|| str.charAt(i) == ' ') {
+		while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
 			++i;
 			if (i == (str.length()))
 				break;
 		}
-		
+
 		if (i < str.length()) {
 			str = str.substring(i);
 		} else {
@@ -1019,8 +984,7 @@ public class BundlesSection extends DPPFormSection implements
 	 * bundles presents this table.
 	 */
 	private void handleRemove() {
-		Object object = ((IStructuredSelection) bundlesTable.getSelection())
-				.getFirstElement();
+		Object object = ((IStructuredSelection) bundlesTable.getSelection()).getFirstElement();
 		if (object != null && object instanceof BundleInfo) {
 			BundleInfo bundle = (BundleInfo) object;
 			bundleInfoChange(bundle, REMOVE_BUNDLE);
@@ -1035,8 +999,7 @@ public class BundlesSection extends DPPFormSection implements
 	 * package file, which bundles presents this table.
 	 */
 	private void handleUp() {
-		Object object = ((IStructuredSelection) bundlesTable.getSelection())
-				.getFirstElement();
+		Object object = ((IStructuredSelection) bundlesTable.getSelection()).getFirstElement();
 		if (object != null && object instanceof BundleInfo) {
 			BundleInfo bundle = (BundleInfo) object;
 			bundleInfoChange(bundle, UP_BUNDLE);
@@ -1052,8 +1015,7 @@ public class BundlesSection extends DPPFormSection implements
 	 * Deployment package file, which bundles presents this table.
 	 */
 	private void handleDown() {
-		Object object = ((IStructuredSelection) bundlesTable.getSelection())
-				.getFirstElement();
+		Object object = ((IStructuredSelection) bundlesTable.getSelection()).getFirstElement();
 		if (object != null && object instanceof BundleInfo) {
 			BundleInfo bundle = (BundleInfo) object;
 			bundleInfoChange(bundle, DOWN_BUNDLE);
@@ -1178,29 +1140,24 @@ public class BundlesSection extends DPPFormSection implements
 	 *            values: ADD_BUNDLE, REMOVE_BUNDLE, UP_BUNDLE and DOWN_BUNDLE
 	 */
 	private void bundleInfoChange(BundleInfo bundle, int key) {
-		DPPFile dppFile = ((DPPFileModel) getFormPage().getModel())
-				.getDPPFile();
+		DPPFile dppFile = ((DPPFileModel) getFormPage().getModel()).getDPPFile();
 		Vector infos = dppFile.getBundleInfos();
 		switch (key) {
 		case ADD_BUNDLE:
 			infos.addElement(bundle);
-			model.fireModelChanged(new ModelChangedEvent(
-					IModelChangedEvent.ADD, new Object[] { bundle }, null));
+			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.ADD, new Object[] { bundle }, null));
 			break;
 		case REMOVE_BUNDLE:
 			infos.removeElement(bundle);
-			model.fireModelChanged(new ModelChangedEvent(
-					IModelChangedEvent.REMOVE, new Object[] { bundle }, null));
+			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.REMOVE, new Object[] { bundle }, null));
 			break;
 		case UP_BUNDLE:
 			DPPUtilities.moveElement(infos, bundle, true);
-			model.fireModelChanged(new ModelChangedEvent(
-					IModelChangedEvent.INSERT, new Object[] { bundle }, null));
+			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] { bundle }, null));
 			break;
 		case DOWN_BUNDLE:
 			DPPUtilities.moveElement(infos, bundle, false);
-			model.fireModelChanged(new ModelChangedEvent(
-					IModelChangedEvent.INSERT, new Object[] { bundle }, null));
+			model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] { bundle }, null));
 			break;
 		}
 	}
