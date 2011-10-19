@@ -395,7 +395,8 @@ public class DPPUtil {
 	}
 
 	public static String parseSymbolicName(String symbolicName) {
-		return symbolicName.contains(";") ? symbolicName.substring(0, symbolicName.indexOf(';')) : symbolicName;
+		return symbolicName != null && symbolicName.contains(";") ? symbolicName
+				.substring(0, symbolicName.indexOf(';')) : symbolicName;
 	}
 
 	// wait flag

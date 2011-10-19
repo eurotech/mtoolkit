@@ -21,6 +21,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
+import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 
 /**
@@ -288,6 +290,18 @@ public class DPPFile {
 		}
 		return false;
 	}
+	
+	private boolean areBundleSymbNameAndVersionDuplicated(String bundleSymbName, String version, int index) {
+		for (int i = 0; i < bundleInfos.size(); i++) {
+			if (bundleSymbName != null
+					&& bundleSymbName.equals(((BundleInfo) bundleInfos.elementAt(i)).getBundleSymbolicName())
+					&& version.equals(((BundleInfo) bundleInfos.elementAt(i)).getBundleVersion())
+					&& index != i) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * This method should be called each time when a tab is switched and the dp
@@ -302,10 +316,17 @@ public class DPPFile {
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
 			String bundlePath = bInfo.getBundlePath();
 			String bName = bInfo.getName();
+			String bSymbName = bInfo.getBundleSymbolicName();
+			String bVersion = bInfo.getBundleVersion();
 			StringBuilder strBuilder = new StringBuilder();
 
 			if (isEmptyOrNull(bundlePath)) {
 				strBuilder.append("Bundle Path is empty!");
+			} else if (areBundleSymbNameAndVersionDuplicated(bSymbName, bVersion, i)) {
+				strBuilder.append((strBuilder.length() != 0 ? "\n" : "")
+						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists1")
+						+ bSymbName
+						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists2"));
 			} else if (isBundleNameDuplicated(bName, i)) {
 				strBuilder.append((strBuilder.length() != 0 ? "\n" : "")
 						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists1") + bName
@@ -314,19 +335,19 @@ public class DPPFile {
 				if (isEmptyOrNull(bName)) {
 					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Name is empty!");
 				}
-				if (isEmptyOrNull(bInfo.getBundleSymbolicName())) {
+				if (isEmptyOrNull(bSymbName)) {
 					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Symbolic Name is empty!");
 				}
-				if (isEmptyOrNull(bInfo.getBundleVersion())) {
+				if (isEmptyOrNull(bVersion)) {
 					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Version is empty!");
 				}
 			}
-			
+
 			if (strBuilder.length() > 0) {
 				throw new InconsistentDataException(strBuilder.toString());
 			}
-		}		
-		
+		}
+
 		for (int i = 0; i < resourceInfos.size(); i++) {
 			ResourceInfo rInfo = (ResourceInfo) resourceInfos.elementAt(i);
 			if (isEmptyOrNull(rInfo.getResourcePath()) || isEmptyOrNull(rInfo.getName())) {

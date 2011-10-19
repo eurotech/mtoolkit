@@ -255,7 +255,7 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 				bundlePath = loc + bundlePath.substring("<.>".length());
 			}
 
-			if (bundlePath != null && newValue.equals(bundlePath) && !newValue.equals("")) {
+			if (newValue.equals(bundlePath)) {
 				return false;
 			}
 
@@ -285,39 +285,77 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 
 			bundle.setBundlePath(newValue);
 			// Currently the formation of the new Name is not 100% correct
-			// logically,
-			// but this issue should concern future improvements, according to
-			// I. Karabashev
+			// logically, but this issue should be left future improvements,
+			// according to I. Karabashev
 			String tempSTR = DPPUtilities.getPath(item.getText(1));
 			bundlesCustomPath = item.getText(1).equals("") ? getUpperPath(item) : (tempSTR == null) ? "" : tempSTR;
 			String bundleName = bundlesCustomPath + getName(newValue);
 			bundle.setName(bundleName);
+			
+			IPluginModelBase findModel = PluginRegistry.findModel(selProject);
+			String symbName = null;
 
+			if (findModel != null) {
+				BundleDescription bundleDescr = findModel.getBundleDescription();
+
+				if (bundleDescr == null) {
+					try {
+						IBundleModel bundleModel = (IBundleModel) ((IBundlePluginModelBase) findModel).getBundleModel();
+
+						if (bundleModel != null) {
+							symbName = DPPUtil.parseSymbolicName(bundleModel.getBundle()
+									.getManifestHeader("Bundle-SymbolicName").getValue());
+							bundle.setBundleSymbolicName(symbName);
+							bundle.setBundleVersion(bundleModel.getBundle().getManifestHeader("Bundle-Version")
+									.getValue());
+						}
+					} catch (Throwable t) {
+						t.printStackTrace();
+					}
+				} else {
+					symbName = DPPUtil.parseSymbolicName(bundleDescr.getSymbolicName());
+					bundle.setBundleSymbolicName(symbName);
+					bundle.setBundleVersion(bundleDescr.getVersion().toString());
+				}
+			}
+
+			String msg = null;
+			boolean versionAndSymbNameFlag = isExistingItemWithEqualSymbNameAndVersion(item,
+					bundle.getBundleSymbolicName(), bundle.getBundleVersion());
+			
 			if (DPPUtil.isAlreadyInTheTable(bundleName, item)) {
-				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
+				if (versionAndSymbNameFlag) {
+					msg = ResourceManager
+							.getString("DPPEditor.BundlesSection.VersonAndNameAndSymbolicNameAlreadyExists");
+				} else {
+					msg = ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS);
+				}
+			} else if (versionAndSymbNameFlag) {
+				msg = ResourceManager.getString("DPPEditor.BundlesSection.VersionAndSymbolicNameAlreadyExists");
+			}
+
+			// table should be updated before the modal dialog is shown!!!!
+			// DELAY!!!!
+			if (msg != null) {
+				DPPErrorHandler.processError(msg, true);
 				bundlesTable.getTable().setFocus();
 				return false;
 			}
 
-			IPluginModelBase findModel = PluginRegistry.findModel(selProject);
-			if (findModel != null) {
-				BundleDescription bundleDescr = findModel.getBundleDescription();
+			return true;
+		}
+			
+		private boolean isExistingItemWithEqualSymbNameAndVersion(TableItem item, String symbolicName, String version) {
+			Table table = item.getParent();
 
-				if (bundleDescr != null) {
-					bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(bundleDescr.getSymbolicName()));
-					bundle.setBundleVersion(bundleDescr.getVersion().toString());
-				} else {
-					try {
-						IBundleModel bundleModel = (IBundleModel) ((IBundlePluginModelBase) findModel).getBundleModel();
-						bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(bundleModel.getBundle()
-								.getManifestHeader("Bundle-SymbolicName").getValue()));
-						bundle.setBundleVersion(bundleModel.getBundle().getManifestHeader("Bundle-Version").getValue());
-					} catch (Throwable t) {
-						t.printStackTrace();
-					}
+			for (int i = 0; i < table.getItems().length; i++) {
+				TableItem curItem = table.getItem(i);
+
+				if (symbolicName.equals(curItem.getText(2)) && version.equals(curItem.getText(3)) && curItem != item) {
+					return true;
 				}
 			}
-			return true;
+			return false;
 		}
 
 		private boolean modifyNameColumn(String newValue, TableItem item) {
@@ -348,7 +386,7 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 			}
 			return true;
 		}
-
+		
 		public void modify(Object object, String property, Object value) {
 			TableItem item = (TableItem) object;
 			if (item == null) {
