@@ -23,7 +23,6 @@ import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -41,18 +40,15 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.IModel;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.PluginUtilities;
@@ -395,24 +391,24 @@ public class DPPUtil {
 	}
 
 	public static String parseSymbolicName(String symbolicName) {
-		return symbolicName != null && symbolicName.contains(";") ? symbolicName
+		return symbolicName != null && symbolicName.indexOf(";")!=-1 ? symbolicName
 				.substring(0, symbolicName.indexOf(';')) : symbolicName;
 	}
 
 	// wait flag
-	private static boolean running = false;;
+	//private static boolean running = false;;
 
 	public static Hashtable buildProjectsInWorkspace(Vector prjInfos) throws Throwable {
 		Hashtable result = new Hashtable();
-		Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
+    //Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject[] projects = root.getProjects();
-		Vector pluginBundlePrjs = new Vector();
+		/*Vector pluginBundlePrjs = new Vector();
 		IPluginModelBase base[] = PluginRegistry.getWorkspaceModels();
 		for (int i = 0; i < base.length; i++) {
 			IPluginModelBase pluginModelBase = base[i];
 			BundleDescription bundleDescr = pluginModelBase.getBundleDescription();
-		}
+		}*/
 		for (int j = 0; j < prjInfos.size(); j++) {
 			String prjInfo = (String) prjInfos.elementAt(j);
 			for (int i = 0; i < projects.length; i++) {

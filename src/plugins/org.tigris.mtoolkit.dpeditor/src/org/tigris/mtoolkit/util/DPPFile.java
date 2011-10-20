@@ -21,8 +21,6 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
-import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 
 /**
@@ -318,7 +316,7 @@ public class DPPFile {
 			String bName = bInfo.getName();
 			String bSymbName = bInfo.getBundleSymbolicName();
 			String bVersion = bInfo.getBundleVersion();
-			StringBuilder strBuilder = new StringBuilder();
+			StringBuffer strBuilder = new StringBuffer();
 
 			if (isEmptyOrNull(bundlePath)) {
 				strBuilder.append("Bundle Path is empty!");
@@ -492,7 +490,7 @@ public class DPPFile {
 			bInfo.setMissing("true".equalsIgnoreCase(props.getProperty("bundles." + i + ".missing")));
 			bInfo.setBundlePath(convertToAbsolute(props.getProperty("bundles." + i + ".bundle_path")));
 			String symbolicName = props.getProperty("bundles." + i + ".symbolic_name");
-			String version = props.getProperty("bundles." + i + ".version");
+			//String version = props.getProperty("bundles." + i + ".version");
 			String tmp = bInfo.getBundleSymbolicName();
 			if (!needToSave && ((tmp != null && symbolicName == null) || (tmp == null && symbolicName != null) || (tmp == null && symbolicName == null) || !tmp.equals(symbolicName))) {
 			}

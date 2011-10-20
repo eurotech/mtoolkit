@@ -15,7 +15,6 @@ import java.util.Vector;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -44,13 +43,10 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -365,7 +361,7 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 				return true;
 			}
 
-			if (!PluginUtilities.isValidPath(newValue) || newValue.contains(":")) {
+			if (!PluginUtilities.isValidPath(newValue) || newValue.indexOf(":")!=-1) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager
 						.getString("DPPEditor.BundlesSection.InvalidBundleName"));
 				bundlesTable.getTable().setFocus();
