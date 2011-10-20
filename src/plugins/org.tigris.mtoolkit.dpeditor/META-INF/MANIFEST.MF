@@ -25,7 +25,7 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.core.filesystem,
  org.eclipse.core.runtime,
  org.tigris.mtoolkit.common
-Eclipse-LazyStart: true
+Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.4
 Export-Package: org.tigris.mtoolkit.dpeditor,
  org.tigris.mtoolkit.dpeditor.editor,
