@@ -18,9 +18,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-//import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,12 +26,10 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
-import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.ReflectionUtils;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
@@ -41,8 +37,6 @@ import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 import org.tigris.mtoolkit.util.BuildInfo;
 import org.tigris.mtoolkit.util.DPPFile;
-import org.tigris.mtoolkit.util.DPPUtilities;
-import org.tigris.mtoolkit.util.InconsistentDataException;
 
 public class QuickBuildActionDelegate extends Action implements
 		IWorkbenchWindowActionDelegate {
