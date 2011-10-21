@@ -12,14 +12,11 @@ package org.tigris.mtoolkit.osgimanagement.model;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
-import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 
 /**
  * @since 5.0

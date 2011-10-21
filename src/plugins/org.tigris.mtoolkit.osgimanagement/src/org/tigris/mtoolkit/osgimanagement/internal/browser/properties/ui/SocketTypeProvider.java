@@ -141,7 +141,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 			return "Type port number";
 		}
 		try {
-			int intPort = Integer.parseInt(port);
+			Integer.parseInt(port);
 		} catch (NumberFormatException ex) {
 			return "Invalid port: " + port;
 		}
