@@ -1,6 +1,5 @@
 package org.tigris.mtoolkit.osgimanagement.internal;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -13,13 +12,11 @@ import java.util.Set;
 import org.eclipse.swt.widgets.Display;
 import org.tigris.mtoolkit.common.ReflectionUtils;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
-import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.ServiceManager;
 import org.tigris.mtoolkit.iagent.VMManager;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
-import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 
