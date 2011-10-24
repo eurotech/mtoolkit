@@ -952,6 +952,7 @@ public class HeadersSection extends DPPFormSection implements
 		}
 
 		table.setSelection(size - 1);
+		table.setFocus();
 		updateEnabledButtons();
 	}
 

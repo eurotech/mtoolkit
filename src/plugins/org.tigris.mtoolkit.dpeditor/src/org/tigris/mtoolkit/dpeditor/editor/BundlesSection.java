@@ -968,6 +968,7 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 		}
 
 		table.setSelection(size - 1);
+		table.setFocus();
 		updateEnabledButtons();
 	}
 

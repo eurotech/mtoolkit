@@ -713,6 +713,7 @@ public class CertificatesSection extends DPPFormSection implements SelectionList
 		}
 
 		table.setSelection(size - 1);
+		table.setFocus();
 		updateEnabledButtons();
 	}
 

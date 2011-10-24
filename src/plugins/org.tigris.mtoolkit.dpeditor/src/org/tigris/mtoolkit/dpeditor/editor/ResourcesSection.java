@@ -984,6 +984,7 @@ public class ResourcesSection extends DPPFormSection implements
 		}
 
 		table.setSelection(size - 1);
+		table.setFocus();
 		updateEnabledButtons();
 	}
 
