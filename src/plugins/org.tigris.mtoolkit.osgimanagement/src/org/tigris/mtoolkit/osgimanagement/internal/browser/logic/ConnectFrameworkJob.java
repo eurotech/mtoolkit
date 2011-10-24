@@ -143,7 +143,7 @@ public class ConnectFrameworkJob extends Job {
 					}.start();
 					while (conn[0] == null && rStatus[0] == null) {
 						try {
-							Thread.currentThread().sleep(50);
+							Thread.sleep(50);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}

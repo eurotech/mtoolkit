@@ -244,7 +244,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				SubMonitor monitor = sMonitor.newChild(modelTotal);
 				monitor.setTaskName("Retrieve additional providers data");
 				ContentTypeModelProvider manager = ((ModelProviderElement) modelProviders.get(i)).getProvider();
-				Model node = manager.connect(this, connector, monitor);
+				/*Model node =*/ manager.connect(this, connector, monitor);
 				if (monitor.isCanceled())
 					return false;
 			}

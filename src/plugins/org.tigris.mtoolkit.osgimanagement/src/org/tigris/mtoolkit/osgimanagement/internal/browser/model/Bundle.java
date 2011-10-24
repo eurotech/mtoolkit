@@ -31,7 +31,6 @@ import org.tigris.mtoolkit.osgimanagement.IconProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
-import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class Bundle extends Model implements IconProvider {
@@ -150,7 +149,7 @@ public class Bundle extends Model implements IconProvider {
 	// this method will always ask the remote side, so it needs to throw
 	// exception
 	public void update() throws IAgentException {
-		Framework framework = findFramework();
+		/*Framework framework =*/ findFramework();
 //		if (framework != null && framework.getConnector() != null) {
 			try {
 				refreshStateFromRemote();
