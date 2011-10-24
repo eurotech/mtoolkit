@@ -464,7 +464,7 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 		}
 
 		private String getUpperPath(Object object) {
-			String path = "bundles" + File.separator;
+			String path = "bundles/";
 			Table table = bundlesTable.getTable();
 
 			for (int i = 0; i < table.getItems().length; i++) {

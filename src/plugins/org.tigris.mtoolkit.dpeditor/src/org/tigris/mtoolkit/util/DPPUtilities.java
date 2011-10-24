@@ -802,7 +802,7 @@ public class DPPUtilities {
 	public static String getPath(String str) {
 		if (PluginUtilities.isValidPath(str)) {
 			IPath path = new Path(str);
-			return path.segmentCount() > 1 ? path.removeLastSegments(1).toString() + File.separator : "";
+			return path.segmentCount() > 1 ? path.removeLastSegments(1).toString() + "/" : "";
 		} else
 			return null;
 	}
