@@ -281,16 +281,13 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 
 			bundle.setBundlePath(newValue);
 			// Currently the formation of the new Name is not 100% correct
-			// logically, but this issue should be left future improvements,
+			// logically, but this issue should be left for future improvements,
 			// according to I. Karabashev
 			String tempSTR = DPPUtilities.getPath(item.getText(1));
 			bundlesCustomPath = item.getText(1).equals("") ? getUpperPath(item) : (tempSTR == null) ? "" : tempSTR;
-			String bundleName = bundlesCustomPath + getName(newValue);
-			bundle.setName(bundleName);
+			bundle.setName(bundlesCustomPath + getName(newValue));
 			
 			IPluginModelBase findModel = PluginRegistry.findModel(selProject);
-			String symbName = null;
-
 			if (findModel != null) {
 				BundleDescription bundleDescr = findModel.getBundleDescription();
 
@@ -299,9 +296,8 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 						IBundleModel bundleModel = (IBundleModel) ((IBundlePluginModelBase) findModel).getBundleModel();
 
 						if (bundleModel != null) {
-							symbName = DPPUtil.parseSymbolicName(bundleModel.getBundle()
-									.getManifestHeader("Bundle-SymbolicName").getValue());
-							bundle.setBundleSymbolicName(symbName);
+							bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(bundleModel.getBundle()
+									.getManifestHeader("Bundle-SymbolicName").getValue()));
 							bundle.setBundleVersion(bundleModel.getBundle().getManifestHeader("Bundle-Version")
 									.getValue());
 						}
@@ -309,31 +305,20 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 						t.printStackTrace();
 					}
 				} else {
-					symbName = DPPUtil.parseSymbolicName(bundleDescr.getSymbolicName());
-					bundle.setBundleSymbolicName(symbName);
+					bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(bundleDescr.getSymbolicName()));
 					bundle.setBundleVersion(bundleDescr.getVersion().toString());
 				}
 			}
-
-			String msg = null;
-			boolean versionAndSymbNameFlag = isExistingItemWithEqualSymbNameAndVersion(item,
-					bundle.getBundleSymbolicName(), bundle.getBundleVersion());
 			
-			if (DPPUtil.isAlreadyInTheTable(bundleName, item)) {
-				if (versionAndSymbNameFlag) {
-					msg = ResourceManager
-							.getString("DPPEditor.BundlesSection.VersonAndNameAndSymbolicNameAlreadyExists");
-				} else {
-					msg = ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS);
-				}
-			} else if (versionAndSymbNameFlag) {
-				msg = ResourceManager.getString("DPPEditor.BundlesSection.VersionAndSymbolicNameAlreadyExists");
+			if (DPPUtil.isAlreadyInTheTable(bundle.getBundleSymbolicName(), item, 2)) {
+				DPPErrorHandler.processError(
+						ResourceManager.getString("DPPEditor.BundlesSection.SymbolicNameAlreadyExists"), true);
+				bundlesTable.getTable().setFocus();
+				return false;
 			}
-
-			// table should be updated before the modal dialog is shown!!!!
-			// DELAY!!!!
-			if (msg != null) {
-				DPPErrorHandler.processError(msg, true);
+			
+			if (DPPUtil.isAlreadyInTheTable(bundle.getName(), item, 1)) {
+				DPPErrorHandler.processError(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS), true);
 				bundlesTable.getTable().setFocus();
 				return false;
 			}
@@ -341,19 +326,6 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 			return true;
 		}
 			
-		private boolean isExistingItemWithEqualSymbNameAndVersion(TableItem item, String symbolicName, String version) {
-			Table table = item.getParent();
-
-			for (int i = 0; i < table.getItems().length; i++) {
-				TableItem curItem = table.getItem(i);
-
-				if (symbolicName.equals(curItem.getText(2)) && version.equals(curItem.getText(3)) && curItem != item) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		private boolean modifyNameColumn(String newValue, TableItem item) {
 			BundleInfo bundle = (BundleInfo) item.getData();
 
@@ -375,7 +347,7 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 			}
 			bundle.setName(newValue);
 
-			if (DPPUtil.isAlreadyInTheTable(newValue, item)) {
+			if (DPPUtil.isAlreadyInTheTable(newValue, item, 1)) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS));
 				bundlesTable.getTable().setFocus();
 				return false;

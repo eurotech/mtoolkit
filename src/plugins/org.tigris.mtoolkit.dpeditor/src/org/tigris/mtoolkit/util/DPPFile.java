@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -279,23 +280,21 @@ public class DPPFile {
 		props.setProperty(key, value);
 	}
 	
-	private boolean isBundleNameDuplicated(String bundleName, int index) {
-		for (int i = 0; i < bundleInfos.size(); i++) {
-			if (bundleName != null && bundleName.equals(((BundleInfo) bundleInfos.elementAt(i)).getName())
-					&& index != i) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	private boolean areBundleSymbNameAndVersionDuplicated(String bundleSymbName, String version, int index) {
-		for (int i = 0; i < bundleInfos.size(); i++) {
-			if (bundleSymbName != null
-					&& bundleSymbName.equals(((BundleInfo) bundleInfos.elementAt(i)).getBundleSymbolicName())
-					&& version.equals(((BundleInfo) bundleInfos.elementAt(i)).getBundleVersion())
-					&& index != i) {
-				return true;
+	private boolean isFieldValueDuplicated(Vector objVector, int objIndex, String fldName, String fldValue) {
+		if (objVector != null && objVector.size() > 0 && fldValue != null) {
+			try {
+				Class clazz = objVector.get(0).getClass();
+				Field field = clazz.getDeclaredField(fldName);
+
+				if (field != null) {
+					for (int i = 0; i < objVector.size(); i++) {
+						if (objIndex != i && fldValue.equals(field.get(objVector.elementAt(i)))) {
+							return true;
+						}
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		return false;
@@ -312,37 +311,25 @@ public class DPPFile {
 	public void checkConsistency() throws InconsistentDataException {
 		for (int i = 0; i < bundleInfos.size(); i++) {
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
-			String bundlePath = bInfo.getBundlePath();
 			String bName = bInfo.getName();
 			String bSymbName = bInfo.getBundleSymbolicName();
-			String bVersion = bInfo.getBundleVersion();
-			StringBuffer strBuilder = new StringBuffer();
 
-			if (isEmptyOrNull(bundlePath)) {
-				strBuilder.append("Bundle Path is empty!");
-			} else if (areBundleSymbNameAndVersionDuplicated(bSymbName, bVersion, i)) {
-				strBuilder.append((strBuilder.length() != 0 ? "\n" : "")
-						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists1")
-						+ bSymbName
-						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists2"));
-			} else if (isBundleNameDuplicated(bName, i)) {
-				strBuilder.append((strBuilder.length() != 0 ? "\n" : "")
-						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists1") + bName
-						+ ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists2"));
-			} else if (!bundlePath.endsWith(".project")) {
-				if (isEmptyOrNull(bName)) {
-					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Name is empty!");
-				}
-				if (isEmptyOrNull(bSymbName)) {
-					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Symbolic Name is empty!");
-				}
-				if (isEmptyOrNull(bVersion)) {
-					strBuilder.append((strBuilder.length() != 0 ? "\n" : "") + "Bundle Version is empty!");
-				}
-			}
-
-			if (strBuilder.length() > 0) {
-				throw new InconsistentDataException(strBuilder.toString());
+			if (isEmptyOrNull(bInfo.getBundlePath())) {
+				throw new InconsistentDataException("Bundle Path is empty!");
+			} else if (isEmptyOrNull(bName)) {
+				throw new InconsistentDataException("Bundle Name is empty!");
+			} else if (isEmptyOrNull(bSymbName)) {
+				throw new InconsistentDataException("Bundle Symbolic Name is empty!");
+			} else if (isEmptyOrNull(bInfo.getBundleVersion())) {
+				throw new InconsistentDataException("Bundle Version is empty!");
+			} else if (isFieldValueDuplicated(bundleInfos, i, "bundleSymbolicName", bSymbName)) {
+				throw new InconsistentDataException(
+						ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists1") + bSymbName
+								+ ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists2"));
+			} else if (isFieldValueDuplicated(bundleInfos, i, "name", bName)) {
+				throw new InconsistentDataException(
+						ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists1") + bName
+								+ ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists2"));
 			}
 		}
 

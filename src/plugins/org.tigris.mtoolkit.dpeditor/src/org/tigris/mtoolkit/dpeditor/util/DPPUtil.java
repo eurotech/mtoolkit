@@ -738,15 +738,11 @@ public class DPPUtil {
 		return path;
 	}
 
-	public static boolean isAlreadyInTheTable(String bundleName, TableItem currentItem) {
+	public static boolean isAlreadyInTheTable(String bundleName, TableItem currentItem, int column) {
 		Table table = currentItem.getParent();
-		int size = table.getItems().length;
-		if (size == 0)
-			return false;
-		for (int i = 0; i < size; i++) {
-			if (currentItem == table.getItem(i))
-				continue;
-			if (bundleName.equals(table.getItem(i).getText(1))) {
+
+		for (int i = 0; i < table.getItems().length; i++) {
+			if (!currentItem.equals(table.getItem(i)) && bundleName.equals(table.getItem(i).getText(column))) {
 				return true;
 			}
 		}

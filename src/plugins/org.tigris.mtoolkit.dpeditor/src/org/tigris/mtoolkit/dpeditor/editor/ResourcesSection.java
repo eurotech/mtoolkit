@@ -59,7 +59,6 @@ import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 import org.tigris.mtoolkit.util.DPPFile;
 import org.tigris.mtoolkit.util.DPPUtilities;
-import org.tigris.mtoolkit.util.Header;
 import org.tigris.mtoolkit.util.ResourceInfo;
 
 /**
@@ -251,7 +250,7 @@ public class ResourcesSection extends DPPFormSection implements
 					String tempSTR = getPath(item.getText(1));
 					customPath = (tempSTR == null) ? "" : tempSTR;
 				}
-				if (DPPUtil.isAlreadyInTheTable(customPath + filename, item)) {
+				if (DPPUtil.isAlreadyInTheTable(customPath + filename, item, 1)) {
 					DPPErrorHandler.showErrorTableDialog(ResourceManager
 							.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
 					return;
@@ -276,7 +275,7 @@ public class ResourcesSection extends DPPFormSection implements
 					String currentPath = getPath(newValue);
 					customPath = (currentPath == null) ? "" : currentPath;
 				}
-				if (DPPUtil.isAlreadyInTheTable(customPath + filename, item)) {
+				if (DPPUtil.isAlreadyInTheTable(customPath + filename, item, 1)) {
 					DPPErrorHandler.showErrorTableDialog(ResourceManager
 							.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
 					return;
