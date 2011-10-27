@@ -38,19 +38,22 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.PluginProvider.PluginItem;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundlesOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -127,7 +130,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 	public IStatus processInstallationItems(final InstallationItem[] items, InstallationTarget target,
 			final IProgressMonitor monitor) {
-
 		SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
 
 		Framework framework = ((FrameworkTarget) target).getFramework();
@@ -195,37 +197,11 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			return signStatus;
 		}
 
+		List<FrameworkInstallationItem> itemsToInstall = new ArrayList<FrameworkInstallationItem>();
 		for (final InstallationItem item : items) {
-
-			if (item instanceof PluginItem) {
-				IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, monitor);
-				if (status.getSeverity() == IStatus.CANCEL) {
-					monitor.setCanceled(true);
-					return status;
-				}
-				if (status.getSeverity() == IStatus.ERROR) {
-					return status;
-				}
-			}
-
-			InstallationItem[] children = item.getChildren();
-			if (children == null) {
-				IStatus childStatus = processInstallationItem(item, framework, monitor, subMonitor);
-				if (childStatus != null) {
-					item.dispose();
-					return childStatus;
-				}
-			} else {
-				for (InstallationItem childItem : children) {
-					IStatus childStatus = processInstallationItem(childItem, framework, monitor, subMonitor);
-					if (childStatus != null) {
-						item.dispose();
-						return childStatus;
-					}
-				}
-			}
-			item.dispose();
+			processItem(item, framework, monitor, subMonitor, itemsToInstall);
 		}
+		installBundles(itemsToInstall);
 
 		monitor.done();
 		if (monitor.isCanceled()) {
@@ -234,9 +210,42 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return Status.OK_STATUS;
 	}
 
+	private IStatus processItem(final InstallationItem item, Framework framework, final IProgressMonitor monitor,
+			SubMonitor subMonitor, List itemsToInstall) {
+		if (item instanceof PluginItem) {
+			IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, monitor,
+					itemsToInstall);
+			if (status.getSeverity() == IStatus.CANCEL) {
+				monitor.setCanceled(true);
+				return status;
+			}
+			if (status.getSeverity() == IStatus.ERROR) {
+				return status;
+			}
+		}
+
+		InstallationItem[] children = item.getChildren();
+		if (children == null) {
+			IStatus childStatus = processInstallationItem(item, framework, monitor, subMonitor, itemsToInstall);
+			if (childStatus != null) {
+				// item.dispose();
+				return childStatus;
+			}
+		} else {
+			for (InstallationItem childItem : children) {
+				IStatus childStatus = processInstallationItem(childItem, framework, monitor, subMonitor, itemsToInstall);
+				if (childStatus != null) {
+					// item.dispose();
+					return childStatus;
+				}
+			}
+		}
+		// item.dispose();
+		return Status.OK_STATUS;
+	}
+
 	private IStatus processInstallationItem(final InstallationItem item, Framework framework,
-			final IProgressMonitor monitor, SubMonitor subMonitor) {
-		InputStream input = null;
+			final IProgressMonitor monitor, SubMonitor subMonitor, List itemsToInstall) {
 		try {
 			String mimeType = item.getMimeType();
 			Vector processors = new Vector();
@@ -268,6 +277,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 						dialog.setTitle("Select processor");
 						dialog.setLabelProvider(new LabelProvider() {
+							@Override
 							public Image getImage(Object element) {
 								return ((FrameworkProcessor) element).getImage();
 							}
@@ -290,18 +300,9 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				}
 			}
 
-			input = item.getInputStream();
-			String name = item.getName();
-			processor[0].install(input, name, framework, subMonitor.newChild(1));
+			itemsToInstall.add(new FrameworkInstallationItem((FrameworkImpl) framework, processor[0], item));
 		} catch (Exception e) {
 			return Util.newStatus(IStatus.ERROR, "Remote content installation failed", e);
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-				}
-			}
 		}
 		return null;
 	}
@@ -313,20 +314,15 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}
 
-	public void install(InputStream input, String name, Framework framework, IProgressMonitor monitor) throws Exception {
-		// TODO: Make methods, which are called from inside jobs to do
-		// the real job
-		installBundle(input, name, (FrameworkImpl) framework);
-	}
-
-	private void installBundle(InputStream input, String name, FrameworkImpl framework) {
+	private void installBundles(List<FrameworkInstallationItem> itemsToInstall) {
+		if (itemsToInstall.isEmpty()) {
+			return;
+		}
 		try {
-			final File bundle = saveFile(input, name);
-			Job installBundleJob = new InstallBundleOperation(bundle, framework);
-			installBundleJob.addJobChangeListener(new DeleteWhenDoneListener(bundle));
+			Job installBundleJob = new InstallBundlesOperation(itemsToInstall);
 			installBundleJob.schedule();
-		} catch (IOException e) {
-			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e),
+		} catch (Exception e) {
+			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle(s)", e),
 					StatusManager.SHOW | StatusManager.LOG);
 		}
 	}
@@ -355,6 +351,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return "Bundles processor";
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}
@@ -378,6 +375,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			this.packageFile = packageFile;
 		}
 
+		@Override
 		public void done(IJobChangeEvent event) {
 			packageFile.delete();
 		}

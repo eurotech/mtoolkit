@@ -48,8 +48,6 @@ import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
@@ -85,20 +83,19 @@ public class PluginProvider implements InstallationItemProvider {
 
 		public IStatus prepare(IProgressMonitor monitor, Map properties) {
 			if (pluginBase == null) {
-			  return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
 						"Can not parse the manifest file for the plugin");
 			}
 			BundleDescription description = pluginBase.getBundleDescription();
 			if (description == null) {
-				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
-						"This is not valid OSGI plug-in project.");
+				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "This is not valid OSGI plug-in project.");
 			}
 			List items = new ArrayList();
 			items.add(this);
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
-		
+
 			return provider.prepareItems(items, properties, monitor);
 		}
 
@@ -135,9 +132,10 @@ public class PluginProvider implements InstallationItemProvider {
 		 * 
 		 * @param framework
 		 *            - target framework
+		 * @param bundlesToInstall
 		 * @return IStatus
 		 */
-		public IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor) {
+		public IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall) {
 			// first check if framework is connected and all bundles info is
 			// retrieved
 			while ((!framework.isConnected() || framework.isConnecting()) && !monitor.isCanceled()) {
@@ -213,8 +211,7 @@ public class PluginProvider implements InstallationItemProvider {
 				for (int i = 0; i < dependencies.size(); i++) {
 					descr = (BundleDescription) dependencies.elementAt(i);
 					String location = descr.getLocation();
-					RemoteBundleOperation job = new InstallBundleOperation(new File(location), framework);
-					job.schedule();
+					bundlesToInstall.add(new FrameworkInstallationItem(framework, new File(location)));
 
 				}
 			}
@@ -296,7 +293,7 @@ public class PluginProvider implements InstallationItemProvider {
 		try {
 			IStatus result = export(items, monitor);
 			if (!result.isOK())
-			  return result;
+				return result;
 
 			List<PluginItem> pluginItems = new ArrayList<PluginItem>();
 			// post process exported bundles
@@ -371,7 +368,8 @@ public class PluginProvider implements InstallationItemProvider {
 				if (item instanceof PluginItem) {
 					PluginItem pluginItem = (PluginItem) item;
 					if (pluginItem.getPlugin().getUnderlyingResource() != null) {
-						// Set location only for exported plug-ins. Plug-ins from TP will not be exported.
+						// Set location only for exported plug-ins. Plug-ins
+						// from TP will not be exported.
 						pluginItem.setLocation(new File(exportManager.getLocation(pluginItem.getPlugin())));
 					}
 				}
