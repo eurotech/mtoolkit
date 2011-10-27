@@ -135,7 +135,8 @@ public class PluginProvider implements InstallationItemProvider {
 		 * @param bundlesToInstall
 		 * @return IStatus
 		 */
-		public IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall) {
+		protected IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor,
+				List bundlesToInstall) {
 			// first check if framework is connected and all bundles info is
 			// retrieved
 			while ((!framework.isConnected() || framework.isConnecting()) && !monitor.isCanceled()) {
