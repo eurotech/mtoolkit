@@ -37,6 +37,7 @@ import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 public class CertificateManagementDialog extends TitleAreaDialog {
 
 	private String title;
+	private String message;
 
 	private Text txtAlias;
 	private Text txtLocation;
@@ -61,15 +62,16 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 	"JCECCAKS" //$NON-NLS-1$
 	};
 
-	public CertificateManagementDialog(Shell shell, String title) {
+	public CertificateManagementDialog(Shell shell, String title, String message) {
 		super(shell);
 		Assert.isNotNull(title);
 		this.title = title;
+		this.message = message;
 	}
 
 	public CertificateManagementDialog(Shell shell, String title,
-			ICertificateDescriptor init) {
-		this(shell, title);
+			ICertificateDescriptor init, String message) {
+		this(shell, title, message);
 		alias = init.getAlias();
 		storeLocation = init.getStoreLocation();
 		storeType = init.getStoreType();
@@ -87,7 +89,7 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-	      PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.CERT_MNG_DIALOG);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.CERT_MNG_DIALOG);
 		final Composite parentComposite = (Composite) super.createDialogArea(parent);
 		Composite composite = new Composite(parentComposite, SWT.NONE);
 		GridLayout layout = new GridLayout(3, false);
@@ -95,6 +97,7 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		setTitle(Messages.dlgCertMan_descr);
+		setMessage(message);
 
 		Label lblAlias = new Label(composite, SWT.LEFT);
 		lblAlias.setText(Messages.dlgCertMan_labelAlias);
@@ -205,7 +208,7 @@ public class CertificateManagementDialog extends TitleAreaDialog {
 			return false;
 		}
 
-		setMessage("", IMessageProvider.NONE); //$NON-NLS-1$
+		setMessage(message, IMessageProvider.NONE); //$NON-NLS-1$
 		return true;
 	}
 

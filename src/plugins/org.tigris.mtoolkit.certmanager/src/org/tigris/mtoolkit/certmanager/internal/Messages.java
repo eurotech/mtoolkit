@@ -26,6 +26,8 @@ public class Messages extends NLS {
 	public static String dlgCertMan_titleAdd;
 	public static String dlgCertMan_titleEdit;
 	public static String dlgCertMan_descr;
+	public static String dlgCertMan_message_add;
+	public static String dlgCertMan_message_edit;
 	public static String dlgCertMan_labelAlias;
 	public static String dlgCertMan_labelLocation;
 	public static String dlgCertMan_labelType;
@@ -35,7 +37,7 @@ public class Messages extends NLS {
 	public static String dlgCertMan_verifyLocationEmpty;
 	public static String dlgCertMan_verifyLocationNotExist;
 	public static String dlgCertMan_browseDlgCaption;
-	
+
 	public static String okLabel;
 	public static String cancelLabel;
 	public static String browseLabel;

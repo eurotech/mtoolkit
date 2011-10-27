@@ -180,7 +180,7 @@ public class CertPreferencesPage extends PreferencePage implements
 
 	private void addCertificate() {
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-		CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleAdd);
+		CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleAdd, Messages.dlgCertMan_message_add);
 		if (dialog.open() == Dialog.OK) {
 			CertDescriptor cert = new CertDescriptor(CertStorage.getDefault().generateCertificateUid());
 			cert.setAlias(dialog.alias);
@@ -200,7 +200,7 @@ public class CertPreferencesPage extends PreferencePage implements
 		}
 		CertDescriptor cert = (CertDescriptor) el;
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-		CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleEdit, cert);
+		CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleEdit, cert, Messages.dlgCertMan_message_edit);
 		if (dialog.open() == Dialog.OK) {
 			cert.setAlias(dialog.alias);
 			cert.setStoreLocation(dialog.storeLocation);
