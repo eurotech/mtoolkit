@@ -244,7 +244,6 @@ public class HeadersSection extends DPPFormSection implements
 			Header header = (Header) item.getData();
 			String newValue = value.toString();
 			boolean isSet = false;
-			DPPEditor.isDialogShown = false;
 
 			if (property.equals("key")) {
 				if (comboValues.containsValue(newValue)) {
@@ -267,14 +266,12 @@ public class HeadersSection extends DPPFormSection implements
 				if (newValue.length() > 0 && newValue.trim().equals("")) {
 					showErrorTableDialog(ResourceManager
 							.getString(ERROR_SPACE_CONTAINT));
-					DPPEditor.isDialogShown = true;
 					return;
 				}
 				newValue = newValue.trim();
 				if (newValue.indexOf(' ') != -1) {
 					showErrorTableDialog(ResourceManager
 							.getString(ERROR_SPACE_CONTAINT));
-					DPPEditor.isDialogShown = true;
 					return;
 				}
 				if (!DPPUtilities.isValidManifestHeader(newValue)) {
@@ -288,7 +285,6 @@ public class HeadersSection extends DPPFormSection implements
 							.getString(EQUAL_VALUES_MSG1)
 							+ "\n"
 							+ ResourceManager.getString(EQUAL_VALUES_MSG2));
-					DPPEditor.isDialogShown = true;
 					return;
 				}
 				if (headerKey.equals(DPPConstants.dpSymbolicNameHeader)
@@ -298,7 +294,6 @@ public class HeadersSection extends DPPFormSection implements
 					if (!headerKey.equals(DPPConstants.dpFixPackHeader)) {
 						showWarningTableDialog(ResourceManager
 								.getString(WARNING_VALUES_MSG));
-						DPPEditor.isDialogShown = true;
 					}
 					return;
 				}
@@ -308,7 +303,6 @@ public class HeadersSection extends DPPFormSection implements
 					} catch (IllegalArgumentException ex) {
 						showErrorTableDialog(ResourceManager
 								.getString(WRONG_VERSION));
-						DPPEditor.isDialogShown = true;
 						headerTable.editElement(header, 1);
 						return;
 					}
@@ -319,7 +313,6 @@ public class HeadersSection extends DPPFormSection implements
 						if (!DPPUtilities.isValidVersion(headerValue)) {
 							showErrorTableDialog(ResourceManager
 									.getString(WRONG_FIXPACK_HEADER));
-							DPPEditor.isDialogShown = true;
 							return;
 						}
 					}
@@ -347,7 +340,6 @@ public class HeadersSection extends DPPFormSection implements
 							|| (index != -1 && (index == newValue.length()))) {
 						showErrorTableDialog(ResourceManager
 								.getString(WRONG_VERSION));
-						DPPEditor.isDialogShown = true;
 						return;
 					}
 					if (verTxt.indexOf(" ") == -1) {
@@ -357,7 +349,6 @@ public class HeadersSection extends DPPFormSection implements
 						} catch (IllegalArgumentException ex) {
 							showErrorTableDialog(ResourceManager
 									.getString(WRONG_VERSION));
-							DPPEditor.isDialogShown = true;
 							return;
 						}
 					}
@@ -371,7 +362,6 @@ public class HeadersSection extends DPPFormSection implements
 						} else {
 							showErrorTableDialog(ResourceManager
 									.getString(WRONG_FIXPACK_HEADER));
-							DPPEditor.isDialogShown = true;
 							return;
 						}
 					}
@@ -391,7 +381,7 @@ public class HeadersSection extends DPPFormSection implements
 									WRONG_SYMBOLIC_IDENTIFIER,
 									new Object[] { newValue }));
 						}
-						DPPEditor.isDialogShown = true;
+
 						return;
 					}
 				}
@@ -807,23 +797,15 @@ public class HeadersSection extends DPPFormSection implements
 		DPPFile dppFile = model.getDPPFile();
 		boolean isPageConsistent = true;
 
-		if (!DPPEditor.isDialogShown) {
-			DPPEditor.isDialogShown = false;
-			try {
-				dppFile.checkConsistency();
-			} catch (InconsistentDataException e) {
-				DPPErrorHandler.processError(e);
-				isPageConsistent = false;
-				
-				if (!DPPEditor.isDialogShown) {
-					DPPEditor.isDialogShown = true;
-					DPPEditor.showErrorDialog(e.getMessage());
-				}
-			}
+		try {
+			dppFile.checkHeadersConsistency();
+		} catch (InconsistentDataException e) {
+			DPPErrorHandler.processError(e);
+			isPageConsistent = false;
+		}
 
-			if (isPageConsistent) {				
-				headerTable.refresh();
-			}	
+		if (isPageConsistent) {
+			headerTable.refresh();
 		}
 
 		updateNeeded = false;

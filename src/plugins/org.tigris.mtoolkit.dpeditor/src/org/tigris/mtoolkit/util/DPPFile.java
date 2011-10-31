@@ -179,7 +179,11 @@ public class DPPFile {
 
 	private Properties saveInternal() throws IOException, InconsistentDataException {
 		DPPUtilities.debug("Checking consistency before save");
-		checkConsistency();
+		checkHeadersConsistency();
+		checkCertificatesConsistency();
+		checkResourcesConsistency();
+		checkBundlesConsistency();
+		
 		DPPUtilities.debug("Starting save of DP to " + file.getAbsolutePath());
 		if (file == null) {
 			throw new IOException("Where to save?");
@@ -308,7 +312,7 @@ public class DPPFile {
 	 * @throws InconsistentDataException
 	 *             if the data here is inconsistent
 	 */
-	public void checkConsistency() throws InconsistentDataException {
+	public void checkBundlesConsistency() throws InconsistentDataException {
 		for (int i = 0; i < bundleInfos.size(); i++) {
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
 			String bName = bInfo.getName();
@@ -316,121 +320,128 @@ public class DPPFile {
 
 			if (isEmptyOrNull(bInfo.getBundlePath())) {
 				throw new InconsistentDataException("Bundle Path is empty!");
-			} else if (isEmptyOrNull(bName)) {
+			}
+			if (isEmptyOrNull(bName)) {
 				throw new InconsistentDataException("Bundle Name is empty!");
-			} else if (isEmptyOrNull(bSymbName)) {
+			}
+			if (isEmptyOrNull(bSymbName)) {
 				throw new InconsistentDataException("Bundle Symbolic Name is empty!");
-			} else if (isEmptyOrNull(bInfo.getBundleVersion())) {
+			}
+			if (isEmptyOrNull(bInfo.getBundleVersion())) {
 				throw new InconsistentDataException("Bundle Version is empty!");
-			} else if (isFieldValueDuplicated(bundleInfos, i, "bundleSymbolicName", bSymbName)) {
+			}
+			if (isFieldValueDuplicated(bundleInfos, i, "bundleSymbolicName", bSymbName)) {
 				throw new InconsistentDataException(
 						ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists1") + bSymbName
 								+ ResourceManager.getString("DPPEditor.BundlesSection.BundleSymbNameAlreadyExists2"));
-			} else if (isFieldValueDuplicated(bundleInfos, i, "name", bName)) {
+			}
+			if (isFieldValueDuplicated(bundleInfos, i, "name", bName)) {
 				throw new InconsistentDataException(
 						ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists1") + bName
 								+ ResourceManager.getString("DPPEditor.BundlesSection.BundleNameAlreadyExists2"));
 			}
 		}
+	}
 
+	/**
+	 * This method should be called each time when a tab is switched and the dp
+	 * may have become inconsistent. If it throws exception the tab should not
+	 * be switched.
+	 * 
+	 * @throws InconsistentDataException
+	 *             if the data here is inconsistent
+	 */
+	public void checkResourcesConsistency() throws InconsistentDataException {
 		for (int i = 0; i < resourceInfos.size(); i++) {
 			ResourceInfo rInfo = (ResourceInfo) resourceInfos.elementAt(i);
-			if (isEmptyOrNull(rInfo.getResourcePath()) || isEmptyOrNull(rInfo.getName())) {
-				String message = "";
-				if (isEmptyOrNull(rInfo.getResourcePath())) {
-					message = "Resource Path is empty";
-				}
-				if (isEmptyOrNull(rInfo.getName())) {
-					message += !message.equals("") ? "\n" : message;
-					message += "Resource Name is empty";
-				}
-				throw new InconsistentDataException(message);
-			} else {
-				if (!isEmptyOrNull(rInfo.getResourcePath()) && !isEmptyOrNull(rInfo.getName()) && isEmptyOrNull(rInfo.getResourceProcessor())) {
-					String message = "Resource Processor is not set";
-					throw new InconsistentDataException(message);
-				}
+
+			if (isEmptyOrNull(rInfo.getResourcePath())) {
+				throw new InconsistentDataException("Resource Path is empty");
+			}
+			if (isEmptyOrNull(rInfo.getName())) {
+				throw new InconsistentDataException("Resource Name is empty");
+			}
+			if (isEmptyOrNull(rInfo.getResourceProcessor())) {
+				throw new InconsistentDataException("Resource Processor is not set");
 			}
 		}
+	}
+
+	/**
+	 * This method should be called each time when a tab is switched and the dp
+	 * may have become inconsistent. If it throws exception the tab should not
+	 * be switched.
+	 * 
+	 * @throws InconsistentDataException
+	 *             if the data here is inconsistent
+	 */
+	public void checkCertificatesConsistency() throws InconsistentDataException {
 		for (int i = 0; i < certificateInfos.size(); i++) {
 			CertificateInfo cInfo = (CertificateInfo) certificateInfos.elementAt(i);
+
 			if (isEmptyOrNull(cInfo.getAlias())) {
 				throw new InconsistentDataException("Alias is empty");
 			}
 		}
-		if (isEmptyOrNull(packageHeaders.getSymbolicName()) || isEmptyOrNull(packageHeaders.getVersion())) {
-			String message = "";
-			if (isEmptyOrNull(packageHeaders.getSymbolicName())) {
-				message = "Deployment Package Symbolic Name is empty";
-			}
-			String version = packageHeaders.getVersion();
-			if (isEmptyOrNull(version)) {
-				message += !message.equals("") ? "\n" : message;
-				message += "Deployment Package Version is empty";
-			} else {
-				int index = version.lastIndexOf('.');
-				String verTxt = version;
-				if (verTxt.indexOf(" ") != -1 || ((index != -1) && (index == version.length()))) {
-					message += !message.equals("") ? "\n" : message;
-					message += "The version is not correct - it must start with digits separated \n" + "with points until after the last point where you can use letters, \n" + "for example: 1.0.0 or 1.2.3.build200501041230";
-				}
-				if (verTxt.indexOf(" ") == -1) {
-					if (index != -1 && index != version.length()) {
-						verTxt = version.substring(0, index);
-					}
-					if (!DPPUtilities.isValidVersion(verTxt)) {
-						message += !message.equals("") ? "\n" : message;
-						message += "The version is not correct - it must start with digits separated \n" + "with points until after the last point where you can use letters, \n" + "for example: 1.0.0 or 1.2.3.build200501041230";
-					}
-				}
-			}
-			throw new InconsistentDataException(message);
-		} else {
-			if (!isEmptyOrNull(packageHeaders.getSymbolicName())) {
-				String message = "";
-				String symbolicName = packageHeaders.getSymbolicName();
-				if (!DPPUtilities.isCorrectPackage(symbolicName)) {
-					if (symbolicName.startsWith(".") || symbolicName.endsWith(".")) {
-						message = "Symbolic name '" + symbolicName + "' is not valid. \nA symbolic name cannot start or end with a dot.";
-					} else if (symbolicName.indexOf(" ") != -1) {
-						message = "Symbolic name '" + symbolicName + "' is not valid. \nA symbolic name cannot contain empty space.";
-					} else {
-						message = "Symbolic name is not valid.\n'" + symbolicName + "' is not a valid Java identifier.";
-					}
-					if (!message.equals("")) {
-						throw new InconsistentDataException(message);
-					}
-				}
-			}
-			if (!isEmptyOrNull(packageHeaders.getVersion())) {
-				String message = "";
-				String version = packageHeaders.getVersion();
-				if (isEmptyOrNull(version)) {
-					message += !message.equals("") ? "\n" : message;
-					message += "Deployment Package Version is empty";
-				} else {
-					if (!DPPUtilities.isValidVersion(version)) {
-						message += !message.equals("") ? "\n" : message;
-						message += "The version is not correct - it must start with digits separated \n" + "with points until after the last point where you can use letters, \n" + "for example: 1.0.0 or 1.2.3.build200501041230";
-					}
-				}
-				if (!message.equals("")) {
-					throw new InconsistentDataException(message);
-				}
-			}
-		}
+	}
+
+	/**
+	 * This method should be called each time when a tab is switched and the dp
+	 * may have become inconsistent. If it throws exception the tab should not
+	 * be switched.
+	 * 
+	 * @throws InconsistentDataException
+	 *             if the data here is inconsistent
+	 */
+	public void checkHeadersConsistency() throws InconsistentDataException {
+		String version = packageHeaders.getVersion();
+		String symbolicName = packageHeaders.getSymbolicName();
 		String fixPack = packageHeaders.getFixPack();
+
+		if (isEmptyOrNull(packageHeaders.getSymbolicName())) {
+			throw new InconsistentDataException("Deployment Package Symbolic Name is empty");
+		}
+		if (isEmptyOrNull(version)) {
+			throw new InconsistentDataException("Deployment Package Version is empty");
+		}
+		if (version.indexOf(" ") != -1 || version.endsWith(".")) {
+			throw new InconsistentDataException("The version is incorrect! It has to contain digits, separated \n"
+					+ "by points. The last portion can contain letters, \n"
+					+ "for example: 1.0.0 or 1.2.3.build200501041230");
+		}
+		if (version.indexOf(" ") == -1 && !DPPUtilities.isValidVersion(version.substring(0, version.lastIndexOf('.')))) {
+			throw new InconsistentDataException("The version is not correct - it must start with digits separated \n"
+					+ "with points until after the last point where you can use letters, \n"
+					+ "for example: 1.0.0 or 1.2.3.build200501041230");
+		}
+		if (!DPPUtilities.isCorrectPackage(symbolicName)) {
+			if (symbolicName.startsWith(".") || symbolicName.endsWith(".")) {
+				throw new InconsistentDataException("Symbolic name '" + symbolicName
+						+ "' is not valid. \nA symbolic name cannot start or end with a dot.");
+			}
+			if (symbolicName.indexOf(" ") != -1) {
+				throw new InconsistentDataException("Symbolic name '" + symbolicName
+						+ "' is not valid. \nA symbolic name cannot contain empty space.");
+			}
+
+			throw new InconsistentDataException("Symbolic name is not valid.\n'" + symbolicName
+					+ "' is not a valid Java identifier.");
+		}
+
 		if (packageHeaders.isFixPackSet()) {
-			if (!isEmptyOrNull(fixPack) && !DPPUtilities.isValidFixPack(fixPack)) {
-				if (!DPPUtilities.isValidVersion(fixPack)) {
-					String message = "Deployment Package Fix Pack is not correct.\n" + "The value must be similar like the example: (1.3, 5.7)\n" + "or contains only digit and points.";
-					throw new InconsistentDataException(message);
-				}
-			} else if (packageHeaders.isFixPackSet() && fixPack != null && fixPack.equals("")) {
+			if (!isEmptyOrNull(fixPack)
+					&& (!DPPUtilities.isValidFixPack(fixPack) || !DPPUtilities.isValidVersion(fixPack))) {
+				throw new InconsistentDataException("Deployment Package Fix Pack is not correct.\n"
+						+ "The value must be similar like the example: (1.3, 5.7)\n"
+						+ "or contains only digit and points.");
+			}
+			if (fixPack != null && fixPack.equals("")) {
 				throw new InconsistentDataException("Deployment Package Fix Pack cannot be empty");
 			}
 		}
+
 		Vector otherHeaders = packageHeaders.getOtherHeaders();
+
 		for (int i = 0; i < otherHeaders.size(); i++) {
 			Header header = (Header) otherHeaders.elementAt(i);
 			if (header.getKey().equals("")) {

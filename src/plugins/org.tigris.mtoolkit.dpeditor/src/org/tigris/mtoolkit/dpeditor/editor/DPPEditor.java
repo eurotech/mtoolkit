@@ -50,7 +50,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.editor.base.CustomWorkbook;
 import org.tigris.mtoolkit.dpeditor.editor.base.DPPFormPage;
@@ -137,8 +136,6 @@ public class DPPEditor extends DPPMultiPageEditor implements
 	 * will be selected
 	 */
 	private boolean formSelection = false;
-
-	public static boolean isDialogShown = false;
 
 	/** The <code>IFile</code> for which this editor was responsible to */
 	private IFile dppFile;
@@ -665,7 +662,12 @@ public class DPPEditor extends DPPMultiPageEditor implements
 	 */
 	protected void checkCorrectness() throws InconsistentDataException {
 		try {
-			getDPPFile().checkConsistency();
+			DPPFile dppFile = getDPPFile();
+			
+			dppFile.checkHeadersConsistency();
+			dppFile.checkCertificatesConsistency();
+			dppFile.checkResourcesConsistency();
+			dppFile.checkBundlesConsistency();
 		} catch (Exception e) {
 			DPPErrorHandler.processError(e);
 			DPPUtil.showErrorDialog(DPPErrorHandler.getAnyShell(), ResourceManager.getString(ERROR_MSG), ResourceManager.getString("DPPEditor.TabError"), e.getMessage(), e);
@@ -1087,28 +1089,33 @@ public class DPPEditor extends DPPMultiPageEditor implements
 	public void formSelected(IFormPage page) {
 		if (page instanceof DPPFormPage || (page instanceof SourceFormPage || page instanceof ManifestSourceFormPage)) {
 			IDPPEditorPage oldPage = getOldPage();
+			DPPFile dppFile = getDPPFile();
+
 			if (!formSelection) {
+				if (dppFile == null) {
+					showPage(oldPage);
+					showErrorDialog(ResourceManager.getString("DPPEditor.EmptyFileMessage"));
+					return;
+				}
+
 				try {
-					if (getDPPFile() == null) {
-						showPage(oldPage);
-						if (!DPPEditor.isDialogShown) {
-							showErrorDialog(ResourceManager.getString("DPPEditor.EmptyFileMessage"));
-						}
-						return;
+					if (oldPage instanceof BundlesFormPage) {
+						dppFile.checkBundlesConsistency();
+					} else if (oldPage instanceof HeadersFormPage) {
+						dppFile.checkHeadersConsistency();
+					} else if (oldPage instanceof CertificatesFormPage) {
+						dppFile.checkCertificatesConsistency();
+					} else if (oldPage instanceof ResourcesFormPage) {
+						dppFile.checkResourcesConsistency();
 					}
-					getDPPFile().checkConsistency();
 				} catch (Exception e) {
 					formSelection = true;
 					if (oldPage != null) {
 						showPage(oldPage);
-						if (!DPPEditor.isDialogShown) {
-							DPPEditor.isDialogShown = true;
-							DPPErrorHandler.showErrorTableDialog(e.getMessage());
-						}
+						DPPErrorHandler.showErrorTableDialog(e.getMessage());
 					} else {
 						showPage((IDPPEditorPage) page);
 					}
-					DPPEditor.isDialogShown = false;
 					return;
 				}
 			}

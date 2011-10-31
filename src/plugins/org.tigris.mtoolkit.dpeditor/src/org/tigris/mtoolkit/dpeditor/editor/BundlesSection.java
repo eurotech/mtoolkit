@@ -310,13 +310,21 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 				}
 			}
 			
-			if (DPPUtil.isAlreadyInTheTable(bundle.getBundleSymbolicName(), item, 2)) {
+			String symbolicName = bundle.getBundleSymbolicName();
+			if (symbolicName == null) {
+				DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.SymbolicNameisEmpty"),
+						true);
+				bundlesTable.getTable().setFocus();
+				return false;
+			}
+
+			if (!symbolicName.equals("") && DPPUtil.isAlreadyInTheTable(symbolicName, item, 2)) {
 				DPPErrorHandler.processError(
 						ResourceManager.getString("DPPEditor.BundlesSection.SymbolicNameAlreadyExists"), true);
 				bundlesTable.getTable().setFocus();
 				return false;
 			}
-			
+
 			if (DPPUtil.isAlreadyInTheTable(bundle.getName(), item, 1)) {
 				DPPErrorHandler.processError(ResourceManager.getString(ERROR_BUNDLE_NAME_ALREADY_EXISTS), true);
 				bundlesTable.getTable().setFocus();

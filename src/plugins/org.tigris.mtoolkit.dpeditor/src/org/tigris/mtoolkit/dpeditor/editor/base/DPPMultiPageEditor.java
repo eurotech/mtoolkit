@@ -554,7 +554,6 @@ IModelChangedListener {
       return;
     }
 
-    if (!DPPEditor.isDialogShown) {
       try {
         updateDocument(true);
       } catch (Exception e) {
@@ -600,7 +599,6 @@ IModelChangedListener {
         return;
       }
       op = null;
-    }
 
     if (getCurrentPage().isSource()) {
       getCurrentPage().becomesVisible(getCurrentPage());
