@@ -963,11 +963,11 @@ public class ResourcesSection extends DPPFormSection implements
 
 		ResourceInfo resource = new ResourceInfo();
 		boolean found = false;
-
-		for (int i = 0; i < size; i++) {
-			TableItem currentItem = table.getItem(i);
-			if (currentItem.getText(0).equalsIgnoreCase("")
-					&& !currentItem.getData().equals(resource)) {
+		int i = 0;
+		
+		while(i < size) {
+			TableItem currentItem = table.getItem(i++);
+			if (currentItem.getText(0).equalsIgnoreCase("") && !currentItem.getData().equals(resource)) {
 				found = true;
 				break;
 			}
@@ -979,10 +979,9 @@ public class ResourcesSection extends DPPFormSection implements
 			resourcesTable.editElement(resource, 0);
 			setDirty(true);
 			commitChanges(false);
-			size++;
 		}
 
-		table.setSelection(size - 1);
+		table.setSelection(found ? i - 1 : i);
 		table.setFocus();
 		updateEnabledButtons();
 	}

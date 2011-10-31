@@ -52,7 +52,6 @@ import org.tigris.mtoolkit.dpeditor.editor.model.DPPFileModel;
 import org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.editor.model.ModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
-import org.tigris.mtoolkit.util.BundleInfo;
 import org.tigris.mtoolkit.util.CertificateInfo;
 import org.tigris.mtoolkit.util.DPPFile;
 import org.tigris.mtoolkit.util.DPPUtilities;
@@ -694,9 +693,10 @@ public class CertificatesSection extends DPPFormSection implements SelectionList
 		int size = table.getItems().length;
 		CertificateInfo cert = new CertificateInfo();
 		boolean found = false;
-
-		for (int i = 0; i < size; i++) {
-			TableItem currentItem = table.getItem(i);
+		int i = 0;
+		
+		while(i < size) {
+			TableItem currentItem = table.getItem(i++);
 			if (currentItem.getText(0).equalsIgnoreCase("") && !currentItem.getData().equals(cert)) {
 				found = true;
 				break;
@@ -709,10 +709,9 @@ public class CertificatesSection extends DPPFormSection implements SelectionList
 			certsTable.editElement(cert, 0);
 			setDirty(true);
 			commitChanges(false);
-			size++;
 		}
 
-		table.setSelection(size - 1);
+		table.setSelection(found ? i - 1 : i);
 		table.setFocus();
 		updateEnabledButtons();
 	}

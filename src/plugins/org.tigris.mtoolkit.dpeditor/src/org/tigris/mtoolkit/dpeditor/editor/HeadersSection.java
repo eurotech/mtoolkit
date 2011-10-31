@@ -53,7 +53,6 @@ import org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.editor.model.ModelChangedEvent;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
-import org.tigris.mtoolkit.util.CertificateInfo;
 import org.tigris.mtoolkit.util.DPPConstants;
 import org.tigris.mtoolkit.util.DPPFile;
 import org.tigris.mtoolkit.util.DPPUtilities;
@@ -914,12 +913,13 @@ public class HeadersSection extends DPPFormSection implements
 		int size = table.getItems().length;
 		Header header = new Header();
 		boolean found = false;
-
-		for (int i = 0; i < size; i++) {
-			TableItem currentItem = table.getItem(i);
-			if (currentItem.getText(0).equalsIgnoreCase("")
-					&& !currentItem.getData().equals(header)) {
+		int i = 0;
+		
+		while (i < size) {
+			TableItem currentItem = table.getItem(i++);
+			if (currentItem.getText(0).equalsIgnoreCase("") && !currentItem.getData().equals(header)) {
 				found = true;
+
 				break;
 			}
 		}
@@ -930,10 +930,9 @@ public class HeadersSection extends DPPFormSection implements
 			headerTable.editElement(header, 0);
 			setDirty(true);
 			commitChanges(false);
-			size++;
 		}
 
-		table.setSelection(size - 1);
+		table.setSelection(found ? i - 1 : i);
 		table.setFocus();
 		updateEnabledButtons();
 	}
