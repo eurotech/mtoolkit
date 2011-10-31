@@ -17,8 +17,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
@@ -199,7 +197,7 @@ public class FormWidgetFactory {
 	 * @return the created control
 	 */
 	public static Button createButton(Composite parent, String text, int style) {
-		int flatStyle = BORDER_STYLE == SWT.BORDER ? SWT.NULL : SWT.FLAT;
+		int flatStyle = SWT.FLAT;
 		Button button = new Button(parent, style | flatStyle);
 		if (text != null)
 			button.setText(text);
@@ -253,11 +251,6 @@ public class FormWidgetFactory {
 	public static SashForm createSashForm(Composite parent) {
 		SashForm composite = new SashForm(parent, SWT.NULL);
 		composite.setBackgroundMode(SWT.INHERIT_DEFAULT);
-		composite.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				((Control) e.widget).setFocus();
-			}
-		});
 		return composite;
 	}
 
@@ -275,11 +268,6 @@ public class FormWidgetFactory {
 	public static Composite createComposite(Composite parent, int style) {
 		Composite composite = new Composite(parent, style);
 		composite.setBackgroundMode(SWT.INHERIT_DEFAULT);
-		composite.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent e) {
-				((Control) e.widget).setFocus();
-			}
-		});
 		return composite;
 	}
 
