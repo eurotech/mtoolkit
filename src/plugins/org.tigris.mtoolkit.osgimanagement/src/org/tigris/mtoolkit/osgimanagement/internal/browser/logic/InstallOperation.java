@@ -52,7 +52,6 @@ public class InstallOperation extends Job {
 		}
 		installationPairs = null;
 		startInstalledItems(installedItems, monitor);
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>END>>>>>>>>>>>>>>>>>>>>>>>");
 		return Util.newStatus(getMessage(operationResult), operationResult);
 	}
 
