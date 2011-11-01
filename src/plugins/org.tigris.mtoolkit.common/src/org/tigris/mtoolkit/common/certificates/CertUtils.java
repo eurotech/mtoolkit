@@ -627,7 +627,7 @@ public class CertUtils {
 
     } catch (IOException ioe) {
       hasError = true;
-      throw new IOException(ioe);
+      throw ioe;
     } finally {
       if (monitor.isCanceled() || hasError) {
         deleteSignedFiles(allSignedFilesList);
@@ -663,7 +663,7 @@ public class CertUtils {
       CertUtils.signJars((File[]) jarFilesToSign.toArray(new File[] {}), (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
     } catch (IOException ioe) {
       hasError = true;
-      throw new IOException(ioe);
+      throw ioe;
     } finally {
       if (monitor.isCanceled() || hasError) {
         deleteSignedFiles(allSignedFilesList);
