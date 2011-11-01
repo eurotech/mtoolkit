@@ -20,6 +20,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * specified targets.
  */
 public interface InstallationItemProcessor {
+
+  static String MIME_DP = "application/vnd.osgi.dp";
+
 	/**
 	 * Returns human-readable name of the general target for which this
 	 * processor installs items e.g. "OSGi Framework".
