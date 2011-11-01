@@ -322,7 +322,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		try {
 			Job installBundleJob = new InstallOperation(framework, itemsToInstall);
 			installBundleJob.schedule();
-			installBundleJob.addJobChangeListener(new DisposeWhenDoneListener(itemsToInstall));
 		} catch (Exception e) {
 			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle(s)", e),
 					StatusManager.SHOW | StatusManager.LOG);
@@ -382,8 +381,8 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		} catch (IOException e) {
 			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e),
 					StatusManager.SHOW | StatusManager.LOG);
-//		} finally {
-//			monitor.done();
+			// } finally {
+			// monitor.done();
 		}
 		return result;
 	}
@@ -439,21 +438,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		@Override
 		public void done(IJobChangeEvent event) {
 			packageFile.delete();
-		}
-	}
-
-	protected static class DisposeWhenDoneListener extends JobChangeAdapter {
-		private final List<InstallationPair> itemsToInstall;
-
-		public DisposeWhenDoneListener(List<InstallationPair> itemsToInstall) {
-			this.itemsToInstall = itemsToInstall;
-		}
-
-		@Override
-		public void done(IJobChangeEvent event) {
-			for (InstallationPair instPair : itemsToInstall) {
-				instPair.item().dispose();
-			}
 		}
 	}
 

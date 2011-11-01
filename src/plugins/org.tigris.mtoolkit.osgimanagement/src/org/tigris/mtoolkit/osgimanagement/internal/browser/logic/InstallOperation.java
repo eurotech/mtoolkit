@@ -1,5 +1,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,17 +63,24 @@ public class InstallOperation extends Job {
 		FrameworkProcessor processor = installationPair.processor();
 		if (processor != null) {
 			InstallationItem item = installationPair.item();
+			InputStream input = null;
 			try {
-				Object installedItem = processor.install(item.getInputStream(), item.getName(), framework,
-						subMonitor.newChild(1));
+				input = item.getInputStream();
+				Object installedItem = processor.install(input, item.getName(), framework, subMonitor.newChild(1));
 				if (installedItem != null) {
 					installedItems.put(installedItem, processor);
 				}
-				item.getInputStream().close();
-				item.dispose();
 				result = Status.OK_STATUS;
 			} catch (Exception e) {
 				result = new Status(Status.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage());
+			} finally {
+				if (input != null) {
+					try {
+						input.close();
+					} catch (IOException e) {
+					}
+				}
+				item.dispose();
 			}
 		} else {
 			result = Status.CANCEL_STATUS;
