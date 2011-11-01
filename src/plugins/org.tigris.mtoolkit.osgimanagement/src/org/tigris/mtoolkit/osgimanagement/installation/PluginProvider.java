@@ -44,6 +44,7 @@ import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.export.PluginExportManager;
 import org.tigris.mtoolkit.common.images.UIResources;
+import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -120,8 +121,9 @@ public class PluginProvider implements InstallationItemProvider {
 
 		public void dispose() {
 			if (preparedItem != null) {
-				preparedItem.delete();
-				preparedItem = null;
+				if (preparedItem.delete()) {
+					preparedItem = null;
+				}
 			}
 		}
 
@@ -212,7 +214,8 @@ public class PluginProvider implements InstallationItemProvider {
 				for (int i = 0; i < dependencies.size(); i++) {
 					descr = (BundleDescription) dependencies.elementAt(i);
 					String location = descr.getLocation();
-					bundlesToInstall.add(new FrameworkInstallationItem(framework, new File(location)));
+					bundlesToInstall.add(new InstallationPair(FrameworkProcessor.getDefault(), new BaseFileItem(
+							new File(location), getMimeType())));
 
 				}
 			}

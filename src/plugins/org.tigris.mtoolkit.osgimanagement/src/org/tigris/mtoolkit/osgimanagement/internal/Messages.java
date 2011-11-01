@@ -55,6 +55,7 @@ public final class Messages extends NLS {
 	public static String service_label;
 	public static String headers_label;
 	public static String install_dialog_title;
+	public static String install_operation_title;
 	public static String update_dialog_title;
 	public static String install_dp_dialog_title;
 	public static String install_confirm_title;
@@ -107,7 +108,7 @@ public final class Messages extends NLS {
 	public static String file_not_exists;
 	public static String no_reason_message;
 	public static String no_exception_message;
-	
+
 	public static String no_plugin_exporter_available;
 	public static String bundle_deinstalled_message;
 
@@ -164,7 +165,7 @@ public final class Messages extends NLS {
 	public static String refresh_bundles_info;
 	public static String connect_framework;
 	public static String connection_failed;
-	
+
 	public static String show_service_properties_in_tree;
 
 	public static String question_dialog_title;

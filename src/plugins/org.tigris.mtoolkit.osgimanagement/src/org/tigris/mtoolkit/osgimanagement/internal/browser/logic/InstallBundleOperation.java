@@ -15,7 +15,6 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.osgi.util.NLS;
@@ -26,54 +25,48 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.statushandlers.StatusManager;
-import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.common.ManifestUtils;
 import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
-public class InstallBundleOperation extends RemoteBundleOperation {
-	private final File bundle;
-	private final FrameworkImpl framework;
-	private String symbolicName;
-	private String version;
+public class InstallBundleOperation {
+	private FrameworkImpl framework;
 
-	public InstallBundleOperation(File bundle, FrameworkImpl framework) {
-		super(Messages.install_bundle, null);
-		this.bundle = bundle;
+	public InstallBundleOperation(FrameworkImpl framework) {
 		this.framework = framework;
 	}
 
-	protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
+	public RemoteBundle installBundle(File bundle, IProgressMonitor monitor) throws IAgentException,
+			IllegalArgumentException {
 		InputStream input = null;
 		RemoteBundle rBundle[] = null;
 		ZipFile zip = null;
 		InputStream zis = null;
 		try {
 			int work = (int) bundle.length();
-			monitor.beginTask(getName(), work);
+			monitor.beginTask(Messages.install_bundle, work);
 			input = new ProgressInputStream(new FileInputStream(bundle), monitor);
 			DeviceConnector connector = framework.getConnector();
-			if (connector == null)
-				return Util.newStatus(IStatus.ERROR, "Connection lost", null);
+			if (connector == null) {
+				BrowserErrorHandler.processError("Connection lost", true);
+				return null;
+			}
 
 			zip = new ZipFile(bundle);
 			ZipEntry entry = zip.getEntry("META-INF/MANIFEST.MF");
 			if (entry == null) {
-				return Util.newStatus(IStatus.ERROR, "Invalid bundle content", null);
+				throw new IllegalArgumentException("Invalid bundle content: " + bundle.getName());
 			}
 			zis = zip.getInputStream(entry);
 			Map headers = ManifestUtils.getManifestHeaders(zis);
-			symbolicName =  ManifestUtils.getBundleSymbolicName(headers);
-			version = ManifestUtils.getBundleVersion(headers);
+			String symbolicName = ManifestUtils.getBundleSymbolicName(headers);
+			String version = ManifestUtils.getBundleVersion(headers);
 
 			// check if already installed
 			final boolean update[] = new boolean[] { false };
@@ -90,7 +83,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				}
 			}
 			if (rBundle != null && rBundle[0].isSystemBundle()) {
-				return Util.newStatus(IStatus.ERROR, "Bundle "+symbolicName+" is system", null);
+				throw new IllegalArgumentException("Bundle " + symbolicName + " is system");
 			}
 
 			// install if missing
@@ -117,7 +110,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				if (!install[0] && FrameworkConnectorFactory.isAutoUpdateBundlesOnInstallEnabled) {
 					bundleIndex = 0;
 				} else {
-					bundleIndex = showUpdateBundleDialog(update, install, rBundles)[0];
+					bundleIndex = showUpdateBundleDialog(symbolicName, version, update, install, rBundles)[0];
 				}
 				if (install[0]) {
 					monitor.beginTask(Messages.install_bundle, work);
@@ -131,8 +124,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				}
 			}
 		} catch (IOException e) {
-			return Util.newStatus(IStatus.ERROR, NLS.bind(Messages.update_file_not_found, bundle.getName()),
-					e);
+			throw new IllegalArgumentException(NLS.bind(Messages.update_file_not_found, bundle.getName()), e);
 		} finally {
 			if (input != null) {
 				try {
@@ -152,32 +144,24 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 				} catch (IOException e) {
 				}
 			}
+			// item.dispose();
 		}
-		if (FrameworkConnectorFactory.isAutoStartBundlesEnabled && rBundle != null && rBundle[0].getType() != RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
-			try {
-				monitor.setTaskName("Starting bundle "+symbolicName+" ("+version+")");
-				int flags = FrameworkConnectorFactory.isActivationPolicyEnabled ? Bundle.START_ACTIVATION_POLICY : 0;
-				rBundle[0].start(flags);
-			} catch (IAgentException e) {
-				// only log this exception, because the user requested install
-				// bundle, which succeeded
-				StatusManager.getManager().handle(Util.handleIAgentException(e), StatusManager.LOG);
-			}
-		}
-		return Status.OK_STATUS;
+		return rBundle[0];
 	}
 
-	private int[] showUpdateBundleDialog(final boolean[] update, final boolean[] install, final Object[] rBundles) {
+	private int[] showUpdateBundleDialog(final String symbolicName, final String version, final boolean[] update,
+			final boolean[] install, final Object[] rBundles) {
 		final int selected[] = new int[] { 0 };
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				TitleAreaDialog updateDialog = new TitleAreaDialog(FrameWorkView.getShell()) {
 					private Button updateButton;
-					private List list;
+					private org.eclipse.swt.widgets.List list;
 
+					@Override
 					protected Control createDialogArea(Composite parent) {
 						Control main = super.createDialogArea(parent);
-						list = new List((Composite) main, SWT.BORDER);
+						list = new org.eclipse.swt.widgets.List((Composite) main, SWT.BORDER);
 						try {
 							for (int i = 0; i < rBundles.length; i++) {
 								list.add(symbolicName + " (" + ((RemoteBundle) rBundles[i]).getVersion() + ")");
@@ -204,6 +188,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 						return main;
 					}
 
+					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
 						Button installButton = createButton(parent, IDialogConstants.CLIENT_ID + 1, "Install", false);
 						updateButton = createButton(parent, IDialogConstants.CLIENT_ID + 2, "Update", false);
@@ -214,6 +199,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 						}
 					}
 
+					@Override
 					protected void buttonPressed(int buttonId) {
 						selected[0] = list.getSelectionIndex();
 						setReturnCode(buttonId);
@@ -238,7 +224,7 @@ public class InstallBundleOperation extends RemoteBundleOperation {
 	}
 
 	private static final DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");
-	
+
 	private String getTimestamp() {
 		return df.format(new Date());
 	}

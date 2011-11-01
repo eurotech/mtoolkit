@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -34,93 +35,150 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
-public class InstallDeploymentOperation extends RemoteDeploymentOperation {
+public class InstallDeploymentOperation {
 
-	private File sourceFile;
-	private Framework framework;
+  private Framework framework;
 
-	public InstallDeploymentOperation(File dpFile, Framework framework) {
-		super("Installing deployment package...", framework);
-		this.sourceFile = dpFile;
-		this.framework = framework;
-	}
+  public InstallDeploymentOperation(Framework framework) {
+    this.framework = framework;
+  }
 
-	protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
-		try {
-			JarFile jar = new JarFile(sourceFile);
-			Manifest manifest = jar.getManifest();
-			if (manifest == null)
-        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file \"{0}\" doesn't have valid manifest",
-					sourceFile), null);
-			String symbolicName = manifest.getMainAttributes().getValue("DeploymentPackage-SymbolicName");
-			if (symbolicName == null)
-        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file \"{0}\" doesn't have valid manifest",
-					sourceFile), null);
-			String version = manifest.getMainAttributes().getValue("DeploymentPackage-Version");
-			if (version == null)
-        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Source file \"{0}\" doesn't have valid manifest",
-					sourceFile), null);
-			DeviceConnector connector = framework.getConnector();
-			if (connector == null) return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Connection lost", null);
-			RemoteDP remoteDP = connector.getDeploymentManager().getDeploymentPackage(symbolicName);
-			if (remoteDP != null) {
-				// deployment package already exists, if it has the same version
-				// we need to remove and install again after user confirmation
-				String remoteVersion = remoteDP.getVersion();
-				if (remoteVersion.equals(version)) {
-					if (askUserToUninstallRemotePackage(symbolicName)) {
-						Model[] fwChildren = framework.getChildren();
-						Model dpNode = null;
-						for (int i=0; i<fwChildren.length; i++) {
-							if (fwChildren[i] instanceof SimpleNode &&
-								"Deployment Packages".equals(fwChildren[i].getName())) {
-								dpNode = fwChildren[i];
-								break;
-							}
-						}
-						DeploymentPackage packageNode = DPModelProvider.findDP(dpNode, symbolicName);
-						if (packageNode == null)
-							return new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-								"Local representation of the remote OSGi framework is stale. Refresh and try again.",
-								null);
-						UninstallDeploymentOperation uninstallJob = new UninstallDeploymentOperation(packageNode);
-						monitor.subTask(uninstallJob.getName());
-						IStatus status = uninstallJob.uninstallDeploymentPackage(false);
-						if (!status.equals(Status.OK_STATUS)) {
-							return status;
-						}
-						monitor.subTask(getName());
-					}
-				}
-			}
-			 framework.getConnector().getDeploymentManager().installDeploymentPackage(new FileInputStream(sourceFile));
-		} catch (IOException e) {
-      return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind("Failed to prepare file \"{0}\" Cause:", sourceFile.getName(), e.getMessage()), e);
-		}
-		return Status.OK_STATUS;
-	}
+  public void startJob(final File sourceFile, IProgressMonitor monitor) {
+    RemoteDeploymentOperation operation = new RemoteDeploymentOperation("Installing deployment package...", framework) {
+      protected IStatus doOperation(IProgressMonitor monitor) {
+        RemoteDP remoteDP = null;
+        try {
+          remoteDP = install(sourceFile, monitor);
+          if (remoteDP == null) {
+            return new Status(Status.ERROR, Activator.PLUGIN_ID, NLS.bind("Unable to install the source file \"{0}\"",
+                sourceFile));
+          }
+        } catch (Exception e) {
+          return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e);
+        }
 
-	private boolean askUserToUninstallRemotePackage(final String symbolicName) {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		final int[] result = new int[1];
-		display.syncExec(new Runnable() {
-			public void run() {
-				dialog = new MessageDialog(PluginUtilities.getActiveWorkbenchShell(),
-						"Uninstall Existing Deployment Package",
-						null,
- NLS.bind("The deployment package \"{0}\" exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",
-							symbolicName),
-						MessageDialog.QUESTION,
-						new String[] { "Uninstall Remote Version", "Cancel" },
-						0);
-				result[0] = dialog.open();
-			}
-		});
-		return result[0] == 0;
-	}
+        return Status.OK_STATUS;
+      }
 
-	protected String getMessage(IStatus operationStatus) {
-		return "Deployment package installation failed";
-	}
+      protected String getMessage(IStatus operationStatus) {
+        // TODO Auto-generated method stub
+        return null;
+      }
+    };
+    operation.schedule();
+  }
+
+  public RemoteDP install(File sourceFile, IProgressMonitor monitor) throws IAgentException, IllegalArgumentException {
+    RemoteDP dp = null;
+    try {
+      JarFile jar = new JarFile(sourceFile);
+      Manifest manifest = jar.getManifest();
+      if (manifest == null)
+        throw new IllegalArgumentException(NLS.bind("Source file \"{0}\" doesn't have valid manifest", sourceFile));
+      String symbolicName = manifest.getMainAttributes().getValue("DeploymentPackage-SymbolicName");
+      if (symbolicName == null)
+        throw new IllegalArgumentException(NLS.bind("Source file \"{0}\" doesn't have valid manifest", sourceFile));
+      String version = manifest.getMainAttributes().getValue("DeploymentPackage-Version");
+      if (version == null)
+        throw new IllegalArgumentException(NLS.bind("Source file \"{0}\" doesn't have valid manifest", sourceFile));
+      DeviceConnector connector = framework.getConnector();
+      if (connector == null) {
+        //        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Connection lost", null);
+        //processError("Connection lost", true);
+        throw new IAgentException("Connection lost", IStatus.ERROR);
+        //        return null;
+      }
+      RemoteDP remoteDP = connector.getDeploymentManager().getDeploymentPackage(symbolicName);
+      if (remoteDP != null) {
+        // deployment package already exists, if it has the same version
+        // we need to remove and install again after user confirmation
+        String remoteVersion = remoteDP.getVersion();
+        if (remoteVersion.equals(version)) {
+          if (askUserToUninstallRemotePackage(symbolicName)) {
+            Model[] fwChildren = framework.getChildren();
+            Model dpNode = null;
+            for (int i = 0; i < fwChildren.length; i++) {
+              if (fwChildren[i] instanceof SimpleNode && "Deployment Packages".equals(fwChildren[i].getName())) {
+                dpNode = fwChildren[i];
+                break;
+              }
+            }
+            DeploymentPackage packageNode = DPModelProvider.findDP(dpNode, symbolicName);
+            if (packageNode == null)
+              throw new IllegalArgumentException(
+                  "Local representation of the remote OSGi framework is stale. Refresh and try again.");
+            UninstallDeploymentOperation uninstallJob = new UninstallDeploymentOperation(packageNode);
+            monitor.subTask(uninstallJob.getName());
+            IStatus status = uninstallJob.uninstallDeploymentPackage(false);
+            if (!status.equals(Status.OK_STATUS)) {
+              throw new IAgentException(status.getMessage(), status.getCode(), status.getException());
+            }
+            monitor.subTask(getName(sourceFile));
+          }
+        }
+      }
+      dp = framework.getConnector().getDeploymentManager().installDeploymentPackage(new FileInputStream(sourceFile));
+    } catch (IOException e) {
+      throw new IllegalArgumentException(NLS.bind("Failed to prepare file \"{0}\" Cause:", sourceFile.getName(),
+          e.getMessage()));
+    }
+    return dp;
+  }
+
+  private String getName(File sourceFile) {
+    return sourceFile.getName();
+  }
+
+  private boolean askUserToUninstallRemotePackage(final String symbolicName) {
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    final int[] result = new int[1];
+    display.syncExec(new Runnable() {
+      private MessageDialog dialog;
+
+      public void run() {
+        dialog = new MessageDialog(
+            PluginUtilities.getActiveWorkbenchShell(),
+            "Uninstall Existing Deployment Package",
+            null,
+            NLS.bind(
+                "The deployment package \"{0}\" exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",
+                symbolicName), MessageDialog.QUESTION, new String[] { "Uninstall Remote Version", "Cancel" }, 0);
+        result[0] = dialog.open();
+      }
+    });
+    return result[0] == 0;
+  }
+
+  protected String getMessage(IStatus operationStatus) {
+    return "Deployment package installation failed";
+  }
+
+  public static void processError(final String message, boolean showDialog) {
+    if (showDialog) {
+      Display display = PlatformUI.getWorkbench().getDisplay();
+      if (!display.isDisposed()) {
+        display.asyncExec(new Runnable() {
+          public void run() {
+            Shell shell = getShell();
+            if (shell != null) {
+              if (!shell.isDisposed()) {
+                MessageDialog.openError(shell, "Error", message);
+              }
+            }
+          }
+        });
+      }
+    }
+    //dumpToLog(IStatus.ERROR, message, null);
+  }
+
+  // Get active shell
+  public static Shell getShell() {
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    if (display.isDisposed()) {
+      return null;
+    }
+    return display.getActiveShell();
+  }
 
 }

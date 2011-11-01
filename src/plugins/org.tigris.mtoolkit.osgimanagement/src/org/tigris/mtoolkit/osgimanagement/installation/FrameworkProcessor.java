@@ -38,19 +38,23 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.PluginProvider.PluginItem;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundlesOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -194,11 +198,11 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			return signStatus;
 		}
 
-		List<FrameworkInstallationItem> itemsToInstall = new ArrayList<FrameworkInstallationItem>();
+		List<InstallationPair> itemsToInstall = new ArrayList<InstallationPair>();
 		for (final InstallationItem item : items) {
 			processItem(item, framework, monitor, subMonitor, itemsToInstall);
 		}
-		installBundles(itemsToInstall);
+		installItems((FrameworkImpl) framework, itemsToInstall);
 
 		monitor.done();
 		if (monitor.isCanceled()) {
@@ -242,7 +246,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	}
 
 	private IStatus processInstallationItem(final InstallationItem item, Framework framework,
-			final IProgressMonitor monitor, SubMonitor subMonitor, List itemsToInstall) {
+			final IProgressMonitor monitor, SubMonitor subMonitor, List<InstallationPair> itemsToInstall) {
 		try {
 			String mimeType = item.getMimeType();
 			Vector processors = new Vector();
@@ -297,7 +301,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				}
 			}
 
-			itemsToInstall.add(new FrameworkInstallationItem((FrameworkImpl) framework, processor[0], item));
+			itemsToInstall.add(new InstallationPair(processor[0], item));
 		} catch (Exception e) {
 			return Util.newStatus(IStatus.ERROR, "Remote content installation failed", e);
 		}
@@ -311,17 +315,77 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}
 
-	private void installBundles(List<FrameworkInstallationItem> itemsToInstall) {
+	private void installItems(FrameworkImpl framework, List<InstallationPair> itemsToInstall) {
 		if (itemsToInstall.isEmpty()) {
 			return;
 		}
 		try {
-			Job installBundleJob = new InstallBundlesOperation(itemsToInstall);
+			Job installBundleJob = new InstallOperation(framework, itemsToInstall);
 			installBundleJob.schedule();
+			installBundleJob.addJobChangeListener(new DisposeWhenDoneListener(itemsToInstall));
 		} catch (Exception e) {
 			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle(s)", e),
 					StatusManager.SHOW | StatusManager.LOG);
 		}
+	}
+
+	public Object install(InputStream input, String name, Framework framework, IProgressMonitor monitor)
+			throws Exception {
+		// TODO: Make methods, which are called from inside jobs to do
+		// the real job
+		return installBundle(input, name, (FrameworkImpl) framework, monitor);
+	}
+
+	public void start(Object installedItem, IProgressMonitor monitor) throws Exception {
+		if (installedItem instanceof RemoteBundle) {
+			final RemoteBundle remoteBundle = (RemoteBundle) installedItem;
+			if (FrameworkConnectorFactory.isAutoStartBundlesEnabled
+					&& remoteBundle.getType() != RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
+				Job job = new Job("Starting bundle " + remoteBundle.getSymbolicName() + " ("
+						+ remoteBundle.getVersion() + ")") {
+					@Override
+					public IStatus run(IProgressMonitor monitor) {
+						int flags = FrameworkConnectorFactory.isActivationPolicyEnabled ? Bundle.START_ACTIVATION_POLICY
+								: 0;
+						try {
+							remoteBundle.start(flags);
+						} catch (IAgentException e) {
+							// only log this exception, because the user
+							// requested
+							// install bundle, which succeeded
+							StatusManager.getManager().handle(Util.handleIAgentException(e), StatusManager.LOG);
+							return Status.CANCEL_STATUS;
+						}
+
+						monitor.done();
+						if (monitor.isCanceled()) {
+							return Status.CANCEL_STATUS;
+						}
+						return Status.OK_STATUS;
+					}
+				};
+				job.schedule();
+			}
+		}
+	}
+
+	private Object installBundle(InputStream input, String name, FrameworkImpl framework, IProgressMonitor monitor)
+			throws IAgentException {
+		RemoteBundle result = null;
+		try {
+			final File bundle = saveFile(input, name);
+			result = new InstallBundleOperation(framework).installBundle(bundle, monitor);
+			bundle.delete();
+		} catch (IllegalArgumentException ie) {
+			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", ie),
+					StatusManager.SHOW | StatusManager.LOG);
+		} catch (IOException e) {
+			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e),
+					StatusManager.SHOW | StatusManager.LOG);
+//		} finally {
+//			monitor.done();
+		}
+		return result;
 	}
 
 	protected File saveFile(InputStream input, String name) throws IOException {
@@ -375,6 +439,21 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		@Override
 		public void done(IJobChangeEvent event) {
 			packageFile.delete();
+		}
+	}
+
+	protected static class DisposeWhenDoneListener extends JobChangeAdapter {
+		private final List<InstallationPair> itemsToInstall;
+
+		public DisposeWhenDoneListener(List<InstallationPair> itemsToInstall) {
+			this.itemsToInstall = itemsToInstall;
+		}
+
+		@Override
+		public void done(IJobChangeEvent event) {
+			for (InstallationPair instPair : itemsToInstall) {
+				instPair.item().dispose();
+			}
 		}
 	}
 
