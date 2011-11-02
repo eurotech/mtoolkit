@@ -69,8 +69,10 @@ public class InstallDeploymentOperation {
 
   public RemoteDP install(File sourceFile, IProgressMonitor monitor) throws IAgentException, IllegalArgumentException {
     RemoteDP dp = null;
+    JarFile jar = null;
+    FileInputStream fis = null;
     try {
-      JarFile jar = new JarFile(sourceFile);
+      jar = new JarFile(sourceFile);
       Manifest manifest = jar.getManifest();
       if (manifest == null)
         throw new IllegalArgumentException(NLS.bind("Source file \"{0}\" doesn't have valid manifest", sourceFile));
@@ -115,10 +117,25 @@ public class InstallDeploymentOperation {
           }
         }
       }
-      dp = framework.getConnector().getDeploymentManager().installDeploymentPackage(new FileInputStream(sourceFile));
+      fis = new FileInputStream(sourceFile);
+      dp = framework.getConnector().getDeploymentManager().installDeploymentPackage(fis);
     } catch (IOException e) {
       throw new IllegalArgumentException(NLS.bind("Failed to prepare file \"{0}\" Cause:", sourceFile.getName(),
           e.getMessage()));
+    } finally {
+      if (fis != null) {
+        try {
+          fis.close();
+        } catch (IOException e) {
+        }
+        if (jar != null) {
+          try {
+            jar.close();
+          } catch (IOException e) {
+          }
+        }
+      }
+
     }
     return dp;
   }

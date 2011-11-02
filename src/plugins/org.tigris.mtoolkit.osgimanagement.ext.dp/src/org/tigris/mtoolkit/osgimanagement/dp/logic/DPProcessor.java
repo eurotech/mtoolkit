@@ -39,10 +39,10 @@ public class DPProcessor extends FrameworkProcessor {
   public Object install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
       throws Exception {
     RemoteDP result = null;
+    File packageFile = null;
     try {
-      final File packageFile = saveFile(input, item.getName());
+      packageFile = saveFile(input, item.getName());
       result = new InstallDeploymentOperation(framework).install(packageFile, monitor);
-      packageFile.delete();
       //			InstallDeploymentOperation job = new InstallDeploymentOperation(packageFile, framework);
       //			job.schedule();
       //			job.addJobChangeListener(new DeleteWhenDoneListener(packageFile));
@@ -54,6 +54,16 @@ public class DPProcessor extends FrameworkProcessor {
       StatusManager.getManager().handle(
           new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to install deployment package", ex),
           StatusManager.SHOW | StatusManager.LOG);
+    } finally {
+      if (input != null) {
+        try {
+          input.close();
+        } catch (IOException e) {
+        }
+      }
+      if (packageFile != null) {
+        packageFile.delete();
+      }
     }
     return result;
   }
