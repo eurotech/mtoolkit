@@ -13,6 +13,8 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
@@ -23,8 +25,8 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.IconFetcher;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
-import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView.ActionsProviderElement;
+import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
@@ -73,53 +75,12 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		}
 		if (element instanceof Bundle) {
 			Bundle bundle = (Bundle) element;
-			int state = bundle.getState();
-
-			Image icon = getBundleIcon(bundle);
-			if (icon != null) {
-				return icon;
+			Image icon = getBundleImage(bundle);
+			if (bundle.isSigned()) {
+				icon = new DecorationOverlayIcon(icon, ImageHolder.getImageDescriptor(Bundle.OVR_SIGNED_ICON),
+						IDecoration.BOTTOM_LEFT).createImage();
 			}
-
-			if (state == org.osgi.framework.Bundle.INSTALLED) {
-				if (bundle.getType() != 0) {
-					if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
-						return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT_INSTALLED);
-					} else {
-						return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION_INSTALLED);
-					}
-				}
-				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_INSTALLED);
-			} else if (bundle.getType() != 0) {
-				if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT);
-				} else {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION);
-				}
-			} else {
-				if (state == 0)
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNKNOWN);
-
-				switch (state) {
-				case org.osgi.framework.Bundle.UNINSTALLED: {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNINSTALLED);
-				}
-				case org.osgi.framework.Bundle.RESOLVED: {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
-				}
-				case org.osgi.framework.Bundle.STARTING: {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STARTING);
-				}
-				case org.osgi.framework.Bundle.STOPPING: {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STOPPING);
-				}
-				case org.osgi.framework.Bundle.ACTIVE: {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_ACTIVE);
-				}
-				default: {
-					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
-				}
-				}
-			}
+			return icon;
 		}
 		if ((element instanceof ServicesCategory) || (element instanceof BundlesCategory)) {
 			return ImageHolder.getImage(ViewLabelProvider.SERVICES_CATEGORY_ICON);
@@ -142,8 +103,9 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 			FrameworkImpl fw = (FrameworkImpl) ((Model) element).findFramework();
 			if (fw != null) {
 				List actionProviders = FrameWorkView.getActionsProviders();
-				for (int i=0; i<actionProviders.size(); i++) {
-					ContentTypeActionsProvider manager = ((ActionsProviderElement)actionProviders.get(i)).getProvider();
+				for (int i = 0; i < actionProviders.size(); i++) {
+					ContentTypeActionsProvider manager = ((ActionsProviderElement) actionProviders.get(i))
+							.getProvider();
 					Image image = manager.getImage((Model) element);
 					if (image != null) {
 						return image;
@@ -154,10 +116,63 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		return null;
 	}
 
+	private Image getBundleImage(Bundle bundle) {
+		int state = bundle.getState();
+
+		Image icon = getBundleDefinedIcon(bundle);
+		if (icon != null) {
+			return icon;
+		}
+
+		if (state == org.osgi.framework.Bundle.INSTALLED) {
+			if (bundle.getType() != 0) {
+				if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT_INSTALLED);
+				} else {
+					return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION_INSTALLED);
+				}
+			}
+			return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_INSTALLED);
+		} else if (bundle.getType() != 0) {
+			if (bundle.getType() == Bundle.BUNDLE_TYPE_FRAGMENT) {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_FRAGMENT);
+			} else {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_EXTENSION);
+			}
+		} else {
+			if (state == 0)
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNKNOWN);
+
+			switch (state) {
+			case org.osgi.framework.Bundle.UNINSTALLED: {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_UNINSTALLED);
+			}
+			case org.osgi.framework.Bundle.RESOLVED: {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
+			}
+			case org.osgi.framework.Bundle.STARTING: {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STARTING);
+			}
+			case org.osgi.framework.Bundle.STOPPING: {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_STOPPING);
+			}
+			case org.osgi.framework.Bundle.ACTIVE: {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_ACTIVE);
+			}
+			default: {
+				return ImageHolder.getImage(ViewLabelProvider.BUNDLE_ICON_RESOLVED);
+			}
+			}
+		}
+
+	}
+
 	// Override to dispose Images properly
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void update(ViewerCell cell) {
 		Object element = cell.getElement();
 		String text = (element instanceof Model) ? ((Model) element).getLabel() : element.toString();
@@ -176,13 +191,13 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 		super.update(cell);
 	}
 
-	private Image getBundleIcon(Bundle bundle) {
+	private Image getBundleDefinedIcon(Bundle bundle) {
 		Image icon = bundle.getIcon();
 		if (icon != null) {
 			return icon;
 		}
 		String name = null;
-		Framework fw = (Framework) bundle.findFramework();
+		Framework fw = bundle.findFramework();
 		if (fw != null) {
 			name = fw.getName();
 		}

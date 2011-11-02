@@ -45,10 +45,18 @@ public interface RemoteBundleAdmin {
 	 */
 	public static final String KEY_USED_SERVICES = "used.services";
 
-
 	long getBundleByLocation(String location);
 
 	int getBundleState(long id);
+
+	/**
+	 * Checks if the bundle is signed.
+	 * 
+	 * @param id
+	 *            the bundle id
+	 * @return <code>true</code> if there are signer certificates.
+	 */
+	boolean isBundleSigned(long id);
 
 	String getBundleLocation(long id);
 
@@ -213,7 +221,7 @@ public interface RemoteBundleAdmin {
 	public int getBundleStartLevel(long id);
 
 	public int getFrameworkStartLevel();
-	
+
 	public String getSystemProperty(String property);
 
 	/**

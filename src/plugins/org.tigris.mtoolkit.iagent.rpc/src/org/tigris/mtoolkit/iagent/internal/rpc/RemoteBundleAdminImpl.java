@@ -30,6 +30,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -74,10 +75,10 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	private ServiceTracker delegatesTrack;
 	private ServiceRegistration registration;
 	private BundleContext bc;
-	
+
 	private Set loadedSymbolicNames;
 	private Bundle systemBundle;
-	
+
 	private BundleManagerDelegate defaultDelegate;
 
 	public Class[] remoteInterfaces() {
@@ -87,18 +88,18 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	public void register(BundleContext bc) {
 		debug("[register] Registering remote Bundle Admin...");
 		this.bc = bc;
-		
+
 		this.defaultDelegate = new DefaultBundleManagerDelegate(bc);
-		
+
 		packageAdminTrack = new ServiceTracker(bc, PackageAdmin.class.getName(), null);
 		packageAdminTrack.open();
 
 		startLevelTrack = new ServiceTracker(bc, StartLevel.class.getName(), null);
 		startLevelTrack.open();
-		
+
 		delegatesTrack = new ServiceTracker(bc, BundleManagerDelegate.class.getName(), null);
 		delegatesTrack.open();
-		
+
 		registration = bc.registerService(RemoteBundleAdmin.class.getName(), this, null);
 
 		bc.addBundleListener(this);
@@ -127,7 +128,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			startLevelTrack.close();
 			startLevelTrack = null;
 		}
-		
+
 		bc.removeBundleListener(this);
 
 		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
@@ -171,6 +172,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			Object key = e.nextElement();
 			converted.put(key.toString(), headers.get(key).toString());
 		}
+
 		debug("[getBundleHeaders] headers: " + DebugUtils.convertForDebug(converted));
 		return converted;
 	}
@@ -188,6 +190,20 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		Object bundleHeader = value != null ? value.toString() : null;
 		debug("[getBundleHeader] header value: " + bundleHeader);
 		return bundleHeader;
+	}
+
+	public boolean isBundleSigned(long id) {
+		debug("[isBundleSigned] >>> id: " + id);
+		Bundle bundle = bc.getBundle(id);
+		if (bundle == null) {
+			info("[getBundleHeaders] No such bundle");
+			return false;
+		}
+
+		Map ss = bundle.getSignerCertificates(Bundle.SIGNERS_ALL);
+		boolean signed = !ss.isEmpty();
+		debug("[isBundleSigned] result: " + signed);
+		return signed;
 	}
 
 	public long getBundleLastModified(long id) {
@@ -241,7 +257,8 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			info("[startBundle] No such bundle: " + error);
 			return error;
 		} catch (Throwable t) {
-			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to start bundle: " + (t.getMessage() != null ? t.getMessage() : t.toString()));
+			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to start bundle: "
+					+ (t.getMessage() != null ? t.getMessage() : t.toString()));
 			info("[startBundle] Bundle cannot be started: " + error, t);
 			return error;
 		}
@@ -272,7 +289,8 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			info("[stopBundle] No such bundle: " + error);
 			return error;
 		} catch (Throwable t) {
-			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to stop bundle: " + (t.getMessage() != null ? t.getMessage() : t.toString()));
+			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to stop bundle: "
+					+ (t.getMessage() != null ? t.getMessage() : t.toString()));
 			info("[stopBundle] Unable to stop bundle: " + error, t);
 			return error;
 		}
@@ -377,13 +395,13 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			info("[installBundle] Unable to install bundle: " + result);
 			return result;
 		}
-		
+
 		Bundle bundle = (Bundle) result;
 		Long bundleId = new Long(bundle.getBundleId());
 		debug("[installBundle] Bundle installed successfully. Id: " + bundleId);
 		return bundleId;
 	}
-	
+
 	private BundleManagerDelegate getDelegate() {
 		BundleManagerDelegate delegate = (BundleManagerDelegate) delegatesTrack.getService();
 		if (delegate != null)
@@ -543,7 +561,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			return; // stop sending events when the iagent bundle is stopping,
 		// they're inspectation will lead to errors
 		debug("[bundleChanged] Event type is BundleEvent." + event.getType());
-			
+
 		EventSynchronizer synchronizer = Activator.getSynchronizer();
 		if (synchronizer != null) {
 			Dictionary convEvent = convertBundleEvent(event);
@@ -734,7 +752,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		else
 			return -1;
 	}
-	
+
 	public String getSystemProperty(String name) {
 		return Activator.getBundleContext().getProperty(name);
 	}

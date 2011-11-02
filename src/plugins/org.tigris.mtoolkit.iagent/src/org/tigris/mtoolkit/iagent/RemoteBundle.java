@@ -82,8 +82,8 @@ public interface RemoteBundle {
 	 * as {@link #getHeaders(String)} method. The call to this method is
 	 * equivalent to: <br>
 	 * <code>
-   *    getHeaders(locale).get(headerName);
-   * </code>
+	 *    getHeaders(locale).get(headerName);
+	 * </code>
 	 * 
 	 * @param headerName
 	 *            the name of the header to return
@@ -93,6 +93,14 @@ public interface RemoteBundle {
 	 * @throws IAgentException
 	 */
 	public String getHeader(String headerName, String locale) throws IAgentException;
+
+	/**
+	 * Returns if the underlying bundle is signed.
+	 * 
+	 * @return the signed state of the remote bundle
+	 * @throws IAgentException
+	 */
+	public boolean isBundleSigned() throws IAgentException;
 
 	/**
 	 * Returns the location of the bundle

@@ -37,6 +37,7 @@ public class Bundle extends Model implements IconProvider {
 
 	public static final String OVR_ACTIVE_ICON = "ovr_active.gif"; //$NON-NLS-1$
 	public static final String OVR_RESOLVED_ICON = "ovr_resolved.gif"; //$NON-NLS-1$
+	public static final String OVR_SIGNED_ICON = "ovr_signed2.gif"; //$NON-NLS-1$
 
 	private long id;
 	private boolean needsUpdate;
@@ -67,7 +68,7 @@ public class Bundle extends Model implements IconProvider {
 		this.version = version;
 		needsUpdate = true;
 	}
-	
+
 	public Bundle(Bundle master) {
 		super(master.getName(), master);
 		rBundle = master.rBundle;
@@ -78,7 +79,7 @@ public class Bundle extends Model implements IconProvider {
 		needsUpdate = true;
 		version = master.version;
 	}
-	
+
 	public Bundle(Bundle master, String category) {
 		this(master);
 		this.category = category;
@@ -93,6 +94,7 @@ public class Bundle extends Model implements IconProvider {
 	}
 
 	// Overrides method in Model class
+	@Override
 	public boolean testAttribute(Object target, String name, String value) {
 		if (!(target instanceof org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle)) {
 			return false;
@@ -149,22 +151,22 @@ public class Bundle extends Model implements IconProvider {
 	// this method will always ask the remote side, so it needs to throw
 	// exception
 	public void update() throws IAgentException {
-		/*Framework framework =*/ findFramework();
-//		if (framework != null && framework.getConnector() != null) {
-			try {
-				refreshStateFromRemote();
-				RemoteBundle rBundle = getRemoteBundle();
-				version = rBundle.getVersion();
-				iconData = null;
-				if (icon != null) {
-					icon.dispose();
-					icon = null;
-				}
-			} finally {
-				// always update the viewers
-				updateElement();
+		/* Framework framework = */findFramework();
+		// if (framework != null && framework.getConnector() != null) {
+		try {
+			refreshStateFromRemote();
+			RemoteBundle rBundle = getRemoteBundle();
+			version = rBundle.getVersion();
+			iconData = null;
+			if (icon != null) {
+				icon.dispose();
+				icon = null;
 			}
-//		}
+		} finally {
+			// always update the viewers
+			updateElement();
+		}
+		// }
 	}
 
 	public boolean isNeedUpdate() {
@@ -210,12 +212,12 @@ public class Bundle extends Model implements IconProvider {
 	}
 
 	public void refreshTypeFromRemote() throws IAgentException {
-		FrameworkImpl fw = (FrameworkImpl)findFramework();
+		FrameworkImpl fw = (FrameworkImpl) findFramework();
 		if (fw != null) {
 			type = fw.getRemoteBundleType(rBundle, rBundle.getHeaders(null));
 		}
 	}
-	
+
 	public String getCategory() {
 		return category;
 	}
@@ -226,6 +228,7 @@ public class Bundle extends Model implements IconProvider {
 		return buff.toString();
 	}
 
+	@Override
 	public String toString() {
 		try {
 			return name + " " + getVersion();
@@ -234,6 +237,7 @@ public class Bundle extends Model implements IconProvider {
 		return name;
 	}
 
+	@Override
 	public String getLabel() {
 		String label = getName();
 		if (isShowID()) {
@@ -333,6 +337,16 @@ public class Bundle extends Model implements IconProvider {
 		return null;
 	}
 
+	public boolean isSigned() {
+		boolean result = false;
+		try {
+			result = rBundle.isBundleSigned();
+		} catch (IAgentException e) {
+		}
+		return result;
+	}
+
+	@Override
 	public void finalize() {
 		if (icon != null) {
 			icon.dispose();
