@@ -66,7 +66,7 @@ public class InstallOperation extends Job {
 			InputStream input = null;
 			try {
 				input = item.getInputStream();
-				Object installedItem = processor.install(input, item.getName(), framework, subMonitor.newChild(1));
+				Object installedItem = processor.install(input, item, framework, subMonitor.newChild(1));
 				if (installedItem != null) {
 					installedItems.put(installedItem, processor);
 				}

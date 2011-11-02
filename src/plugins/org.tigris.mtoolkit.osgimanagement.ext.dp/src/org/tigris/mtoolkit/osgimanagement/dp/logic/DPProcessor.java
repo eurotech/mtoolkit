@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
@@ -35,10 +36,11 @@ public class DPProcessor extends FrameworkProcessor {
     return new String[] { MIME_DP };
   }
 
-  public Object install(InputStream input, String name, Framework framework, IProgressMonitor monitor) {
+  public Object install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
+      throws Exception {
     RemoteDP result = null;
     try {
-      final File packageFile = saveFile(input, name);
+      final File packageFile = saveFile(input, item.getName());
       result = new InstallDeploymentOperation(framework).install(packageFile, monitor);
       packageFile.delete();
       //			InstallDeploymentOperation job = new InstallDeploymentOperation(packageFile, framework);

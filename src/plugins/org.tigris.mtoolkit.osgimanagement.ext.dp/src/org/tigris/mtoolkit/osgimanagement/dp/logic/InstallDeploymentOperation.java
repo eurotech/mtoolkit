@@ -61,8 +61,7 @@ public class InstallDeploymentOperation {
       }
 
       protected String getMessage(IStatus operationStatus) {
-        // TODO Auto-generated method stub
-        return null;
+        return "Deployment package installation failed";
       }
     };
     operation.schedule();
@@ -86,7 +85,6 @@ public class InstallDeploymentOperation {
         //        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Connection lost", null);
         //processError("Connection lost", true);
         throw new IAgentException("Connection lost", IStatus.ERROR);
-        //        return null;
       }
       RemoteDP remoteDP = connector.getDeploymentManager().getDeploymentPackage(symbolicName);
       if (remoteDP != null) {
@@ -147,10 +145,6 @@ public class InstallDeploymentOperation {
       }
     });
     return result[0] == 0;
-  }
-
-  protected String getMessage(IStatus operationStatus) {
-    return "Deployment package installation failed";
   }
 
   public static void processError(final String message, boolean showDialog) {

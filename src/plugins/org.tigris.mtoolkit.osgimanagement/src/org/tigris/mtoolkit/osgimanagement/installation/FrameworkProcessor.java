@@ -328,11 +328,11 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		}
 	}
 
-	public Object install(InputStream input, String name, Framework framework, IProgressMonitor monitor)
+	public Object install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
 			throws Exception {
 		// TODO: Make methods, which are called from inside jobs to do
 		// the real job
-		return installBundle(input, name, (FrameworkImpl) framework, monitor);
+		return installBundle(input, item.getName(), (FrameworkImpl) framework, monitor);
 	}
 
 	public void start(Object installedItem, IProgressMonitor monitor) throws Exception {
