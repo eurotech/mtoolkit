@@ -559,11 +559,13 @@ public class DeploymentPackageGenerator {
 	}
 
 	private String substituteSpecialXMLCharacters(String strToParse) {
-		strToParse = strToParse.replaceAll("&", "&amp;");
-		strToParse = strToParse.replaceAll("'", "&apos;");
-		strToParse = strToParse.replaceAll("<", "&lt;");
-		strToParse = strToParse.replaceAll(">", "&gt;");
-		strToParse = strToParse.replaceAll("\"", "&quot;");
+		if (strToParse != null && !strToParse.equals("")) {
+			strToParse = strToParse.replaceAll("&", "&amp;");
+			strToParse = strToParse.replaceAll("'", "&apos;");
+			strToParse = strToParse.replaceAll("<", "&lt;");
+			strToParse = strToParse.replaceAll(">", "&gt;");
+			strToParse = strToParse.replaceAll("\"", "&quot;");
+		}
 		return strToParse;
 	}
 
