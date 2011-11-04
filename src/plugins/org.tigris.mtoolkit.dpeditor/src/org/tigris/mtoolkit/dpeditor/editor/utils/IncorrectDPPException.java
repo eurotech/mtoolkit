@@ -12,7 +12,12 @@ package org.tigris.mtoolkit.dpeditor.editor.utils;
 
 public class IncorrectDPPException extends Exception {
 
-	/** Nested exception for holding wrapped exception */
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 12345678L;
+  
+  /** Nested exception for holding wrapped exception */
 	protected Throwable nested = null;
 	protected String details;
 
