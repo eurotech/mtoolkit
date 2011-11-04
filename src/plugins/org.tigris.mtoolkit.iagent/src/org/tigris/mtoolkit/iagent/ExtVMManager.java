@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent;
 
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,5 +25,20 @@ public interface ExtVMManager {
 	public Map getPlatformProperties() throws IAgentException;
 
 	public String[] getSystemBundlesNames() throws IAgentException;
+
+	/**
+	 * @since 4.1
+	 */
+	public List/*<String>*/ listConfigurables(Map properties) throws IAgentException;
+
+	/**
+	 * @since 4.1
+	 */
+	public InputStream readConfigurable(String name, Map properties) throws IAgentException;
+
+	/**
+	 * @since 4.1
+	 */
+	public void writeConfigurable(String name, InputStream is, Map properties) throws IAgentException;
 
 }
