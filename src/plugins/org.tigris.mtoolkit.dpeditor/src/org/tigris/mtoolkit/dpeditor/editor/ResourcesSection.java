@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.dpeditor.editor.base.CustomCellEditor;
 import org.tigris.mtoolkit.dpeditor.editor.base.DPPFormSection;
 import org.tigris.mtoolkit.dpeditor.editor.event.EventConstants;
@@ -188,6 +189,31 @@ public class ResourcesSection extends DPPFormSection implements
 		public boolean canModify(Object object, String property) {
 			return isTableEditable;
 		}
+		
+		private boolean modifyNameColumn(String newValue, TableItem item) {
+			ResourceInfo resource = (ResourceInfo) item.getData();
+
+			if (newValue.equals("") || newValue.equals(resource.getName())) {
+				return true;
+			}
+
+			if (newValue.indexOf(":") != -1 || newValue.endsWith("/") || newValue.endsWith("\\")
+					|| newValue.equals("\\") || newValue.equals("/") || !PluginUtilities.isValidPath(newValue)) {
+				DPPErrorHandler.showErrorTableDialog(ResourceManager
+						.getString("DPPEditor.ResourcesSection.InvalidResourceName"));
+				resourcesTable.getTable().setFocus();
+				return false;
+			}
+			resource.setName(newValue);
+
+			if (DPPUtil.isAlreadyInTheTable(newValue, item, 1)) {
+				DPPErrorHandler.showErrorTableDialog(ResourceManager
+						.getString("DPPEditor.ResourcesSection.ResourceNameAlreadyExists"));
+				resourcesTable.getTable().setFocus();
+				return false;
+			}
+			return true;
+		}
 
 		/**
 		 * Modifies the value for the given property of the given element. In
@@ -259,32 +285,7 @@ public class ResourcesSection extends DPPFormSection implements
 				resource.setName(customPath + filename);
 				isSet = true;
 			} else if (property.equals("name")) {
-				if (newValue.equals("")) { // delete or New
-					TableItem currentItem = (TableItem) object;
-					String resourceFileSystemPath = currentItem.getText(0);
-					if (resourceFileSystemPath.equals("")) {
-						return;
-					}
-					filename = getName(currentItem.getText(0));
-					customPath = getUpperPath(object);
-				} else { // modify
-					filename = getName(newValue);
-					if (filename.equals("")) {
-						filename = getName(item.getText(0));
-					}
-					String currentPath = getPath(newValue);
-					customPath = (currentPath == null) ? "" : currentPath;
-				}
-				if (DPPUtil.isAlreadyInTheTable(customPath + filename, item, 1)) {
-					DPPErrorHandler.showErrorTableDialog(ResourceManager
-							.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
-					return;
-				}
-				String newName = customPath + filename;
-				if (newName.equals(resource.getName()))
-					return;
-				resource.setName(newName);
-				isSet = true;
+				isSet = modifyNameColumn(newValue, item);
 			} else if (property.equals("missing")) {
 				Integer newInteger = new Integer(newValue);
 				int val = newInteger.intValue();
@@ -333,12 +334,7 @@ public class ResourcesSection extends DPPFormSection implements
 				resource.setResourceProcessor(newValue);
 
 			} else if (property.equals("custom")) {
-				if (newValue.equals(resource.otherHeadersToString()) /*
-																	 * &&
-																	 * (!newValue
-																	 * .equals
-																	 * (""))
-																	 */) {
+				if (newValue.equals(resource.otherHeadersToString())) {
 					return;
 				}
 				resource.setOtherHeaders(newValue);
