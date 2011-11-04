@@ -228,9 +228,6 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 			String bundlePath = bundle.getBundlePath();
 			String loc = ((DPPFileModel) getFormPage().getModel()).getFile().getProject().getLocation().toOSString();
 
-			// The verifications about "<.>" are made only because of a
-			// "feature" in the class TableLabelProvier
-			// and should be reconsidered are they worth it at all!
 			if (newValue.startsWith("<.>")) {
 				newValue = loc + newValue.substring("<.>".length());
 			}
@@ -341,7 +338,7 @@ public class BundlesSection extends DPPFormSection implements SelectionListener,
 				return true;
 			}
 
-			if (!PluginUtilities.isValidPath(newValue) || newValue.indexOf(":")!=-1) {
+			if (!PluginUtilities.isValidPath(newValue) || newValue.indexOf(":") != -1) {
 				DPPErrorHandler.showErrorTableDialog(ResourceManager
 						.getString("DPPEditor.BundlesSection.InvalidBundleName"));
 				bundlesTable.getTable().setFocus();
