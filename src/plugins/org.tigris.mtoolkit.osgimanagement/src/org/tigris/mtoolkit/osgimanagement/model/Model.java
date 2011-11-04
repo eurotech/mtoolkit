@@ -63,11 +63,11 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 		if (element.getParent() != null)
 			throw new IllegalArgumentException(
 					"Cannot change the parent of model object without removing it from the old one");
-		if (elementList.contains(element)) {
+		/*if (elementList.contains(element)) {
 			System.out.println("WARNING: Tried to add a model object twice to the same parent: " + this + "; child: "
 					+ element);
 			return;
-		}
+		}*/
 
 		if (element.selectedChilds != 0)
 			fireChildSelected(element.selectedChilds);

@@ -963,7 +963,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		private Object[] savedExpansionState;
 		// keeps the elements, which have revealed on the previous filter run
 		private Model[] lastRunRevealedElements;
-		private int lastRunSelectedElementsCount;
 		private volatile boolean ignoreSelectionEvents = false;
 
 		private FilterJob() {
@@ -999,9 +998,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			}
 			if (monitor.isCanceled())
 				return Status.CANCEL_STATUS;
-			System.out.println("Filtered: lastRun: " + lastRunSelectedElementsCount + "; now: "
-					+ treeRoot.getSelectedChildren() + "(" + allSelectedElements.length + "); revealed: " + lastRunIdx);
-			this.lastRunSelectedElementsCount = treeRoot.getSelectedChildren();
 			final int lastRunRevealedCount = lastRunIdx;
 			Display display = PlatformUI.getWorkbench().getDisplay();
 			if (!display.isDisposed()) {
@@ -1025,9 +1021,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			int itemsToReveal = lastRunRevealedElements != null ? (allSelectedElements.length - alreadyRevealedElementsCount)
 					: allSelectedElements.length;
 			boolean autoExpand = itemsToReveal < MAX_ITEMS_TO_AUTOEXPAND;
-			System.out.println("all: " + allSelectedElements.length + "; previous: "
-					+ (lastRunRevealedElements != null) + "; expanded: " + alreadyRevealedElementsCount + "; items: "
-					+ itemsToReveal + "; auto: " + autoExpand);
 			if (savedExpansionState == null) {
 				savedExpansionState = tree.getExpandedElements();
 			}
