@@ -77,13 +77,6 @@ public class Utils {
 		return false;
 	}
 
-	private final static String formatRemoteMethodInformation(RemoteObject remote, MethodSignature methodSignature) {
-		if (DebugUtils.DEBUG_ENABLED)
-			return "RemoteObject: " + remote + "; methodName: " + methodSignature.name;
-		else
-			return "Debug not enabled";
-	}
-
 	private static Object callRemoteMethod0(RemoteObject remote, Object[] parameters, MethodSignature methodSignature)
 			throws PMPException, IAgentException {
 		RemoteMethod method = getRemoteMethod(remote, methodSignature);
@@ -127,9 +120,5 @@ public class Utils {
 
 	private static final void info(String message, Throwable t) {
 		DebugUtils.info(Utils.class, message, t);
-	}
-
-	private static final void error(String message) {
-		DebugUtils.error(Utils.class, message);
 	}
 }
