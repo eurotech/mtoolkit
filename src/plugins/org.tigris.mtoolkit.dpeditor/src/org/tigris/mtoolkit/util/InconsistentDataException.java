@@ -21,6 +21,11 @@ package org.tigris.mtoolkit.util;
 public class InconsistentDataException extends Exception {
 
 	/**
+   * 
+   */
+  private static final long serialVersionUID = 123456L;
+
+  /**
 	 * Constructs a new InconsistentDataException without message
 	 * 
 	 */
