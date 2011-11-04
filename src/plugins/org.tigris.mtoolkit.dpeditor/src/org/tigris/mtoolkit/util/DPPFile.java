@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 
 /**
@@ -358,8 +359,17 @@ public class DPPFile {
 			if (isEmptyOrNull(rInfo.getResourcePath())) {
 				throw new InconsistentDataException("Resource Path is empty");
 			}
-			if (isEmptyOrNull(rInfo.getName())) {
+			
+			String resourcename = rInfo.getName();
+			if (isEmptyOrNull(resourcename)) {
 				throw new InconsistentDataException("Resource Name is empty");
+			}
+			if (resourcename.indexOf(":") != -1 || resourcename.endsWith("/") || resourcename.endsWith("\\")
+					|| resourcename.equals("\\") || resourcename.equals("/")
+					|| !PluginUtilities.isValidPath(resourcename)) {
+				throw new InconsistentDataException(
+						ResourceManager.getString("DPPEditor.ResourcesSection.InvalidResourceName1") + resourcename
+								+ ResourceManager.getString("DPPEditor.ResourcesSection.InvalidResourceName2"));
 			}
 			if (isEmptyOrNull(rInfo.getResourceProcessor())) {
 				throw new InconsistentDataException("Resource Processor is not set");
@@ -399,44 +409,42 @@ public class DPPFile {
 		String fixPack = packageHeaders.getFixPack();
 
 		if (isEmptyOrNull(packageHeaders.getSymbolicName())) {
-			throw new InconsistentDataException("Deployment Package Symbolic Name is empty");
+			throw new InconsistentDataException("The Deployment Package Symbolic Name is empty");
 		}
 		if (isEmptyOrNull(version)) {
-			throw new InconsistentDataException("Deployment Package Version is empty");
+			throw new InconsistentDataException("The Deployment Package Version is empty");
 		}
 		if (version.indexOf(" ") != -1 || version.endsWith(".")) {
-			throw new InconsistentDataException("The version is incorrect! It has to contain digits, separated \n"
-					+ "by points. The last portion can contain letters, \n"
-					+ "for example: 1.0.0 or 1.2.3.build200501041230");
+			throw new InconsistentDataException("The version is incorrect. It should contain only digits, separated by points," + 
+					"\nand digits and letters in its last section. (example: 1.2.3.build2005)");
 		}
 		if (version.indexOf(" ") == -1 && !DPPUtilities.isValidVersion(version.substring(0, version.lastIndexOf('.')))) {
-			throw new InconsistentDataException("The version is not correct - it must start with digits separated \n"
-					+ "with points until after the last point where you can use letters, \n"
-					+ "for example: 1.0.0 or 1.2.3.build200501041230");
+			throw new InconsistentDataException("The version is incorrect. It should contain only digits, separated by points," + 
+					"\nand digits and letters in its last section. (example: 1.2.3.build2005)");
 		}
 		if (!DPPUtilities.isCorrectPackage(symbolicName)) {
 			if (symbolicName.startsWith(".") || symbolicName.endsWith(".")) {
-				throw new InconsistentDataException("Symbolic name '" + symbolicName
-						+ "' is not valid. \nA symbolic name cannot start or end with a dot.");
+				throw new InconsistentDataException("The Symbolic name '" + symbolicName
+						+ "' is not valid. \nA symbolic name can't start or end with a dot.");
 			}
 			if (symbolicName.indexOf(" ") != -1) {
-				throw new InconsistentDataException("Symbolic name '" + symbolicName
-						+ "' is not valid. \nA symbolic name cannot contain empty space.");
+				throw new InconsistentDataException("The Symbolic name '" + symbolicName
+						+ "' is invalid. \nThe Symbolic name can't contain empty spaces.");
 			}
 
-			throw new InconsistentDataException("Symbolic name is not valid.\n'" + symbolicName
+			throw new InconsistentDataException("The Symbolic name is invalid.\n'" + symbolicName
 					+ "' is not a valid Java identifier.");
 		}
 
 		if (packageHeaders.isFixPackSet()) {
 			if (!isEmptyOrNull(fixPack)
 					&& (!DPPUtilities.isValidFixPack(fixPack) || !DPPUtilities.isValidVersion(fixPack))) {
-				throw new InconsistentDataException("Deployment Package Fix Pack is not correct.\n"
-						+ "The value must be similar like the example: (1.3, 5.7)\n"
-						+ "or contains only digit and points.");
+				throw new InconsistentDataException("The Deployment Package Fix Pack is incorrect.\n"
+						+ "The value should be similar to the example: (1.3, 5.7)\n"
+						+ "or contain only digit and points.");
 			}
 			if (fixPack != null && fixPack.equals("")) {
-				throw new InconsistentDataException("Deployment Package Fix Pack cannot be empty");
+				throw new InconsistentDataException("The Deployment Package Fix Pack can't be empty");
 			}
 		}
 
@@ -445,7 +453,7 @@ public class DPPFile {
 		for (int i = 0; i < otherHeaders.size(); i++) {
 			Header header = (Header) otherHeaders.elementAt(i);
 			if (header.getKey().equals("")) {
-				throw new InconsistentDataException("Header of Deployment Package cannot be empty");
+				throw new InconsistentDataException("The Header of Deployment Package can't be empty");
 			}
 		}
 	}
