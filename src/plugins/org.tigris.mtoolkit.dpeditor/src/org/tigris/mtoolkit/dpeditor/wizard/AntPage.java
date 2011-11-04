@@ -71,15 +71,9 @@ public class AntPage extends WizardPage implements ModifyListener, KeyListener,
 	private Text antFileText;
 	/** The Browse button for the ant file name */
 	private Button antFileButton;
-	/**
-	 * The string value of the ant file name loaded from the given deployment
-	 * package file
-	 */
-	private String antFileTxt = "";
 	/** The given deployment package file */
 	private DPPFile dppFile;
 	/** The project of the deployment package file */
-	private IProject prj;
 
 	private Text dppFileText;
 	private String prevBuildLocation = "";
@@ -501,7 +495,6 @@ public class AntPage extends WizardPage implements ModifyListener, KeyListener,
 	 */
 	public void setDPPFileProject(DPPFile dppFile, IProject project) {
 		this.dppFile = dppFile;
-		this.prj = project;
 	}
 
 	/**

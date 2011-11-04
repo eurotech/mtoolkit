@@ -67,7 +67,6 @@ public class BuildSection extends DPPFormSection implements IFormTextListener,
 	 * The <code>boolean</code> flag that shows if the update of the section is
 	 * needed
 	 */
-	private boolean updateNeeded;
 
 	/** The text field, thats presents the deployment package's file */
 	private FormText dpFileText;
@@ -218,7 +217,6 @@ public class BuildSection extends DPPFormSection implements IFormTextListener,
 		setIfDefined(dpFileText, buildInfo.getDpFileName());
 		setIfDefined(antFileText, buildInfo.getAntFileName());
 		FormWidgetFactory.paintBordersFor(dpFileText.getControl().getParent());
-		updateNeeded = false;
 	}
 
 	/**
