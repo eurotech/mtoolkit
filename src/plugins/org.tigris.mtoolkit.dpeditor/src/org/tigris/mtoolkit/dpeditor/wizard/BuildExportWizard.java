@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
@@ -155,7 +154,7 @@ public class BuildExportWizard extends Wizard implements IExportWizard {
 			BuildPage page = (BuildPage) getPage(WIZARD_BUILD_PAGE_NAME);
 			Object obj = page.getDPPFile();
 			if (obj instanceof DPPFile) {
-				DPPFile dppFile = (DPPFile) obj;
+				//DPPFile dppFile = (DPPFile) obj;
 			}
 		}
 	}

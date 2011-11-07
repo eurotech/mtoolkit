@@ -142,7 +142,7 @@ public class AntExportWizard extends Wizard implements IExportWizard {
 			AntPage page = (AntPage) getPage(WIZARD_ANT_PAGE_NAME);
 			Object obj = page.getDPPFile();
 			if (obj instanceof DPPFile) {
-				DPPFile dppFile = (DPPFile) obj;
+				//DPPFile dppFile = (DPPFile) obj;
 			}
 		}
 	}
