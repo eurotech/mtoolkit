@@ -369,7 +369,6 @@ public class CertificatesPasswordsDialog extends Dialog implements
 			TableItem item = (TableItem) object;
 			CertificateInfo cert = (CertificateInfo) item.getData();
 			String newValue = value.toString();
-			boolean isSet = false;
 
 			if (property.equals("alias")) {
 				return;
@@ -380,7 +379,6 @@ public class CertificatesPasswordsDialog extends Dialog implements
 						&& (!newValue.equals(""))) {
 					return;
 				}
-				isSet = true;
 				int index = certsVector.indexOf(cert);
 				cert.setStorepass(newValue);
 				CertificateInfo certInfo = (CertificateInfo) certsVector
@@ -391,7 +389,6 @@ public class CertificatesPasswordsDialog extends Dialog implements
 						&& (!newValue.equals(""))) {
 					return;
 				}
-				isSet = true;
 				int index = certsVector.indexOf(cert);
 				cert.setKeypass(newValue);
 				CertificateInfo certInfo = (CertificateInfo) certsVector
@@ -550,7 +547,7 @@ public class CertificatesPasswordsDialog extends Dialog implements
 						Table table = (Table) ev.getSource();
 						if (table.getSelectionIndex() < 0)
 							return;
-						TableItem item = table.getItem(table
+						/*TableItem item =*/ table.getItem(table
 								.getSelectionIndex());
 					}
 				}
