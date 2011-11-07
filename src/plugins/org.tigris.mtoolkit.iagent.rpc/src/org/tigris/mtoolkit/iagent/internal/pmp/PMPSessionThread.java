@@ -258,7 +258,7 @@ public class PMPSessionThread implements Runnable {
 						break;
 					}
 				} catch (IOException exc) {
-					if (isConBroken(exc)) {
+					if (!isConBroken(exc)) {
 						error("An unexpected error occurred: " + exc.toString(), exc);
 					}
 					disconnect("Disconnecting...", false);
@@ -1003,10 +1003,11 @@ public class PMPSessionThread implements Runnable {
 		if (exmsg == null) {
 			return false;
 		}
-		return exmsg.startsWith("Connection reset") //$NON-NLS-1$
-				|| exmsg.startsWith("Connection aborted") //$NON-NLS-1$
-				|| exmsg.startsWith("Software caused connection abort") //$NON-NLS-1$
-				|| exmsg.startsWith("Broken pipe") //$NON-NLS-1$
-				|| exmsg.startsWith("Socket closed"); //$NON-NLS-1$
+		exmsg=exmsg.toLowerCase();
+		return exmsg.startsWith("connection reset") //$NON-NLS-1$
+				|| exmsg.startsWith("connection aborted") //$NON-NLS-1$
+				|| exmsg.startsWith("software caused connection abort") //$NON-NLS-1$
+				|| exmsg.startsWith("broken pipe") //$NON-NLS-1$
+				|| exmsg.startsWith("socket closed"); //$NON-NLS-1$
 	}
 }
