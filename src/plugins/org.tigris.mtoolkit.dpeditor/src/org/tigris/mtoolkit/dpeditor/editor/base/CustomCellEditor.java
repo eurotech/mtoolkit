@@ -1088,33 +1088,6 @@ public class CustomCellEditor extends CellEditor implements SelectionListener,
 	}
 
 	/**
-	 * Sets the values in this cell editor.
-	 */
-	private void editCell() {
-		// Identify the selected row
-		int index = table.getSelectionIndex();
-		if (index == -1)
-			return;
-		TableItem item = table.getItem(index);
-
-		Control nw = getTableCellEditorComponent(index, column, item.getData());
-
-		// The text editor must have the same size as the cell and must
-		// not be any smaller than 50 pixels.
-		editor.horizontalAlignment = SWT.LEFT;
-		editor.grabHorizontal = true;
-		editor.minimumWidth = 5;
-		if ((supports & SUPPROTS_TAGS) != 0) {
-			editor.minimumHeight = 20;
-		} else {
-			editor.minimumHeight = table.getItemHeight();
-		}
-		editor.setEditor(nw, item, column);
-		editorPanel.setFocus();
-		nw.setFocus();
-	}
-
-	/**
 	 * Creates the editor control with the given composite parent.
 	 * 
 	 * @param parent
@@ -1290,9 +1263,9 @@ public class CustomCellEditor extends CellEditor implements SelectionListener,
 		Object typedValue = value;
 		boolean oldValidState = isValueValid();
 		boolean newValidState = isCorrect(typedValue);
-		if (typedValue == null && newValidState) {
-			Assert.isTrue(false, "Validator isn't limiting the cell editor's type range");//$NON-NLS-1$
-		}
+		 if (newValidState) {
+	      Assert.isTrue(false, "Validator isn't limiting the cell editor's type range");//$NON-NLS-1$
+	    }
 		if (!newValidState) {
 			// try to insert the current value into the error message.
 			setErrorMessage(MessageFormat.format(getErrorMessage(), new Object[] { value }));

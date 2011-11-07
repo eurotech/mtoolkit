@@ -12,7 +12,12 @@ package org.tigris.mtoolkit.dpeditor.editor.base;
 
 public class CanceledOperationException extends Exception {
 
-	public CanceledOperationException() {
+	/**
+   * 
+   */
+  private static final long serialVersionUID = 112345678L;
+
+  public CanceledOperationException() {
 		super();
 	}
 
