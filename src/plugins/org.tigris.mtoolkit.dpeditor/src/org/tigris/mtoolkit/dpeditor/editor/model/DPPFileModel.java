@@ -17,8 +17,6 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.widgets.Shell;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.util.DPPFile;
@@ -202,25 +200,6 @@ public class DPPFileModel {
 	 */
 	public long getModelModified() {
 		return lastModified;
-	}
-
-	/**
-	 * Returns the time that the given <code>IFile</code> was last modified.
-	 * 
-	 * @param file
-	 *            the <code>IFile</code>, that last modification we are looking
-	 *            for
-	 * @return A <code>long</code> value representing the time the file was last
-	 *         modified
-	 */
-	private long getLastModified(IFile file) {
-		try {
-			file.refreshLocal(IResource.DEPTH_ZERO, null);
-			return (file.getLocation() == null) ? -1 : file.getLocation().toFile().lastModified();
-		} catch (CoreException ex) {
-			DPPErrorHandler.processError(ex, false);
-			return lastModified;
-		}
 	}
 
 	/**
