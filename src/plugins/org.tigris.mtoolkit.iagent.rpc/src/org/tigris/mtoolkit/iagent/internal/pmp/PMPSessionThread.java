@@ -128,7 +128,7 @@ public class PMPSessionThread implements Runnable {
 	private static final String ERRMSG3 = "Read Error";
 	private static final String DSCMSG1 = "Normal Disconnect Received";
 	private static final String DSCMSG2 = "Error Disconnect Received: ";
-	
+
 	protected ThreadPool pool;
 	private Thread sessionThread;
 
@@ -258,8 +258,10 @@ public class PMPSessionThread implements Runnable {
 						break;
 					}
 				} catch (IOException exc) {
-					error("An unexpected error occurred: " + exc.toString(), exc);
-					disconnect("An unexpected error occurred: " + exc.toString(), false);
+					if (isConBroken(exc)) {
+						error("An unexpected error occurred: " + exc.toString(), exc);
+					}
+					disconnect("Disconnecting...", false);
 				} catch (Exception exc) {
 					debug("Runtime Exception " + exc);
 				}
@@ -939,11 +941,11 @@ public class PMPSessionThread implements Runnable {
 					return "Read Error";
 			}
 			methods[pos] = new RemoteMethodImpl(name,
-				returnType,
-				argTypes,
-				answer.connection,
-				pos + 1,
-				answer.requestingRObj);
+					returnType,
+					argTypes,
+					answer.connection,
+					pos + 1,
+					answer.requestingRObj);
 			return null;
 		} catch (IOException ioExc) {
 			return ioExc.toString();
@@ -991,5 +993,20 @@ public class PMPSessionThread implements Runnable {
 		} catch (IOException ioExc) {
 			error("error receiving event", ioExc);
 		}
+	}
+	
+	private static boolean isConBroken(Throwable aThrow) {
+		if (!(aThrow instanceof java.net.SocketException)) {
+			return false;
+		}
+		String exmsg = aThrow.getLocalizedMessage();
+		if (exmsg == null) {
+			return false;
+		}
+		return exmsg.startsWith("Connection reset") //$NON-NLS-1$
+				|| exmsg.startsWith("Connection aborted") //$NON-NLS-1$
+				|| exmsg.startsWith("Software caused connection abort") //$NON-NLS-1$
+				|| exmsg.startsWith("Broken pipe") //$NON-NLS-1$
+				|| exmsg.startsWith("Socket closed"); //$NON-NLS-1$
 	}
 }

@@ -55,7 +55,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 	private ServiceTracker eventAdminTracker;
 
 	public void start(BundleContext context) throws Exception {
-		this.context = context;
+		Activator.context = context;
 		instance = this;
 		DebugUtils.initialize(context);
 
@@ -203,7 +203,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		}
 
 		instance = null;
-		this.context = null;
+		Activator.context = null;
 	}
 
 	private boolean registerDeploymentAdmin(Object admin) {
