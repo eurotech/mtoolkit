@@ -464,8 +464,6 @@ public class FormWidgetFactory {
 	 *            the control in which will be added paint listener
 	 */
 	public static void paintBordersFor(Composite parent) {
-		if (BORDER_STYLE == SWT.BORDER)
-			return;
 		if (borderPainter == null)
 			borderPainter = new BorderPainter();
 		parent.addPaintListener(borderPainter);
