@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.dpeditor.editor;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -181,11 +180,6 @@ public class HeadersSection extends DPPFormSection implements
 	private DPPFileModel model;
 	/** The parents form page */
 	private HeadersFormPage page;
-	/**
-	 * The <code>boolean</code> flag, that shows if this section needed of
-	 * update
-	 */
-	private boolean updateNeeded = true;
 
 	/**
 	 * A cell modifier is used to access the data model from a cell editor.
@@ -396,20 +390,6 @@ public class HeadersSection extends DPPFormSection implements
 				model.fireModelChanged(new ModelChangedEvent(
 						IModelChangedEvent.EDIT, new Object[] { header }, null));
 			}
-			updateNeeded = true;
-		}
-
-		private boolean haveInvalidChars(String fileName) {
-			if (fileName == null)
-				return false;
-			StringTokenizer t = new StringTokenizer(fileName, "/");
-			while (t.hasMoreElements()) {
-				String next = ((String) t.nextElement()).trim();
-				if (!DPPUtilities.isValidPath(next)) {
-					return true;
-				}
-			}
-			return false;
 		}
 
 		/**
@@ -806,8 +786,6 @@ public class HeadersSection extends DPPFormSection implements
 		if (isPageConsistent) {
 			headerTable.refresh();
 		}
-
-		updateNeeded = false;
 	}
 
 	// ISelectionListener Implementation
