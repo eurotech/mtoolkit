@@ -66,7 +66,7 @@ public class ThreadPoolTest extends TestCase {
 		Worker first = new Worker(0, 1000, reg);
 		Worker second = new Worker(1, 2500, reg);
 		Worker third = new Worker(2, 500, reg);
-		int total = 1000 + 2500 + 500;
+		//total = 1000 + 2500 + 500;
 
 		ThreadPool pool = new ThreadPool(1, ThreadPool.OPTION_NONE);
 		pool.enqueueWork(first);
