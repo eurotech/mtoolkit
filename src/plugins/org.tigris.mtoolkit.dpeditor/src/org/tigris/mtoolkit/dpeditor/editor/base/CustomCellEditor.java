@@ -17,7 +17,6 @@ import java.util.Vector;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -1263,9 +1262,6 @@ public class CustomCellEditor extends CellEditor implements SelectionListener,
 		Object typedValue = value;
 		boolean oldValidState = isValueValid();
 		boolean newValidState = isCorrect(typedValue);
-		 if (newValidState) {
-	      Assert.isTrue(false, "Validator isn't limiting the cell editor's type range");//$NON-NLS-1$
-	    }
 		if (!newValidState) {
 			// try to insert the current value into the error message.
 			setErrorMessage(MessageFormat.format(getErrorMessage(), new Object[] { value }));
