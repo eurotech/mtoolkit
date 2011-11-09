@@ -1,5 +1,6 @@
 package org.tigris.mtoolkit.common.export;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,6 +17,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.ModelEntry;
 import org.eclipse.pde.core.plugin.PluginRegistry;
+import org.eclipse.pde.internal.core.bundle.BundlePluginModel;
+import org.eclipse.pde.internal.core.bundle.WorkspaceBundleModel;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
@@ -160,8 +163,31 @@ public class PluginExportManager {
     return bundles;
   }
 
-  public void dispose() {
-    // do nothing currently
+  /**
+   * Removes packed workspace bundles.
+   */
+  public void deleteTempResources() {
+    for (Iterator it = bundlesToExport.entrySet().iterator(); it.hasNext();) {
+      Entry entry = (Entry) it.next();
+      IPluginModelBase bundle = (IPluginModelBase) entry.getKey();
+      boolean isWorkspaceBundle = false;
+      if (bundle instanceof BundlePluginModel) {
+        isWorkspaceBundle = ((BundlePluginModel) bundle).getBundleModel() instanceof WorkspaceBundleModel;
+      }
+      if (!isWorkspaceBundle) {
+        continue;
+      }
+      String expLocation = (String) entry.getValue();
+      if (expLocation != NOT_EXPORTED) {
+        new File(expLocation).delete();
+      }
+    }
+  }
+
+  public void dispose(boolean freeTempResources) {
+    if (freeTempResources) {
+      deleteTempResources();
+    }
   }
 
   public static PluginExportManager create(IPluginExporter exporter) {
