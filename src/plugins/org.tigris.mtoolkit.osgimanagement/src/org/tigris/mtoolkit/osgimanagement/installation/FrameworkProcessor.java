@@ -52,7 +52,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;

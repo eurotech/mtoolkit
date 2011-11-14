@@ -27,6 +27,7 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.osgimanagement.Util;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -42,7 +43,8 @@ public class PMPConnectionListener implements ConnectionListener {
 	boolean shouldInstallIAgent = false;
 	private boolean instrumenting = false;
 
-	public PMPConnectionListener(FrameworkImpl fw, String frameworkName, DeviceConnector connector, boolean autoConnected) {
+	public PMPConnectionListener(FrameworkImpl fw, String frameworkName, DeviceConnector connector,
+			boolean autoConnected) {
 		this.fw = fw;
 		this.frameworkName = frameworkName;
 		this.connector = connector;
@@ -53,11 +55,13 @@ public class PMPConnectionListener implements ConnectionListener {
 	public void connectionChanged(ConnectionEvent e) {
 		if (e.getConnection().getType() != ConnectionManager.PMP_CONNECTION)
 			return;
-		BrowserErrorHandler.debug("PMP Connection Changed " + (e.getType() == ConnectionEvent.CONNECTED	? "CONNECTED" : "DISCONNECTED") + " " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		BrowserErrorHandler
+				.debug("PMP Connection Changed " + (e.getType() == ConnectionEvent.CONNECTED ? "CONNECTED" : "DISCONNECTED") + " " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		if (e.getType() == ConnectionEvent.DISCONNECTED) {
 			disconnected();
 		} else if (e.getType() == ConnectionEvent.CONNECTED) {
-			// in case we are instrumenting the framework, we want to ignore connection events
+			// in case we are instrumenting the framework, we want to ignore
+			// connection events
 			if (!instrumenting)
 				connected();
 		}
@@ -80,11 +84,13 @@ public class PMPConnectionListener implements ConnectionListener {
 		if (fw.isConnected())
 			return;
 		Job connectJob = new Job(frameworkName) {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				SubMonitor sMonitor = SubMonitor.convert(monitor, FrameworkConnectorFactory.CONNECT_PROGRESS);
 				try {
-					sMonitor.setTaskName("Connecting "+frameworkName);
-					SubMonitor connectMonitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
+					sMonitor.setTaskName("Connecting " + frameworkName);
+					SubMonitor connectMonitor = sMonitor
+							.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
 					try {
 						// force creation of pmp connection
 						if (!connector.getVMManager().isVMActive()) {
@@ -93,8 +99,7 @@ public class PMPConnectionListener implements ConnectionListener {
 					} catch (IAgentException e) {
 						return Util.newStatus(IStatus.ERROR, "Connection failed", e);
 					}
-					
-					
+
 					try {
 						if (!connector.getVMManager().isVMInstrumented(false)) {
 							if (shouldInstallIAgent()) {
@@ -102,8 +107,10 @@ public class PMPConnectionListener implements ConnectionListener {
 									instrumenting = true;
 									connector.getVMManager().instrumentVM();
 								} catch (IAgentException iae) {
-									if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-									return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Unable to instrument VM.", iae);
+									if (monitor.isCanceled())
+										return Status.CANCEL_STATUS;
+									return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+											"Unable to instrument VM.", iae);
 								} finally {
 									instrumenting = false;
 								}
@@ -114,9 +121,9 @@ public class PMPConnectionListener implements ConnectionListener {
 					} catch (IAgentException e) {
 						return Util.newStatus(IStatus.ERROR, "Connection failed", e);
 					}
-					
+
 					connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
-					
+
 					if (fw != null) {
 						fw.connect(connector, sMonitor);
 					}
@@ -134,7 +141,10 @@ public class PMPConnectionListener implements ConnectionListener {
 			}
 		};
 		connectJob.schedule();
-		
+	}
+
+	public DeviceConnector getConnector() {
+		return connector;
 	}
 
 	private boolean shouldInstallIAgent() {

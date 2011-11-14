@@ -24,10 +24,10 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 

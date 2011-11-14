@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
+package org.tigris.mtoolkit.osgimanagement.installation;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -27,6 +27,9 @@ import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
@@ -52,15 +55,13 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	public static boolean isAutoUpdateBundlesOnInstallEnabled = FrameworkPreferencesPage.autoUpdateBundlesOnInstallDefault;
 
 	public static final int CONNECT_PROGRESS = 1000;
-	
+
 	public static final int CONNECT_PROGRESS_CONNECTING = (int) (CONNECT_PROGRESS * 0.1);
 	public static final int CONNECT_PROGRESS_BUNDLES = (int) (CONNECT_PROGRESS * 0.3);
 	public static final int CONNECT_PROGRESS_SERVICES = (int) (CONNECT_PROGRESS * 0.2);
 	public static final int CONNECT_PROGRESS_ADDITIONAL = (int) (CONNECT_PROGRESS * 0.4);
-	
-	
 
-//	public static Hashtable connectJobs = new Hashtable();
+	// public static Hashtable connectJobs = new Hashtable();
 
 	public static void init() {
 		DeviceConnector.addDeviceConnectionListener(factory);
@@ -80,7 +81,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 	public static void connectFramework(final DeviceConnector connector, String frameworkName) {
 		// wrap the connector
-		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, PlatformUI.getWorkbench().getDisplay());
+		final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, PlatformUI.getWorkbench()
+				.getDisplay());
 		Dictionary connProps = fConnector.getProperties();
 		Boolean temporary = (Boolean) connProps.get("framework-connection-temporary");
 		if (temporary != null && temporary.booleanValue())
@@ -114,16 +116,25 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		if (!fConnector.equals(fw.getConnector())) {
 			fw.setConnector(fConnector);
 		}
-//		fw.connect(connector, SubMonitor.convert(new NullProgressMonitor()));
+		// fw.connect(connector, SubMonitor.convert(new NullProgressMonitor()));
 		BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$
 		createPMPConnection(fConnector, fw, frameworkName, autoConnected);
 	}
 
-	static void createPMPConnection(final DeviceConnector connector, final FrameworkImpl fw, String frameworkName,
-					boolean autoConnected) {
+	/**
+	 * Creates PMP connection.
+	 * 
+	 * @param connector
+	 * @param fw
+	 * @param frameworkName
+	 * @param autoConnected
+	 */
+	public static void createPMPConnection(final DeviceConnector connector, final FrameworkImpl fw,
+			String frameworkName, boolean autoConnected) {
 		boolean pmp = false;
 		try {
-			pmp = ((DeviceConnectorSpi) connector).getConnectionManager().getActiveConnection(ConnectionManager.PMP_CONNECTION) != null;
+			pmp = ((DeviceConnectorSpi) connector).getConnectionManager().getActiveConnection(
+					ConnectionManager.PMP_CONNECTION) != null;
 		} catch (IAgentException e1) {
 			e1.printStackTrace();
 		}
@@ -131,8 +142,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 		// create and add pmp connection listener to fw
 		PMPConnectionListener pmpListener = fw.getPMPConnectionListener();
-		if (pmpListener == null || 
-				!connector.equals(pmpListener.connector)) {
+		if (pmpListener == null || !connector.equals(pmpListener.getConnector())) {
 			pmpListener = new PMPConnectionListener(fw, frameworkName, connector, autoConnected);
 			fw.setPMPConnectionListener(pmpListener);
 		}
@@ -141,6 +151,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 		// force creating of pmp connection
 		Job job = new Job(NLS.bind(Messages.connect_framework, fw.getName())) {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				monitor.beginTask("", 2); //$NON-NLS-1$
 				// if pmp connection is available do not force creation but
@@ -151,8 +162,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 					try {
 						connector.getVMManager().isVMActive();
 					} catch (IAgentException e) {
-						BrowserErrorHandler.processError(e, NLS.bind(Messages.pmp_connect_error_message,
-							fw.getName()), true); //$NON-NLS-1$
+						BrowserErrorHandler.processError(e, NLS.bind(Messages.pmp_connect_error_message, fw.getName()),
+								true); //$NON-NLS-1$
 						e.printStackTrace();
 					}
 				}
@@ -160,7 +171,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 			}
 		};
-//		connectJobs.put(connector, job);
+		// connectJobs.put(connector, job);
 		job.schedule();
 	}
 
@@ -172,7 +183,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 		for (int j = 0; j < fwArr.length; j++) {
 			FrameworkImpl fw = fwArr[j];
-			BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
+			BrowserErrorHandler
+					.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
 			synchronized (Framework.getLockObject(connector)) {
 				ActionsManager.disconnectConsole(fw); //$NON-NLS-1$
 				FrameworkImpl fws[] = FrameWorkView.getFrameworks();

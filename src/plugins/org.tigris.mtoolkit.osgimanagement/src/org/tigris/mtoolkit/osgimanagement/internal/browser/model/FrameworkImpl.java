@@ -60,11 +60,11 @@ import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.Util;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -244,7 +244,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				SubMonitor monitor = sMonitor.newChild(modelTotal);
 				monitor.setTaskName("Retrieve additional providers data");
 				ContentTypeModelProvider manager = ((ModelProviderElement) modelProviders.get(i)).getProvider();
-				/*Model node =*/ manager.connect(this, connector, monitor);
+				/* Model node = */manager.connect(this, connector, monitor);
 				if (monitor.isCanceled())
 					return false;
 			}
@@ -384,6 +384,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	// Overrides method in Model class
+	@Override
 	public boolean testAttribute(Object target, String name, String value) {
 		if (!(target instanceof org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl)) {
 			return false;
@@ -809,6 +810,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			return;
 		}
 		Job job = new Job(Messages.refresh_framework_info) {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				synchronized (Framework.getLockObject(connector)) {
 					SubMonitor sMonitor = SubMonitor.convert(monitor, FrameworkConnectorFactory.CONNECT_PROGRESS);
@@ -867,6 +869,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public void refreshBundleAction(final Bundle sourceBundle) {
 		Job job = new Job(Messages.refresh_bundles_info) {
 
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					long id = sourceBundle.getID();
@@ -902,8 +905,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					for (int i = 0; i < regServ.length; i++) {
 						String objClass[] = regServ[i].getObjectClass();
 						for (int j = 0; j < objClass.length; j++) {
-							ObjectClass oc = new ObjectClass(objClass[j] + " [" + regServ[i].getServiceId()
-									+ "]", new Long(regServ[i].getServiceId()), regServ[i]);
+							ObjectClass oc = new ObjectClass(objClass[j] + " [" + regServ[i].getServiceId() + "]",
+									new Long(regServ[i].getServiceId()), regServ[i]);
 							BundlesCategory regCategory = new BundlesCategory(BundlesCategory.REGISTERED);
 							BundlesCategory usedCategory = new BundlesCategory(BundlesCategory.IN_USE);
 							oc.addElement(regCategory);
@@ -951,8 +954,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			for (int i = 0; i < regServ.length; i++) {
 				String objClass[] = regServ[i].getObjectClass();
 				for (int j = 0; j < objClass.length; j++) {
-					ObjectClass oc = new ObjectClass(objClass[j] + " [" + regServ[i].getServiceId() + "]",
-							new Long(regServ[i].getServiceId()), regServ[i]);
+					ObjectClass oc = new ObjectClass(objClass[j] + " [" + regServ[i].getServiceId() + "]", new Long(
+							regServ[i].getServiceId()), regServ[i]);
 					regServCategory.addElement(oc);
 					if (isShownServicePropertiss()) {
 						try {
@@ -970,8 +973,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			for (int i = 0; i < usedServ.length; i++) {
 				String objClass[] = usedServ[i].getObjectClass();
 				for (int j = 0; j < objClass.length; j++) {
-					ObjectClass oc = new ObjectClass(objClass[j] + " [" + usedServ[i].getServiceId() + "]",
-							new Long(usedServ[i].getServiceId()), usedServ[i]);
+					ObjectClass oc = new ObjectClass(objClass[j] + " [" + usedServ[i].getServiceId() + "]", new Long(
+							usedServ[i].getServiceId()), usedServ[i]);
 					usedServCategory.addElement(oc);
 					if (isShownServicePropertiss()) {
 						try {
@@ -1053,7 +1056,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				+ FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES;
 		SubMonitor monitor = sMonitor.newChild(totalWork);
 		monitor.setTaskName(Messages.retrieve_bundles_info);
-		int work = (int) (totalWork / snapshots.length);
+		int work = (totalWork / snapshots.length);
 		for (int i = 0; i < snapshots.length; i++) {
 			try {
 				RemoteBundle rBundle = snapshots[i].getRemoteBundle();
@@ -1324,8 +1327,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	private void addObjectClassNodes(Model parent, String objClasses[], Long nameID, RemoteService service)
 			throws IAgentException {
 		for (int i = 0; i < objClasses.length; i++) {
-			ObjectClass objClass = new ObjectClass(objClasses[i] + " [" + service.getServiceId() + "]", nameID,
-					service);
+			ObjectClass objClass = new ObjectClass(objClasses[i] + " [" + service.getServiceId() + "]", nameID, service);
 			parent.addElement(objClass);
 			if (isShownServicePropertiss()) {
 				addServicePropertiesNodes(objClass);
@@ -1384,6 +1386,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			if (Capabilities.BUNDLE_SUPPORT.equals(property)) {
 				if (enabled) {
 					Job addJob = new Job(Messages.retrieve_bundles_info) {
+						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							int total = FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES;
 							SubMonitor sMonitor = SubMonitor.convert(monitor, total);
@@ -1411,6 +1414,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				if (enabled) {
 					supportServices = true;
 					Job addJob = new Job(Messages.retrieve_services_info) {
+						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							int total = FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES;
 							SubMonitor sMonitor = SubMonitor.convert(monitor, total);
@@ -1437,6 +1441,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 	}
 
+	@Override
 	public IMemento getConfig() {
 		return configs;
 	}
@@ -1448,6 +1453,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	 * 
 	 * @return the map with certificate properties
 	 */
+	@Override
 	public Map getSigningProperties() {
 		Map properties = new Hashtable();
 		List certUids = getSignCertificateUids(getConfig());
@@ -1531,6 +1537,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 	}
 
+	@Override
 	public Model createModel(String mimeType, String id, String version) {
 		Model model = null;
 		if (ContentTypeModelProvider.MIME_TYPE_BUNDLE.equals(mimeType)) {
@@ -1621,6 +1628,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(IWorkbenchAdapter.class)) {
 			return new WorkbenchAdapter() {
+				@Override
 				public String getLabel(Object o) {
 					if (o instanceof Model) {
 						return ((Model) o).getLabel();
