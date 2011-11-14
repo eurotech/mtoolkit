@@ -13,6 +13,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -35,16 +36,24 @@ import org.eclipse.swt.widgets.Text;
  */
 public class SelectionPanel extends Composite {
 
-  private CheckboxTableViewer list;
+  private TableViewer list;//Checkbox
   private Text filterText;
   private ListItem[] listItems = new ListItem[0];
   private ListenerList checkStateListeners = new ListenerList();
+  private boolean isSingleSelection;
 
   public SelectionPanel(Composite parent, int style) {
     super(parent, style);
 
     setLayout(new GridLayout());
-    list = CheckboxTableViewer.newCheckList(this, SWT.BORDER);
+    int listStyle = SWT.BORDER;
+    isSingleSelection = (getStyle() & SWT.SINGLE) != 0;
+    if (isSingleSelection) {
+      listStyle = listStyle | SWT.SINGLE;
+      list = new TableViewer(this, listStyle);
+    } else {
+      list = CheckboxTableViewer.newCheckList(this, listStyle);
+    }
     list.setContentProvider(new IStructuredContentProvider() {
       public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
       }
@@ -100,7 +109,6 @@ public class SelectionPanel extends Composite {
         return out.toArray();
       }
 
-
       public boolean select(Viewer viewer, Object parentElement, Object element) {
         String filter = filterText.getText().trim().toLowerCase();
         return match(element, filter, viewer);
@@ -132,7 +140,21 @@ public class SelectionPanel extends Composite {
       }
     });
 
-    list.setCheckStateProvider(new ICheckStateProvider() {
+    final FilterJob filterJob = new FilterJob("", list);
+    filterText.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        filterJob.cancel();
+        filterJob.schedule(300);
+      }
+    });
+
+    if (!isSingleSelection) {
+      setUpCheckboxViewer((CheckboxTableViewer) list);
+    }
+  }
+
+  private void setUpCheckboxViewer(final CheckboxTableViewer chbList) {
+    chbList.setCheckStateProvider(new ICheckStateProvider() {
       public boolean isGrayed(Object element) {
         return false;
       }
@@ -142,17 +164,10 @@ public class SelectionPanel extends Composite {
       }
     });
 
-    list.addCheckStateListener(new ICheckStateListener() {
+    chbList.addCheckStateListener(new ICheckStateListener() {
       public void checkStateChanged(CheckStateChangedEvent event) {
         ((ListItem) event.getElement()).checked = event.getChecked();
         fireCheckStateChanged(event);
-      }
-    });
-    final FilterJob filterJob = new FilterJob("", list);
-    filterText.addModifyListener(new ModifyListener() {
-      public void modifyText(ModifyEvent e) {
-        filterJob.cancel();
-        filterJob.schedule(300);
       }
     });
 
@@ -166,7 +181,7 @@ public class SelectionPanel extends Composite {
       public void widgetSelected(SelectionEvent event) {
         if (listItems.length > 0) {
           selectAll(true);
-          fireCheckStateChanged(new CheckStateChangedEvent2(list, listItems, true));
+          fireCheckStateChanged(new CheckStateChangedEvent2(chbList, listItems, true));
         }
       }
     });
@@ -179,7 +194,7 @@ public class SelectionPanel extends Composite {
       public void widgetSelected(SelectionEvent event) {
         if (listItems.length > 0) {
           selectAll(false);
-          fireCheckStateChanged(new CheckStateChangedEvent2(list, listItems, false));
+          fireCheckStateChanged(new CheckStateChangedEvent2(chbList, listItems, false));
         }
       }
     });
@@ -188,8 +203,8 @@ public class SelectionPanel extends Composite {
   }
 
   /**
-   * Sets to the given value the checked state for all elements. Does not fire
-   * events to check state listeners.
+   * Sets to the given value the checked state for all elements. Does not fire events to check state
+   * listeners.
    * 
    * @param state
    */
@@ -211,25 +226,34 @@ public class SelectionPanel extends Composite {
   }
 
   public Object[] getSelected() {
-    int size = listItems.length;
-    ArrayList out = new ArrayList(size);
-    for (int i = 0; i < size; ++i) {
-      if (listItems[i].checked) {
-        out.add(listItems[i].element);
+    ArrayList out;
+    if (isSingleSelection) {
+      out = new ArrayList(1);
+      StructuredSelection selection = (StructuredSelection) list.getSelection();
+      Object item = selection.getFirstElement();
+      if (item instanceof ListItem) {
+        out.add(((ListItem) item).element);
+      }
+    } else {
+      int size = listItems.length;
+      out = new ArrayList(size);
+      for (int i = 0; i < size; ++i) {
+        if (listItems[i].checked) {
+          out.add(listItems[i].element);
+        }
       }
     }
     return out.toArray();
   }
 
   /**
-   * Returns the viewer used for displaying items. It uses
-   * <code>ListItem</code> for holding items. The returned viewer can be used
-   * to specify custom label providers, etc.
+   * Returns the viewer used for displaying items. It uses <code>ListItem</code> for holding items.
+   * The returned viewer can be used to specify custom label providers, etc.
    * 
    * @return the viewer
    * @see ListItem
    */
-  public CheckboxTableViewer getViewer() {
+  public TableViewer getViewer() {
     return list;
   }
 
@@ -238,13 +262,12 @@ public class SelectionPanel extends Composite {
   }
 
   /**
-   * Adds a listener for changes to the checked state of elements in this
-   * panel. Has no effect if an identical listener is already registered. This
-   * panel supports sending events with multiple check changes at once (i.e.
-   * from Select All/Deselect All buttons)
+   * Adds a listener for changes to the checked state of elements in this panel. Has no effect if an
+   * identical listener is already registered. This panel supports sending events with multiple
+   * check changes at once (i.e. from Select All/Deselect All buttons)
    * 
    * @param listener
-   *            a check state listener
+   *          a check state listener
    * @see CheckStateChangedEvent2
    */
   public void addCheckStateListener(ICheckStateListener listener) {
@@ -252,11 +275,11 @@ public class SelectionPanel extends Composite {
   }
 
   /**
-   * Removes the given check state listener. Has no effect if an identical
-   * listener is not registered.
+   * Removes the given check state listener. Has no effect if an identical listener is not
+   * registered.
    * 
    * @param listener
-   *            a check state listener
+   *          a check state listener
    */
   public void removeCheckStateListener(ICheckStateListener listener) {
     checkStateListeners.remove(listener);
