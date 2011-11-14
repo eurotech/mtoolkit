@@ -1008,6 +1008,7 @@ public class PMPSessionThread implements Runnable {
 				|| exmsg.startsWith("connection aborted") //$NON-NLS-1$
 				|| exmsg.startsWith("software caused connection abort") //$NON-NLS-1$
 				|| exmsg.startsWith("broken pipe") //$NON-NLS-1$
-				|| exmsg.startsWith("socket closed"); //$NON-NLS-1$
+				|| exmsg.startsWith("socket closed") //$NON-NLS-1$
+				|| exmsg.startsWith("bad socket"); //$NON-NLS-1$
 	}
 }
