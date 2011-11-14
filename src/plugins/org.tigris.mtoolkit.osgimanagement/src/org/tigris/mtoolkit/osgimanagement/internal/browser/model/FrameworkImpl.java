@@ -902,7 +902,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					for (int i = 0; i < regServ.length; i++) {
 						String objClass[] = regServ[i].getObjectClass();
 						for (int j = 0; j < objClass.length; j++) {
-							ObjectClass oc = new ObjectClass(objClass[j] + " [Service " + regServ[i].getServiceId()
+							ObjectClass oc = new ObjectClass(objClass[j] + " [" + regServ[i].getServiceId()
 									+ "]", new Long(regServ[i].getServiceId()), regServ[i]);
 							BundlesCategory regCategory = new BundlesCategory(BundlesCategory.REGISTERED);
 							BundlesCategory usedCategory = new BundlesCategory(BundlesCategory.IN_USE);
@@ -951,7 +951,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			for (int i = 0; i < regServ.length; i++) {
 				String objClass[] = regServ[i].getObjectClass();
 				for (int j = 0; j < objClass.length; j++) {
-					ObjectClass oc = new ObjectClass(objClass[j] + " [Service " + regServ[i].getServiceId() + "]",
+					ObjectClass oc = new ObjectClass(objClass[j] + " [" + regServ[i].getServiceId() + "]",
 							new Long(regServ[i].getServiceId()), regServ[i]);
 					regServCategory.addElement(oc);
 					if (isShownServicePropertiss()) {
@@ -970,7 +970,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			for (int i = 0; i < usedServ.length; i++) {
 				String objClass[] = usedServ[i].getObjectClass();
 				for (int j = 0; j < objClass.length; j++) {
-					ObjectClass oc = new ObjectClass(objClass[j] + " [Service " + usedServ[i].getServiceId() + "]",
+					ObjectClass oc = new ObjectClass(objClass[j] + " [" + usedServ[i].getServiceId() + "]",
 							new Long(usedServ[i].getServiceId()), usedServ[i]);
 					usedServCategory.addElement(oc);
 					if (isShownServicePropertiss()) {
@@ -1268,7 +1268,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 						.getServiceId()), servObj.getRemoteService());
 
 				for (int i = 0; i < servObj.getObjectClass().length; i++) {
-					ObjectClass hashService = new ObjectClass(servObj.getObjectClass()[i] + " [Service "
+					ObjectClass hashService = new ObjectClass(servObj.getObjectClass()[i] + " ["
 							+ servObj.getRemoteService().getServiceId() + "]", new Long(servObj.getRemoteService()
 							.getServiceId()), servObj.getRemoteService());
 					BundlesCategory hashRegisteredCategory = new BundlesCategory(BundlesCategory.REGISTERED);
@@ -1324,7 +1324,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	private void addObjectClassNodes(Model parent, String objClasses[], Long nameID, RemoteService service)
 			throws IAgentException {
 		for (int i = 0; i < objClasses.length; i++) {
-			ObjectClass objClass = new ObjectClass(objClasses[i] + " [Service " + service.getServiceId() + "]", nameID,
+			ObjectClass objClass = new ObjectClass(objClasses[i] + " [" + service.getServiceId() + "]", nameID,
 					service);
 			parent.addElement(objClass);
 			if (isShownServicePropertiss()) {
