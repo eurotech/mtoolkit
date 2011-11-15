@@ -1219,9 +1219,6 @@ public class CustomCellEditor extends CellEditor implements SelectionListener,
 								String infoName = info.getName();
 								if (infoName != null && !infoName.equals("")) {
 									customPath = "bundles" + File.separator + infoName;
-									if (value == null || ((String) value).equals("")) {
-										value = infoName;
-									}
 								}
 							}
 						}
