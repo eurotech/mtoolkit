@@ -57,7 +57,7 @@ public class BundleInfo {
 	 * @param bundlePath
 	 *            the path that is to be set
 	 */
-	//what the hell? is this.. a simple setter?
+	//what the hell? is this.. a simple bundlePath setter?
 	public void setBundlePath(String bundlePath) {
 		this.bundlePath = bundlePath;
 		
@@ -66,6 +66,7 @@ public class BundleInfo {
 		}
 		try {
 			JarFile jf = new JarFile(bundlePath);
+			//and what if the file ends with .project?
 			Manifest mf = jf.getManifest();
 			jf.close();
 			String value = null;
@@ -87,6 +88,8 @@ public class BundleInfo {
 				prefix = "bundles/";
 			}
 			setName(prefix + bundlePath.substring(bundlePath.lastIndexOf(File.separator) + 1));
+			// well.. at least the bundlePath getter does not return name, bundleVersion 
+			// and bundleSymbolicName in an array :D
 		} catch (IOException e) {
 		}
 	}
