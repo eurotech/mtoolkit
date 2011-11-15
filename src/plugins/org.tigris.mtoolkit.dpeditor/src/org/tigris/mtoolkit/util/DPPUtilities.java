@@ -356,55 +356,93 @@ public class DPPUtilities {
 	}
 
 	public static File findLastJar(File file) {
-		File result = file;
 		if (file.exists()) {
-			return result;
+			return file;
 		}
-		String fileName = file.getName();
-		String name = file.getName();
-		int dashIndex = name.lastIndexOf("_");
-		if (dashIndex == -1) {
-			if (name.endsWith(".jar")) {
-				name = name.substring(0, name.length() - 4);
-			}
-			name = findNameWithoutVersion(name);
-		} else {
-			name = name.substring(0, dashIndex + 1);
-		}
+
 		File parent = file.getParentFile();
 		if (parent == null || !parent.exists()) {
-			return result;
+			return file;
 		}
-		File[] listFiles = parent.listFiles();
-		long resLastModified = result.lastModified();
-		for (int i = 0; i < listFiles.length; i++) {
-			File tmpFile = listFiles[i];
-			String tmpName = tmpFile.getName();
-			if (!tmpName.endsWith(".jar"))
-				continue;
-			if (tmpName.startsWith(name)) {
-				int compareTo = fileName.compareToIgnoreCase(tmpName);
-				if (compareTo < 0) {
-					resLastModified = result.lastModified();
-					long tmpLastModified = tmpFile.lastModified();
-					if (resLastModified < tmpLastModified) {
-						fileName = tmpName;
-						result = tmpFile;
-					}
-				}
-				if (compareTo > 0) {
-					resLastModified = result.lastModified();
-					long tmpLastModified = tmpFile.lastModified();
-					if (resLastModified < tmpLastModified) {
-						fileName = tmpName;
-						result = tmpFile;
+
+		String oldFileName = file.getName();
+		String fileNameWithoutVersion = getNameWithoutVersion(oldFileName);
+
+		if (!oldFileName.equals(fileNameWithoutVersion + ".jar")) {
+			File[] listFiles = parent.listFiles();
+			File tmpFileWithLowerVersion = null;
+
+			for (int i = 0; i < listFiles.length; i++) {
+				String tmpFileName = listFiles[i].getName();
+
+				if (tmpFileName.endsWith(".jar") && tmpFileName.startsWith(fileNameWithoutVersion)) {
+					if (file.getName().compareToIgnoreCase(tmpFileName) < 0) {
+						file = listFiles[i];
+					} else if (oldFileName.compareToIgnoreCase(tmpFileName) > 0) {
+						if (tmpFileWithLowerVersion != null
+								&& tmpFileName.compareToIgnoreCase(tmpFileWithLowerVersion.getName()) < 0) {
+							continue;
+						}
+						tmpFileWithLowerVersion = listFiles[i];
 					}
 				}
 			}
-		}
-		return result;
-	}
 
+			if (file.getName().equals(oldFileName) && tmpFileWithLowerVersion != null) {
+				file = tmpFileWithLowerVersion;
+			}
+		}
+		return file;
+	}
+	
+	/*
+	 * grammar for version strings.
+	 *
+	 *	version ::= major('.'minor('.'micro('.'qualifier)?)?)?
+	 *	major ::= digit+
+	 *	minor ::= digit+
+	 *	micro ::= digit+
+	 *	qualifier ::= (alpha|digit|'_'|'-')+
+	 *	digit ::= [0..9]
+	 *	alpha ::= [a..zA..Z]
+	 * 
+	 * example: test_1plugin1.2.1_21._1.1.3_3_3_1.0.0.201109091503_changed.jar
+	 */
+	public static String getNameWithoutVersion(String fileName) {
+		if (fileName.endsWith(".jar")) {
+			fileName = fileName.substring(0, fileName.length() - ".jar".length());
+		}
+
+		if (fileName.indexOf('_') != -1) {
+			StringTokenizer nameTokens = new StringTokenizer(fileName, ".");
+			
+			if (nameTokens.countTokens() <= 4) {
+				int currTokenIndex = 0;
+				int versionLenth = 0;
+
+				while (nameTokens.hasMoreTokens()) {
+					String currToken = nameTokens.nextToken();
+
+					String currVersionSector = currTokenIndex == 0 ? currToken.substring(
+							currToken.lastIndexOf('_') + 1, currToken.length()) : currToken;
+
+					if (currTokenIndex == 0 && currVersionSector.equals(currToken)) {
+						return fileName;
+					}
+
+					if (currVersionSector.matches(currTokenIndex != 3 ? "[\\d]+" : "[\\w-]+")) {
+						versionLenth += 1 + currVersionSector.length();
+						currTokenIndex++;
+					} else {
+						return fileName;
+					}
+				}
+				return fileName.substring(0, fileName.length() - versionLenth);
+			}
+		}
+		return fileName;
+	}
+	
 	public static String encodePassword(String pass) {
 		if (pass == null) {
 			return null;
@@ -496,35 +534,6 @@ public class DPPUtilities {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public static String findNameWithoutVersion(String name) {
-		String result = name;
-		StringTokenizer tokenizer = new StringTokenizer(name, ".");
-		String tmp = "";
-		while (tokenizer.hasMoreTokens()) {
-			String nextToken = tokenizer.nextToken();
-			try {
-				Double.valueOf(nextToken);
-				break;
-			} catch (NumberFormatException e) {
-				String nextTmp = "";
-				if (nextToken.startsWith("v")) {
-					nextTmp = nextToken.substring(1);
-					try {
-						Double.valueOf(nextTmp);
-						break;
-					} catch (NumberFormatException ex) {
-					}
-				}
-				tmp += tmp.equals("") ? "" : ".";
-				tmp += nextToken;
-			}
-		}
-		if (!tmp.equals("")) {
-			result = tmp;
-		}
-		return result;
 	}
 
 	public static boolean containsArticles(String pathName) {
