@@ -57,7 +57,6 @@ public class BundleInfo {
 	 * @param bundlePath
 	 *            the path that is to be set
 	 */
-	//what the hell? is this.. a simple bundlePath setter?
 	public void setBundlePath(String bundlePath) {
 		this.bundlePath = bundlePath;
 		
