@@ -301,6 +301,8 @@ public class DeploymentPackageGenerator {
 
 	}
 
+	//O, dio mio!!!
+	//Magic! Do not touch!
 	private boolean signJar(String jarName, String signedJar, CertificateInfo ci) {
 		String jarSigner = CertUtils.getJarsignerLocation();
 		if (jarSigner == null) {
@@ -396,7 +398,7 @@ public class DeploymentPackageGenerator {
 					ps.getOutputStream().write("a\na\na\n".getBytes());
 					ps.getOutputStream().flush();
 				} catch (IOException e) {
-					// ignore, most probably the pipe will be closed
+					// ignore, most probably the pipe will be closed //MOST PROBABLY? Ok..
 				}
 				// causes problems sometimes.(infinite wait)
 				System.out.println(errorStream);
@@ -405,6 +407,8 @@ public class DeploymentPackageGenerator {
 			}
 			timeout = true;
 		} catch (Throwable t) {
+			error = ResourceManager.getString("DPPEditor.JarSignerException");
+			return false;
 		}
 		return ret;
 	}
