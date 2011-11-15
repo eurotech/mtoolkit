@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.tigris.mtoolkit.iagent.rpc" version="2">
+    <resource path="src/org/tigris/mtoolkit/iagent/Error.java" type="org.tigris.mtoolkit.iagent.Error">
+        <filter id="576725006">
+            <message_arguments>
+                <message_argument value="Externalizable"/>
+                <message_argument value="Error"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
