@@ -87,8 +87,6 @@ public class BundleInfo {
 				prefix = "bundles/";
 			}
 			setName(prefix + bundlePath.substring(bundlePath.lastIndexOf(File.separator) + 1));
-			// well.. at least the bundlePath getter does not return name, bundleVersion 
-			// and bundleSymbolicName in an array :D
 		} catch (IOException e) {
 		}
 	}

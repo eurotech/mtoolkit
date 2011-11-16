@@ -301,8 +301,6 @@ public class DeploymentPackageGenerator {
 
 	}
 
-	//O, dio mio!!!
-	//Magic! Do not touch!
 	private boolean signJar(String jarName, String signedJar, CertificateInfo ci) {
 		String jarSigner = CertUtils.getJarsignerLocation();
 		if (jarSigner == null) {
@@ -398,7 +396,7 @@ public class DeploymentPackageGenerator {
 					ps.getOutputStream().write("a\na\na\n".getBytes());
 					ps.getOutputStream().flush();
 				} catch (IOException e) {
-					// ignore, most probably the pipe will be closed //MOST PROBABLY? Ok..
+					// ignore, most probably the pipe will be closed
 				}
 				// causes problems sometimes.(infinite wait)
 				System.out.println(errorStream);
