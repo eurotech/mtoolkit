@@ -946,7 +946,7 @@ public class DPPEditor extends DPPMultiPageEditor implements
 								IProject prj = dppFile.getProject();
 								iFolder = prj.getFolder(newPath);
 							}
-							IFile newDPPFile = iFolder.getFile(fileName);
+							/*IFile newDPPFile =*/ iFolder.getFile(fileName);
 						}
 					}
 				}
@@ -980,12 +980,12 @@ public class DPPEditor extends DPPMultiPageEditor implements
 					} else {
 						iPath = iPath.append(pp);
 					}
-					IFile newDPPFile;
+					//IFile newDPPFile;
 					if (iPath.isEmpty()) {
-						newDPPFile = prj.getFile(fileName);
+						/*newDPPFile =*/ prj.getFile(fileName);
 					} else {
 						IFolder iFolder = prj.getFolder(iPath);
-						newDPPFile = iFolder.getFile(fileName);
+						/*newDPPFile =*/ iFolder.getFile(fileName);
 					}
 				}
 			} else {
@@ -996,7 +996,7 @@ public class DPPEditor extends DPPMultiPageEditor implements
 					IPath path = dppFile.getFullPath().removeLastSegments(1).removeFirstSegments(1);
 					IProject prj = ResourcesPlugin.getWorkspace().getRoot().getProject(newPrj);
 					IFolder iFolder = prj.getFolder(path);
-					IFile newDPPFile = iFolder.getFile(dppFile.getName());
+					/*IFile newDPPFile =*/ iFolder.getFile(dppFile.getName());
 				}
 			}
 		}
