@@ -27,7 +27,6 @@ import org.tigris.mtoolkit.iagent.spi.MethodSignature;
  * @see RemoteInputStream
  */
 public class RemoteReader extends InputStream {
-
 	private static MethodSignature READ_METHOD = new MethodSignature("read", new String[] { "int" }, true);
 	private static MethodSignature CLOSE_METHOD = new MethodSignature("close");
 
@@ -74,17 +73,6 @@ public class RemoteReader extends InputStream {
 			remoteInput.dispose();
 		} catch (PMPException e) {
 			DebugUtils.info(this, "Failed to dispose remote object: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Added to ensure that the Remote object will be disposed and remote stream
-	 * will be closed.
-	 */
-	public void finalize() {
-		try {
-			close();
-		} catch (Exception exc) {
 		}
 	}
 }
