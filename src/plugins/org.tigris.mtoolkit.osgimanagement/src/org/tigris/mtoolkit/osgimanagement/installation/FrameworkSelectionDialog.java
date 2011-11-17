@@ -207,7 +207,10 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 	}
 
 	private void handleFrameworkAdd() {
-		ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot(), FrameWorkView.tree);
+		FrameWorkView view = FrameWorkView.getActiveInstance();
+		if (view != null) {
+			ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot(), view.getTree());
+		}
 	}
 
 	private void handleFrameworkRemove() {

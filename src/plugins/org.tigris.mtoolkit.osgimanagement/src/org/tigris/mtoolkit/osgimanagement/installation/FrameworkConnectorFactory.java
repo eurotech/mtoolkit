@@ -61,8 +61,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	public static final int CONNECT_PROGRESS_SERVICES = (int) (CONNECT_PROGRESS * 0.2);
 	public static final int CONNECT_PROGRESS_ADDITIONAL = (int) (CONNECT_PROGRESS * 0.4);
 
-	// public static Hashtable connectJobs = new Hashtable();
-
 	public static void init() {
 		DeviceConnector.addDeviceConnectionListener(factory);
 	}
@@ -71,7 +69,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 		DeviceConnector.removeDeviceConnectionListener(factory);
 	}
 
-	public static void connectFrameWork(final FrameworkImpl fw) {
+	public static void connectFrameWork(final Framework fw) {
 		ConnectFrameworkJob job = new ConnectFrameworkJob(fw);
 		job.schedule();
 	}
@@ -195,7 +193,7 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 							fw.disconnect();
 							fw.setPMPConnectionListener(null);
 							if (fw.autoConnected) {
-								FrameWorkView.treeRoot.removeElement(fw);
+								FrameWorkView.getTreeRoot().removeElement(fw);
 							}
 							break;
 						}

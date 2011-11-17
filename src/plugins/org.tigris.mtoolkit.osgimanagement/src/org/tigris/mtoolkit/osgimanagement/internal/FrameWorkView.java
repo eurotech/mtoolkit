@@ -86,8 +86,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
@@ -138,8 +141,8 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
-public class FrameWorkView extends ViewPart implements ConstantsDistributor {
-
+// TODO:Remove static access to ui widgets and model entries
+public final class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public static final String VIEW_ID = FrameworkPlugin.PLUGIN_ID + ".frameworkview";
 
 	public static final String PROPERTIES_IMAGE_PATH = "properties.gif"; //$NON-NLS-1$
@@ -158,10 +161,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	public static final String SEARCH_IMAGE_PATH = "search_action.gif";
 	public static final String REFRESH_IMAGE_PATH = "refresh_action.gif";
 	public static final String CONSOLE_IMAGE_PATH = "console.gif";
+
 	private static final String FIND_COMMAND_ID = FindAction.class.getName();
 	private static final String REFRESH_COMMAND_ID = RefreshAction.class.getName();
 	private static final String REMOVE_COMMAND_ID = RemoveAction.class.getName();
-
 	private static final String PROPERTIES_COMMAND_ID = CommonPropertiesAction.class.getName();
 
 	private static AddAction addFrameworkAction;
@@ -170,57 +173,62 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	private static DisconnectAction disconnectAction;
 	private static InstallBundleAction installBundleAction;
 	private static DeInstallBundleAction deinstallBundleAction;
-
 	private static StartAction startAction;
 	private static StopAction stopAction;
 	private static UpdateBundleAction updateBundleAction;
 	private static CommonPropertiesAction commonPropertiesAction;
 	private static ShowServicePropertiesInTree showServPropsInTreeAction;
-	private GotoServiceAction gotoServiceAction;
+	private static ShowFrameworkConsole showConsoleAction;
+	private static RefreshAction refreshAction;
 	private static ViewAction viewServicesAction;
 	private static ViewAction viewBundlesAction;
 	private ShowBundleIDAction showBundleIDAction;
+	private GotoServiceAction gotoServiceAction;
 	private ShowBundleVersionAction showBundleVersionAction;
 	private FindAction findAction;
-	private static ShowFrameworkConsole showConsoleAction;
-	private static RefreshAction refreshAction;
-	private static Text filterField;
 
-	public static TreeViewer tree;
+	private final FilterJob filterJob = new FilterJob();
+	private final MyViewerFilter filter = new MyViewerFilter();
+
+	private Text filterField;
+	private TreeViewer tree;
 	private IWorkbenchPage activePage;
-
-	public static TreeRoot treeRoot;
+	private MenuManager mgr;
+	private ToolbarIMenuCreator bundlesTB;
+	private static TreeRoot treeRoot;
 
 	private static HashMap activeInstances;
-	private MenuManager mgr;
-
-	private FilterJob filterJob = new FilterJob();
-	private MyViewerFilter filter = new MyViewerFilter();
-
-	private static ToolbarIMenuCreator bundlesTB;
-
-	private static String notFoundText = null;
+	private String notFoundText = null;
 
 	// Get current shell
 	public static Shell getShell() {
-		if (tree != null) {
-			return tree.getControl().getShell();
-		} else {
-			return PluginUtilities.getActiveWorkbenchShell();
-		}
+		return PluginUtilities.getActiveWorkbenchShell();
 	}
 
 	// Get current active FrameWorkView
 	public static FrameWorkView getActiveInstance() {
-		FrameWorkView resultView = null;
-		try {
-			IWorkbenchPage activePage = FrameworkPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage();
-			resultView = (FrameWorkView) activeInstances.get(new Integer(activePage.hashCode()));
-		} catch (NullPointerException e) {
-			// do nothing
+		final IViewPart[] view = new IViewPart[1];
+		IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		if (workbenchWindows != null && workbenchWindows.length > 0) {
+			final IWorkbenchWindow workbenchWindow = workbenchWindows[0];
+			Display display = PlatformUI.getWorkbench().getDisplay();
+			display.syncExec(new Runnable() {
+				public void run() {
+					IWorkbenchPage activePage = workbenchWindow.getActivePage();
+					if (activePage == null) {
+						return;
+					}
+					IViewReference[] viewRefs = activePage.getViewReferences();
+					for (int i = 0; i < viewRefs.length; i++) {
+						if (VIEW_ID.equals(viewRefs[i].getId())) {
+							view[0] = viewRefs[i].getView(true);
+							return;
+						}
+					}
+				}
+			});
 		}
-		return resultView;
+		return (FrameWorkView) view[0];
 	}
 
 	// Get the root containing all frameworks
@@ -228,15 +236,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		return FrameWorkView.treeRoot;
 	}
 
-	// Get the TreeViewer
-	public static TreeViewer[] getTreeViewers() {
-		if (activeInstances == null || activeInstances.values() == null)
-			return null;
-		TreeViewer[] result = new TreeViewer[activeInstances.size()];
-		for (int i = 0; i < result.length; i++) {
-			result[i] = FrameWorkView.tree;
-		}
-		return result;
+	// Gets current view tree
+	public TreeViewer getTree() {
+		return tree;
 	}
 
 	/*
@@ -278,12 +280,14 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		});
 
 		treeRoot.addListener(new ContentChangeListener() {
-
 			public void elementRemoved(ContentChangeEvent event) {
 				Display display = PlatformUI.getWorkbench().getDisplay();
 				if (display != null && !display.isDisposed()) {
 					display.asyncExec(new Runnable() {
 						public void run() {
+							if (filterField == null || filterField.isDisposed()) {
+								return;
+							}
 							treeRoot.setFilter(filterField.getText());
 						}
 					});
@@ -298,6 +302,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				if (display != null && !display.isDisposed()) {
 					display.asyncExec(new Runnable() {
 						public void run() {
+							if (filterField == null || filterField.isDisposed()) {
+								return;
+							}
 							treeRoot.setFilter(filterField.getText());
 						}
 					});
@@ -312,6 +319,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				if (display != null && !display.isDisposed()) {
 					display.asyncExec(new Runnable() {
 						public void run() {
+							if (filterField == null || filterField.isDisposed()) {
+								return;
+							}
 							treeRoot.setFilter(filterField.getText());
 						}
 					});
@@ -321,8 +331,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 				filterJob.schedule(300);
 			}
 		});
-
-		setFilter("");
+		filterField.setText("");
 
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
@@ -367,8 +376,9 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 		activePage = getSite().getPage();
 
-		if (activeInstances == null)
+		if (activeInstances == null) {
 			activeInstances = new HashMap();
+		}
 
 		activeInstances.put(new Integer(activePage.hashCode()), this);
 
@@ -427,14 +437,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 	}
 
-	public static String getFilter() {
-		return filterField.getText();
-	}
-
-	public static void setFilter(String text) {
-		filterField.setText(text);
-	}
-
 	private void createToolbarAndMenu() {
 		MenuManager mainMenu = (MenuManager) getViewSite().getActionBars().getMenuManager();
 		mainMenu.addMenuListener(new IMenuListener() {
@@ -482,10 +484,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, addFrameworkAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK, removeFrameworkAction);
 		commonPropertiesAction.setToolTipText(Messages.property_action_label);
-		// toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK,
-		// commonPropertiesAction);
-		// toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_FRAMEWORK,
-		// frameworkPropertiesAction);
 
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewServicesAction);
 		toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, viewBundlesAction);
@@ -574,8 +572,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	}
 
 	// Create custom contributions - tree popup menu
-	protected void addContributions() {
-
+	private void addContributions() {
 		addFrameworkAction = new AddAction(tree, Messages.add_action_label);
 		addFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(ADD_ACTION_IMAGE_PATH));
 
@@ -651,9 +648,10 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		getSite().registerContextMenu(mgr, tree);
 	}
 
-	public static void updateContextMenuStates() {
-		if (tree == null)
+	public void updateContextMenuStates() {
+		if (tree == null || tree.getControl().isDisposed()) {
 			return;
+		}
 		IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
 
 		connectAction.updateState(selection);
@@ -664,7 +662,6 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		stopAction.updateState(selection);
 		updateBundleAction.updateState(selection);
 		deinstallBundleAction.updateState(selection);
-		// commonPropertiesAction.updateState(selection);
 
 		installBundleAction.updateState(selection);
 
@@ -696,7 +693,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	}
 
 	// Fill context menu Actions when menu is about to show
-	protected void fillContextMenu(IMenuManager manager) {
+	private void fillContextMenu(IMenuManager manager) {
 		tree.setSelection(tree.getSelection());
 		StructuredSelection selection = (StructuredSelection) tree.getSelection();
 		boolean homogen = true;
@@ -781,7 +778,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 	}
 
 	// Save Tree Model
-	protected static void saveModel() {
+	private static void saveModel() {
 		XMLMemento rootConfig = XMLMemento.createWriteRoot(MEMENTO_ROOT_TYPE);
 
 		IMemento child;
@@ -975,7 +972,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		// TODO: Add a text when there are no elements in the filter
 		// TODO: Add a text in the filter to explain the purpose of the text
 		// line
-		protected IStatus run(final IProgressMonitor monitor) {
+		public IStatus run(final IProgressMonitor monitor) {
 			tree.addSelectionChangedListener(this);
 			filterRecursively(treeRoot);
 			if (monitor.isCanceled())
@@ -1016,8 +1013,12 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 
 		private void refreshTree(Model[] allSelectedElements, Model[] unrevealedElements,
 				int alreadyRevealedElementsCount) {
-			if (selection == null)
+			if (tree == null || tree.getControl().isDisposed()) {
+				return;
+			}
+			if (selection == null) {
 				selection = tree.getSelection();
+			}
 			int itemsToReveal = lastRunRevealedElements != null ? (allSelectedElements.length - alreadyRevealedElementsCount)
 					: allSelectedElements.length;
 			boolean autoExpand = itemsToReveal < MAX_ITEMS_TO_AUTOEXPAND;
@@ -1086,7 +1087,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		}
 	}
 
-	private static void findItem(String text, TreeViewer parentView) {
+	private void findItem(String text, TreeViewer parentView) {
 		if (text.equals(""))return; //$NON-NLS-1$
 		if (notFoundText != null && text.indexOf(notFoundText) != -1) {
 			return;
@@ -1149,7 +1150,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 			notFoundText = null;
 	}
 
-	private static Model findItem(Model parent, String searching, Model startNode) {
+	private Model findItem(Model parent, String searching, Model startNode) {
 		Model children[] = parent.getChildren();
 		for (int i = 0; i < children.length; i++) {
 			Model child = children[i];
@@ -1168,7 +1169,7 @@ public class FrameWorkView extends ViewPart implements ConstantsDistributor {
 		return null;
 	}
 
-	private static boolean isTextFound(String text, String searchFor) {
+	private boolean isTextFound(String text, String searchFor) {
 		return (text.indexOf(searchFor) != -1 && !text.equals(ServicesCategory.nodes[0]) && !text
 				.equals(ServicesCategory.nodes[1]));
 	}

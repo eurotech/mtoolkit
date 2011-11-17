@@ -124,7 +124,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		if (this.isConnected()) {
 			this.disconnect();
 		}
-		FrameWorkView.treeRoot.removeElement(this);
+		FrameWorkView.getTreeRoot().removeElement(this);
 		bundleHash = null;
 		systemBundles = null;
 		categoryHash = null;
@@ -136,29 +136,8 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		return connecting;
 	}
 
-	// private void refreshViewers() {
-	// display = Display.getDefault();
-	// if (display == null)
-	// display = Display.getCurrent();
-	// display.asyncExec(new Runnable() {
-	// public void run() {
-	// TreeViewer[] all = FrameWorkView.getTreeViewers();
-	// if (all != null) {
-	// for (int i = 0; i < all.length; i++) {
-	// if (!all[i].getControl().isDisposed()) {
-	// all[i].refresh();
-	// }
-	// }
-	// }
-	// }
-	// });
-	// }
-
 	public void setConnector(DeviceConnector connector) {
 		this.connector = connector;
-		// if (connector == null) {
-		// connectedFlag = false;
-		// }
 	}
 
 	public void connect(final DeviceConnector connector, SubMonitor monitor) {
@@ -796,7 +775,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		}
 		display.asyncExec(new Runnable() {
 			public void run() {
-				FrameWorkView.updateContextMenuStates();
+				FrameWorkView view = FrameWorkView.getActiveInstance();
+				if (view != null) {
+					view.updateContextMenuStates();
+				}
 			}
 		});
 	}
@@ -845,11 +827,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					} finally {
 						refreshing = false;
 						sMonitor.done();
-						Display.getDefault().asyncExec(new Runnable() {
-							public void run() {
-								FrameWorkView.setFilter(FrameWorkView.getFilter());
-							}
-						});
 					}
 				}
 				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
