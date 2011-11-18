@@ -65,6 +65,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -73,7 +74,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener,
-		RemoteDevicePropertyListener, IAdaptable {
+		RemoteDevicePropertyListener, IAdaptable,ConstantsDistributor {
 
 	private boolean showServicePropertiesInTree = false;
 

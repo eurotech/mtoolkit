@@ -25,7 +25,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeLi
 /**
  * @since 5.0
  */
-public abstract class Model implements Comparable, IActionFilter, ConstantsDistributor {
+public abstract class Model implements Comparable, IActionFilter {
 
 	protected String name;
 	protected Model parent;
@@ -256,7 +256,7 @@ public abstract class Model implements Comparable, IActionFilter, ConstantsDistr
 			return false;
 		}
 
-		if (name.equalsIgnoreCase(NODE_NAME)) {
+		if (name.equalsIgnoreCase(ConstantsDistributor.NODE_NAME)) {
 			if (value.equalsIgnoreCase(this.name)) {
 				return true;
 			}

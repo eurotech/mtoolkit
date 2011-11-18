@@ -30,10 +30,11 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.IconProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class Bundle extends Model implements IconProvider {
+public class Bundle extends Model implements IconProvider,ConstantsDistributor {
 
 	public static final String OVR_ACTIVE_ICON = "ovr_active.gif"; //$NON-NLS-1$
 	public static final String OVR_RESOLVED_ICON = "ovr_resolved.gif"; //$NON-NLS-1$
