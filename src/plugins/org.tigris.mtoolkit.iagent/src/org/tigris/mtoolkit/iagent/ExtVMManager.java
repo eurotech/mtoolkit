@@ -41,4 +41,14 @@ public interface ExtVMManager {
 	 */
 	public void writeConfigurable(String name, InputStream is, Map properties) throws IAgentException;
 
+	/**
+	 * @since 4.1
+	 */
+	public boolean isAddonEnabled(String name, Map properties) throws IAgentException;
+
+	/**
+	 * @since 4.1
+	 */
+	public void setAddonEnabled(String name, boolean enabled, Map properties) throws IAgentException;
+
 }
