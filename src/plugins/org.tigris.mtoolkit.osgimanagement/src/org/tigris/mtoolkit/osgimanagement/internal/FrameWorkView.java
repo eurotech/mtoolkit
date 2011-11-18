@@ -154,7 +154,6 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 	public static final String DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif"; //$NON-NLS-1$
 	public static final String WEBADMIN_ACTION_IMAGE_PATH = "webadmin_action.gif"; //$NON-NLS-1$
 	public static final String CONNECT_ACTION_IMAGE_PATH = "connect_action.gif"; //$NON-NLS-1$
-	public static final String PROPERTIES_ACTION_IMAGE_PATH = "properties_action.gif"; //$NON-NLS-1$
 	public static final String REMOVE_ACTION_ACTION_PATH = "remove_action.gif"; //$NON-NLS-1$
 	public static final String ADD_ACTION_IMAGE_PATH = "add_action.gif"; //$NON-NLS-1$
 	public static final String BUNDLES_GROUP_IMAGE_PATH = "bundles_group.gif"; //$NON-NLS-1$
