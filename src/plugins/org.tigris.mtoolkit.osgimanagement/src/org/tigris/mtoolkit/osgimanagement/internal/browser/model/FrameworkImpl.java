@@ -74,7 +74,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener,
-		RemoteDevicePropertyListener, IAdaptable,ConstantsDistributor {
+		RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	private boolean showServicePropertiesInTree = false;
 
@@ -1003,7 +1003,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 		SubMonitor monitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES);
 		monitor.setTaskName(Messages.retrieve_bundles_info);
-		int work = (int) (FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES / rBundlesArray.length);
+		int work = (FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES / rBundlesArray.length);
 		for (int i = 0; i < rBundlesArray.length; i++) {
 			try {
 				addBundle(rBundlesArray[i]);
@@ -1056,7 +1056,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			SubMonitor monitor = sMonitor.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES);
 			monitor.setTaskName(Messages.retrieve_services_info);
 
-			int work = (int) (FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES / rBundlesArray.length);
+			int work = (FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES / rBundlesArray.length);
 
 			for (int i = 0; i < rBundlesArray.length; i++) {
 				retrieveServicesInfo(rBundlesArray[i], null, null);
@@ -1253,13 +1253,13 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 							+ servObj.getRemoteService().getServiceId() + "]", new Long(servObj.getRemoteService()
 							.getServiceId()), servObj.getRemoteService());
 					BundlesCategory hashRegisteredCategory = new BundlesCategory(BundlesCategory.REGISTERED);
-					BundlesCategory hashUsedCategory = new BundlesCategory(BundlesCategory.IN_USE);
 					hashService.addElement(hashRegisteredCategory);
-					hashService.addElement(hashUsedCategory);
 					hashRegisteredCategory.addElement(new Bundle(bundle));
 
 					RemoteBundle usedInBundles[] = servObj.getUsedIn(this);
 					if (usedInBundles != null) {
+						BundlesCategory hashUsedCategory = new BundlesCategory(BundlesCategory.IN_USE);
+						hashService.addElement(hashUsedCategory);
 						for (int k = 0; k < usedInBundles.length; k++) {
 							Bundle usedInBundleNode = findBundle(usedInBundles[k].getBundleId());
 							if (usedInBundleNode == null) {
