@@ -162,17 +162,6 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		// Signing properties
 		preparationProps.putAll(framework.getSigningProperties());
 
-		// Platform properties
-		try {
-			DeviceConnector connector = framework.getConnector();
-			if (connector == null)
-				return Util.newStatus(IStatus.ERROR, "Connection lost", null);
-			Map platformProps = connector.getVMManager().getPlatformProperties();
-			preparationProps.putAll(platformProps);
-		} catch (IAgentException iae) {
-			// Cannot get platform properties - continuing.
-		}
-
 		if (framework.getConnector() == null) {
 			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not establish connection to "
 					+ framework);
