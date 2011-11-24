@@ -55,6 +55,8 @@ public final class Messages extends NLS {
 	public static String service_label;
 	public static String headers_label;
 	public static String install_dialog_title;
+	public static String connecting_operation_title;
+	public static String preparing_operation_title;
 	public static String install_operation_title;
 	public static String update_dialog_title;
 	public static String install_dp_dialog_title;

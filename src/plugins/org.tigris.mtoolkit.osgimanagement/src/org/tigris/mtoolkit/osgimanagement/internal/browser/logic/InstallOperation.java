@@ -41,7 +41,7 @@ public class InstallOperation extends Job {
 		Map<Object, FrameworkProcessor> installedItems = new HashMap<Object, FrameworkProcessor>();
 		for (InstallationPair item : installationPairs) {
 			try {
-				monitor.beginTask(getName(), 1);
+				monitor.beginTask(getName() + " " + item.item().getName(), 1);
 				operationResult = doOperation(monitor, item, installedItems, subMonitor);
 			} catch (IAgentException e) {
 				operationResult = handleException(e);

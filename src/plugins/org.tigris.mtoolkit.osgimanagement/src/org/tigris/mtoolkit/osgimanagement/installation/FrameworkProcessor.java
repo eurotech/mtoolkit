@@ -50,6 +50,7 @@ import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.PluginProvider.PluginItem;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
@@ -133,9 +134,8 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
 
 		Framework framework = ((FrameworkTarget) target).getFramework();
+		subMonitor.beginTask(Messages.connecting_operation_title, 10);
 
-		// TODO: Connecting to framework should report the connection progress
-		// to the current monitor
 		if (!framework.isConnected()) {
 			Job connectJob = new ConnectFrameworkJob(framework);
 			connectJob.schedule();
@@ -156,6 +156,10 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				}
 			}
 		}
+		subMonitor.worked(1);
+		if (monitor.isCanceled()) {
+			return Status.CANCEL_STATUS;
+		}
 
 		Map preparationProps = new Hashtable();
 
@@ -174,12 +178,20 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				preparationProps.put(PROP_JVM_NAME, "Dalvik");
 			}
 		}
+
+		if (monitor.isCanceled()) {
+			return Status.CANCEL_STATUS;
+		}
+		subMonitor.worked(1);
+
+		subMonitor.setTaskName(Messages.preparing_operation_title);
 		for (int i = 0; i < items.length; i++) {
 			IStatus preparationStatus = items[i].prepare(subMonitor.newChild(1), preparationProps);
 			if (preparationStatus.getSeverity() == IStatus.ERROR || preparationStatus.getSeverity() == IStatus.CANCEL) {
 				return preparationStatus;
 			}
 		}
+		subMonitor.worked(4);
 
 		IStatus signStatus = CertUtils.signItems(items, subMonitor.newChild(1), preparationProps);
 		if (signStatus.matches(IStatus.CANCEL | IStatus.ERROR)) {
