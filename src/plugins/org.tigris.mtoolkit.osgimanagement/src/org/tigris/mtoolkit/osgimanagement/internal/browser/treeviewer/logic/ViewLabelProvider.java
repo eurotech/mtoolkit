@@ -11,6 +11,8 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
@@ -60,6 +62,8 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 	public static final String BUNDLE_ICON_ACTIVE = "bundle_active.gif"; //$NON-NLS-1$
 	public static final String BUNDLE_NODE_ICON = "bundles_package.gif"; //$NON-NLS-1$
 
+	HashMap<Object, Image> customImages = new HashMap<Object, Image>();
+
 	// Override to return proper image for every element
 	public Image getImage(Object element) {
 		if (element instanceof FrameworkImpl) {
@@ -77,8 +81,17 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 			Bundle bundle = (Bundle) element;
 			Image icon = getBundleImage(bundle);
 			if (bundle.isSigned()) {
+				if (customImages.containsKey(bundle)) {
+					Image image = customImages.get(bundle);
+					if (image != null) {
+						image.dispose();
+					}
+				}
 				icon = new DecorationOverlayIcon(icon, ImageHolder.getImageDescriptor(Bundle.OVR_SIGNED_ICON),
 						IDecoration.BOTTOM_LEFT).createImage();
+				if (icon != null) {
+					customImages.put(bundle, icon);
+				}
 			}
 			return icon;
 		}
@@ -170,6 +183,11 @@ public class ViewLabelProvider extends StyledCellLabelProvider implements Consta
 	// Override to dispose Images properly
 	@Override
 	public void dispose() {
+		Collection<Image> images = customImages.values();
+		for (Image image : images) {
+			image.dispose();
+		}
+		images.clear();
 	}
 
 	@Override
