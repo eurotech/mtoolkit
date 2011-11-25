@@ -622,18 +622,27 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 							for (int j = 0; j < servicesViewVector.size(); j++) {
 								ObjectClass oc = (ObjectClass) servicesViewVector.elementAt(j);
 								if (oc.getNameID().longValue() == usedServ[i].getServiceId()) {
-									BundlesCategory bCategory = (BundlesCategory) oc.getChildren()[1];
-									Model bundles[] = bCategory.getChildren();
+									Model[] categories = oc.getChildren();
 									boolean added = false;
-									for (int k = 0; k < bundles.length; k++) {
-										if (((Bundle) bundles[k]).getID() == bundle.getID()) {
-											added = true;
-											break;
+									BundlesCategory bCategory = null;
+									if (categories.length > 1) {
+										bCategory = (BundlesCategory) oc.getChildren()[1];
+										Model bundles[] = bCategory.getChildren();
+										for (int k = 0; k < bundles.length; k++) {
+											if (((Bundle) bundles[k]).getID() == bundle.getID()) {
+												added = true;
+												break;
+											}
 										}
 									}
+
 									if (!added) {
 										Bundle usedInBundle = new Bundle(bundle);
 										if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
+											if (bCategory == null) {
+												bCategory = new BundlesCategory(BundlesCategory.IN_USE);
+												oc.addElement(bCategory);
+											}
 											bCategory.addElement(usedInBundle);
 										} else {
 											getBundlesNode().addElement(usedInBundle);
