@@ -480,6 +480,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	private void removeBundle(long id) throws IAgentException {
 		// remove bundle and empty category
 		Bundle bundle = findBundle(id);
+		if (bundle == null) {
+			return;
+		}
 		for (int i = 0; i < bundle.getSlaves().size(); i++) {
 			Model parent = ((Model) bundle.getSlaves().elementAt(i)).getParent();
 			if (parent != null) {
