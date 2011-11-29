@@ -28,7 +28,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
-import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
@@ -40,128 +39,120 @@ import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
+public final class ApplicationActionsProvider implements ContentTypeActionsProvider {
+  private static final String START_APPLICATION_IMAGE_PATH = "start_application_action.gif";
+  private static final String STOP_APPLICATION_IMAGE_PATH = "stop_application_action.gif";
+  private static final String APPLICATION_GROUP_IMAGE_PATH = "application_group.gif";
+  private static final String APPLICATION_PROPERTIES_IMAGE_PATH = "application_properties.gif";
 
-public class ApplicationActionsProvider implements ContentTypeActionsProvider {
+  public static final String APPLICATION_STARTED_ICON_PATH = "started_application_state.gif";
+  public static final String APPLICATION_STOPPING_ICON_PATH = "stopping_application_state.gif";
+  public static final String APPLICATION_INSTALLED_ICON_PATH = "installed_application_state.gif";
+  public static final String APPLICATION_MIXED_ICON_PATH = "mixed_application_state.gif";
 
-	private static final String START_APPLICATION_IMAGE_PATH = "start_application_action.gif";
-	private static final String STOP_APPLICATION_IMAGE_PATH = "stop_application_action.gif";
-	private static final String APPLICATION_GROUP_IMAGE_PATH = "application_group.gif";
-	private static final String APPLICATION_PROPERTIES_IMAGE_PATH = "application_properties.gif";
+  public static final String APPLICATION_ICON_PATH = "application.gif";
+  public static final String APPLICATION_PACKAGE_ICON_PATH = "application_package.gif";
 
-	public static final String APPLICATION_STARTED_ICON_PATH = "started_application_state.gif";
-	public static final String APPLICATION_STOPPING_ICON_PATH = "stopping_application_state.gif";
-	public static final String APPLICATION_INSTALLED_ICON_PATH = "installed_application_state.gif";
-	public static final String APPLICATION_MIXED_ICON_PATH = "mixed_application_state.gif";
-	
-	public static final String APPLICATION_ICON_PATH = "application.gif";
-	public static final String APPLICATION_PACKAGE_ICON_PATH = "application_package.gif";
+  private StartApplicationAction startApplicationAction;
+  private StopApplicationAction stopApplicationAction;
+  private ApplicationPropertiesAction applicationPropertiesAction;
 
-	private StartApplicationAction startApplicationAction;
-	private StopApplicationAction stopApplicationAction;
-	private ApplicationPropertiesAction applicationPropertiesAction;
-	
-	private TreeViewer tree;
-	private ToolbarIMenuCreator applicationTB;
-	private Hashtable commonActions;
-	
-	
-	public void init(TreeViewer tree) {
-		this.tree = tree;
-		startApplicationAction = new StartApplicationAction(tree, "Start Application");
-		startApplicationAction.setImageDescriptor(ImageHolder.getImageDescriptor(START_APPLICATION_IMAGE_PATH));
-		stopApplicationAction = new StopApplicationAction(tree, "Stop Application");
-		stopApplicationAction.setImageDescriptor(ImageHolder.getImageDescriptor(STOP_APPLICATION_IMAGE_PATH));
-		applicationPropertiesAction = new ApplicationPropertiesAction(tree, "Properties");
-		applicationPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(APPLICATION_PROPERTIES_IMAGE_PATH));
-		commonActions = new Hashtable();
-		commonActions.put(PROPERTIES_ACTION, applicationPropertiesAction);
-	}
-	
-	public Map getCommonActions() {
-		return commonActions;
-	}
+  private TreeViewer tree;
+  private ToolbarIMenuCreator applicationTB;
+  private Hashtable commonActions;
 
-	public void fillToolBar(ToolBarManager tbm) {
-		Action[] actions = new Action[] { startApplicationAction, stopApplicationAction, applicationPropertiesAction};
-		applicationTB = new ToolbarIMenuCreator(actions, tree);
-		applicationTB.setImageDescriptor(ImageHolder.getImageDescriptor(APPLICATION_GROUP_IMAGE_PATH));
-		applicationTB.setToolTipText("Various application actions");
-		tbm.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, applicationTB);
-	}
+  public void init(TreeViewer tree) {
+    this.tree = tree;
+    startApplicationAction = new StartApplicationAction(tree, "Start Application");
+    startApplicationAction.setImageDescriptor(ImageHolder.getImageDescriptor(START_APPLICATION_IMAGE_PATH));
+    stopApplicationAction = new StopApplicationAction(tree, "Stop Application");
+    stopApplicationAction.setImageDescriptor(ImageHolder.getImageDescriptor(STOP_APPLICATION_IMAGE_PATH));
+    applicationPropertiesAction = new ApplicationPropertiesAction(tree, "Properties");
+    applicationPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(APPLICATION_PROPERTIES_IMAGE_PATH));
+    commonActions = new Hashtable();
+    commonActions.put(PROPERTIES_ACTION, applicationPropertiesAction);
+  }
 
-	public void menuAboutToShow(StructuredSelection selection, IMenuManager manager) {
-		boolean homogen = true;
-		if (selection.size() > 0) {
-			Model element = (Model) selection.getFirstElement();
-			Class clazz = element.getClass();
+  public Map getCommonActions() {
+    return commonActions;
+  }
 
-			Iterator iterator = selection.iterator();
-			while (iterator.hasNext()) {
-				Object sel = iterator.next();
-				if (!clazz.equals(sel.getClass())) {
-					homogen = false;
-					break;
-				}
-			}
+  public void fillToolBar(ToolBarManager tbm) {
+    Action[] actions = new Action[] { startApplicationAction, stopApplicationAction, applicationPropertiesAction };
+    applicationTB = new ToolbarIMenuCreator(actions, tree);
+    applicationTB.setImageDescriptor(ImageHolder.getImageDescriptor(APPLICATION_GROUP_IMAGE_PATH));
+    applicationTB.setToolTipText("Various application actions");
+    tbm.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, applicationTB);
+  }
 
-			if (homogen) {
-				if (element instanceof Application) {
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, startApplicationAction);
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, stopApplicationAction);
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, applicationPropertiesAction);
-				}
-			}
-		}
-		
-	}
+  public void menuAboutToShow(StructuredSelection selection, IMenuManager manager) {
+    boolean homogen = true;
+    if (selection.size() > 0) {
+      Model element = (Model) selection.getFirstElement();
+      Class clazz = element.getClass();
 
-	public Image getImage(Model node) {
-		if (node instanceof Application) {
-			try {
-				String state = ((Application)node).getRemoteApplication().getState();
-				if (RemoteApplication.STATE_RUNNING.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_STARTED_ICON_PATH);
-				} else if (RemoteApplication.STATE_INSTALLED.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_INSTALLED_ICON_PATH);
-				} else if (RemoteApplication.STATE_MIXED.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_MIXED_ICON_PATH);
-				} else if (RemoteApplication.STATE_STOPPING.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_STOPPING_ICON_PATH);
-				} else if (RemoteApplication.STATE_STARTING.equals(state)) {
-					return ImageHolder.getImage(APPLICATION_STARTED_ICON_PATH);
-				}
-			} catch (IAgentException e) {
-				e.printStackTrace();
-				return ImageHolder.getImage(APPLICATION_INSTALLED_ICON_PATH);
-			}
-		}
-		if (node instanceof ApplicationPackage) {
-			return ImageHolder.getImage(APPLICATION_PACKAGE_ICON_PATH);
-		}
-		return null;
-	}
+      Iterator iterator = selection.iterator();
+      while (iterator.hasNext()) {
+        Object sel = iterator.next();
+        if (!clazz.equals(sel.getClass())) {
+          homogen = false;
+          break;
+        }
+      }
 
-	public void updateEnabledState(final DeviceConnector connector) {
-       Job job = new Job("Update state") {
-            protected IStatus run(IProgressMonitor monitor) {
-                final boolean enabled = ApplicationModelProvider.isApplicationsSupported(connector);
-                Display display = PlatformUI.getWorkbench().getDisplay();
-                if (!display.isDisposed()) {
-	                display.asyncExec(new Runnable() {
-	                    public void run() {
-	                        boolean enabledState = false;
-	                        if (enabled) {
-	                            applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
-                              enabledState = startApplicationAction.isEnabled();
-	                        }
-	                        applicationTB.setEnabled(enabledState);
-	                    }
-	                });
-                }
-                return Status.OK_STATUS;
+      if (homogen) {
+        if (element instanceof Application) {
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, startApplicationAction);
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, stopApplicationAction);
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, applicationPropertiesAction);
+        }
+      }
+    }
+
+  }
+
+  public Image getImage(Model node) {
+    if (node instanceof Application) {
+      String state = ((Application) node).getState();
+      if (RemoteApplication.STATE_RUNNING.equals(state)) {
+        return ImageHolder.getImage(APPLICATION_STARTED_ICON_PATH);
+      } else if (RemoteApplication.STATE_INSTALLED.equals(state)) {
+        return ImageHolder.getImage(APPLICATION_INSTALLED_ICON_PATH);
+      } else if (RemoteApplication.STATE_MIXED.equals(state)) {
+        return ImageHolder.getImage(APPLICATION_MIXED_ICON_PATH);
+      } else if (RemoteApplication.STATE_STOPPING.equals(state)) {
+        return ImageHolder.getImage(APPLICATION_STOPPING_ICON_PATH);
+      } else if (RemoteApplication.STATE_STARTING.equals(state)) {
+        return ImageHolder.getImage(APPLICATION_STARTED_ICON_PATH);
+      }
+    }
+    if (node instanceof ApplicationPackage) {
+      return ImageHolder.getImage(APPLICATION_PACKAGE_ICON_PATH);
+    }
+    return null;
+  }
+
+  public void updateEnabledState(final DeviceConnector connector) {
+    Job job = new Job("Update state") {
+      protected IStatus run(IProgressMonitor monitor) {
+        final boolean enabled = ApplicationModelProvider.isApplicationsSupported(connector);
+        Display display = PlatformUI.getWorkbench().getDisplay();
+        if (!display.isDisposed()) {
+          display.asyncExec(new Runnable() {
+            public void run() {
+              boolean enabledState = false;
+              if (enabled) {
+                applicationPropertiesAction.updateState((IStructuredSelection) tree.getSelection());
+                enabledState = startApplicationAction.isEnabled();
+              }
+              applicationTB.setEnabled(enabledState);
             }
-        };
-        job.schedule();
-	}
+          });
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    job.schedule();
+  }
 
 }

@@ -15,24 +15,40 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class Application extends Model {
-	
-	private RemoteApplication remoteApplication;
-	
-	public Application(String name, RemoteApplication remoteApplication) {
-		super(name);
-		this.remoteApplication = remoteApplication;
-		try {
-			String localizedName = (String) remoteApplication.getProperties().get(ApplicationDescriptor.APPLICATION_NAME);
-			if (localizedName != null) {
-				setName(localizedName);
-			}
-		} catch (IAgentException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public RemoteApplication getRemoteApplication() {
-		return remoteApplication;
-	}
+public final class Application extends Model {
+  private final String applicationID;
+  private final RemoteApplication remoteApplication;
+  private String state = RemoteApplication.STATE_INSTALLED;
+
+  public Application(String id, RemoteApplication remoteApplication) {
+    super(id);
+    applicationID = id;
+    this.remoteApplication = remoteApplication;
+    try {
+      String localizedName = (String) remoteApplication.getProperties().get(ApplicationDescriptor.APPLICATION_NAME);
+      if (localizedName != null) {
+        setName(localizedName);
+      }
+      state = remoteApplication.getState();
+    } catch (IAgentException e) {
+      //TODO handle this exception
+      e.printStackTrace();
+    }
+  }
+
+  public String getApplicationID() {
+    return applicationID;
+  }
+
+  public RemoteApplication getRemoteApplication() {
+    return remoteApplication;
+  }
+
+  public synchronized String getState() {
+    return state;
+  }
+
+  public synchronized void setState(String aState) {
+    state = aState;
+  }
 }

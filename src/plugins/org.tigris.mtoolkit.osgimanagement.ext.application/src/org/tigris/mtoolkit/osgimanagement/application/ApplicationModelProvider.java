@@ -32,184 +32,210 @@ import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
+public final class ApplicationModelProvider implements ContentTypeModelProvider, RemoteApplicationListener,
+    RemoteDevicePropertyListener {
 
-public class ApplicationModelProvider implements ContentTypeModelProvider, RemoteApplicationListener, RemoteDevicePropertyListener {
+  private ApplicationPackage applicationsNode;
+  private DeviceConnector connector;
+  private Model parent;
+  private ApplicationManager manager;
+  private boolean supportApplications;
 
-	private ApplicationPackage applicationsNode;
-	private DeviceConnector connector;
-	private Model parent;
-	private ApplicationManager manager;
-	private boolean supportApplications;
+  public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
+    this.connector = connector;
+    this.parent = parent;
 
-	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
-		this.connector = connector;
-		this.parent = parent;
+    supportApplications = isApplicationsSupported(connector);
 
-		supportApplications = isApplicationsSupported(connector);
+    try {
+      connector.addRemoteDevicePropertyListener(this);
+    } catch (IAgentException e1) {
+      e1.printStackTrace();
+    }
 
-		try {
-			connector.addRemoteDevicePropertyListener(this);
-		} catch (IAgentException e1) {
-			e1.printStackTrace();
-		}
-		
-		if (supportApplications) {
-			initModel(monitor);
-		}
-		monitor.done();
-		return applicationsNode;
-	}
-	
-	private void initModel(IProgressMonitor monitor) {
-		applicationsNode = new ApplicationPackage("Applications");
-		if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) { 
-			parent.addElement(applicationsNode);
-		}
-		try {
-			manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
-			addApplications(monitor);
-			try {
-				manager.addRemoteApplicationListener(this);
-			} catch (IAgentException e) {
-				e.printStackTrace();
-			}
-		} catch (IAgentException e) {
-			e.printStackTrace();
-		}
-	}
+    if (supportApplications) {
+      initModel(monitor);
+    }
+    monitor.done();
+    return applicationsNode;
+  }
 
-	private void addApplications(IProgressMonitor monitor) {
-		try {
-			RemoteApplication[] applications = manager.listApplications();
-			SubMonitor sMonitor = SubMonitor.convert(monitor, applications.length);
-			for (int i=0; i<applications.length; i++) {
-				Application application = new Application(applications[i].getApplicationId(), applications[i]);
-				applicationsNode.addElement(application);
-				sMonitor.worked(1);
-			}
-		} catch (IAgentException e) {
-			if (e.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
-				e.printStackTrace();
-			} else {
-				// no support for applications
-				// do nothing
-			}
-		}
-	}
+  private void initModel(IProgressMonitor monitor) {
+    applicationsNode = new ApplicationPackage("Applications");
+    if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) {
+      parent.addElement(applicationsNode);
+    }
+    try {
+      manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
+      addApplications(monitor);
+      try {
+        manager.addRemoteApplicationListener(this);
+      } catch (IAgentException e) {
+        e.printStackTrace();
+      }
+    } catch (IAgentException e) {
+      e.printStackTrace();
+    }
+  }
 
-	public void disconnect() {
-		if (manager != null) {
-			try {
-				manager.removeRemoteApplicationListener(this);
-			} catch (IAgentException e) {
-				e.printStackTrace();
-			}
-		}
-		if (parent != null) {
-			if (applicationsNode != null) {
-				parent.removeElement(applicationsNode);
-			}
-			parent = null;
-		}
-		connector = null;
-		applicationsNode = null;
-		supportApplications = false;
-	}
+  private void addApplications(IProgressMonitor monitor) {
+    try {
+      RemoteApplication[] applications = manager.listApplications();
+      SubMonitor sMonitor = SubMonitor.convert(monitor, applications.length);
+      for (int i = 0; i < applications.length; i++) {
+        Application application = new Application(applications[i].getApplicationId(), applications[i]);
+        applicationsNode.addElement(application);
+        sMonitor.worked(1);
+      }
+    } catch (IAgentException e) {
+      if (e.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
+        e.printStackTrace();
+      } else {
+        // no support for applications
+        // do nothing
+      }
+    }
+  }
 
-	public Model switchView(int viewType) {
-		Model node = null;
-		if (supportApplications) {
-			if (viewType == Framework.BUNDLES_VIEW) {
-				parent.addElement(applicationsNode);
-				node = applicationsNode;
-			} else if (viewType == Framework.SERVICES_VIEW) {
-				parent.removeElement(applicationsNode);
-			}
-		}
-		return node;
-	}
+  public void disconnect() {
+    if (manager != null) {
+      try {
+        manager.removeRemoteApplicationListener(this);
+      } catch (IAgentException e) {
+        e.printStackTrace();
+      }
+    }
+    if (parent != null) {
+      if (applicationsNode != null) {
+        parent.removeElement(applicationsNode);
+      }
+      parent = null;
+    }
+    connector = null;
+    applicationsNode = null;
+    supportApplications = false;
+  }
 
-	public void applicationChanged(RemoteApplicationEvent event) {
-		synchronized (Framework.getLockObject(connector)) {
-			if (event.getType() == RemoteApplicationEvent.INSTALLED) {
-				RemoteApplication rApplication = event.getApplication();
-				Application application;
-				try {
-					application = new Application(rApplication.getApplicationId(), rApplication);
-					applicationsNode.addElement(application);
-				} catch (IAgentException e) {
-					e.printStackTrace();
-				}
-			} else if (event.getType() == RemoteApplicationEvent.UNINSTALLED) {
-				Model applications[] = applicationsNode.getChildren();
-				for (int i=0; i<applications.length; i++) {
-					try {
-						if (((Application)applications[i]).getRemoteApplication().getApplicationId().equals(event.getApplication().getApplicationId())) {
-							applicationsNode.removeElement(applications[i]);
-							break;
-						}
-					} catch (IAgentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
+  public Model switchView(int viewType) {
+    Model node = null;
+    if (supportApplications && applicationsNode != null) {
+      if (viewType == Framework.BUNDLES_VIEW) {
+        parent.addElement(applicationsNode);
+        node = applicationsNode;
+      } else if (viewType == Framework.SERVICES_VIEW) {
+        parent.removeElement(applicationsNode);
+      }
+    }
+    return node;
+  }
 
-	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
-		if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
-			boolean enabled = ((Boolean) e.getValue()).booleanValue();
-			Object property = e.getProperty();
-			if (Capabilities.APPLICATION_SUPPORT.equals(property)) {
-				if (enabled) {
-					supportApplications = true;
-					initModel(new NullProgressMonitor());
-				} else {
-					supportApplications = false;
-					manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
-					try {
-						manager.removeRemoteApplicationListener(this);
-					} catch (IAgentException ex) {
-						ex.printStackTrace();
-					}
-					if (applicationsNode != null) {
-						applicationsNode.removeChildren();
-						parent.removeElement(applicationsNode);
-						applicationsNode = null;
-					}
+  public void applicationChanged(RemoteApplicationEvent event) {
+    if (applicationsNode == null) {
+      return;
+    }
+    synchronized (Framework.getLockObject(connector)) {
+      String remoteAppID = null;
+      RemoteApplication remoteApp = event.getApplication();
+      try {
+        remoteAppID = remoteApp.getApplicationId();
+      } catch (IAgentException e) {
+        // TODO handle exception
+        e.printStackTrace();
+        return;
+      }
+      if (remoteAppID == null) {
+        return;
+      }
+      if (event.getType() == RemoteApplicationEvent.INSTALLED) {
+        Application application = new Application(remoteAppID, remoteApp);
+        applicationsNode.addElement(application);
+      } else if (event.getType() == RemoteApplicationEvent.UNINSTALLED) {
+        Model applications[] = applicationsNode.getChildren();
+        for (int i = 0; i < applications.length; i++) {
+          Application app = (Application) applications[i];
+          if (remoteAppID.equals(app.getApplicationID())) {
+            applicationsNode.removeElement(app);
+            break;
+          }
+        }
+      } else if (event.getType() == RemoteApplicationEvent.STARTED || event.getType() == RemoteApplicationEvent.STOPPED) {
+        updateApplicationState(remoteApp, remoteAppID);
+      }
+    }
+  }
 
-				}
-			}
-		}
-	}
+  public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
+    if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
+      boolean enabled = ((Boolean) e.getValue()).booleanValue();
+      Object property = e.getProperty();
+      if (Capabilities.APPLICATION_SUPPORT.equals(property)) {
+        if (enabled) {
+          supportApplications = true;
+          initModel(new NullProgressMonitor());
+        } else {
+          supportApplications = false;
+          manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
+          try {
+            manager.removeRemoteApplicationListener(this);
+          } catch (IAgentException ex) {
+            ex.printStackTrace();
+          }
+          if (applicationsNode != null) {
+            applicationsNode.removeChildren();
+            parent.removeElement(applicationsNode);
+            applicationsNode = null;
+          }
 
-	public Model getResource(String id, String version, Framework fw) throws IAgentException {
-		return null;
-	}
+        }
+      }
+    }
+  }
 
-	public String[] getSupportedMimeTypes() {
-		return null;
-	}
+  public Model getResource(String id, String version, Framework fw) throws IAgentException {
+    return null;
+  }
 
-	public static boolean isApplicationsSupported(DeviceConnector connector) {
-		if (connector == null) {
-			return true;
-		}
-		Framework fw = Util.findFramework(connector);
-		if (fw == null) {
-			return false;
-		}
-		Dictionary connectorProperties = fw.getConnectorProperties();
-		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
-			return true;
-		} else {
-			support = connectorProperties.get(Capabilities.APPLICATION_SUPPORT);
-			if (support != null && Boolean.parseBoolean(support.toString())) {
-				return true;
-			}
-		}
-		return false;
-	}
+  public String[] getSupportedMimeTypes() {
+    return null;
+  }
+
+  public static boolean isApplicationsSupported(DeviceConnector connector) {
+    if (connector == null) {
+      return true;
+    }
+    Framework fw = Util.findFramework(connector);
+    if (fw == null) {
+      return false;
+    }
+    Dictionary connectorProperties = fw.getConnectorProperties();
+    Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+    if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
+      return true;
+    } else {
+      support = connectorProperties.get(Capabilities.APPLICATION_SUPPORT);
+      if (support != null && Boolean.parseBoolean(support.toString())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void updateApplicationState(RemoteApplication remoteApp, String remoteAppID) {
+    if (applicationsNode == null) {
+      return;
+    }
+    Model applications[] = applicationsNode.getChildren();
+    for (int i = 0; i < applications.length; i++) {
+      try {
+        Application app = (Application) applications[i];
+        if (remoteAppID.equals(app.getApplicationID())) {
+          app.setState(remoteApp.getState());
+          break;
+        }
+      } catch (IAgentException e) {
+        // TODO handle exception
+        e.printStackTrace();
+      }
+    }
+  }
 }
