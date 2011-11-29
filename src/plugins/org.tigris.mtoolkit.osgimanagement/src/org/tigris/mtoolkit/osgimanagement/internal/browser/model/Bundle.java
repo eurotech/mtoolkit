@@ -34,23 +34,24 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class Bundle extends Model implements IconProvider,ConstantsDistributor {
-
+public class Bundle extends Model implements IconProvider, ConstantsDistributor {
 	public static final String OVR_ACTIVE_ICON = "ovr_active.gif"; //$NON-NLS-1$
 	public static final String OVR_RESOLVED_ICON = "ovr_resolved.gif"; //$NON-NLS-1$
 	public static final String OVR_SIGNED_ICON = "ovr_signed2.gif"; //$NON-NLS-1$
 
+	// bundle types
+	public static final int BUNDLE_TYPE_FRAGMENT = RemoteBundle.BUNDLE_TYPE_FRAGMENT;
+	public static final int BUNDLE_TYPE_EXTENSION = BUNDLE_TYPE_FRAGMENT + 1;
+	
+	private final RemoteBundle rBundle;
+	
 	private long id;
 	private boolean needsUpdate;
 	private int state;
 	private String version;
-
-	// bundle types
-	public static final int BUNDLE_TYPE_FRAGMENT = RemoteBundle.BUNDLE_TYPE_FRAGMENT;
-	public static final int BUNDLE_TYPE_EXTENSION = BUNDLE_TYPE_FRAGMENT + 1;
+	private boolean isSigned;
 	// 0 for regular bundles
 	private int type = -1;
-	private final RemoteBundle rBundle;
 	private String category;
 	private ImageData iconData;
 	private Image icon;
@@ -61,6 +62,7 @@ public class Bundle extends Model implements IconProvider,ConstantsDistributor {
 		Assert.isNotNull(rBundle);
 		this.rBundle = rBundle;
 		this.id = rBundle.getBundleId();
+		isSigned = rBundle.isBundleSigned();
 		// state is not get from rBundle to avoid unnecessary remote method
 		// calls
 		this.state = state;
@@ -78,6 +80,7 @@ public class Bundle extends Model implements IconProvider,ConstantsDistributor {
 		type = master.getType();
 		category = master.getCategory();
 		needsUpdate = true;
+		isSigned = master.isSigned;
 		version = master.version;
 	}
 
@@ -163,6 +166,7 @@ public class Bundle extends Model implements IconProvider,ConstantsDistributor {
 				icon.dispose();
 				icon = null;
 			}
+			isSigned = rBundle.isBundleSigned();
 		} finally {
 			// always update the viewers
 			updateElement();
@@ -339,12 +343,7 @@ public class Bundle extends Model implements IconProvider,ConstantsDistributor {
 	}
 
 	public boolean isSigned() {
-		boolean result = false;
-		try {
-			result = rBundle.isBundleSigned();
-		} catch (IAgentException e) {
-		}
-		return result;
+		return isSigned;
 	}
 
 	@Override
