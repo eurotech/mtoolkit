@@ -53,12 +53,12 @@ implements IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	// TODO: Move these defaults to PreferencesInitializer, which is more
 	// suitable for them
 	public static final boolean autoConnectDefault = true;
-	public static final boolean infoLogDefault = true;
+	public static final boolean infoLogDefault = false;
 	public static final boolean autoStartAfterInstall = true;
 	public static final boolean useActivationPolicy = true;
 	public static final boolean showBundleCategories = true;
 	public static final boolean showSkippedSystemBundlesDefault = true;
-	public static boolean autoUpdateBundlesOnInstallDefault = false;
+	public static final boolean autoUpdateBundlesOnInstallDefault = false;
 
 	private boolean showSkippedSystemBundles;
 
