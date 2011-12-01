@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.tigris.mtoolkit.osgimanagement" version="2">
+    <resource path="src/org/tigris/mtoolkit/osgimanagement/installation/FrameworkConnectorFactory.java" type="org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory">
+        <filter id="643846161">
+            <message_arguments>
+                <message_argument value="FrameworkImpl"/>
+                <message_argument value="FrameworkConnectorFactory"/>
+                <message_argument value="createPMPConnection(DeviceConnector, FrameworkImpl, String, boolean)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
