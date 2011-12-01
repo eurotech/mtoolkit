@@ -137,10 +137,13 @@ public class PluginProvider implements InstallationItemProvider {
 		 * @param bundlesToInstall
 		 * @return IStatus
 		 */
-		protected IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor,
+		IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor,
 				List bundlesToInstall) {
 			// first check if framework is connected and all bundles info is
 			// retrieved
+			 //TODO:We don't need that because it blocks the install job if user manually 
+			 //disconnects the framework-https://devzone.prosyst.bg/jira/browse/TOOLKIT-1840.
+			 //We must decide if the install should fail in such case.
 			while ((!framework.isConnected() || framework.isConnecting()) && !monitor.isCanceled()) {
 				try {
 					Thread.sleep(50);
