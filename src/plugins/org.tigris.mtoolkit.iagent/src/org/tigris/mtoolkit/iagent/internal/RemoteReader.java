@@ -30,6 +30,7 @@ public class RemoteReader extends InputStream {
 	private static MethodSignature READ_METHOD = new MethodSignature("read", new String[] { "int" }, true);
 	private static MethodSignature CLOSE_METHOD = new MethodSignature("close");
 
+	private boolean isClosed;
 	private RemoteObject remoteInput;
 
 	public RemoteReader(RemoteObject remoteInput) {
@@ -64,8 +65,12 @@ public class RemoteReader extends InputStream {
 	 * Closes the remote stream and disposes the remote object.
 	 */
 	public synchronized void close() {
+		if (isClosed) {
+			return;
+		}
 		try {
 			CLOSE_METHOD.call(remoteInput);
+			isClosed = true;
 		} catch (IAgentException e) {
 			DebugUtils.info(this, "Failed to close remote input stream: " + e.getMessage());
 		}
