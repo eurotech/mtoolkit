@@ -867,6 +867,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					RemoteService usedServ[] = sourceBundle.getRemoteBundle().getServicesInUse();
 
 					Bundle bundle = findBundle(id);
+					if (bundle == null) {
+						return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+					}
 					updateBundleServices(bundle, regServ, usedServ);
 					for (int i = 0; i < bundle.getSlaves().size(); i++) {
 						updateBundleServices((Bundle) bundle.getSlaves().elementAt(i), regServ, usedServ);
