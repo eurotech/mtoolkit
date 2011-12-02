@@ -11,7 +11,7 @@
 <body>
 <h1>OSGi Frameworks  Tree </h1>
 <p>OSGi frameworks are displayed in a separate view in the Eclipse Workbench - the <b>Frameworks</b> view. The view arranges the  OSGi frameworks in separate trees as you can unfold the tree of a connected framework and browse its components.</p>
-<p>Basically, an OSGi framework tree has two display modes - <i>Bundles</i> and <i>Services</i>. In the Bundles (default) mode, the main components of the tree are the bundles, organized by category, the deployment packages, widgets and applications currently installed in the target framework. In the Services mode, the main components of the tree are the services registered in the OSGi framework. </p>
+<p>Basically, an OSGi framework tree has two display modes - <i>Bundles</i> and <i>Services</i>. In the Bundles (default) mode, the main components of the tree are the bundles, organized by category,  deployment packages and applications currently installed in the target framework. In the Services mode, the main components of the tree are the services registered in the OSGi framework. </p>
 <h2>Bundles Display Mode</h2>
 <p>You can observe the following hierarchy of components in the Bundles display mode:</p>
 <p class="Note">Note: Following is the complete structure provided by mToolkit including base  features and available  extensions. </p>
@@ -20,7 +20,7 @@
       <ul>
         <li><b>Application</b>
             <ul>
-              <li><i>Application</i> - An Application compatible with the OSGi Application Admin specification, currently available on the target framework. For example, such an applications might be eRCP applications, MIDlets, widgets, etc., depending on the application containers installed in  the target framework. </li>
+              <li><i>Application</i> - An Application compatible with the OSGi Application Admin specification, currently available on the target framework. For example, such  applications might be eRCP applications, Android APK applications, etc., depending on the application containers installed in  the target framework. </li>
             </ul>
         </li>
         <li><b>Bundles</b>
@@ -66,12 +66,6 @@
 (Available upon installing an extension)            
   <ul>
               <li><i>Management Server</i> - An OMA-DM server that can manage remotely the target OSGi framework. To be able to connect an OSGi platform to an OMA-DM server, it must have an OMA-DM client installed. </li>
-          </ul>
-        </li>
-        <li><b>Widgets</b>
-(Available upon installing an extension)             
-  <ul>
-          <li><i>Widget</i> - W3C widgets are shown by their name as defined in the <i>widgetname </i> tag of the <i>config.xml</i> files. To be able to install and manage W3C widgets, you have to enable a widget container on the target OSGi framework. </li>
           </ul>
         </li>
       </ul>
