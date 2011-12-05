@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.SameShellProvider;
+import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -183,8 +184,9 @@ public class ActionsManager {
 					Messages.stop_system_bundle, bundle.getName()), MessageDialog.QUESTION, new String[] { "Continue",
 					"Cancel" }, 0);
 			int statusCode = UIHelper.openWindow(dialog);
-			if (statusCode == 1)
+			if (statusCode != Window.OK){
 				return;
+			}
 		}
 
 		RemoteBundleOperation job = new StopBundleOperation(bundle);
