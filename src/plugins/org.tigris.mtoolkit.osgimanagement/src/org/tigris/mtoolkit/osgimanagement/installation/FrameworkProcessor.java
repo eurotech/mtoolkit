@@ -129,6 +129,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return processInstallationItems(new InstallationItem[] { item }, target, monitor);
 	}
 
+	//TODO use multi status to handle errors and warnings
 	public IStatus processInstallationItems(final InstallationItem[] items, InstallationTarget target,
 			final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
@@ -200,7 +201,10 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 		List<InstallationPair> itemsToInstall = new ArrayList<InstallationPair>();
 		for (final InstallationItem item : items) {
-			processItem(item, framework, monitor, subMonitor, itemsToInstall);
+			IStatus status = processItem(item, framework, monitor, subMonitor, itemsToInstall);
+			if (status != null && status.matches(IStatus.ERROR)) {
+				FrameworkPlugin.log(status);
+			}
 		}
 		installItems((FrameworkImpl) framework, itemsToInstall);
 

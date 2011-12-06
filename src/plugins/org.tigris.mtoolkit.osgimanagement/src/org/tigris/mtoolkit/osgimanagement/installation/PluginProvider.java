@@ -55,7 +55,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 /**
  * @since 5.0
  */
-public class PluginProvider implements InstallationItemProvider {
+public final class PluginProvider implements InstallationItemProvider {
 
 	public class PluginItem implements InstallationItem {
 		private IPluginModelBase pluginBase;
@@ -127,6 +127,33 @@ public class PluginProvider implements InstallationItemProvider {
 			}
 		}
 
+		public Object getAdapter(Class adapter) {
+			if (adapter.equals(IBaseModel.class)) {
+				return pluginBase;
+			} else {
+				return null;
+			}
+		}
+
+		/**
+		 * @since 6.0
+		 */
+		public IPluginModelBase getPlugin() {
+			return pluginBase;
+		}
+
+		public InstallationItem[] getChildren() {
+			return null;
+		}
+
+		public void setLocation(File file) {
+			if (preparedItem != null && !preparedItem.equals(file)) {
+				// delete the previous prepared item
+				preparedItem.delete();
+			}
+			preparedItem = file;
+		}
+
 		/**
 		 * This method checks for required bundles for specified plugin missing
 		 * on target framework. A dialog with missing bundles is shown to user
@@ -137,24 +164,15 @@ public class PluginProvider implements InstallationItemProvider {
 		 * @param bundlesToInstall
 		 * @return IStatus
 		 */
-		IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor,
-				List bundlesToInstall) {
-			// first check if framework is connected and all bundles info is
-			// retrieved
-			 //TODO:We don't need that because it blocks the install job if user manually 
-			 //disconnects the framework-https://devzone.prosyst.bg/jira/browse/TOOLKIT-1840.
-			 //We must decide if the install should fail in such case.
-			while ((!framework.isConnected() || framework.isConnecting()) && !monitor.isCanceled()) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-				}
-			}
-
+		IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall) {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
-
+			
+			if (!framework.isConnected()) {
+				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
+						"Connection to framework was lost.");
+			}
 			// find missing bundle dependencies
 			BundleDescription descr = pluginBase.getBundleDescription();
 			if (descr == null) {
@@ -223,36 +241,6 @@ public class PluginProvider implements InstallationItemProvider {
 				}
 			}
 			return Status.OK_STATUS;
-		}
-
-		public Object getAdapter(Class adapter) {
-			// if (adapter.equals(IResource.class)) {
-			// return project;
-			if (adapter.equals(IBaseModel.class)) {
-				return pluginBase;
-			} else {
-				return null;
-			}
-		}
-
-		/**
-		 * @since 6.0
-		 */
-		public IPluginModelBase getPlugin() {
-			return pluginBase;
-		}
-
-		public InstallationItem[] getChildren() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		public void setLocation(File file) {
-			if (preparedItem != null && !preparedItem.equals(file)) {
-				// delete the previous prepared item
-				preparedItem.delete();
-			}
-			preparedItem = file;
 		}
 	}
 
