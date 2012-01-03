@@ -20,5 +20,10 @@
             type="application/vnd.osgi.dp">
       </provider>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.tigris.mtoolkit.osgimanagement.dp.StartupClass">
+      </startup>
+   </extension>
 </plugin>
