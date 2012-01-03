@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
@@ -42,6 +43,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchAdapter;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.iagent.BundleSnapshot;
@@ -88,7 +91,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	private Model bundles;
 
-	// public IProgressMonitor monitor;
 	private boolean refreshing = false;
 	private boolean connecting = false;
 
@@ -1219,16 +1221,20 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	protected int getRemoteBundleType(RemoteBundle rBundle, Dictionary headers) throws IAgentException {
-		String fragment = (String) headers.get("Fragment-Host"); //$NON-NLS-1$
-		int type = 0;
-		if (fragment != null && !fragment.equals("")) { //$NON-NLS-1$
-			type = Bundle.BUNDLE_TYPE_FRAGMENT;
-			RemoteBundle hosts[] = rBundle.getHosts();
-			if (hosts != null && hosts.length == 1 && hosts[0].getBundleId() == 0) {
-				type = Bundle.BUNDLE_TYPE_EXTENSION;
+		try {
+			ManifestElement[] fragmentHost = ManifestElement.parseHeader(Constants.FRAGMENT_HOST,
+					(String) headers.get(Constants.FRAGMENT_HOST));
+			if (fragmentHost != null && fragmentHost.length > 0) {
+				if (fragmentHost[0].getDirective(Constants.EXTENSION_DIRECTIVE) != null) {
+					return Bundle.BUNDLE_TYPE_EXTENSION;
+				} else {
+					return Bundle.BUNDLE_TYPE_FRAGMENT;
+				}
 			}
+		} catch (BundleException e) {
+			// nothing to do!!!
 		}
-		return type;
+		return 0;
 	}
 
 	private void addServices(SubMonitor sMonitor) throws IAgentException {
