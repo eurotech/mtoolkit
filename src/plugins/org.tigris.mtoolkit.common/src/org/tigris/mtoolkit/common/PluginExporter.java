@@ -12,14 +12,11 @@ package org.tigris.mtoolkit.common;
 
 public class PluginExporter {
 
-	public static IPluginExporter getInstance() {
-		if (PluginExporter_34.isCompatible())
-			return new PluginExporter_34();
-		if (PluginExporter_35.isCompatible())
-			return new PluginExporter_35();
-		else
-			return null;
-	}
+  public static IPluginExporter getInstance() {
+    if (PluginExporter_35.isCompatible()) {
+      return new PluginExporter_35();
+    }
+    return null;
+  }
 
-	
 }
