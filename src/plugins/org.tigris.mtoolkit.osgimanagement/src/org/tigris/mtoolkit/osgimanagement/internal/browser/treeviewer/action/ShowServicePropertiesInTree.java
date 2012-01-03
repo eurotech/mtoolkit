@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class ShowServicePropertiesInTree extends SelectionProviderAction implements IStateAction {
@@ -67,7 +68,8 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 			setEnabled(false);
 			setChecked(false);
 		} else {
-			setEnabled(true);
+			Framework fw = (Framework) frameworks.get(0);
+			setEnabled(fw.getViewType() == Framework.BUNDLES_VIEW);
 			setChecked(srvcPropertiesShown);
 		}
 	}
