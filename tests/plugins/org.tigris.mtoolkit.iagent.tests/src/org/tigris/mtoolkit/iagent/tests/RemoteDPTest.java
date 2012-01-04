@@ -12,11 +12,8 @@ package org.tigris.mtoolkit.iagent.tests;
 
 import java.util.Dictionary;
 
-import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.iagent.VMManager;
 
 public class RemoteDPTest extends DeploymentTestCase {
 
@@ -66,26 +63,6 @@ public class RemoteDPTest extends DeploymentTestCase {
 		String bundleVer = (String) bundles.get(bundleSN);
 		assertEquals("1.0.0", bundleVer);
 
-	}
-
-	public void testGetBundle() throws IAgentException {
-		RemoteBundle bundle = dp.getBundle("test.depl.b1");
-		assertNotNull("The test bundle should be available", bundle);
-		assertTrue("The test bundle must be not in UNINSTALLED state", bundle.getState() != Bundle.UNINSTALLED);
-		assertEquals("test.depl.b1", bundle.getSymbolicName());
-		assertEquals("1.0.0", bundle.getVersion());
-
-		assertNotNull("DeviceConnector is null", connector);
-		VMManager vmManager = connectorSpi.getDeviceConnector().getVMManager();
-		assertNotNull("VMManager is null", vmManager);
-		try {
-			bundle.uninstall();
-			fail("Bundle uninstallation should not succeed for bundle contained in dp");
-		} catch (IAgentException iae) {
-			assertTrue(Bundle.UNINSTALLED != bundle.getState());
-		}
-		bundle = dp.getBundle("test.depl.b1");
-		assertNotNull(bundle);
 	}
 
 	public void testUninstall() throws IAgentException {
