@@ -39,7 +39,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
-import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -129,7 +128,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return processInstallationItems(new InstallationItem[] { item }, target, monitor);
 	}
 
-	//TODO use multi status to handle errors and warnings
+	// TODO use multi status to handle errors and warnings
 	public IStatus processInstallationItems(final InstallationItem[] items, InstallationTarget target,
 			final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
@@ -186,18 +185,17 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		subMonitor.worked(1);
 
 		subMonitor.setTaskName(Messages.preparing_operation_title);
+
 		for (int i = 0; i < items.length; i++) {
 			IStatus preparationStatus = items[i].prepare(subMonitor.newChild(1), preparationProps);
-			if (preparationStatus.getSeverity() == IStatus.ERROR || preparationStatus.getSeverity() == IStatus.CANCEL) {
+			if (preparationStatus == null) {
+				continue;
+			}
+			if (preparationStatus.matches(IStatus.ERROR) || preparationStatus.matches(IStatus.CANCEL)) {
 				return preparationStatus;
 			}
 		}
 		subMonitor.worked(4);
-
-		IStatus signStatus = CertUtils.signItems(items, subMonitor.newChild(1), preparationProps);
-		if (signStatus.matches(IStatus.CANCEL | IStatus.ERROR)) {
-			return signStatus;
-		}
 
 		List<InstallationPair> itemsToInstall = new ArrayList<InstallationPair>();
 		for (final InstallationItem item : items) {

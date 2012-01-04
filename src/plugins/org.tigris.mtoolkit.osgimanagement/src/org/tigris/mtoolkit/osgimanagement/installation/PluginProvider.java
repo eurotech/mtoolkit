@@ -42,6 +42,7 @@ import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.export.PluginExportManager;
 import org.tigris.mtoolkit.common.images.UIResources;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
@@ -168,7 +169,7 @@ public final class PluginProvider implements InstallationItemProvider {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
-			
+
 			if (!framework.isConnected()) {
 				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
 						"Connection to framework was lost.");
@@ -404,6 +405,12 @@ public final class PluginProvider implements InstallationItemProvider {
 					convertedFile.getParentFile().mkdirs();
 					AndroidUtils.convertToDex(file[i], convertedFile, monitor);
 					item.setLocation(convertedFile);
+				}
+				IStatus status = CertUtils.signItems(new InstallationItem[] { item }, monitor, properties);
+				if (status != null) {
+					if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
+						return status;
+					}
 				}
 			}
 		} catch (IOException ioe) {

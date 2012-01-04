@@ -22,92 +22,93 @@ import org.eclipse.core.runtime.Status;
 import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 
 public class BaseFileItem implements InstallationItem {
 
-	/**
-	 * @since 6.0
-	 */
-	protected InstallationItemProvider provider;
-	protected File baseFile;
-	protected String mimeType;
-	protected File preparedFile;
+  /**
+   * @since 6.0
+   */
+  protected InstallationItemProvider provider;
+  protected File baseFile;
+  protected String mimeType;
+  protected File preparedFile;
 
-	public BaseFileItem(File file, String mimeType) {
-		this.baseFile = file;
-		this.mimeType = mimeType;
-	}
+  public BaseFileItem(File file, String mimeType) {
+    this.baseFile = file;
+    this.mimeType = mimeType;
+  }
 
   public InputStream getInputStream() throws IOException {
-		if (preparedFile != null)
-			return new FileInputStream(preparedFile);
-		if (baseFile != null)
-			return new FileInputStream(baseFile);
-		throw new IllegalStateException("Installation item is not initialized properly with the generated artifact location");
-	}
+    if (preparedFile != null)
+      return new FileInputStream(preparedFile);
+    if (baseFile != null)
+      return new FileInputStream(baseFile);
+    throw new IllegalStateException(
+        "Installation item is not initialized properly with the generated artifact location");
+  }
 
-	/**
-	 * @since 6.0
-	 */
+  /**
+   * @since 6.0
+   */
   public String getLocation() {
-		if (preparedFile != null)
-			return preparedFile.getAbsolutePath();
-		if (baseFile != null)
-			return baseFile.getAbsolutePath();
-		throw new IllegalStateException("Installation item wasn't initialized correctly, missing location to base file");
-	}
+    if (preparedFile != null)
+      return preparedFile.getAbsolutePath();
+    if (baseFile != null)
+      return baseFile.getAbsolutePath();
+    throw new IllegalStateException("Installation item wasn't initialized correctly, missing location to base file");
+  }
 
-	public String getMimeType() {
-		return mimeType;
-	}
+  public String getMimeType() {
+    return mimeType;
+  }
 
   public String getName() {
-		return baseFile.getName();
-	}
+    return baseFile.getName();
+  }
 
   public InstallationItem[] getChildren() {
     return null;
   }
 
-  public IStatus prepare(IProgressMonitor monitor, Map properties){
-		try {
-			if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name")) &&
-							!AndroidUtils.isConvertedToDex(baseFile)) {
-				File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + getName());
-				convertedFile.getParentFile().mkdirs();
-				if (FileUtils.getFileExtension(baseFile).equals("dp")) {
-					if (!AndroidUtils.isDpConvertedToDex(baseFile)) {
-						AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
-						preparedFile = convertedFile;
-					}
-				} else if (AndroidUtils.isDexCompatible(baseFile) && !AndroidUtils.isConvertedToDex(baseFile)) {
-					AndroidUtils.convertToDex(baseFile, convertedFile, monitor);
-					preparedFile = convertedFile;
-				}
-			}
-         if(monitor.isCanceled()){
-       return  Status.CANCEL_STATUS;
-         }
-		} catch (IOException ioe) {
-     return UtilitiesPlugin.newStatus(IStatus.ERROR,
-          "Failed to prepare file for installation", ioe);
-		}
-    return Status.OK_STATUS;
-	}
+  public IStatus prepare(IProgressMonitor monitor, Map properties) {
+    try {
+      if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))
+          && !AndroidUtils.isConvertedToDex(baseFile)) {
+        File convertedFile = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/dex/" + getName());
+        convertedFile.getParentFile().mkdirs();
+        if (FileUtils.getFileExtension(baseFile).equals("dp")) {
+          if (!AndroidUtils.isDpConvertedToDex(baseFile)) {
+            AndroidUtils.convertDpToDex(baseFile, convertedFile, monitor);
+            preparedFile = convertedFile;
+          }
+        } else if (AndroidUtils.isDexCompatible(baseFile) && !AndroidUtils.isConvertedToDex(baseFile)) {
+          AndroidUtils.convertToDex(baseFile, convertedFile, monitor);
+          preparedFile = convertedFile;
+        }
+      }
+      if (monitor.isCanceled()) {
+        return Status.CANCEL_STATUS;
+      }
+      return CertUtils.signItems(new InstallationItem[] { this }, monitor, properties);
+    } catch (IOException ioe) {
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Failed to prepare file for installation", ioe);
+    }
+  }
 
-	public void dispose() {
+  public void dispose() {
     if (preparedFile != null) {
-			preparedFile.delete();
-			preparedFile = null;
-		}
-	}
+      preparedFile.delete();
+      preparedFile = null;
+    }
+  }
 
-	public Object getAdapter(Class adapter) {
-		return null;
-	}
-  
+  public Object getAdapter(Class adapter) {
+    return null;
+  }
+
   public void setLocation(File file) {
     preparedFile = file;
   }
-  
+
 }

@@ -52,11 +52,10 @@ import org.tigris.mtoolkit.common.installation.InstallationConstants;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 
-public class CertUtils {
-  private static ServiceTracker certProviderTracker;
-
+public final class CertUtils {
   private static final String DT = "."; //$NON-NLS-1$
 
+  private static ServiceTracker certProviderTracker;
 
   /**
    * A convenient method which delegates to
@@ -90,15 +89,6 @@ public class CertUtils {
       return provider.getCertificate(uid);
     }
     return null;
-  }
-
-  private static ICertificateProvider getCertProvider() {
-    if (certProviderTracker == null) {
-      certProviderTracker = new ServiceTracker(UtilitiesPlugin.getDefault().getBundleContext(),
-          ICertificateProvider.class.getName(), null);
-      certProviderTracker.open();
-    }
-    return (ICertificateProvider) certProviderTracker.getService();
   }
 
   /**
@@ -162,12 +152,212 @@ public class CertUtils {
     return (String) properties.get(InstallationConstants.CERT_KEY_PASS + DT + id);
   }
 
+  /**
+   * Method for signing InstallationItem instances as they must contain a java.io.File instance 
+   * that will be signed. Files can be JAR and DP files. It is common this file instance 
+   * to be set at implementation of InstallationItem interface method prepare() in each provided item. In that case
+   * prepare() method should be invoked before invoking signItems() method.
+   * If key store and/or private key passwords for given
+   * certificate are not provided then this function opens 
+   * password dialogs for getting them from the user.
+   * 
+   * @param InstallationItem[] items - items that will be signed
+   * @param IProgressMonitor monitor
+   * @param Map preparationProps - properties for signing. 
+   * @return IStatus that can be with severity ERROR / CANCEL or OK
+   */
+
+  public static IStatus signItems(InstallationItem[] items, IProgressMonitor monitor, Map preparationProps) {
+    boolean hasError = false;
+    try {
+      if (preparationProps == null) {
+        throw new CoreException(new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID,
+            "Signing properties are not initialized!"));
+      }
+      int count = getCertificatesCount(preparationProps);
+      if (count <= 0) {
+        return Status.OK_STATUS;
+      }
+      List preparedJarFiles = new ArrayList();
+      List preparedDpFiles = new ArrayList();
+
+      Map preparedItems = initializePreparedItemsMap(items, preparedJarFiles, preparedDpFiles);
+      //if items types are not supporting signing
+      if (preparedItems == null || preparedItems.size() == 0) {
+        return Status.OK_STATUS;
+      }
+      setSigningProperties(monitor, preparationProps);
+      List signedJarFilesList = CertUtils.signJars0(preparedJarFiles, monitor, preparationProps);
+      List signedDpFilesList = CertUtils.signDps0(preparedDpFiles, monitor, preparationProps);
+      setItemsLocation(preparedJarFiles, preparedDpFiles, preparedItems, signedJarFilesList, signedDpFilesList);
+    } catch (IOException ioe) {
+      //this exception is thrown by setSigningProperties() if the user has not been entered full information needed for sign
+      if (!monitor.isCanceled()) {
+        if (!CertUtils.continueWithoutSigning(ioe.getMessage())) {
+          monitor.setCanceled(true);
+        }
+      }
+    } catch (CoreException ex) {
+      hasError = true;
+      return ex.getStatus();
+    } finally {
+      //if installation process is cancelled by the user or there is error
+      if (monitor.isCanceled() || hasError) {
+        for (int i = 0; i < items.length; i++) {
+          items[i].dispose();
+        }
+      }
+    }
+    if (monitor.isCanceled()) {
+      return Status.CANCEL_STATUS;
+    }
+    return Status.OK_STATUS;
+  }
+
+  public static boolean signJar(File file, File signedFile, IProgressMonitor monitor, Map properties)
+      throws IOException {
+    if (properties == null) {
+      throw new IOException("Signing properties are not initialized");
+    }
+    int count = getCertificatesCount(properties);
+    if (count == 0) {
+      return !monitor.isCanceled();
+    }
+    Map propertiesDupl = new HashMap(properties);
+    setSigningProperties(monitor, propertiesDupl);
+
+    for (int i = 0; i < count && !monitor.isCanceled(); i++) {
+      String alias = getCertificateAlias(propertiesDupl, i);
+      String location = getCertificateStoreLocation(propertiesDupl, i);
+      String type = getCertificateStoreType(propertiesDupl, i);
+      String storePass = getCertificateStorePass(propertiesDupl, i);
+      String keyPass = getCertificateKeyPass(propertiesDupl, i);
+      String inFileName = (signedFile != null && i > 0) ? signedFile.getAbsolutePath() : file.getAbsolutePath();
+      String outFileName = (signedFile != null && i == 0) ? signedFile.getAbsolutePath() : null;
+      signJar(inFileName, outFileName, monitor, alias, location, type, storePass, keyPass);
+    }
+    return !monitor.isCanceled();
+  }
+
+  /**
+   * Returns location of jarsigner tool or null if the location cannot be
+   * determined.
+   * 
+   * @return the jarsigner location
+   */
+  public static String getJarsignerLocation() {
+    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
+        "org.tigris.mtoolkit.certmanager");
+    String location = preferenceStore.getString("jarsigner.location");
+    if (location == null || location.length() == 0) {
+      location = getDefaultJarsignerLocation();
+    }
+    return location;
+  }
+
+  public static String getDefaultJarsignerLocation() {
+    String location = "";
+    String javaHome = System.getProperty("java.home");
+    if (javaHome != null) {
+      String relativePath = "bin" + File.separator + "jarsigner.exe";
+      File signerFile = new File(javaHome, relativePath);
+      if (signerFile.exists()) {
+        location = signerFile.getAbsolutePath();
+      } else {
+        File parentPath = new File(javaHome).getParentFile();
+        signerFile = new File(parentPath, relativePath);
+        if (signerFile.exists()) {
+          location = signerFile.getAbsolutePath();
+        }
+      }
+    }
+    return location;
+  }
+
+  /**
+   * Opens "Continue without signing" dialog. Returns true if user selects Yes.
+   * 
+   * @param error
+   *          error to be displayed
+   * @return
+   */
+  public static boolean continueWithoutSigning(final String error) {
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    final Boolean result[] = new Boolean[1];
+    display.syncExec(new Runnable() {
+      public void run() {
+        Shell shell = display.getActiveShell();
+        String nl = System.getProperty("line.separator");
+        MessageDialog dialog = new MessageDialog(shell, "Warning", null, "The signing operation failed. Reason:" + nl
+            + error + nl + "Continue without signing?", MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
+        if (dialog.open() == Window.OK) {
+          result[0] = new Boolean(true);
+        }
+      }
+    });
+    return result[0] != null;
+  }
+
+  /**
+   * Opens password dialog for getting keystore password.
+   * 
+   * @param keystoreLocation
+   * @return the password entered or null if dialog is canceled
+   */
+  public static String getKeystorePassword(final String keystoreLocation) {
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    final String result[] = new String[1];
+    display.syncExec(new Runnable() {
+      public void run() {
+        Shell shell = display.getActiveShell();
+        PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
+        dialog.setMessage("Enter password for keystore: \"" + keystoreLocation + "\"");
+        if (dialog.open() == Window.OK) {
+          result[0] = dialog.getPassword();
+        }
+      }
+    });
+    return result[0];
+  }
+
+  /**
+   * Opens password dialog for getting private key password.
+   * 
+   * @param keystoreLocation
+   * @return the password entered or null if dialog is canceled
+   */
+  public static String getPrivateKeyPassword(final String keystoreLocation, final String alias) {
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    final String result[] = new String[1];
+    display.syncExec(new Runnable() {
+      public void run() {
+        Shell shell = display.getActiveShell();
+        PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
+        dialog.setMessage("Enter private key password for alias \"" + alias + "\" in keystore \"" + keystoreLocation
+            + "\" or leave the field empty to use the keystore password.");
+        if (dialog.open() == Window.OK) {
+          result[0] = dialog.getPassword();
+        }
+      }
+    });
+    return result[0];
+  }
+
   private static void setCertificateStorePass(Map properties, int id, String storePass) {
     properties.put(InstallationConstants.CERT_STORE_PASS + DT + id, storePass);
   }
 
   private static void setCertificateKeyPass(Map properties, int id, String keyPass) {
     properties.put(InstallationConstants.CERT_KEY_PASS + DT + id, keyPass);
+  }
+
+  private static ICertificateProvider getCertProvider() {
+    if (certProviderTracker == null) {
+      certProviderTracker = new ServiceTracker(UtilitiesPlugin.getDefault().getBundleContext(),
+          ICertificateProvider.class.getName(), null);
+      certProviderTracker.open();
+    }
+    return (ICertificateProvider) certProviderTracker.getService();
   }
 
   /**
@@ -193,7 +383,7 @@ public class CertUtils {
    *          be used.
    * @throws IOExceptions
    */
-  public static void signJar(String jarName, String signedJar, IProgressMonitor monitor, String alias,
+  private static void signJar(String jarName, String signedJar, IProgressMonitor monitor, String alias,
       String storeLocation, String storeType, String storePass, String keyPass) throws IOException {
     String jarSigner = getJarsignerLocation();
     if (jarSigner == null) {
@@ -455,149 +645,19 @@ public class CertUtils {
     }
   }
 
-  public static boolean signJar(File file, File signedFile, IProgressMonitor monitor, Map properties)
-      throws IOException {
-    if (properties == null) {
-      throw new IOException("Signing properties are not initialized");
-    }
-    int count = getCertificatesCount(properties);
-    if (count == 0) {
-      return !monitor.isCanceled();
-    }
-    Map propertiesDupl = new HashMap(properties);
-    setSigningProperties(monitor, propertiesDupl);
-
-    for (int i = 0; i < count && !monitor.isCanceled(); i++) {
-      String alias = getCertificateAlias(propertiesDupl, i);
-      String location = getCertificateStoreLocation(propertiesDupl, i);
-      String type = getCertificateStoreType(propertiesDupl, i);
-      String storePass = getCertificateStorePass(propertiesDupl, i);
-      String keyPass = getCertificateKeyPass(propertiesDupl, i);
-      String inFileName = (signedFile != null && i > 0) ? signedFile.getAbsolutePath() : file.getAbsolutePath();
-      String outFileName = (signedFile != null && i == 0) ? signedFile.getAbsolutePath() : null;
-      signJar(inFileName, outFileName, monitor, alias, location, type, storePass, keyPass);
-    }
-    return !monitor.isCanceled();
-  }
-
-
   /**
-   * Returns location of jarsigner tool or null if the location cannot be
-   * determined.
-   * 
-   * @return the jarsigner location
-   */
-  public static String getJarsignerLocation() {
-    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
-        "org.tigris.mtoolkit.certmanager");
-    String location = preferenceStore.getString("jarsigner.location");
-    if (location == null || location.length() == 0) {
-      location = getDefaultJarsignerLocation();
-    }
-    return location;
-  }
+           * Signs a List of java.io.File items with provided in parameter properties  information.
+           * If there is not information for certificates at provided properties or an error occurs during the signing
+           * and the user chooses to continue without sign or the user has canceled operation - signFiles method returns empty List.
+           * @param files - An List of java.io.File items that will be signed. Files can be JAR or DP.
+           * @param monitor
+           * @param properties - Properties used for signing
+           * @return List of java.io. File items - signed files 
+          * @throws IOException 
+           * @throws CoreException if provided parameters are not correct
+           * 
+           */
 
-  public static String getDefaultJarsignerLocation() {
-    String location = "";
-    String javaHome = System.getProperty("java.home");
-    if (javaHome != null) {
-      String relativePath = "bin" + File.separator + "jarsigner.exe";
-      File signerFile = new File(javaHome, relativePath);
-      if (signerFile.exists()) {
-        location = signerFile.getAbsolutePath();
-      } else {
-        File parentPath = new File(javaHome).getParentFile();
-        signerFile = new File(parentPath, relativePath);
-        if (signerFile.exists()) {
-          location = signerFile.getAbsolutePath();
-        }
-      }
-    }
-    return location;
-  }
-
-  /**
-   * Opens "Continue without signing" dialog. Returns true if user selects Yes.
-   * 
-   * @param error
-   *          error to be displayed
-   * @return
-   */
-  public static boolean continueWithoutSigning(final String error) {
-    final Display display = PlatformUI.getWorkbench().getDisplay();
-    final Boolean result[] = new Boolean[1];
-    display.syncExec(new Runnable() {
-      public void run() {
-        Shell shell = display.getActiveShell();
-        String nl = System.getProperty("line.separator");
-        MessageDialog dialog = new MessageDialog(shell, "Warning", null, "The signing operation failed. Reason:" + nl
-            + error + nl + "Continue without signing?", MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
-        if (dialog.open() == Window.OK) {
-          result[0] = new Boolean(true);
-        }
-      }
-    });
-    return result[0] != null;
-  }
-
-  /**
-   * Opens password dialog for getting keystore password.
-   * 
-   * @param keystoreLocation
-   * @return the password entered or null if dialog is canceled
-   */
-  public static String getKeystorePassword(final String keystoreLocation) {
-    final Display display = PlatformUI.getWorkbench().getDisplay();
-    final String result[] = new String[1];
-    display.syncExec(new Runnable() {
-      public void run() {
-        Shell shell = display.getActiveShell();
-        PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
-        dialog.setMessage("Enter password for keystore: \"" + keystoreLocation + "\"");
-        if (dialog.open() == Window.OK) {
-          result[0] = dialog.getPassword();
-        }
-      }
-    });
-    return result[0];
-  }
-
-  /**
-   * Opens password dialog for getting private key password.
-   * 
-   * @param keystoreLocation
-   * @return the password entered or null if dialog is canceled
-   */
-  public static String getPrivateKeyPassword(final String keystoreLocation, final String alias) {
-    final Display display = PlatformUI.getWorkbench().getDisplay();
-    final String result[] = new String[1];
-    display.syncExec(new Runnable() {
-      public void run() {
-        Shell shell = display.getActiveShell();
-        PasswordDialog dialog = new PasswordDialog(shell, "Enter Password");
-        dialog.setMessage("Enter private key password for alias \"" + alias + "\" in keystore \"" + keystoreLocation
-            + "\" or leave the field empty to use the keystore password.");
-        if (dialog.open() == Window.OK) {
-          result[0] = dialog.getPassword();
-        }
-      }
-    });
-    return result[0];
-  }
-
- /**
-          * Signs a List of java.io.File items with provided in parameter properties  information.
-          * If there is not information for certificates at provided properties or an error occurs during the signing
-          * and the user chooses to continue without sign or the user has canceled operation - signFiles method returns empty List.
-          * @param files - An List of java.io.File items that will be signed. Files can be JAR or DP.
-          * @param monitor
-          * @param properties - Properties used for signing
-          * @return List of java.io. File items - signed files 
-         * @throws IOException 
-          * @throws CoreException if provided parameters are not correct
-          * 
-          */
-  
   private static List signDps0(List files, IProgressMonitor monitor, Map properties) throws IOException {
     if (files.isEmpty()) {
       return files;
@@ -623,7 +683,8 @@ public class CertUtils {
         dpFilesToSign.add(fileToSign);
         dpSignedFiles.add(signedFile);
       }
-      CertUtils.signDpFiles((File[]) dpFilesToSign.toArray(new File[] {}), (File[]) dpSignedFiles.toArray(new File[] {}), monitor, properties);
+      CertUtils.signDpFiles((File[]) dpFilesToSign.toArray(new File[] {}),
+          (File[]) dpSignedFiles.toArray(new File[] {}), monitor, properties);
 
     } catch (IOException ioe) {
       hasError = true;
@@ -660,7 +721,8 @@ public class CertUtils {
         jarFilesToSign.add(fileToSign);
         jarSignedFiles.add(signedFile);
       }
-      CertUtils.signJars((File[]) jarFilesToSign.toArray(new File[] {}), (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
+      CertUtils.signJars((File[]) jarFilesToSign.toArray(new File[] {}),
+          (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
     } catch (IOException ioe) {
       hasError = true;
       throw ioe;
@@ -683,70 +745,8 @@ public class CertUtils {
     }
   }
 
-  /**
-   * Method for signing InstallationItem instances as they must contain a java.io.File instance 
-   * that will be signed. Files can be JAR and DP files. It is common this file instance 
-   * to be set at implementation of InstallationItem interface method prepare() in each provided item. In that case
-   * prepare() method should be invoked before invoking signItems() method.
-   * If key store and/or private key passwords for given
-   * certificate are not provided then this function opens 
-   * password dialogs for getting them from the user.
-   * 
-   * @param InstallationItem[] items - items that will be signed
-   * @param IProgressMonitor monitor
-   * @param Map preparationProps - properties for signing. 
-   * @return IStatus that can be with severity ERROR / CANCEL or OK
-   */
-
-  public static IStatus signItems(InstallationItem[] items, IProgressMonitor monitor, Map preparationProps) {
-    boolean hasError = false;
-    try {
-      if (preparationProps == null) {
-        throw new CoreException(new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, "Signing properties are not initialized!"));
-      }
-      int count = getCertificatesCount(preparationProps);
-      if (count <= 0) {
-        return Status.OK_STATUS;
-      }
-      List preparedJarFiles = new ArrayList();
-      List preparedDpFiles = new ArrayList();
-
-      Map preparedItems = initializePreparedItemsMap(items, preparedJarFiles, preparedDpFiles);
-      //if items types are not supporting signing
-      if (preparedItems == null || preparedItems.size() == 0) {
-        return Status.OK_STATUS;
-      }
-      Map propertiesDupl = new HashMap(preparationProps);
-      setSigningProperties(monitor, propertiesDupl);
-
-      List signedJarFilesList = CertUtils.signJars0(preparedJarFiles, monitor, propertiesDupl);
-      List signedDpFilesList = CertUtils.signDps0(preparedDpFiles, monitor, propertiesDupl);
-      setItemsLocation(preparedJarFiles, preparedDpFiles, preparedItems, signedJarFilesList, signedDpFilesList);
-    } catch (IOException ioe) {
-      //this exception is thrown by setSigningProperties() if the user has not been entered full information needed for sign
-      if (!monitor.isCanceled()) {
-        if (!CertUtils.continueWithoutSigning(ioe.getMessage())) {
-          monitor.setCanceled(true);
-        }
-      }
-    } catch (CoreException ex) {
-      hasError = true;
-      return ex.getStatus();
-    } finally {
-      //if installation process is cancelled by the user or there is error
-      if (monitor.isCanceled() || hasError) {
-        for (int i = 0; i < items.length; i++) {
-          items[i].dispose();
-        }
-      }
-    }
-    if (monitor.isCanceled()) {
-      return Status.CANCEL_STATUS;
-    }
-    return Status.OK_STATUS;
-  }
-
-  private static void setItemsLocation(List preparedJarFiles, List preparedDpFiles, Map preparedItems, List signedJarFilesList, List signedDpFilesList) {
+  private static void setItemsLocation(List preparedJarFiles, List preparedDpFiles, Map preparedItems,
+      List signedJarFilesList, List signedDpFilesList) {
     int size = signedJarFilesList.size();
     InstallationItem itemToSet;
     for (int i = 0; i < size; i++) {
@@ -778,4 +778,3 @@ public class CertUtils {
     return preparedItems;
   }
 }
-

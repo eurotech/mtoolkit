@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileItem;
 import org.tigris.mtoolkit.common.installation.WorkspaceFileProvider;
@@ -71,7 +72,7 @@ public final class DPPFileProvider extends WorkspaceFileProvider {
       }
       throw new IllegalStateException("Installation item wasn't initialized correctly, missing location to base file");
     }
-    
+
     public void setLocation(File file) {
       if (preparedFile != null && !preparedFile.equals(file)) {
         // delete the previous prepared item
@@ -103,11 +104,10 @@ public final class DPPFileProvider extends WorkspaceFileProvider {
         if (monitor.isCanceled()) {
           return Status.CANCEL_STATUS;
         }
+        return CertUtils.signItems(new InstallationItem[] { this }, monitor, properties);
       } catch (Exception e) {
         return new Status(Status.ERROR, DPActivator.PLUGIN_ID, "Failed to prepare file for installation");
       }
-
-      return Status.OK_STATUS;
     }
 
   } // end of DPPFileItem
