@@ -17,9 +17,15 @@ import java.io.OutputStream;
  * @since 5.0
  */
 public final class NullOutputStream extends OutputStream {
+  /* (non-Javadoc)
+   * @see java.io.OutputStream#write(byte[], int, int)
+   */
   public void write(byte[] b, int off, int len) throws IOException {
   }
 
+  /* (non-Javadoc)
+   * @see java.io.OutputStream#write(int)
+   */
   public void write(int b) throws IOException {
   }
 }
