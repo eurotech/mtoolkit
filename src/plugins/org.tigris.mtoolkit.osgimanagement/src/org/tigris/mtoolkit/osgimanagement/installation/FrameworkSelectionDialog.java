@@ -40,7 +40,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.installation.TargetSelectionDialog;
@@ -74,20 +73,12 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 
 	protected Control createContents(Composite parent) {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_SELECT_DIALOG);
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(FrameWorkView.VIEW_ID);
-		} catch (PartInitException e) {
-			// TODO Frameworks view cannot be shown - decide what to do
-			e.printStackTrace();
-		}
 		Control contents = super.createContents(parent);
 		getShell().setText("Install to");
 		setTitle("OSGi Framework");
 		setTitleImage(ImageHolder.getImage(FW_ICON_WIZBAN));
 		setMessage("Select OSGi Framework from the list", IMessageProvider.INFORMATION);
-
 		updateButtonsState();
-
 		return contents;
 	}
 
@@ -207,10 +198,7 @@ public class FrameworkSelectionDialog extends TargetSelectionDialog {
 	}
 
 	private void handleFrameworkAdd() {
-		FrameWorkView view = FrameWorkView.getActiveInstance();
-		if (view != null) {
-			ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot(), view.getTree());
-		}
+		ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot());
 	}
 
 	private void handleFrameworkRemove() {

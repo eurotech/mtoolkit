@@ -12,31 +12,34 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 
-public class AddAction extends SelectionProviderAction implements IStateAction {
-
-	private TreeViewer parentView;
+public final class AddAction extends SelectionProviderAction implements IStateAction {
 
 	public AddAction(ISelectionProvider provider, String label) {
 		super(provider, label);
-		this.parentView = (TreeViewer) provider;
 	}
-
-	// run method
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.action.Action#run()
+	 */
 	public void run() {
-		ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot(), parentView);
+		ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot());
 		getSelectionProvider().setSelection(getSelection());
 	}
-
-	// override to react properly to selection change
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
 	public void selectionChanged(IStructuredSelection selection) {
-		this.setEnabled(true);
+		setEnabled(true);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
 	public void updateState(IStructuredSelection selection) {
 		setEnabled(true);
 	}

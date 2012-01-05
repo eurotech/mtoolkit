@@ -67,10 +67,10 @@ public class ActionsManager {
 	private static final String MIME_JAR = "application/java-archive"; //$NON-NLS-1$
 	private static final String JAR_FILTER = "*.jar"; //$NON-NLS-1$
 
-	public static void addFrameworkAction(TreeRoot treeRoot, TreeViewer parentView) {
+	public static void addFrameworkAction(TreeRoot treeRoot) {
 		String frameworkName = generateName(treeRoot);
 		FrameworkImpl newFrameWork = new FrameworkImpl(frameworkName, false);
-		PropertySheet sheet = new PropertySheet(parentView, treeRoot, newFrameWork, true);
+		PropertySheet sheet = new PropertySheet(treeRoot, newFrameWork, true);
 		sheet.open();
 	}
 

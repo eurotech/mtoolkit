@@ -22,9 +22,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -46,14 +48,10 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 
 	private Model parent;
 
-	private TreeViewer parentView;
-
-	// Constructor
-	public PropertySheet(TreeViewer parentView, Model parent, FrameworkImpl element, boolean newFramework) {
-		super(parentView.getControl().getShell());
+	public PropertySheet(Model parent, FrameworkImpl element, boolean newFramework) {
+		super(PluginUtilities.getActiveWorkbenchShell());
 		this.addFramework = newFramework;
 		this.parent = parent;
-		this.parentView = parentView;
 		this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
 		fw = element;
 	}
@@ -147,7 +145,11 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 				}
 			}
 			fw.updateElement();
-			parentView.setSelection(parentView.getSelection());
+			FrameWorkView fwView = FrameWorkView.getActiveInstance();
+			if (fwView != null) {
+				final TreeViewer tree = fwView.getTree();
+				tree.setSelection(tree.getSelection());
+			}
 		}
 	}
 
