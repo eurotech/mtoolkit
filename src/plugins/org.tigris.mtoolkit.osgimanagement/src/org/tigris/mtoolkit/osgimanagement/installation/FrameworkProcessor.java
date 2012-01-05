@@ -56,6 +56,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOp
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
+import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 /**
@@ -340,13 +341,13 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	public void start(Object installedItem, IProgressMonitor monitor) throws Exception {
 		if (installedItem instanceof RemoteBundle) {
 			final RemoteBundle remoteBundle = (RemoteBundle) installedItem;
-			if (FrameworkConnectorFactory.isAutoStartBundlesEnabled
+			if (FrameworkPreferencesPage.isAutoStartBundlesEnabled()
 					&& remoteBundle.getType() != RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
 				Job job = new Job("Starting bundle " + remoteBundle.getSymbolicName() + " ("
 						+ remoteBundle.getVersion() + ")") {
 					@Override
 					public IStatus run(IProgressMonitor monitor) {
-						int flags = FrameworkConnectorFactory.isActivationPolicyEnabled ? Bundle.START_ACTIVATION_POLICY
+						int flags =  FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY
 								: 0;
 						try {
 							remoteBundle.start(flags);

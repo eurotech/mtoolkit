@@ -19,20 +19,12 @@ public interface ConstantsDistributor {
 
 	static final String FRAMEWORK_NAME = "framework_name_key"; //$NON-NLS-1$
 	static final String TRANSPORT_PROVIDER_ID = "transport_type_key"; //$NON-NLS-1$
-	
+
 	static final String FRAMEWORK_SIGN_CERTIFICATE_ID = "framework_sign_certificate_uid"; //$NON-NLS-1$
 	static final String CONNECT_TO_FRAMEWORK = "framework_connect_key";
 
 	static final String MEMENTO_TYPE = "browser_model"; //$NON-NLS-1$
 	static final String MEMENTO_ROOT_TYPE = "browser_root_model"; //$NON-NLS-1$
-
-	static final String MEMENTO_AUTOCONNECT = "framework_autoconnect"; //$NON-NLS-1$
-	static final String MEMENTO_INFO_LOG = "info_log"; //$NON-NLS-1$
-	static final String MEMENTO_AUTOSTART_AFTER_INSTALL = "autostart_after_install"; //$NON-NLS-1$
-	static final String MEMENTO_USE_ACTIVATION_POLICY = "use_activation_policy"; //$NON-NLS-1$
-	static final String MEMENTO_SHOW_BUNDLE_CATEGORY = "show_bundle_categories"; //$NON-NLS-1$
-	static final String MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES = "show_skipped_system_bundles"; //$NON-NLS-1$
-	static final String MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL = "auto_update_bundles_on_install";//$NON-NLS-1$
 
 	static final String STORAGE_FILE_NAME = "ModelStorage.xml"; //$NON-NLS-1$
 

@@ -71,6 +71,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHan
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
+import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.FrameworkConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
@@ -467,7 +468,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		Bundle bundle = findBundle(id);
 		bundleHash.remove(new Long(id));
 
-		if (bundle != null && FrameworkConnectorFactory.isBundlesCategoriesShown) {
+		if (bundle != null && FrameworkPreferencesPage.isBundlesCategoriesShown()) {
 			Category category = (Category) bundle.getParent();
 			category.removeElement(bundle);
 			if (category.getSize() == 0) {
@@ -495,7 +496,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		bundleHash.remove(new Long(id));
 		systemBundles.remove(new Long(id));
 		if (bundle != null) {
-			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
+			if (FrameworkPreferencesPage.isBundlesCategoriesShown()) {
 				Category category = (Category) bundle.getParent();
 				category.removeElement(bundle);
 				if (category.getSize() == 0) {
@@ -600,7 +601,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					Bundle bundle = findBundle(id);
 					String category = rBundle.getHeader("Bundle-Category", ""); //$NON-NLS-1$ //$NON-NLS-2$
 					if (!bundle.getParent().getName().equals(category)
-							&& FrameworkConnectorFactory.isBundlesCategoriesShown) {
+							&& FrameworkPreferencesPage.isBundlesCategoriesShown()) {
 						updateBundleCategory(rBundle);
 					}
 					bundle = findBundle(id);
@@ -643,7 +644,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 									if (!added) {
 										Bundle usedInBundle = new Bundle(bundle);
-										if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
+										if (FrameworkPreferencesPage.isBundlesCategoriesShown()) {
 											if (bCategory == null) {
 												bCategory = new BundlesCategory(BundlesCategory.IN_USE);
 												oc.addElement(bCategory);
@@ -1160,7 +1161,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					categoriesNames.addElement(categoryName);
 				}
 			}
-			if (FrameworkConnectorFactory.isBundlesCategoriesShown) {
+			if (FrameworkPreferencesPage.isBundlesCategoriesShown()) {
 				for (int i = 0; i < categoriesNames.size(); i++) {
 					if (!categoryHash.containsKey(categoriesNames.elementAt(i))) {
 						Category category = new Category((String) categoriesNames.elementAt(i));

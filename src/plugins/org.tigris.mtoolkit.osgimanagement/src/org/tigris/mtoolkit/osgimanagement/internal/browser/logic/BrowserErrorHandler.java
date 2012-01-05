@@ -28,10 +28,8 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class BrowserErrorHandler {
-
 	private static boolean internalShell;
 	private static Shell shell;
-	public static boolean isInfoLogEnabled = FrameworkPreferencesPage.infoLogDefault;
 
 	private static final boolean debug = Boolean.getBoolean("mtoolkit.osgimanagement.debug"); //$NON-NLS-1$
 
@@ -243,7 +241,7 @@ public class BrowserErrorHandler {
 		if (display) {
 			showInfoDialog(text);
 		}
-		if (isInfoLogEnabled) {
+		if (FrameworkPreferencesPage.isLogInfoEnabled()) {
 			dumpToLog(IStatus.INFO, text, null);
 		}
 	}

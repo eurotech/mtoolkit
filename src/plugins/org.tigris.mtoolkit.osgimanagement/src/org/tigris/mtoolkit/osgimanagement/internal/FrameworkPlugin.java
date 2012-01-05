@@ -31,8 +31,6 @@ import org.osgi.framework.Constants;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 
 public class FrameworkPlugin extends AbstractUIPlugin {
 
@@ -63,14 +61,6 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		// TODO: These settings should be kept in separate class, which also
-		// needs to listen for changes in these settings
-		FrameworkConnectorFactory.isAutoConnectEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOCONNECT);
-		FrameworkConnectorFactory.isAutoStartBundlesEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_AUTOSTART_AFTER_INSTALL);
-		FrameworkConnectorFactory.isActivationPolicyEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_USE_ACTIVATION_POLICY);
-		BrowserErrorHandler.isInfoLogEnabled = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_INFO_LOG);
-		FrameworkConnectorFactory.isBundlesCategoriesShown = getPreferenceStore().getBoolean(ConstantsDistributor.MEMENTO_SHOW_BUNDLE_CATEGORY);
-
 		FrameworkConnectorFactory.init();
 		FrameWorkView.restoreModel();
 		fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
@@ -103,7 +93,7 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 	public static void warning(String message, Throwable t) {
 		log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
 	}
-	
+
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 	}
@@ -121,7 +111,7 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		}
 		fwLog.log(status);
 	}
-	
+
 	private static String formatStatus(IStatus status) {
 		String statusText = status.toString();
 		if (status.getException() == null)
@@ -132,7 +122,7 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		pwriter.flush();
 		return statusText + System.getProperty("line.separator") + swriter.toString();
 	}
-	
+
 	public static InputStream getIAgentBundleAsStream() {
 		Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
 		Bundle selectedIAgent = null;

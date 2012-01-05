@@ -9,11 +9,11 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.Util;
+import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
 public class StartBundleOperation extends RemoteBundleOperation {
 	
@@ -23,7 +23,7 @@ public class StartBundleOperation extends RemoteBundleOperation {
 
 	protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
 		RemoteBundle rBundle = getBundle().getRemoteBundle();
-		int flags = FrameworkConnectorFactory.isActivationPolicyEnabled ? org.osgi.framework.Bundle.START_ACTIVATION_POLICY : 0;
+		int flags =  FrameworkPreferencesPage.isActivationPolicyEnabled() ? org.osgi.framework.Bundle.START_ACTIVATION_POLICY : 0;
 		rBundle.start(flags);
 		if (rBundle.getState() == org.osgi.framework.Bundle.RESOLVED) {
 			// the bundle failed to start, most probably because its

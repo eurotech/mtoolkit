@@ -36,7 +36,11 @@ import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferen
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class FrameworkConnectorFactory implements DeviceConnectionListener {
-
+	public static final int CONNECT_PROGRESS = 1000;
+	public static final int CONNECT_PROGRESS_CONNECTING = (int) (CONNECT_PROGRESS * 0.1);
+	public static final int CONNECT_PROGRESS_BUNDLES = (int) (CONNECT_PROGRESS * 0.3);
+	public static final int CONNECT_PROGRESS_SERVICES = (int) (CONNECT_PROGRESS * 0.2);
+	public static final int CONNECT_PROGRESS_ADDITIONAL = (int) (CONNECT_PROGRESS * 0.4);
 	/**
 	 * Job listener, which deletes given file, when the associated job has
 	 * finished.
@@ -47,19 +51,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 	 * 
 	 */
 	private static FrameworkConnectorFactory factory = new FrameworkConnectorFactory();
-
-	public static boolean isAutoConnectEnabled = FrameworkPreferencesPage.autoConnectDefault;
-	public static boolean isAutoStartBundlesEnabled = FrameworkPreferencesPage.autoStartAfterInstall;
-	public static boolean isActivationPolicyEnabled = FrameworkPreferencesPage.useActivationPolicy;
-	public static boolean isBundlesCategoriesShown = FrameworkPreferencesPage.showBundleCategories;
-	public static boolean isAutoUpdateBundlesOnInstallEnabled = FrameworkPreferencesPage.autoUpdateBundlesOnInstallDefault;
-
-	public static final int CONNECT_PROGRESS = 1000;
-
-	public static final int CONNECT_PROGRESS_CONNECTING = (int) (CONNECT_PROGRESS * 0.1);
-	public static final int CONNECT_PROGRESS_BUNDLES = (int) (CONNECT_PROGRESS * 0.3);
-	public static final int CONNECT_PROGRESS_SERVICES = (int) (CONNECT_PROGRESS * 0.2);
-	public static final int CONNECT_PROGRESS_ADDITIONAL = (int) (CONNECT_PROGRESS * 0.4);
 
 	public static void init() {
 		DeviceConnector.addDeviceConnectionListener(factory);
@@ -101,8 +92,9 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
 
 		// generate framework name
 		if (fw == null) {
-			if (!isAutoConnectEnabled)
+			if (!FrameworkPreferencesPage.isAutoConnectEnabled()) {
 				return;
+			}
 			frameworkName = generateFrameworkName(connProps);
 		}
 

@@ -31,10 +31,10 @@ import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
 public class InstallBundleOperation {
 	private FrameworkImpl framework;
@@ -108,7 +108,7 @@ public class InstallBundleOperation {
 				}
 				final Object rBundles[] = rBundle;
 				int bundleIndex;
-				if (!install[0] && FrameworkConnectorFactory.isAutoUpdateBundlesOnInstallEnabled) {
+				if (!install[0] && FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled()) {
 					bundleIndex = 0;
 				} else {
 					bundleIndex = showUpdateBundleDialog(symbolicName, version, update, install, rBundles)[0];
