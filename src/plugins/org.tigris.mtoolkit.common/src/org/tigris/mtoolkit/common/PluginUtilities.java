@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 public class PluginUtilities {
@@ -788,7 +789,7 @@ public class PluginUtilities {
    * @return  Version for specified bundle
    */
   public static Version getBundleVersion(String bundleName) {
-    return new Version((String) Platform.getBundle(bundleName).getHeaders().get("Bundle-Version")); //$NON-NLS-1$
+    return new Version((String) Platform.getBundle(bundleName).getHeaders().get(Constants.BUNDLE_VERSION));
   }
 
   /**
