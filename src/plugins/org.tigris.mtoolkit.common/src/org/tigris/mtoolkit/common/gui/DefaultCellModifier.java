@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.ICellModifier;
 /**
  * @since 5.0
  */
+//TODO What is this class used for?
 public class DefaultCellModifier implements ICellModifier {
 
 	public boolean canModify(Object element, String property) {

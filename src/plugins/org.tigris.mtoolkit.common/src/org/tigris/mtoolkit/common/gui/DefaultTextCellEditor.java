@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.TextCellEditor;
 /**
  * @since 5.0
  */
+//TODO What is this class used for?
 public class DefaultTextCellEditor extends TextCellEditor {
 
 	private int fColumn;
