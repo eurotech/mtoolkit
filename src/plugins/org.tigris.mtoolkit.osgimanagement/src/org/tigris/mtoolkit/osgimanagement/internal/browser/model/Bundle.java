@@ -38,10 +38,12 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
 	public static final String OVR_ACTIVE_ICON = "ovr_active.gif"; //$NON-NLS-1$
 	public static final String OVR_RESOLVED_ICON = "ovr_resolved.gif"; //$NON-NLS-1$
 	public static final String OVR_SIGNED_ICON = "ovr_signed2.gif"; //$NON-NLS-1$
-
+	
 	// bundle types
 	public static final int BUNDLE_TYPE_FRAGMENT = RemoteBundle.BUNDLE_TYPE_FRAGMENT;
 	public static final int BUNDLE_TYPE_EXTENSION = BUNDLE_TYPE_FRAGMENT + 1;
+	
+	private static final String BUNDLE_ICON_HEADER="Bundle-Icon";
 	
 	private final RemoteBundle rBundle;
 	
@@ -316,10 +318,10 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
 
 	private String getIconPath() throws IAgentException, BundleException {
 		// TODO add support for big icons by scaling them
-		String iconHeader = rBundle.getHeader("Bundle-Icon", null);
+		String iconHeader = rBundle.getHeader(BUNDLE_ICON_HEADER, null);
 		ManifestElement[] elements = null;
 		if (iconHeader != null) {
-			elements = ManifestElement.parseHeader("Bundle-Icon", iconHeader);
+			elements = ManifestElement.parseHeader(BUNDLE_ICON_HEADER, iconHeader);
 		}
 		if (elements == null) {
 			return null;
