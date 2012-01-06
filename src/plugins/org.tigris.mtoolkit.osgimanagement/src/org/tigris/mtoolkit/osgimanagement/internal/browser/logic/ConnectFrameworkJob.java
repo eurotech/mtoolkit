@@ -46,7 +46,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Framewo
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel.DeviceTypeProviderElement;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public class ConnectFrameworkJob extends Job {
+public final class ConnectFrameworkJob extends Job {
 	private static List connectingFrameworks = new ArrayList();
 
 	private Framework fw;
@@ -77,28 +77,26 @@ public class ConnectFrameworkJob extends Job {
 				if (fw.isConnected()) {
 					return Status.OK_STATUS;
 				} else {
-					return Util.newStatus(IStatus.ERROR,
-						"Could not connect to framework " + fw.getName(),
-						null);
+					return Util.newStatus(IStatus.ERROR, "Could not connect to framework " + fw.getName(), null);
 				}
 			}
 			connectingFrameworks.add(fw);
 		}
 
 		DeviceConnector connector = fw.getConnector();
-		final boolean canceled[] = new boolean[] {false};
 		try {
 			if (connector != null && connector.isActive()) {
-				FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl)fw, fw.getName(), ((FrameworkImpl)fw).autoConnected);
+				FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl) fw, fw.getName(),
+						((FrameworkImpl) fw).autoConnected);
 			} else {
 				IMemento config = ((FrameworkImpl) fw).getConfig();
 				String id = null;
 				String transportType = null;
 				Dictionary aConnProps = null;
-				
+
 				String providerID = config.getString(ConstantsDistributor.TRANSPORT_PROVIDER_ID);
 				List providers = FrameworkPanel.obtainDeviceTypeProviders(null);
-				for (int i=0; i<providers.size(); i++) {
+				for (int i = 0; i < providers.size(); i++) {
 					DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);
 					if (providerID.equals(provider.getTypeId())) {
 						try {
@@ -106,8 +104,7 @@ public class ConnectFrameworkJob extends Job {
 							aConnProps = provider.getProvider().load(config);
 							id = (String) aConnProps.get(Framework.FRAMEWORK_ID);
 						} catch (CoreException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							FrameworkPlugin.log(e.getStatus());
 						}
 						break;
 					}
@@ -117,46 +114,27 @@ public class ConnectFrameworkJob extends Job {
 					if (aConnProps == null) {
 						aConnProps = new Hashtable();
 					}
-					final DeviceConnector conn[] = new DeviceConnector[1];
-					final String rTransportType = transportType;
-					final String rID = id;
-					final Dictionary rConnProps = aConnProps;
-					final IStatus rStatus[] = new IStatus[1];
-					new Thread() {
-						public void run() {
-							try {
-								conn[0] = DeviceConnector.connect(rTransportType, rID, rConnProps, null);
-								FrameworkConnectorFactory.connectFramework(conn[0], fw.getName());
-							} catch (IAgentException e) {
-								if (monitor.isCanceled() || canceled[0]) {
-									return;
-								}
-								if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT) {
-									handleConnectionFailure(e);
-									monitor.setCanceled(true);
-								} else {
-									rStatus[0] = Util.handleIAgentException(e);
-								}
-							} catch (IllegalStateException e) {
-								rStatus[0] = Util.handleIAgentException(new IAgentException(e.getMessage(), IAgentErrors.ERROR_CANNOT_CONNECT, e));
-							}
-						}
-					}.start();
-					while (conn[0] == null && rStatus[0] == null) {
-						try {
-							Thread.sleep(50);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
+					IStatus rStatus = null;
+					try {
+						DeviceConnector conn = DeviceConnector.connect(transportType, id, aConnProps, null);
+						FrameworkConnectorFactory.connectFramework(conn, fw.getName());
+					} catch (IAgentException e) {
 						if (monitor.isCanceled()) {
-							monitor.done();
-							canceled[0] = true;
 							return Status.CANCEL_STATUS;
 						}
+						if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT) {
+							handleConnectionFailure(e);
+							monitor.setCanceled(true);
+						} else {
+							rStatus = Util.handleIAgentException(e);
+						}
+					} catch (IllegalStateException e) {
+						rStatus = Util.handleIAgentException(new IAgentException(e.getMessage(),
+								IAgentErrors.ERROR_CANNOT_CONNECT, e));
 					}
-					if (rStatus[0] != null) {
+					if (rStatus != null) {
 						monitor.done();
-						return rStatus[0];
+						return rStatus;
 					}
 				} else {
 					errorProviderNotFound();
@@ -178,8 +156,8 @@ public class ConnectFrameworkJob extends Job {
 		display.syncExec(new Runnable() {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				MessageDialog.openError(shell, "Error", "Could not connect to framework. The selected " +
-						"connection type provider is no more available. Please select another connection type.");
+				MessageDialog.openError(shell, "Error", "Could not connect to framework. The selected "
+						+ "connection type provider is no more available. Please select another connection type.");
 			}
 		});
 	}
@@ -196,21 +174,17 @@ public class ConnectFrameworkJob extends Job {
 			public void run() {
 				String[] buttons = { Messages.close_button_label, Messages.get_iagent_button_label };
 				String message = Messages.connection_failed;
-				if (e != null) {//add cause for connection failed
+				if (e != null) {// add cause for connection failed
 					message += "\nCause: " + e.getMessage();
 					Throwable cause = e.getCauseException();
 					if (cause != null) {
-						message +=  " (" + cause.getLocalizedMessage() + ")";
+						message += " (" + cause.getLocalizedMessage() + ")";
 					}
+					FrameworkPlugin.error(e);
 				}
 				message += "\n\n" + Messages.rcp_bundle_missing_message;
-				MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(),
-					Messages.rcp_bundle_missing_title,
-					null,
-					message,
-					MessageDialog.INFORMATION,
-					buttons,
-					0);
+				MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), Messages.rcp_bundle_missing_title,
+						null, message, MessageDialog.INFORMATION, buttons, 0);
 				dialog.setBlockOnOpen(true);
 				dialog.open();
 				if (dialog.getReturnCode() == 1) {
@@ -230,7 +204,8 @@ public class ConnectFrameworkJob extends Job {
 						// X
 						saveDialog.setFileName("iagent.rpc.jar");
 						String path = saveDialog.open();
-						if (path == null) return;
+						if (path == null)
+							return;
 						output = new FileOutputStream(path);
 
 						int bytesRead = 0;
@@ -241,9 +216,8 @@ public class ConnectFrameworkJob extends Job {
 						}
 
 					} catch (IOException e1) {
-						StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR,
-							"An error occurred while saving IAgent bundle",
-							e1));
+						StatusManager.getManager().handle(
+								Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle", e1));
 					} finally {
 						if (output != null)
 							try {
