@@ -599,7 +599,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 					addBundle(rBundle);
 				} else if (type == RemoteBundleEvent.UPDATED) {
 					Bundle bundle = findBundle(id);
-					String category = rBundle.getHeader("Bundle-Category", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					String category = rBundle.getHeader(Constants.BUNDLE_CATEGORY, ""); //$NON-NLS-1$
 					if (!bundle.getParent().getName().equals(category)
 							&& FrameworkPreferencesPage.isBundlesCategoriesShown()) {
 						updateBundleCategory(rBundle);
@@ -1144,10 +1144,10 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 			if (state == 0) {
 				state = rBundle.getState();
 			}
-			String categoryName = (String) headers.get("Bundle-Category");
+			String categoryName = (String) headers.get(Constants.BUNDLE_CATEGORY);
 			Vector categoriesNames = new Vector();
 			String bundleName = getBundleName(rBundle, headers);
-			String bundleVersion = (String) headers.get("Bundle-Version");
+			String bundleVersion = (String) headers.get(Constants.BUNDLE_VERSION);
 
 			if (categoryName == null) {
 				categoriesNames.addElement(Messages.unknown_category_label);
@@ -1204,9 +1204,9 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 		String bundleName = ""; //$NON-NLS-1$
 		if (headers == null)
 			headers = bundle.getHeaders(null);
-		bundleName = (String) headers.get("Bundle-SymbolicName"); //$NON-NLS-1$
+		bundleName = (String) headers.get(Constants.BUNDLE_SYMBOLICNAME);
 		if (bundleName == null || bundleName.equals("")) { //$NON-NLS-1$
-			bundleName = (String) headers.get("Bundle-Name"); //$NON-NLS-1$
+			bundleName = (String) headers.get(Constants.BUNDLE_NAME);
 		}
 		if (bundleName == null || bundleName.equals("")) { //$NON-NLS-1$
 			bundleName = bundle.getLocation();
