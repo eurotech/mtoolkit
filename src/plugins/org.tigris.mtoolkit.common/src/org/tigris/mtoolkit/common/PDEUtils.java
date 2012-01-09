@@ -147,17 +147,17 @@ public final class PDEUtils {
   }
 
   /**
-   * Gets bundles which are enabled from the target
+   * Gets bundles from the target based on their enablement
    * 
-   * @param enabled
+   * @param includeEnabled
    * @return bundles array
    */
-  public static IPluginModelBase[] getTargetPlatfomBundles(boolean enabled) {
+  public static IPluginModelBase[] getTargetPlatfomBundles(boolean includeEnabled) {
     IPluginModelBase[] externalModels = PluginRegistry.getExternalModels();
-    if (enabled) {
+    if (includeEnabled) {
       List models = new ArrayList();
       for (int i = 0; i < externalModels.length; i++) {
-        if (!selectBundle(externalModels[i], enabled)) {
+        if (!selectBundle(externalModels[i], includeEnabled)) {
           continue;
         }
         models.add(externalModels[i]);
@@ -334,8 +334,8 @@ public final class PDEUtils {
     return false;
   }
 
-  private static boolean selectBundle(IPluginModelBase bundle, boolean enabled) {
-    if (enabled && !bundle.isEnabled()) {
+  private static boolean selectBundle(IPluginModelBase bundle, boolean includeEnabled) {
+    if (includeEnabled && !bundle.isEnabled()) {
       return false;
     }
     return bundle.getBundleDescription() != null;
