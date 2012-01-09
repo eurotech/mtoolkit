@@ -438,7 +438,7 @@ public class DPPFile {
 
 		if (packageHeaders.isFixPackSet()) {
 			if (!isEmptyOrNull(fixPack)
-					&& (!DPPUtilities.isValidFixPack(fixPack) || !DPPUtilities.isValidVersion(fixPack))) {
+					&& !DPPUtilities.isValidFixPack(fixPack)) {
 				throw new InconsistentDataException("The Deployment Package Fix Pack is incorrect.\n"
 						+ "The value should be similar to the example: (1.3, 5.7)\n"
 						+ "or contain only digit and points.");
