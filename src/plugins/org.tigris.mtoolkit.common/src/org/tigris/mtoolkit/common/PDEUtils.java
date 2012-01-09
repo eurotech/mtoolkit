@@ -48,16 +48,16 @@ public final class PDEUtils {
    * returned over TP bundles.Only valid plug-ins are returned.
    * @param symbolicName
    * @param version
-   * @param active
+   * @param enabledOnly
    * @param match
    * @return the bundle or null
    */
-  public static IPluginModelBase findBundle(String symbolicName, String version, boolean active, int match) {
+  public static IPluginModelBase findBundle(String symbolicName, String version, boolean enabledOnly, int match) {
     ModelEntry entry = PluginRegistry.findEntry(symbolicName);
     if (entry == null) {
       return null;
     }
-    return findBundle(entry.getActiveModels(), symbolicName, version, active, match);
+    return findBundle(entry.getActiveModels(), symbolicName, version, enabledOnly, match);
   }
 
   /**
@@ -74,16 +74,16 @@ public final class PDEUtils {
    * Only valid plug-ins are returned.
    * @param symbolicName
    * @param version
-   * @param active
+   * @param enabledOnly
    * @param match
    * @return the bundle or null
    */
-  public static IPluginModelBase findTargetPlatformBundle(String symbolicName, String version, boolean active, int match) {
+  public static IPluginModelBase findTargetPlatformBundle(String symbolicName, String version, boolean enabledOnly, int match) {
     ModelEntry entry = PluginRegistry.findEntry(symbolicName);
     if (entry == null) {
       return null;
     }
-    return findBundle(entry.getExternalModels(), symbolicName, version, active, match);
+    return findBundle(entry.getExternalModels(), symbolicName, version, enabledOnly, match);
   }
 
   /**
@@ -112,16 +112,16 @@ public final class PDEUtils {
    * Finds bundle with specified symbolic name and version from the workspace according to match rule.
    * @param symbolicName
    * @param version
-   * @param active
+   * @param enabledOnly
    * @param match
    * @return the bundle or null
    */
-  public static IPluginModelBase findWorkspaceBundle(String symbolicName, String version, boolean active, int match) {
+  public static IPluginModelBase findWorkspaceBundle(String symbolicName, String version, boolean enabledOnly, int match) {
     ModelEntry entry = PluginRegistry.findEntry(symbolicName);
     if (entry == null) {
       return null;
     }
-    return findBundle(entry.getWorkspaceModels(), symbolicName, version, active, match);
+    return findBundle(entry.getWorkspaceModels(), symbolicName, version, enabledOnly, match);
   }
 
   /**
@@ -149,15 +149,15 @@ public final class PDEUtils {
   /**
    * Gets bundles from the target based on their enablement
    * 
-   * @param includeEnabled
+   * @param enabledOnly
    * @return bundles array
    */
-  public static IPluginModelBase[] getTargetPlatfomBundles(boolean includeEnabled) {
+  public static IPluginModelBase[] getTargetPlatfomBundles(boolean enabledOnly) {
     IPluginModelBase[] externalModels = PluginRegistry.getExternalModels();
-    if (includeEnabled) {
+    if (enabledOnly) {
       List models = new ArrayList();
       for (int i = 0; i < externalModels.length; i++) {
-        if (!selectBundle(externalModels[i], includeEnabled)) {
+        if (!selectBundle(externalModels[i], enabledOnly)) {
           continue;
         }
         models.add(externalModels[i]);
@@ -334,8 +334,8 @@ public final class PDEUtils {
     return false;
   }
 
-  private static boolean selectBundle(IPluginModelBase bundle, boolean includeEnabled) {
-    if (includeEnabled && !bundle.isEnabled()) {
+  private static boolean selectBundle(IPluginModelBase bundle, boolean enabledOnly) {
+    if (enabledOnly && !bundle.isEnabled()) {
       return false;
     }
     return bundle.getBundleDescription() != null;
