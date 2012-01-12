@@ -92,7 +92,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 
 	private Model bundles;
 
-	private boolean refreshing = false;
+	private volatile boolean  refreshing = false;
 	private boolean connecting = false;
 
 	private PMPConnectionListener connectionListener;
@@ -804,7 +804,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 	}
 
 	public void refreshAction(final Composite tree) {
-		if (!isConnected()) {
+		if (!isConnected() || refreshing) {
 			return;
 		}
 		Job job = new Job(Messages.refresh_framework_info) {
@@ -817,7 +817,6 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 						SubMonitor connectMonitor = sMonitor
 								.newChild(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
 						connectMonitor.setTaskName("Refreshing " + FrameworkImpl.this.getName());
-						refreshing = true;
 						try {
 							if (tree != null) {
 								tree.getDisplay().asyncExec(new Runnable() {
@@ -848,6 +847,7 @@ public class FrameworkImpl extends Framework implements RemoteBundleListener, Re
 				return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 			}
 		};
+		refreshing = true;
 		job.schedule();
 	}
 
