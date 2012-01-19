@@ -972,6 +972,9 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 		// TODO: Add a text in the filter to explain the purpose of the text
 		// line
 		public IStatus run(final IProgressMonitor monitor) {
+			if (tree == null || tree.getControl().isDisposed()) {
+				return Status.CANCEL_STATUS;
+			}
 			tree.addSelectionChangedListener(this);
 			filterRecursively(treeRoot);
 			if (monitor.isCanceled())
