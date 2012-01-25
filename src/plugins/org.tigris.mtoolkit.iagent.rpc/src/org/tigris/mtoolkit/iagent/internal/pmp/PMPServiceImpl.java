@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 import java.net.Socket;
 import java.util.Dictionary;
 
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
@@ -20,7 +21,7 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 	private static final int DEFAULT_PMP_PORT = 1450;
-	
+
 	protected boolean running = false;
 
 	protected static ClassLoader loader;
@@ -37,7 +38,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 				return;
 			running = false;
 		}
-		info("Disconnecting Clients ...");
+		DebugUtils.info(this, "Disconnecting Clients ...");
 		closeConnections("PMP Service has been stopped.");
 		if (connDispatcher != null)
 			connDispatcher.stopEvent();
@@ -56,7 +57,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 			throw new PMPException("URI can't be null");
 		}
 		try {
-			info("Creating new connection for " + uri);
+			DebugUtils.info(this, "Creating new connection for " + uri);
 			PMPSessionThread st = null;
 			Socket socket = new Socket(uri, DEFAULT_PMP_PORT);
 			// read timeout of 1 sec
@@ -68,7 +69,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 			addElement(st);
 			return con;
 		} catch (Exception exc) {
-			error("Error creating connection for " + uri, exc);
+			DebugUtils.debug(this, "Error creating connection for " + uri, exc);
 			if (exc instanceof PMPException)
 				throw (PMPException) exc;
 			throw new PMPException(exc.getMessage(), exc);
@@ -80,7 +81,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 			throw new PMPException("Stopping pmpservice");
 		}
 		try {
-			info("Creating new connection for " + transport);
+			DebugUtils.info(this, "Creating new connection for " + transport);
 			Object pmpPort = properties.get(PROP_PMP_PORT);
 			int port = -1;
 			if (pmpPort != null && pmpPort instanceof Integer) {
@@ -89,7 +90,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 			if (port < 0) {
 				port = DEFAULT_PMP_PORT;
 			}
-			
+
 			PMPSessionThread st = null;
 			st = new PMPSessionThread(this, transport.createConnection(port), createSessionId());
 
@@ -98,7 +99,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 			addElement(st);
 			return con;
 		} catch (Exception exc) {
-			error("Error creating connection for " + transport, exc);
+			DebugUtils.debug(this, "Error creating connection for " + transport, exc);
 			if (exc instanceof PMPException)
 				throw (PMPException) exc;
 			throw new PMPException(exc.getMessage(), exc);
@@ -124,18 +125,6 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 				return false;
 		}
 		return toRet;
-	}
-
-	protected void debug(String msg) {
-		// TODO: Add logging
-	}
-
-	protected void error(String msg, Throwable exc) {
-		// TODO: Add logging
-	}
-
-	protected void info(String msg) {
-		// TODO: Add logging
 	}
 
 	public String getRole() {

@@ -15,7 +15,6 @@ import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 
 public class DeploymentEventListener implements EventHandler {
-
 	public static final String DEPLOYMENT_EVENT = "d_event";
 
 	private static final String EVENT_TYPE_KEY = "type";
@@ -41,20 +40,20 @@ public class DeploymentEventListener implements EventHandler {
 	public void register(BundleContext context, DeploymentAdmin admin) {
 		this.deploymentAdmin = admin;
 		
-		debug("[register] Registering Event handler for deployment package events...");
+		DebugUtils.debug(this, "[register] Registering Event handler for deployment package events...");
 		Dictionary eventProps = new Hashtable();
 		eventProps.put(EventConstants.EVENT_TOPIC, new String[] { INSTALL_EVENT_TOPIC, UNINSTALL_EVENT_TOPIC,
 				COMPLETE_EVENT_TOPIC, });
 		registration = context.registerService(EventHandler.class.getName(), this, eventProps);
-		debug("[register] Event handler registered.");
+		DebugUtils.debug(this, "[register] Event handler registered.");
 	}
 
 	public void unregister() {
 		if (registration != null) {
-			debug("[unregister] Unregistering event handler for deployment packages...");
+			DebugUtils.debug(this, "[unregister] Unregistering event handler for deployment packages...");
 			registration.unregister();
 			registration = null;
-			debug("[unregister] Event handler unregistered.");
+			DebugUtils.debug(this, "[unregister] Event handler unregistered.");
 		}
 	}
 
@@ -72,8 +71,8 @@ public class DeploymentEventListener implements EventHandler {
 	}
 
 	private void handleInstall(String symbolicName) {
-		debug("[handleInstall] newSymbolicName: " + symbolicName + "; oldSymbolicName: "
-				+ dpSymbolicName);
+		DebugUtils.debug(this, "[handleInstall] newSymbolicName: " + symbolicName + "; oldSymbolicName: "
+		+ dpSymbolicName);
 		if (dpSymbolicName != null)
 			return;
 		dpSymbolicName = symbolicName;
@@ -82,27 +81,27 @@ public class DeploymentEventListener implements EventHandler {
 	private void handleUninstall(String symbolicName) {
 		DeploymentAdmin deploymentAdmin = this.deploymentAdmin;
 		if (deploymentAdmin == null) {
-			info("[handleUninstall] DeploymentAdmin is unavailable");
+			DebugUtils.debug(this, "[handleUninstall] DeploymentAdmin is unavailable");
 			return;
 		}
 		DeploymentPackage dp = deploymentAdmin.getDeploymentPackage(symbolicName);
 		if (dp == null) {
-			info("[handleUninstall] No such deployment package with symbolic name: " + symbolicName);
+			DebugUtils.debug(this, "[handleUninstall] No such deployment package with symbolic name: " + symbolicName);
 			return;
 		}
 		if (dpSymbolicName != null) {
-			debug("[handleUninstall] Uninstallation already in progress for: " + dpSymbolicName
-					+ " Check for bug in deployment admin.");
+			DebugUtils.debug(this, "[handleUninstall] Uninstallation already in progress for: " + dpSymbolicName
+			+ " Check for bug in deployment admin.");
 			return; // don't handle uninstall events for bundles
 		}
 		dpSymbolicName = symbolicName;
 		dpVersion = dp.getVersion().toString();
-		debug("[handleUninstall] Uninstallation in progress for: " + dpSymbolicName + "_" + dpVersion);
+		DebugUtils.debug(this, "[handleUninstall] Uninstallation in progress for: " + dpSymbolicName + "_" + dpVersion);
 	}
 
 	private void handleComplete(String symbolicName, boolean successful) {
 		if (dpSymbolicName == null) {
-			info("[handleComplete] There is no information for started session");
+			DebugUtils.debug(this, "[handleComplete] There is no information for started session");
 			return;
 		}
 		if (dpSymbolicName != null && dpSymbolicName.equals(symbolicName)) {
@@ -112,8 +111,8 @@ public class DeploymentEventListener implements EventHandler {
 					EventSynchronizer synchronizer = Activator.getSynchronizer();
 					if (synchronizer != null) {
 						if (dpVersion != null) { // uninstall event
-							debug("[handleComplete] Uninstall event completed for: " + dpSymbolicName
-									+ "_" + dpVersion);
+							DebugUtils.debug(this, "[handleComplete] Uninstall event completed for: " + dpSymbolicName
+							+ "_" + dpVersion);
 							event = convertDeploymentEvent(dpSymbolicName, dpVersion, DP_UNINSTALLED);
 						} else { // install event
 							DeploymentAdmin deploymentAdmin = this.deploymentAdmin; // save
@@ -127,16 +126,16 @@ public class DeploymentEventListener implements EventHandler {
 								return;
 							DeploymentPackage dp = deploymentAdmin.getDeploymentPackage(dpSymbolicName);
 							dpVersion = dp.getVersion().toString();
-							debug("[handleComplete] Install event completed for: " + dpSymbolicName
-									+ "_" + dpVersion);
+							DebugUtils.debug(this, "[handleComplete] Install event completed for: " + dpSymbolicName
+							+ "_" + dpVersion);
 							event = convertDeploymentEvent(dpSymbolicName, dpVersion, DP_INSTALLED);
 						}
 						synchronizer.enqueue(new EventData(event, DEPLOYMENT_EVENT));
 					} else {
-						info("[handleComplete] Event synchronizer was disabled.");
+						DebugUtils.debug(this, "[handleComplete] Event synchronizer was disabled.");
 					}
 				} else {
-					info("[handleComplete] Deployment package event is not successful");
+					DebugUtils.debug(this, "[handleComplete] Deployment package event is not successful");
 				}
 			} finally {
 				dpSymbolicName = null;
@@ -150,13 +149,5 @@ public class DeploymentEventListener implements EventHandler {
 		event.put(EVENT_TYPE_KEY, new Integer(type));
 		event.put(EVENT_DEPLOYMENT_PACKAGE_KEY, new String[] { symbolicName, version });
 		return event;
-	}
-
-	private final void debug(String message) {
-		DebugUtils.debug(this, message);
-	}
-
-	private final void info(String message) {
-		DebugUtils.info(this, message);
 	}
 }
