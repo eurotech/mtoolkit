@@ -33,7 +33,6 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 
 public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllServiceListener {
-
 	private static final String EVENT_TYPE_KEY = "type";
 	private static final int SERVICE_REGISTERED = 1 << 0;
 	private static final int SERVICE_MODIFIED = 1 << 1;
@@ -67,7 +66,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 	private Map services = new Hashtable();
 
 	public void register(BundleContext context) {
-		debug("[register] Registering remote service admin...");
+		DebugUtils.debug(this, "[register] Registering remote service admin...");
 		this.bc = context;
 
 		registration = context.registerService(RemoteServiceAdmin.class.getName(), this, null);
@@ -87,7 +86,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(true));
 		}
 
-		debug("[register] Remote Service Admin Registered.");
+		DebugUtils.debug(this, "[register] Remote Service Admin Registered.");
 	}
 
 	private void fillServicesMap(ServiceReference[] references) {
@@ -101,7 +100,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 	}
 
 	public void unregister(BundleContext context) {
-		debug("[unregister] Unregistering...");
+		DebugUtils.debug(this, "[unregister] Unregistering...");
 		context.removeServiceListener(this);
 		services = null;
 		if (registration != null) {
@@ -116,30 +115,30 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 
 		this.bc = null;
 
-		debug("[unregister] Unregistered.");
+		DebugUtils.debug(this, "[unregister] Unregistered.");
 	}
 
 	public String checkFilter(String filter) {
-		debug("[checkFilter] >>> filter: " + filter);
+		DebugUtils.debug(this, "[checkFilter] >>> filter: " + filter);
 		try {
 			bc.createFilter(filter);
-			debug("[checkFilter] Filter check is successful");
+			DebugUtils.debug(this, "[checkFilter] Filter check is successful");
 			return null;
 		} catch (InvalidSyntaxException e) {
-			debug("[checkFilter] Unable to create filter", e);
+			DebugUtils.debug(this, "[checkFilter] Unable to create filter", e);
 			return e.toString();
 		}
 	}
 
 	public Dictionary[] getAllRemoteServices(String clazz, String filter) {
-		debug("[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
+		DebugUtils.debug(this, "[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
 		ServiceReference[] refs;
 		try {
 			refs = bc.getAllServiceReferences(clazz, filter);
 		} catch (InvalidSyntaxException e) {
 			return null;
 		}
-		debug("[getAllRemoteServices] " + (refs != null ? refs.length : 0) + " services found.");
+		DebugUtils.debug(this, "[getAllRemoteServices] " + (refs != null ? refs.length : 0) + " services found.");
 		return convertReferences(refs);
 	}
 
@@ -155,14 +154,14 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 	public void addService(ServiceReference ref) {
 		Long serviceId = (Long) ref.getProperty(Constants.SERVICE_ID);
 		if (TRACK_SERVICES_DEBUG)
-			debug("[addService] Track service: " + ref + "; id: " + serviceId);
+			DebugUtils.debug(this, "[addService] Track service: " + ref + "; id: " + serviceId);
 		services.put(serviceId, ref);
 	}
 
 	public void removeService(ServiceReference ref) {
 		Long serviceId = (Long) ref.getProperty(Constants.SERVICE_ID);
 		if (TRACK_SERVICES_DEBUG)
-			debug("[addService] Stop tracking service: " + ref + "; id: " + serviceId);
+			DebugUtils.debug(this, "[addService] Stop tracking service: " + ref + "; id: " + serviceId);
 		// XXX: Unnecessary synchronization?
 		synchronized (services) {
 			services.remove(serviceId);
@@ -193,13 +192,13 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 		EventSynchronizer synchronizer = Activator.getSynchronizer();
 		if (synchronizer != null) {
 			Dictionary convertedServiceEvent = convertServiceEvent(event);
-			debug("[postRemoteEvent] Posting remote event: "
-							+ DebugUtils.convertForDebug(convertedServiceEvent)
-							+ "; type: "
-							+ RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
+			DebugUtils.debug(this, "[postRemoteEvent] Posting remote event: "
+			+ DebugUtils.convertForDebug(convertedServiceEvent)
+			+ "; type: "
+			+ RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
 			synchronizer.enqueue(new EventData(convertedServiceEvent, RemoteServiceAdmin.CUSTOM_SERVICE_EVENT));
 		} else {
-			debug("[postRemoteEvent] Event synchronizer was disabled");
+			DebugUtils.debug(this, "[postRemoteEvent] Event synchronizer was disabled");
 		}
 	}
 
@@ -224,23 +223,23 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 
 
 	public long getBundle(long id) {
-		debug("[getBundle] >>> id: " + id);
+		DebugUtils.debug(this, "[getBundle] >>> id: " + id);
 		ServiceReference ref = getServiceReference(id);
 		if (ref == null) {
-			info("[getBundle] No such service");
+			DebugUtils.debug(this, "[getBundle] No such service");
 			return -1;
 		}
 		long bundleID = ref.getBundle().getBundleId();
-		debug("[getBundle] bundle id: " + bundleID);
+		DebugUtils.debug(this, "[getBundle] bundle id: " + bundleID);
 		return bundleID;
 	}
 
 	public Dictionary getProperties(long id) {
-		debug("[getProperties] >>> id: " + id);
+		DebugUtils.debug(this, "[getProperties] >>> id: " + id);
 
 		ServiceReference ref = getServiceReference(id);
 		if (ref == null) {
-			info("[getProperties] No such service");
+			DebugUtils.debug(this, "[getProperties] No such service");
 			return null;
 		}
 
@@ -251,7 +250,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			props.put(keys[i], convertProperty(prop));
 		}
 
-		debug("[getProperties] service properties: " + DebugUtils.convertForDebug(props));
+		DebugUtils.debug(this, "[getProperties] service properties: " + DebugUtils.convertForDebug(props));
 
 		return props;
 	}
@@ -318,21 +317,21 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 	}
 
 	public long[] getUsingBundles(long id) {
-		debug("[getUsingBundles] >>> id: " + id);
+		DebugUtils.debug(this, "[getUsingBundles] >>> id: " + id);
 		ServiceReference ref = getServiceReference(id);
 		if (ref == null) {
-			info("[getUsingBundles] No such service");
+			DebugUtils.debug(this, "[getUsingBundles] No such service");
 			return null;
 		}
 		Bundle[] bundles = ref.getUsingBundles();
 		long[] bids = RemoteBundleAdminImpl.convertBundlesToIds(bundles);
-		debug("[getUsingBundles] bundles: " + DebugUtils.convertForDebug(bids));
+		DebugUtils.debug(this, "[getUsingBundles] bundles: " + DebugUtils.convertForDebug(bids));
 		return bids;
 	}
 
 	public boolean isServiceStale(long id) {
 		boolean stale = services.get(new Long(id)) == null;
-		debug("[isServiceStale] id: " + id + "; stale: " + stale);
+		DebugUtils.debug(this, "[isServiceStale] id: " + id + "; stale: " + stale);
 		return stale;
 	}
 
@@ -346,18 +345,6 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 			refsProps[i].put(Constants.OBJECTCLASS, refs[i].getProperty(Constants.OBJECTCLASS));
 		}
 		return refsProps;
-	}
-
-	private final void debug(String message) {
-		DebugUtils.debug(this, message);
-	}
-
-	private final void debug(String message, Throwable t) {
-		DebugUtils.debug(this, message, t);
-	}
-
-	private final void info(String message) {
-		DebugUtils.info(this, message);
 	}
 
 	// XXX: Extract this method in common base class

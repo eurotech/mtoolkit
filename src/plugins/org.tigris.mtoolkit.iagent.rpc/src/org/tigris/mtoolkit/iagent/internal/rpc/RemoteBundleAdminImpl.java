@@ -59,7 +59,6 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
 public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, SynchronousBundleListener {
-
 	public static final String SYNCH_BUNDLE_EVENTS = "synch_bundle_event";
 	public static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
 	public static final String EVENT_TYPE_KEY = "type";
@@ -86,7 +85,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	}
 
 	public void register(BundleContext bc) {
-		debug("[register] Registering remote Bundle Admin...");
+		DebugUtils.debug(this, "[register] Registering remote Bundle Admin...");
 		this.bc = bc;
 
 		this.defaultDelegate = new DefaultBundleManagerDelegate(bc);
@@ -109,11 +108,11 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			capMan.setCapability(Capabilities.BUNDLE_SUPPORT, Boolean.TRUE);
 		}
 
-		debug("[register] Remote Bundle Admin Registered.");
+		DebugUtils.debug(this, "[register] Remote Bundle Admin Registered.");
 	}
 
 	public void unregister(BundleContext bc) {
-		debug("[unregister] Unregistering remoteBundleAdmin...");
+		DebugUtils.debug(this, "[unregister] Unregistering remoteBundleAdmin...");
 		if (registration != null) {
 			registration.unregister();
 			registration = null;
@@ -137,13 +136,13 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		}
 
 		this.bc = null;
-		debug("[unregister] Remote Bundle Admin unregistered.");
+		DebugUtils.debug(this, "[unregister] Remote Bundle Admin unregistered.");
 	}
 
 	public int getBundleState(long id) {
 		Bundle bundle = bc.getBundle(id);
 		int bundleState = bundle != null ? bundle.getState() : Bundle.UNINSTALLED;
-		debug("[getBundleState] id " + id + "; state: " + bundleState);
+		DebugUtils.debug(this, "[getBundleState] id " + id + "; state: " + bundleState);
 		return bundleState;
 	}
 
@@ -151,19 +150,19 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		Bundle bundle = bc.getBundle(id);
 		if (bundle != null) {
 			String bundleLocation = bundle.getLocation();
-			debug("[getBundleLocation] id: " + id + "; location: " + bundleLocation);
+			DebugUtils.debug(this, "[getBundleLocation] id: " + id + "; location: " + bundleLocation);
 			return bundleLocation;
 		} else {
-			info("[getBundleLocation] id: " + id + " -> No such bundle");
+			DebugUtils.debug(this, "[getBundleLocation] id: " + id + " -> No such bundle");
 			return null;
 		}
 	}
 
 	public Dictionary getBundleHeaders(long id, String locale) {
-		debug("[getBundleHeaders] >>> id: " + id + "; locale: " + locale);
+		DebugUtils.debug(this, "[getBundleHeaders] >>> id: " + id + "; locale: " + locale);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getBundleHeaders] No such bundle");
+			DebugUtils.debug(this, "[getBundleHeaders] No such bundle");
 			return null;
 		}
 		Dictionary headers = bundle.getHeaders(locale);
@@ -173,73 +172,73 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			converted.put(key.toString(), headers.get(key).toString());
 		}
 
-		debug("[getBundleHeaders] headers: " + DebugUtils.convertForDebug(converted));
+		DebugUtils.debug(this, "[getBundleHeaders] headers: " + DebugUtils.convertForDebug(converted));
 		return converted;
 	}
 
 	public Object getBundleHeader(long id, String headerName, String locale) {
-		debug("[getBundleHeader] >>> id: " + id + "; headerName" + headerName + "; locale" + locale);
+		DebugUtils.debug(this, "[getBundleHeader] >>> id: " + id + "; headerName" + headerName + "; locale" + locale);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
-			info("[getBundleHeader] No such bundle: " + error);
+			DebugUtils.debug(this, "[getBundleHeader] No such bundle: " + error);
 			return error;
 		}
 		Dictionary headers = bundle.getHeaders(locale);
 		Object value = headers.get(headerName);
 		Object bundleHeader = value != null ? value.toString() : null;
-		debug("[getBundleHeader] header value: " + bundleHeader);
+		DebugUtils.debug(this, "[getBundleHeader] header value: " + bundleHeader);
 		return bundleHeader;
 	}
 
 	public boolean isBundleSigned(long id) {
-		debug("[isBundleSigned] >>> id: " + id);
+		DebugUtils.debug(this, "[isBundleSigned] >>> id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getBundleHeaders] No such bundle");
+			DebugUtils.debug(this, "[getBundleHeaders] No such bundle");
 			return false;
 		}
 
 		Map ss = bundle.getSignerCertificates(Bundle.SIGNERS_ALL);
 		boolean signed = !ss.isEmpty();
-		debug("[isBundleSigned] result: " + signed);
+		DebugUtils.debug(this, "[isBundleSigned] result: " + signed);
 		return signed;
 	}
 
 	public long getBundleLastModified(long id) {
-		debug("[getBundleLastModified] >>> id: " + id);
+		DebugUtils.debug(this, "[getBundleLastModified] >>> id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getBundleLastModified] No such bundle");
+			DebugUtils.debug(this, "[getBundleLastModified] No such bundle");
 			return -2; // -1 value is often used to indicate unknown value, so
 			// we return -2
 			// it is hard for impl. to return -2 meaning that the bundle was
 			// last modified 2 ms before 1 Jan, 1970:)
 		}
 		long bundleLastModified = bundle.getLastModified();
-		debug("[getBundleLastModified] last modified: " + bundleLastModified);
+		DebugUtils.debug(this, "[getBundleLastModified] last modified: " + bundleLastModified);
 		return bundleLastModified;
 	}
 
 	public String getBundleSymbolicName(long id) {
-		debug("[getBundleSymbolicName] >>> id: " + id);
+		DebugUtils.debug(this, "[getBundleSymbolicName] >>> id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getBundleSymbolicName] No such bundle");
+			DebugUtils.debug(this, "[getBundleSymbolicName] No such bundle");
 			return null;
 		}
 		String symbolicName = bundle.getSymbolicName();
 		symbolicName = symbolicName != null ? symbolicName : "";
-		debug("[getBundleSymbolicName] symbolic name: " + symbolicName);
+		DebugUtils.debug(this, "[getBundleSymbolicName] symbolic name: " + symbolicName);
 		return symbolicName;
 	}
 
 	public Object startBundle(long id, int flags) {
-		debug("[startBundle] >>> id: " + id + "; flags" + flags);
+		DebugUtils.debug(this, "[startBundle] >>> id: " + id + "; flags" + flags);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
-			info("[startBundle] No such bundle");
+			DebugUtils.debug(this, "[startBundle] No such bundle");
 			return error;
 		}
 		try {
@@ -250,28 +249,28 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			}
 		} catch (BundleException e) {
 			Error error = new Error(getBundleErrorCode(e), "Failed to start bundle: " + e.getMessage());
-			info("[startBundle] Bundle cannot be started: " + error, e);
+			DebugUtils.debug(this, "[startBundle] Bundle cannot be started: " + error, e);
 			return error;
 		} catch (IllegalStateException e) {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
-			info("[startBundle] No such bundle: " + error);
+			DebugUtils.debug(this, "[startBundle] No such bundle: " + error);
 			return error;
 		} catch (Throwable t) {
 			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to start bundle: "
 					+ (t.getMessage() != null ? t.getMessage() : t.toString()));
-			info("[startBundle] Bundle cannot be started: " + error, t);
+			DebugUtils.debug(this, "[startBundle] Bundle cannot be started: " + error, t);
 			return error;
 		}
-		debug("[startBundle] Bundle started successfully");
+		DebugUtils.debug(this, "[startBundle] Bundle started successfully");
 		return null;
 	}
 
 	public Object stopBundle(long id, int flags) {
-		debug("[stopBundle] id: " + id + "; flags" + flags);
+		DebugUtils.debug(this, "[stopBundle] id: " + id + "; flags" + flags);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
-			debug("[stopBundle] No such bundle: " + error);
+			DebugUtils.debug(this, "[stopBundle] No such bundle: " + error);
 			return error;
 		}
 		try {
@@ -282,28 +281,28 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			}
 		} catch (BundleException e) {
 			Error error = new Error(getBundleErrorCode(e), "Failed to stop bundle: " + e.getMessage());
-			info("[stopBundle] Unable to stop bundle: " + error, e);
+			DebugUtils.debug(this, "[stopBundle] Unable to stop bundle: " + error, e);
 			return error;
 		} catch (IllegalStateException e) {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, null);
-			info("[stopBundle] No such bundle: " + error);
+			DebugUtils.debug(this, "[stopBundle] No such bundle: " + error);
 			return error;
 		} catch (Throwable t) {
 			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to stop bundle: "
 					+ (t.getMessage() != null ? t.getMessage() : t.toString()));
-			info("[stopBundle] Unable to stop bundle: " + error, t);
+			DebugUtils.debug(this, "[stopBundle] Unable to stop bundle: " + error, t);
 			return error;
 		}
-		debug("[stopBundle] Successfully stopped");
+		DebugUtils.debug(this, "[stopBundle] Successfully stopped");
 		return null;
 	}
 
 	public boolean resolveBundles(long[] ids) {
 		if (ids == null) {
-			info("[resolveBundles] Passed bundle ids must not be null");
+			DebugUtils.debug(this, "[resolveBundles] Passed bundle ids must not be null");
 			throw new IllegalArgumentException("Passed bundle ids must be not null");
 		}
-		debug("[resolveBundles] bundles: " + DebugUtils.convertForDebug(ids));
+		DebugUtils.debug(this, "[resolveBundles] bundles: " + DebugUtils.convertForDebug(ids));
 		Vector v = new Vector();
 		for (int i = 0; i < ids.length; i++) {
 			Bundle b = bc.getBundle(ids[i]);
@@ -318,24 +317,24 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 
 		PackageAdmin packageAdmin = (PackageAdmin) packageAdminTrack.getService();
 		if (packageAdmin == null) {
-			info("[resolveBundles] PackageAdmin service is not available!");
+			DebugUtils.debug(this, "[resolveBundles] PackageAdmin service is not available!");
 			throw new IllegalStateException("PackageAdmin is not available at the moment");
 		}
 		boolean areBundlesResolved = packageAdmin.resolveBundles(bs);
-		debug("[resolveBundles] Bundles resolved successfully: " + areBundlesResolved);
+		DebugUtils.debug(this, "[resolveBundles] Bundles resolved successfully: " + areBundlesResolved);
 		return areBundlesResolved;
 	}
 
 	public long[] listBundles() {
-		debug("[listBundles] >>>");
+		DebugUtils.debug(this, "[listBundles] >>>");
 		Bundle[] bundles = bc.getBundles();
 		long[] bids = convertBundlesToIds(bundles);
-		debug("[listBundles] bundles: " + DebugUtils.convertForDebug(bids));
+		DebugUtils.debug(this, "[listBundles] bundles: " + DebugUtils.convertForDebug(bids));
 		return bids;
 	}
 
 	public Object getBundlesSnapshot(int includeOptions, Dictionary properties) {
-		debug("[getBundlesSnapshot] >>>");
+		DebugUtils.debug(this, "[getBundlesSnapshot] >>>");
 		long[] ids = listBundles();
 		List snapshots = new ArrayList();
 		for (int i = 0; i < ids.length; i++) {
@@ -389,16 +388,16 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	}
 
 	public Object installBundle(String location, InputStream is) {
-		debug("[installBundle] location: " + location + "; inputStream: " + is);
+		DebugUtils.debug(this, "[installBundle] location: " + location + "; inputStream: " + is);
 		Object result = getDelegate().installBundle(location, is);
 		if (result instanceof Error) {
-			info("[installBundle] Unable to install bundle: " + result);
+			DebugUtils.debug(this, "[installBundle] Unable to install bundle: " + result);
 			return result;
 		}
 
 		Bundle bundle = (Bundle) result;
 		Long bundleId = new Long(bundle.getBundleId());
-		debug("[installBundle] Bundle installed successfully. Id: " + bundleId);
+		DebugUtils.debug(this, "[installBundle] Bundle installed successfully. Id: " + bundleId);
 		return bundleId;
 	}
 
@@ -410,136 +409,139 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	}
 
 	public Object uninstallBundle(long id) {
-		debug("[uninstallBundle] id: " + id);
+		DebugUtils.debug(this, "[uninstallBundle] id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle != null) {
 			Object result = getDelegate().uninstallBundle(bundle);
 			if (result instanceof Error) {
-				info("[uninstallBundle] Unable to uninstall bundle: " + result);
+				DebugUtils.debug(this, "[uninstallBundle] Unable to uninstall bundle: " + result);
 				return result;
 			}
-			debug("[uninstallBundle] Bundle uninstalled");
+			DebugUtils.debug(this, "[uninstallBundle] Bundle uninstalled");
 			return result;
 		} else {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
-			info("[uninstallBundle] Unable to uninstall bundle: " + error);
+			DebugUtils.debug(this, "[uninstallBundle] Unable to uninstall bundle: " + error);
 			return error;
 		}
 	}
 
 	public long[] getBundles(String symbolicName, String version) {
-		debug("[getBundles] symbolicName: " + symbolicName + "; version: " + version);
+		DebugUtils.debug(this, "[getBundles] symbolicName: " + symbolicName + "; version: " + version);
 		PackageAdmin admin = (PackageAdmin) packageAdminTrack.getService();
 		if (admin == null) {
 			throw new IllegalStateException("No PackageAdmin available");
 		}
 		Bundle[] bundles = admin.getBundles(symbolicName, version);
 		long[] bids = convertBundlesToIds(bundles);
-		debug("[getBundles] Bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
+		DebugUtils.debug(this, "[getBundles] Bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
 		return bids;
 	}
 
 	public Object updateBundle(long id, InputStream is) {
-		debug("[updateBundle] installBundle; id: " + id + "; inputStream: " + is);
+		DebugUtils.debug(this, "[updateBundle] installBundle; id: " + id + "; inputStream: " + is);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
 			Error error = new Error(Error.BUNDLE_UNINSTALLED_CODE, "Bundle " + id + " has been uninstalled");
-			info("[updateBundle] No such bundle: " + error);
+			DebugUtils.debug(this, "[updateBundle] No such bundle: " + error);
 			return error;
 		} else {
 			Object result = getDelegate().updateBundle(bundle, is);
 			if (result instanceof Error)
-				info("[updateBundle] Unable to update bundle: " + result);
+				DebugUtils.debug(this, "[updateBundle] Unable to update bundle: " + result);
 			else
-				debug("[updateBundle] Bundle updated successfully");
+				DebugUtils.debug(this, "[updateBundle] Bundle updated successfully");
 			return result;
 		}
 	}
 
 	public Dictionary[] getRegisteredServices(long id) {
-		debug("[getRegisteredServices] id: " + id);
+		DebugUtils.debug(this, "[getRegisteredServices] id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getRegisteredServices] No such bundle");
+			DebugUtils.debug(this, "[getRegisteredServices] No such bundle");
 			return null;
 		}
 		try {
 			ServiceReference[] refs = bundle.getRegisteredServices();
 			return RemoteServiceAdminImpl.convertReferences(refs);
 		} catch (IllegalStateException e) {
-			info("[getRegisteredServices] No such bundle");
+			DebugUtils.debug(this, "[getRegisteredServices] No such bundle");
 			return null;
 		}
 	}
 
 	public Dictionary[] getUsingServices(long id) {
-		debug("[getUsingServices] id: " + id);
+		DebugUtils.debug(this, "[getUsingServices] id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getUsingServices] No such bundle");
+			DebugUtils.debug(this, "[getUsingServices] No such bundle");
 			return null;
 		}
 		try {
 			ServiceReference[] refs = bundle.getServicesInUse();
 			Dictionary[] convertedReferences = RemoteServiceAdminImpl.convertReferences(refs);
-			debug("[getUsingServices] Used services: " + DebugUtils.convertForDebug(convertedReferences));
+			DebugUtils.debug(this,
+					"[getUsingServices] Used services: " + DebugUtils.convertForDebug(convertedReferences));
 			return convertedReferences;
 		} catch (IllegalStateException e) {
-			info("[getUsingServices] No such bundle");
+			DebugUtils.debug(this, "[getUsingServices] No such bundle");
 			return null;
 		}
 	}
 
 	public long[] getFragmentBundles(long id) {
-		debug("[getFragmentBundles] id: " + id);
+		DebugUtils.debug(this, "[getFragmentBundles] id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getFragmentBundles] No such bundle");
+			DebugUtils.debug(this, "[getFragmentBundles] No such bundle");
 			return null;
 		}
 		PackageAdmin admin = (PackageAdmin) packageAdminTrack.getService();
 		if (admin == null) {
-			info("[getFragmentBundles] No packageAdmin");
+			DebugUtils.debug(this, "[getFragmentBundles] No packageAdmin");
 			return new long[0];
 		}
 		Bundle[] fragmentBundles = admin.getFragments(bundle);
 		long[] bids = convertBundlesToIds(fragmentBundles);
-		debug("[getFragmentBundles] Fragment bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
+		DebugUtils.debug(this,
+				"[getFragmentBundles] Fragment bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
 		return bids;
 	}
 
 	public long[] getHostBundles(long id) {
-		debug("[getHostBundles] id: " + id);
+		DebugUtils.debug(this, "[getHostBundles] id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getHostBundles] No such bundle");
+			DebugUtils.debug(this, "[getHostBundles] No such bundle");
 			return null;
 		}
 		PackageAdmin admin = (PackageAdmin) packageAdminTrack.getService();
 		if (admin == null) {
-			info("[getHostBundles] No packageAdmin");
+			DebugUtils.debug(this, "[getHostBundles] No packageAdmin");
 			return new long[0];
 		}
 		Bundle[] hostBundles = admin.getHosts(bundle);
 		long[] bids = convertBundlesToIds(hostBundles);
-		debug("[getHostBundles] Host bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
+		DebugUtils
+				.debug(this, "[getHostBundles] Host bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
 		return bids;
 	}
 
 	public int getBundleType(long id) {
-		debug("[getBundleType] id: " + id);
+		DebugUtils.debug(this, "[getBundleType] id: " + id);
 		Bundle bundle = bc.getBundle(id);
 		if (bundle == null) {
-			info("[getBundleType] No such bundle");
+			DebugUtils.debug(this, "[getBundleType] No such bundle");
 			return -1;
 		}
 		PackageAdmin admin = (PackageAdmin) packageAdminTrack.getService();
 		if (admin == null) {
-			info("[getBundleType] No packageAdmin");
+			DebugUtils.debug(this, "[getBundleType] No packageAdmin");
 			return -2;
 		}
 		int bundleType = admin.getBundleType(bundle);
-		debug("[getBundleType] Bundle Type successfully gotten: " + bundleType);
+		DebugUtils.debug(this, "[getBundleType] Bundle Type successfully gotten: " + bundleType);
 		return bundleType;
 	}
 
@@ -560,12 +562,13 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		if (bc.getBundle().getState() == Bundle.STOPPING)
 			return; // stop sending events when the iagent bundle is stopping,
 		// they're inspectation will lead to errors
-		debug("[bundleChanged] Event type is BundleEvent." + event.getType());
+		DebugUtils.debug(this, "[bundleChanged] Event type is BundleEvent." + event.getType());
 
 		EventSynchronizer synchronizer = Activator.getSynchronizer();
 		if (synchronizer != null) {
 			Dictionary convEvent = convertBundleEvent(event);
-			debug("[bundleChanged] Sending event through existing pmpConnection. eventType: " + event.getType());
+			DebugUtils.debug(this,
+					"[bundleChanged] Sending event through existing pmpConnection. eventType: " + event.getType());
 			String symbolicName = event.getBundle().getSymbolicName();
 			if (event.getType() == BundleEvent.INSTALLED && symbolicName != null && isBundleSystem(symbolicName)) {
 				// post event if new bundle is installed whose symbolic name is
@@ -573,9 +576,9 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				synchronizer.enqueue(new EventData(new Long(event.getBundle().getBundleId()), SYSTEM_BUNDLE_EVENT));
 			}
 			synchronizer.enqueue(new EventData(convEvent, SYNCH_BUNDLE_EVENTS));
-			debug("[bundleChanged] Bundle successfully changed");
+			DebugUtils.debug(this, "[bundleChanged] Bundle successfully changed");
 		} else {
-			info("[bundleChanged] Event synchronizer was disabled.");
+			DebugUtils.debug(this, "[bundleChanged] Event synchronizer was disabled.");
 		}
 	}
 
@@ -591,22 +594,6 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		event.put(EVENT_TYPE_KEY, new Integer(bEvent.getType()));
 		event.put(EVENT_BUNDLE_ID_KEY, new Long(bEvent.getBundle().getBundleId()));
 		return event;
-	}
-
-	private final void debug(String message) {
-		DebugUtils.debug(this, message);
-	}
-
-	private final void info(String message) {
-		DebugUtils.info(this, message);
-	}
-
-	private final void info(String message, Throwable t) {
-		DebugUtils.info(this, message, t);
-	}
-
-	private final void error(String message, Throwable e) {
-		DebugUtils.error(this, message, e);
 	}
 
 	// XXX: Extract this method in common base class
@@ -721,7 +708,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				}
 				this.loadedSymbolicNames = symbolicNames;
 			} catch (IOException e) {
-				error("Failed to load system buindles list from the bundle resources", e);
+				DebugUtils.error(this, "Failed to load system buindles list from the bundle resources", e);
 				loadedSymbolicNames = Collections.EMPTY_SET;
 			} finally {
 				if (reader != null) {
@@ -758,7 +745,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 	}
 
 	public Object getBundleResource(long id, String name, Dictionary properties) {
-		debug("[getBundleResource] id: " + id);
+		DebugUtils.debug(this, "[getBundleResource] id: " + id);
 		if (name == null)
 			throw new IllegalArgumentException("getBundleResource requires non-null name");
 		Bundle bundle = bc.getBundle(id);
