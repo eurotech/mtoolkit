@@ -47,7 +47,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Framewo
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public final class ConnectFrameworkJob extends Job {
-	private static List connectingFrameworks = new ArrayList();
+	private static final List connectingFrameworks = new ArrayList();
 
 	private Framework fw;
 
@@ -148,6 +148,9 @@ public final class ConnectFrameworkJob extends Job {
 			}
 		}
 		monitor.done();
+		if (monitor.isCanceled()) {
+			return Status.CANCEL_STATUS;
+		}
 		return Status.OK_STATUS;
 	}
 
