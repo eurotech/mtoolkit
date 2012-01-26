@@ -34,7 +34,7 @@ import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationRegistry;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 
-public class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
+public final class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
   private ISelectionService selectionService = null;
 
   public InstallToMenu() {
@@ -45,6 +45,16 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
     super(id);
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.menus.IWorkbenchContribution#initialize(org.eclipse.ui.services.IServiceLocator)
+   */
+  public void initialize(IServiceLocator serviceLocator) {
+    selectionService = ((ISelectionService) serviceLocator.getService(ISelectionService.class));
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.CompoundContributionItem#getContributionItems()
+   */
   protected IContributionItem[] getContributionItems() {
     List mappings = getInstallationMappings();
     if (mappings == null || mappings.size() == 0) {
@@ -82,8 +92,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
       menuManager.add(new ActionContributionItem(action));
     }
 
-    Action action = new InstallToSelectionDlgAction(processor, mappings, InstallationRegistry.getInstance()
-        .getSelectionDialog(processor), new IShellProvider() {
+    Action action = new InstallToSelectionDlgAction(processor, mappings, new IShellProvider() {
       public Shell getShell() {
         return menuManager.getMenu().getShell();
       }
@@ -154,9 +163,5 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
       }
     }
     return false;
-  }
-
-  public void initialize(IServiceLocator serviceLocator) {
-    selectionService = ((ISelectionService) serviceLocator.getService(ISelectionService.class));
   }
 }

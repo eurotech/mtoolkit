@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Shell;
 
-public abstract class TargetSelectionDialog extends TitleAreaDialog {
-	public TargetSelectionDialog(Shell parentShell) {
-		super(parentShell);
-	}
-
-	public abstract InstallationTarget getSelectedTarget();
+public interface TargetSelectionDialog {
+  /**
+   * Gets selected installation target  
+   * @return selected installation target or null if none
+   */
+  public InstallationTarget getSelectedTarget(Shell parentShell);
 }

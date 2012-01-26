@@ -76,7 +76,7 @@
       <processor
             class="org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor"
             id="org.tigris.mtoolkit.osgimanagement.frameworkprocessor"
-            selectionDialog="org.tigris.mtoolkit.osgimanagement.installation.FrameworkSelectionDialog">
+            selectionDialog="org.tigris.mtoolkit.osgimanagement.installation.FrameworkSelector">
       </processor>
    </extension>
    <extension

@@ -1,21 +1,17 @@
 package org.tigris.mtoolkit.common.installation;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 /**
@@ -36,7 +32,6 @@ public class InstallationRegistry {
 
   public InstallationTarget findTarget(Object target) {
     InstallationTarget result = null;
-
     Iterator processorsIterator = getProcessors().iterator();
     while (processorsIterator.hasNext()) {
       InstallationItemProcessor element = (InstallationItemProcessor) processorsIterator.next();
@@ -102,23 +97,20 @@ public class InstallationRegistry {
     return itemProcessors;
   }
 
-  public Class getSelectionDialog(InstallationItemProcessor itemProcessor) {
-    return (Class) selectionDialogs.get(itemProcessor);
+  public TargetSelectionDialog getSelectionDialog(InstallationItemProcessor itemProcessor) {
+    return (TargetSelectionDialog) selectionDialogs.get(itemProcessor);
   }
 
   private void obtainInstallationProviders() {
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProviders");
-
     obtainProviderElements(extensionPoint.getConfigurationElements(), itemProviders);
   }
 
-  // getSelectionDialog
-
   private void obtainInstallationProcessors() {
     IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint extensionPoint = registry.getExtensionPoint("org.tigris.mtoolkit.common.installationItemProcessors");
-
+    IExtensionPoint extensionPoint = registry
+        .getExtensionPoint("org.tigris.mtoolkit.common.installationItemProcessors");
     obtainProcessorElements(extensionPoint.getConfigurationElements(), itemProcessors, selectionDialogs);
   }
 
@@ -150,10 +142,8 @@ public class InstallationRegistry {
           providers.add(provider);
         }
       } catch (CoreException e) {
-        UtilitiesPlugin.error("Failed to initialize installation provider from "
-            + elements[i].getNamespaceIdentifier()
-            + " namespace",
-      e);
+        UtilitiesPlugin.error("Failed to initialize installation provider from " + elements[i].getNamespaceIdentifier()
+            + " namespace", e);
       }
     }
   }
@@ -179,43 +169,14 @@ public class InstallationRegistry {
       if (!elements[i].getName().equals("processor")) {
         continue;
       }
-      //      String clazz = elements[i].getAttribute("class");
-      String dlgClassName = elements[i].getAttribute("selectionDialog");
       try {
         Object processor = elements[i].createExecutableExtension("class");
-
-        Class dlgClass = null;
-        String classPackageName = dlgClassName.substring(0, dlgClassName.lastIndexOf('.'));
-        BundleContext bc = ResourcesPlugin.getPlugin().getBundle().getBundleContext();
-        Bundle[] bundles = bc.getBundles();
-
-        for (int index = 0; index < bundles.length; index++) {
-          Dictionary dictionary = bundles[index].getHeaders();
-
-          String exportedPackages = (String) dictionary.get("Export-Package");
-          if (exportedPackages != null) {
-            if (exportedPackages.indexOf(classPackageName) != -1) {
-              dlgClass = bundles[index].loadClass(dlgClassName);
-            }
-          }
-        }
-        if (dlgClass == null)
-          continue;
-
-        if (processor instanceof InstallationItemProcessor
- && TargetSelectionDialog.class.isAssignableFrom(dlgClass)) {
+        if (processor instanceof InstallationItemProcessor) {
           processors.add(processor);
-          try {
-            dialogs.put(processor, dlgClass);
-          } catch (AbstractMethodError e) {
-            // TODO: handle exception
-          }
+          dialogs.put(processor, elements[i].createExecutableExtension("selectionDialog"));
         }
-        dlgClass = null;
       } catch (CoreException e) {
-        e.printStackTrace();
-      } catch (ClassNotFoundException e) {
-        e.printStackTrace();
+        UtilitiesPlugin.error("Failed to obtain installation processors", e);
       }
     }
   }

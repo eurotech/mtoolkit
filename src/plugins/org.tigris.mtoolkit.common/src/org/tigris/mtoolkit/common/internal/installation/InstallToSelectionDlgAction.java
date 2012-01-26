@@ -10,43 +10,37 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.internal.installation;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
+import org.tigris.mtoolkit.common.installation.InstallationRegistry;
+import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.installation.TargetSelectionDialog;
 
-public class InstallToSelectionDlgAction extends Action {
-	private InstallationItemProcessor processor;
-	private List items;
-	private Class dlgClass;
-	private IShellProvider shellProvider;
+public final class InstallToSelectionDlgAction extends Action {
+  private List items;
+  private InstallationItemProcessor processor;
+  private IShellProvider parentShell;
 
-	public InstallToSelectionDlgAction(	InstallationItemProcessor processor,
-										List items,
-										Class dlgClass,
-										IShellProvider shellProvider) {
-		super("Select " + processor.getGeneralTargetName() + "...");
-		this.processor = processor;
-		this.items = items;
-		this.dlgClass = dlgClass;
-		this.shellProvider = shellProvider;
-	}
+  public InstallToSelectionDlgAction(InstallationItemProcessor processor, List items, IShellProvider parentShell) {
+    super("Select " + processor.getGeneralTargetName() + "...");
+    this.processor = processor;
+    this.items = items;
+    this.parentShell = parentShell;
+  }
 
-	public void run() {
-		try {
-			Constructor constructor = dlgClass.getConstructor(new Class[] { Shell.class });
-			TargetSelectionDialog dialog = (TargetSelectionDialog) constructor.newInstance(new Object[] { shellProvider.getShell() });
-      if (dialog.open() == Window.OK) {
-				new InstallToAction(processor, dialog.getSelectedTarget(), items).run();
-			}
-		} catch (Exception e) {
-			// TODO log error
-			e.printStackTrace();
-		}
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  public void run() {
+    InstallationRegistry registry = InstallationRegistry.getInstance();
+    TargetSelectionDialog dialog = registry.getSelectionDialog(processor);
+    InstallationTarget selectedTarget = dialog.getSelectedTarget(parentShell.getShell());
+    if (selectedTarget != null) {
+      Action installTo = new InstallToAction(processor, selectedTarget, items);
+      installTo.run();
+    }
+  }
 }
