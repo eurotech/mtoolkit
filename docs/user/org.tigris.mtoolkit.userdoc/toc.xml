@@ -10,8 +10,9 @@
       <topic label="OSGi Management">
         <topic label="Concepts" href="doc/mbserver/concepts/fw_introduction.html">
           <topic label="OSGi Management Overview" href="doc/mbserver/concepts/fw_overview.html"/>
-          <topic label="OSGi Frameworks Tree" href="doc/mbserver/concepts/fw_tree.html"/>
-      <topic label="Remote Console" href="doc/mbserver/concepts/rem_console.html"/>
+          <topic label="OSGi Frameworks Tree" href="doc/mbserver/concepts/fw_tree.html"/>          
+          <topic label="Remote Console" href="doc/mbserver/concepts/rem_console.html"/>
+          <anchor id="configMgmtConcept"></anchor>
         </topic>
         <topic label="Tasks" href="doc/mbserver/tasks/introduction.html">
           <topic label="Adding/Removing an OSGi Runtime" href="doc/mbserver/tasks/add_fw.html"/>
