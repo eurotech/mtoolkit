@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: mToolkit Deployment Package Editor Doumentation
+Bundle-Name: mToolkit Deployment Package Editor Documentation
 Bundle-SymbolicName: org.tigris.mtoolkit.dpeditor.userdoc; singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Tigris.org
