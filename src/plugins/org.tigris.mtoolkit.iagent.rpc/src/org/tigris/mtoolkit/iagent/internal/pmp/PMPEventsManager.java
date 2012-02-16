@@ -232,7 +232,7 @@ class PMPEventsManager implements Runnable {
 				}
 			}
 		} catch (Exception exc) { // PMPException, IOException
-			session.error("error unregitering event listener", exc);
+			session.debug("error unregitering event listener");
 		}
 	}
 
