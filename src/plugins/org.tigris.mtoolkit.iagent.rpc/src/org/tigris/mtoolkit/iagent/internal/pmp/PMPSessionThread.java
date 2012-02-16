@@ -994,21 +994,22 @@ public class PMPSessionThread implements Runnable {
 			error("error receiving event", ioExc);
 		}
 	}
-	
+
 	private static boolean isConBroken(Throwable aThrow) {
-		if (!(aThrow instanceof java.net.SocketException)) {
+		if (!(aThrow instanceof IOException)) {
 			return false;
 		}
 		String exmsg = aThrow.getLocalizedMessage();
 		if (exmsg == null) {
 			return false;
 		}
-		exmsg=exmsg.toLowerCase();
+		exmsg = exmsg.toLowerCase();
 		return exmsg.startsWith("connection reset") //$NON-NLS-1$
 				|| exmsg.startsWith("connection aborted") //$NON-NLS-1$
 				|| exmsg.startsWith("software caused connection abort") //$NON-NLS-1$
 				|| exmsg.startsWith("broken pipe") //$NON-NLS-1$
 				|| exmsg.startsWith("socket closed") //$NON-NLS-1$
-				|| exmsg.startsWith("bad socket"); //$NON-NLS-1$
+				|| exmsg.startsWith("bad socket") //$NON-NLS-1$
+				|| exmsg.startsWith("read error"); //$NON-NLS-1$
 	}
 }
