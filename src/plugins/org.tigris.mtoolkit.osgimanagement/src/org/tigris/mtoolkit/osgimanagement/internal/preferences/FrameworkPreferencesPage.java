@@ -191,11 +191,6 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 		return getBoolean(store, MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL, AUTO_UPDATE_BUNDLES_DEFAULT);
 	}
 
-	public static boolean isShowSkippedSystemBundles() {
-		IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
-		return getBoolean(store, MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES, SHOW_SKIPPED_SYSTEM_BUNDLES_DEFAULT);
-	}
-
 	static void initDefaults() {
 		IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
 		store.setDefault(MEMENTO_AUTOCONNECT, AUTO_CONNECT_DEFAULT);
@@ -205,6 +200,11 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 		store.setDefault(MEMENTO_SHOW_BUNDLE_CATEGORY, SHOW_BUNDLE_CATEGORIES_DEFAULT);
 		store.setDefault(MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES, SHOW_SKIPPED_SYSTEM_BUNDLES_DEFAULT);
 		store.setDefault(MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL, AUTO_UPDATE_BUNDLES_DEFAULT);
+	}
+
+	private static boolean isShowSkippedSystemBundles() {
+		IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
+		return getBoolean(store, MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES, SHOW_SKIPPED_SYSTEM_BUNDLES_DEFAULT);
 	}
 
 	private static boolean getBoolean(IPreferenceStore aStore, String aName, boolean aDefault) {
