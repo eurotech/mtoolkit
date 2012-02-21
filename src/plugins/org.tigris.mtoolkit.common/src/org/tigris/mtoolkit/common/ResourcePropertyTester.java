@@ -11,8 +11,8 @@ import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.common.installation.InstallationRegistry;
 
-public final class ResourcePropertyTester extends PropertyTester {
-  private InstallationItem installationItem;
+public class ResourcePropertyTester extends PropertyTester {
+  protected InstallationItem installationItem;
 
   /* (non-Javadoc)
    * @see org.eclipse.core.expressions.IPropertyTester#test(java.lang.Object, java.lang.String, java.lang.Object[], java.lang.Object)

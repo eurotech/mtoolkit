@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.common.internal.installation;
+package org.tigris.mtoolkit.common.installation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,20 +24,18 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.tigris.mtoolkit.common.installation.InstallationItem;
-import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
-import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
-import org.tigris.mtoolkit.common.installation.InstallationTarget;
-import org.tigris.mtoolkit.common.installation.ProviderSelectionDialog;
 
 public class InstallToAction extends Action {
-  private InstallationItemProcessor processor;
-  private InstallationTarget target;
-  private List items;
+  protected final Map args;
+  protected final List items;
+  protected final InstallationTarget target;
+  protected final InstallationItemProcessor processor;
 
-  public InstallToAction(InstallationItemProcessor processor, InstallationTarget target, List/*<Mapping>*/items) {
+  public InstallToAction(InstallationItemProcessor processor, Map/*<String,Object>*/args, InstallationTarget target,
+      List/*<Mapping>*/items) {
     super(target.getName());
     this.processor = processor;
+    this.args = args;
     this.target = target;
     this.items = items;
   }
@@ -52,8 +50,11 @@ public class InstallToAction extends Action {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
   public void run() {
-    Job job = new Job("Installing to " + target.getName()) {
+    Job job = new Job(getActionText()) {
       public IStatus run(IProgressMonitor monitor) {
         InstallationHistory.getDefault().promoteHistory(target, processor);
         InstallationHistory.getDefault().saveHistory();
@@ -72,8 +73,18 @@ public class InstallToAction extends Action {
             return Status.CANCEL_STATUS;
           }
         }
-        IStatus status = processor.processInstallationItems(
-            (InstallationItem[]) instItems.toArray(new InstallationItem[instItems.size()]), target, monitor);
+
+        InstallationItem[] items = (InstallationItem[]) instItems.toArray(new InstallationItem[instItems.size()]);
+
+        IStatus status = preInstall(items);
+        if (status != null) {
+          if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
+            monitor.done();
+            return status;
+          }
+        }
+
+        status = processor.processInstallationItems(items, args, target, monitor);
 
         monitor.done();
         if (monitor.isCanceled()) {
@@ -83,6 +94,14 @@ public class InstallToAction extends Action {
       }
     };
     job.schedule();
+  }
+
+  protected IStatus preInstall(InstallationItem[] items) {
+    return Status.OK_STATUS;
+  }
+
+  protected String getActionText() {
+    return "Installing to " + target.getName();
   }
 
   private InstallationItem selectInstallationItem(final Object resource, final Map items) {

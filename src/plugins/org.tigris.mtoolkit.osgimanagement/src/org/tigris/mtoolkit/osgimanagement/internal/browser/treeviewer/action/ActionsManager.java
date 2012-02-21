@@ -136,7 +136,7 @@ public class ActionsManager {
 					}
 				}
 				status = processor.processInstallationItems(
-						(InstallationItem[]) items.toArray(new InstallationItem[items.size()]), target, monitor);
+						(InstallationItem[]) items.toArray(new InstallationItem[items.size()]), null, target, monitor);
 
 				monitor.done();
 				if (monitor.isCanceled()) {
@@ -184,7 +184,7 @@ public class ActionsManager {
 					Messages.stop_system_bundle, bundle.getName()), MessageDialog.QUESTION, new String[] { "Continue",
 					"Cancel" }, 0);
 			int statusCode = UIHelper.openWindow(dialog);
-			if (statusCode != Window.OK){
+			if (statusCode != Window.OK) {
 				return;
 			}
 		}

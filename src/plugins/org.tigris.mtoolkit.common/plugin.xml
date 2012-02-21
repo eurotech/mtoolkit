@@ -19,13 +19,12 @@
       <menuContribution
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
          <dynamic
-               class="org.tigris.mtoolkit.common.internal.installation.InstallToMenu"
+               class="org.tigris.mtoolkit.common.installation.InstallToMenu"
                id="org.tigris.mtoolkit.osgimanagement.installto">
             <visibleWhen>
                <reference
                      definitionId="org.tigris.mtoolkit.osgimanagement.installto.selection">
                </reference>
-          
             </visibleWhen>
          </dynamic>
       </menuContribution>

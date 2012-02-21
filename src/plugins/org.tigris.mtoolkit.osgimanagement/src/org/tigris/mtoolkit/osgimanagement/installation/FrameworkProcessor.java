@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
+import org.tigris.mtoolkit.common.installation.InstallationConstants;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -63,7 +66,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
  * @since 5.0
  */
 public class FrameworkProcessor implements InstallationItemProcessor {
-
+	private static final Map properties;
 	private static FrameworkProcessor defaultinstance;
 	private static final String MIME_JAR = "application/java-archive";
 	private static final String MIME_ZIP = "application/zip";
@@ -72,6 +75,12 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 	private static Vector additionalProcessors = new Vector();
 
 	private boolean useAdditionalProcessors = true;
+
+	static {
+		Map props = new HashMap(1, 1);
+		props.put(InstallationConstants.TESTING_SUPPORTED, Boolean.TRUE);
+		properties = Collections.unmodifiableMap(props);
+	}
 
 	public static FrameworkProcessor getDefault() {
 		if (defaultinstance == null) {
@@ -125,12 +134,8 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return result;
 	}
 
-	public IStatus processInstallationItem(InstallationItem item, InstallationTarget target, IProgressMonitor monitor) {
-		return processInstallationItems(new InstallationItem[] { item }, target, monitor);
-	}
-
 	// TODO use multi status to handle errors and warnings
-	public IStatus processInstallationItems(final InstallationItem[] items, InstallationTarget target,
+	public IStatus processInstallationItems(final InstallationItem[] items, Map args, InstallationTarget target,
 			final IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
 
@@ -205,7 +210,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 				FrameworkPlugin.log(status);
 			}
 		}
-		installItems((FrameworkImpl) framework, itemsToInstall);
+		installItems((FrameworkImpl) framework, itemsToInstall, args);
 
 		monitor.done();
 		if (monitor.isCanceled()) {
@@ -318,12 +323,12 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}
 
-	private void installItems(FrameworkImpl framework, List<InstallationPair> itemsToInstall) {
+	private void installItems(FrameworkImpl framework, List<InstallationPair> itemsToInstall, Map args) {
 		if (itemsToInstall.isEmpty()) {
 			return;
 		}
 		try {
-			Job installBundleJob = new InstallOperation(framework, itemsToInstall);
+			Job installBundleJob = new InstallOperation(framework, itemsToInstall, args);
 			installBundleJob.schedule();
 		} catch (Exception e) {
 			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle(s)", e),
@@ -347,7 +352,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 						+ remoteBundle.getVersion() + ")") {
 					@Override
 					public IStatus run(IProgressMonitor monitor) {
-						int flags =  FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY
+						int flags = FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY
 								: 0;
 						try {
 							remoteBundle.start(flags);
@@ -454,10 +459,24 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return null;
 	}
 
-	/**
-	 * @since 6.0
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.common.installation.InstallationItemProcessor#isSupported
+	 * (java.lang.Object)
 	 */
 	public boolean isSupported(Object target) {
 		return (target instanceof Framework);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * getProperties()
+	 */
+	public Map getProperties() {
+		return properties;
 	}
 }

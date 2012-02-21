@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.common.internal.installation;
+package org.tigris.mtoolkit.common.installation;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,10 +28,8 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
-import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
-import org.tigris.mtoolkit.common.installation.InstallationTarget;
 
-public class InstallationHistory {
+public final class InstallationHistory {
 	private static final int HISTORY_SIZE = 5;
 	private static final String STORAGE_FILE = "installation_history.xml";
 	private static final String ROOT_TYPE = "history";

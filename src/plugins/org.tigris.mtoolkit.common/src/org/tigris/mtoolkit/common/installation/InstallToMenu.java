@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.common.internal.installation;
+package org.tigris.mtoolkit.common.installation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,20 +22,14 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.IShellProvider;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.actions.CompoundContributionItem;
 import org.eclipse.ui.menus.IWorkbenchContribution;
 import org.eclipse.ui.services.IServiceLocator;
 import org.tigris.mtoolkit.common.Messages;
-import org.tigris.mtoolkit.common.installation.InstallationItem;
-import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
-import org.tigris.mtoolkit.common.installation.InstallationRegistry;
-import org.tigris.mtoolkit.common.installation.InstallationTarget;
 
-public final class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
-  private ISelectionService selectionService = null;
+public class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
+  protected ISelectionService selectionService = null;
 
   public InstallToMenu() {
     super();
@@ -60,14 +54,11 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
     if (mappings == null || mappings.size() == 0) {
       return new IContributionItem[0];
     }
-
     List capableProcessors = getCapableProcessors(mappings);
     if (capableProcessors == null || capableProcessors.size() == 0) {
       return new IContributionItem[0];
     }
-
-    MenuManager menuManager = new MenuManager(Messages.install_to_menu_label); //$NON-NLS-1$
-
+    MenuManager menuManager = new MenuManager(getMenuText()); //$NON-NLS-1$
     Iterator iterator = capableProcessors.iterator();
     boolean first = true;
     while (iterator.hasNext()) {
@@ -77,27 +68,48 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
       createActions((InstallationItemProcessor) iterator.next(), mappings, menuManager);
       first = false;
     }
-
     menuManager.setVisible(true);
     return new IContributionItem[] { menuManager };
   }
 
-  private void createActions(InstallationItemProcessor processor, List mappings, final MenuManager menuManager) {
-    InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
+  protected String getMenuText() {
+    return Messages.install_to_menu_label;
+  }
 
+  protected boolean isCapable(InstallationItemProcessor processor) {
+    return true;
+  }
+
+  protected Action createInstallationAction(InstallationItemProcessor processor, InstallationTarget target,
+      List mappings) {
+    return new InstallToAction(processor, null, target, mappings);
+  }
+
+  private void createActions(final InstallationItemProcessor processor, final List mappings,
+      final MenuManager menuManager) {
+    InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
     for (int i = 0; i < targets.length; i++) {
-      Action action = new InstallToAction(processor, targets[i], mappings);
-      action.setId("Install_to_" + processor.hashCode() + targets[i].getName().hashCode()); //$NON-NLS-1$
+      Action action = createInstallationAction(processor, targets[i], mappings);
+      action.setId(getClass().getName() + processor.hashCode() + targets[i].getName().hashCode()); //$NON-NLS-1$
       action.setImageDescriptor(targets[i].getIcon());
       menuManager.add(new ActionContributionItem(action));
     }
 
-    Action action = new InstallToSelectionDlgAction(processor, mappings, new IShellProvider() {
-      public Shell getShell() {
-        return menuManager.getMenu().getShell();
+    Action action = new Action("Select " + processor.getGeneralTargetName() + "...") {
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.action.Action#run()
+       */
+      public void run() {
+        InstallationRegistry registry = InstallationRegistry.getInstance();
+        TargetSelectionDialog dialog = registry.getSelectionDialog(processor);
+        InstallationTarget selectedTarget = dialog.getSelectedTarget(menuManager.getMenu().getShell());
+        if (selectedTarget != null) {
+          Action installTo = createInstallationAction(processor, selectedTarget, mappings);
+          installTo.run();
+        }
       }
-    });
-    action.setId("Install_to_" + processor.hashCode() + "selection_dlg"); //$NON-NLS-1$
+    };
+    action.setId(getClass().getName() + processor.hashCode() + "selection_dlg"); //$NON-NLS-1$
     action.setImageDescriptor(processor.getGeneralTargetImageDescriptor());
     menuManager.add(new ActionContributionItem(action));
   }
@@ -107,11 +119,11 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
     if (selection == null) {
       return null;
     }
-    if (!(selection instanceof IStructuredSelection))
+    if (!(selection instanceof IStructuredSelection)) {
       return null;
+    }
     IStructuredSelection sel = (IStructuredSelection) selection;
     List resources = sel.toList();
-
     List mappings = new ArrayList();
     Iterator resIterator = resources.iterator();
     while (resIterator.hasNext()) {
@@ -121,13 +133,11 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
         mappings.add(new InstallToAction.Mapping(res, resItems));
       }
     }
-
     return mappings;
   }
 
   private List getCapableProcessors(List/*<Mapping>*/installationMappings) {
     List capableProcessors = new ArrayList();
-
     Iterator processorsIterator = InstallationRegistry.getInstance().getProcessors().iterator();
     while (processorsIterator.hasNext()) {
       InstallationItemProcessor processor = (InstallationItemProcessor) processorsIterator.next();
@@ -149,7 +159,7 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
           break;
         }
       }
-      if (isCapable) {
+      if (isCapable && isCapable(processor)) {
         capableProcessors.add(processor);
       }
     }

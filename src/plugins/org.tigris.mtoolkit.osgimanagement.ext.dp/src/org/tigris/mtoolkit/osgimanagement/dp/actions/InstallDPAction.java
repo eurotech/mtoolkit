@@ -38,87 +38,87 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class InstallDPAction extends SelectionProviderAction implements IStateAction {
 
-	private static final String DP_FILTER = "*.dp"; //$NON-NLS-1$
+  private static final String DP_FILTER = "*.dp"; //$NON-NLS-1$
 
-	private TreeViewer parentView;
+  private TreeViewer parentView;
 
-	public InstallDPAction(ISelectionProvider provider, String label) {
-		super(provider, label);
-		this.parentView = (TreeViewer) provider;
-	}
+  public InstallDPAction(ISelectionProvider provider, String label) {
+    super(provider, label);
+    this.parentView = (TreeViewer) provider;
+  }
 
-	// run method
-	public void run() {
-		Model node = (Model) getStructuredSelection().getFirstElement();
-		Framework framework = node.findFramework();
-		installDPAction(framework, parentView);
-		getSelectionProvider().setSelection(getSelection());
-	}
+  // run method
+  public void run() {
+    Model node = (Model) getStructuredSelection().getFirstElement();
+    Framework framework = node.findFramework();
+    installDPAction(framework, parentView);
+    getSelectionProvider().setSelection(getSelection());
+  }
 
-	private void installDPAction(final Framework framework, TreeViewer parentView) {
-		final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
-				"Select Deployment Package To Install", DP_FILTER, "Deployment Package (*.dp)", true);
-		if (files == null || files.length == 0) {
-			return;
-		}
+  private void installDPAction(final Framework framework, TreeViewer parentView) {
+    final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
+        "Select Deployment Package To Install", DP_FILTER, "Deployment Package (*.dp)", true);
+    if (files == null || files.length == 0) {
+      return;
+    }
 
-		Job job = new Job("Installing to " + framework.getName()) {
-			public IStatus run(IProgressMonitor monitor) {
-				FrameworkProcessor processor = new FrameworkProcessor();
-				processor.setUseAdditionalProcessors(true);
-				InstallationTarget target = new FrameworkTarget(framework);
+    Job job = new Job("Installing to " + framework.getName()) {
+      public IStatus run(IProgressMonitor monitor) {
+        FrameworkProcessor processor = new FrameworkProcessor();
+        processor.setUseAdditionalProcessors(true);
+        InstallationTarget target = new FrameworkTarget(framework);
 
-				IStatus status = Status.OK_STATUS;
-				List items = new ArrayList();
-				for (int i = 0; i < files.length; i++) {
-					InstallationItem item = new BaseFileItem(files[i], DPProcessor.MIME_DP);
-					items.add(item);
-					if (monitor.isCanceled()) {
-						break;
-					}
-				}
-				status = processor.processInstallationItems((InstallationItem[]) items.toArray(new InstallationItem[items.size()]), target, monitor);
+        IStatus status = Status.OK_STATUS;
+        List items = new ArrayList();
+        for (int i = 0; i < files.length; i++) {
+          InstallationItem item = new BaseFileItem(files[i], DPProcessor.MIME_DP);
+          items.add(item);
+          if (monitor.isCanceled()) {
+            break;
+          }
+        }
+        status = processor.processInstallationItems(
+            (InstallationItem[]) items.toArray(new InstallationItem[items.size()]), null, target, monitor);
 
-				monitor.done();
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
-				}
-				return status;
-			}
-		};
-		job.schedule();
-	}
+        monitor.done();
+        if (monitor.isCanceled()) {
+          return Status.CANCEL_STATUS;
+        }
+        return status;
+      }
+    };
+    job.schedule();
+  }
 
+  // override to react properly to selection change
+  public void selectionChanged(IStructuredSelection selection) {
+    updateState(selection);
+  }
 
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
-
-	public void updateState(IStructuredSelection selection) {
-		if (selection.size() == 0) {
-			setEnabled(false);
-			return;
-		}
-		Framework fw = ((Model) selection.getFirstElement()).findFramework();
-		boolean enabled = true;
-		if (fw == null || !fw.isConnected()) {
-			enabled = false;
-		} else {
-			Iterator iterator = selection.iterator();
-			while (iterator.hasNext()) {
-				Model model = (Model) iterator.next();
-				if (model.findFramework() != fw) {
-					enabled = false;
-					break;
-				}
-				DeviceConnector connector = model.findFramework().getConnector();
-				if (connector == null || DPModelProvider.supportDPDictionary.get(connector) != Boolean.TRUE) {
-					enabled = false;
-					break;
-				}
-			}
-		}
-		setEnabled(enabled);
-	}
+  public void updateState(IStructuredSelection selection) {
+    if (selection.size() == 0) {
+      setEnabled(false);
+      return;
+    }
+    Framework fw = ((Model) selection.getFirstElement()).findFramework();
+    boolean enabled = true;
+    if (fw == null || !fw.isConnected()) {
+      enabled = false;
+    } else {
+      Iterator iterator = selection.iterator();
+      while (iterator.hasNext()) {
+        Model model = (Model) iterator.next();
+        if (model.findFramework() != fw) {
+          enabled = false;
+          break;
+        }
+        DeviceConnector connector = model.findFramework().getConnector();
+        if (connector == null || DPModelProvider.supportDPDictionary.get(connector) != Boolean.TRUE) {
+          enabled = false;
+          break;
+        }
+      }
+    }
+    setEnabled(enabled);
+  }
 }

@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.installation.InstallationConstants;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
@@ -23,13 +24,14 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public class InstallOperation extends Job {
-
+	private final Map args;
 	private FrameworkImpl framework;
 	private List<InstallationPair> installationPairs;
 
-	public InstallOperation(FrameworkImpl framework, List<InstallationPair> installationPairs) {
+	public InstallOperation(FrameworkImpl framework, List<InstallationPair> installationPairs, Map args) {
 		super(Messages.install_operation_title);
 		this.framework = framework;
+		this.args = args;
 		this.installationPairs = installationPairs;
 	}
 
@@ -89,6 +91,12 @@ public class InstallOperation extends Job {
 	}
 
 	private IStatus startInstalledItems(Map<Object, FrameworkProcessor> itemsToStart, IProgressMonitor monitor) {
+		if (args != null) {
+			Boolean startItems = (Boolean) args.get(InstallationConstants.START_BUNDLES);
+			if (startItems != null && !startItems.booleanValue()) {
+				return Status.OK_STATUS;
+			}
+		}
 		for (Entry<Object, FrameworkProcessor> entry : itemsToStart.entrySet()) {
 			try {
 				entry.getValue().start(entry.getKey(), monitor);
