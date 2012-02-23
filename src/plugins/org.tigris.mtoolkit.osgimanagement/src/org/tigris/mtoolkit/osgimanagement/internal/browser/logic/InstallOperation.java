@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -61,7 +62,7 @@ public class InstallOperation extends Job {
 
 	protected IStatus doOperation(IProgressMonitor monitor, InstallationPair installationPair, Map installedItems,
 			SubMonitor subMonitor) throws IAgentException {
-		IStatus result;
+		IStatus result = Status.OK_STATUS;
 		FrameworkProcessor processor = installationPair.processor();
 		if (processor != null) {
 			InstallationItem item = installationPair.item();
@@ -72,9 +73,10 @@ public class InstallOperation extends Job {
 				if (installedItem != null) {
 					installedItems.put(installedItem, processor);
 				}
-				result = Status.OK_STATUS;
+			} catch (CoreException e) {
+				result = e.getStatus();
 			} catch (Exception e) {
-				result = new Status(Status.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage());
+				result = new Status(Status.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage(), e);
 			} finally {
 				if (input != null) {
 					try {

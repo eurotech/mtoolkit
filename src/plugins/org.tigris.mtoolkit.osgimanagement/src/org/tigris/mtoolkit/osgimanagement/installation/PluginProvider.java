@@ -40,12 +40,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.IPluginExporter;
+import org.tigris.mtoolkit.common.PDEUtils;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.export.PluginExportManager;
 import org.tigris.mtoolkit.common.images.UIResources;
-import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -71,10 +71,24 @@ public final class PluginProvider implements InstallationItemProvider {
 			this.provider = provider;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.tigris.mtoolkit.common.installation.InstallationItem#getMimeType
+		 * ()
+		 */
 		public String getMimeType() {
 			return "application/java-archive";
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.tigris.mtoolkit.common.installation.InstallationItem#getInputStream
+		 * ()
+		 */
 		public InputStream getInputStream() throws IOException {
 			String location = getLocation();
 			if (location == null) {
@@ -83,6 +97,13 @@ public final class PluginProvider implements InstallationItemProvider {
 			return new FileInputStream(location);
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.tigris.mtoolkit.common.installation.InstallationItem#prepare(
+		 * org.eclipse.core.runtime.IProgressMonitor, java.util.Map)
+		 */
 		public IStatus prepare(IProgressMonitor monitor, Map properties) {
 			if (pluginBase == null) {
 				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
@@ -115,11 +136,23 @@ public final class PluginProvider implements InstallationItemProvider {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.tigris.mtoolkit.common.installation.InstallationItem#getName()
+		 */
 		public String getName() {
 			BundleDescription description = pluginBase.getBundleDescription();
 			return (description != null) ? description.getName() : null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.tigris.mtoolkit.common.installation.InstallationItem#dispose()
+		 */
 		public void dispose() {
 			if (preparedItem != null) {
 				if (preparedItem.delete()) {
@@ -128,6 +161,11 @@ public final class PluginProvider implements InstallationItemProvider {
 			}
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+		 */
 		public Object getAdapter(Class adapter) {
 			if (adapter.equals(IBaseModel.class)) {
 				return pluginBase;
@@ -136,23 +174,37 @@ public final class PluginProvider implements InstallationItemProvider {
 			}
 		}
 
-		/**
-		 * @since 6.0
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.tigris.mtoolkit.common.installation.InstallationItem#getChildren
+		 * ()
 		 */
-		public IPluginModelBase getPlugin() {
-			return pluginBase;
-		}
-
 		public InstallationItem[] getChildren() {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * org.tigris.mtoolkit.common.installation.InstallationItem#setLocation
+		 * (java.io.File)
+		 */
 		public void setLocation(File file) {
 			if (preparedItem != null && !preparedItem.equals(file)) {
 				// delete the previous prepared item
 				preparedItem.delete();
 			}
 			preparedItem = file;
+		}
+
+		/**
+		 * @since 6.0
+		 */
+		public IPluginModelBase getPlugin() {
+			return pluginBase;
 		}
 
 		/**
@@ -165,7 +217,8 @@ public final class PluginProvider implements InstallationItemProvider {
 		 * @param bundlesToInstall
 		 * @return IStatus
 		 */
-		IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall) {
+		IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall,
+				Map preparationProps) {
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}
@@ -231,36 +284,57 @@ public final class PluginProvider implements InstallationItemProvider {
 				if (result[0]) {
 					return Status.CANCEL_STATUS;
 				}
-
 				// install dependencies
 				for (int i = 0; i < dependencies.size(); i++) {
 					descr = (BundleDescription) dependencies.elementAt(i);
-					String location = descr.getLocation();
-					bundlesToInstall.add(new InstallationPair(FrameworkProcessor.getDefault(), new BaseFileItem(
-							new File(location), getMimeType())));
-
+					final InstallationItem installationItem = getInstallationItem(descr);
+					if (installationItem != null) {
+						IStatus preparationStatus = installationItem.prepare(monitor, preparationProps);
+						if (preparationStatus != null) {
+							if (preparationStatus.matches(IStatus.ERROR) || preparationStatus.matches(IStatus.CANCEL)) {
+								return preparationStatus;
+							}
+						}
+						bundlesToInstall.add(new InstallationPair(FrameworkProcessor.getDefault(), installationItem));
+					}
 				}
 			}
 			return Status.OK_STATUS;
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#
+	 * getInstallationItem(java.lang.Object)
+	 */
 	public InstallationItem getInstallationItem(Object resource) {
-		IPluginModelBase model;
+		IPluginModelBase model = null;
 		if (resource instanceof IJavaProject) {
 			IProject project = ((IJavaProject) resource).getProject();
 			model = PluginRegistry.findModel(project);
 		} else if (resource instanceof IProject) {
 			IProject project = ((IProject) resource).getProject();
 			model = PluginRegistry.findModel(project);
+		} else if (resource instanceof BundleDescription) {
+			model = PDEUtils.findBundle((BundleDescription) resource);
 		} else {
 			model = (IPluginModelBase) resource;
 		}
-		if (model == null)
+		if (model == null) {
 			return null;
+		}
 		return new PluginItem(model, this);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#isCapable
+	 * (java.lang.Object)
+	 */
 	public boolean isCapable(Object resource) {
 		if (resource instanceof IProject || resource instanceof IJavaProject) {
 			IProject project = null;
@@ -278,12 +352,23 @@ public final class PluginProvider implements InstallationItemProvider {
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#init
+	 * (org.eclipse.core.runtime.IConfigurationElement)
+	 */
 	public void init(IConfigurationElement element) throws CoreException {
 	}
 
-	/**
-	 * @throws CoreException
-	 * @since 6.0
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#prepareItems
+	 * (java.util.List, java.util.Map,
+	 * org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public IStatus prepareItems(List/* <InstallationItem> */items, Map properties, IProgressMonitor monitor) {
 		try {
@@ -317,10 +402,23 @@ public final class PluginProvider implements InstallationItemProvider {
 		return Status.OK_STATUS;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#getName
+	 * ()
+	 */
 	public String getName() {
 		return "Plug-ins provider";
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#
+	 * getImageDescriptor()
+	 */
 	public ImageDescriptor getImageDescriptor() {
 		return UIResources.getImageDescriptor(UIResources.PLUGIN_ICON);
 	}
@@ -388,7 +486,6 @@ public final class PluginProvider implements InstallationItemProvider {
 	}
 
 	private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
-		// File signedFile[] = new File[items.size()];
 		File file[] = new File[items.size()];
 		try {
 			for (int i = 0; i < items.size(); i++) {

@@ -23,15 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -67,12 +66,13 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
  */
 public class FrameworkProcessor implements InstallationItemProcessor {
 	private static final Map properties;
-	private static FrameworkProcessor defaultinstance;
 	private static final String MIME_JAR = "application/java-archive";
 	private static final String MIME_ZIP = "application/zip";
 	private static final String PROP_JVM_NAME = "jvm.name";
 
-	private static Vector additionalProcessors = new Vector();
+	private static final Vector additionalProcessors = new Vector();
+
+	private static FrameworkProcessor defaultinstance;
 
 	private boolean useAdditionalProcessors = true;
 
@@ -82,22 +82,12 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		properties = Collections.unmodifiableMap(props);
 	}
 
-	public static FrameworkProcessor getDefault() {
-		if (defaultinstance == null) {
-			defaultinstance = new FrameworkProcessor();
-		}
-
-		return defaultinstance;
-	}
-
-	public static void addAdditionalProcessor(InstallationItemProcessor processor) {
-		additionalProcessors.addElement(processor);
-	}
-
-	public static void removeAdditionalProcessor(InstallationItemProcessor processor) {
-		additionalProcessors.removeElement(processor);
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * getInstallationTargets()
+	 */
 	public InstallationTarget[] getInstallationTargets() {
 		FrameworkImpl[] fws = FrameWorkView.getFrameworks();
 		if (fws == null || fws.length == 0) {
@@ -111,10 +101,76 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return (InstallationTarget[]) targets.toArray(new InstallationTarget[targets.size()]);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * getGeneralTargetName()
+	 */
 	public String getGeneralTargetName() {
 		return "OSGi Framework";
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * getGeneralTargetImageDescriptor()
+	 */
+	public ImageDescriptor getGeneralTargetImageDescriptor() {
+		return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * getInstallationTarget(java.lang.Object)
+	 */
+	public InstallationTarget getInstallationTarget(Object target) {
+		if (target instanceof Framework) {
+			return new FrameworkTarget((Framework) target);
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.common.installation.InstallationItemProcessor#isSupported
+	 * (java.lang.Object)
+	 */
+	public boolean isSupported(Object target) {
+		return (target instanceof Framework);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * getProperties()
+	 */
+	public Map getProperties() {
+		return properties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * getSupportedMimeTypes()
+	 */
 	public String[] getSupportedMimeTypes() {
 		Vector mimeTypes = new Vector();
 		mimeTypes.addElement(MIME_JAR);
@@ -134,9 +190,19 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return result;
 	}
 
-	// TODO use multi status to handle errors and warnings
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
+	 * processInstallationItems
+	 * (org.tigris.mtoolkit.common.installation.InstallationItem[],
+	 * java.util.Map,
+	 * org.tigris.mtoolkit.common.installation.InstallationTarget,
+	 * org.eclipse.core.runtime.IProgressMonitor)
+	 */
 	public IStatus processInstallationItems(final InstallationItem[] items, Map args, InstallationTarget target,
 			final IProgressMonitor monitor) {
+		// TODO use multi status to handle errors and warnings
 		SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
 
 		Framework framework = ((FrameworkTarget) target).getFramework();
@@ -205,7 +271,7 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 
 		List<InstallationPair> itemsToInstall = new ArrayList<InstallationPair>();
 		for (final InstallationItem item : items) {
-			IStatus status = processItem(item, framework, monitor, subMonitor, itemsToInstall);
+			IStatus status = processItem(item, preparationProps, framework, monitor, subMonitor, itemsToInstall);
 			if (status != null && status.matches(IStatus.ERROR)) {
 				FrameworkPlugin.log(status);
 			}
@@ -219,11 +285,121 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 		return Status.OK_STATUS;
 	}
 
-	private IStatus processItem(final InstallationItem item, Framework framework, final IProgressMonitor monitor,
-			SubMonitor subMonitor, List itemsToInstall) {
+	public String getName() {
+		return "Bundles processor";
+	}
+
+	public static FrameworkProcessor getDefault() {
+		if (defaultinstance == null) {
+			defaultinstance = new FrameworkProcessor();
+		}
+		return defaultinstance;
+	}
+
+	public static void addAdditionalProcessor(InstallationItemProcessor processor) {
+		additionalProcessors.addElement(processor);
+	}
+
+	public static void removeAdditionalProcessor(InstallationItemProcessor processor) {
+		additionalProcessors.removeElement(processor);
+	}
+
+	public boolean getUseAdditionalProcessors() {
+		return useAdditionalProcessors;
+	}
+
+	public void setUseAdditionalProcessors(boolean enable) {
+		this.useAdditionalProcessors = enable;
+	}
+
+	public Object install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
+			throws CoreException {
+		// TODO: Make methods, which are called from inside jobs to do the real
+		// job
+		File bundle = null;
+		RemoteBundle result = null;
+		try {
+			bundle = saveFile(input, item.getName());
+			result = new InstallBundleOperation((FrameworkImpl) framework).installBundle(bundle, monitor);
+		} catch (Exception e) {
+			throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Unable to install bundle", e));
+		} finally {
+			if (bundle != null) {
+				bundle.delete();
+			}
+		}
+		return result;
+	}
+
+	public void start(Object installedItem, IProgressMonitor monitor) throws Exception {
+		if (!(installedItem instanceof RemoteBundle)) {
+			return;
+		}
+		final RemoteBundle remoteBundle = (RemoteBundle) installedItem;
+		if (FrameworkPreferencesPage.isAutoStartBundlesEnabled()
+				&& remoteBundle.getType() != RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
+			Job job = new Job("Starting bundle " + remoteBundle.getSymbolicName() + " (" + remoteBundle.getVersion()
+					+ ")") {
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see
+				 * org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime
+				 * .IProgressMonitor)
+				 */
+				@Override
+				public IStatus run(IProgressMonitor monitor) {
+					int flags = FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY
+							: 0;
+					try {
+						remoteBundle.start(flags);
+					} catch (IAgentException e) {
+						// only log this exception, because the user
+						// requested
+						// install bundle, which succeeded
+						StatusManager.getManager().handle(Util.handleIAgentException(e), StatusManager.LOG);
+						return Status.CANCEL_STATUS;
+					}
+
+					monitor.done();
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			job.schedule();
+		}
+	}
+
+	protected Image getImage() {
+		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
+	}
+
+	protected File saveFile(InputStream input, String name) throws IOException {
+		IPath statePath = Platform.getStateLocation(FrameworkPlugin.getDefault().getBundle());
+		File file = new File(statePath.toFile(), name);
+		// make the directory hierarchy
+		if (!file.getParentFile().exists() && !file.getParentFile().mkdirs())
+			throw new IOException("Failed to create bundle state folder");
+		FileOutputStream stream = new FileOutputStream(file);
+		try {
+			byte[] buf = new byte[8192];
+			int read;
+			while ((read = input.read(buf)) != -1) {
+				stream.write(buf, 0, read);
+			}
+		} finally {
+			stream.close();
+		}
+		return file;
+	}
+
+	private IStatus processItem(final InstallationItem item, Map preparationProps, Framework framework,
+			final IProgressMonitor monitor, SubMonitor subMonitor, List itemsToInstall) {
 		if (item instanceof PluginItem) {
-			IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, monitor,
-					itemsToInstall);
+			IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, subMonitor,
+					itemsToInstall, preparationProps);
 			if (status.getSeverity() == IStatus.CANCEL) {
 				monitor.setCanceled(true);
 				return status;
@@ -281,11 +457,23 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 					prArr[i] = pr;
 				}
 				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+					/*
+					 * (non-Javadoc)
+					 * 
+					 * @see java.lang.Runnable#run()
+					 */
 					public void run() {
 						ListDialog dialog = new ListDialog(FrameWorkView.getShell());
 
 						dialog.setTitle("Select processor");
 						dialog.setLabelProvider(new LabelProvider() {
+							/*
+							 * (non-Javadoc)
+							 * 
+							 * @see
+							 * org.eclipse.jface.viewers.LabelProvider#getImage
+							 * (java.lang.Object)
+							 */
 							@Override
 							public Image getImage(Object element) {
 								return ((FrameworkProcessor) element).getImage();
@@ -308,19 +496,11 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 					return Status.CANCEL_STATUS;
 				}
 			}
-
 			itemsToInstall.add(new InstallationPair(processor[0], item));
 		} catch (Exception e) {
 			return Util.newStatus(IStatus.ERROR, "Remote content installation failed", e);
 		}
 		return null;
-	}
-
-	/**
-	 * @since 6.0
-	 */
-	protected Image getImage() {
-		return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
 	}
 
 	private void installItems(FrameworkImpl framework, List<InstallationPair> itemsToInstall, Map args) {
@@ -334,149 +514,5 @@ public class FrameworkProcessor implements InstallationItemProcessor {
 			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle(s)", e),
 					StatusManager.SHOW | StatusManager.LOG);
 		}
-	}
-
-	public Object install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
-			throws Exception {
-		// TODO: Make methods, which are called from inside jobs to do
-		// the real job
-		return installBundle(input, item.getName(), (FrameworkImpl) framework, monitor);
-	}
-
-	public void start(Object installedItem, IProgressMonitor monitor) throws Exception {
-		if (installedItem instanceof RemoteBundle) {
-			final RemoteBundle remoteBundle = (RemoteBundle) installedItem;
-			if (FrameworkPreferencesPage.isAutoStartBundlesEnabled()
-					&& remoteBundle.getType() != RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
-				Job job = new Job("Starting bundle " + remoteBundle.getSymbolicName() + " ("
-						+ remoteBundle.getVersion() + ")") {
-					@Override
-					public IStatus run(IProgressMonitor monitor) {
-						int flags = FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY
-								: 0;
-						try {
-							remoteBundle.start(flags);
-						} catch (IAgentException e) {
-							// only log this exception, because the user
-							// requested
-							// install bundle, which succeeded
-							StatusManager.getManager().handle(Util.handleIAgentException(e), StatusManager.LOG);
-							return Status.CANCEL_STATUS;
-						}
-
-						monitor.done();
-						if (monitor.isCanceled()) {
-							return Status.CANCEL_STATUS;
-						}
-						return Status.OK_STATUS;
-					}
-				};
-				job.schedule();
-			}
-		}
-	}
-
-	private Object installBundle(InputStream input, String name, FrameworkImpl framework, IProgressMonitor monitor)
-			throws IAgentException {
-		RemoteBundle result = null;
-		try {
-			final File bundle = saveFile(input, name);
-			result = new InstallBundleOperation(framework).installBundle(bundle, monitor);
-			bundle.delete();
-		} catch (IllegalArgumentException ie) {
-			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", ie),
-					StatusManager.SHOW | StatusManager.LOG);
-		} catch (IOException e) {
-			StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e),
-					StatusManager.SHOW | StatusManager.LOG);
-			// } finally {
-			// monitor.done();
-		}
-		return result;
-	}
-
-	protected File saveFile(InputStream input, String name) throws IOException {
-		// TODO: Make saving stream to file done in a job
-		IPath statePath = Platform.getStateLocation(FrameworkPlugin.getDefault().getBundle());
-		File file = new File(statePath.toFile(), name);
-		// make the directory hierarchy
-		if (!file.getParentFile().exists() && !file.getParentFile().mkdirs())
-			throw new IOException("Failed to create bundle state folder");
-		FileOutputStream stream = new FileOutputStream(file);
-		try {
-			byte[] buf = new byte[8192];
-			int read;
-			while ((read = input.read(buf)) != -1) {
-				stream.write(buf, 0, read);
-			}
-		} finally {
-			stream.close();
-		}
-		return file;
-	}
-
-	public String getName() {
-		return "Bundles processor";
-	}
-
-	@Override
-	public String toString() {
-		return getName();
-	}
-
-	public ImageDescriptor getGeneralTargetImageDescriptor() {
-		return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
-	}
-
-	public boolean getUseAdditionalProcessors() {
-		return useAdditionalProcessors;
-	}
-
-	public void setUseAdditionalProcessors(boolean enable) {
-		this.useAdditionalProcessors = enable;
-	}
-
-	protected static class DeleteWhenDoneListener extends JobChangeAdapter {
-		private final File packageFile;
-
-		public DeleteWhenDoneListener(File packageFile) {
-			this.packageFile = packageFile;
-		}
-
-		@Override
-		public void done(IJobChangeEvent event) {
-			packageFile.delete();
-		}
-	}
-
-	/**
-	 * @since 6.0
-	 */
-	public InstallationTarget getInstallationTarget(Object target) {
-		if (target instanceof Framework) {
-			return new FrameworkTarget((Framework) target);
-		}
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.tigris.mtoolkit.common.installation.InstallationItemProcessor#isSupported
-	 * (java.lang.Object)
-	 */
-	public boolean isSupported(Object target) {
-		return (target instanceof Framework);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
-	 * getProperties()
-	 */
-	public Map getProperties() {
-		return properties;
 	}
 }
