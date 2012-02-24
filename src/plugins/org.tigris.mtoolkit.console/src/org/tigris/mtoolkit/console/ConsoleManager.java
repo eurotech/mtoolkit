@@ -19,16 +19,15 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IOConsole;
 import org.tigris.mtoolkit.console.internal.RemoteConsole;
-import org.tigris.mtoolkit.console.utils.OSGiConsolePlugin;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 
-public class ConsoleManager {
-
-	private static Map consoles = new HashMap();
+public final class ConsoleManager {
 	private static Object CREATING_CONSOLE = new Object();
 	private static Object SHOW_CONSOLE = new Object();
 	private static Object DISCONNECT_CONSOLE = new Object();
-	
+
+	private static Map consoles = new HashMap();
+
 	public static IOConsole connectConsole(DeviceConnector dc, String consoleName) {
 		return connectConsole(dc, consoleName, null);
 	}
@@ -43,7 +42,6 @@ public class ConsoleManager {
 				return null;
 			}
 			if (!dc.isActive()) {
-				OSGiConsolePlugin.error("Remote console cannot be connected to disconnected framework", new Throwable("<from here>"));
 				return null;
 			}
 			consoles.put(dc, CREATING_CONSOLE);
@@ -56,7 +54,7 @@ public class ConsoleManager {
 			synchronized (consoles) {
 				if (con == null) {
 					consoles.remove(dc);
-					return null;	// failed to initialize
+					return null; // failed to initialize
 				}
 				Object action = consoles.put(dc, con);
 				if (action == DISCONNECT_CONSOLE) {
@@ -67,7 +65,7 @@ public class ConsoleManager {
 				if (action == SHOW_CONSOLE) {
 					showConsole = true;
 				} // else action == CREATING_CONSOLE
-				
+
 			}
 		}
 		IConsoleManager conMng = ConsolePlugin.getDefault().getConsoleManager();
@@ -76,7 +74,7 @@ public class ConsoleManager {
 			conMng.showConsoleView(con);
 		return con;
 	}
-	
+
 	public static void showConsole(DeviceConnector dc, String consoleName) {
 		Object obj;
 		synchronized (consoles) {
@@ -90,12 +88,12 @@ public class ConsoleManager {
 		}
 		if (obj == null)
 			connectConsole(dc, consoleName);
-		
+
 		showConsoleIfCreated(dc);
 	}
-	
+
 	private static IOConsole showConsoleIfCreated(DeviceConnector dc) {
-		RemoteConsole con; 
+		RemoteConsole con;
 		synchronized (consoles) {
 			Object obj = consoles.get(dc);
 			if (obj == null || obj == DISCONNECT_CONSOLE)
@@ -109,7 +107,7 @@ public class ConsoleManager {
 		ConsolePlugin.getDefault().getConsoleManager().showConsoleView(con);
 		return con;
 	}
-	
+
 	public static void disconnectConsole(DeviceConnector dc) {
 		RemoteConsole console;
 		synchronized (consoles) {
@@ -124,11 +122,11 @@ public class ConsoleManager {
 		}
 		disconnectConsole0(console);
 	}
-	
+
 	private static void disconnectConsole0(RemoteConsole con) {
 		con.disconnect();
 	}
-	
+
 	private static RemoteConsole createConsole(DeviceConnector dc, String name, IProcess iProcess) {
 		RemoteConsole console = new RemoteConsole(dc, name, iProcess);
 		return console;
@@ -142,5 +140,5 @@ public class ConsoleManager {
 			}
 		}
 	}
-	
+
 }
