@@ -17,17 +17,14 @@ import org.tigris.mtoolkit.common.UtilitiesPlugin;
 /**
  * @since 6.0
  */
-public class InstallationRegistry {
+public final class InstallationRegistry {
   private static InstallationRegistry registry = null;
-  private List itemProviders = new ArrayList();
-  private List itemProcessors = new ArrayList();
-  private Map selectionDialogs = new HashMap();
 
-  public static InstallationRegistry getInstance() {
-    if (registry == null) {
-      registry = new InstallationRegistry();
-    }
-    return registry;
+  private final List itemProviders = new ArrayList();
+  private final List itemProcessors = new ArrayList();
+  private final Map selectionDialogs = new HashMap();
+
+  private InstallationRegistry() {
   }
 
   public InstallationTarget findTarget(Object target) {
@@ -99,6 +96,13 @@ public class InstallationRegistry {
 
   public TargetSelectionDialog getSelectionDialog(InstallationItemProcessor itemProcessor) {
     return (TargetSelectionDialog) selectionDialogs.get(itemProcessor);
+  }
+
+  public static InstallationRegistry getInstance() {
+    if (registry == null) {
+      registry = new InstallationRegistry();
+    }
+    return registry;
   }
 
   private void obtainInstallationProviders() {
