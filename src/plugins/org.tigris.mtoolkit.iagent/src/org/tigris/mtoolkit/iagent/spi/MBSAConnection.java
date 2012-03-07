@@ -1,37 +1,53 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2012 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ ****************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
 
 /**
- * Defines the abstraction transport layer. Isolates the implementation of the DeviceConnector and 
- * device commands from the real data transport. 
- *
+ * Defines the abstraction transport layer. Isolates the implementation of the
+ * DeviceConnector and device commands from the real data transport.
+ * 
  * @version 1.0
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface MBSAConnection extends AbstractConnection {
-	
+
 	/**
 	 * @since 3.0
 	 */
 	public static final String PROP_MBSA_PORT = "mbsa-port";
-	
-  /**
-   * Sends data to the device.
-   * 
-   * @param aCmd command on the device which should be executed
-   * @param aData data arguments for the command
-   * @return the response from the device
-   * @throws IAgentException thrown if some error processing data or during transport occurs
-   */
-  public MBSAConnectionCallBack sendData(int aCmd, byte[] aData) throws IAgentException;
-  
-  public MBSAConnectionCallBack sendData(int aCmd, byte[] aData, boolean disconnectOnFailure) throws IAgentException;
-  
-  /**
-   * Returns the maximum size of the data which could be sent over this transport
-   * @return
-   */
-  public int getDataMaxSize();
-  
+
+	/**
+	 * Sends data to the device.
+	 * 
+	 * @param aCmd
+	 *            command on the device which should be executed
+	 * @param aData
+	 *            data arguments for the command
+	 * @return the response from the device
+	 * @throws IAgentException
+	 *             thrown if some error processing data or during transport
+	 *             occurs
+	 */
+	public MBSAConnectionCallBack sendData(int aCmd, byte[] aData) throws IAgentException;
+
+	public MBSAConnectionCallBack sendData(int aCmd, byte[] aData, boolean disconnectOnFailure) throws IAgentException;
+
+	/**
+	 * Returns the maximum size of the data which could be sent over this
+	 * transport
+	 * 
+	 * @return
+	 */
+	public int getDataMaxSize();
+
 }
