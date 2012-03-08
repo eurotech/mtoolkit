@@ -38,211 +38,214 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListener, RemoteDevicePropertyListener {
 
-	private SimpleNode dpNode;
-	private DeviceConnector connector;
-	private Model parent;
-	private DeploymentManager manager;
-	private boolean supportDP;
-	public static final Dictionary supportDPDictionary = new Hashtable();
-	
-	public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
-		this.connector = connector;
-		this.parent = parent;
+  private SimpleNode dpNode;
+  private DeviceConnector connector;
+  private Model parent;
+  private DeploymentManager manager;
+  private boolean supportDP;
+  public static final Dictionary supportDPDictionary = new Hashtable();
 
-		supportDP = isDpSupported(connector);
-		supportDPDictionary.put(connector, Boolean.valueOf(supportDP));
+  public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
+    this.connector = connector;
+    this.parent = parent;
 
-		try {
-			connector.addRemoteDevicePropertyListener(this);
-		} catch (IAgentException e1) {
-			e1.printStackTrace();
-		}
-		
-		if (supportDP) {
-			initModel(monitor);
-		}
-		return dpNode;
-	}
+    supportDP = isDpSupported(connector);
+    supportDPDictionary.put(connector, Boolean.valueOf(supportDP));
 
-	private void initModel(IProgressMonitor monitor) {
-		dpNode = new SimpleNode("Deployment Packages");
-		if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) { 
-			parent.addElement(dpNode);
-		}
-		try {
-			manager = connector.getDeploymentManager();
-			addDPs(monitor);
-			try {
-				manager.addRemoteDPListener(this);
-			} catch (IAgentException e) {
-				e.printStackTrace();
-			}
-		} catch (IAgentException e) {
-			e.printStackTrace();
-		}
-	}
+    try {
+      connector.addRemoteDevicePropertyListener(this);
+    } catch (IAgentException e1) {
+      e1.printStackTrace();
+    }
 
+    if (supportDP) {
+      initModel(monitor);
+    }
+    return dpNode;
+  }
 
-	public void disconnect() {
-		if (manager != null) {
-			try {
-				manager.removeRemoteDPListener(this);
-			} catch (IAgentException e) {
-				e.printStackTrace();
-			}
-		}
-		if (parent != null) {
-			if (dpNode != null) {
-				parent.removeElement(dpNode);
-			}
-			parent = null;
-		}
-		connector = null;
-		dpNode = null;
-		supportDP = false;
-	}
+  private void initModel(IProgressMonitor monitor) {
+    dpNode = new SimpleNode("Deployment Packages");
+    if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) {
+      parent.addElement(dpNode);
+    }
+    try {
+      manager = connector.getDeploymentManager();
+      addDPs(monitor);
+      try {
+        manager.addRemoteDPListener(this);
+      } catch (IAgentException e) {
+        e.printStackTrace();
+      }
+    } catch (IAgentException e) {
+      e.printStackTrace();
+    }
+  }
 
-	public Model switchView(int viewType) {
-		Model node = null;
-		if (supportDP) {
-			if (viewType == Framework.BUNDLES_VIEW) {
-				parent.addElement(dpNode);
-				node = dpNode;
-			} else if (viewType == Framework.SERVICES_VIEW) {
-				parent.removeElement(dpNode);
-			}
-		}
-		return node;
-	}
+  public void disconnect() {
+    if (manager != null) {
+      try {
+        manager.removeRemoteDPListener(this);
+      } catch (IAgentException e) {
+        e.printStackTrace();
+      }
+    }
+    if (parent != null) {
+      if (dpNode != null) {
+        parent.removeElement(dpNode);
+      }
+      parent = null;
+    }
+    connector = null;
+    dpNode = null;
+    supportDP = false;
+  }
 
-	private void addDPs(IProgressMonitor monitor) throws IAgentException {
-		if (!supportDP) {
-			return;
-		}
-		Model deplPackagesNode = dpNode;
-		RemoteDP dps[] = null;
-		dps = connector.getDeploymentManager().listDeploymentPackages();
+  public Model switchView(int viewType) {
+    Model node = null;
+    if (supportDP) {
+      if (viewType == Framework.BUNDLES_VIEW) {
+        parent.addElement(dpNode);
+        node = dpNode;
+      } else if (viewType == Framework.SERVICES_VIEW) {
+        parent.removeElement(dpNode);
+      }
+    }
+    return node;
+  }
 
-		if (dps != null && dps.length > 0) {
-			SubMonitor sMonitor = SubMonitor.convert(monitor, dps.length);
-			sMonitor.setTaskName("Retrieving deployment packages information...");
+  private void addDPs(IProgressMonitor monitor) throws IAgentException {
+    if (!supportDP) {
+      return;
+    }
+    Model deplPackagesNode = dpNode;
+    RemoteDP dps[] = null;
+    dps = connector.getDeploymentManager().listDeploymentPackages();
 
-			for (int i = 0; i < dps.length; i++) {
-				DeploymentPackage dpNode = new DeploymentPackage(dps[i], (Framework) parent);
-				deplPackagesNode.addElement(dpNode);
-				monitor.worked(1);
-				if (monitor.isCanceled()) {
-					return;
-				}
-			}
-		}
-	}
+    if (dps != null && dps.length > 0) {
+      SubMonitor sMonitor = SubMonitor.convert(monitor, dps.length);
+      sMonitor.setTaskName("Retrieving deployment packages information...");
 
-	public void deploymentPackageChanged(final RemoteDPEvent e) {
-		synchronized (Framework.getLockObject(connector)) {
-			try {
-				RemoteDP remoteDP = e.getDeploymentPackage();
-				if (e.getType() == RemoteDPEvent.INSTALLED) {
-					Model dpNodeRoot = dpNode;
-					try {
-						// check if this install actually is update
-						DeploymentPackage dp = findDP(dpNodeRoot, remoteDP.getName());
-						if (dp != null) {
-							dpNode.removeElement(dp);
-						}
+      for (int i = 0; i < dps.length; i++) {
+        DeploymentPackage dpNode = new DeploymentPackage(dps[i], (Framework) parent);
+        deplPackagesNode.addElement(dpNode);
+        monitor.worked(1);
+        if (monitor.isCanceled()) {
+          return;
+        }
+      }
+    }
+  }
 
-						DeploymentPackage dpNode = new DeploymentPackage(remoteDP, (Framework) parent);
-						dpNodeRoot.addElement(dpNode);
-					} catch (IAgentException e1) {
-						if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE
-								&& e1.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
-							StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e1.getMessage(), e1));
-						}
-					}
-				} else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
-					if (remoteDP != null) {
-						// there are cases where the dp failed to be added,
-						// because it was too quickly uninstalled/updated
-						DeploymentPackage dp = findDP(dpNode, remoteDP.getName());
-						if (dp != null) {
-							dpNode.removeElement(dp);
-						}
-					}
-				}
+  public void deploymentPackageChanged(final RemoteDPEvent e) {
+    synchronized (Framework.getLockObject(connector)) {
+      try {
+        RemoteDP remoteDP = e.getDeploymentPackage();
+        if (e.getType() == RemoteDPEvent.INSTALLED) {
+          Model dpNodeRoot = dpNode;
+          try {
+            // check if this install actually is update
+            DeploymentPackage dp = findDP(dpNodeRoot, remoteDP.getName());
+            if (dp != null) {
+              dpNode.removeElement(dp);
+            }
 
-				dpNode.updateElement();
-			} catch (IllegalStateException ex) {
-				// ignore state exceptions, which usually indicates that something
-				// is was fast enough to disappear
-			} catch (Throwable t) {
-				StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, t.getMessage(), t));
-			}
-		}
-	}
+            DeploymentPackage dpNode = new DeploymentPackage(remoteDP, (Framework) parent);
+            dpNodeRoot.addElement(dpNode);
+          } catch (IAgentException e1) {
+            if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE
+                && e1.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
+              StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e1.getMessage(), e1));
+            }
+          }
+        } else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
+          if (remoteDP != null) {
+            // there are cases where the dp failed to be added,
+            // because it was too quickly uninstalled/updated
+            DeploymentPackage dp = findDP(dpNode, remoteDP.getName());
+            if (dp != null) {
+              dpNode.removeElement(dp);
+            }
+          }
+        }
 
-	public static DeploymentPackage findDP(Model dpNode, String name) {
-		Model[] dps = dpNode.getChildren();
-		for (int i=0; i<dps.length; i++) {
-			if (dps[i].getName().equals(name)) {
-				return (DeploymentPackage) dps[i];
-			}
-		}
-		return null;
-	}
+        dpNode.updateElement();
+      } catch (IllegalStateException ex) {
+        // ignore state exceptions, which usually indicates that something
+        // is was fast enough to disappear
+      } catch (Throwable t) {
+        StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, t.getMessage(), t));
+      }
+    }
+  }
 
-	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
-		if (connector == null) return;
-		if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
-			Object property = e.getProperty();
-			if (Capabilities.DEPLOYMENT_SUPPORT.equals(property)) {
-				boolean enabled = ((Boolean) e.getValue()).booleanValue();
-				supportDPDictionary.put(connector, Boolean.valueOf(enabled));
-				if (enabled) {
-					supportDP = true;
-					initModel(new NullProgressMonitor());
-				} else {
-					supportDP = false;
-					try {
-						manager.removeRemoteDPListener(this);
-					} catch (IAgentException ex) {
-						ex.printStackTrace();
-					}
-					if (dpNode != null) {
-						dpNode.removeChildren();
-						parent.removeElement(dpNode);
-						dpNode = null;
-					}
-				}
-			}
-		}
-	}
+  public static DeploymentPackage findDP(Model dpNode, String name) {
+    Model[] dps = dpNode.getChildren();
+    for (int i = 0; i < dps.length; i++) {
+      if (dps[i].getName().equals(name)) {
+        return (DeploymentPackage) dps[i];
+      }
+    }
+    return null;
+  }
 
-	public Model getResource(String id, String version, Framework fw) throws IAgentException {
-		return null;
-	}
+  public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
+    if (connector == null)
+      return;
+    if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
+      Object property = e.getProperty();
+      if (Capabilities.DEPLOYMENT_SUPPORT.equals(property)) {
+        boolean enabled = ((Boolean) e.getValue()).booleanValue();
+        supportDPDictionary.put(connector, Boolean.valueOf(enabled));
+        if (enabled) {
+          supportDP = true;
+          initModel(new NullProgressMonitor());
+        } else {
+          supportDP = false;
+          try {
+            manager.removeRemoteDPListener(this);
+          } catch (IAgentException ex) {
+            ex.printStackTrace();
+          }
+          if (dpNode != null) {
+            dpNode.removeChildren();
+            parent.removeElement(dpNode);
+            dpNode = null;
+          }
+        }
+      }
+    }
+  }
 
-	public String[] getSupportedMimeTypes() {
-		return null;
-	}
+  public Model getResource(String id, String version, Framework fw) throws IAgentException {
+    return null;
+  }
 
-	public static boolean isDpSupported(DeviceConnector connector) {
-		if (connector == null) {
-			return false;
-		}
-		Framework fw = Util.findFramework(connector);
-		if (fw == null) {
-			return false;
-		}
-		Dictionary connectorProperties = fw.getConnectorProperties();
-		Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-		if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
-			return true;
-		} else {
-			support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
-			if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
-				return true;
-			}
-		}
-		return false;
-	}
+  public String[] getSupportedMimeTypes() {
+    return null;
+  }
+
+  public static boolean isDpSupported(DeviceConnector connector) {
+    if (connector == null) {
+      return false;
+    }
+    Framework fw = Util.findFramework(connector);
+    if (fw == null) {
+      return false;
+    }
+    Dictionary connectorProperties = fw.getConnectorProperties();
+    if (connectorProperties == null) {
+      return false;
+    }
+    Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+    if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
+      return true;
+    } else {
+      support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
+      if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

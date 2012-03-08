@@ -191,6 +191,9 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
       return false;
     }
     Dictionary connectorProperties = fw.getConnectorProperties();
+    if (connectorProperties == null) {
+      return false;
+    }
     Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
     if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
       return true;

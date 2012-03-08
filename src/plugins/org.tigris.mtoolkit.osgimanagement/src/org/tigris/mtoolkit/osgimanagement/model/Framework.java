@@ -22,83 +22,83 @@ import org.tigris.mtoolkit.iagent.DeviceConnector;
  * @since 5.0
  */
 public abstract class Framework extends Model {
+  public final static int BUNDLES_VIEW = 0;
+  public final static int SERVICES_VIEW = 1;
 
-	public final static int BUNDLES_VIEW = 0;
-	public final static int SERVICES_VIEW = 1;
+  /**
+   * @since 6.0
+   */
+  public boolean autoConnected;
+  protected DeviceConnector connector;
+  protected boolean connectedFlag;
+  protected int viewType;
+  protected List modelProviders = new ArrayList();
+  // framework IP or other ID
+  public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
+  protected final List listeners = new ArrayList();
 
-	/**
-	 * @since 6.0
-	 */
-	public boolean autoConnected;
-	protected DeviceConnector connector;
-	protected boolean connectedFlag;
-	protected int viewType;
-	protected List modelProviders = new ArrayList();
-	// framework IP or other ID
-	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
-	protected final List listeners = new ArrayList();
-	
-	private Dictionary connectorProperties = null;
-	private long timeStamp;
-	
+  private Dictionary connectorProperties = null;
+  private long timeStamp;
 
-	/**
-	 * @since 6.0
-	 */
-	public Framework(String name, boolean autoConnected) {
-		super(name);
-		this.autoConnected = autoConnected;
-	}
+  /**
+   * @since 6.0
+   */
+  public Framework(String name, boolean autoConnected) {
+    super(name);
+    this.autoConnected = autoConnected;
+  }
 
-	public DeviceConnector getConnector() {
-		return connector;
-	}
-	
-	public synchronized Dictionary getConnectorProperties() {
-		if (connectorProperties == null || System.currentTimeMillis() - timeStamp > 30 * 1000) {
-			connectorProperties = connector.getProperties();
-			timeStamp = System.currentTimeMillis();
-		}
-		return connectorProperties;
-	}
+  public DeviceConnector getConnector() {
+    return connector;
+  }
 
-	public boolean isConnected() {
-		return connectedFlag;
-	}
-	
-	/**
-	 * @since 6.0
-	 */
-	public boolean isAutoConnected() {
-		return autoConnected;
-	}
-	
-	public int getViewType() {
-		return viewType;
-	}
+  public synchronized Dictionary getConnectorProperties() {
+    if (connector == null) {
+      return null;
+    }
+    if (connectorProperties == null || System.currentTimeMillis() - timeStamp > 30 * 1000) {
+      connectorProperties = connector.getProperties();
+      timeStamp = System.currentTimeMillis();
+    }
+    return connectorProperties;
+  }
 
+  public boolean isConnected() {
+    return connectedFlag;
+  }
 
-	/**
-	 * Returns map, containing information for certificates which shall be 
-	 * used for signing the content, installed to this framework. If no signing
-	 * is required, then empty Map is returned.
-	 * @return the map with certificate properties
-	 */
-	public abstract Map getSigningProperties();
+  /**
+   * @since 6.0
+   */
+  public boolean isAutoConnected() {
+    return autoConnected;
+  }
 
-	public abstract Model createModel(String mimeType, String id, String version);
+  public int getViewType() {
+    return viewType;
+  }
 
-	public static Object getLockObject(DeviceConnector connector) {
-		return connector.lockObj;
-	}
-	
-	public abstract IMemento getConfig();
-	
-	public void addConnectionListener(FrameworkConnectionListener l) {
-		listeners.add(l);
-	}
+  /**
+   * Returns map, containing information for certificates which shall be 
+   * used for signing the content, installed to this framework. If no signing
+   * is required, then empty Map is returned.
+   * @return the map with certificate properties
+   */
+  public abstract Map getSigningProperties();
 
-	public void removeConnectionListener(FrameworkConnectionListener l) {
-		listeners.remove(l);
-	}
+  public abstract Model createModel(String mimeType, String id, String version);
+
+  public static Object getLockObject(DeviceConnector connector) {
+    return connector.lockObj;
+  }
+
+  public abstract IMemento getConfig();
+
+  public void addConnectionListener(FrameworkConnectionListener l) {
+    listeners.add(l);
+  }
+
+  public void removeConnectionListener(FrameworkConnectionListener l) {
+    listeners.remove(l);
+  }
 }
