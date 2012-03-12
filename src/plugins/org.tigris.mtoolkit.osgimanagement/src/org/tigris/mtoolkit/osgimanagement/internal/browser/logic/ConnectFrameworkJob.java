@@ -22,6 +22,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -33,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.lm.LM;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -56,7 +58,19 @@ public final class ConnectFrameworkJob extends Job {
 		this.fw = framework;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.
+	 * IProgressMonitor)
+	 */
 	public IStatus run(final IProgressMonitor monitor) {
+		try {
+			LM.verify(new NullProgressMonitor());
+		} catch (CoreException e) {
+			return e.getStatus();
+		}
+
 		monitor.beginTask(NLS.bind(Messages.connect_framework, fw.getName()), 1);
 
 		synchronized (connectingFrameworks) {
@@ -154,9 +168,20 @@ public final class ConnectFrameworkJob extends Job {
 		return Status.OK_STATUS;
 	}
 
+	public static boolean isConnecting(FrameworkImpl fw) {
+		synchronized (connectingFrameworks) {
+			return connectingFrameworks.contains(fw);
+		}
+	}
+
 	private static void errorProviderNotFound() {
 		Display display = PlatformUI.getWorkbench().getDisplay();
 		display.syncExec(new Runnable() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see java.lang.Runnable#run()
+			 */
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				MessageDialog.openError(shell, "Error", "Could not connect to framework. The selected "
@@ -165,15 +190,14 @@ public final class ConnectFrameworkJob extends Job {
 		});
 	}
 
-	public static boolean isConnecting(FrameworkImpl fw) {
-		synchronized (connectingFrameworks) {
-			return connectingFrameworks.contains(fw);
-		}
-	}
-
-	protected void handleConnectionFailure(final IAgentException e) {
+	private void handleConnectionFailure(final IAgentException e) {
 		final Display display = PlatformUI.getWorkbench().getDisplay();
 		display.asyncExec(new Runnable() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see java.lang.Runnable#run()
+			 */
 			public void run() {
 				String[] buttons = { Messages.close_button_label, Messages.get_iagent_button_label };
 				String message = Messages.connection_failed;

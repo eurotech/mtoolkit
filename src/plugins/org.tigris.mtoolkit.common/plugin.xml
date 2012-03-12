@@ -4,6 +4,8 @@
    <extension-point id="preferencesPages" name="mToolkit Preferences Pages" schema="schema/preferencesPages.exsd"/>
    <extension-point id="installationItemProcessors" name="Inastallation Item Processors" schema="schema/installationItemProcessors.exsd"/>
    <extension-point id="installationItemProviders" name="Installation Item Providers" schema="schema/installationItemProviders.exsd"/>
+   <extension-point id="lm" name="" schema="schema/lm.exsd"/>
+
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
