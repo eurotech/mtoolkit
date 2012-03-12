@@ -260,7 +260,7 @@ public class DebugUtils {
 			return fullClassName;
 	}
 
-	public static String toString(Exception e) {
+	public static String toString(Throwable e) {
 		StringBuffer err = new StringBuffer();
 		err.append(e.toString());
 		try {
