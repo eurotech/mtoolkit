@@ -56,7 +56,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Act
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public final class FrameworkSelector implements TargetSelectionDialog {
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.tigris.mtoolkit.common.installation.TargetSelectionDialog#getSelectedTarget(org.eclipse.swt.widgets.Shell)
 	 */
 	public InstallationTarget getSelectedTarget(Shell parentShell) {
@@ -85,7 +87,7 @@ public final class FrameworkSelector implements TargetSelectionDialog {
 		protected Control createContents(Composite parent) {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_SELECT_DIALOG);
 			Control contents = super.createContents(parent);
-			getShell().setText("Install to");
+			getShell().setText("Select OSGi framework");
 			setTitle("OSGi Framework");
 			setTitleImage(ImageHolder.getImage(FW_ICON_WIZBAN));
 			setMessage("Select OSGi Framework from the list", IMessageProvider.INFORMATION);
