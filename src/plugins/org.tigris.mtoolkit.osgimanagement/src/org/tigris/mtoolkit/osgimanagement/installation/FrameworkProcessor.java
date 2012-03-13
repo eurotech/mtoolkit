@@ -289,10 +289,14 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
       }
 
       if (!itemsToInstall.isEmpty()) {
+        boolean startBundles = true;
+        if (args != null && args.get(InstallationConstants.START_BUNDLES) != null) {
+          startBundles = ((Boolean) args.get(InstallationConstants.START_BUNDLES)).booleanValue();
+        }
         for (InstallationItem item : itemsToInstall) {
           try {
             RemoteBundle bundle = installBundle(item, framework, subMonitor);
-            if (bundle != null) {
+            if (bundle != null && startBundles) {
               startBundle(bundle, subMonitor);
             }
           } catch (CoreException e) {
