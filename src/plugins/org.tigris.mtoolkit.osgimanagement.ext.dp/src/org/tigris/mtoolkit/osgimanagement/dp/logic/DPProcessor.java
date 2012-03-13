@@ -13,6 +13,8 @@ package org.tigris.mtoolkit.osgimanagement.dp.logic;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,16 +22,29 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
-import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.DPActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.images.ImageHolder;
-import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public final class DPProcessor extends FrameworkProcessor {
+public final class DPProcessor implements FrameworkProcessorExtension {
   public static final String MIME_DP = "application/vnd.osgi.dp";
-  private static final String[] SUPPORTED_MIME_TYPES = new String[] { MIME_DP };
+  public static final String[] SUPPORTED_MIME_TYPES = new String[] { MIME_DP };
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#getName()
+   */
+  public String getName() {
+    return "Deployment package processor";
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#getImage()
+   */
+  public Image getImage() {
+    return ImageHolder.getImage(DPActionsProvider.DP_GROUP_IMAGE_PATH);
+  }
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#getSupportedMimeTypes()
@@ -39,18 +54,32 @@ public final class DPProcessor extends FrameworkProcessor {
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#install(java.io.InputStream, 
-   *                                                                                 org.tigris.mtoolkit.common.installation.InstallationItem, 
-   *                                                                                 org.tigris.mtoolkit.osgimanagement.model.Framework, 
-   *                                                                                 org.eclipse.core.runtime.IProgressMonitor)
+   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#getPriority(org.tigris.mtoolkit.common.installation.InstallationItem)
    */
-  public Object install(InputStream input, InstallationItem item, Framework framework, IProgressMonitor monitor)
-      throws CoreException {
-    RemoteDP result = null;
+  public int getPriority(InstallationItem item) {
+    String mimeType = item.getMimeType();
+    if (MIME_DP.equals(mimeType)) {
+      return PRIORITY_HIGH;
+    }
+    return PRIORITY_NOT_SUPPPORTED;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItem(org.tigris.mtoolkit.common.installation.InstallationItem, 
+   *                                                                                              java.util.List, 
+   *                                                                                              java.util.Map, 
+   *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework, 
+   *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
+   */
+  public boolean processItem(InstallationItem item, List dependencies, Map preparationProps, Framework framework,
+      IProgressMonitor monitor) throws CoreException {
     File packageFile = null;
+    InputStream input = null;
     try {
-      packageFile = saveFile(input, item.getName());
-      result = new InstallDeploymentOperation(framework).install(packageFile, monitor);
+      input = item.getInputStream();
+      packageFile = Activator.saveFile(input, item.getName());
+      InstallDeploymentOperation operation = new InstallDeploymentOperation(framework);
+      operation.install(packageFile, monitor);
     } catch (Exception e) {
       throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to install deployment package", e));
     } finally {
@@ -64,21 +93,6 @@ public final class DPProcessor extends FrameworkProcessor {
         packageFile.delete();
       }
     }
-    return result;
+    return true;
   }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#getName()
-   */
-  public String getName() {
-    return "Deployment package processor";
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#getImage()
-   */
-  protected Image getImage() {
-    return ImageHolder.getImage(DPActionsProvider.DP_GROUP_IMAGE_PATH);
-  }
-
 }

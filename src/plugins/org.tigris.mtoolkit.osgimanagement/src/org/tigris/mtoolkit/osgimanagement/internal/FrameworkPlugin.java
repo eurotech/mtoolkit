@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -21,7 +22,9 @@ import java.util.Hashtable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -110,6 +113,25 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 			return;
 		}
 		fwLog.log(status);
+	}
+
+	public static File saveFile(InputStream input, String name) throws IOException {
+		IPath statePath = Platform.getStateLocation(instance.getBundle());
+		File file = new File(statePath.toFile(), name);
+		if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+			throw new IOException("Failed to create bundle state folder");
+		}
+		FileOutputStream stream = new FileOutputStream(file);
+		try {
+			byte[] buf = new byte[8192];
+			int read;
+			while ((read = input.read(buf)) != -1) {
+				stream.write(buf, 0, read);
+			}
+		} finally {
+			stream.close();
+		}
+		return file;
 	}
 
 	private static String formatStatus(IStatus status) {

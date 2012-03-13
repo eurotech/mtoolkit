@@ -295,7 +295,7 @@ public final class PluginProvider implements InstallationItemProvider {
 								return preparationStatus;
 							}
 						}
-						bundlesToInstall.add(new InstallationPair(FrameworkProcessor.getDefault(), installationItem));
+						bundlesToInstall.add(installationItem);
 					}
 				}
 			}

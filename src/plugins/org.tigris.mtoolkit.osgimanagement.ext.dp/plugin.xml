@@ -21,9 +21,10 @@
       </provider>
    </extension>
    <extension
-         point="org.eclipse.ui.startup">
-      <startup
-            class="org.tigris.mtoolkit.osgimanagement.dp.StartupClass">
-      </startup>
+         point="org.tigris.mtoolkit.osgimanagement.frameworkProcessorExtensions">
+      <processor
+            class="org.tigris.mtoolkit.osgimanagement.dp.logic.DPProcessor"
+            id="org.tigris.mtoolkit.osgimanagement.dp.logic.DPProcessor">
+      </processor>
    </extension>
 </plugin>
