@@ -38,7 +38,8 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 public class Util {
 
 	public static IStatus handleIAgentException(IAgentException e) {
-		return Util.newStatus(IStatus.ERROR, getErrorMessage(e), e.getCauseException());
+		Throwable cause = e.getCauseException() != null ? e.getCauseException() : e;
+		return Util.newStatus(IStatus.ERROR, getErrorMessage(e), cause);
 	}
 
 	public static IStatus newStatus(String message, IStatus e) {
@@ -65,7 +66,7 @@ public class Util {
 	 * @since 6.0
 	 */
 	public static void throwException(int severity, String message, Throwable t) throws CoreException {
-        throw newException(severity, message, t);
+		throw newException(severity, message, t);
 	}
 
 	/**
@@ -116,7 +117,8 @@ public class Util {
 	/**
 	 * @since 6.0
 	 */
-	public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel, boolean multiple) {
+	public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel,
+			boolean multiple) {
 		FileDialog dialog = new FileDialog(shell, SWT.OPEN | (multiple ? SWT.MULTI : SWT.SINGLE));
 		String[] filterArr = { filter, "*.*" }; //$NON-NLS-1$
 		String[] namesArr = { filterLabel, Messages.all_files_filter_label };

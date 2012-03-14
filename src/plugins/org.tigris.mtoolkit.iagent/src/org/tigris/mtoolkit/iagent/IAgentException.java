@@ -76,6 +76,7 @@ public class IAgentException extends Exception {
 			causeException.printStackTrace(s);
 		}
 		if (details != null) {
+			s.println("Details:");
 			s.println(details);
 		}
 	}
@@ -87,6 +88,7 @@ public class IAgentException extends Exception {
 			causeException.printStackTrace(s);
 		}
 		if (details != null) {
+			s.println("Details:");
 			s.println(details);
 		}
 	}
