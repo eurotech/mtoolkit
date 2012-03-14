@@ -34,5 +34,5 @@ public interface FrameworkProcessorExtension {
   int getPriority(InstallationItem item);
 
   boolean processItem(InstallationItem item, List<InstallationItem> dependencies, Map preparationProps,
-      Framework framework, IProgressMonitor monitor) throws CoreException;
+      boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException;
 }

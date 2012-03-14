@@ -274,9 +274,14 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
       }
 
       subMonitor.worked(4);
+      boolean startBundles = FrameworkPreferencesPage.isAutoStartBundlesEnabled();
+      if (startBundles && args != null && args.get(InstallationConstants.START_BUNDLES) != null) {
+        startBundles = ((Boolean) args.get(InstallationConstants.START_BUNDLES)).booleanValue();
+      }
       List<InstallationItem> itemsToInstall = new ArrayList<InstallationItem>();
       for (InstallationItem item : items) {
-        IStatus status = processItem0(item, preparationProps, framework, subMonitor.newChild(1), itemsToInstall);
+        IStatus status = processItem0(item, preparationProps, startBundles, framework, subMonitor.newChild(1),
+            itemsToInstall);
         if (status == null) {
           continue;
         }
@@ -289,10 +294,6 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
       }
 
       if (!itemsToInstall.isEmpty()) {
-        boolean startBundles = true;
-        if (args != null && args.get(InstallationConstants.START_BUNDLES) != null) {
-          startBundles = ((Boolean) args.get(InstallationConstants.START_BUNDLES)).booleanValue();
-        }
         for (InstallationItem item : itemsToInstall) {
           try {
             RemoteBundle bundle = installBundle(item, framework, subMonitor);
@@ -321,14 +322,14 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
     return Status.OK_STATUS;
   }
 
-  private IStatus processItem0(final InstallationItem item, Map preparationProps, Framework framework,
-      final IProgressMonitor monitor, List<InstallationItem> itemsToInstall) {
+  private IStatus processItem0(final InstallationItem item, Map preparationProps, boolean autoStart,
+      Framework framework, final IProgressMonitor monitor, List<InstallationItem> itemsToInstall) {
     try {
       FrameworkProcessorExtension processor = findProcessor(item, monitor);
       if (processor instanceof BundlesProcessor) {
-        bundlesProcessor.processItem(item, itemsToInstall, preparationProps, framework, monitor);
+        bundlesProcessor.processItem(item, itemsToInstall, preparationProps, autoStart, framework, monitor);
         itemsToInstall.add(item);
-      } else if (!processor.processItem(item, itemsToInstall, preparationProps, framework, monitor)) {
+      } else if (!processor.processItem(item, itemsToInstall, preparationProps, autoStart, framework, monitor)) {
         InstallationItem[] children = item.getChildren();
         if (children != null) {
           for (InstallationItem childItem : children) {
@@ -336,7 +337,7 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
             if (prio == FrameworkProcessorExtension.PRIORITY_NOT_SUPPPORTED) {
               throw new CoreException(Util.newStatus(IStatus.ERROR, "No suitable processor found.", null));
             }
-            bundlesProcessor.processItem(childItem, itemsToInstall, preparationProps, framework, monitor);
+            bundlesProcessor.processItem(childItem, itemsToInstall, preparationProps, autoStart, framework, monitor);
             itemsToInstall.add(childItem);
           }
         }
@@ -469,9 +470,6 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
   }
 
   private static void startBundle(RemoteBundle installedItem, IProgressMonitor monitor) throws Exception {
-    if (!FrameworkPreferencesPage.isAutoStartBundlesEnabled()) {
-      return;
-    }
     final RemoteBundle remoteBundle = (RemoteBundle) installedItem;
     if (remoteBundle.getType() == RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
       // Fragment bundles cannot be started
@@ -542,12 +540,13 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
     /* (non-Javadoc)
      * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItem(org.tigris.mtoolkit.common.installation.InstallationItem, 
      *                                                                                              java.util.List, 
-     *                                                                                              java.util.Map, 
+     *                                                                                              java.util.Map,
+     *                                                                                              boolean 
      *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework, 
      *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
      */
     public boolean processItem(InstallationItem item, List<InstallationItem> dependencies, Map preparationProps,
-        Framework framework, IProgressMonitor monitor) throws CoreException {
+        boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException {
       if (item instanceof PluginItem) {
         IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, monitor, dependencies,
             preparationProps);
