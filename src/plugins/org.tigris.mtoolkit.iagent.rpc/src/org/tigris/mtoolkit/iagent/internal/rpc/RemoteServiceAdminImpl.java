@@ -27,12 +27,14 @@ import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 
-public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllServiceListener {
+public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements RemoteServiceAdmin, Remote,
+		AllServiceListener {
 	private static final String EVENT_TYPE_KEY = "type";
 	private static final int SERVICE_REGISTERED = 1 << 0;
 	private static final int SERVICE_MODIFIED = 1 << 1;
@@ -43,23 +45,22 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 	private Bundle systemBundle;
 
 	private Class[] filterSupportedClasses = new Class[] { int.class,
-		long.class,
-		float.class,
-		double.class,
-		byte.class,
-		short.class,
-		char.class,
-		boolean.class,
-		Integer.class,
-		Long.class,
-		Float.class,
-		Double.class,
-		Byte.class,
-		Short.class,
-		Character.class,
-		Boolean.class,
-		String.class };
-
+			long.class,
+			float.class,
+			double.class,
+			byte.class,
+			short.class,
+			char.class,
+			boolean.class,
+			Integer.class,
+			Long.class,
+			Float.class,
+			Double.class,
+			Byte.class,
+			Short.class,
+			Character.class,
+			Boolean.class,
+			String.class };
 	private BundleContext bc;
 	private ServiceRegistration registration;
 
@@ -80,7 +81,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 				// ignore
 			}
 		}
-		
+
 		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
 		if (capMan != null) {
 			capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(true));
@@ -192,10 +193,9 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 		EventSynchronizer synchronizer = Activator.getSynchronizer();
 		if (synchronizer != null) {
 			Dictionary convertedServiceEvent = convertServiceEvent(event);
-			DebugUtils.debug(this, "[postRemoteEvent] Posting remote event: "
-			+ DebugUtils.convertForDebug(convertedServiceEvent)
-			+ "; type: "
-			+ RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
+			DebugUtils.debug(this,
+					"[postRemoteEvent] Posting remote event: " + DebugUtils.convertForDebug(convertedServiceEvent)
+							+ "; type: " + RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
 			synchronizer.enqueue(new EventData(convertedServiceEvent, RemoteServiceAdmin.CUSTOM_SERVICE_EVENT));
 		} else {
 			DebugUtils.debug(this, "[postRemoteEvent] Event synchronizer was disabled");
@@ -220,7 +220,6 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 		props.put(Constants.OBJECTCLASS, event.getServiceReference().getProperty(Constants.OBJECTCLASS));
 		return props;
 	}
-
 
 	public long getBundle(long id) {
 		DebugUtils.debug(this, "[getBundle] >>> id: " + id);
@@ -347,19 +346,7 @@ public class RemoteServiceAdminImpl implements RemoteServiceAdmin, Remote, AllSe
 		return refsProps;
 	}
 
-	// XXX: Extract this method in common base class
-	public long getRemoteServiceID() {
-		try {
-			ServiceRegistration localRegistration = registration;
-			if (localRegistration == null)
-				return -1;
-			ServiceReference localRef = localRegistration.getReference();
-			if (localRef == null)
-				return -1;
-			return ((Long) localRef.getProperty(Constants.SERVICE_ID)).longValue();
-		} catch (IllegalStateException e) {
-			// catch it in case the service is unregistered mean while
-			return -1;
-		}
+	protected ServiceRegistration getServiceRegistration() {
+		return registration;
 	}
 }

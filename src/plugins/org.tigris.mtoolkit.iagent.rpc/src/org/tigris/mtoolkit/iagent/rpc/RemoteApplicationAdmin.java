@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.osgi.framework.BundleContext;
 
-public interface RemoteApplicationAdmin {
+public interface RemoteApplicationAdmin extends RemoteServiceIDProvider {
 
 	/**
 	 * Returns all currently installed application from OSGI environment.
@@ -53,10 +53,8 @@ public interface RemoteApplicationAdmin {
 	 * @return - the state as string.
 	 */
 	public String getState(String applicationId);
-	
-	public Object getProperties(String applicationId);
 
-	public long getRemoteServiceID();
+	public Object getProperties(String applicationId);
 
 	void unregister(BundleContext bc);
 }

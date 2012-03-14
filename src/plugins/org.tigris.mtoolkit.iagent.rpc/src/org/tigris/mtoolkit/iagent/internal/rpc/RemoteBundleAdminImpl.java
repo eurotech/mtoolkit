@@ -52,13 +52,16 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
-public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, SynchronousBundleListener {
+public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements Remote, RemoteBundleAdmin,
+		SynchronousBundleListener {
+
 	public static final String SYNCH_BUNDLE_EVENTS = "synch_bundle_event";
 	public static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
 	public static final String EVENT_TYPE_KEY = "type";
@@ -248,7 +251,8 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				bundle.start();
 			}
 		} catch (BundleException e) {
-			Error error = new Error(getBundleErrorCode(e), "Failed to start bundle: " + e.getMessage());
+			Error error = new Error(getBundleErrorCode(e), "Failed to start bundle: " + DebugUtils.toString(e),
+					DebugUtils.getStackTrace(e));
 			DebugUtils.debug(this, "[startBundle] Bundle cannot be started: " + error, e);
 			return error;
 		} catch (IllegalStateException e) {
@@ -257,7 +261,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			return error;
 		} catch (Throwable t) {
 			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to start bundle: "
-					+ (t.getMessage() != null ? t.getMessage() : t.toString()));
+					+ DebugUtils.toString(t), DebugUtils.getStackTrace(t));
 			DebugUtils.debug(this, "[startBundle] Bundle cannot be started: " + error, t);
 			return error;
 		}
@@ -280,7 +284,8 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 				bundle.stop();
 			}
 		} catch (BundleException e) {
-			Error error = new Error(getBundleErrorCode(e), "Failed to stop bundle: " + e.getMessage());
+			Error error = new Error(getBundleErrorCode(e), "Failed to stop bundle: " + DebugUtils.toString(e),
+					DebugUtils.getStackTrace(e));
 			DebugUtils.debug(this, "[stopBundle] Unable to stop bundle: " + error, e);
 			return error;
 		} catch (IllegalStateException e) {
@@ -289,7 +294,7 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 			return error;
 		} catch (Throwable t) {
 			Error error = new Error(IAgentErrors.ERROR_BUNDLE_UNKNOWN, "Failed to stop bundle: "
-					+ (t.getMessage() != null ? t.getMessage() : t.toString()));
+					+ DebugUtils.toString(t), DebugUtils.getStackTrace(t));
 			DebugUtils.debug(this, "[stopBundle] Unable to stop bundle: " + error, t);
 			return error;
 		}
@@ -596,22 +601,6 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		return event;
 	}
 
-	// XXX: Extract this method in common base class
-	public long getRemoteServiceID() {
-		try {
-			ServiceRegistration localRegistration = registration;
-			if (localRegistration == null)
-				return -1;
-			ServiceReference localRef = localRegistration.getReference();
-			if (localRef == null)
-				return -1;
-			return ((Long) localRef.getProperty(Constants.SERVICE_ID)).longValue();
-		} catch (IllegalStateException e) {
-			// catch it in case the service is unregistered mean while
-			return -1;
-		}
-	}
-
 	public long getBundleByLocation(String location) {
 		if (location == null)
 			throw new IllegalArgumentException("getBundleByLocation requires non-null string passed as arg");
@@ -797,5 +786,9 @@ public class RemoteBundleAdminImpl implements Remote, RemoteBundleAdmin, Synchro
 		default:
 			return IAgentErrors.ERROR_BUNDLE_UNKNOWN;
 		}
+	}
+
+	protected ServiceRegistration getServiceRegistration() {
+		return registration;
 	}
 }

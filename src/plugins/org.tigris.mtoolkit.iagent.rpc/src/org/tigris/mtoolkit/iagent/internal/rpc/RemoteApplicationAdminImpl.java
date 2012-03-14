@@ -34,12 +34,14 @@ import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
+import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 
-public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmin, ServiceTrackerCustomizer {
+public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implements Remote, RemoteApplicationAdmin,
+		ServiceTrackerCustomizer {
 
 	private static final String OSGI_APPLICATION_PACKAGE = "org.osgi.service.application.";
 	private static final String APPLICATION_DESCRIPTOR = OSGI_APPLICATION_PACKAGE + "ApplicationDescriptor";
@@ -136,22 +138,6 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		return ids;
 	}
 
-	// XXX: Extract this method in common base class
-	public long getRemoteServiceID() {
-		try {
-			ServiceRegistration localRegistration = registration;
-			if (localRegistration == null)
-				return -1;
-			ServiceReference localRef = localRegistration.getReference();
-			if (localRef == null)
-				return -1;
-			return ((Long) localRef.getProperty(Constants.SERVICE_ID)).longValue();
-		} catch (IllegalStateException e) {
-			// catch it in case the service is unregistered mean while
-			return -1;
-		}
-	}
-
 	private final void debug(String message) {
 		DebugUtils.debug(this, message);
 	}
@@ -163,7 +149,8 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 	public Object start(String applicationID, Map properties) {
 		Object descriptor = findApplicationDescriptor(applicationID);
 		if (descriptor == null)
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application with ID \"" + applicationID + "\" is not installed.");
+			return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application with ID \"" + applicationID
+					+ "\" is not installed.");
 		Object result = launchFromDescriptor(descriptor, properties);
 		return result;
 	}
@@ -190,10 +177,11 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 		} catch (Exception e) {
 			if (e instanceof ApplicationException) {
 				return new Error(ExceptionCodeHelper.fromApplicationExceptionCode(((ApplicationException) e)
-						.getErrorCode()), "Application start failed: " + DebugUtils.toString(e));
+						.getErrorCode()), "Application start failed: " + DebugUtils.toString(e),
+						DebugUtils.getStackTrace(e));
 			} else {
 				return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application start failed: "
-						+ DebugUtils.toString(e));
+						+ DebugUtils.toString(e), DebugUtils.getStackTrace(e));
 			}
 		}
 	}
@@ -204,7 +192,7 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 			return null;
 		} catch (Exception e) {
 			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application stop failed: "
-					+ DebugUtils.toString(e));
+					+ DebugUtils.toString(e), DebugUtils.getStackTrace(e));
 		}
 	}
 
@@ -381,10 +369,14 @@ public class RemoteApplicationAdminImpl implements Remote, RemoteApplicationAdmi
 				return map;
 			}
 		} catch (Exception e) {
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Cannot get properties: "
-					+ DebugUtils.toString(e));
+			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN,
+					"Cannot get properties: " + DebugUtils.toString(e), DebugUtils.getStackTrace(e));
 		}
 		return new Hashtable();
+	}
+
+	protected ServiceRegistration getServiceRegistration() {
+		return registration;
 	}
 
 	private Map getReferenceProperties(ServiceReference ref) {

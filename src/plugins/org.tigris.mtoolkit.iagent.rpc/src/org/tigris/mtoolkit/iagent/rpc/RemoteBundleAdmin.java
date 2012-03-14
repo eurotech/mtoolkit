@@ -13,7 +13,7 @@ package org.tigris.mtoolkit.iagent.rpc;
 import java.io.InputStream;
 import java.util.Dictionary;
 
-public interface RemoteBundleAdmin {
+public interface RemoteBundleAdmin extends RemoteServiceIDProvider {
 
 	public static final int INCLUDE_BUNDLE_HEADERS = 0x01;
 	public static final int INCLUDE_BUNDLE_STATES = 0x02;
@@ -209,8 +209,6 @@ public interface RemoteBundleAdmin {
 	 *         PackageAdmin is unavailable
 	 */
 	public int getBundleType(long id);
-
-	public long getRemoteServiceID();
 
 	public String[] getAgentData();
 

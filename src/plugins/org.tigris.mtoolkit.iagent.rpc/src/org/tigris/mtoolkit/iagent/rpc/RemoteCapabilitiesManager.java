@@ -10,16 +10,12 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.rpc;
 
-
-public interface RemoteCapabilitiesManager extends RemoteCapabilitiesProvider {
-
+public interface RemoteCapabilitiesManager extends RemoteCapabilitiesProvider, RemoteServiceIDProvider {
 	/**
 	 * Sets the given capability.
+	 * 
 	 * @param capability
 	 * @param value
 	 */
 	public void setCapability(String capability, Object value);
-
-	public long getRemoteServiceID();
-
 }

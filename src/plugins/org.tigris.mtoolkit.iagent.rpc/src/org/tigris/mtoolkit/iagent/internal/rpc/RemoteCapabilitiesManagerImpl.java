@@ -15,16 +15,16 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
+import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
-import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
+import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 
-public class RemoteCapabilitiesManagerImpl implements Remote, RemoteCapabilitiesProvider, RemoteCapabilitiesManager {
+public class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implements Remote, RemoteCapabilitiesProvider,
+		RemoteCapabilitiesManager {
 
 	private static final String PROPERTY_EVENT = "iagent_property_event";
 	private static final String EVENT_CAPABILITY_NAME = "capability.name";
@@ -75,19 +75,7 @@ public class RemoteCapabilitiesManagerImpl implements Remote, RemoteCapabilities
 		}
 	}
 
-	public long getRemoteServiceID() {
-		try {
-			ServiceRegistration localRegistration = registration;
-			if (localRegistration == null)
-				return -1;
-			ServiceReference localRef = localRegistration.getReference();
-			if (localRef == null)
-				return -1;
-			return ((Long) localRef.getProperty(Constants.SERVICE_ID)).longValue();
-		} catch (IllegalStateException e) {
-			// catch it in case the service is unregistered mean while
-			return -1;
-		}
+	protected ServiceRegistration getServiceRegistration() {
+		return registration;
 	}
-
 }

@@ -15,7 +15,7 @@ import java.util.Dictionary;
 
 import org.osgi.framework.BundleContext;
 
-public interface RemoteDeploymentAdmin {
+public interface RemoteDeploymentAdmin extends RemoteServiceIDProvider {
 
 	void unregister(BundleContext bc);
 
@@ -35,8 +35,6 @@ public interface RemoteDeploymentAdmin {
 	String getDeploymentPackageVersion(String dpName);
 
 	Object installDeploymentPackage(InputStream in);
-
-	public long getRemoteServiceID();
 
 	/**
 	 * Returns deployment package's icon.
