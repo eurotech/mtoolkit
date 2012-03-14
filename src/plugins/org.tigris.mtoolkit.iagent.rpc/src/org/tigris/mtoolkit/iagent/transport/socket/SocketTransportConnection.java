@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent.transport.socket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -21,36 +22,70 @@ import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 /**
  * @since 3.0
  */
-public class SocketTransportConnection implements TransportConnection {
-	private String host;
-	private int port;
-	private Socket socket;
+public final class SocketTransportConnection implements TransportConnection {
+	private static final String IAGENT_LOCAL_ADDRESS_PROP = "iagent.pmp.local.address";
+
+	private final String host;
+	private final int port;
+	private final Socket socket;
+
 	private volatile boolean closed;
-	private static boolean preJava14EE = false;
+	private static volatile boolean preJava14EE = false;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return "SocketTransportConnection: " + host + ":" + port;
+	}
 
 	public SocketTransportConnection(String host, int port, int timeout) throws IOException {
 		this.host = host;
 		this.port = port;
-		socket = new Socket(host, port);
+		String iagentLocalAddr = System.getProperty(IAGENT_LOCAL_ADDRESS_PROP);
+		if (iagentLocalAddr != null) {
+			socket = new Socket(host, port, InetAddress.getByName(iagentLocalAddr), 0);
+		} else {
+			socket = new Socket(host, port);
+		}
 		try {
 			setKeepAlive(socket, true);
 		} catch (SocketException e) {
 			// problem setting keepalive shouldn't affect the connection
 		}
-		if (timeout > 0)
+		if (timeout > 0) {
 			socket.setSoTimeout(timeout);
-	}
-	
-	private void setKeepAlive(Socket socket, boolean keepAlive) throws SocketException {
-		if (preJava14EE)
-			return;
-		try {
-			socket.setKeepAlive(keepAlive);
-		} catch (NoSuchMethodError e) {
-			preJava14EE = false;
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.iagent.transport.TransportConnection#getInputStream()
+	 */
+	public InputStream getInputStream() throws IOException {
+		return socket.getInputStream();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.iagent.transport.TransportConnection#getOutputStream
+	 * ()
+	 */
+	public OutputStream getOutputStream() throws IOException {
+		return socket.getOutputStream();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.transport.TransportConnection#close()
+	 */
 	public void close() {
 		closed = true;
 		try {
@@ -60,23 +95,22 @@ public class SocketTransportConnection implements TransportConnection {
 		}
 	}
 
-	public InputStream getInputStream() throws IOException {
-		return socket.getInputStream();
-	}
-
-	public OutputStream getOutputStream() throws IOException {
-		return socket.getOutputStream();
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.transport.TransportConnection#isClosed()
+	 */
 	public boolean isClosed() {
-		if (closed)
+		if (closed) {
 			return true;
+		}
 		return isSocketClosed(socket);
 	}
-	
+
 	private static boolean isSocketClosed(Socket socket) {
-		if (preJava14EE)
+		if (preJava14EE) {
 			return false;
+		}
 		try {
 			return socket.isClosed();
 		} catch (NoSuchMethodError e) {
@@ -85,7 +119,15 @@ public class SocketTransportConnection implements TransportConnection {
 		}
 	}
 
-	public String toString() {
-		return "SocketTransportConnection: " + host + ":" + port;
+	private static void setKeepAlive(Socket socket, boolean keepAlive) throws SocketException {
+		if (preJava14EE) {
+			return;
+		}
+		try {
+			socket.setKeepAlive(keepAlive);
+		} catch (NoSuchMethodError e) {
+			preJava14EE = false;
+		}
 	}
+
 }
