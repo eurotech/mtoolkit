@@ -145,6 +145,10 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 			t.printStackTrace(System.out);
 	}
 
+  public static IStatus newStatus(int severity, String message) {
+    return new Status(severity, PLUGIN_ID, message);
+  }
+
 	public static IStatus newStatus(int severity, String message, Throwable t) {
 		return new Status(severity, PLUGIN_ID, message, t);
 	}
