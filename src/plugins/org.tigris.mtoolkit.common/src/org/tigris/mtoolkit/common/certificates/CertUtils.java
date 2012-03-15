@@ -32,6 +32,7 @@ import java.util.jar.Manifest;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -186,10 +187,16 @@ public final class CertUtils {
       if (preparedItems == null || preparedItems.size() == 0) {
         return Status.OK_STATUS;
       }
-      setSigningProperties(monitor, preparationProps);
-      List signedJarFilesList = CertUtils.signJars0(preparedJarFiles, monitor, preparationProps);
-      List signedDpFilesList = CertUtils.signDps0(preparedDpFiles, monitor, preparationProps);
-      setItemsLocation(preparedJarFiles, preparedDpFiles, preparedItems, signedJarFilesList, signedDpFilesList);
+      IStatus status = setSigningProperties(monitor, preparationProps);
+      if (status.matches(IStatus.ERROR)) {
+        if (!CertUtils.continueWithoutSigning(status.getMessage())) {
+          monitor.setCanceled(true);
+        }
+      } else {
+        List signedJarFilesList = CertUtils.signJars0(preparedJarFiles, monitor, preparationProps);
+        List signedDpFilesList = CertUtils.signDps0(preparedDpFiles, monitor, preparationProps);
+        setItemsLocation(preparedJarFiles, preparedDpFiles, preparedItems, signedJarFilesList, signedDpFilesList);
+      }
     } catch (IOException ioe) {
       //this exception is thrown by setSigningProperties() if the user has not been entered full information needed for sign
       if (!monitor.isCanceled()) {
@@ -214,29 +221,35 @@ public final class CertUtils {
     return Status.OK_STATUS;
   }
 
-  public static boolean signJar(File file, File signedFile, IProgressMonitor monitor, Map properties)
-      throws IOException {
+  public static IStatus signJar(File file, File signedFile, IProgressMonitor monitor, Map properties) {
     if (properties == null) {
-      throw new IOException("Signing properties are not initialized");
+      return UtilitiesPlugin.newStatus(IStatus.ERROR,  "Signing properties are not initialized");
     }
     int count = getCertificatesCount(properties);
     if (count == 0) {
-      return !monitor.isCanceled();
+      int code = monitor.isCanceled() ? IStatus.CANCEL : IStatus.OK;
+      return UtilitiesPlugin.newStatus(code, "No certificates set");
     }
+    IStatus status = Status.OK_STATUS;
     Map propertiesDupl = new HashMap(properties);
-    setSigningProperties(monitor, propertiesDupl);
+    status = setSigningProperties(monitor, propertiesDupl);
 
-    for (int i = 0; i < count && !monitor.isCanceled(); i++) {
-      String alias = getCertificateAlias(propertiesDupl, i);
-      String location = getCertificateStoreLocation(propertiesDupl, i);
-      String type = getCertificateStoreType(propertiesDupl, i);
-      String storePass = getCertificateStorePass(propertiesDupl, i);
-      String keyPass = getCertificateKeyPass(propertiesDupl, i);
-      String inFileName = (signedFile != null && i > 0) ? signedFile.getAbsolutePath() : file.getAbsolutePath();
-      String outFileName = (signedFile != null && i == 0) ? signedFile.getAbsolutePath() : null;
-      signJar(inFileName, outFileName, monitor, alias, location, type, storePass, keyPass);
+    if (status.isOK()) {
+      for (int i = 0; i < count && !monitor.isCanceled(); i++) {
+        String alias = getCertificateAlias(propertiesDupl, i);
+        String location = getCertificateStoreLocation(propertiesDupl, i);
+        String type = getCertificateStoreType(propertiesDupl, i);
+        String storePass = getCertificateStorePass(propertiesDupl, i);
+        String keyPass = getCertificateKeyPass(propertiesDupl, i);
+        String inFileName = (signedFile != null && i > 0) ? signedFile.getAbsolutePath() : file.getAbsolutePath();
+        String outFileName = (signedFile != null && i == 0) ? signedFile.getAbsolutePath() : null;
+        status = signJar(inFileName, outFileName, monitor, alias, location, type, storePass, keyPass);
+      }
     }
-    return !monitor.isCanceled();
+    if (monitor.isCanceled()) {
+      return UtilitiesPlugin.newStatus(IStatus.CANCEL, "The signing process is canceled");
+    }
+    return status;
   }
 
   /**
@@ -381,20 +394,23 @@ public final class CertUtils {
    * @param keyPass
    *          the key store pass. If null then the same pass as store pass will
    *          be used.
-   * @throws IOExceptions
    */
-  private static void signJar(String jarName, String signedJar, IProgressMonitor monitor, String alias,
-      String storeLocation, String storeType, String storePass, String keyPass) throws IOException {
+  private static IStatus signJar(
+      String jarName, String signedJar, IProgressMonitor monitor, String alias, String storeLocation, String storeType,
+      String storePass, String keyPass) {
     String jarSigner = getJarsignerLocation();
     if (jarSigner == null) {
-      throw new IOException("The location of jarsigner tool was not correctly specified in Preferences.");
+      return UtilitiesPlugin.newStatus(
+        IStatus.ERROR, "The location of jarsigner tool was not correctly specified in Preferences.");
     }
     File f = new File(jarSigner);
     if (!f.exists()) {
-      throw new IOException("The jarsigner tool was not found at \"" + jarSigner + "\"");
+      UtilitiesPlugin.newStatus(IStatus.ERROR, "The jarsigner tool was not found at \"" + jarSigner
+        + "\"");
     }
     List list = new ArrayList();
     list.add(jarSigner);
+    //    list.add("-strict");//added in java7
     addOption(list, "-keystore", storeLocation, false);
     addOption(list, "-storepass", storePass, true);
     addOption(list, "-keypass", keyPass, false);
@@ -407,9 +423,7 @@ public final class CertUtils {
     try {
       ps = Runtime.getRuntime().exec((String[]) list.toArray(new String[list.size()]));
     } catch (IOException ioe) {
-      IOException e = new IOException("Cannot sign provided content.");
-      e.initCause(ioe);
-      throw e;
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content.", ioe);
     }
     ProcessOutputReader outputReader = new ProcessOutputReader(ps.getInputStream(), "[Jar Signer] Output Reader");
     outputReader.start();
@@ -434,23 +448,31 @@ public final class CertUtils {
     if (monitor.isCanceled()) {
       ps.destroy();
       if (result != 0) {
-        throw new IOException("Signing operation was cancelled.");
+        return UtilitiesPlugin.newStatus(IStatus.CANCEL, "Signing operation was cancelled.");
       }
     }
-    if (result != 0) {
+
       try {
         ps.getOutputStream().write("a\na\na\n".getBytes());
         ps.getOutputStream().flush();
       } catch (IOException e) {
         // ignore, most probably the pipe will be closed
       }
+    if (result != 0) {
       if (retries == 0) {
-        throw new IOException("Cannot sign provided content. Operation timed out.");
-      } else {
-        throw new IOException("Cannot sign provided content. Jarsigner return code: " + result + ". Jarsigner output: "
-            + outputReader.getOutput());
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content. Operation timed out. Alias: "
+          + alias);
       }
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content. Alias: " + alias
+        + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputReader.getOutput());
     }
+    String outputMsg = outputReader.getOutput();
+    //return the warnings
+    if (outputMsg.indexOf("Warning") != -1 && outputMsg.indexOf("will expire") == -1) {//skip the unnecessary warning for the '6 months'
+      return UtilitiesPlugin.newStatus(IStatus.WARNING, "Signing warning found. Alias: " + alias
+        + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputMsg.replaceAll("\r\n", " "));
+    }
+    return Status.OK_STATUS;
   }
 
   private static void addOption(List list, String option, String value, boolean emptyAllowed) {
@@ -481,15 +503,27 @@ public final class CertUtils {
    *           in case of signing error
    * @since 6.1
    */
-  private static void signJars(File files[], File signedFiles[], IProgressMonitor monitor, Map properties)
+  private static IStatus signJars(File files[], File signedFiles[], IProgressMonitor monitor, Map properties)
       throws IOException {
     if (files == null || signedFiles == null || files.length != signedFiles.length) {
-      throw new IOException("Invalid or missing sinning information.");
+      return new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, "Invalid or missing sinning information.");
     }
+    MultiStatus operationStatus =
+      new MultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.WARNING, "Signing warnings found.", null);
     for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
-      signJar(files[i], signedFiles[i], monitor, properties);
+      IStatus status = signJar(files[i], signedFiles[i], monitor, properties);
+      if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
+        return status;
+      }
+      if (status.matches(IStatus.WARNING)) {
+        operationStatus.add(status);
+      }
       monitor.worked(1);
     }
+    if (operationStatus.getChildren().length == 0) {
+      return Status.OK_STATUS;
+    }
+    return operationStatus;
   }
 
   /**
@@ -521,8 +555,7 @@ public final class CertUtils {
     }
   }
 
-  private static void signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
-
+  private static IStatus signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
     SubMonitor subMonitor = SubMonitor.convert(monitor);
     File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.extracted");
     FileUtils.deleteDir(tmpDir);
@@ -533,11 +566,12 @@ public final class CertUtils {
       jis = new JarInputStream(new FileInputStream(dpFile));
       Manifest manifest = jis.getManifest();
       if (manifest == null) {
-        throw new IOException("DP file has no manifest.");
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, "DP file has no manifest.");
       }
       jos = new JarOutputStream(new FileOutputStream(signedFile), manifest);
       JarEntry jarEntry;
 
+      MultiStatus operationStatus = new MultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.OK, "", null);
       while ((jarEntry = jis.getNextJarEntry()) != null && !monitor.isCanceled()) {
         JarEntry newEntry = new JarEntry(jarEntry.getName());
         newEntry.setTime(jarEntry.getTime());
@@ -553,9 +587,12 @@ public final class CertUtils {
           file.getParentFile().mkdirs();
 
           copyBytes(jis, new FileOutputStream(file), false, true);
-          if (!signJar(file, null, subMonitor.newChild(1), properties)) {
-            // operation is cancelled
-            return;
+          IStatus status = signJar(file, null, subMonitor.newChild(1), properties);
+          if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
+            return status;
+          }
+          if (status.matches(IStatus.WARNING)) {
+            operationStatus.add(status);
           }
           copyBytes(new FileInputStream(file), jos, true, false);
         } else {
@@ -567,7 +604,14 @@ public final class CertUtils {
       }
       jis.close();
       jos.close();
-      signJar(signedFile, null, subMonitor.newChild(1), properties);
+      IStatus status = signJar(signedFile, null, subMonitor.newChild(1), properties);
+      if (status.matches(IStatus.CANCEL) || status.getCode() == IStatus.ERROR) {
+        return status;
+      }
+      if (status.matches(IStatus.WARNING)) {
+        operationStatus.add(status);
+      }
+      return operationStatus;
     } finally {
       if (jis != null) {
         try {
@@ -585,18 +629,18 @@ public final class CertUtils {
     }
   }
 
-  private static void setSigningProperties(IProgressMonitor monitor, Map properties) throws IOException {
+  private static IStatus setSigningProperties(IProgressMonitor monitor, Map properties) {
     int count = getCertificatesCount(properties);
     for (int i = 0; i < count && !monitor.isCanceled(); i++) {
       String alias = getCertificateAlias(properties, i);
       String location = getCertificateStoreLocation(properties, i);
       String type = getCertificateStoreType(properties, i);
       if (alias == null || location == null || type == null) {
-        throw new IOException("Not enough information is specified for signing content.");
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, "Not enough information is specified for signing content.");
       }
       File keyStoreLocation = new File(location);
       if (!keyStoreLocation.isFile() || !keyStoreLocation.exists()) {
-        throw new IOException(NLS.bind("Keystore {0} is invalid or does not exists.", location));
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, NLS.bind("Keystore {0} is invalid or does not exists.", location));
       }
     }
     for (int i = 0; i < count && !monitor.isCanceled(); i++) {
@@ -604,7 +648,7 @@ public final class CertUtils {
       if (storePass == null || storePass.length() == 0) {
         storePass = getKeystorePassword(getCertificateStoreLocation(properties, i));
         if (storePass == null || storePass.length() == 0) {
-          throw new IOException("Keystore password is not provided");
+          return UtilitiesPlugin.newStatus(IStatus.ERROR, "Keystore password is not provided");
         }
         setCertificateStorePass(properties, i, storePass);
       }
@@ -614,7 +658,7 @@ public final class CertUtils {
         String alias = getCertificateAlias(properties, i);
         keyPass = getPrivateKeyPassword(getCertificateStoreLocation(properties, i), alias);
         if (keyPass == null) {
-          throw new IOException("Private key password is missing");
+          return UtilitiesPlugin.newStatus(IStatus.ERROR, "Private key password is missing");
         }
         if (keyPass.length() == 0) {
           keyPass = storePass;
@@ -622,6 +666,7 @@ public final class CertUtils {
         setCertificateKeyPass(properties, i, keyPass);
       }
     }
+    return Status.OK_STATUS;
   }
 
   private static void copyBytes(InputStream in, OutputStream out, boolean closeIn, boolean closeOut) throws IOException {
@@ -721,8 +766,15 @@ public final class CertUtils {
         jarFilesToSign.add(fileToSign);
         jarSignedFiles.add(signedFile);
       }
-      CertUtils.signJars((File[]) jarFilesToSign.toArray(new File[] {}),
+      IStatus status =
+        CertUtils.signJars(
+          (File[]) jarFilesToSign.toArray(new File[] {}),
           (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
+      if (status.matches(IStatus.WARNING)) {
+        UtilitiesPlugin.log(status);
+      } else if (status.matches(IStatus.ERROR)) {
+        throw new IOException(status.getMessage());
+      }
     } catch (IOException ioe) {
       hasError = true;
       throw ioe;

@@ -34,7 +34,8 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 	}
 
 	// This job is scheduled after preverification completes successfully, so
-	// there is no need  to check preconditions here.
+	// there is no need to check preconditions here.
+	@Override
 	protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
@@ -60,15 +61,12 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 			if (signedFile.exists()) {
 				signedFile.delete();
 			}
-			try {
-				CertUtils.signJar(preparedFile != null ? preparedFile : bundleFile, signedFile,
-						subMonitor.newChild(10), framework.getSigningProperties());
-			} catch (IOException ioe) {
-				if (CertUtils.continueWithoutSigning(ioe.getMessage())) {
-					signedFile.delete();
-				} else {
-					return Status.CANCEL_STATUS;
-				}
+			IStatus status = CertUtils.signJar(preparedFile != null ? preparedFile : bundleFile, signedFile,
+					subMonitor.newChild(10), framework.getSigningProperties());
+			if (status.matches(IStatus.ERROR) && CertUtils.continueWithoutSigning(status.getMessage())) {
+				signedFile.delete();
+			} else {
+				return Status.CANCEL_STATUS;
 			}
 			if (signedFile.exists()) {
 				if (preparedFile != null) {
@@ -87,6 +85,7 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 			pis = new ProgressInputStream(new FileInputStream(updateFile), mon);
 			rBundle.update(pis);
 			getBundle().refreshTypeFromRemote();
+			return status;
 		} catch (IOException ioe) {
 			return Util.newStatus(IStatus.ERROR, "Failed to update bundle", ioe);
 		} finally {
@@ -100,9 +99,9 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 				preparedFile.delete();
 			}
 		}
-		return Status.OK_STATUS;
 	}
 
+	@Override
 	protected String getMessage(IStatus operationStatus) {
 		return NLS.bind(Messages.bundle_update_failure, operationStatus);
 	}
