@@ -1,5 +1,6 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -23,6 +24,7 @@ public class SigningPropertyPage extends PropertyPage {
 	/**
 	 * @see PreferencePage#createContents(Composite)
 	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PROPERTY_FRAMEWORK);
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -34,16 +36,18 @@ public class SigningPropertyPage extends PropertyPage {
 
 		fw = (FrameworkImpl) getElement();
 
-		certificatesPanel = new CertificatesPanel(composite, 1, 1, GridData.FILL_HORIZONTAL);
+		certificatesPanel = new CertificatesPanel(composite, 1, 1, GridData.FILL_BOTH);// HORIZONTAL);
 		certificatesPanel.initialize(fw.getSignCertificateUids(fw.getConfig()));
 
 		return composite;
 	}
 
+	@Override
 	protected void performDefaults() {
 
 	}
 
+	@Override
 	public boolean performOk() {
 		fw.setSignCertificateUids(fw.getConfig(), certificatesPanel.getSignCertificateUids());
 		return true;

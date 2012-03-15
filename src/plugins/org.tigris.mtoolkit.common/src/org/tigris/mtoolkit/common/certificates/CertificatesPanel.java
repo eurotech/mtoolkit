@@ -19,11 +19,13 @@ import java.util.Set;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -114,12 +116,16 @@ public class CertificatesPanel {
         }
       }
     });
+
+    TableLayout layout = new TableLayout();
+    layout.addColumnData(new ColumnWeightData(30, 100, true));
+    layout.addColumnData(new ColumnWeightData(70, 160, true));
+    tblCertificates.setLayout(layout);
+
     TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
     column.setText(Messages.CertificatesPanel_tblCertColAlias);
-    column.setWidth(100);
     column = new TableColumn(tblCertificates, SWT.LEFT);
     column.setText(Messages.CertificatesPanel_tblCertColLocation);
-    column.setWidth(160);
 
     certificatesViewer = new CheckboxTableViewer(tblCertificates);
     certificatesViewer.setContentProvider(new CertContentProvider());
