@@ -42,9 +42,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
+import org.tigris.mtoolkit.common.installation.AbstractInstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationConstants;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
-import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -65,10 +65,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 /**
  * @since 5.0
  */
-public final class FrameworkProcessor implements InstallationItemProcessor {
-  public static final String MIME_ZIP = "application/zip";
-  public static final String MIME_JAR = "application/java-archive";
-
+public final class FrameworkProcessor extends AbstractInstallationItemProcessor {
   private static final Map properties;
   private static final String PROP_JVM_NAME = "jvm.name";
   private static final String ANDROID_TRANSPORT_TYPE = "android";
@@ -155,30 +152,6 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
   /*
    * (non-Javadoc)
    * 
-   * @see
-   * org.tigris.mtoolkit.common.installation.InstallationItemProcessor#isSupported
-   * (java.lang.Object)
-   */
-  public boolean isSupported(Object target) {
-    return (target instanceof Framework);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
-   * getInstallationTarget(java.lang.Object)
-   */
-  public InstallationTarget getInstallationTarget(Object target) {
-    if (target instanceof Framework) {
-      return new FrameworkTarget((Framework) target);
-    }
-    return null;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
    * getProperties()
    */
@@ -218,19 +191,20 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
   public IStatus processInstallationItems(final InstallationItem[] items, Map args, InstallationTarget target,
       final IProgressMonitor monitor) {
     // TODO use multi status to handle errors and warnings
-    SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2 + 1);
     subMonitor.beginTask(Messages.connecting_operation_title, 10);
 
     try {
       Framework framework = ((FrameworkTarget) target).getFramework();
       if (!framework.isConnected()) {
-        Job connectJob = new ConnectFrameworkJob(framework);
-        connectJob.schedule();
-        try {
-          connectJob.join();
-          if (!connectJob.getResult().isOK()) {
-            return connectJob.getResult();
+        ConnectFrameworkJob connectJob = new ConnectFrameworkJob(framework);
+        IStatus status = connectJob.run(subMonitor.newChild(1));
+        if (status != null) {
+          if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
+            return status;
           }
+        }
+        try {
           int counter = 0;
           while (!framework.isConnected() && counter++ < 100) {
             Thread.sleep(50);
@@ -239,7 +213,8 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
           return Util.newStatus(IStatus.ERROR, ex.getMessage(), ex);
         }
       }
-      subMonitor.worked(1);
+
+      subMonitor.worked(2);
       if (monitor.isCanceled()) {
         return Status.CANCEL_STATUS;
       }
@@ -294,25 +269,43 @@ public final class FrameworkProcessor implements InstallationItemProcessor {
       }
 
       if (!itemsToInstall.isEmpty()) {
+        IStatus fieStatus = fireInstallEvent(true);
+        if (fieStatus != null) {
+          if (fieStatus.matches(IStatus.CANCEL) || fieStatus.matches(IStatus.ERROR)) {
+            return fieStatus;
+          }
+        }
+        List<RemoteBundle> bundlesToStart = new ArrayList<RemoteBundle>();
         for (InstallationItem item : itemsToInstall) {
           try {
-            RemoteBundle bundle = installBundle(item, framework, subMonitor);
-            if (bundle != null && startBundles) {
-              startBundle(bundle, subMonitor);
-            }
+            bundlesToStart.add(installBundle(item, framework, subMonitor));
           } catch (CoreException e) {
             final IStatus status = e.getStatus();
             if (status.matches(IStatus.CANCEL)) {
               monitor.setCanceled(true);
-              break;
+              return status;
             }
             FrameworkPlugin.log(status);
-          } catch (Exception e) {
-            FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
+          }
+        }
+        fieStatus = fireInstallEvent(false);
+        if (fieStatus != null) {
+          if (fieStatus.matches(IStatus.CANCEL) || fieStatus.matches(IStatus.ERROR)) {
+            return fieStatus;
+          }
+        }
+        if (startBundles) {
+          for (RemoteBundle bundle : bundlesToStart) {
+            if (bundle != null) {
+              try {
+                startBundle(bundle, subMonitor);
+              } catch (Exception e) {
+                FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
+              }
+            }
           }
         }
       }
-
     } finally {
       monitor.done();
     }

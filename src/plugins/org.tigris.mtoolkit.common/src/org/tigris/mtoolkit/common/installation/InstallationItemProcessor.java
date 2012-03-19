@@ -23,7 +23,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
  */
 public interface InstallationItemProcessor {
 
-  static String MIME_DP = "application/vnd.osgi.dp";
+  String MIME_ZIP = "application/zip";
+  String MIME_JAR = "application/java-archive";
+  String MIME_DP = "application/vnd.osgi.dp";
 
   /**
    * Returns human-readable name of the general target for which this
@@ -80,19 +82,22 @@ public interface InstallationItemProcessor {
       InstallationTarget target, IProgressMonitor monitor);
 
   /**
-   * Returns installation item processor properties
+   * Returns processor properties
    * @return properties map
    */
   public Map/*<String,Object>*/getProperties();
 
   /**
-   * @since 6.0
+   *  Adds the listener to the collection of listeners who will be notified for specified event 
+   *  during installation process.Moreover the listener may decide to stop installation.
+   *  This method has no effect if the listener is already added.This method is thread-safe.
+   *  @param listener to be added
    */
-  public InstallationTarget getInstallationTarget(Object target);
+  void addListener(InstallListener listener);
 
   /**
-   * @since 6.0
+   * Removes specific listener.If that listener doesn't exist this method does nothing.This method is thread-safe.
+    @param listener to be added
    */
-  public boolean isSupported(Object target);
-
+  void removeListener(InstallListener listener);
 }

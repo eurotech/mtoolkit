@@ -27,19 +27,6 @@ public final class InstallationRegistry {
   private InstallationRegistry() {
   }
 
-  public InstallationTarget findTarget(Object target) {
-    InstallationTarget result = null;
-    Iterator processorsIterator = getProcessors().iterator();
-    while (processorsIterator.hasNext()) {
-      InstallationItemProcessor element = (InstallationItemProcessor) processorsIterator.next();
-      result = element.getInstallationTarget(target);
-      if (result != null) {
-        return result;
-      }
-    }
-    return result;
-  }
-
   /**
    * Returns map containing capable providers (as keys) and installation items
    * (as values) for the given source element.

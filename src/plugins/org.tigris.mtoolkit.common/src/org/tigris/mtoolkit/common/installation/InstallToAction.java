@@ -40,21 +40,14 @@ public class InstallToAction extends Action {
     this.items = items;
   }
 
-  public static class Mapping {
-    public Object resource;
-    public Map providerSpecificItems;
-
-    public Mapping(Object resource, Map providerSpecificItems) {
-      this.resource = resource;
-      this.providerSpecificItems = providerSpecificItems;
-    }
-  }
-
   /* (non-Javadoc)
    * @see org.eclipse.jface.action.Action#run()
    */
   public void run() {
     Job job = new Job(getActionText()) {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       public IStatus run(IProgressMonitor monitor) {
         InstallationHistory.getDefault().promoteHistory(target, processor);
         InstallationHistory.getDefault().saveHistory();
@@ -67,13 +60,11 @@ public class InstallToAction extends Action {
           if (item == null) {
             return Status.CANCEL_STATUS;
           }
-
           instItems.add(item);
           if (monitor.isCanceled()) {
             return Status.CANCEL_STATUS;
           }
         }
-
         InstallationItem[] items = (InstallationItem[]) instItems.toArray(new InstallationItem[instItems.size()]);
 
         IStatus status = preInstall(items);
@@ -85,6 +76,8 @@ public class InstallToAction extends Action {
         }
 
         status = processor.processInstallationItems(items, args, target, monitor);
+
+        postInstall();
 
         monitor.done();
         if (monitor.isCanceled()) {
@@ -98,6 +91,9 @@ public class InstallToAction extends Action {
 
   protected IStatus preInstall(InstallationItem[] items) {
     return Status.OK_STATUS;
+  }
+
+  protected void postInstall() {
   }
 
   protected String getActionText() {
@@ -129,6 +125,9 @@ public class InstallToAction extends Action {
 
     final InstallationItemProvider[] selected = new InstallationItemProvider[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      /* (non-Javadoc)
+       * @see java.lang.Runnable#run()
+       */
       public void run() {
         Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
         String resourceName = getResourceName(resource);
@@ -137,7 +136,6 @@ public class InstallToAction extends Action {
         selected[0] = dialog.getSelectedProvider();
       }
     });
-
     if (selected[0] != null) {
       return (InstallationItem) items.get(selected[0]);
     } else {
@@ -156,4 +154,15 @@ public class InstallToAction extends Action {
     }
     return resource.toString();
   }
+
+  public static class Mapping {
+    public Object resource;
+    public Map providerSpecificItems;
+
+    public Mapping(Object resource, Map providerSpecificItems) {
+      this.resource = resource;
+      this.providerSpecificItems = providerSpecificItems;
+    }
+  }
+
 }
