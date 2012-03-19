@@ -14,7 +14,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-public abstract class AbstractRemoteAdmin implements RemoteServiceIDProvider {
+public abstract class AbstractRemoteAdmin implements RemoteServiceIDProvider, Remote {
 	/*
 	 * (non-Javadoc)
 	 * 
