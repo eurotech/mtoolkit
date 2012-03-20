@@ -41,7 +41,7 @@ public class DeploymentPackageGenerator {
 	String baseDir = "";
 	Vector baseDirPaths;
 	private IProgressMonitor monitor;
-	static String nl = System.getProperty("line.separator");
+	static String nl = "\r\n";
 
 	/**
 	 * This method generates a deployment package by the passed DPPFile object
@@ -516,7 +516,7 @@ public class DeploymentPackageGenerator {
 						header.getValue()));
 			}
 		}
-
+        manifest.append(nl);
 		return manifest.toString();
 	}
 
