@@ -34,17 +34,20 @@ import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
-
 /**
  * Implementation of VMManager
  * 
  */
 public class VMManagerImpl implements VMManager, ConnectionListener {
 
-	private static MethodSignature REGISTER_METHOD = new MethodSignature("registerOutput", new String[] { RemoteObject.class.getName() }, true);
-	private static MethodSignature EXECUTE_METHOD = new MethodSignature("executeCommand", new String[] { MethodSignature.STRING_TYPE }, true);
-	private static MethodSignature GET_FW_START_LEVEL = new MethodSignature("getFrameworkStartLevel", MethodSignature.NO_ARGS, true);
-	private static MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty", new String[] { MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature REGISTER_METHOD = new MethodSignature("registerOutput",
+			new String[] { RemoteObject.class.getName() }, true);
+	private static MethodSignature EXECUTE_METHOD = new MethodSignature("executeCommand",
+			new String[] { MethodSignature.STRING_TYPE }, true);
+	private static MethodSignature GET_FW_START_LEVEL = new MethodSignature("getFrameworkStartLevel",
+			MethodSignature.NO_ARGS, true);
+	private static MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty",
+			new String[] { MethodSignature.STRING_TYPE }, true);
 
 	private DeviceConnectorImpl connector;
 
@@ -185,66 +188,67 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 	public String[] listRawArgs() throws IAgentException {
 		debug("[listRawArgs] >>>");
 		MBSAConnection connection = getMBSAConnection();
-		if ( !connection.isConnected() ){
-		  info("[listRawArgs] Device is disconnected!");
-		  throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
+		if (!connection.isConnected()) {
+			info("[listRawArgs] Device is disconnected!");
+			throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
 		}
 		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_LISTRAWARGS, null);
 		int rspStatus = tCallBack.getRspStatus();
-		if ( rspStatus >= 0 ) {
-		  byte rspData[] = tCallBack.getRspData();
-		  if ( rspData != null ) {
-		    ByteArrayInputStream bis = null;
-		    try {
-		      bis = new ByteArrayInputStream(rspData);
-		      String[] args = DataFormater.readStringArray(bis);
-		      debug("[listRawArgs] Raw arguments list: " + DebugUtils.convertForDebug(args));
-		      return args;
-		    } catch(IOException e) {
-		      info("[listRawArgs] Error formatting response data!", e);
-		      throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
-		    } finally {
-		      DataFormater.closeInputStream(bis);
-		    }
-		  } else {
-			  debug("[listRawArgs] no arguments available");
-		    return new String[0];
-		  }
+		if (rspStatus >= 0) {
+			byte rspData[] = tCallBack.getRspData();
+			if (rspData != null) {
+				ByteArrayInputStream bis = null;
+				try {
+					bis = new ByteArrayInputStream(rspData);
+					String[] args = DataFormater.readStringArray(bis);
+					debug("[listRawArgs] Raw arguments list: " + DebugUtils.convertForDebug(args));
+					return args;
+				} catch (IOException e) {
+					info("[listRawArgs] Error formatting response data!", e);
+					throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
+				} finally {
+					DataFormater.closeInputStream(bis);
+				}
+			} else {
+				debug("[listRawArgs] no arguments available");
+				return new String[0];
+			}
 		} else {
-		  info("[listRawArgs] Command failure: " + rspStatus);
-		  throw new IAgentException("Command failure: " + rspStatus, rspStatus);
-	    }
+			info("[listRawArgs] Command failure: " + rspStatus);
+			throw new IAgentException("Command failure: " + rspStatus, rspStatus);
+		}
 	}
-	
+
 	public void addRawArgument(String aRawArgument) throws IAgentException {
 		debug("[addRawArgument] >>> aRawArgument: " + aRawArgument);
 		MBSAConnection connection = getMBSAConnection();
-		if ( !connection.isConnected() ){
-		  info("[addRawArgument] Device is disconnected!");
-		  throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
+		if (!connection.isConnected()) {
+			info("[addRawArgument] Device is disconnected!");
+			throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
 		}
-		if ( aRawArgument == null ){
-		  throw new IllegalArgumentException("Argument could not be null!");
+		if (aRawArgument == null) {
+			throw new IllegalArgumentException("Argument could not be null!");
 		}
 		ByteArrayOutputStream bos = null;
 		try {
-		  bos = new ByteArrayOutputStream(256);
-		  DataFormater.writeString(bos, aRawArgument);
+			bos = new ByteArrayOutputStream(256);
+			DataFormater.writeString(bos, aRawArgument);
 		} catch (IOException e) {
-		  info("[addRawArgument] Error processing arguments!",e);
-		  throw new IAgentException("Error processing arguments!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
+			info("[addRawArgument] Error processing arguments!", e);
+			throw new IAgentException("Error processing arguments!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
 		}
-		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_ADDRAWARGUMENT, bos.toByteArray());
+		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_ADDRAWARGUMENT,
+				bos.toByteArray());
 		DataFormater.closeOutputStream(bos);
 		int rspStatus = tCallBack.getRspStatus();
-		if ( rspStatus < 0 ){
-		  info("[addRawArgument] Command failure: " + rspStatus);
-		  throw new IAgentException("Command failure: " + rspStatus, rspStatus);
+		if (rspStatus < 0) {
+			info("[addRawArgument] Command failure: " + rspStatus);
+			throw new IAgentException("Command failure: " + rspStatus, rspStatus);
 		} else {
-		  debug("[addRawArgument] argument addition successful");
-	    }
-	} 
-	  
+			debug("[addRawArgument] argument addition successful");
+		}
+	}
+
 	public boolean removeRawArgument(String aRawArgument) throws IAgentException {
 		debug("[removeRawArgument] >>> aRawArgument: " + aRawArgument);
 		MBSAConnection connection = getMBSAConnection();
@@ -262,8 +266,8 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 			info("[removeRawArgument] Error processing arguments!", e);
 			throw new IAgentException("Error processing arguments!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
 		}
-		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_REMOVERAWARGUMENT, bos
-				.toByteArray());
+		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_REMOVERAWARGUMENT,
+				bos.toByteArray());
 		DataFormater.closeOutputStream(bos);
 		int rspStatus = tCallBack.getRspStatus();
 		if (rspStatus < 0) {
@@ -346,7 +350,8 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 			info("[getPlatformProperties] Device is disconnected!");
 			throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
 		}
-		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GETPLATFORMPROPERTIES, null, false);
+		MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GETPLATFORMPROPERTIES, null,
+				false);
 		int rspStatus = tCallBack.getRspStatus();
 		if (rspStatus >= 0) {
 			byte rspData[] = tCallBack.getRspData();
@@ -376,7 +381,7 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 	private MBSAConnection getMBSAConnection() throws IAgentException {
 		return (MBSAConnection) connector.getConnection(ConnectionManager.MBSA_CONNECTION);
 	}
-	
+
 	private static Map convertStringArrayToMap(String[] arr) {
 		Map result = new HashMap();
 		if (arr == null || arr.length == 0)
@@ -391,59 +396,9 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 		}
 		return result;
 	}
-	
+
 	public String getSystemProperty(String propertyName) throws IAgentException {
-		return (String) GET_SYSTEM_PROPERTY.call(getPMPConnection().getRemoteBundleAdmin(), new Object[] { propertyName });
-	}
-
-	public String[] getSystemBundlesNames() throws IAgentException {
-		debug("[getSystemBundlesNames] >>>");
-		try {
-			ExtVMManager extMan = (ExtVMManager) connector.getManager(ExtVMManager.class.getName());
-			if (extMan != null) {
-				return extMan.getSystemBundlesNames();
-			}
-		} catch(IAgentException e) {
-			// continue trying another method
-		}
-		return fallbackGetSystemBundlesNames();
-	}
-
-	private String[] fallbackGetSystemBundlesNames() throws IAgentException {
-		try {
-			MBSAConnection connection = getMBSAConnection();
-			if (!connection.isConnected()) {
-				info("[getSystemBundlesNames] Device is disconnected!");
-				throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-			}
-			MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_GET_SYSTEM_BUNDLES, null, false);
-			int rspStatus = tCallBack.getRspStatus();
-			if (rspStatus >= 0) {
-				byte rspData[] = tCallBack.getRspData();
-				if (rspData != null) {
-					ByteArrayInputStream bis = null;
-					try {
-						bis = new ByteArrayInputStream(rspData);
-						String[] names = DataFormater.readStringArray(bis);
-						debug("[getSystemBundlesNames] Raw bundle names list: " + DebugUtils.convertForDebug(names));
-						return names;
-					} catch (IOException e) {
-						info("[getSystemBundlesNames] Error formatting response data!", e);
-						throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
-					} finally {
-						DataFormater.closeInputStream(bis);
-					}
-				} else {
-					debug("[getSystemBundlesNames] no bundles available");
-					return new String[0];
-				}
-			} else {
-				debug("[getSystemBundlesNames] Getting system bundles command failed: " + rspStatus);
-				throw new IAgentException("Getting system bundles command failed!", IAgentErrors.ERROR_INTERNAL_ERROR);
-			}
-		} catch (IAgentException e) {
-			// continue trying another method
-		}
-		return ((DeploymentManagerImpl) connector.getDeploymentManager()).getSystemBundlesNames();
+		return (String) GET_SYSTEM_PROPERTY.call(getPMPConnection().getRemoteBundleAdmin(),
+				new Object[] { propertyName });
 	}
 }

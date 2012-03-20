@@ -118,21 +118,14 @@ public class Main {
 			DeploymentManager mng = connector.getDeploymentManager();
 			RemoteBundle bundles[] = mng.listBundles();
 			for (int i = 0; i < bundles.length; i++) {
-				System.out.println(bundles[i].getBundleId() + "\t" + getState(bundles[i].getState()) + "\t" + bundles[i].getSymbolicName() + " [" + bundles[i].getVersion() + "]" + (bundles[i].isSystemBundle() ? "[system]" : ""));
+				System.out.println(bundles[i].getBundleId() + "\t" + getState(bundles[i].getState()) + "\t"
+						+ bundles[i].getSymbolicName() + " [" + bundles[i].getVersion());
 			}
-			String[] systemSymbolicNames = connector.getVMManager().getSystemBundlesNames();
-			System.out.println("System bundles' symbolic names:");
-			if (systemSymbolicNames.length != 0)
-				for (int i = 0; i < systemSymbolicNames.length; i++) {
-					System.out.println("\t" + systemSymbolicNames[i]);
-				}
-			else
-				System.out.println("\tNone.");
 		} finally {
 			connector.closeConnection();
 		}
 	}
-	
+
 	private static String getState(int state) {
 		switch (state) {
 		case Bundle.ACTIVE:
@@ -182,7 +175,7 @@ public class Main {
 		props.put("framework-connection-immediate", Boolean.valueOf(immediate));
 		return DeviceConnector.connect("socket", ip, props, null);
 	}
-	
+
 	private static void usage() {
 		System.out.println("USAGE: iagent <command> <IP> [args]");
 		System.out.println("\t<command> - instructs the iagent what to do. The following commands can be used:");

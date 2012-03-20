@@ -223,16 +223,6 @@ public interface RemoteBundle {
 	public RemoteBundle[] getHosts() throws IAgentException;
 
 	/**
-	 * Returns whether the bundle referenced is considered system or not. The
-	 * system bundles are the bundles which are part of the platform and
-	 * shouldn't be managed by users.
-	 * 
-	 * @return true if the bundle is system
-	 * @throws IAgentException
-	 */
-	public boolean isSystemBundle() throws IAgentException;
-
-	/**
 	 * Returns a timestamp of the last modification of the bundle.
 	 * <p>
 	 * The timestamp is a number, which can be used to track any changes to the

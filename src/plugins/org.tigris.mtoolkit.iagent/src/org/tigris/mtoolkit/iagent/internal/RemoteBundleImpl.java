@@ -69,10 +69,8 @@ public class RemoteBundleImpl implements RemoteBundle {
 	private Long id;
 	private String location;
 	public boolean uninstalled = false;
-	private boolean isSystemBundle = false;
 
 	private DeploymentManagerImpl commands;
-	private boolean cachedSystemBundle = false;
 
 	public RemoteBundleImpl(DeploymentManagerImpl deploymentCommands, Long id) {
 		this(deploymentCommands, id, null);
@@ -131,7 +129,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 			debug("[isSigned] Bundle signed: " + isSigned);
 			isSigned = isSignedResult.booleanValue();
 		} else {
-		  debug("[method not found on iagent] >>>");
+			debug("[method not found on iagent] >>>");
 		}
 		return isSigned;
 	}
@@ -382,14 +380,6 @@ public class RemoteBundleImpl implements RemoteBundle {
 
 	public String toString() {
 		return "RemoteBundle@" + Integer.toHexString(System.identityHashCode(this)) + "[" + id + "][" + location + "]";
-	}
-
-	public boolean isSystemBundle() throws IAgentException {
-		if (!cachedSystemBundle) {
-			isSystemBundle = commands.scanSystemBundlesList(this);
-			cachedSystemBundle = true;
-		}
-		return isSystemBundle;
 	}
 
 	public int getBundleStartLevel() throws IAgentException {

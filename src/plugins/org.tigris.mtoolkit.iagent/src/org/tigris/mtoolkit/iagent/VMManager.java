@@ -185,12 +185,4 @@ public interface VMManager {
 	 */
 	public Map getPlatformProperties() throws IAgentException;
 
-	/**
-	 * Returns string array with names of all System bundles.
-	 * 
-	 * @return A string array with symbolic names of all system bundles.
-	 * 
-	 * @throws IAgentException
-	 */
-	public String[] getSystemBundlesNames() throws IAgentException;
 }

@@ -212,10 +212,6 @@ public interface RemoteBundleAdmin extends RemoteServiceIDProvider {
 
 	public String[] getAgentData();
 
-	public long[] getSystemBundlesIDs();
-
-	public String[] getSystemBundlesNames();
-
 	public int getBundleStartLevel(long id);
 
 	public int getFrameworkStartLevel();

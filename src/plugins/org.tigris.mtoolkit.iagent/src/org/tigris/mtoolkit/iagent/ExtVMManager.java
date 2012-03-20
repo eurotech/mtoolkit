@@ -24,12 +24,10 @@ public interface ExtVMManager {
 
 	public Map getPlatformProperties() throws IAgentException;
 
-	public String[] getSystemBundlesNames() throws IAgentException;
-
 	/**
 	 * @since 4.1
 	 */
-	public List/*<String>*/ listConfigurables(Map properties) throws IAgentException;
+	public List/* <String> */listConfigurables(Map properties) throws IAgentException;
 
 	/**
 	 * @since 4.1
