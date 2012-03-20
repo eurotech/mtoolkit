@@ -14,7 +14,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
@@ -27,6 +26,7 @@ public class UpdateBundleAction extends SelectionProviderAction implements IStat
 		this.parentView = (TreeViewer) provider;
 	}
 
+	@Override
 	public void run() {
 		IStructuredSelection selection = getStructuredSelection();
 		Bundle bundle = (Bundle) selection.getFirstElement();
@@ -35,26 +35,22 @@ public class UpdateBundleAction extends SelectionProviderAction implements IStat
 	}
 
 	// override to react properly to selection change
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		updateState(selection);
 	}
 
 	public void updateState(IStructuredSelection selection) {
-		try {
-			if (selection.size() == 1
-							&& (selection.getFirstElement() instanceof Bundle)
-							&&
-							/*
-							 * ((Bundle)selection.getFirstElement()).getType()
-							 * == 0 &&
-							 */
-							!((((Bundle) selection.getFirstElement()).getState() & (org.osgi.framework.Bundle.UNINSTALLED | org.osgi.framework.Bundle.STOPPING)) != 0)
-							&& !((Bundle) selection.getFirstElement()).getRemoteBundle().isSystemBundle()) {
-				setEnabled(true);
-			} else {
-				setEnabled(false);
-			}
-		} catch (IAgentException e) {
+		if (selection.size() == 1
+				&& (selection.getFirstElement() instanceof Bundle)
+				&&
+				/*
+				 * ((Bundle)selection.getFirstElement()).getType() == 0 &&
+				 */
+				!((((Bundle) selection.getFirstElement()).getState() & (org.osgi.framework.Bundle.UNINSTALLED | org.osgi.framework.Bundle.STOPPING)) != 0)
+				&& !((Bundle) selection.getFirstElement()).isSystemBundle()) {
+			setEnabled(true);
+		} else {
 			setEnabled(false);
 		}
 	}

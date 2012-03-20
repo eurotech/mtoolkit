@@ -32,6 +32,7 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 	}
 
 	// run method
+	@Override
 	public void run() {
 		final int result[] = new int[1];
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -39,7 +40,7 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 				int count = getStructuredSelection().size();
 				String msg = "Are you sure you want to uninstall ";
 				if (count == 1) {
-					msg += getStructuredSelection().getFirstElement()+"?";
+					msg += getStructuredSelection().getFirstElement() + "?";
 				} else {
 					msg += count + " selected resources?";
 				}
@@ -49,7 +50,7 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 		if (result[0] != SWT.OK) {
 			return;
 		}
-		
+
 		ISelection selection = getSelection();
 		Iterator iterator = getStructuredSelection().iterator();
 		while (iterator.hasNext()) {
@@ -60,6 +61,7 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 	}
 
 	// override to react properly to selection change
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		updateState(selection);
 	}
@@ -79,21 +81,12 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 				break;
 			}
 			Bundle bundle = (Bundle) model;
-//			try {
-			if (bundle.getState() == org.osgi.framework.Bundle.UNINSTALLED/*
-								|| bundle.getRemoteBundle().isSystemBundle()*/
-					|| bundle.findFramework() == null
-					|| ((FrameworkImpl)bundle.findFramework()).systemBundles.contains(new Long(bundle.getID()))
-			) {
+			if (bundle.getState() == org.osgi.framework.Bundle.UNINSTALLED || bundle.findFramework() == null
+					|| ((FrameworkImpl) bundle.findFramework()).isSystemBundle(bundle)) {
 				enabled = false;
 				break;
 			}
-				
-//			} catch (IAgentException e) {
-//				enabled = false;
-//			}
 		}
 		this.setEnabled(enabled);
 	}
-
 }

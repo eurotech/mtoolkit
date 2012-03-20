@@ -4,6 +4,7 @@
    <extension-point id="contentTypeExtensions" name="Content Type Extensions" schema="schema/contentTypeExtensions.exsd"/>
    <extension-point id="osgiDeviceTypes" name="osgiDeviceTypes" schema="schema/osgiDeviceTypes.exsd"/>
    <extension-point id="frameworkProcessorExtensions" name="Extensions for FrameworkProcessor" schema="schema/frameworkProcessorExtensions.exsd"/>
+   <extension-point id="systemBundlesProvider" name="OSGi System Bundles Provider" schema="schema/systemBundlesProvider.exsd"/>
 
    <extension point="org.eclipse.ui.views">
       <category
@@ -113,6 +114,13 @@
             </instanceof>
          </enabledWhen>
       </page>
+   </extension>
+   <extension
+         point="org.tigris.mtoolkit.osgimanagement.systemBundlesProvider">
+      <bundlesListProvider
+            class="org.tigris.mtoolkit.osgimanagement.installation.FrameworkSystemBundlesProvider"
+            id="Framework System Bundles Provider">
+      </bundlesListProvider>
    </extension>
 
 </plugin>

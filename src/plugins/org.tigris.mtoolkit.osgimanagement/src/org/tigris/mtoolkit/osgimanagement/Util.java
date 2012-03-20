@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.osgimanagement;
 
 import java.io.File;
 import java.util.Dictionary;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -114,6 +115,10 @@ public class Util {
 		}
 	}
 
+	public static Set<String> getSystemBundles() {
+		return FrameWorkView.getSystemBundles();
+	}
+
 	/**
 	 * @since 6.0
 	 */
@@ -156,6 +161,6 @@ public class Util {
 	 * @since 6.1
 	 */
 	public static void connectFramework(Framework fw) {
-		FrameworkConnectorFactory.connectFrameWork((FrameworkImpl) fw);
+		FrameworkConnectorFactory.connectFrameWork(fw);
 	}
 }

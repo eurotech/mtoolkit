@@ -38,15 +38,15 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
 	public static final String OVR_ACTIVE_ICON = "ovr_active.gif"; //$NON-NLS-1$
 	public static final String OVR_RESOLVED_ICON = "ovr_resolved.gif"; //$NON-NLS-1$
 	public static final String OVR_SIGNED_ICON = "ovr_signed2.gif"; //$NON-NLS-1$
-	
+
 	// bundle types
 	public static final int BUNDLE_TYPE_FRAGMENT = RemoteBundle.BUNDLE_TYPE_FRAGMENT;
 	public static final int BUNDLE_TYPE_EXTENSION = BUNDLE_TYPE_FRAGMENT + 1;
-	
-	private static final String BUNDLE_ICON_HEADER="Bundle-Icon";
-	
+
+	private static final String BUNDLE_ICON_HEADER = "Bundle-Icon";
+
 	private final RemoteBundle rBundle;
-	
+
 	private long id;
 	private boolean needsUpdate;
 	private int state;
@@ -216,6 +216,14 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
 
 	public int getType() {
 		return type;
+	}
+
+	public boolean isSystemBundle() {
+		FrameworkImpl framework = (FrameworkImpl) findFramework();
+		if (framework == null || !framework.isConnected()) {
+			return false;
+		}
+		return framework.isSystemBundle(this);
 	}
 
 	public void refreshTypeFromRemote() throws IAgentException {

@@ -16,7 +16,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
@@ -27,6 +26,7 @@ public class StartAction extends SelectionProviderAction implements IStateAction
 		super(provider, label);
 	}
 
+	@Override
 	public void run() {
 		ISelection selection = getSelection();
 		Iterator iterator = getStructuredSelection().iterator();
@@ -38,6 +38,7 @@ public class StartAction extends SelectionProviderAction implements IStateAction
 	}
 
 	// override to react properly to selection change
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		updateState(selection);
 	}
@@ -57,16 +58,11 @@ public class StartAction extends SelectionProviderAction implements IStateAction
 				break;
 			}
 			Bundle bundle = (Bundle) model;
-			try {
-				if (bundle.getType() != 0
-								|| (bundle.getState() & (org.osgi.framework.Bundle.ACTIVE
-												| org.osgi.framework.Bundle.STOPPING | org.osgi.framework.Bundle.UNINSTALLED)) != 0
-								|| bundle.getRemoteBundle().isSystemBundle()) {
-					enabled = false;
-					break;
-				}
-			} catch (IAgentException e) {
+			if (bundle.getType() != 0
+					|| (bundle.getState() & (org.osgi.framework.Bundle.ACTIVE | org.osgi.framework.Bundle.STOPPING | org.osgi.framework.Bundle.UNINSTALLED)) != 0
+					|| bundle.isSystemBundle()) {
 				enabled = false;
+				break;
 			}
 		}
 		this.setEnabled(enabled);

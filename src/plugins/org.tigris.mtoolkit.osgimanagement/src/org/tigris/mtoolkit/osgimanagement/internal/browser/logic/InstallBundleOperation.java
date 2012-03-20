@@ -83,7 +83,7 @@ public class InstallBundleOperation {
 					}
 				}
 			}
-			if (rBundle != null && rBundle[0].isSystemBundle()) {
+			if (rBundle != null && framework.isSystemBundle(rBundle[0])) {
 				throw new IllegalArgumentException("Bundle " + symbolicName + " is system");
 			}
 

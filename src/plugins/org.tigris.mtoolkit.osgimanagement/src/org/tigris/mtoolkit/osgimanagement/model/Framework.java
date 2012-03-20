@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -22,83 +23,91 @@ import org.tigris.mtoolkit.iagent.DeviceConnector;
  * @since 5.0
  */
 public abstract class Framework extends Model {
-  public final static int BUNDLES_VIEW = 0;
-  public final static int SERVICES_VIEW = 1;
+	public final static int BUNDLES_VIEW = 0;
+	public final static int SERVICES_VIEW = 1;
 
-  /**
-   * @since 6.0
-   */
-  public boolean autoConnected;
-  protected DeviceConnector connector;
-  protected boolean connectedFlag;
-  protected int viewType;
-  protected List modelProviders = new ArrayList();
-  // framework IP or other ID
-  public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
-  protected final List listeners = new ArrayList();
+	/**
+	 * @since 6.0
+	 */
+	public boolean autoConnected;
+	protected DeviceConnector connector;
+	protected boolean connectedFlag;
+	protected int viewType;
+	protected List modelProviders = new ArrayList();
+	// framework IP or other ID
+	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
+	protected final List listeners = new ArrayList();
 
-  private Dictionary connectorProperties = null;
-  private long timeStamp;
+	private Dictionary connectorProperties = null;
+	private long timeStamp;
 
-  /**
-   * @since 6.0
-   */
-  public Framework(String name, boolean autoConnected) {
-    super(name);
-    this.autoConnected = autoConnected;
-  }
+	/**
+	 * @since 6.0
+	 */
+	public Framework(String name, boolean autoConnected) {
+		super(name);
+		this.autoConnected = autoConnected;
+	}
 
-  public DeviceConnector getConnector() {
-    return connector;
-  }
+	public DeviceConnector getConnector() {
+		return connector;
+	}
 
-  public synchronized Dictionary getConnectorProperties() {
-    if (connector == null) {
-      return null;
-    }
-    if (connectorProperties == null || System.currentTimeMillis() - timeStamp > 30 * 1000) {
-      connectorProperties = connector.getProperties();
-      timeStamp = System.currentTimeMillis();
-    }
-    return connectorProperties;
-  }
+	public synchronized Dictionary getConnectorProperties() {
+		if (connector == null) {
+			return null;
+		}
+		if (connectorProperties == null || System.currentTimeMillis() - timeStamp > 30 * 1000) {
+			connectorProperties = connector.getProperties();
+			timeStamp = System.currentTimeMillis();
+		}
+		return connectorProperties;
+	}
 
-  public boolean isConnected() {
-    return connectedFlag;
-  }
+	public boolean isConnected() {
+		return connectedFlag;
+	}
 
-  /**
-   * @since 6.0
-   */
-  public boolean isAutoConnected() {
-    return autoConnected;
-  }
+	/**
+	 * @since 6.0
+	 */
+	public boolean isAutoConnected() {
+		return autoConnected;
+	}
 
-  public int getViewType() {
-    return viewType;
-  }
+	public int getViewType() {
+		return viewType;
+	}
 
-  /**
-   * Returns map, containing information for certificates which shall be 
-   * used for signing the content, installed to this framework. If no signing
-   * is required, then empty Map is returned.
-   * @return the map with certificate properties
-   */
-  public abstract Map getSigningProperties();
+	/**
+	 * Returns map, containing information for certificates which shall be used
+	 * for signing the content, installed to this framework. If no signing is
+	 * required, then empty Map is returned.
+	 * 
+	 * @return the map with certificate properties
+	 */
+	public abstract Map getSigningProperties();
 
-  public abstract Model createModel(String mimeType, String id, String version);
+	/**
+	 * Returns the symbolic names of the framework system bundles.
+	 * 
+	 * @return the set with the symbolic names
+	 */
+	public abstract Set getSystemBundlesNames();
 
-  public static Object getLockObject(DeviceConnector connector) {
-    return connector.lockObj;
-  }
+	public abstract Model createModel(String mimeType, String id, String version);
 
-  public abstract IMemento getConfig();
+	public static Object getLockObject(DeviceConnector connector) {
+		return connector.lockObj;
+	}
 
-  public void addConnectionListener(FrameworkConnectionListener l) {
-    listeners.add(l);
-  }
+	public abstract IMemento getConfig();
 
-  public void removeConnectionListener(FrameworkConnectionListener l) {
-    listeners.remove(l);
-  }
+	public void addConnectionListener(FrameworkConnectionListener l) {
+		listeners.add(l);
+	}
+
+	public void removeConnectionListener(FrameworkConnectionListener l) {
+		listeners.remove(l);
+	}
 }
