@@ -65,6 +65,7 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 	 * org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse
 	 * .swt.widgets.Composite)
 	 */
+	@Override
 	public Control createContents(Composite parent) {
 		store = FrameworkPlugin.getDefault().getPreferenceStore();
 
@@ -90,6 +91,7 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 		enableActivationPolicyButton = new Button(composite, SWT.CHECK);
 		enableActivationPolicyButton.setText(Messages.use_activation_policy);
 		enableActivationPolicyButton.setSelection(isActivationPolicyEnabled());
+		enableActivationPolicyButton.setToolTipText(Messages.use_activation_policy_tooltip);
 
 		enableBundleCategoriesButton = new Button(composite, SWT.CHECK);
 		enableBundleCategoriesButton.setText(Messages.show_bundle_categories);
@@ -98,6 +100,7 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 		showSkippedSystemBundlesButton = new Button(composite, SWT.CHECK);
 		showSkippedSystemBundlesButton.setText(Messages.show_skipped_system_bundles);
 		showSkippedSystemBundlesButton.setSelection(isShowSkippedSystemBundles());
+		showSkippedSystemBundlesButton.setToolTipText(Messages.show_skipped_system_bundles_tooltip);
 
 		autoUpdateBundlesOnInstallButton = new Button(composite, SWT.CHECK);
 		autoUpdateBundlesOnInstallButton.setText(Messages.auto_update_bundles_on_install);
@@ -112,6 +115,7 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 	 * 
 	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 		super.performDefaults();
 		enableAutoConnectButton.setSelection(AUTO_CONNECT_DEFAULT);
@@ -128,6 +132,7 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 	 * 
 	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		boolean showBundleCategories = isBundlesCategoriesShown();
 		store.setValue(MEMENTO_AUTOCONNECT, enableAutoConnectButton.getSelection());

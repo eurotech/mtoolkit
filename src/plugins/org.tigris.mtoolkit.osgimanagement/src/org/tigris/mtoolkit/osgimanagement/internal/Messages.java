@@ -182,6 +182,10 @@ public final class Messages extends NLS {
 
 	public static String operation_failed;
 
+	public static String use_activation_policy_tooltip;
+
+	public static String show_skipped_system_bundles_tooltip;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
 	}
