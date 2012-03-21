@@ -216,6 +216,7 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 				continue;
 			status &= page.getPage().isValid();
 		}
+    setValid(status);
 		return status;
 	}
 
