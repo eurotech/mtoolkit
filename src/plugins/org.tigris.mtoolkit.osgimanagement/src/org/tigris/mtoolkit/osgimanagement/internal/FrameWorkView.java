@@ -1087,9 +1087,6 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 						return;
 					} // else restore original state, too much work otherwise
 				}
-				// in the default case restore the tree state
-				// collapse the tree, because the refresh is much faster
-				tree.collapseAll();
 				if (!refreshed)
 					tree.refresh();
 				tree.setExpandedElements(savedExpansionState);
@@ -1098,7 +1095,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 			} finally {
 				// TODO: Change this to not set the selection on elements which
 				// are out of the filter
-				tree.setSelection(selection, true);
+			    tree.setSelection(selection);
 				tree.getTree().setRedraw(true);
 				ignoreSelectionEvents = false;
 			}
@@ -1113,8 +1110,9 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 		}
 
 		public void selectionChanged(SelectionChangedEvent event) {
-			if (ignoreSelectionEvents)
+			if (ignoreSelectionEvents){
 				return;
+			}
 			selection = event.getSelection();
 		}
 	}
