@@ -59,7 +59,7 @@ public class StartAction extends SelectionProviderAction implements IStateAction
 			}
 			Bundle bundle = (Bundle) model;
 			if (bundle.getType() != 0
-					|| (bundle.getState() & (org.osgi.framework.Bundle.ACTIVE | org.osgi.framework.Bundle.STOPPING | org.osgi.framework.Bundle.UNINSTALLED)) != 0
+					|| (bundle.getState() & (/*org.osgi.framework.Bundle.ACTIVE |*/ org.osgi.framework.Bundle.STOPPING | org.osgi.framework.Bundle.UNINSTALLED)) != 0
 					|| bundle.isSystemBundle()) {
 				enabled = false;
 				break;
