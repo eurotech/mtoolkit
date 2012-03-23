@@ -65,7 +65,7 @@ public class ResourcePropertyTester extends PropertyTester {
         continue;
       }
       if (provider.isCapable(resource)) {
-        installationItem = ((InstallationItemProvider) provider).getInstallationItem(resource);
+        installationItem = provider.getInstallationItem(resource);
         if (installationItem != null) {
           return true;
         }
