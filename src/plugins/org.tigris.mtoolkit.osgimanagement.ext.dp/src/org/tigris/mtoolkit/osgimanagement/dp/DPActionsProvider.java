@@ -41,114 +41,114 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public class DPActionsProvider implements ContentTypeActionsProvider {
 
-	public static final String DP_GROUP_IMAGE_PATH = "dp_group.gif";
-	private static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif";
-	private static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif";
-	private static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif";
-	private static final String DP_ICON_PATH = "dpackage.gif";
-	private static final String DP_PACKAGE_PATH = "dp_package.gif";
-	
-	private InstallDPAction installDPAction;
-	private UninstallDPAction uninstallDPAction;
-	private DPPropertiesAction dpPropertiesAction;
+  public static final String DP_GROUP_IMAGE_PATH = "dp_group.gif";
+  private static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif";
+  private static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif";
+  private static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif";
+  private static final String DP_ICON_PATH = "dpackage.gif";
+  private static final String DP_PACKAGE_PATH = "dp_package.gif";
 
-	private TreeViewer tree;
-	private ToolbarIMenuCreator dpTB;
-	private Hashtable commonActions;
+  private InstallDPAction installDPAction;
+  private UninstallDPAction uninstallDPAction;
+  private DPPropertiesAction dpPropertiesAction;
 
-	public void init(TreeViewer tree) {
-		this.tree = tree;
-		installDPAction = new InstallDPAction(tree, "Install Deployment Package...");
-		installDPAction.setImageDescriptor(ImageHolder.getImageDescriptor(INSTALL_DP_IMAGE_PATH));
-		uninstallDPAction = new UninstallDPAction(tree, "Uninstall Deployment Package");
-		uninstallDPAction.setImageDescriptor(ImageHolder.getImageDescriptor(UNINSTALL_DP_IMAGE_PATH));
-		dpPropertiesAction = new DPPropertiesAction(tree, "Properties");
-		dpPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(DP_PROPERTIES_IMAGE_PATH));
-		commonActions = new Hashtable();
-		commonActions.put(PROPERTIES_ACTION, dpPropertiesAction);
-	}
+  private TreeViewer tree;
+  private ToolbarIMenuCreator dpTB;
+  private Hashtable commonActions;
 
-	public Map getCommonActions() {
-		return commonActions;
-	}
+  public void init(TreeViewer tree) {
+    this.tree = tree;
+    installDPAction = new InstallDPAction(tree, "Install Deployment Package...");
+    installDPAction.setImageDescriptor(ImageHolder.getImageDescriptor(INSTALL_DP_IMAGE_PATH));
+    uninstallDPAction = new UninstallDPAction(tree, "Uninstall Deployment Package");
+    uninstallDPAction.setImageDescriptor(ImageHolder.getImageDescriptor(UNINSTALL_DP_IMAGE_PATH));
+    dpPropertiesAction = new DPPropertiesAction(tree, "Properties");
+    dpPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(DP_PROPERTIES_IMAGE_PATH));
+    commonActions = new Hashtable();
+    commonActions.put(PROPERTIES_ACTION, dpPropertiesAction);
+  }
 
-	public void fillToolBar(ToolBarManager tbm) {
-		Action[] actions = new Action[] { installDPAction, uninstallDPAction, dpPropertiesAction};
-		dpTB = new ToolbarIMenuCreator(actions, tree);
-		dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
-		dpTB.setToolTipText("Various deployment package actions");
-		tbm.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, dpTB);
-	}
+  public Map getCommonActions() {
+    return commonActions;
+  }
 
-	public void menuAboutToShow(StructuredSelection selection, IMenuManager manager) {
-		boolean homogen = true;
-		if (selection.size() > 0) {
-			Model element = (Model) selection.getFirstElement();
-			Class clazz = element.getClass();
+  public void fillToolBar(ToolBarManager tbm) {
+    Action[] actions = new Action[] { installDPAction, uninstallDPAction, dpPropertiesAction};
+    dpTB = new ToolbarIMenuCreator(actions, tree);
+    dpTB.setImageDescriptor(ImageHolder.getImageDescriptor(DP_GROUP_IMAGE_PATH));
+    dpTB.setToolTipText("Various deployment package actions");
+    tbm.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, dpTB);
+  }
 
-			Iterator iterator = selection.iterator();
-			while (iterator.hasNext()) {
-				Object sel = iterator.next();
-				if (!clazz.equals(sel.getClass())) {
-					homogen = false;
-					break;
-				}
-			}
+  public void menuAboutToShow(StructuredSelection selection, IMenuManager manager) {
+    boolean homogen = true;
+    if (selection.size() > 0) {
+      Model element = (Model) selection.getFirstElement();
+      Class clazz = element.getClass();
 
-			if (homogen) {
-				if (element instanceof DeploymentPackage) {
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, installDPAction);
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, uninstallDPAction);
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, dpPropertiesAction);
-				} else if (element instanceof SimpleNode && "Deployment Packages".equals(element.getName()) ||
-								element instanceof Framework) {
-					manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
-				}
-			}
-		}
-		
-	}
+      Iterator iterator = selection.iterator();
+      while (iterator.hasNext()) {
+        Object sel = iterator.next();
+        if (!clazz.equals(sel.getClass())) {
+          homogen = false;
+          break;
+        }
+      }
 
-	public Image getImage(Model node) {
-		if (node instanceof DeploymentPackage) {
-			Image icon = getDPIcon((DeploymentPackage) node);
-			return (icon != null) ? icon : ImageHolder.getImage(DP_ICON_PATH);
-		} else if (node instanceof SimpleNode && 
-						"Deployment Packages".equals(node.getName())) {
-			return ImageHolder.getImage(DP_PACKAGE_PATH);
-		}
-		return null;
-	}
+      if (homogen) {
+        if (element instanceof DeploymentPackage) {
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, installDPAction);
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, uninstallDPAction);
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, dpPropertiesAction);
+        } else if (element instanceof SimpleNode && "Deployment Packages".equals(element.getName()) ||
+            element instanceof Framework) {
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
+        }
+      }
+    }
 
-	public void updateEnabledState(final DeviceConnector connector) {
-	    Job job = new Job("Update state") {
-            protected IStatus run(IProgressMonitor monitor) {
-                final boolean isSupported = DPModelProvider.isDpSupported(connector);
-                Display display = PlatformUI.getWorkbench().getDisplay();
-                if (!display.isDisposed()) {
-                	display.asyncExec(new Runnable() {
-	                    public void run() {
-	                        dpTB.setEnabled(isSupported);
-	                    }
-	                });
-                }
-                return Status.OK_STATUS;
+  }
+
+  public Image getImage(Model node) {
+    if (node instanceof DeploymentPackage) {
+      Image icon = getDPIcon((DeploymentPackage) node);
+      return (icon != null) ? icon : ImageHolder.getImage(DP_ICON_PATH);
+    } else if (node instanceof SimpleNode &&
+        "Deployment Packages".equals(node.getName())) {
+      return ImageHolder.getImage(DP_PACKAGE_PATH);
+    }
+    return null;
+  }
+
+  public void updateEnabledState(final DeviceConnector connector) {
+    Job job = new Job("Update state") {
+      protected IStatus run(IProgressMonitor monitor) {
+        final boolean isSupported = DPModelProvider.isDpSupported(connector);
+        Display display = PlatformUI.getWorkbench().getDisplay();
+        if (!display.isDisposed()) {
+          display.asyncExec(new Runnable() {
+            public void run() {
+              dpTB.setEnabled(isSupported);
             }
-        };
-        job.schedule();
-	}
+          });
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    job.schedule();
+  }
 
-	private Image getDPIcon(DeploymentPackage dp) {
-		Image icon = dp.getIcon();
-		if (icon != null) {
-			return icon;
-		}
-		String name = null;
-		Framework fw = (Framework) dp.findFramework();
-		if (fw != null) {
-			name = fw.getName();
-		}
-		IconFetcher.getInstance(name).enqueue(dp);
-		return null;
-	}
+  private Image getDPIcon(DeploymentPackage dp) {
+    Image icon = dp.getIcon();
+    if (icon != null) {
+      return icon;
+    }
+    String name = null;
+    Framework fw = dp.findFramework();
+    if (fw != null) {
+      name = fw.getName();
+    }
+    IconFetcher.getInstance(name).enqueue(dp);
+    return null;
+  }
 }
