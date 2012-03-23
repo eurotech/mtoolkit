@@ -49,22 +49,20 @@ public abstract class AbstractInstallationItemProcessor implements InstallationI
   }
 
   protected IStatus fireInstallEvent(boolean before) {
-    EventListener[] listeners = null;
+    EventListener[] listeners;
     synchronized (listenersList) {
       listeners = new EventListener[listenersList.size()];
       listenersList.toArray(listeners);
     }
-    if (listeners != null) {
-      for (int i = 0; i < listeners.length; i++) {
-        IStatus status = null;
-        if (before) {
-          status = ((InstallListener) listeners[i]).beforeInstall();
-        } else {
-          status = ((InstallListener) listeners[i]).afterInstall();
-        }
-        if (status != null && status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
-          return status;
-        }
+    for (int i = 0; i < listeners.length; i++) {
+      IStatus status = null;
+      if (before) {
+        status = ((InstallListener) listeners[i]).beforeInstall();
+      } else {
+        status = ((InstallListener) listeners[i]).afterInstall();
+      }
+      if (status != null && (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR))) {
+        return status;
       }
     }
     return Status.OK_STATUS;
