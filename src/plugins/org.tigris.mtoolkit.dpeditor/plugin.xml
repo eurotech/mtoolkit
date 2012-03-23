@@ -55,13 +55,17 @@
         <selection class="org.eclipse.core.resources.IResource"/>
      </wizard>
    </extension>
-  <extension point="org.tigris.mtoolkit.common.preferencesPages">
-     <page class="org.tigris.mtoolkit.dpeditor.preferences.DPEditorPreferencesPage"
+  
+   <extension 
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"
+			class="org.tigris.mtoolkit.dpeditor.preferences.DPEditorPreferencesPage"
            id="org.tigris.mtoolkit.dpeditor.preferences.DPEditorPreferencesPage"
-           index="10"
            name="%DPPreferencesPage.name">
      </page>
-  </extension> 
+   </extension>
+  
    <extension 
        point = "org.eclipse.ui.popupMenus">
        <objectContribution 

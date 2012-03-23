@@ -150,6 +150,9 @@ public class CommonPreferencePage extends PreferencePage implements IWorkbenchPr
 
 			// sort them
 			Collections.sort(preferencePages);
+			if (preferencePages.isEmpty()) {
+			  noDefaultAndApplyButton();
+			}
 		}
 	}
 
