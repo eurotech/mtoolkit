@@ -20,13 +20,15 @@
       </view>
    </extension>
 
-  <extension point="org.tigris.mtoolkit.common.preferencesPages">
-     <page class="org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage"
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"
+			class="org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage"
            id="org.tigris.mtoolkit.osgimanagement.preferences.FrameworkPreferencesPage"
-           index="20"
            name="%FrameworkPreferencesPage.name">
      </page>
-  </extension> 
+   </extension>
 
 
    <extension
