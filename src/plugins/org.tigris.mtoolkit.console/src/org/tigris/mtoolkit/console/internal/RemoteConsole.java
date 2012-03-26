@@ -43,6 +43,7 @@ import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.VMManager;
 
+@SuppressWarnings("deprecation")
 public final class RemoteConsole extends IOConsole implements IConsole {
 
 	private final Date timestamp;
@@ -200,6 +201,7 @@ public final class RemoteConsole extends IOConsole implements IConsole {
 	public IOConsoleOutputStream getStream(String streamIdentifier) {
 		return output;
 	}
+
 
 	public void addLink(IConsoleHyperlink link, int offset, int length) {
 	}

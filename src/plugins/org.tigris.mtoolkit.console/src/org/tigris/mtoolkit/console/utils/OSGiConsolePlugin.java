@@ -48,12 +48,14 @@ public class OSGiConsolePlugin extends AbstractUIPlugin {
 		return instance;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		instance = null;
 	}
 
 	// Initialize perspectives
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
@@ -86,7 +88,8 @@ public class OSGiConsolePlugin extends AbstractUIPlugin {
 	public static void warning(String message, Throwable t) {
 		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
 	}
-	
+
+	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 	}
@@ -94,7 +97,7 @@ public class OSGiConsolePlugin extends AbstractUIPlugin {
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
 	}
-	
+
 	public static InputStream getIAgentBundleAsStream() {
 		Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
 		Bundle selectedIAgent = null;
@@ -102,6 +105,7 @@ public class OSGiConsolePlugin extends AbstractUIPlugin {
 		for (int i = 0; i < bundles.length; i++) {
 			Bundle bundle = bundles[i];
 			if (IAGENT_RPC_ID.equals(bundle.getSymbolicName())) {
+				@SuppressWarnings("cast")
 				String version = (String) bundle.getHeaders("").get(Constants.BUNDLE_VERSION);
 				if (version == null) {
 					if (selectedVersion == null) {
