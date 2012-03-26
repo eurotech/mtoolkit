@@ -48,6 +48,7 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 	 * 
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		if (!isChecked())
 			return;
@@ -85,7 +86,7 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 		else
 			return new StructuredSelection();
 	}
-	
+
 	private void setViewType(final FrameworkImpl fw, int newViewType) {
 		if (fw.getViewType() == newViewType)
 			return;
@@ -96,8 +97,8 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 		} catch (Throwable t) {
 			FrameworkPlugin.error("Exception while switching framework view type", t);
 		}
-		
-		
+
+
 	}
 
 	public void updateState(IStructuredSelection selection) {
@@ -109,7 +110,7 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 
 		Set frameworks = new HashSet();
 		for (Iterator it = selection.iterator(); it.hasNext();) {
-			Object next = (Object) it.next();
+			Object next = it.next();
 			if (next instanceof Model) {
 				FrameworkImpl fw = (FrameworkImpl) ((Model) next).findFramework();
 				if (fw != null && fw.isConnected())
@@ -121,7 +122,7 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 			setChecked(false);
 			return;
 		}
-		
+
 		Iterator it = frameworks.iterator();
 		FrameworkImpl fw = (FrameworkImpl) it.next();
 		boolean checked = fw.getViewType() == viewType;
