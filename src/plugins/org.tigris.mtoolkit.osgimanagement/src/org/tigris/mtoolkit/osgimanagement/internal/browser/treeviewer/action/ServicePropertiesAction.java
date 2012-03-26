@@ -42,26 +42,29 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
 	 * 
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
+	@Override
 	public void run() {
 		Display display = Display.getCurrent();
 		RemoteService service = null;
 		ObjectClass object = (ObjectClass) getStructuredSelection().getFirstElement();
 		service = object.getService();
-		String tableHeader = null;
-		try {
-			tableHeader = "Service " + service.getServiceId();
-		} catch (IAgentException e1) {
-		}		
 		if (service != null) {
-			PropertiesDialog dialog = new PropertiesDialog(display.getActiveShell(), Messages.service_properties_title, tableHeader) {
+			String tableHeader = null;
+			try {
+				tableHeader = "Service " + service.getServiceId();
+			} catch (IAgentException e1) {
+			}
+			PropertiesDialog dialog = new PropertiesDialog(display.getActiveShell(), Messages.service_properties_title,
+					tableHeader) {
+				@Override
 				protected void attachHelp(Composite container) {
 					PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_SERVICE);
 				}
-				
+
 			};
 			try {
 				dialog.create();
-				PropertiesPage mainControl = (PropertiesPage) dialog.getMainControl();
+				PropertiesPage mainControl = dialog.getMainControl();
 				mainControl.setData(service.getProperties());
 			} catch (IAgentException e) {
 				BrowserErrorHandler.processError(e, true);
@@ -69,6 +72,7 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
 			}
 			dialog.open();
 		}
+
 	}
 
 	/*
@@ -78,6 +82,7 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
 	 * org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse
 	 * .jface.viewers.IStructuredSelection)
 	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		updateState(selection);
 	}
