@@ -56,12 +56,14 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		return instance;
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		FrameworkConnectorFactory.deinit();
 		instance = null;
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		FrameworkConnectorFactory.init();
@@ -97,6 +99,7 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
 	}
 
+	@Override
 	protected void initializeImageRegistry(ImageRegistry reg) {
 		super.initializeImageRegistry(reg);
 	}
@@ -152,13 +155,13 @@ public class FrameworkPlugin extends AbstractUIPlugin {
 		for (int i = 0; i < bundles.length; i++) {
 			Bundle bundle = bundles[i];
 			if (IAGENT_RPC_ID.equals(bundle.getSymbolicName())) {
+				@SuppressWarnings("cast")
 				String version = (String) bundle.getHeaders("").get(Constants.BUNDLE_VERSION);
 				if (version == null) {
 					if (selectedVersion == null) {
 						// if the iagent don't have a version
 						// use the bundle with highest ID
 						selectedIAgent = bundle;
-						selectedVersion = version;
 					}
 				} else {
 					if (selectedVersion == null || version.compareTo(selectedVersion) >= 0) {
