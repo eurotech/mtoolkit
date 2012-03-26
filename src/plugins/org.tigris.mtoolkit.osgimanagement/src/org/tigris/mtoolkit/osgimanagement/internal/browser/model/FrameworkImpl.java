@@ -507,7 +507,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 		FrameworkImpl fw = (FrameworkImpl) bundle.findFramework();
 		bundleHash.remove(new Long(id));
 		frameworkSystemBundles.remove(new Long(id));
-		if (bundle != null) {
 			if (FrameworkPreferencesPage.isBundlesCategoriesShown()) {
 				Category category = (Category) bundle.getParent();
 				category.removeElement(bundle);
@@ -518,7 +517,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 			} else {
 				fw.getBundlesNode().removeElement(bundle);
 			}
-		}
 		removeBundleInServicesView(id);
 	}
 
