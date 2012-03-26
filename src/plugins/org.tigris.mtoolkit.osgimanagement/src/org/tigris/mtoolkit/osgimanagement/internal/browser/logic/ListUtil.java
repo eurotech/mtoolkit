@@ -27,6 +27,8 @@ public class ListUtil {
 	}
 
 	public static class BundleSorter extends NameSorter {
+		@Override
+		@SuppressWarnings("cast")
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			int result = 0;
 			Object name1 = getName(e1);
