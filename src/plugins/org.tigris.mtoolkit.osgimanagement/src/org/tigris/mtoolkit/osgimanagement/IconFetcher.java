@@ -74,11 +74,13 @@ public class IconFetcher {
 			super("Icon Fetcher - " + (name != null ? name : "default"));
 		}
 
-		public void start() {
+		@Override
+		public synchronized void start() {
 			isRunning = true;
 			super.start();
 		}
 
+		@Override
 		public void run() {
 			try {
 				while (isRunning) {
