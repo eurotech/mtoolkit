@@ -149,6 +149,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
   }
 
+
   /*
    * (non-Javadoc)
    * 
@@ -462,8 +463,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     }
   }
 
-  private static void startBundle(RemoteBundle installedItem, IProgressMonitor monitor) throws Exception {
-    final RemoteBundle remoteBundle = (RemoteBundle) installedItem;
+  private static void startBundle(final RemoteBundle remoteBundle, final IProgressMonitor monitor) throws Exception {
     if (remoteBundle.getType() == RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
       // Fragment bundles cannot be started
       return;
