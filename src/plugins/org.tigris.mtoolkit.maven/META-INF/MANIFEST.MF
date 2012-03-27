@@ -5,16 +5,18 @@ Bundle-SymbolicName: org.tigris.mtoolkit.maven;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.prosyst.tools.maven.internal.MavenCorePlugin
 Bundle-Vendor: Tigris.org
-Require-Bundle: org.eclipse.ui;bundle-version="3.5.0",
- org.eclipse.core.runtime;bundle-version="3.5.0",
- org.tigris.mtoolkit.common;bundle-version="6.0.0",
- org.eclipse.core.resources;bundle-version="3.5.0"
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.tigris.mtoolkit.common,
+ org.eclipse.core.resources,
+ org.eclipse.m2e.maven.runtime,
+ org.eclipse.m2e.core
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.maven.model,
- org.apache.maven.project,
- org.maven.ide.eclipse,
- org.maven.ide.eclipse.embedder,
- org.maven.ide.eclipse.project
+Import-Package: org.eclipse.debug.core,
+ org.eclipse.debug.core.model,
+ org.eclipse.m2e.core,
+ org.eclipse.m2e.core.embedder,
+ org.eclipse.m2e.core.project
 Export-Package: com.prosyst.tools.maven;version="1.0.0",
  org.tigris.mtoolkit.maven.launching;version="1.0.0"
