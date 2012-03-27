@@ -74,11 +74,6 @@
 	<target name="fetchm2eclipse" unless="m2eclipse.available">
 		<property file="${builder}/build.properties"/>
 		<delete dir="${extDirectory}/m2eclipse"/>
-		<echo message="======================"/>
-		<echo message="file:/${extDirectory}/m2eclipse"/>
-		<echo message="${m2eclipse.repo}"/>
-		<echo message="${eclipse.repo}"/>
-		<echo message="======================"/>
 		<p2.mirror destination="file:/${extDirectory}/m2eclipse">
 			<source>
 				<repository location="${m2eclipse.repo}"/>
