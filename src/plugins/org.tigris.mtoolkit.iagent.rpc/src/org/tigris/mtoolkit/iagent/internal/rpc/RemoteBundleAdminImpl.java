@@ -10,29 +10,19 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.zip.DeflaterOutputStream;
 
@@ -54,23 +44,17 @@ import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
-import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
-public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements Remote, RemoteBundleAdmin,
+public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements RemoteBundleAdmin,
 		SynchronousBundleListener {
 
 	public static final String SYNCH_BUNDLE_EVENTS = "synch_bundle_event";
 	public static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
 	public static final String EVENT_TYPE_KEY = "type";
 	public static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
-
-	private static final String PROP_SYSTEM_BUNDLES_LIST = "iagent.system.bundles.list";
-	private static final String PROP_SYSTEM_BUNDLES = "iagent.system.bundles";
-	private static final String SYSTEM_BUNDLES_FILE_NAME = "system_bundles.txt";
-	private static final String SYSTEM_BUNDLES_RESOURCE_NAME = "/" + SYSTEM_BUNDLES_FILE_NAME;
 
 	private ServiceTracker packageAdminTrack;
 	private ServiceTracker startLevelTrack;
@@ -620,96 +604,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 		String[] agentData = new String[] { Long.toString(agentBundle.getBundleId()), agentVersion };
 		return agentData;
 
-	}
-
-	public String[] getSystemBundlesNames() {
-		Set symbolicNames = getSystemSymbolicNames();
-		List systemBundlesNames = new ArrayList(symbolicNames.size());
-		Bundle[] allBundles = bc.getBundles();
-		for (int i = 0; i < allBundles.length; i++) {
-			for (Iterator iter = symbolicNames.iterator(); iter.hasNext();) {
-				String symbolicName = (String) iter.next();
-				if (symbolicName.equals(allBundles[i].getSymbolicName())) {
-					systemBundlesNames.add(symbolicName);
-				}
-			}
-		}
-		return (String[]) systemBundlesNames.toArray(new String[systemBundlesNames.size()]);
-	}
-
-	public long[] getSystemBundlesIDs() {
-		Set symbolicNames = getSystemSymbolicNames();
-		List systemBundles = new LinkedList();
-		Bundle[] allBundles = bc.getBundles();
-		for (int i = 0; i < allBundles.length; i++) {
-			for (Iterator iter = symbolicNames.iterator(); iter.hasNext();) {
-				String symbolicName = (String) iter.next();
-				if (symbolicName.equals(allBundles[i].getSymbolicName())) {
-					systemBundles.add(allBundles[i]);
-				}
-			}
-		}
-		return convertBundlesToIds((Bundle[]) systemBundles.toArray(new Bundle[systemBundles.size()]));
-	}
-
-	private Set getSystemSymbolicNames() {
-		if (loadedSymbolicNames == null) {
-			BufferedReader reader = null;
-			try {
-				String systemBundlesName = System.getProperty(PROP_SYSTEM_BUNDLES_LIST, SYSTEM_BUNDLES_FILE_NAME);
-				File systemBundlesFile = new File(systemBundlesName);
-				if (!systemBundlesFile.exists()) {
-					File cwd = new File("").getAbsoluteFile();
-					systemBundlesFile = new File(cwd.getParentFile(), systemBundlesName);
-				}
-				if (systemBundlesFile.exists()) {
-					try {
-						reader = new BufferedReader(new FileReader(systemBundlesFile));
-					} catch (FileNotFoundException e) {
-						// ignore and fall down
-					}
-				}
-				if (reader == null) { // file not found, load default
-					URL systemBundleURL = bc.getBundle().getResource(SYSTEM_BUNDLES_RESOURCE_NAME);
-					if (systemBundleURL != null) {
-						reader = new BufferedReader(new InputStreamReader(systemBundleURL.openStream()));
-					}
-				}
-				if (reader == null) {
-					if (System.getProperty(PROP_SYSTEM_BUNDLES) != null) {
-						String sysBundles = System.getProperty(PROP_SYSTEM_BUNDLES);
-						StringTokenizer token = new StringTokenizer(sysBundles, ",");
-						Set bundleNames = new HashSet();
-						while (token.hasMoreElements()) {
-							String sysBundle = (String) token.nextElement();
-							bundleNames.add(sysBundle);
-						}
-						this.loadedSymbolicNames = bundleNames;
-						return loadedSymbolicNames;
-					}
-					this.loadedSymbolicNames = Collections.EMPTY_SET;
-					return loadedSymbolicNames;
-				}
-				Set symbolicNames = new HashSet();
-				String line;
-				while ((line = reader.readLine()) != null) {
-					symbolicNames.add(line);
-				}
-				this.loadedSymbolicNames = symbolicNames;
-			} catch (IOException e) {
-				DebugUtils.error(this, "Failed to load system buindles list from the bundle resources", e);
-				loadedSymbolicNames = Collections.EMPTY_SET;
-			} finally {
-				if (reader != null) {
-					try {
-						reader.close();
-					} catch (IOException e) {
-						// ignore
-					}
-				}
-			}
-		}
-		return loadedSymbolicNames;
 	}
 
 	public int getBundleStartLevel(long id) {

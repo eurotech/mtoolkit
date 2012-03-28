@@ -15,26 +15,25 @@ import junit.framework.TestSuite;
 
 public class AllTests {
 
-	public static Test suite() {
-		TestSuite suite = new TestSuite("Tests for IAgent API");
-		// $JUnit-BEGIN$
-		suite.addTestSuite(ApplicationManagerTest.class);
-		suite.addTestSuite(RemoteApplicationTest.class);
-		suite.addTestSuite(DeploymentManagerTest.class);
-		suite.addTestSuite(RemoteBundleTest.class);
-		suite.addTestSuite(RemoteBundleIsSystemTest.class);
-		suite.addTestSuite(RemoteBundleListenerTest.class);
-		suite.addTestSuite(RemoteCapabilitiesTest.class);
-		suite.addTestSuite(RemoteDPTest.class);
-		suite.addTestSuite(RemoteDPListenerTest.class);
-		suite.addTestSuite(ServiceManagerTest.class);
-		suite.addTestSuite(RemoteServiceTest.class);
-		suite.addTestSuite(RemoteServiceListenerTest.class);
-		suite.addTestSuite(MBSASessionTest.class);
-		suite.addTestSuite(ThreadPoolTest.class);
-		suite.addTestSuite(VMManagerTest.class);
-		// $JUnit-END$
-		return suite;
-	}
+  public static Test suite() {
+    TestSuite suite = new TestSuite("Tests for IAgent API");
+    // $JUnit-BEGIN$
+    suite.addTestSuite(ApplicationManagerTest.class);
+    suite.addTestSuite(RemoteApplicationTest.class);
+    suite.addTestSuite(DeploymentManagerTest.class);
+    suite.addTestSuite(RemoteBundleTest.class);
+    suite.addTestSuite(RemoteBundleListenerTest.class);
+    suite.addTestSuite(RemoteCapabilitiesTest.class);
+    suite.addTestSuite(RemoteDPTest.class);
+    suite.addTestSuite(RemoteDPListenerTest.class);
+    suite.addTestSuite(ServiceManagerTest.class);
+    suite.addTestSuite(RemoteServiceTest.class);
+    suite.addTestSuite(RemoteServiceListenerTest.class);
+    suite.addTestSuite(MBSASessionTest.class);
+    suite.addTestSuite(ThreadPoolTest.class);
+    suite.addTestSuite(VMManagerTest.class);
+    // $JUnit-END$
+    return suite;
+  }
 
 }

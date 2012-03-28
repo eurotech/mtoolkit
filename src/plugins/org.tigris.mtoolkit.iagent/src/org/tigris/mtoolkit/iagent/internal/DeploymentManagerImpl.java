@@ -13,7 +13,6 @@ package org.tigris.mtoolkit.iagent.internal;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -52,20 +51,15 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 	private static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
 
 	private static MethodSignature INSTALL_BUNDLE_METHOD = new MethodSignature("installBundle", new String[] { MethodSignature.STRING_TYPE, MethodSignature.INPUT_STREAM_TYPE }, true);
-	private static MethodSignature GET_SYSTEM_BUNDLES_NAMES = new MethodSignature("getSystemBundlesNames");
 	private static MethodSignature LIST_BUNDLES_METHOD = new MethodSignature("listBundles", MethodSignature.NO_ARGS, true);
 	private static MethodSignature GET_BUNDLES_METHOD = new MethodSignature("getBundles", new String[] { MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE }, true);
 	private static MethodSignature LIST_DPS_METHOD = new MethodSignature("listDeploymentPackages", MethodSignature.NO_ARGS, true);
 	private static MethodSignature GET_DP_VERSION_METHOD = new MethodSignature("getDeploymentPackageVersion", new String[] { MethodSignature.STRING_TYPE }, true);
 	private static MethodSignature INSTALL_DP_METHOD = new MethodSignature("installDeploymentPackage", new String[] { MethodSignature.INPUT_STREAM_TYPE }, true);
 	private static MethodSignature GET_BUNDLE_BY_LOCATION_METHOD = new MethodSignature("getBundleByLocation", new String[] { MethodSignature.STRING_TYPE }, true);
-	private static MethodSignature GET_SYSTEM_BUNDLES_IDS_METHOD = new MethodSignature("getSystemBundlesIDs", MethodSignature.NO_ARGS, true);
 	private static MethodSignature GET_BUNDLES_SNAPSHOT_METHOD = new MethodSignature("getBundlesSnapshot", new String[] { "int", Dictionary.class.getName() }, true);
 
 	private DeviceConnectorImpl connector;
-
-	private long[] systemBundlesIDs = null;
-	private String[] systemBundlesNames = null;
 
 	private List bundleListeners = new LinkedList();
 	private List dpListeners = new LinkedList();
@@ -319,7 +313,7 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		synchronized (bundleListeners) {
 			if (bundleListeners.size() != 0) {
 				listeners = (RemoteBundleListener[]) bundleListeners.toArray(new RemoteBundleListener[bundleListeners
-						.size()]);
+				                                                                                      .size()]);
 			} else {
 				return;
 			}
@@ -376,8 +370,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 				int type = ((Integer) eventProps.get(EVENT_TYPE_KEY)).intValue();
 				Long bid = (Long) eventProps.get(EVENT_BUNDLE_ID_KEY);
 				fireBundleEvent(bid.longValue(), type);
-			} else if (SYSTEM_BUNDLE_EVENT.equals(eventType)) {
-				clearSystemBundlesList();
 			}
 		} catch (Throwable e) {
 			error("[event] Failed to process PMP event: " + event + "; type: " + eventType, e);
@@ -393,51 +385,28 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		if (event.getType() == ConnectionEvent.CONNECTED
 				&& event.getConnection().getType() == ConnectionManager.PMP_CONNECTION) {
 			debug("[connectionChanged] New PMP connection created, restore event listeners");
-			systemBundlesIDs = null; // reset system bundle ids - we don't know
-			// whether it was VM restart or PMP connection closed
-			systemBundlesNames = null;
 			synchronized (dpListeners) {
 				synchronized (bundleListeners) {
-						PMPConnection connection = (PMPConnection) event.getConnection();
-						if (dpListeners.size() > 0) {
-							debug("[connectionChanged] Restoring deployment package listeners...");
-							try {
-								connection.addEventListener(this, new String[] { DEPLOYMENT_EVENT });
-							} catch (IAgentException e) {
-								error("[connectionChanged] Failed to add event listener to PMP connection", e);
-							}
+					PMPConnection connection = (PMPConnection) event.getConnection();
+					if (dpListeners.size() > 0) {
+						debug("[connectionChanged] Restoring deployment package listeners...");
+						try {
+							connection.addEventListener(this, new String[] { DEPLOYMENT_EVENT });
+						} catch (IAgentException e) {
+							error("[connectionChanged] Failed to add event listener to PMP connection", e);
 						}
-						if (bundleListeners.size() > 0) {
-							debug("[connectionChanged] Restoring bundle listeners...");
-							try {
-								connection.addEventListener(this, new String[] { SYNCH_BUNDLE_EVENT });
-							} catch (IAgentException e) {
-								error("[connectionChanged] Failed to add event listener to PMP connection", e);
-							}
+					}
+					if (bundleListeners.size() > 0) {
+						debug("[connectionChanged] Restoring bundle listeners...");
+						try {
+							connection.addEventListener(this, new String[] { SYNCH_BUNDLE_EVENT });
+						} catch (IAgentException e) {
+							error("[connectionChanged] Failed to add event listener to PMP connection", e);
 						}
+					}
 				}
 			}
 		}
-	}
-
-	private long[] getSystemBundlesIDs() throws IAgentException {
-		if (systemBundlesIDs != null) {
-			return systemBundlesIDs;
-		}
-		long[] result = (long[]) GET_SYSTEM_BUNDLES_IDS_METHOD.call(getBundleAdmin());
-		if (result == null) {
-			info("[getSystemBundlesIDs] getSystemBundlesIDs() must not return null array. There is a problem with the transport.");
-			throw new IAgentException(
-					"getSystemBundlesIDs() must not return null array. There is a problem with the transport.",
-					IAgentErrors.ERROR_INTERNAL_ERROR);
-		}
-		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
-		if (connection != null) {
-			debug("[getSystemBundlesIDs] PMP connection is available, add event listener");
-			connection.addEventListener(this, new String[] { SYSTEM_BUNDLE_EVENT });
-		}
-		systemBundlesIDs = result;
-		return result;
 	}
 
 	public void removeListeners() throws IAgentException {
@@ -467,22 +436,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		}
 	}
 
-	public boolean scanSystemBundlesList(RemoteBundle bundle) throws IAgentException {
-		long systemIDs[] = getSystemBundlesIDs();
-		long tempBundleID = bundle.getBundleId();
-		for (int i = 0; i < systemIDs.length; i++) {
-			if (tempBundleID == systemIDs[i]) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public void clearSystemBundlesList() {
-		systemBundlesIDs = null;
-		systemBundlesNames = null;
-	}
-
 	private final void debug(String message) {
 		DebugUtils.debug(this, message);
 	}
@@ -493,44 +446,6 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 
 	private final void error(String message, Throwable e) {
 		DebugUtils.error(this, message, e);
-	}
-
-	public String[] getSystemBundlesNames() throws IAgentException {
-		if (systemBundlesNames != null) {
-			return systemBundlesNames;
-		}
-		String[] result = null;
-		if (GET_SYSTEM_BUNDLES_NAMES.isDefined(getBundleAdmin())) {
-			result = (String[]) GET_SYSTEM_BUNDLES_NAMES.call(getBundleAdmin());
-			if (result == null) {
-				info("[getSystemBundlesNames] getSystemBundlesNames() must not return null array. There is a problem with the transport.");
-				throw new IAgentException(
-						"getSystemBundlesNames() must not return null array. There is a problem with the transport.",
-						IAgentErrors.ERROR_INTERNAL_ERROR);
-			}
-		} else {
-			// fallback to old method of retrieving the names
-			result = getSystemBundlesNamesFallback();
-		}
-		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
-		if (connection != null) {
-			debug("[getSystemBundlesIDs] PMP connection is available, add event listener");
-			connection.addEventListener(this, new String[] { SYSTEM_BUNDLE_EVENT });
-		}
-		systemBundlesNames = result;
-		return result;
-	}
-
-	private String[] getSystemBundlesNamesFallback() throws IAgentException {
-		long[] idArray = getSystemBundlesIDs();
-
-		List names = new ArrayList(idArray.length);
-		for (int i = 0; i < idArray.length; i++) {
-			RemoteBundle bundle = getBundle(idArray[i]);
-			if (bundle != null)
-				names.add(bundle.getSymbolicName());
-		}
-		return (String[]) names.toArray(new String[names.size()]);
 	}
 
 	public BundleSnapshot[] getBundlesSnapshot(Dictionary properties) throws IAgentException {
