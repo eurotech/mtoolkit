@@ -59,7 +59,7 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
 	private Image icon;
 
 	public Bundle(String name, RemoteBundle rBundle, int state, int type, String category, String version)
-			throws IAgentException {
+	throws IAgentException {
 		super(name);
 		Assert.isNotNull(rBundle);
 		this.rBundle = rBundle;
@@ -286,6 +286,11 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
 			overlay = ImageHolder.getImageDescriptor(OVR_ACTIVE_ICON);
 			break;
 		default:
+			return null;
+		}
+		if (iconData == null) {
+			// it could be in a just started icon update process, so later will
+			// be updated
 			return null;
 		}
 		Image baseIcon = new Image(PlatformUI.getWorkbench().getDisplay(), iconData);
