@@ -55,9 +55,9 @@ import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 
 public final class CertUtils {
   private static final String DT = "."; //$NON-NLS-1$
-
+  
   private static ServiceTracker certProviderTracker;
-
+  
   /**
    * A convenient method which delegates to
    * ICertificateProvider.getCertificates() method if ICertificateProvider
@@ -73,7 +73,7 @@ public final class CertUtils {
     }
     return null;
   }
-
+  
   /**
    * A convenient method which delegates to
    * ICertificateProvider.getCertificate() method if ICertificateProvider
@@ -91,7 +91,7 @@ public final class CertUtils {
     }
     return null;
   }
-
+  
   /**
    * Adds certificate data for signing content to provided properties.
    * 
@@ -119,7 +119,7 @@ public final class CertUtils {
       properties.put(InstallationConstants.CERT_KEY_PASS + DT + id, cert.getKeyPass());
     }
   }
-
+  
   public static int getCertificatesCount(Map properties) {
     Set keys = properties.keySet();
     Iterator iterator = keys.iterator();
@@ -132,42 +132,42 @@ public final class CertUtils {
     }
     return count;
   }
-
+  
   public static String getCertificateAlias(Map properties, int id) {
     return (String) properties.get(InstallationConstants.CERT_ALIAS + DT + id);
   }
-
+  
   public static String getCertificateStoreLocation(Map properties, int id) {
     return (String) properties.get(InstallationConstants.CERT_STORE_LOCATION + DT + id);
   }
-
+  
   public static String getCertificateStoreType(Map properties, int id) {
     return (String) properties.get(InstallationConstants.CERT_STORE_TYPE + DT + id);
   }
-
+  
   public static String getCertificateStorePass(Map properties, int id) {
     return (String) properties.get(InstallationConstants.CERT_STORE_PASS + DT + id);
   }
-
+  
   public static String getCertificateKeyPass(Map properties, int id) {
     return (String) properties.get(InstallationConstants.CERT_KEY_PASS + DT + id);
   }
-
+  
   /**
-   * Method for signing InstallationItem instances as they must contain a java.io.File instance 
-   * that will be signed. Files can be JAR and DP files. It is common this file instance 
+   * Method for signing InstallationItem instances as they must contain a java.io.File instance
+   * that will be signed. Files can be JAR and DP files. It is common this file instance
    * to be set at implementation of InstallationItem interface method prepare() in each provided item. In that case
    * prepare() method should be invoked before invoking signItems() method.
    * If key store and/or private key passwords for given
-   * certificate are not provided then this function opens 
+   * certificate are not provided then this function opens
    * password dialogs for getting them from the user.
    * 
    * @param InstallationItem[] items - items that will be signed
    * @param IProgressMonitor monitor
-   * @param Map preparationProps - properties for signing. 
+   * @param Map preparationProps - properties for signing.
    * @return IStatus that can be with severity ERROR / CANCEL or OK
    */
-
+  
   public static IStatus signItems(InstallationItem[] items, IProgressMonitor monitor, Map preparationProps) {
     boolean hasError = false;
     try {
@@ -181,7 +181,7 @@ public final class CertUtils {
       }
       List preparedJarFiles = new ArrayList();
       List preparedDpFiles = new ArrayList();
-
+      
       Map preparedItems = initializePreparedItemsMap(items, preparedJarFiles, preparedDpFiles);
       //if items types are not supporting signing
       if (preparedItems == null || preparedItems.size() == 0) {
@@ -220,7 +220,7 @@ public final class CertUtils {
     }
     return Status.OK_STATUS;
   }
-
+  
   public static IStatus signJar(File file, File signedFile, IProgressMonitor monitor, Map properties) {
     if (properties == null) {
       return UtilitiesPlugin.newStatus(IStatus.ERROR,  "Signing properties are not initialized");
@@ -233,7 +233,7 @@ public final class CertUtils {
     IStatus status = Status.OK_STATUS;
     Map propertiesDupl = new HashMap(properties);
     status = setSigningProperties(monitor, propertiesDupl);
-
+    
     if (status.isOK()) {
       for (int i = 0; i < count && !monitor.isCanceled(); i++) {
         String alias = getCertificateAlias(propertiesDupl, i);
@@ -251,7 +251,7 @@ public final class CertUtils {
     }
     return status;
   }
-
+  
   /**
    * Returns location of jarsigner tool or null if the location cannot be
    * determined.
@@ -267,7 +267,7 @@ public final class CertUtils {
     }
     return location;
   }
-
+  
   public static String getDefaultJarsignerLocation() {
     String location = "";
     String javaHome = System.getProperty("java.home");
@@ -286,7 +286,7 @@ public final class CertUtils {
     }
     return location;
   }
-
+  
   /**
    * Opens "Continue without signing" dialog. Returns true if user selects Yes.
    * 
@@ -310,7 +310,7 @@ public final class CertUtils {
     });
     return result[0] != null;
   }
-
+  
   /**
    * Opens password dialog for getting keystore password.
    * 
@@ -332,7 +332,7 @@ public final class CertUtils {
     });
     return result[0];
   }
-
+  
   /**
    * Opens password dialog for getting private key password.
    * 
@@ -355,15 +355,15 @@ public final class CertUtils {
     });
     return result[0];
   }
-
+  
   private static void setCertificateStorePass(Map properties, int id, String storePass) {
     properties.put(InstallationConstants.CERT_STORE_PASS + DT + id, storePass);
   }
-
+  
   private static void setCertificateKeyPass(Map properties, int id, String keyPass) {
     properties.put(InstallationConstants.CERT_KEY_PASS + DT + id, keyPass);
   }
-
+  
   private static ICertificateProvider getCertProvider() {
     if (certProviderTracker == null) {
       certProviderTracker = new ServiceTracker(UtilitiesPlugin.getDefault().getBundleContext(),
@@ -372,7 +372,7 @@ public final class CertUtils {
     }
     return (ICertificateProvider) certProviderTracker.getService();
   }
-
+  
   /**
    * Signs provided file with passed information for signing.
    * 
@@ -401,12 +401,12 @@ public final class CertUtils {
     String jarSigner = getJarsignerLocation();
     if (jarSigner == null) {
       return UtilitiesPlugin.newStatus(
-        IStatus.ERROR, "The location of jarsigner tool was not correctly specified in Preferences.");
+          IStatus.ERROR, "The location of jarsigner tool was not correctly specified in Preferences.");
     }
     File f = new File(jarSigner);
     if (!f.exists()) {
-      UtilitiesPlugin.newStatus(IStatus.ERROR, "The jarsigner tool was not found at \"" + jarSigner
-        + "\"");
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "The jarsigner tool was not found at \"" + jarSigner
+          + "\"");
     }
     List list = new ArrayList();
     list.add(jarSigner);
@@ -418,7 +418,7 @@ public final class CertUtils {
     addOption(list, "-signedjar", signedJar, false);
     list.add(jarName);
     list.add(alias);
-
+    
     Process ps;
     try {
       ps = Runtime.getRuntime().exec((String[]) list.toArray(new String[list.size()]));
@@ -427,7 +427,7 @@ public final class CertUtils {
     }
     ProcessOutputReader outputReader = new ProcessOutputReader(ps.getInputStream(), "[Jar Signer] Output Reader");
     outputReader.start();
-
+    
     int retries = 150;
     int result = -1;
     while (!monitor.isCanceled()) {
@@ -451,30 +451,30 @@ public final class CertUtils {
         return UtilitiesPlugin.newStatus(IStatus.CANCEL, "Signing operation was cancelled.");
       }
     }
-
-      try {
-        ps.getOutputStream().write("a\na\na\n".getBytes());
-        ps.getOutputStream().flush();
-      } catch (IOException e) {
-        // ignore, most probably the pipe will be closed
-      }
+    
+    try {
+      ps.getOutputStream().write("a\na\na\n".getBytes());
+      ps.getOutputStream().flush();
+    } catch (IOException e) {
+      // ignore, most probably the pipe will be closed
+    }
     if (result != 0) {
       if (retries == 0) {
         return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content. Operation timed out. Alias: "
-          + alias);
+            + alias);
       }
       return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content. Alias: " + alias
-        + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputReader.getOutput());
+          + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputReader.getOutput());
     }
     String outputMsg = outputReader.getOutput();
     //return the warnings
     if (outputMsg.indexOf("Warning") != -1 && outputMsg.indexOf("will expire") == -1) {//skip the unnecessary warning for the '6 months'
       return UtilitiesPlugin.newStatus(IStatus.WARNING, "Signing warning found. Alias: " + alias
-        + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputMsg.replaceAll("\r\n", " "));
+          + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputMsg.replaceAll("\r\n", " "));
     }
     return Status.OK_STATUS;
   }
-
+  
   private static void addOption(List list, String option, String value, boolean emptyAllowed) {
     if (value == null) {
       return;
@@ -485,7 +485,7 @@ public final class CertUtils {
     list.add(option.trim());
     list.add(value.trim());
   }
-
+  
   /**
    * Convenient method for signing jar files with information provided in passed
    * properties. If no signing information is provided then this function does
@@ -509,7 +509,7 @@ public final class CertUtils {
       return new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, "Invalid or missing sinning information.");
     }
     MultiStatus operationStatus =
-      new MultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.WARNING, "Signing warnings found.", null);
+        new MultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.WARNING, "Signing warnings found.", null);
     for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
       IStatus status = signJar(files[i], signedFiles[i], monitor, properties);
       if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
@@ -525,7 +525,7 @@ public final class CertUtils {
     }
     return operationStatus;
   }
-
+  
   /**
    * Convenient method for signing DP file with information provided in passed
    * properties. If no signing information is provided then this function does
@@ -543,7 +543,7 @@ public final class CertUtils {
    *           in case of signing error
    * @since 5.1
    */
-
+  
   private static void signDpFiles(File[] dpFiles, File[] signedFiles, IProgressMonitor monitor, Map properties)
       throws IOException {
     if (dpFiles == null || signedFiles == null || dpFiles.length != signedFiles.length) {
@@ -554,12 +554,12 @@ public final class CertUtils {
       monitor.worked(1);
     }
   }
-
+  
   private static IStatus signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
     SubMonitor subMonitor = SubMonitor.convert(monitor);
     File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.extracted");
     FileUtils.deleteDir(tmpDir);
-
+    
     JarInputStream jis = null;
     JarOutputStream jos = null;
     try {
@@ -570,7 +570,7 @@ public final class CertUtils {
       }
       jos = new JarOutputStream(new FileOutputStream(signedFile), manifest);
       JarEntry jarEntry;
-
+      
       MultiStatus operationStatus = new MultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.OK, "", null);
       while ((jarEntry = jis.getNextJarEntry()) != null && !monitor.isCanceled()) {
         JarEntry newEntry = new JarEntry(jarEntry.getName());
@@ -578,14 +578,14 @@ public final class CertUtils {
         newEntry.setExtra(jarEntry.getExtra());
         newEntry.setComment(jarEntry.getComment());
         jos.putNextEntry(newEntry);
-
+        
         Attributes attributes = jarEntry.getAttributes();
         if (attributes != null && attributes.getValue(Constants.BUNDLE_SYMBOLICNAME) != null) {
           // this entry is bundle - sign it
           String entryName = jarEntry.getName();
           File file = new File(tmpDir.getAbsolutePath() + "/" + entryName);
           file.getParentFile().mkdirs();
-
+          
           copyBytes(jis, new FileOutputStream(file), false, true);
           IStatus status = signJar(file, null, subMonitor.newChild(1), properties);
           if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
@@ -628,7 +628,7 @@ public final class CertUtils {
       FileUtils.deleteDir(tmpDir);
     }
   }
-
+  
   private static IStatus setSigningProperties(IProgressMonitor monitor, Map properties) {
     int count = getCertificatesCount(properties);
     for (int i = 0; i < count && !monitor.isCanceled(); i++) {
@@ -652,7 +652,7 @@ public final class CertUtils {
         }
         setCertificateStorePass(properties, i, storePass);
       }
-
+      
       String keyPass = getCertificateKeyPass(properties, i);
       if (keyPass == null || keyPass.length() == 0) {
         String alias = getCertificateAlias(properties, i);
@@ -668,7 +668,7 @@ public final class CertUtils {
     }
     return Status.OK_STATUS;
   }
-
+  
   private static void copyBytes(InputStream in, OutputStream out, boolean closeIn, boolean closeOut) throws IOException {
     byte[] buf = new byte[1024];
     int len;
@@ -689,20 +689,20 @@ public final class CertUtils {
         }
     }
   }
-
+  
   /**
-           * Signs a List of java.io.File items with provided in parameter properties  information.
-           * If there is not information for certificates at provided properties or an error occurs during the signing
-           * and the user chooses to continue without sign or the user has canceled operation - signFiles method returns empty List.
-           * @param files - An List of java.io.File items that will be signed. Files can be JAR or DP.
-           * @param monitor
-           * @param properties - Properties used for signing
-           * @return List of java.io. File items - signed files 
-          * @throws IOException 
-           * @throws CoreException if provided parameters are not correct
-           * 
-           */
-
+   * Signs a List of java.io.File items with provided in parameter properties  information.
+   * If there is not information for certificates at provided properties or an error occurs during the signing
+   * and the user chooses to continue without sign or the user has canceled operation - signFiles method returns empty List.
+   * @param files - An List of java.io.File items that will be signed. Files can be JAR or DP.
+   * @param monitor
+   * @param properties - Properties used for signing
+   * @return List of java.io. File items - signed files
+   * @throws IOException
+   * @throws CoreException if provided parameters are not correct
+   * 
+   */
+  
   private static List signDps0(List files, IProgressMonitor monitor, Map properties) throws IOException {
     if (files.isEmpty()) {
       return files;
@@ -710,10 +710,10 @@ public final class CertUtils {
     List allSignedFilesList = new ArrayList();
     boolean hasError = false;
     try {
-
+      
       List dpFilesToSign = new ArrayList();
       List dpSignedFiles = new ArrayList();
-
+      
       for (int i = 0; i < files.size() && !monitor.isCanceled(); i++) {
         File fileToSign = (File) files.get(i);
         if (fileToSign == null || !fileToSign.exists()) {
@@ -730,7 +730,7 @@ public final class CertUtils {
       }
       CertUtils.signDpFiles((File[]) dpFilesToSign.toArray(new File[] {}),
           (File[]) dpSignedFiles.toArray(new File[] {}), monitor, properties);
-
+      
     } catch (IOException ioe) {
       hasError = true;
       throw ioe;
@@ -742,7 +742,7 @@ public final class CertUtils {
     }
     return allSignedFilesList;
   }
-
+  
   private static List signJars0(List files, IProgressMonitor monitor, Map properties) throws IOException {
     if (files.isEmpty()) {
       return files;
@@ -767,9 +767,9 @@ public final class CertUtils {
         jarSignedFiles.add(signedFile);
       }
       IStatus status =
-        CertUtils.signJars(
-          (File[]) jarFilesToSign.toArray(new File[] {}),
-          (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
+          CertUtils.signJars(
+              (File[]) jarFilesToSign.toArray(new File[] {}),
+              (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
       if (status.matches(IStatus.WARNING)) {
         UtilitiesPlugin.log(status);
       } else if (status.matches(IStatus.ERROR)) {
@@ -786,7 +786,7 @@ public final class CertUtils {
     }
     return allSignedFilesList;
   }
-
+  
   private static void deleteSignedFiles(List signedFiles) {
     File fileToDelete = null;
     for (int i = 0; i < signedFiles.size(); i++) {
@@ -796,7 +796,7 @@ public final class CertUtils {
       }
     }
   }
-
+  
   private static void setItemsLocation(List preparedJarFiles, List preparedDpFiles, Map preparedItems,
       List signedJarFilesList, List signedDpFilesList) {
     int size = signedJarFilesList.size();
@@ -811,14 +811,14 @@ public final class CertUtils {
       itemToSet.setLocation((File) signedDpFilesList.get(i));
     }
   }
-
+  
   private static Map initializePreparedItemsMap(InstallationItem[] items, List preparedJarFiles, List preparedDpFiles) {
     InstallationItem item;
     Map preparedItems = new HashMap();
     for (int i = 0; i < items.length; i++) {
       item = items[i];
       File preparedFile = new File(item.getLocation());
-
+      
       if (item.getMimeType().equals(InstallationItemProcessor.MIME_DP)) {
         preparedItems.put(preparedFile, item);
         preparedDpFiles.add(preparedFile);
