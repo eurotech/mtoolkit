@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2012 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.installation;
 
 import java.io.BufferedReader;
@@ -12,22 +22,25 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
-public class FrameworkSystemBundlesProvider implements ISystemBundlesProvider {
-
+public final class FrameworkSystemBundlesProvider implements ISystemBundlesProvider {
 	private static final String SYSTEM_BUNDLES_FILE_NAME = "system_bundles.txt";
 	private static final String SYSTEM_BUNDLES_RESOURCE_NAME = "recources/" + SYSTEM_BUNDLES_FILE_NAME;
 
 	private Set loadedSymbolicNames;
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider#getSystemBundlesIDs()
+	 */
 	public Set<String> getSystemBundlesIDs() {
 		if (loadedSymbolicNames == null) {
 			BufferedReader reader = null;
 			try {
 				URL systemBundleURL = FrameworkPlugin.getDefault().getBundle()
 						.getResource(SYSTEM_BUNDLES_RESOURCE_NAME);
-				if (systemBundleURL != null) {
-					reader = new BufferedReader(new InputStreamReader(systemBundleURL.openStream()));
-				}
+				reader = new BufferedReader(new InputStreamReader(systemBundleURL.openStream()));
 				Set symbolicNames = new HashSet();
 				String line;
 				while ((line = reader.readLine()) != null) {
