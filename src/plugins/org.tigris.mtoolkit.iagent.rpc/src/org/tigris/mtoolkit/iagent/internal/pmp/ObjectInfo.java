@@ -63,18 +63,18 @@ public final class ObjectInfo {
 			argtypes[i] = getClass(argTypes[i]);
 		}
 		Method m = null;
-		Exception exc = null;
-		if (interfaces == null)
+		if (interfaces == null) {
 			throw new NoSuchMethodException(name);
+		}
 		for (int i = 0; i < interfaces.length; i++) {
 			try {
 				m = interfaces[i].getMethod(name, argtypes);
 			} catch (Exception ex) {
-				exc = ex;
 			}
 		}
-		if (m == null)
-			throw exc;
+		if (m == null) {
+			throw new NoSuchMethodException(name);
+		}
 		mArr[0] = m;
 		if (methods == null)
 			methods = new Vector(2, 5);
@@ -129,7 +129,6 @@ public final class ObjectInfo {
 																																																																												: obj.getClass().getClassLoader() == null	? Class.forName(name)
 																																																																																							: obj.getClass().getClassLoader().loadClass(name);
 	}
-
 	/** puts an ObjectInfo instance in the free objects' queue */
 	public void freeInfo() {
 		methods = null;
