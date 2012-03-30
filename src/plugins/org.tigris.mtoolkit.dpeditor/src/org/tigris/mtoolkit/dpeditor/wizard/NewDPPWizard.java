@@ -34,12 +34,9 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 import org.tigris.mtoolkit.util.BuildInfo;
-import org.tigris.mtoolkit.util.BundleInfo;
-import org.tigris.mtoolkit.util.CertificateInfo;
 import org.tigris.mtoolkit.util.DPPFile;
 import org.tigris.mtoolkit.util.InconsistentDataException;
 import org.tigris.mtoolkit.util.PackageHeaders;
-import org.tigris.mtoolkit.util.ResourceInfo;
 
 /**
  * Generates new deployment package file object.
@@ -199,7 +196,6 @@ public class NewDPPWizard extends Wizard implements INewWizard {
 				dppProperty = new DPPFile(dppPropFile, prjRootPath);
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				dppProperty = null;
 			}
 		}
 		if (!parentFile.exists()) {
@@ -238,19 +234,19 @@ public class NewDPPWizard extends Wizard implements INewWizard {
 				Vector copyInfos = (Vector) infos.clone();
 				Vector dppBundles = dppFile.getBundleInfos();
 				for (int i = 0; i < copyInfos.size(); i++) {
-					dppBundles.addElement((BundleInfo) copyInfos.elementAt(i));
+					dppBundles.addElement(copyInfos.elementAt(i));
 				}
 				Vector resInfos = dppProperty.getResourceInfos();
 				copyInfos = (Vector) resInfos.clone();
 				Vector dppResInfos = dppFile.getResourceInfos();
 				for (int i = 0; i < copyInfos.size(); i++) {
-					dppResInfos.addElement((ResourceInfo) copyInfos.elementAt(i));
+					dppResInfos.addElement(copyInfos.elementAt(i));
 				}
 				Vector certInfos = dppProperty.getCertificateInfos();
 				copyInfos = (Vector) certInfos.clone();
 				Vector dppCertInfos = dppFile.getCertificateInfos();
 				for (int i = 0; i < copyInfos.size(); i++) {
-					dppCertInfos.addElement((CertificateInfo) copyInfos.elementAt(i));
+					dppCertInfos.addElement(copyInfos.elementAt(i));
 				}
 			}
 			BuildInfo buildInfo = dppFile.getBuildInfo();

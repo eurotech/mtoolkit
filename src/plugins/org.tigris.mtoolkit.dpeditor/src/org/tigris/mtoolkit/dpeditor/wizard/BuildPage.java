@@ -251,7 +251,6 @@ public class BuildPage extends WizardPage implements ModifyListener,
 
 				prevBuildLocation = (new File(newBuildLocation)).getCanonicalPath();
 			} catch (IOException e1) {
-				;
 			}
 		}
 
