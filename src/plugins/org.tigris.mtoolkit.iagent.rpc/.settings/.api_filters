@@ -8,4 +8,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/tigris/mtoolkit/iagent/internal/rpc/console/EquinoxCommandInterpreter.java" type="org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxCommandInterpreter">
+        <filter id="574619656">
+            <message_arguments>
+                <message_argument value="CommandInterpreter"/>
+                <message_argument value="EquinoxCommandInterpreter"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
