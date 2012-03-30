@@ -238,7 +238,7 @@ public final class PluginProvider implements InstallationItemProvider {
 				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Missing bundle description"
 						+ path);
 			}
-			BundleDescription[] required = descr == null ? new BundleDescription[0] : descr.getResolvedRequires();
+			BundleDescription[] required = descr.getResolvedRequires();
 			final Vector dependencies = new Vector();
 			for (int i = 0; i < required.length; i++) {
 				String symbName = required[i].getSymbolicName();
