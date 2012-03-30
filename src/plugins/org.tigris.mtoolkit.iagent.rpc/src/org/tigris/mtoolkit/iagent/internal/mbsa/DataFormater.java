@@ -189,7 +189,7 @@ public class DataFormater {
 	public static void appendIntArray(OutputStream os, int[] array) throws IOException {
 		int len = array == null ? 0 : array.length;
 		appendInt(os, len);
-		if (len > 0) {
+		if (array != null) {
 			for (int i = 0; i < len; i++) {
 				appendInt(os, array[i]);
 			}
@@ -255,7 +255,7 @@ public class DataFormater {
 	public static void appendShortArray(OutputStream os, short[] array) throws IOException {
 		int len = array == null ? 0 : array.length;
 		appendInt(os, len);
-		if (len > 0) {
+		if (array != null) {
 			for (int i = 0; i < len; i++) {
 				appendShort(os, array[i]);
 			}
@@ -333,7 +333,7 @@ public class DataFormater {
 	public static void appendLongArray(OutputStream os, long[] array) throws IOException {
 		int len = array == null ? 0 : array.length;
 		appendInt(os, len);
-		if (len > 0) {
+		if (array != null) {
 			for (int i = 0; i < len; i++) {
 				appendLong(os, array[i]);
 			}
@@ -767,7 +767,7 @@ public class DataFormater {
 	public static void writeStringArray(OutputStream os, String[] value) throws IOException {
 		int len = value == null ? 0 : value.length;
 		writeInt(os, len);
-		if (len > 0) {
+		if (value != null) {
 			for (int i = 0; i < len; i++) {
 				writeString(os, value[i]);
 			}
