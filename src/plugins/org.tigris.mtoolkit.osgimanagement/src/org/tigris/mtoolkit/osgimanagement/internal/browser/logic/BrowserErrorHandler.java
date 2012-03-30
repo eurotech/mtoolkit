@@ -59,9 +59,7 @@ public class BrowserErrorHandler {
 	}
 
 	public static void processError(Throwable t, Model unknown) {
-		if (unknown instanceof Model) {
-			processError(t, findConnector((Model) unknown), ((FrameworkImpl)unknown.findFramework()).userDisconnect);
-		}
+		processError(t, findConnector(unknown), ((FrameworkImpl) unknown.findFramework()).userDisconnect);
 	}
 
 	private static DeviceConnector findConnector(Model node) {
@@ -82,7 +80,7 @@ public class BrowserErrorHandler {
 	public static void processError(Throwable t, DeviceConnector connector, String reason) {
 		boolean display = true;
 		Boolean autoConnected = connector == null	? new Boolean(false)
-													: (Boolean) connector.getProperties().get("framework-connection-immediate"); //$NON-NLS-1$
+		: (Boolean) connector.getProperties().get("framework-connection-immediate"); //$NON-NLS-1$
 		if (autoConnected == null || autoConnected.booleanValue()) {
 			display = false;
 		}
