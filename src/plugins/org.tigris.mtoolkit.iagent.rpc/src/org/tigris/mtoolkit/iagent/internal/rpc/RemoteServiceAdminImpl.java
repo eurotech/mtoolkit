@@ -29,12 +29,11 @@ import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
-import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 
-public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements RemoteServiceAdmin, Remote,
-		AllServiceListener {
+public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements RemoteServiceAdmin,
+AllServiceListener {
 	private static final String EVENT_TYPE_KEY = "type";
 	private static final int SERVICE_REGISTERED = 1 << 0;
 	private static final int SERVICE_MODIFIED = 1 << 1;
@@ -195,7 +194,7 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
 			Dictionary convertedServiceEvent = convertServiceEvent(event);
 			DebugUtils.debug(this,
 					"[postRemoteEvent] Posting remote event: " + DebugUtils.convertForDebug(convertedServiceEvent)
-							+ "; type: " + RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
+					+ "; type: " + RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
 			synchronizer.enqueue(new EventData(convertedServiceEvent, RemoteServiceAdmin.CUSTOM_SERVICE_EVENT));
 		} else {
 			DebugUtils.debug(this, "[postRemoteEvent] Event synchronizer was disabled");

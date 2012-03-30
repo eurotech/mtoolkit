@@ -31,12 +31,11 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
-import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
 
-public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Remote, RemoteDeploymentAdmin {
+public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements RemoteDeploymentAdmin {
 	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
 
 	private ServiceRegistration registration;

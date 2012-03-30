@@ -19,12 +19,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
-import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 
-public class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implements Remote, RemoteCapabilitiesProvider,
-		RemoteCapabilitiesManager {
+public class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implements RemoteCapabilitiesManager {
 
 	private static final String PROPERTY_EVENT = "iagent_property_event";
 	private static final String EVENT_CAPABILITY_NAME = "capability.name";

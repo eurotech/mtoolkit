@@ -36,12 +36,11 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
-import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 
-public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implements Remote, RemoteApplicationAdmin,
-		ServiceTrackerCustomizer {
+public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implements RemoteApplicationAdmin,
+ServiceTrackerCustomizer {
 
 	private static final String OSGI_APPLICATION_PACKAGE = "org.osgi.service.application.";
 	private static final String APPLICATION_DESCRIPTOR = OSGI_APPLICATION_PACKAGE + "ApplicationDescriptor";
