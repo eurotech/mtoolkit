@@ -888,12 +888,10 @@ public class CustomCellEditor extends CellEditor implements SelectionListener,
 		if (data instanceof ResourceInfo) {
 			dialog.setBundleDialog(false);
 			ResourceInfo info = null;
-			if (data != null) {
 				if (data instanceof ResourceInfo) {
 					info = (ResourceInfo) data;
 					dialog.setHeaders(info.getOtherHeaders());
 				}
-			}
 
 			if (dialog.open() == Window.OK) {
 				if (info != null) {
@@ -914,12 +912,10 @@ public class CustomCellEditor extends CellEditor implements SelectionListener,
 		} else if (data instanceof BundleInfo) {
 			dialog.setBundleDialog(true);
 			BundleInfo info = null;
-			if (data != null) {
 				if (data instanceof BundleInfo) {
 					info = (BundleInfo) data;
 					dialog.setHeaders(info.getOtherHeaders());
 				}
-			}
 
 			if (dialog.open() == Window.OK) {
 				if (info != null) {
