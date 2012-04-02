@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.PluginUtilities;
+import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.editor.dialog.CertificatesPasswordsDialog;
 import org.tigris.mtoolkit.dpeditor.editor.dialog.ChangeBundleJarNameDialog;
@@ -63,19 +64,19 @@ import org.tigris.mtoolkit.util.DPPUtilities;
 import org.tigris.mtoolkit.util.DeploymentPackageGenerator;
 
 public class DPPUtil {
-
+  
   public static final int TYPE_QUICK_BUILD_DPP = 0;
   public static final int TYPE_EXPORT_DPP = 1;
   public static final int TYPE_EXPORT_ANT = 2;
   private final static String[] jobText = new String[] { "QuickBuild", "BuildExportWizard", "AntExportWizard" };
   public static String fileDialogLastSelection;
-
+  
   static List errorTable = new ArrayList();
-
+  
   private static Point displayLoc = null;
   private static CertificatesPasswordsDialog certDialog;
   private static ChangeBundleJarNameDialog changeBundleNameDialog;
-
+  
   /**
    * Performs specified by type export
    * 
@@ -89,7 +90,7 @@ public class DPPUtil {
    *            type of export (quick build, export dp, export xml)
    * @throws InvocationTargetException
    */
-  public static void generateDeploymentPackage(final DPPFile dppFile, IProgressMonitor monitor,
+  public static IStatus generateDeploymentPackage(final DPPFile dppFile, IProgressMonitor monitor,
       final IContainer project, int type) throws InvocationTargetException {
     BuildInfo buildInfo = dppFile.getBuildInfo();
     String dppFileName = dppFile.getFile().getAbsolutePath();
@@ -118,7 +119,7 @@ public class DPPUtil {
     Vector prjInfos = new Vector();
     for (int i = 0; i < infos.size(); i++) {
       if (monitor.isCanceled()) {
-        return;
+        return Status.CANCEL_STATUS;
       }
       BundleInfo info = (BundleInfo) infos.elementAt(i);
       String path = info.getBundlePath();
@@ -126,7 +127,7 @@ public class DPPUtil {
         boolean isFromWorkspace = false;
         for (int j = 0; j < projects.length; j++) {
           if (monitor.isCanceled()) {
-            return;
+            return Status.CANCEL_STATUS;
           }
           IProject prj = projects[j];
           String location = prj.getLocation().toOSString();
@@ -138,14 +139,15 @@ public class DPPUtil {
           }
         }
         if (!isFromWorkspace) {
-          DPPErrorHandler.processError(ResourceManager.format("DPPEditor.ProjectError", new String[] { path }), true);
-          return;
+          String errorMsg = ResourceManager.format("DPPEditor.ProjectError", new String[] { path });
+          DPPErrorHandler.processError(errorMsg, true);
+          return UtilitiesPlugin.newStatus(Status.ERROR, errorMsg);
         }
       }
     }
     monitor.subTask(ResourceManager.getString("DPPEditor.CheckBundleTask"));
     monitor.worked(800);
-
+    
     final Control shellControl = DPPErrorHandler.getShell();
     shellControl.getDisplay().syncExec(new Runnable() {
       public void run() {
@@ -155,8 +157,8 @@ public class DPPUtil {
     if (!DPActivator.getDefault().isAcceptAutomaticallyChanges()) {
       shellControl.getDisplay().syncExec(new Runnable() {
         public void run() {
-          changeBundleNameDialog = new ChangeBundleJarNameDialog(DPPErrorHandler.getShell(), displayLoc, shellControl
-              .getSize());
+          changeBundleNameDialog = new ChangeBundleJarNameDialog(DPPErrorHandler.getShell(),
+              displayLoc, shellControl.getSize());
           changeBundleNameDialog.setDPPFile(dppFile);
           changeBundleNameDialog.open();
         }
@@ -169,7 +171,7 @@ public class DPPUtil {
           String valuePair = (String) selectedJars.get(key);
           for (int i = 0; i < infos.size(); i++) {
             if (monitor.isCanceled()) {
-              return;
+              return Status.CANCEL_STATUS;
             }
             BundleInfo info = (BundleInfo) infos.elementAt(i);
             String bundlePath = info.getBundlePath();
@@ -182,7 +184,7 @@ public class DPPUtil {
     } else {
       for (int i = 0; i < infos.size(); i++) {
         if (monitor.isCanceled()) {
-          return;
+          return Status.CANCEL_STATUS;
         }
         BundleInfo info = (BundleInfo) infos.elementAt(i);
         String bundlePath = info.getBundlePath();
@@ -193,16 +195,16 @@ public class DPPUtil {
         }
       }
     }
-
+    
     DPPUtil.updateBundlesData(dppFile);
-
+    
     monitor.subTask(ResourceManager.getString("DPPEditor.BuildProjectsTask"));
     monitor.worked(1200);
     try {
       Hashtable prjJars = buildProjectsInWorkspace(projectPaths);
       for (int i = 0; i < prjInfos.size(); i++) {
         if (monitor.isCanceled()) {
-          return;
+          return Status.CANCEL_STATUS;
         }
         BundleInfo info = (BundleInfo) prjInfos.elementAt(i);
         String path = info.getBundlePath();
@@ -213,12 +215,12 @@ public class DPPUtil {
       }
     } catch (Throwable t) {
       throw new InvocationTargetException(t);
-
+      
     }
-
+    
     monitor.subTask(ResourceManager.getString("DPPEditor.CheckCertsPassTask"));
     monitor.worked(1600);
-
+    
     final String prjRootPath = project.getLocation().toOSString();
     shellControl.getDisplay().syncExec(new Runnable() {
       public void run() {
@@ -234,7 +236,7 @@ public class DPPUtil {
         CertificateInfo info = (CertificateInfo) certsInfos.elementAt(i);
         for (int j = 0; j < dppCertsInfos.size(); j++) {
           if (monitor.isCanceled()) {
-            return;
+            return Status.CANCEL_STATUS;
           }
           CertificateInfo cert = (CertificateInfo) dppCertsInfos.elementAt(j);
           if (cert.getAlias().equals(info.getAlias())) {
@@ -246,35 +248,36 @@ public class DPPUtil {
     } else if (certDialog.openResult == Window.CANCEL) {
       dppFile.getCertificateInfos().clear();
     }
-
+    
     try {
       monitor.subTask(ResourceManager.getString(jobText[type] + ".CreateTaskName"));
       monitor.worked(2000);
       DeploymentPackageGenerator dpGenerator = new DeploymentPackageGenerator();
       dpGenerator.setMonitor(monitor);
       switch (type) {
-      case TYPE_QUICK_BUILD_DPP:
-      case TYPE_EXPORT_DPP: {
-        dpGenerator.generateDeploymentPackage(dppFile, prjRootPath);
-        String error = dpGenerator.getError();
-        if (error.equals("") && !monitor.isCanceled()) {
-          monitor.subTask(ResourceManager.getString(jobText[type] + ".SignTaskName"));
-          dpGenerator.signDP(dppFile);
+        case TYPE_QUICK_BUILD_DPP:
+        case TYPE_EXPORT_DPP: {
+          IStatus status = dpGenerator.generateDeploymentPackage(dppFile, prjRootPath);
+          if (status.isOK()) {
+            monitor.subTask(ResourceManager.getString(jobText[type] + ".SignTaskName"));
+            dpGenerator.signDP(dppFile);
+          }
+          break;
         }
-        break;
-      }
-      case TYPE_EXPORT_ANT: {
-        dpGenerator.generateAntFile(dppFile, prjRootPath, true);
-        break;
-      }
+        case TYPE_EXPORT_ANT: {
+          dpGenerator.generateAntFile(dppFile, prjRootPath, true);
+          break;
+        }
       }
       String error = dpGenerator.getError();
       String psOutput = dpGenerator.getOutput();
       if (!error.equals("")) {
         DPPErrorHandler.processError(error + "\n" + psOutput, true);
+        error += "\n" + psOutput;
       } else {
         if (!dpGenerator.getErrorStream().equals("")) {
           DPPErrorHandler.processError(psOutput, true);
+          error = psOutput;
         } else {
           if (!dpGenerator.getOutputStream().equals("")) {
             DPPErrorHandler.processWarning(psOutput, true);
@@ -283,22 +286,26 @@ public class DPPUtil {
       }
       project.refreshLocal(IResource.DEPTH_INFINITE, null);
       monitor.done();
+      if (monitor.isCanceled()) {
+        return Status.CANCEL_STATUS;
+      }
+      return error.equals("") ? Status.OK_STATUS : UtilitiesPlugin.newStatus(IStatus.ERROR, error);
     } catch (Throwable ex) {
       ex.printStackTrace();
       throw new InvocationTargetException(ex);
     }
   }
-
+  
   public static boolean isValidExportDestination(File exportDest) {
     boolean isValidFile = false;
-
+    
     try {
       String path = exportDest.getAbsolutePath();
-
+      
       if (path.equals(exportDest.getCanonicalPath()) && PluginUtilities.isValidPath(path)) {
         IPath filePath = new Path(path);
         String fileName = filePath.lastSegment();
-
+        
         if (!fileName.startsWith(".") && fileName.endsWith(".dp")) {
           isValidFile = true;
         }
@@ -306,10 +313,10 @@ public class DPPUtil {
     } catch (IOException ex) {
       isValidFile = false;
     }
-
+    
     return isValidFile;
   }
-
+  
   public static void updateBundlePath(BundleInfo info, String path) {
     // for midlets and R3 bundles this headers could be missing in manifest
     String symbName = info.getBundleSymbolicName();
@@ -324,7 +331,7 @@ public class DPPUtil {
       info.setBundleVersion(ver);
     }
   }
-
+  
   // read data (symbolic name and bundle version) from manifests for bundles
   // in specified dppFile and updates it dppFile
   public static void updateBundlesData(DPPFile file) {
@@ -336,10 +343,10 @@ public class DPPUtil {
       }
     }
   }
-
+  
   public static void updateBundleData(BundleInfo info, String projectLocation) {
     String path = info.getBundlePath();
-
+    
     if (path.startsWith("<.>" + File.separator)) {
       path = projectLocation + path.substring(3);
     }
@@ -385,26 +392,26 @@ public class DPPUtil {
       info.setBundleVersion(bunVersion);
     }
   }
-
+  
   public static String parseSymbolicName(String symbolicName) {
-    return symbolicName != null && symbolicName.indexOf(";") != -1 ? symbolicName.substring(0,
-        symbolicName.indexOf(';')) : symbolicName;
+    return symbolicName != null && symbolicName.indexOf(";")!=-1 ? symbolicName
+        .substring(0, symbolicName.indexOf(';')) : symbolicName;
   }
-
+  
   // wait flag
   //private static boolean running = false;;
-
+  
   public static Hashtable buildProjectsInWorkspace(Vector prjInfos) throws Throwable {
     Hashtable result = new Hashtable();
     //Workspace workspace = (Workspace) ResourcesPlugin.getWorkspace();
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IProject[] projects = root.getProjects();
     /*Vector pluginBundlePrjs = new Vector();
-    IPluginModelBase base[] = PluginRegistry.getWorkspaceModels();
-    for (int i = 0; i < base.length; i++) {
-    	IPluginModelBase pluginModelBase = base[i];
-    	BundleDescription bundleDescr = pluginModelBase.getBundleDescription();
-    }*/
+		IPluginModelBase base[] = PluginRegistry.getWorkspaceModels();
+		for (int i = 0; i < base.length; i++) {
+			IPluginModelBase pluginModelBase = base[i];
+			BundleDescription bundleDescr = pluginModelBase.getBundleDescription();
+		}*/
     for (int j = 0; j < prjInfos.size(); j++) {
       String prjInfo = (String) prjInfos.elementAt(j);
       for (int i = 0; i < projects.length; i++) {
@@ -429,13 +436,13 @@ public class DPPUtil {
                 } catch (Exception e) {
                   throw e;
                 }
-
+                
                 IPluginExporter exporter = PluginExporter.getInstance();
-
+                
                 if (exporter == null) {
                   throw new Exception("Unable to find suitable exporter for your version of Eclipse");
                 }
-
+                
                 FeatureExportInfo info = new FeatureExportInfo();
                 info.toDirectory = true;
                 info.useJarFormat = true;
@@ -447,7 +454,7 @@ public class DPPUtil {
                 info.destinationDirectory = file.toString();
                 info.zipFileName = null;
                 IPluginModelBase findModel = PluginRegistry.findModel(project);
-
+                
                 info.items = new IModel[] { findModel };
                 info.signingInfo = null;
                 info.qualifier = null;
@@ -455,20 +462,19 @@ public class DPPUtil {
                 if (findModel != null) {
                   version = findModel.getBundleDescription().getVersion().toString();
                 }
-
+                
                 if (version.endsWith("qualifier")) {
                   info.qualifier = exporter.getQualifier();
                   version = version.replaceAll("qualifier", info.qualifier);
                 }
                 String jarFile = null;
                 if (findModel != null)
-                  jarFile = file.toString() + File.separator + "plugins" + File.separator
-                  + findModel.getBundleDescription().getSymbolicName() + "_" + version + ".jar";
-
+                  jarFile = file.toString() + File.separator + "plugins" + File.separator + findModel.getBundleDescription().getSymbolicName() + "_" + version + ".jar";
+                
                 result.put(prjInfo, jarFile);
-
+                
                 IStatus exportResult = exporter.syncExportPlugins(info, new NullProgressMonitor());
-
+                
                 if (!exportResult.isOK()) {
                   if (exportResult.matches(IStatus.ERROR)) {
                     if (exportResult.getException() != null) {
@@ -493,7 +499,7 @@ public class DPPUtil {
     }
     return result;
   }
-
+  
   public static boolean isPluginProject(IProject selProject) {
     IPath prjPath = selProject.getProject().getLocation().append(".project");
     String prjLocation = prjPath.makeAbsolute().toOSString();
@@ -517,8 +523,7 @@ public class DPPUtil {
     IProjectDescription descr = null;
     try {
       if (!isOpen) {
-        descr = ResourcesPlugin.getWorkspace().loadProjectDescription(
-            selProject.getProject().getLocation().append(".project"));
+        descr = ResourcesPlugin.getWorkspace().loadProjectDescription(selProject.getProject().getLocation().append(".project"));
       } else {
         descr = selProject.getDescription();
       }
@@ -526,7 +531,7 @@ public class DPPUtil {
       DPPErrorHandler.processError(e);
       return false;
     }
-
+    
     boolean hasPluginNature = false;
     boolean hasJavaNature = false;
     String[] natureIds = descr.getNatureIds();
@@ -542,19 +547,18 @@ public class DPPUtil {
     if (!hasJavaNature || !hasPluginNature) {
       return false;
     }
-
     return true;
   }
-
+  
   protected static boolean isValidModel(IModel model) {
     return model != null && model instanceof IPluginModelBase;
   }
-
+  
   private static boolean hasBuildProperties(IPluginModelBase model) {
     File file = new File(model.getInstallLocation(), "build.properties");
     return file.exists();
   }
-
+  
   /**
    * Shows the error dialog with the given parent, title, message, reason.
    * 
@@ -570,7 +574,7 @@ public class DPPUtil {
   public static void showErrorDialog(Shell parent, String title, String message, String reason) {
     showDialog(parent, title, message, reason, null, null, IStatus.ERROR);
   }
-
+  
   /**
    * Shows the error dialog with the given parent, title, message, reason and
    * exception.
@@ -589,7 +593,7 @@ public class DPPUtil {
   public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e) {
     showDialog(parent, title, message, reason, e, null, IStatus.ERROR);
   }
-
+  
   /**
    * Shows the error dialog with the given parent, title, message, reason and
    * exception.
@@ -607,11 +611,10 @@ public class DPPUtil {
    * @param nested
    *            the nested exception
    */
-  public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e,
-      Throwable nested) {
+  public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e, Throwable nested) {
     showDialog(parent, title, message, reason, e, nested, IStatus.ERROR);
   }
-
+  
   /**
    * Shows the warning dialog with the given parent, title, message and
    * reason.
@@ -628,7 +631,7 @@ public class DPPUtil {
   public static void showWarningDialog(Shell parent, String title, String message, String reason) {
     showDialog(parent, title, message, reason, null, null, IStatus.WARNING);
   }
-
+  
   /**
    * Shows the information dialog with the given parent, title, message and
    * reason.
@@ -645,7 +648,7 @@ public class DPPUtil {
   public static void showInformationDialog(Shell parent, String title, String message, String reason) {
     showDialog(parent, title, message, reason, null, null, IStatus.INFO);
   }
-
+  
   /**
    * Shows the dialog with the given parent, title, message and reason.
    * 
@@ -661,7 +664,7 @@ public class DPPUtil {
   public static void showMessageDialog(Shell parent, String title, String message, String reason) {
     showDialog(parent, title, message, reason, null, null, IStatus.OK);
   }
-
+  
   /**
    * Shows the dialog with the given parent, title, message, reason, exception
    * and code of the status.
@@ -683,8 +686,7 @@ public class DPPUtil {
    *            <code>Status.ERROR</code>, <code>Status.INFO</code>,
    *            <code>Status.WARNING</code>, or <code>Status.CANCEL</code>
    */
-  private static void showDialog(Shell parent, String title, String message, String reason, Throwable e,
-      Throwable nested, int code) {
+  private static void showDialog(Shell parent, String title, String message, String reason, Throwable e, Throwable nested, int code) {
     if (title == null)
       title = ""; //$NON-NLS-1$
     if (message == null)
@@ -697,7 +699,7 @@ public class DPPUtil {
       ex = DPPUtilities.dumpToText(e);
       List sTokensList = DPPUtilities.getStringTokens(ex);
       Object[] sTokens = sTokensList.toArray();
-
+      
       for (int i = 0; i < sTokens.length; i++) {
         errorTable.add(new Status(code, DPActivator.PLUGIN_ID, 1, (String) sTokens[i], e));
       }
@@ -706,14 +708,14 @@ public class DPPUtil {
       ex = DPPUtilities.dumpToText(nested);
       List sTokensList = DPPUtilities.getStringTokens(ex);
       Object[] sTokens = sTokensList.toArray();
-
+      
       for (int i = 0; i < sTokens.length; i++) {
         errorTable.add(new Status(code, DPActivator.PLUGIN_ID, 1, (String) sTokens[i], null));
       }
     }
     ErrorDialog.openError(parent, title, message, getStatus(reason, code));
   }
-
+  
   public static IStatus getStatus(String reason, int code) {
     if (errorTable.size() == 0) {
       return new Status(code, DPActivator.PLUGIN_ID, 1, reason, null);
@@ -722,7 +724,7 @@ public class DPPUtil {
     errorTable.toArray(errors);
     return new MultiStatus(DPActivator.PLUGIN_ID, IStatus.OK, errors, reason, null);
   }
-
+  
   public static String getFileDialogPath(String path) {
     if (path == null || path.equals("")) {
       path = fileDialogLastSelection;
@@ -736,10 +738,10 @@ public class DPPUtil {
     }
     return path;
   }
-
+  
   public static boolean isAlreadyInTheTable(String bundleName, TableItem currentItem, int column) {
     Table table = currentItem.getParent();
-
+    
     for (int i = 0; i < table.getItems().length; i++) {
       if (!currentItem.equals(table.getItem(i)) && bundleName.equals(table.getItem(i).getText(column))) {
         return true;

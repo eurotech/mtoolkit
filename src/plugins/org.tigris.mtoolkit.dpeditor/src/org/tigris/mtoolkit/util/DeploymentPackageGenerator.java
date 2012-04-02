@@ -22,6 +22,9 @@ import java.util.jar.JarOutputStream;
 import java.util.zip.ZipException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
 
@@ -33,16 +36,16 @@ import org.tigris.mtoolkit.dpeditor.util.ResourceManager;
  * 
  */
 public class DeploymentPackageGenerator {
-
+  
   String error = "";
   String outputStream = "";
   String errorStream = "";
-
+  
   String baseDir = "";
   Vector baseDirPaths;
   private IProgressMonitor monitor;
   static String nl = "\r\n";
-
+  
   /**
    * This method generates a deployment package by the passed DPPFile object
    * 
@@ -51,7 +54,7 @@ public class DeploymentPackageGenerator {
    * @param projectRootPath
    *            the root path to the project. all paths are relative to it.
    */
-  public void generateDeploymentPackage(DPPFile dppFile,
+  public IStatus generateDeploymentPackage(DPPFile dppFile,
       String projectRootPath) {
     error = "";
     outputStream = "";
@@ -77,7 +80,7 @@ public class DeploymentPackageGenerator {
     boolean signBundles = dppFile.getSignBundles();
     for (int i = 0; i < dppFile.getBundleInfos().size(); i++) {
       if (monitor.isCanceled()) {
-        return;
+        return Status.CANCEL_STATUS;
       }
       BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos().elementAt(
           i);
@@ -88,19 +91,19 @@ public class DeploymentPackageGenerator {
         error = "The bundle "
             + bInfo.getBundleSymbolicName()
             + " does not exist.\n The Deployment Packages was not created";
-        return;
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, error);
       }
       File f = new File(getPath(projectRootPath, bInfo.getBundlePath()));
       if (!f.exists()) {
         error = "The bundle "
             + f.getAbsolutePath()
             + " does not exist.\n The Deployment Packages was not created";
-        return;
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, error);
       }
     }
     for (int i = 0; i < dppFile.getResourceInfos().size(); i++) {
       if (monitor.isCanceled()) {
-        return;
+        return Status.CANCEL_STATUS;
       }
       ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos()
           .elementAt(i);
@@ -112,7 +115,7 @@ public class DeploymentPackageGenerator {
         error = "The resource "
             + f.getAbsolutePath()
             + " does not exist.\n The Deployment Packages was not created";
-        return;
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, error);
       }
     }
     String manifest = generateManifest(dppFile);
@@ -137,7 +140,7 @@ public class DeploymentPackageGenerator {
       for (int i = 0; i < dppFile.getBundleInfos().size(); i++) {
         if (monitor.isCanceled()) {
           jos.close();
-          return;
+          return Status.CANCEL_STATUS;
         }
         BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos()
             .elementAt(i);
@@ -147,7 +150,7 @@ public class DeploymentPackageGenerator {
         }
         je = new JarEntry(bInfo.getName());
         jos.putNextEntry(je);
-
+        
         String signedBundlePath = null;
         if (signBundles && dppFile.getCertificateInfos().size() != 0) {
           String bundle = getPath(projectRootPath,
@@ -156,7 +159,7 @@ public class DeploymentPackageGenerator {
             if (monitor.isCanceled()) {
               if (j > 0)
                 new File(bundle).delete();
-              return;
+              return Status.CANCEL_STATUS;
             }
             final CertificateInfo ci = (CertificateInfo) dppFile
                 .getCertificateInfos().elementAt(j);
@@ -172,7 +175,7 @@ public class DeploymentPackageGenerator {
               tmpFile.delete();
               if (j > 0)
                 new File(bundle).delete();
-              return;
+              return UtilitiesPlugin.newStatus(IStatus.ERROR, error);
             }
             if (j > 0) // remove the old temporary file
               new File(bundle).delete();
@@ -195,11 +198,11 @@ public class DeploymentPackageGenerator {
         if (signedBundlePath != null)
           new File(signedBundlePath).delete();
       }
-
+      
       for (int i = 0; i < dppFile.getResourceInfos().size(); i++) {
         if (monitor.isCanceled()) {
           jos.close();
-          return;
+          return Status.CANCEL_STATUS;
         }
         ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos()
             .elementAt(i);
@@ -274,14 +277,15 @@ public class DeploymentPackageGenerator {
         }
       }
     }
+    return error.equals("") ? Status.OK_STATUS : UtilitiesPlugin.newStatus(IStatus.ERROR, error);
   }
-
+  
   private boolean timeout = false;
-
+  
   public void signDP(final DPPFile dppFile) {
     if (dppFile.getCertificateInfos().size() == 0)
       return;
-
+    
     for (int i = 0; i < dppFile.getCertificateInfos().size(); i++) {
       if (monitor.isCanceled()) {
         return;
@@ -298,9 +302,9 @@ public class DeploymentPackageGenerator {
       if (!signJar(dpName, null, ci))
         return;
     }
-
+    
   }
-
+  
   private boolean signJar(String jarName, String signedJar, CertificateInfo ci) {
     String jarSigner = CertUtils.getJarsignerLocation();
     if (jarSigner == null) {
@@ -323,7 +327,7 @@ public class DeploymentPackageGenerator {
     v.addElement(ci.getAlias());
     boolean ret = true;
     try {
-
+      
       final Process ps = Runtime.getRuntime().exec(
           (String[]) v.toArray(new String[0]));
       int result = -1;
@@ -345,7 +349,7 @@ public class DeploymentPackageGenerator {
         }
       };
       errorReader.start();
-
+      
       Thread outputReader = new Thread() {
         public void run() {
           Thread.currentThread()
@@ -410,7 +414,7 @@ public class DeploymentPackageGenerator {
     }
     return ret;
   }
-
+  
   private void genereateDefaultBuildProperties(DPPFile dppFile) {
     BuildInfo buildInfo = dppFile.getBuildInfo();
     String dppFileName = dppFile.getFile().getAbsolutePath();
@@ -428,14 +432,14 @@ public class DeploymentPackageGenerator {
       buildInfo.setAntFileName(dppFileName + "_build.xml");
     }
   }
-
+  
   private String getPath(String projectRootPath, String path) {
     if (path != null && path.startsWith("<.>")) {
       return projectRootPath + path.substring(3);
     }
     return path;
   }
-
+  
   /**
    * Generates the deployment package manifest for passed dpp file.
    * 
@@ -472,7 +476,7 @@ public class DeploymentPackageGenerator {
       Header header = (Header) otherHeaders.elementAt(i);
       manifest.append(getManifestLine(header.getKey(), header.getValue()));
     }
-
+    
     for (int i = 0; i < dppFile.getBundleInfos().size(); i++) {
       manifest.append(nl);
       BundleInfo bInfo = (BundleInfo) dppFile.getBundleInfos().elementAt(
@@ -497,7 +501,7 @@ public class DeploymentPackageGenerator {
             header.getValue()));
       }
     }
-
+    
     for (int i = 0; i < dppFile.getResourceInfos().size(); i++) {
       manifest.append(nl);
       ResourceInfo rInfo = (ResourceInfo) dppFile.getResourceInfos()
@@ -519,14 +523,14 @@ public class DeploymentPackageGenerator {
     manifest.append(nl);
     return manifest.toString();
   }
-
+  
   private String getManifestLine(String header, String value) {
     if (value == null) {
       return "";
     }
     return header + ": " + value + nl;
   }
-
+  
   private void getOptionsLine(String option, String value, Vector v) {
     if (value == null || value.length() == 0) {
       return;
@@ -534,14 +538,14 @@ public class DeploymentPackageGenerator {
     v.addElement(option);
     v.addElement(value);
   }
-
+  
   private String getAntOptionsLine(String option, String value) {
     if (value == null || value.length() == 0) {
       return "";
     }
     return option + "=\"" + value + "\" ";
   }
-
+  
   /**
    * this matehod generates a deployment package by the passed file
    * 
@@ -551,15 +555,16 @@ public class DeploymentPackageGenerator {
    * @param projectRootPath
    *            the root path to the project. all paths are relative to it.
    */
-  public void generateDeploymentPackage(File file, String projectRootPath)
+  public IStatus generateDeploymentPackage(File file, String projectRootPath)
       throws IOException {
     DPPFile dppFile = new DPPFile(file, projectRootPath);
-    generateDeploymentPackage(dppFile, projectRootPath);
-    if (error.equals("") && !monitor.isCanceled()) {
+    IStatus status = generateDeploymentPackage(dppFile, projectRootPath);
+    if (status.isOK()) {
       signDP(dppFile);
     }
+    return status;
   }
-
+  
   private String substituteSpecialXMLCharacters(String strToParse) {
     if (strToParse != null && !strToParse.equals("")) {
       strToParse = strToParse.replaceAll("&", "&amp;");
@@ -570,7 +575,7 @@ public class DeploymentPackageGenerator {
     }
     return strToParse;
   }
-
+  
   /**
    * This method generates an Ant script (xml) for headlessly building a
    * deployment package
@@ -615,7 +620,7 @@ public class DeploymentPackageGenerator {
           tempName.substring(0,
               tempName.lastIndexOf(File.separator)));
     }
-
+    
     // XML
     StringBuffer antFile = new StringBuffer();
     antFile.append("<?xml version=\"1.0\" ?>"
@@ -627,7 +632,7 @@ public class DeploymentPackageGenerator {
             + substituteSpecialXMLCharacters(calculateBaseDir(dppFile
                 .getBuildInfo().getAntFileName(), projectRootPath))
                 + "\" >" + nl + "");
-
+    
     Vector bundleInfos = dppFile.getBundleInfos();
     for (int i = 0; i < bundleInfos.size(); i++) {
       if (monitor.isCanceled()) {
@@ -637,12 +642,12 @@ public class DeploymentPackageGenerator {
       if (!fixPack || !bInfo.isMissing()) {
         String path = substituteSpecialXMLCharacters(calculateRelative(getPath(
             projectRootPath, (bInfo.getBundlePath()))));
-
+        
         antFile.append("<available property=\"file.exists.").append(
             path);
         antFile.append("\" file=\"").append(path).append("\"/>")
         .append(nl);
-
+        
         antFile.append("<target name=\"check.file.exists ")
         .append(path);
         antFile.append("\" unless=\"file.exists.").append(path)
@@ -653,14 +658,14 @@ public class DeploymentPackageGenerator {
         antFile.append("</target>").append(nl);
       }
     }
-
+    
     Vector resourceInfos = dppFile.getResourceInfos();
     for (int i = 0; i < resourceInfos.size(); i++) {
       if (monitor.isCanceled()) {
         return;
       }
       ResourceInfo rInfo = (ResourceInfo) resourceInfos.elementAt(i);
-
+      
       if (!fixPack || !rInfo.isMissing()) {
         String path = substituteSpecialXMLCharacters(calculateRelative(getPath(
             projectRootPath, (rInfo.getResourcePath()))));
@@ -668,7 +673,7 @@ public class DeploymentPackageGenerator {
             path);
         antFile.append("\" file=\"").append(path).append("\"/>")
         .append(nl);
-
+        
         antFile.append("<target name=\"check.file.exists ")
         .append(path);
         antFile.append("\" unless=\"file.exists.").append(path)
@@ -679,13 +684,13 @@ public class DeploymentPackageGenerator {
         antFile.append("</target>").append(nl);
       }
     }
-
+    
     antFile.append("<target name=\"all\">" + nl);
     String path = substituteSpecialXMLCharacters(getPath(projectRootPath,
         (dppFile.getBuildInfo().getBuildLocation())));
-
+    
     antFile.append("  <mkdir dir=\"" + path + "\"/>" + nl);
-
+    
     for (int i = 0; i < bundleInfos.size(); i++) {
       if (monitor.isCanceled()) {
         return;
@@ -710,7 +715,7 @@ public class DeploymentPackageGenerator {
             .append("\"/>").append(nl);
       }
     }
-
+    
     antFile.append("  <jar destfile=\""
         + substituteSpecialXMLCharacters(calculateRelative(getPath(
             projectRootPath, (dppFile.getBuildInfo()
@@ -749,14 +754,14 @@ public class DeploymentPackageGenerator {
     antFile.append("  </jar>" + nl + "");
     appendSigningData(antFile, dppFile, projectRootPath);
     antFile.append("</target>" + nl + "</project>" + nl + "");
-
+    
     String antFileName = dppFile.getBuildInfo().getAntFileName();
     File tmpAntFile = new File(antFileName);
     File tmpParentFile = tmpAntFile.getParentFile();
     if (!tmpParentFile.exists()) {
       tmpParentFile.mkdirs();
     }
-
+    
     FileOutputStream fos = new FileOutputStream(dppFile.getBuildInfo()
         .getAntFileName());
     fos.write(antFile.toString().getBytes());
@@ -767,7 +772,7 @@ public class DeploymentPackageGenerator {
     fos.write(generateManifest(dppFile).getBytes());
     fos.close();
   }
-
+  
   private void appendSignJarTag(StringBuffer antFile, DPPFile dppFile, String jarPath) {
     for (int i = 0; i < dppFile.getCertificateInfos().size(); i++) {
       if (monitor.isCanceled()) {
@@ -782,7 +787,7 @@ public class DeploymentPackageGenerator {
           getAntOptionsLine("storetype", substituteSpecialXMLCharacters(ci.getStoreType())) + "/>" + nl + "");
     }
   }
-
+  
   private void appendSigningData(StringBuffer antFile, DPPFile dppFile, String projectRootPath) {
     appendSignJarTag(antFile, dppFile, calculateRelative(getPath(projectRootPath, (dppFile.getBuildInfo().getBuildLocation() +
         File.separator + dppFile.getBuildInfo().getDpFileName()))));
@@ -797,7 +802,7 @@ public class DeploymentPackageGenerator {
       appendSignJarTag(antFile, dppFile, calculateRelative(getPath(projectRootPath, (((BundleInfo)(bundleInfos.get(i))).getBundlePath()))));
     }
   }
-
+  
   private String calculateRelative(String path) {
     if (baseDirPaths == null) {
       File f = new File(baseDir);
@@ -836,13 +841,13 @@ public class DeploymentPackageGenerator {
     }
     return path;
   }
-
+  
   private String stripDP(String dpFileName) {
     return dpFileName.substring(0, dpFileName.length() - 3);// cuts the
     // '.dp'
     // part
   }
-
+  
   private String calculateBaseDir(String antFileName, String projectRootPath) {
     File f = new File(antFileName).getParentFile();
     String antPath = f.getAbsolutePath();
@@ -869,7 +874,7 @@ public class DeploymentPackageGenerator {
     baseDir = antPath;
     return ".";
   }
-
+  
   /**
    * If the generation finished with a warning it may be took throug this
    * method
@@ -880,26 +885,26 @@ public class DeploymentPackageGenerator {
   public String getWarning() {
     return getError();
   }
-
+  
   public String getError() {
     return error;
   }
-
+  
   public String getOutput() {
     return errorStream + outputStream;
   }
-
+  
   public String getErrorStream() {
     return errorStream;
   }
-
+  
   public String getOutputStream() {
     return outputStream;
   }
-
+  
   public void setMonitor(IProgressMonitor monitor) {
     this.monitor = monitor;
-
+    
   }
-
+  
 }
