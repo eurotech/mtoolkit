@@ -29,9 +29,9 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
+import org.tigris.mtoolkit.maven.MavenConstants;
+import org.tigris.mtoolkit.maven.internal.MavenCorePlugin;
 
-import com.prosyst.tools.maven.MavenConstants;
-import com.prosyst.tools.maven.internal.MavenCorePlugin;
 
 public class MavenProcess {
 
@@ -124,10 +124,6 @@ public class MavenProcess {
 		return Runtime.getRuntime().exec(cmdLine, null, workingDir);
 	}
 
-	/*private static void captureOutput(Process process, OutputStream collectOutput) {
-  	captureOutput(process, collectOutput, collectOutput);
-  }*/
-
 	private static void captureOutput(Process process, OutputStream collectOutput, OutputStream collectError) {
 		new CaptureOutputJob(process, process.getInputStream(), collectOutput, process.toString() + "[stdout]").schedule();
 		new CaptureOutputJob(process, process.getErrorStream(), collectError, process.toString() + "[stderr]").schedule();
@@ -140,7 +136,6 @@ public class MavenProcess {
 	private static void waitForMavenBuild(Process process, IProgressMonitor monitor) throws CoreException {
 		// TODO: Redirect the maven output, so we can handle client requests
 		redirectOutputToStdout(process);
-		//captureOutput(process, new NullOutputStream());
 		MonitorProcessJob job = new MonitorProcessJob(process.toString(), process);
 		job.schedule();
 		try {
@@ -223,15 +218,4 @@ public class MavenProcess {
 			return exitValue;
 		}
 	}
-
-	/*private static class NullOutputStream extends OutputStream {
-  	@Override
-  	public void write(byte[] b, int off, int len) throws IOException {
-  	}
-
-  	@Override
-  	public void write(int b) throws IOException {
-  	}
-
-  }*/
 }

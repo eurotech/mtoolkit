@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package com.prosyst.tools.maven;
+package org.tigris.mtoolkit.maven;
 
 import java.io.File;
 
@@ -17,8 +17,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
+import org.tigris.mtoolkit.maven.internal.MavenCorePlugin;
 
-import com.prosyst.tools.maven.internal.MavenCorePlugin;
 
 /**
  * Grouping class for various utility methods, which helps dealing with Maven

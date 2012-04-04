@@ -13,8 +13,8 @@ package org.tigris.mtoolkit.maven.internal.images;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.tigris.mtoolkit.maven.internal.MavenCorePlugin;
 
-import com.prosyst.tools.maven.internal.MavenCorePlugin;
 
 public class ImageHolder {
 

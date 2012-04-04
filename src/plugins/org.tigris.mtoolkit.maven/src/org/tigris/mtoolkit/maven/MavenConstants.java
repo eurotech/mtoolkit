@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package com.prosyst.tools.maven;
+package org.tigris.mtoolkit.maven;
 
 public class MavenConstants {
 

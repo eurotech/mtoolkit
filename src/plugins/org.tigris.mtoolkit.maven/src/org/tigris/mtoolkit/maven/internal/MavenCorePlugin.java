@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package com.prosyst.tools.maven.internal;
+package org.tigris.mtoolkit.maven.internal;
 
 import java.util.List;
 

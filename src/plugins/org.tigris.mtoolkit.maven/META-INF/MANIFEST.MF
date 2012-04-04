@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Maven Integration Core Plugin
 Bundle-SymbolicName: org.tigris.mtoolkit.maven;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.prosyst.tools.maven.internal.MavenCorePlugin
+Bundle-Activator: org.tigris.mtoolkit.maven.internal.MavenCorePlugin
 Bundle-Vendor: Tigris.org
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -18,5 +18,5 @@ Import-Package: org.eclipse.debug.core,
  org.eclipse.m2e.core,
  org.eclipse.m2e.core.embedder,
  org.eclipse.m2e.core.project
-Export-Package: com.prosyst.tools.maven;version="1.0.0",
+Export-Package: org.tigris.mtoolkit.maven;version="1.0.0",
  org.tigris.mtoolkit.maven.launching;version="1.0.0"

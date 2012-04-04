@@ -31,11 +31,11 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
+import org.tigris.mtoolkit.maven.MavenUtils;
+import org.tigris.mtoolkit.maven.internal.MavenCorePlugin;
 import org.tigris.mtoolkit.maven.internal.images.ImageHolder;
 import org.tigris.mtoolkit.maven.launching.MavenProcess;
 
-import com.prosyst.tools.maven.MavenUtils;
-import com.prosyst.tools.maven.internal.MavenCorePlugin;
 
 public class InstallationProvider implements InstallationItemProvider {
 
