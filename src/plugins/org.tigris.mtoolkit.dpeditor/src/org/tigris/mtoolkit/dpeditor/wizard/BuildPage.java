@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.pde.internal.ui.PDEPlugin;
 import org.eclipse.pde.internal.ui.util.FileExtensionFilter;
@@ -481,7 +480,6 @@ public class BuildPage extends WizardPage implements ModifyListener,
 	 * Sets the chosen deployment package file in the BuildInfo of the given
 	 * deployment package file.
 	 * 
-	 * @see Wizard#performFinish
 	 */
 	public boolean performFinish() {
 		String customBuildPath = dpFileText.getText();

@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.pde.internal.ui.PDEPlugin;
 import org.eclipse.pde.internal.ui.util.FileExtensionFilter;
@@ -519,7 +518,6 @@ public class AntPage extends WizardPage implements ModifyListener, KeyListener,
 	 * Sets the chosen ant file in the BuildInfo of the given deployment package
 	 * file.
 	 * 
-	 * @see Wizard#performFinish
 	 */
 	public boolean performFinish() {
 		try {
