@@ -5,6 +5,13 @@
             <message_arguments>
                 <message_argument value="FrameworkImpl"/>
                 <message_argument value="FrameworkConnectorFactory"/>
+                <message_argument value="connectFramework(DeviceConnector, FrameworkImpl)"/>
+            </message_arguments>
+        </filter>
+        <filter id="643846161">
+            <message_arguments>
+                <message_argument value="FrameworkImpl"/>
+                <message_argument value="FrameworkConnectorFactory"/>
                 <message_argument value="createPMPConnection(DeviceConnector, FrameworkImpl, String, boolean)"/>
             </message_arguments>
         </filter>
