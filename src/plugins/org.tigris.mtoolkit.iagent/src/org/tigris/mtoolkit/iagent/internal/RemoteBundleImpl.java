@@ -23,7 +23,7 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 
-public class RemoteBundleImpl implements RemoteBundle {
+public final class RemoteBundleImpl implements RemoteBundle {
 
 	private static MethodSignature GET_BUNDLE_STATE_METHOD = new MethodSignature("getBundleState",
 			MethodSignature.BID_ARGS, true);
@@ -34,7 +34,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 	private static MethodSignature GET_BUNDLE_LOCATION_METHOD = new MethodSignature("getBundleLocation",
 			MethodSignature.BID_ARGS, true);
 	private static MethodSignature START_BUNDLE_METHOD = new MethodSignature("startBundle", new String[] { "long",
-			"int" }, true);
+	"int" }, true);
 	private static MethodSignature STOP_BUNDLE_METHOD = new MethodSignature("stopBundle",
 			new String[] { "long", "int" }, true);
 	private static MethodSignature UPDATE_BUNDLE_METHOD = new MethodSignature("updateBundle", new String[] { "long",
@@ -69,7 +69,6 @@ public class RemoteBundleImpl implements RemoteBundle {
 	private Long id;
 	private String location;
 	public boolean uninstalled = false;
-
 	private DeploymentManagerImpl commands;
 
 	public RemoteBundleImpl(DeploymentManagerImpl deploymentCommands, Long id) {
@@ -84,10 +83,20 @@ public class RemoteBundleImpl implements RemoteBundle {
 		this.location = location;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getBundleId()
+	 */
 	public long getBundleId() {
 		return id.longValue();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getHeaders(java.lang.String)
+	 */
 	public Dictionary getHeaders(String locale) throws IAgentException {
 		debug("[getHeaders] >>> locale: " + locale);
 		checkBundleState();
@@ -101,6 +110,12 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return headers;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getHeader(java.lang.String,
+	 * java.lang.String)
+	 */
 	public String getHeader(String headerName, String locale) throws IAgentException {
 		debug("[getHeader] >>> headerName: " + headerName + "; locale: " + locale);
 		checkBundleState();
@@ -119,6 +134,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#isBundleSigned()
+	 */
 	public boolean isBundleSigned() throws IAgentException {
 		debug("[isSigned] >>>");
 		boolean isSigned = false;
@@ -134,13 +154,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return isSigned;
 	}
 
-	private void checkBundleState() throws IAgentException {
-		if (uninstalled) {
-			debug("[checkBundleState] Remote bundle has been uninstalled");
-			throw new IAgentException("Remote bundle has been uninstalled", IAgentErrors.ERROR_BUNDLE_UNINSTALLED);
-		}
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getLocation()
+	 */
 	public String getLocation() throws IAgentException {
 		debug("[getLocation] >>>");
 		checkBundleState();
@@ -157,10 +175,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return location;
 	}
 
-	private RemoteObject getBundleAdmin() throws IAgentException {
-		return commands.getBundleAdmin();
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getState()
+	 */
 	public int getState() throws IAgentException {
 		if (uninstalled) {
 			debug("[getState] bundle state: " + UNINSTALLED);
@@ -173,6 +192,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return state.intValue();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getSymbolicName()
+	 */
 	public String getSymbolicName() throws IAgentException {
 		debug("[getSymbolicName] >>>");
 		checkBundleState();
@@ -191,6 +215,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getVersion()
+	 */
 	public String getVersion() throws IAgentException {
 		debug("[getVersion] >>>");
 		checkBundleState();
@@ -199,6 +228,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return headerValue != null ? headerValue.trim() : null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#resolve()
+	 */
 	public boolean resolve() throws IAgentException {
 		debug("[resolve] >>> Trying to resolve bundle...");
 		if (!uninstalled && getState() == UNINSTALLED)
@@ -210,6 +244,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return resolvingResult;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#start(int)
+	 */
 	public void start(int flags) throws IAgentException {
 		debug("[start] >>> flags: " + flags);
 		checkBundleState();
@@ -218,6 +257,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		checkBundleErrorResult(error);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#stop(int)
+	 */
 	public void stop(int flags) throws IAgentException {
 		debug("[stop] flags: " + flags);
 		checkBundleState();
@@ -226,18 +270,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		checkBundleErrorResult(error);
 	}
 
-	public void uninstall() throws IAgentException {
-		debug("[uninstall] >>>");
-		checkBundleState();
-		Error err = (Error) UNINSTALL_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] { id });
-		debug("[uninstall] Bundle uninstallation result: " + err);
-		if (err == null) {
-			uninstalled = true;
-			return;
-		}
-		checkBundleErrorResult(err);
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#update(java.io.InputStream)
+	 */
 	public void update(InputStream in) throws IAgentException {
 		debug("[update] >>> in: " + in);
 		if (in == null) {
@@ -249,17 +286,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		checkBundleErrorResult(err);
 	}
 
-	private void checkBundleErrorResult(Error err) throws IAgentException {
-		if (err == null)
-			return;
-		else if (err.getCode() == Error.BUNDLE_UNINSTALLED_CODE) {
-			uninstalled = true;
-			checkBundleState();
-		} else {
-			throw new IAgentException(err);
-		}
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getLastModified()
+	 */
 	public long getLastModified() throws IAgentException {
 		debug("[getLastModified] >>>");
 		checkBundleState();
@@ -274,6 +305,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return lastModified.longValue();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getRegisteredServices()
+	 */
 	public RemoteService[] getRegisteredServices() throws IAgentException {
 		debug("[getRegisteredServices] >>>");
 		checkBundleState();
@@ -283,6 +319,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 			debug("[getRegisteredServices] remote call result is: " + servicesProps + " -> bundle is uninstalled");
 			uninstalled = true;
 			checkBundleState();
+			return new RemoteService[0];
 		}
 		RemoteService[] services = new RemoteService[servicesProps.length];
 		for (int i = 0; i < servicesProps.length; i++) {
@@ -293,6 +330,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return services;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getServicesInUse()
+	 */
 	public RemoteService[] getServicesInUse() throws IAgentException {
 		debug("[getServicesInUse] >>>");
 		checkBundleState();
@@ -302,6 +344,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 			debug("[getServicesInUse] remote call result is: " + servicesProps + " -> bundle is uninstalled");
 			uninstalled = true;
 			checkBundleState();
+			return new RemoteService[0];
 		}
 		RemoteService[] services = new RemoteService[servicesProps.length];
 		for (int i = 0; i < servicesProps.length; i++) {
@@ -312,6 +355,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return services;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getFragments()
+	 */
 	public RemoteBundle[] getFragments() throws IAgentException {
 		debug("[getFragments] >>>");
 		checkBundleState();
@@ -320,6 +368,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 			debug("[getFragments] remote call result is: " + fragmentBundleIDs + " -> bundle is uninstalled");
 			uninstalled = true;
 			checkBundleState();
+			return null;
 		}
 		if (fragmentBundleIDs.length == 0) {
 			debug("[getFragments] No fragment bundles");
@@ -333,6 +382,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return fragmentRemoteBundles;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getHosts()
+	 */
 	public RemoteBundle[] getHosts() throws IAgentException {
 		debug("[getHosts] >>>");
 		checkBundleState();
@@ -341,6 +395,7 @@ public class RemoteBundleImpl implements RemoteBundle {
 			debug("[getHosts] remote call result is: " + hostBundleIDs + " -> bundle is uninstalled");
 			uninstalled = true;
 			checkBundleState();
+			return null;
 		}
 		if (hostBundleIDs.length == 0) {
 			debug("[getHosts] No host bundles");
@@ -354,6 +409,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return hostRemoteBundles;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getType()
+	 */
 	public int getType() throws IAgentException {
 		debug("[getType] >>>");
 		checkBundleState();
@@ -370,18 +430,11 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return bundleType.intValue();
 	}
 
-	private final void debug(String message) {
-		DebugUtils.debug(this, message);
-	}
-
-	private final void info(String message) {
-		DebugUtils.info(this, message);
-	}
-
-	public String toString() {
-		return "RemoteBundle@" + Integer.toHexString(System.identityHashCode(this)) + "[" + id + "][" + location + "]";
-	}
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.tigris.mtoolkit.iagent.RemoteBundle#getBundleStartLevel()
+	 */
 	public int getBundleStartLevel() throws IAgentException {
 		debug("[getBundleStartLevel] >>>");
 		checkBundleState();
@@ -389,6 +442,12 @@ public class RemoteBundleImpl implements RemoteBundle {
 		return bundleStartLevel.intValue();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.iagent.RemoteBundle#getResource(java.lang.String)
+	 */
 	public InputStream getResource(String name) throws IAgentException {
 		if (name == null) {
 			throw new IllegalArgumentException();
@@ -405,6 +464,58 @@ public class RemoteBundleImpl implements RemoteBundle {
 			return new RemoteReader((RemoteObject) res);
 		}
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.tigris.mtoolkit.iagent.RemotePackage#uninstall(java.util.Dictionary)
+	 */
+	public void uninstall(Dictionary params) throws IAgentException {
+		debug("[uninstall] >>>");
+		checkBundleState();
+		Error err = (Error) UNINSTALL_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] { id });
+		debug("[uninstall] Bundle uninstallation result: " + err);
+		if (err == null) {
+			uninstalled = true;
+			return;
+		}
+		checkBundleErrorResult(err);
+	}
+
+	public String toString() {
+		return "RemoteBundle@" + Integer.toHexString(System.identityHashCode(this)) + "[" + id + "][" + location + "]";
+	}
+
+	private void checkBundleErrorResult(Error err) throws IAgentException {
+		if (err == null)
+			return;
+		else if (err.getCode() == Error.BUNDLE_UNINSTALLED_CODE) {
+			uninstalled = true;
+			checkBundleState();
+		} else {
+			throw new IAgentException(err);
+		}
+	}
+
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
+	}
+
+	private final void info(String message) {
+		DebugUtils.info(this, message);
+	}
+
+	private void checkBundleState() throws IAgentException {
+		if (uninstalled) {
+			debug("[checkBundleState] Remote bundle has been uninstalled");
+			throw new IAgentException("Remote bundle has been uninstalled", IAgentErrors.ERROR_BUNDLE_UNINSTALLED);
+		}
+	}
+
+	private RemoteObject getBundleAdmin() throws IAgentException {
+		return commands.getBundleAdmin();
 	}
 
 }

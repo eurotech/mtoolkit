@@ -49,217 +49,216 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Framewo
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public final class ConnectFrameworkJob extends Job {
-	private static final List connectingFrameworks = new ArrayList();
+  private static final List connectingFrameworks = new ArrayList();
 
-	private Framework fw;
+  private Framework fw;
 
-	public ConnectFrameworkJob(Framework framework) {
-		super(NLS.bind(Messages.connect_framework, framework.getName()));
-		this.fw = framework;
-	}
+  public ConnectFrameworkJob(Framework framework) {
+    super(NLS.bind(Messages.connect_framework, framework.getName()));
+    this.fw = framework;
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.
-	 * IProgressMonitor)
-	 */
-	public IStatus run(final IProgressMonitor monitor) {
-		try {
-			LM.verify(new NullProgressMonitor());
-		} catch (CoreException e) {
-			return e.getStatus();
-		}
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.
+   * IProgressMonitor)
+   */
+  @Override
+  public IStatus run(final IProgressMonitor monitor) {
+    try {
+      LM.verify(new NullProgressMonitor());
+    } catch (CoreException e) {
+      return e.getStatus();
+    }
 
-		monitor.beginTask(NLS.bind(Messages.connect_framework, fw.getName()), 1);
+    monitor.beginTask(NLS.bind(Messages.connect_framework, fw.getName()), 1);
 
-		synchronized (connectingFrameworks) {
-			// there is already job for this fw, so wait that job
-			// otherwise, start connecting
-			if (connectingFrameworks.contains(fw)) {
-				do {
-					try {
-						connectingFrameworks.wait();
-					} catch (InterruptedException e) {
-					}
-					if (monitor.isCanceled()) {
-						monitor.done();
-						return Status.CANCEL_STATUS;
-					}
-				} while (connectingFrameworks.contains(fw));
-				monitor.done();
-				if (fw.isConnected()) {
-					return Status.OK_STATUS;
-				} else {
-					return Util.newStatus(IStatus.ERROR, "Could not connect to framework " + fw.getName(), null);
-				}
-			}
-			connectingFrameworks.add(fw);
-		}
+    synchronized (connectingFrameworks) {
+      // there is already job for this fw, so wait that job
+      // otherwise, start connecting
+      if (connectingFrameworks.contains(fw)) {
+        do {
+          try {
+            connectingFrameworks.wait();
+          } catch (InterruptedException e) {
+          }
+          if (monitor.isCanceled()) {
+            monitor.done();
+            return Status.CANCEL_STATUS;
+          }
+        } while (connectingFrameworks.contains(fw));
+        monitor.done();
+        if (fw.isConnected()) {
+          return Status.OK_STATUS;
+        } else {
+          return Util.newStatus(IStatus.ERROR, "Could not connect to framework " + fw.getName(), null);
+        }
+      }
+      connectingFrameworks.add(fw);
+    }
 
-		DeviceConnector connector = fw.getConnector();
-		try {
-			if (connector != null && connector.isActive()) {
-				FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl) fw, fw.getName(),
-						((FrameworkImpl) fw).autoConnected);
-			} else {
-				IMemento config = ((FrameworkImpl) fw).getConfig();
-				String id = null;
-				String transportType = null;
-				Dictionary aConnProps = null;
+    DeviceConnector connector = fw.getConnector();
+    try {
+      if (connector != null && connector.isActive()) {
+        FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl) fw, fw.getName(),
+            ((FrameworkImpl) fw).autoConnected);
+      } else {
+        IMemento config = ((FrameworkImpl) fw).getConfig();
+        String id = null;
+        String transportType = null;
+        Dictionary aConnProps = null;
 
-				String providerID = config.getString(ConstantsDistributor.TRANSPORT_PROVIDER_ID);
-				List providers = FrameworkPanel.obtainDeviceTypeProviders(null);
-				for (int i = 0; i < providers.size(); i++) {
-					DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);
-					if (providerID.equals(provider.getTypeId())) {
-						try {
-							transportType = provider.getProvider().getTransportType();
-							aConnProps = provider.getProvider().load(config);
-							id = (String) aConnProps.get(Framework.FRAMEWORK_ID);
-						} catch (CoreException e) {
-							FrameworkPlugin.log(e.getStatus());
-						}
-						break;
-					}
-				}
+        String providerID = config.getString(ConstantsDistributor.TRANSPORT_PROVIDER_ID);
+        List providers = FrameworkPanel.obtainDeviceTypeProviders(null);
+        for (int i = 0; i < providers.size(); i++) {
+          DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);
+          if (providerID.equals(provider.getTypeId())) {
+            try {
+              transportType = provider.getProvider().getTransportType();
+              aConnProps = provider.getProvider().load(config);
+              id = (String) aConnProps.get(Framework.FRAMEWORK_ID);
+            } catch (CoreException e) {
+              FrameworkPlugin.log(e.getStatus());
+            }
+            break;
+          }
+        }
 
-				if (transportType != null && id != null) {
-					if (aConnProps == null) {
-						aConnProps = new Hashtable();
-					}
-					IStatus rStatus = null;
-					try {
-						DeviceConnector conn = DeviceConnector.connect(transportType, id, aConnProps, null);
-						FrameworkConnectorFactory.connectFramework(conn, fw.getName());
-					} catch (IAgentException e) {
-						if (monitor.isCanceled()) {
-							return Status.CANCEL_STATUS;
-						}
-						if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT) {
-							handleConnectionFailure(e);
-							monitor.setCanceled(true);
-						} else {
-							rStatus = Util.handleIAgentException(e);
-						}
-					} catch (IllegalStateException e) {
-						rStatus = Util.handleIAgentException(new IAgentException(e.getMessage(),
-								IAgentErrors.ERROR_CANNOT_CONNECT, e));
-					}
-					if (rStatus != null) {
-						monitor.done();
-						return rStatus;
-					}
-				} else {
-					errorProviderNotFound();
-				}
-			}
-		} finally {
-			// remove the framework in any case
-			synchronized (connectingFrameworks) {
-				connectingFrameworks.remove(fw);
-				connectingFrameworks.notifyAll();
-			}
-		}
-		monitor.done();
-		if (monitor.isCanceled()) {
-			return Status.CANCEL_STATUS;
-		}
-		return Status.OK_STATUS;
-	}
+        if (transportType != null && id != null) {
+          if (aConnProps == null) {
+            aConnProps = new Hashtable();
+          }
+          IStatus rStatus = null;
+          try {
+            DeviceConnector conn = DeviceConnector.connect(transportType, id, aConnProps, null);
+            FrameworkConnectorFactory.connectFramework(conn, (FrameworkImpl) fw);
+          } catch (IAgentException e) {
+            if (monitor.isCanceled()) {
+              return Status.CANCEL_STATUS;
+            }
+            if (e.getErrorCode() == IAgentErrors.ERROR_CANNOT_CONNECT) {
+              handleConnectionFailure(e);
+              monitor.setCanceled(true);
+            } else {
+              rStatus = Util.handleIAgentException(e);
+            }
+          } catch (IllegalStateException e) {
+            rStatus = Util.handleIAgentException(new IAgentException(e.getMessage(), IAgentErrors.ERROR_CANNOT_CONNECT, e));
+          }
+          if (rStatus != null) {
+            monitor.done();
+            return rStatus;
+          }
+        } else {
+          errorProviderNotFound();
+        }
+      }
+    } finally {
+      // remove the framework in any case
+      synchronized (connectingFrameworks) {
+        connectingFrameworks.remove(fw);
+        connectingFrameworks.notifyAll();
+      }
+    }
+    monitor.done();
+    if (monitor.isCanceled()) {
+      return Status.CANCEL_STATUS;
+    }
+    return Status.OK_STATUS;
+  }
 
-	public static boolean isConnecting(FrameworkImpl fw) {
-		synchronized (connectingFrameworks) {
-			return connectingFrameworks.contains(fw);
-		}
-	}
+  public static boolean isConnecting(FrameworkImpl fw) {
+    synchronized (connectingFrameworks) {
+      return connectingFrameworks.contains(fw);
+    }
+  }
 
-	private static void errorProviderNotFound() {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		display.syncExec(new Runnable() {
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see java.lang.Runnable#run()
-			 */
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				MessageDialog.openError(shell, "Error", "Could not connect to framework. The selected "
-						+ "connection type provider is no more available. Please select another connection type.");
-			}
-		});
-	}
+  private static void errorProviderNotFound() {
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    display.syncExec(new Runnable() {
+      /*
+       * (non-Javadoc)
+       * 
+       * @see java.lang.Runnable#run()
+       */
+      public void run() {
+        Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+        MessageDialog.openError(shell, "Error", "Could not connect to framework. The selected "
+            + "connection type provider is no more available. Please select another connection type.");
+      }
+    });
+  }
 
-	private void handleConnectionFailure(final IAgentException e) {
-		final Display display = PlatformUI.getWorkbench().getDisplay();
-		display.asyncExec(new Runnable() {
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see java.lang.Runnable#run()
-			 */
-			public void run() {
-				String[] buttons = { Messages.close_button_label, Messages.get_iagent_button_label };
-				String message = Messages.connection_failed;
-				if (e != null) {// add cause for connection failed
-					message += "\nCause: " + e.getMessage();
-					Throwable cause = e.getCauseException();
-					if (cause != null) {
-						message += " (" + cause.getLocalizedMessage() + ")";
-					}
-					FrameworkPlugin.error(e);
-				}
-				message += "\n\n" + Messages.rcp_bundle_missing_message;
-				MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), Messages.rcp_bundle_missing_title,
-						null, message, MessageDialog.INFORMATION, buttons, 0);
-				dialog.setBlockOnOpen(true);
-				dialog.open();
-				if (dialog.getReturnCode() == 1) {
-					// get IAgent button has been selected
-					InputStream iagentInput = FrameworkPlugin.getIAgentBundleAsStream();
-					OutputStream output = null;
-					try {
-						if (iagentInput == null)
-							// TODO: Add dialog here
-							return;
+  private void handleConnectionFailure(final IAgentException e) {
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    display.asyncExec(new Runnable() {
+      /*
+       * (non-Javadoc)
+       * 
+       * @see java.lang.Runnable#run()
+       */
+      public void run() {
+        String[] buttons = { Messages.close_button_label, Messages.get_iagent_button_label };
+        String message = Messages.connection_failed;
+        if (e != null) {// add cause for connection failed
+          message += "\nCause: " + e.getMessage();
+          Throwable cause = e.getCauseException();
+          if (cause != null) {
+            message += " (" + cause.getLocalizedMessage() + ")";
+          }
+          FrameworkPlugin.error(e);
+        }
+        message += "\n\n" + Messages.rcp_bundle_missing_message;
+        MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), Messages.rcp_bundle_missing_title, null, message,
+            MessageDialog.INFORMATION, buttons, 0);
+        dialog.setBlockOnOpen(true);
+        dialog.open();
+        if (dialog.getReturnCode() == 1) {
+          // get IAgent button has been selected
+          InputStream iagentInput = FrameworkPlugin.getIAgentBundleAsStream();
+          OutputStream output = null;
+          try {
+            if (iagentInput == null)
+              // TODO: Add dialog here
+              return;
 
-						FileDialog saveDialog = new FileDialog(display.getActiveShell(), SWT.SAVE);
-						saveDialog.setText(Messages.save_as_dialog_title);
-						String[] filterExt = { "*.jar" }; //$NON-NLS-1$
-						saveDialog.setFilterExtensions(filterExt);
-						// TODO: initial filename setting doesn't work on Mac OS
-						// X
-						saveDialog.setFileName("iagent.rpc.jar");
-						String path = saveDialog.open();
-						if (path == null)
-							return;
-						output = new FileOutputStream(path);
+            FileDialog saveDialog = new FileDialog(display.getActiveShell(), SWT.SAVE);
+            saveDialog.setText(Messages.save_as_dialog_title);
+            String[] filterExt = { "*.jar" }; //$NON-NLS-1$
+            saveDialog.setFilterExtensions(filterExt);
+            // TODO: initial filename setting doesn't work on Mac OS
+            // X
+            saveDialog.setFileName("iagent.rpc.jar");
+            String path = saveDialog.open();
+            if (path == null)
+              return;
+            output = new FileOutputStream(path);
 
-						int bytesRead = 0;
-						byte[] buffer = new byte[1024];
+            int bytesRead = 0;
+            byte[] buffer = new byte[1024];
 
-						while ((bytesRead = iagentInput.read(buffer)) != -1) {
-							output.write(buffer, 0, bytesRead);
-						}
+            while ((bytesRead = iagentInput.read(buffer)) != -1) {
+              output.write(buffer, 0, bytesRead);
+            }
 
-					} catch (IOException e1) {
-						StatusManager.getManager().handle(
-								Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle", e1));
-					} finally {
-						if (output != null)
-							try {
-								output.close();
-							} catch (IOException e) {
-							}
-						if (iagentInput != null)
-							try {
-								iagentInput.close();
-							} catch (IOException e) {
-							}
-					}
-				}
-			}
-		});
+          } catch (IOException e1) {
+            StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle", e1));
+          } finally {
+            if (output != null)
+              try {
+                output.close();
+              } catch (IOException e) {
+              }
+            if (iagentInput != null)
+              try {
+                iagentInput.close();
+              } catch (IOException e) {
+              }
+          }
+        }
+      }
+    });
 
-	}
+  }
 }

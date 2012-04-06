@@ -14,6 +14,7 @@ public final class InstallationConstants {
   //Installation item processor properties/arguments
   public static final String TESTING_SUPPORTED = "testing_supported"; //$NON-NLS-1$
   public static final String START_BUNDLES = "start_bundles"; //$NON-NLS-1$
+  public static final String CHECK_DEPENDENCIES = "check_dependencies"; //$NON-NLS-1$
 
   // Signing contents
   public static final String CERT_ALIAS = "certificate-alias"; //$NON-NLS-1$

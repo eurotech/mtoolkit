@@ -17,22 +17,28 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
+import org.tigris.mtoolkit.iagent.RemotePackage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public interface FrameworkProcessorExtension {
-  static final int PRIORITY_LOW = 0;
-  static final int PRIORITY_NORMAL = 5;
-  static final int PRIORITY_HIGH = 10;
-  static final int PRIORITY_NOT_SUPPPORTED = -1;
+	static final int PRIORITY_LOW = 0;
+	static final int PRIORITY_NORMAL = 5;
+	static final int PRIORITY_HIGH = 10;
+	static final int PRIORITY_NOT_SUPPPORTED = -1;
 
-  String getName();
+	String getName();
 
-  Image getImage();
+	Image getImage();
 
-  String[] getSupportedMimeTypes();
+	String[] getSupportedMimeTypes();
 
-  int getPriority(InstallationItem item);
+	int getPriority(InstallationItem item);
 
-  boolean processItem(InstallationItem item, List<InstallationItem> dependencies, Map preparationProps,
-      boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException;
+	boolean processItem(InstallationItem item, 
+						List<InstallationItem> dependencies, 
+						List<RemotePackage> installed,
+						Map preparationProps,
+						boolean autoStart, 
+						Framework framework, 
+						IProgressMonitor monitor) throws CoreException;
 }

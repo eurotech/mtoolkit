@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.osgimanagement;
 
 import java.io.File;
-import java.util.Dictionary;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -38,132 +37,117 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
  */
 public class Util {
 
-	public static IStatus handleIAgentException(IAgentException e) {
-		Throwable cause = e.getCauseException() != null ? e.getCauseException() : e;
-		return Util.newStatus(IStatus.ERROR, getErrorMessage(e), cause);
-	}
+  public static IStatus handleIAgentException(IAgentException e) {
+    Throwable cause = e.getCauseException() != null ? e.getCauseException() : e;
+    return Util.newStatus(IStatus.ERROR, getErrorMessage(e), cause);
+  }
 
-	public static IStatus newStatus(String message, IStatus e) {
-		return new MultiStatus(FrameworkPlugin.PLUGIN_ID, 0, new IStatus[] { e }, message, null);
-	}
+  public static IStatus newStatus(String message, IStatus e) {
+    return new MultiStatus(FrameworkPlugin.PLUGIN_ID, 0, new IStatus[] { e }, message, null);
+  }
 
-	public static IStatus newStatus(int severity, String message, Throwable t) {
-		return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
-	}
+  public static IStatus newStatus(int severity, String message, Throwable t) {
+    return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
+  }
 
-	private static String getErrorMessage(IAgentException e) {
-		String msg = e.getMessage();
-		if (msg == null) {
-			msg = Messages.operation_failed;
-			Throwable cause = e.getCauseException();
-			if (cause != null && cause.getMessage() != null) {
-				msg += " " + cause.getMessage(); //$NON-NLS-1$
-			}
-		}
-		return msg;
-	}
+  private static String getErrorMessage(IAgentException e) {
+    String msg = e.getMessage();
+    if (msg == null) {
+      msg = Messages.operation_failed;
+      Throwable cause = e.getCauseException();
+      if (cause != null && cause.getMessage() != null) {
+        msg += " " + cause.getMessage(); //$NON-NLS-1$
+      }
+    }
+    return msg;
+  }
 
-	/**
-	 * @since 6.0
-	 */
-	public static void throwException(int severity, String message, Throwable t) throws CoreException {
-		throw newException(severity, message, t);
-	}
+  /**
+   * @since 6.0
+   */
+  public static void throwException(int severity, String message, Throwable t) throws CoreException {
+    throw newException(severity, message, t);
+  }
 
-	/**
-	 * @since 6.0
-	 */
-	public static CoreException newException(int severity, String message, Throwable t) {
-		return new CoreException(newStatus(severity, message, t));
-	}
+  /**
+   * @since 6.0
+   */
+  public static CoreException newException(int severity, String message, Throwable t) {
+    return new CoreException(newStatus(severity, message, t));
+  }
 
-	/**
-	 * @since 6.0
-	 */
-	public static Framework addFramework(DeviceConnector connector, IProgressMonitor monitor) throws CoreException {
-		if (!FrameworkPreferencesPage.isAutoConnectEnabled()) {
-			return null;
-		}
-		Dictionary connProps = connector.getProperties();
-		String frameWorkName = FrameworkConnectorFactory.generateFrameworkName(connProps);
-		return addFramework(connector, frameWorkName, monitor);
-	}
+  /**
+   * @since 6.0
+   */
+  public static Framework addFramework(DeviceConnector connector, IProgressMonitor monitor) throws CoreException {
+    boolean autoConnectEnabled = FrameworkPreferencesPage.isAutoConnectEnabled();
+    String fwName = FrameworkConnectorFactory.generateFrameworkName(connector.getProperties());
+    FrameworkImpl fw = new FrameworkImpl(fwName, true);
+    try {
+      if (!connector.getVMManager().isVMActive()) {
+        throw newException(IStatus.ERROR, Messages.connection_failed, null);
+      }
+      if (autoConnectEnabled) {
+        FrameWorkView.getTreeRoot().addElement(fw);
+      }
+      fw.connect(connector, SubMonitor.convert(monitor));
+    } catch (IAgentException e) {
+      if (autoConnectEnabled) {
+        FrameWorkView.getTreeRoot().removeElement(fw);
+      }
+      throw newException(IStatus.ERROR, Messages.connection_failed, e);
+    }
+    return fw;
+  }
 
-	public static Framework addFramework(DeviceConnector connector, String name, IProgressMonitor monitor)
-			throws CoreException {
-		if (!FrameworkPreferencesPage.isAutoConnectEnabled()) {
-			return null;
-		}
-		FrameworkImpl fw = null;
-		boolean success = false;
-		try {
-			fw = new FrameworkImpl(name, true);
-			if (!connector.getVMManager().isVMActive()) {
-				String message = Messages.connection_failed;
-				throw newException(IStatus.ERROR, message, null);
-			}
-			FrameWorkView.getTreeRoot().addElement(fw);
-			fw.connect(connector, SubMonitor.convert(monitor));
-			success = true;
-			return fw;
-		} catch (IAgentException e) {
-			throw newException(IStatus.ERROR, Messages.connection_failed, e);
-		} finally {
-			if (!success && fw != null) {
-				FrameWorkView.getTreeRoot().removeElement(fw);
-			}
-		}
-	}
+  public static Set<String> getSystemBundles(Framework fw) {
+    if (fw == null) {
+      return FrameWorkView.getSystemBundles();
+    }
+    return fw.getSystemBundlesNames();
+  }
 
-	public static Set<String> getSystemBundles(Framework fw) {
-		if (fw == null) {
-			return FrameWorkView.getSystemBundles();
-		}
-		return fw.getSystemBundlesNames();
-	}
+  /**
+   * @since 6.0
+   */
+  public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel, boolean multiple) {
+    FileDialog dialog = new FileDialog(shell, SWT.OPEN | (multiple ? SWT.MULTI : SWT.SINGLE));
+    String[] filterArr = { filter, "*.*" }; //$NON-NLS-1$
+    String[] namesArr = { filterLabel, Messages.all_files_filter_label };
+    dialog.setFilterExtensions(filterArr);
+    dialog.setFilterNames(namesArr);
+    if (FrameworkPlugin.fileDialogLastSelection != null) {
+      dialog.setFileName(null);
+      dialog.setFilterPath(FrameworkPlugin.fileDialogLastSelection);
+    }
+    dialog.setText(title);
+    String res = dialog.open();
+    if (res != null) {
+      FrameworkPlugin.fileDialogLastSelection = res;
+      // getFileNames returns relative names!
+      String[] names = dialog.getFileNames();
+      String path = dialog.getFilterPath();
+      File[] files = new File[names.length];
+      for (int i = 0; i < names.length; i++) {
+        files[i] = new File(path, names[i]);
+      }
+      return files;
+    }
+    return null;
+  }
 
-	/**
-	 * @since 6.0
-	 */
-	public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel,
-			boolean multiple) {
-		FileDialog dialog = new FileDialog(shell, SWT.OPEN | (multiple ? SWT.MULTI : SWT.SINGLE));
-		String[] filterArr = { filter, "*.*" }; //$NON-NLS-1$
-		String[] namesArr = { filterLabel, Messages.all_files_filter_label };
-		dialog.setFilterExtensions(filterArr);
-		dialog.setFilterNames(namesArr);
-		if (FrameworkPlugin.fileDialogLastSelection != null) {
-			dialog.setFileName(null);
-			dialog.setFilterPath(FrameworkPlugin.fileDialogLastSelection);
-		}
-		dialog.setText(title);
-		String res = dialog.open();
-		if (res != null) {
-			FrameworkPlugin.fileDialogLastSelection = res;
-			// getFileNames returns relative names!
-			String[] names = dialog.getFileNames();
-			String path = dialog.getFilterPath();
-			File[] files = new File[names.length];
-			for (int i = 0; i < names.length; i++) {
-				files[i] = new File(path, names[i]);
-			}
-			return files;
-		}
-		return null;
-	}
+  public static Framework findFramework(DeviceConnector connector) {
+    FrameworkImpl[] fws = FrameWorkView.findFramework(connector);
+    if (fws != null && fws.length > 0) {
+      return fws[0];
+    }
+    return null;
+  }
 
-	public static Framework findFramework(DeviceConnector connector) {
-		FrameworkImpl[] fws = FrameWorkView.findFramework(connector);
-		if (fws != null && fws.length > 0) {
-			return fws[0];
-		}
-		return null;
-	}
-
-	/**
-	 * @since 6.1
-	 */
-	public static void connectFramework(Framework fw) {
-		FrameworkConnectorFactory.connectFrameWork(fw);
-	}
+  /**
+   * @since 6.1
+   */
+  public static void connectFramework(Framework fw) {
+    FrameworkConnectorFactory.connectFrameWork(fw);
+  }
 }

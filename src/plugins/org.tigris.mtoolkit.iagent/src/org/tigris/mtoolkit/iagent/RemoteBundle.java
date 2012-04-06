@@ -22,7 +22,7 @@ import java.util.Dictionary;
  * @author Danail Nachev
  * 
  */
-public interface RemoteBundle {
+public interface RemoteBundle extends RemotePackage {
 
 	/**
 	 * State indicating that the underlying bundle is uninstalled
@@ -150,13 +150,6 @@ public interface RemoteBundle {
 	 * @throws IAgentException
 	 */
 	public void update(InputStream in) throws IAgentException;
-
-	/**
-	 * Uninstalls the bundle from the runtime
-	 * 
-	 * @throws IAgentException
-	 */
-	public void uninstall() throws IAgentException;
 
 	/**
 	 * Try to resolve the bundle. The method returns true if the bundle is in
