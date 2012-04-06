@@ -65,15 +65,16 @@ public final class DPProcessor implements FrameworkProcessorExtension {
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItem(org.tigris.mtoolkit.common.installation.InstallationItem, 
-   *                                                                                              java.util.List, 
+   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItem(org.tigris.mtoolkit.common.installation.InstallationItem,
+   *                                                                                              java.util.List,
+   *                                                                                              java.util.List,
    *                                                                                              java.util.Map,
-   *                                                                                              boolean, 
-   *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework, 
+   *                                                                                              boolean
+   *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework,
    *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
    */
-  public boolean processItem(InstallationItem item, List dependencies, Map preparationProps,boolean autoStart, Framework framework,
-      IProgressMonitor monitor) throws CoreException {
+  public boolean processItem(InstallationItem item, List dependencies, List installed,
+      Map preparationProps, boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException {
     File packageFile = null;
     InputStream input = null;
     try {
