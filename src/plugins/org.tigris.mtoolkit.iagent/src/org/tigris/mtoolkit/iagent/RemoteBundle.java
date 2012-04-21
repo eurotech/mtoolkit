@@ -23,11 +23,34 @@ import java.util.Dictionary;
  * 
  */
 public interface RemoteBundle extends RemotePackage {
-
 	/**
 	 * State indicating that the underlying bundle is uninstalled
 	 */
-	public final static int UNINSTALLED = 1;
+	public final static int UNINSTALLED = 0x00000001;
+
+	/**
+	 * State indicating that the underlying bundle is installed
+	 */
+	public final static int INSTALLED = 0x00000002;
+
+	/**
+	 * State indicating that the underlying bundle is resolved
+	 */
+	public final static int RESOLVED = 0x00000004;
+
+	/**
+	 * State indicating that the underlying bundle is starting
+	 */
+	public final static int STARTING = 0x00000008;
+
+	/**
+	 * State indicating that the underlying bundle is stopping
+	 */
+	public final static int STOPPING = 0x00000010;
+	/**
+	 * State indicating that the underlying bundle is active
+	 */
+	public final static int ACTIVE = 0x00000020;
 
 	/**
 	 * Bundle type indicating that the underlying bundle is fragment
