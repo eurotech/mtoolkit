@@ -186,7 +186,10 @@
 	<target name="prepareSources">
 		<delete dir="${buildDirectory}"/>
 		<copy todir="${buildDirectory}">
-			<fileset dir="${sourceRepDirectory}"/>
+			<fileset dir="${sourceRepDirectory}">
+				<exclude name="plugins/**/bin/**"/>
+				<exclude name="plugins/**/eclipse_compile/**"/>
+			</fileset>
 		</copy>
 		<copy todir="${buildDirectory}/plugins">
 			<fileset dir="${docsDirectory}"/>
