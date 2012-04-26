@@ -105,6 +105,7 @@ public class DebugUtils {
 	 * Closes any opened logging utilities.
 	 */
 	public static void dispose() {
+		initialized = false;
 		if (log != null) {
 			log.close();
 		}
