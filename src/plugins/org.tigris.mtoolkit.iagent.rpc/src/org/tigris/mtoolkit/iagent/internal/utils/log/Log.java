@@ -17,4 +17,7 @@ public interface Log {
 	public static final int DEBUG = 2;
 
 	public void log(int severity, String message, Throwable t);
+
+	public void close();
+
 }

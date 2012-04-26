@@ -47,6 +47,9 @@ public class EclipseLog implements Log {
 		}
 	}
 
+	public void close() {
+	}
+
 	private int getFrameworkSeverity(int severity) {
 		switch (severity) {
 		case INFO:

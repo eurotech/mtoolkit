@@ -61,8 +61,7 @@ public class DebugUtils {
 	}
 
 	/**
-	 * Initializes logging support. If not called only file logging or console
-	 * logging will be available.
+	 * Initializes logging support.
 	 * 
 	 * @param context
 	 *            the bundle context. If null log service won't be used for
@@ -99,13 +98,16 @@ public class DebugUtils {
 		}
 
 		// Fourth - logging to console
-		try {
-			log = new ConsoleLog();
-			return;
-		} catch (Throwable t) {
-		}
+		log = ConsoleLog.getDefault();
+	}
 
-		log = null;
+	/**
+	 * Closes any opened logging utilities.
+	 */
+	public static void dispose() {
+		if (log != null) {
+			log.close();
+		}
 	}
 
 	/**
@@ -136,7 +138,7 @@ public class DebugUtils {
 			return;
 		}
 		if (!initialized) {
-			initialize(null);
+			return;
 		}
 		String logMessage = "[IAgent][" + getIdentityString(module) + "] " + message;
 

@@ -48,6 +48,9 @@ public class FileLog implements Log {
 		}
 	}
 
+	public void close() {
+	}
+
 	private static String getDateTime() {
 		return new Date().toString();
 	}

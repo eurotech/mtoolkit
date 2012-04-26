@@ -26,7 +26,6 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
-import org.tigris.mtoolkit.iagent.internal.utils.log.Log;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
@@ -40,7 +39,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 	public static final String PORT = "port";
 
 	private static final int DEFAULT_PORT = 1450;
-	
+
 	private static final int FAILURE_RANDOM = 0;
 	private static final int FAILURE_RETRY = 1;
 	private static final int FAILURE_FAIL = 2;
@@ -85,7 +84,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 			}
 		}
 	}
-	
+
 	private int determineFailureAction() {
 		String failureActionProp = System.getProperty("iagent.pmp.bindFailureAction");
 		if ("random".equals(failureActionProp))
@@ -98,25 +97,25 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 			return FAILURE_REUSE;
 		return FAILURE_RANDOM;
 	}
-	
+
 	protected void init() throws IOException {
 		run = true;
 		try {
 			socket = new ServerSocket(port);
 		} catch (IOException e) {
-			DebugUtils.log(this, Log.ERROR, "Failed to open PMP server on " + port + ".", e);
+			DebugUtils.error(this, "Failed to open PMP server on " + port + ".", e);
 			int failureAction = determineFailureAction();
 			switch (failureAction) {
 			case FAILURE_RANDOM:
-				DebugUtils.log(this, Log.INFO, "Failure action set to 'random'. Retrying...");
+				DebugUtils.info(this, "Failure action set to 'random'. Retrying...");
 				socket = new ServerSocket(0);
 				port = socket.getLocalPort();
-				DebugUtils.log(this, Log.INFO, "PMP server listening on " + port);
+				DebugUtils.info(this, "PMP server listening on " + port);
 				break;
 			case FAILURE_RETRY:
 				Integer timeoutProp = Integer.getInteger("iagent.pmp.bindFailureAction.retryTimeout");
 				int timeout = timeoutProp != null ? timeoutProp.intValue() : 10000;
-				DebugUtils.log(this, Log.INFO, "Failure action set to 'retry'. Retrying with timeout " + timeout);
+				DebugUtils.info(this, "Failure action set to 'retry'. Retrying with timeout " + timeout);
 				try {
 					Thread.sleep(timeout);
 				} catch (InterruptedException e1) {
@@ -127,7 +126,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 			case FAILURE_FAIL:
 				throw e;
 			case FAILURE_REUSE:
-				DebugUtils.log(this, Log.INFO, "Failure action set to 'reuse'. Retrying...");
+				DebugUtils.info(this, "Failure action set to 'reuse'. Retrying...");
 				ServerSocket serverSock = new ServerSocket();
 				serverSock.setReuseAddress(true);
 				serverSock.bind(new InetSocketAddress(port));
@@ -153,9 +152,9 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 						client.setSoTimeout(timeout.intValue());
 					}
 					PMPSessionThread newSession = new PMPSessionThread(this,
-						client,
-						createSessionId(),
-						client.getInetAddress().toString());
+							client,
+							createSessionId(),
+							client.getInetAddress().toString());
 					addElement(newSession);
 				}
 			} catch (Exception exc) {

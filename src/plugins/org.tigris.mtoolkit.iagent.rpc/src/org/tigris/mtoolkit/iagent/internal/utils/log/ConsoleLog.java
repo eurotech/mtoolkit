@@ -11,7 +11,17 @@
 package org.tigris.mtoolkit.iagent.internal.utils.log;
 
 public class ConsoleLog implements Log {
-	Object lock = new Object();
+	private static ConsoleLog instance = new ConsoleLog();
+
+	private Object lock = new Object();
+
+	private ConsoleLog() {
+		// singleton
+	}
+
+	public static ConsoleLog getDefault() {
+		return instance;
+	}
 
 	public void log(int severity, String msg, Throwable e) {
 		if (severity == DEBUG || severity == INFO) {
@@ -23,6 +33,9 @@ public class ConsoleLog implements Log {
 				e.printStackTrace(System.out);
 			}
 		}
+	}
+
+	public void close() {
 	}
 
 	private static String getSeverityString(int severity) {

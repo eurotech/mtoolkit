@@ -202,6 +202,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 			capabilitiesManager = null;
 		}
 
+		DebugUtils.dispose();
 		instance = null;
 		Activator.context = null;
 	}
@@ -282,7 +283,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 		if (event.getType() == FrameworkEvent.STARTED)
 			startController(context);
 	}
-	
+
 	public static BundleContext getBundleContext() {
 		return context;
 	}
