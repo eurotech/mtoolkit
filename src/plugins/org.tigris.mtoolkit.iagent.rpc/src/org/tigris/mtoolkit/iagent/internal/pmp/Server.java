@@ -133,7 +133,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 				socket = serverSock;
 			}
 		}
-		socket.setSoTimeout(1000);
 		ThreadUtils.createThread(this, "IAgent Server Thread").start();
 	}
 
