@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
-import java.net.Socket;
 import java.util.Dictionary;
 
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
@@ -47,33 +46,6 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
 
 	public String getName() {
 		return "PMPService"; //$NON-NLS-1$
-	}
-
-	public PMPConnection connect(String uri) throws PMPException {
-		if (!running) {
-			throw new PMPException("Stopping pmpservice");
-		}
-		if (uri == null || uri.length() == 0) {
-			throw new PMPException("URI can't be null");
-		}
-		try {
-			DebugUtils.info(this, "Creating new connection for " + uri);
-			PMPSessionThread st = null;
-			Socket socket = new Socket(uri, DEFAULT_PMP_PORT);
-			// read timeout of 1 sec
-			socket.setSoTimeout(1000);
-			st = new PMPSessionThread(this, socket, createSessionId(), uri);
-
-			Connection con = st.getConnection();
-			con.connect();
-			addElement(st);
-			return con;
-		} catch (Exception exc) {
-			DebugUtils.debug(this, "Error creating connection for " + uri, exc);
-			if (exc instanceof PMPException)
-				throw (PMPException) exc;
-			throw new PMPException(exc.getMessage(), exc);
-		}
 	}
 
 	public PMPConnection connect(Transport transport, Dictionary properties) throws PMPException {
