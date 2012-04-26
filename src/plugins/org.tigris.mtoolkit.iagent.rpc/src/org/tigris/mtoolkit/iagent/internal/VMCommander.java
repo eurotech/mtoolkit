@@ -67,7 +67,7 @@ public class VMCommander {
 			public void run() {
 				startServer();
 				if (closed) {
-					// if VMCommander is closed during connection 
+					// if VMCommander is closed during connection
 					stopServer();
 				}
 			}
@@ -171,33 +171,46 @@ public class VMCommander {
 
 	private class UDPListener implements Runnable {
 		private Thread listenerThread;
-		private volatile boolean listenerRunning;
+		private volatile boolean running;
+		private DatagramSocket socket;
 
 		public UDPListener() {
 			listenerThread = ThreadUtils.createThread(this, "IAgent UDP Listener");
 		}
 
 		public void start() {
-			listenerRunning = true;
+			running = true;
 			listenerThread.start();
 		}
 
 		public void dispose() {
-			listenerRunning = false;
-			listenerThread.interrupt();
+			if (!running) {
+				return;
+			}
+			running = false;
+			try {
+				synchronized (this) {
+					if (socket != null) {
+						socket.close();
+					}
+				}
+			} catch (Exception e) {
+				info("[UDPListener] Error occured while closing UDP socket.", e);
+			}
 		}
 
 		public void run() {
-			DatagramSocket socket = null;
 			byte[] buffer = new byte[UDP_NOTIFICATION.length];
 			DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 			try {
-				socket = new DatagramSocket(UDP_LISTENER_PORT);
+				synchronized (this) {
+					socket = new DatagramSocket(UDP_LISTENER_PORT);
+				}
 			} catch (SocketException se) {
 				error("[startUDPListener] Cannot open socket for UDP notifications on port " + UDP_LISTENER_PORT, se);
 				return;
 			}
-			while (listenerRunning) {
+			while (running) {
 				try {
 					socket.receive(packet);
 					if (Arrays.equals(buffer, UDP_NOTIFICATION)) {
