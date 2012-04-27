@@ -190,29 +190,35 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 	}
 
 	public void event(Object ev, String t) {
-		Vector ls = (Vector) eventTypes.get(t);
-		if (ls != null) {
-			for (int i = 0; i < ls.size(); i++) {
-				((PMPSessionThread) ls.elementAt(i)).event(ev, t);
+		synchronized (eventTypes) {
+			Vector ls = (Vector) eventTypes.get(t);
+			if (ls != null) {
+				for (int i = 0; i < ls.size(); i++) {
+					((PMPSessionThread) ls.elementAt(i)).event(ev, t);
+				}
 			}
 		}
 	}
 
-	protected synchronized byte addListener(String evType, PMPSessionThread listener) {
-		Vector ls = (Vector) eventTypes.get(evType);
-		if (ls == null) {
-			ls = new Vector();
-			eventTypes.put(evType, ls);
+	protected byte addListener(String evType, PMPSessionThread listener) {
+		synchronized (eventTypes) {
+			Vector ls = (Vector) eventTypes.get(evType);
+			if (ls == null) {
+				ls = new Vector();
+				eventTypes.put(evType, ls);
+			}
+			if (ls.contains(listener))
+				return 1;
+			ls.addElement(listener);
+			return 2;
 		}
-		if (ls.contains(listener))
-			return 1;
-		ls.addElement(listener);
-		return 2;
 	}
 
-	protected synchronized byte removeListener(String evType, PMPSessionThread listener) {
-		Vector ls = (Vector) eventTypes.get(evType);
-		return ls == null ? 1 : ls.removeElement(listener) ? 2 : (byte) 1;
+	protected byte removeListener(String evType, PMPSessionThread listener) {
+		synchronized (eventTypes) {
+			Vector ls = (Vector) eventTypes.get(evType);
+			return ls == null ? 1 : ls.removeElement(listener) ? 2 : (byte) 1;
+		}
 	}
 
 	protected synchronized void removeListeners(Vector evTypes, PMPSessionThread listener) {
