@@ -14,7 +14,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -92,6 +95,83 @@ public class FileUtils {
     }
   }
 
+  public static void archiveDirectory(File archive, File directory) throws IOException {
+    archiveDirectory(archive, directory, null);
+  }
+
+  public static void archiveDirectory(File archive, File directory, String prefix) throws IOException {
+    FileOutputStream out = new FileOutputStream(archive);
+    try {
+      ZipOutputStream zip = new ZipOutputStream(out);
+      addFileToArchive(directory, directory, zip, getPrefix(prefix));
+      zip.close();
+    } finally {
+      close(out);
+    }
+  }
+
+  private static String getPrefix(String originalPrefix) {
+    // check for empty prefix
+    if (originalPrefix == null || "".equals(originalPrefix))
+      return "";
+    // if there is a leading slash, remove it
+    if (originalPrefix.startsWith("/")) {
+      if (originalPrefix.length() == 1)
+        return "";
+      originalPrefix = originalPrefix.substring(1);
+    }
+    if (!originalPrefix.endsWith("/"))
+      originalPrefix = originalPrefix.concat("/");
+    return originalPrefix;
+  }
+
+  private static void addFileToArchive(File archiveBase, File file, ZipOutputStream zip, String prefix) throws IOException {
+    if (file.isFile()) {
+      String name = getEntryName(archiveBase, file, prefix);
+      FileInputStream input = new FileInputStream(file);
+      try {
+        addStreamToArchive(name, input, zip);
+      } finally {
+        close(input);
+      }
+    } else {
+      File[] files = file.listFiles();
+      if (files == null || files.length == 0) {
+        return;
+      }
+      for (int i = 0; i < files.length; i++) {
+        addFileToArchive(archiveBase, files[i], zip, prefix);
+      }
+    }
+  }
+
+  private static void addStreamToArchive(String name, InputStream in, ZipOutputStream zip) throws IOException {
+    ZipEntry newEntry = new ZipEntry(name);
+    zip.putNextEntry(newEntry);
+    byte[] buf = new byte[4096];
+    int read;
+    while ((read = in.read(buf)) != -1) {
+      zip.write(buf, 0, read);
+    }
+  }
+
+  private static String getEntryName(File archiveBase, File file, String prefix) throws IOException {
+    String relativePath = getRelativePath(archiveBase, file);
+    return prefix.concat(relativePath);
+  }
+
+  private static String getRelativePath(File base, File file) throws IOException {
+    String basePath = base.getAbsolutePath();
+    String filePath = file.getAbsolutePath();
+    if (!filePath.startsWith(basePath))
+      throw new IOException("Cannot add file to archive from different directory: " + filePath);
+    String relativePath = filePath.substring(basePath.length());
+    relativePath = relativePath.replace(File.separatorChar, '/');
+    if (relativePath.startsWith("/"))
+      relativePath = relativePath.substring(1);
+    return relativePath;
+  }
+
   private static void addToZip(File file, String name, ZipOutputStream zos) throws IOException {
     if (file.isDirectory()) {
       File[] files = file.listFiles();
@@ -151,5 +231,31 @@ public class FileUtils {
   public static String getFileExtension(File file) {
     String name = file.getName();
     return name.substring(name.lastIndexOf('.') + 1, name.length()).toLowerCase();
+  }
+
+  public static void close(InputStream stream) {
+    if (stream != null) {
+      try {
+        stream.close();
+      } catch (IOException e) {
+      }
+    }
+  }
+
+  public static void close(OutputStream stream) {
+    if (stream != null) {
+      try {
+        stream.close();
+      } catch (IOException e) {
+      }
+    }
+  }
+
+  public static void close(ZipFile zip) {
+    if (zip != null)
+      try {
+        zip.close();
+      } catch (IOException e) {
+      }
   }
 }
