@@ -636,7 +636,7 @@ public class PMPSessionThread implements Runnable {
 	}
 
 	private void writeGetMethodError(String errMsg) {
-		error(errMsg, null);
+		info(errMsg);
 		try {
 			os.begin(msgID);
 			os.write(METHOD);
