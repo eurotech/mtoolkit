@@ -1,5 +1,6 @@
+org.tigris.mtoolkit.iagent.rpc
+com.prosyst.mbs.system_bundle
 com.prosyst.mbs.osgilib
 com.prosyst.mbs.putil
-org.tigris.mtoolkit.iagent.rpc
 com.prosyst.mbs.console
 com.prosyst.tools.iagent.ext.rpc
