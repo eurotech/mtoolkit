@@ -214,8 +214,37 @@ public final class PDEUtils {
     return bundle.getUnderlyingResource() == null;
   }
 
-  private static IPluginModelBase findBundle(IPluginModelBase[] models, String symbolicName, String version,
-      boolean active, int match) {
+  /**
+   * Returns true if the given version number is an empty version as
+   * defined by {@link Version}. Used in cases where it would be
+   * inappropriate to parse the actual version number.
+   * 
+   * @param version version string to check
+   * @return true if empty version
+   */
+  public static boolean isEmptyVersion(String version) {
+    if (version == null) {
+      return true;
+    }
+    version = version.trim();
+    return version.length() == 0 || version.equals(Version.emptyVersion.toString());
+  }
+
+  /**
+   * Returns bundle version number defined by {@link Version} or empty version if none.
+   * 
+   * @param version version string to check
+   * @return input version number or empty version, never null.
+   */
+  public static Version getBundleVersion(String version) {
+    if (isEmptyVersion(version)) {
+      return Version.emptyVersion;
+    }
+    return new Version(version);
+  }
+
+  private static IPluginModelBase findBundle(IPluginModelBase[] models, String symbolicName, String version, boolean active,
+      int match) {
     List results = new ArrayList();
     for (int i = 0; i < models.length; i++) {
       if (selectBundle(models[i], active)) {
