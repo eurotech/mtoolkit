@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -26,6 +27,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
@@ -193,7 +195,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   public IStatus processInstallationItems(final InstallationItem[] items, Map args, InstallationTarget target,
       final IProgressMonitor monitor) {
     // TODO use multi status to handle errors and warnings
-    SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2 + 1);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2 + 7);
 
     try {
       Framework framework = ((FrameworkTarget) target).getFramework();
@@ -215,7 +217,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           return Util.newStatus(IStatus.ERROR, ex.getMessage(), ex);
         }
       }
-
       if (monitor.isCanceled()) {
         return Status.CANCEL_STATUS;
       }
@@ -258,17 +259,15 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
       List<InstallationItem> itemsToInstall = new ArrayList<InstallationItem>();
       List<RemotePackage> installedPackages = new ArrayList<RemotePackage>();
-      for (InstallationItem item : items) {
-        IStatus status = processItemInternal(item, preparationProps, startBundles, framework, subMonitor.newChild(1),
-            itemsToInstall, installedPackages);
-        if (status == null) {
-          continue;
-        }
-        if (status.matches(IStatus.CANCEL)) {
-          return status;
-        } else if (!status.isOK()) {
-          FrameworkPlugin.log(status);
-        }
+      itemsToInstall.addAll(Arrays.asList(items));
+      IStatus processStatus = processItemsInternal(itemsToInstall, preparationProps, startBundles, framework, installedPackages,
+          subMonitor.newChild(items.length));
+      if (processStatus.matches(IStatus.CANCEL)) {
+        monitor.setCanceled(true);
+        return processStatus;
+      }
+      if (processStatus.matches(IStatus.ERROR)) {
+        return processStatus;
       }
 
       if (!itemsToInstall.isEmpty()) {
@@ -313,6 +312,9 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         }
       }
     } finally {
+      for (int i = 0; i < items.length; i++) {
+        items[i].dispose();
+      }
       monitor.done();
     }
     if (monitor.isCanceled()) {
@@ -321,29 +323,71 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return Status.OK_STATUS;
   }
 
-  //TODO This method should not be revealed.
-  public IStatus processItemInternal(final InstallationItem item, Map preparationProps, boolean autoStart, Framework framework,
-      final IProgressMonitor monitor, List<InstallationItem> itemsToInstall, List<RemotePackage> installed) {
+  // TODO This method should not be revealed.
+  public IStatus processItemsInternal(List<InstallationItem> itemsToInstall, Map preparationProps, boolean autoStart,
+      Framework framework, List<RemotePackage> installed, IProgressMonitor monitor) {
+    Map<FrameworkProcessorExtension, List<InstallationItem>> installationMap = new HashMap<FrameworkProcessorExtension, List<InstallationItem>>();
+    for (InstallationItem item : itemsToInstall) {
+      FrameworkProcessorExtension processor;
+      try {
+        processor = findProcessor(item, new NullProgressMonitor());
+        List<InstallationItem> items = installationMap.get(processor);
+        if (items == null) {
+          items = new ArrayList<InstallationItem>();
+          installationMap.put(processor, items);
+        }
+        items.add(item);
+      } catch (CoreException e) {
+        return e.getStatus();
+      }
+    }
+    List<InstallationItem> bundleItems = installationMap.remove(bundlesProcessor);
+    if (bundleItems == null) {
+      bundleItems = new ArrayList<InstallationItem>();
+    }
+    SubMonitor root = SubMonitor.convert(monitor, 100);
     try {
-      FrameworkProcessorExtension processor = findProcessor(item, monitor);
-      if (processor instanceof BundlesProcessor) {
-        bundlesProcessor.processItem(item, itemsToInstall, installed, preparationProps, autoStart, framework, monitor);
-        itemsToInstall.add(item);
-      } else if (!processor.processItem(item, itemsToInstall, installed, preparationProps, autoStart, framework, monitor)) {
-        InstallationItem[] children = item.getChildren();
-        if (children != null) {
-          for (InstallationItem childItem : children) {
-            int prio = bundlesProcessor.getPriority(childItem);
-            if (prio == FrameworkProcessorExtension.PRIORITY_NOT_SUPPPORTED) {
-              throw new CoreException(Util.newStatus(IStatus.ERROR, "No suitable processor found.", null));
+      if (itemsToInstall.size() != bundleItems.size()) {
+        SubMonitor processMonitor = SubMonitor.convert(root.newChild(30), itemsToInstall.size() - bundleItems.size());
+        for (Map.Entry<FrameworkProcessorExtension, List<InstallationItem>> entry : installationMap.entrySet()) {
+          FrameworkProcessorExtension processor = entry.getKey();
+          final List<InstallationItem> processorItems = entry.getValue();
+          final SubMonitor sub = processMonitor.newChild(processorItems.size());
+          if (processor.processItems(processorItems, installed, preparationProps, autoStart, framework, sub)) {
+            if (sub.isCanceled()) {
+              return Status.CANCEL_STATUS;
             }
-            bundlesProcessor.processItem(childItem, itemsToInstall, installed, preparationProps, autoStart, framework, monitor);
-            itemsToInstall.add(childItem);
+            continue;
+          }
+          for (InstallationItem item : processorItems) {
+            InstallationItem[] children = item.getChildren();
+            if (children == null) {
+              continue;
+            }
+            for (InstallationItem childItem : children) {
+              int prio = bundlesProcessor.getPriority(childItem);
+              if (prio == FrameworkProcessorExtension.PRIORITY_NOT_SUPPPORTED) {
+                return Util.newStatus(IStatus.ERROR, "No suitable processor found.", null);
+              }
+              bundleItems.add(childItem);
+            }
           }
         }
       }
+      if (root.isCanceled()) {
+        return Status.CANCEL_STATUS;
+      }
+      SubMonitor postProcessMonitor = SubMonitor.convert(root.newChild(70), bundleItems.size());
+      bundlesProcessor.processItems(bundleItems, installed, preparationProps, autoStart, framework, postProcessMonitor);
     } catch (CoreException e) {
       return e.getStatus();
+    } finally {
+      root.done();
+    }
+    itemsToInstall.clear();
+    itemsToInstall.addAll(bundleItems);
+    if (root.isCanceled()) {
+      return Status.CANCEL_STATUS;
     }
     return Status.OK_STATUS;
   }
@@ -547,18 +591,26 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
      *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework,
      *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
      */
-    public boolean processItem(InstallationItem item, List<InstallationItem> dependencies, List<RemotePackage> installed,
-        Map preparationProps, boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException {
-      Boolean checkDepends = (Boolean) preparationProps.get(InstallationConstants.CHECK_DEPENDENCIES);
-      if ((checkDepends == null || checkDepends.booleanValue()) && (item instanceof PluginItem)) {
-        IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, monitor, dependencies,
-            preparationProps);
-        if (status != null) {
-          if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
-            throw new CoreException(status);
+    public boolean processItems(List<InstallationItem> items, List<RemotePackage> installed, Map preparationProps,
+        boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException {
+      SubMonitor processMonitor = SubMonitor.convert(monitor, items.size() + 1);
+      processMonitor.setTaskName("Installing bundles...");
+      processMonitor.worked(1);
+      List<InstallationItem> dependencies = new ArrayList<InstallationItem>();
+      for (InstallationItem item : items) {
+        Boolean checkDepends = (Boolean) preparationProps.get(InstallationConstants.CHECK_DEPENDENCIES);
+        if ((checkDepends == null || checkDepends.booleanValue()) && (item instanceof PluginItem)) {
+          IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, processMonitor.newChild(1),
+              dependencies, preparationProps);
+          if (status != null) {
+            if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
+              throw new CoreException(status);
+            }
           }
         }
       }
+      items.addAll(dependencies);
+      monitor.done();
       return true;
     }
   }

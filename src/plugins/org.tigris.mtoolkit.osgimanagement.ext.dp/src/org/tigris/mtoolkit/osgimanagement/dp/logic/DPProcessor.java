@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.osgimanagement.dp.logic;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.graphics.Image;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.DPActionsProvider;
@@ -65,16 +66,29 @@ public final class DPProcessor implements FrameworkProcessorExtension {
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItem(org.tigris.mtoolkit.common.installation.InstallationItem,
-   *                                                                                              java.util.List,
+   * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItems(java.util.List,
    *                                                                                              java.util.List,
    *                                                                                              java.util.Map,
    *                                                                                              boolean
    *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework,
    *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
    */
-  public boolean processItem(InstallationItem item, List dependencies, List installed,
-      Map preparationProps, boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException {
+  public boolean processItems(List items, List installed, Map preparationProps, boolean autoStart, Framework framework,
+      IProgressMonitor monitor) throws CoreException {
+    SubMonitor processMonitor = SubMonitor.convert(monitor, items.size() + 1);
+    processMonitor.setTaskName("Installing deployment packages...");
+    processMonitor.worked(1);
+    for (int i = 0; i < items.size(); i++) {
+      processItem((InstallationItem) items.get(i), framework, processMonitor.newChild(1));
+      if (processMonitor.isCanceled()) {
+        break;
+      }
+    }
+    monitor.done();
+    return true;
+  }
+
+  private static void processItem(InstallationItem item, Framework framework, IProgressMonitor monitor) throws CoreException {
     File packageFile = null;
     InputStream input = null;
     try {
@@ -85,16 +99,11 @@ public final class DPProcessor implements FrameworkProcessorExtension {
     } catch (Exception e) {
       throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to install deployment package", e));
     } finally {
-      if (input != null) {
-        try {
-          input.close();
-        } catch (IOException e) {
-        }
-      }
+      FileUtils.close(input);
       if (packageFile != null) {
         packageFile.delete();
       }
+      monitor.done();
     }
-    return true;
   }
 }
