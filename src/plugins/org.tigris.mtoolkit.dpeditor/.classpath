@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.4"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry excluding="org/tigris/mtoolkit/dpeditor/util/PluginExporter_34.java|org/tigris/mtoolkit/dpeditor/actions/QuickBuildActionDelegate_34.java|org/tigris/mtoolkit/dpeditor/util/PluginExporter_35_Helper.java|org/tigris/mtoolkit/dpeditor/util/PluginExporter_35.java|org/tigris/mtoolkit/dpeditor/util/PluginExporter.java" kind="src" path="src"/>
 	<classpathentry kind="output" path="bin"/>
