@@ -43,7 +43,8 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
   private Model parent;
   private DeploymentManager manager;
   private boolean supportDP;
-  public static final Dictionary supportDPDictionary = new Hashtable();
+  //FIXME This might cause memory leaks in some cases
+  public static final Dictionary<DeviceConnector, Boolean> supportDPDictionary = new Hashtable<DeviceConnector, Boolean>();
 
   public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
     this.connector = connector;
@@ -96,7 +97,10 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
       }
       parent = null;
     }
-    connector = null;
+    if (connector != null) {
+      supportDPDictionary.remove(connector);
+      connector = null;
+    }
     dpNode = null;
     supportDP = false;
   }
