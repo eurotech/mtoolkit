@@ -252,15 +252,22 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       }
 
       subMonitor.worked(4);
-      boolean startBundles = FrameworkPreferencesPage.isAutoStartBundlesEnabled();
-      if (startBundles && preparationProps.get(InstallationConstants.START_BUNDLES) != null) {
-        startBundles = ((Boolean) preparationProps.get(InstallationConstants.START_BUNDLES)).booleanValue();
+      boolean startBundles;
+      if (preparationProps.get(InstallationConstants.AUTO_START_ITEMS) != null) {
+        startBundles = ((Boolean) preparationProps.get(InstallationConstants.AUTO_START_ITEMS)).booleanValue();
+      } else {
+        startBundles = FrameworkPreferencesPage.isAutoStartBundlesEnabled();
+        preparationProps.put(InstallationConstants.AUTO_START_ITEMS, new Boolean(startBundles));
+      }
+      if (preparationProps.get(InstallationConstants.AUTO_UPDATE_ITEMS) == null) {
+        boolean autoUpdate = FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled();
+        preparationProps.put(InstallationConstants.AUTO_UPDATE_ITEMS, new Boolean(autoUpdate));
       }
 
       List<InstallationItem> itemsToInstall = new ArrayList<InstallationItem>();
       List<RemotePackage> installedPackages = new ArrayList<RemotePackage>();
       itemsToInstall.addAll(Arrays.asList(items));
-      IStatus processStatus = processItemsInternal(itemsToInstall, preparationProps, startBundles, framework, installedPackages,
+      IStatus processStatus = processItemsInternal(itemsToInstall, preparationProps, framework, installedPackages,
           subMonitor.newChild(items.length));
       if (processStatus.matches(IStatus.CANCEL)) {
         monitor.setCanceled(true);
@@ -324,7 +331,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   }
 
   // TODO This method should not be revealed.
-  public IStatus processItemsInternal(List<InstallationItem> itemsToInstall, Map preparationProps, boolean autoStart,
+  public IStatus processItemsInternal(List<InstallationItem> itemsToInstall, Map preparationProps,
       Framework framework, List<RemotePackage> installed, IProgressMonitor monitor) {
     Map<FrameworkProcessorExtension, List<InstallationItem>> installationMap = new HashMap<FrameworkProcessorExtension, List<InstallationItem>>();
     for (InstallationItem item : itemsToInstall) {
@@ -353,7 +360,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           FrameworkProcessorExtension processor = entry.getKey();
           final List<InstallationItem> processorItems = entry.getValue();
           final SubMonitor sub = processMonitor.newChild(processorItems.size());
-          if (processor.processItems(processorItems, installed, preparationProps, autoStart, framework, sub)) {
+          if (processor.processItems(processorItems, installed, preparationProps, framework, sub)) {
             if (sub.isCanceled()) {
               return Status.CANCEL_STATUS;
             }
@@ -378,7 +385,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         return Status.CANCEL_STATUS;
       }
       SubMonitor postProcessMonitor = SubMonitor.convert(root.newChild(70), bundleItems.size());
-      bundlesProcessor.processItems(bundleItems, installed, preparationProps, autoStart, framework, postProcessMonitor);
+      bundlesProcessor.processItems(bundleItems, installed, preparationProps, framework, postProcessMonitor);
     } catch (CoreException e) {
       return e.getStatus();
     } finally {
@@ -587,12 +594,11 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
      *                                                                                              java.util.List,
      *                                                                                              java.util.List,
      *                                                                                              java.util.Map,
-     *                                                                                              boolean
      *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework,
      *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
      */
     public boolean processItems(List<InstallationItem> items, List<RemotePackage> installed, Map preparationProps,
-        boolean autoStart, Framework framework, IProgressMonitor monitor) throws CoreException {
+        Framework framework, IProgressMonitor monitor) throws CoreException {
       SubMonitor processMonitor = SubMonitor.convert(monitor, items.size() + 1);
       processMonitor.setTaskName("Installing bundles...");
       processMonitor.worked(1);

@@ -34,11 +34,9 @@ public interface FrameworkProcessorExtension {
 
   int getPriority(InstallationItem item);
 
-  
   boolean processItems(List<InstallationItem> items,
       List<RemotePackage> installed,
-      Map preparationProps,
-      boolean autoStart,
+      Map props,
       Framework framework,
       IProgressMonitor monitor) throws CoreException;
 }

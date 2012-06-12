@@ -69,11 +69,10 @@ public final class DPProcessor implements FrameworkProcessorExtension {
    * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItems(java.util.List,
    *                                                                                              java.util.List,
    *                                                                                              java.util.Map,
-   *                                                                                              boolean
    *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework,
    *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
    */
-  public boolean processItems(List items, List installed, Map preparationProps, boolean autoStart, Framework framework,
+  public boolean processItems(List items, List installed, Map preparationProps, Framework framework,
       IProgressMonitor monitor) throws CoreException {
     SubMonitor processMonitor = SubMonitor.convert(monitor, items.size() + 1);
     processMonitor.setTaskName("Installing deployment packages...");
