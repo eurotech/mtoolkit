@@ -31,24 +31,31 @@
 </ul>
 <p><br>
   <img src="img/mToolkit.rem.mngmnt.gif" width="632" height="544" alt="remote management"><br>
-</p>
-<p>Figure 1: OSGi Runtime remote management preferences </p>
+Figure 1: OSGi Runtime remote management preferences</p>
+
 <h3>Certificates </h3>
 <p>Under the <b>Certificates    </b> sub-page specify the certificates (certificate and private/public key pair) which can be used to sign bundles and deployment packages upon deployment on a connected OSGi framework. Signing is activated individually for each OSGi framework in the relevant settings (see &quot;<a href="add_fw.html">Adding/Removing an OSGi Framework</a>&quot;).
 </p>
 <p>Use the <b>Add</b> button to specify a signer by keystore type and location, and  signer alias within the keystore.</p>
 <p>Enter the path to the <b>jarsigner</b> executable of your JDK in the <b>Jar Signer Location </b>text field or use the <b>Browse </b>button to locate it in the file system. It will be used to sign bundles and  deployment packages. </p>
 <p><br>
-<img src="img/mToolkit.certificates.gif" width="632" height="544" alt="certificates"><br>
+<img src="img/mToolkit.certificates.gif" width="632" height="544" alt="certificates"><br>Figure 2:  Certificates  preferences
 </p>
-<p>Figure 2:  Certificates  preferences </p>
+
 <h3>Deployment Package Editor</h3>
 <p>For detailed information about the Deployment Package Editor refer to the <a href="PLUGINS_ROOT/org.tigris.mtoolkit.dpeditor.userdoc/doc/tasks/configure_dp_editor.html">&quot;Configuring Deployment Package Editor</a>&quot; document.</p>
 <h3>Remote Launcher</h3>
 <p>The Remote Launcher sub-page allows you to set a timeout (in seconds) for a connection to a framework as (re)launching the OSGi runtime remotely  on a slow device   might take more timeout than originally expected. The default setting is 30s.</p>
 <p><br>
 <img src="img/mToolkit.rem.launcher.gif" width="632" height="544"><br>
-Figure 2:  Remote Launcher timeout  preference</p>
+Figure 3:  Remote Launcher timeout  preference</p>
+<h3>Test Execution Environment </h3>
+
+<p> If the<b> Automatically show test-case results</b> option is turned on and the <a href="web_console.html">Web Admin Console</a> bundles are installed, a summary  of the test cases execution  results will be displayed in the Eclipse web browser  after  test-case  execution is finished.</p>
+<p><br>
+<img src="img/auto_test_results.gif" width="633" height="543" alt="test_results"><br>
+Figure 4: Automatically show test-case results option.</p>
+
 <h2>Saving changes </h2>
 <p>To save the changes made to the mToolkit preferences and options: </p>
 <ul>
