@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.ManifestUtils;
 import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -102,7 +103,7 @@ public final class InstallBundleOperation {
         Set bundleIds = new HashSet();
         bundleIds.addAll(framework.getBundlesKeys());
         rBundle = new RemoteBundle[1];
-        rBundle[0] = connector.getDeploymentManager().installBundle("remote:" + bundle.getName() + "." + getTimestamp(), input);
+        rBundle[0] = connector.getDeploymentManager().installBundle("remote:" + bundle.getName() + "." + df.format(new Date()), input);
         // check again if already installed
         if (bundleIds.contains(new Long(rBundle[0].getBundleId()))) {
           update[0] = true;
@@ -110,11 +111,8 @@ public final class InstallBundleOperation {
       }
       // bundle already exists, in which case, we need to update it
       if (rBundle != null && (update[0] || install[0])) {
-        try {
-          // close the old input stream and try again
-          input.close();
-        } catch (IOException e) {
-        }
+        // close the old input stream and try again
+    	FileUtils.close(input);
         final Object rBundles[] = rBundle;
         int bundleIndex;
         if (!install[0] && FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled()) {
@@ -124,35 +122,22 @@ public final class InstallBundleOperation {
         }
         if (install[0]) {
           monitor.beginTask(Messages.install_bundle, work);
-          rBundle[0] = connector.getDeploymentManager().installBundle("remote:" + bundle.getName() + "." + getTimestamp(),
+          rBundle[0] = connector.getDeploymentManager().installBundle("remote:" + bundle.getName() + "." + df.format(new Date()),
               new ProgressInputStream(new FileInputStream(bundle), monitor));
         } else if (update[0]) {
           monitor.beginTask(Messages.update_bundle, work);
           input = new ProgressInputStream(new FileInputStream(bundle), monitor);
           rBundle[bundleIndex].update(input);
+        }else{
+        	rBundle=null;
         }
       }
     } catch (IOException e) {
       throw new IllegalArgumentException(NLS.bind(Messages.update_file_not_found, bundle.getName()), e);
     } finally {
-      if (input != null) {
-        try {
-          input.close();
-        } catch (IOException e) {
-        }
-      }
-      if (zis != null) {
-        try {
-          zis.close();
-        } catch (IOException e) {
-        }
-      }
-      if (zip != null) {
-        try {
-          zip.close();
-        } catch (IOException e) {
-        }
-      }
+    	FileUtils.close(input);
+    	FileUtils.close(zis);
+    	FileUtils.close(zip);
     }
     return (rBundle == null) ? null : rBundle[0];
   }
@@ -229,9 +214,5 @@ public final class InstallBundleOperation {
       }
     });
     return selected;
-  }
-
-  private static String getTimestamp() {
-    return df.format(new Date());
   }
 }
