@@ -33,6 +33,8 @@
              </topic>
           </topic>
           <anchor id="widgetMgmt"/>
+             <topic href="doc/mbserver/tasks/test_cases.html" label="Executing Test Cases">
+             </topic>
  		      <topic label="Opening the Web Admin Console inside Eclipse" href="doc/mbserver/tasks/web_console.html"/>
           <topic label="Using Console Commands Remotely" href="doc/mbserver/tasks/rem_console.html"/>
           <anchor id="configMgmt"/>
