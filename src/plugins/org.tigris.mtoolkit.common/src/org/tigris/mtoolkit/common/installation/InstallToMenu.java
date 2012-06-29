@@ -49,6 +49,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
   /* (non-Javadoc)
    * @see org.eclipse.ui.actions.CompoundContributionItem#getContributionItems()
    */
+  @Override
   protected IContributionItem[] getContributionItems() {
     List mappings = getInstallationMappings();
     if (mappings == null || mappings.size() == 0) {
@@ -58,7 +59,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
     if (capableProcessors == null || capableProcessors.size() == 0) {
       return new IContributionItem[0];
     }
-    MenuManager menuManager = new MenuManager(getMenuText()); //$NON-NLS-1$
+    MenuManager menuManager = new MenuManager(getMenuText());
     Iterator iterator = capableProcessors.iterator();
     boolean first = true;
     while (iterator.hasNext()) {
@@ -80,25 +81,24 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
     return true;
   }
 
-  protected Action createInstallationAction(InstallationItemProcessor processor, InstallationTarget target,
-      List mappings) {
+  protected Action createInstallationAction(InstallationItemProcessor processor, InstallationTarget target, List mappings) {
     return new InstallToAction(processor, null, target, mappings);
   }
 
-  private void createActions(final InstallationItemProcessor processor, final List mappings,
-      final MenuManager menuManager) {
+  private void createActions(final InstallationItemProcessor processor, final List mappings, final MenuManager menuManager) {
     InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
     for (int i = 0; i < targets.length; i++) {
       Action action = createInstallationAction(processor, targets[i], mappings);
-      action.setId(getClass().getName() + processor.hashCode() + targets[i].getName().hashCode()); //$NON-NLS-1$
+      action.setId(getClass().getName() + processor.hashCode() + targets[i].getName().hashCode());
       action.setImageDescriptor(targets[i].getIcon());
       menuManager.add(new ActionContributionItem(action));
     }
 
-    Action action = new Action("Select " + processor.getGeneralTargetName() + "...") {
+    Action action = new Action("Select " + processor.getGeneralTargetName() + "...") { //$NON-NLS-1$ //$NON-NLS-2$
       /* (non-Javadoc)
        * @see org.eclipse.jface.action.Action#run()
        */
+      @Override
       public void run() {
         InstallationRegistry registry = InstallationRegistry.getInstance();
         TargetSelectionDialog dialog = registry.getSelectionDialog(processor);

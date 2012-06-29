@@ -19,34 +19,45 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 /**
  * @since 5.0
  */
-public class FrameworkTarget implements InstallationTarget {
-	private Framework fw;
+public final class FrameworkTarget implements InstallationTarget {
+  private final Framework fw;
 
-	public FrameworkTarget(Framework fw) {
-		this.fw = fw;
-	}
+  public FrameworkTarget(Framework fw) {
+    this.fw = fw;
+  }
 
-	public ImageDescriptor getIcon() {
-		if (fw.isConnected()) {
-			return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
-		}
-		return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationTarget#getIcon()
+   */
+  public ImageDescriptor getIcon() {
+    if (fw.isConnected()) {
+      return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
+    }
+    return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
+  }
 
-	public String getName() {
-		return fw.getName();
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationTarget#getName()
+   */
+  public String getName() {
+    return fw.getName();
+  }
 
-	public String getUID() {
-		return "framework_" + fw.getName().hashCode();
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationTarget#getUID()
+   */
+  public String getUID() {
+    return "framework_" + fw.getName().hashCode();
+  }
 
-	public Framework getFramework() {
-		return fw;
-	}
+  /* (non-Javadoc)
+  * @see org.tigris.mtoolkit.common.installation.InstallationTarget#isConnected()
+  */
+  public boolean isConnected() {
+    return fw.isConnected();
+  }
 
-	public boolean isMimeTypeSupported(String type) {
-		return true;
-	}
-
+  public Framework getFramework() {
+    return fw;
+  }
 }
