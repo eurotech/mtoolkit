@@ -40,9 +40,9 @@ public interface InstallationTarget {
   public ImageDescriptor getIcon();
 
   /**
-   * Returns if the target can be stored permanently in the history
+   * Returns if the target is connected
    * 
-   * @return target can be stored permanently in the history
+   * @return connected or not
    */
   public boolean isConnected();
 }
