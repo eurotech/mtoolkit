@@ -13,8 +13,10 @@ package org.tigris.mtoolkit.iagent.internal.rpc.console;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
@@ -84,7 +86,7 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 	}
 
 	protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
-					throws PMPException {
+			throws PMPException {
 		return new WriteDispatcher(conn, buffer, remoteObject);
 	}
 
@@ -176,7 +178,15 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 	}
 
 	protected WriteDispatcher getDispatcher(PMPConnection conn) {
-		return (WriteDispatcher) dispatchers.get(conn);
+		synchronized (dispatchers) {
+			return (WriteDispatcher) dispatchers.get(conn);
+		}
+	}
+
+	protected List/* <WriteDispatcher> */getDispatchers() {
+		synchronized (dispatchers) {
+			return new ArrayList(dispatchers.values());
+		}
 	}
 
 	protected class WriteDispatcher implements Runnable {
@@ -195,8 +205,8 @@ public abstract class RemoteConsoleServiceBase implements RemoteConsole {
 			this.buffer = buffer;
 			this.object = object;
 			method = object.getMethod("write", new String[] { byte[].class.getName(),
-				Integer.TYPE.getName(),
-				Integer.TYPE.getName() });
+					Integer.TYPE.getName(),
+					Integer.TYPE.getName() });
 		}
 
 		public void start() {
