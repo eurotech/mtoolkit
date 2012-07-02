@@ -51,10 +51,18 @@ public final class FrameworkTarget implements InstallationTarget {
   }
 
   /* (non-Javadoc)
-  * @see org.tigris.mtoolkit.common.installation.InstallationTarget#isConnected()
-  */
+   * @see org.tigris.mtoolkit.common.installation.InstallationTarget#isConnected()
+   */
   public boolean isConnected() {
     return fw.isConnected();
+  }
+
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationTarget#isTransient()
+   */
+  public boolean isTransient() {
+    return fw.isAutoConnected();
   }
 
   public Framework getFramework() {

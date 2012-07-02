@@ -185,26 +185,45 @@ public final class InstallationHistory {
       return;
     }
 
+    List processors = InstallationRegistry.getInstance().getProcessors();
     XMLMemento config = XMLMemento.createWriteRoot(ROOT_TYPE);
-
     Enumeration en = history.keys();
     while (en.hasMoreElements()) {
       String processorName = (String) en.nextElement();
+      InstallationItemProcessor processor = null;
+      for (int i = 0; i < processors.size(); i++) {
+        InstallationItemProcessor candidate = (InstallationItemProcessor) processors.get(i);
+        if (candidate.getGeneralTargetName().equals(processorName)) {
+          processor = candidate;
+          break;
+        }
+      }
+      if (processor == null) {
+        UtilitiesPlugin.error("Cannot find processor with name:" + processorName, null);
+        continue;
+      }
+
+      IMemento processorItem = null;
       List targets = (List) history.get(processorName);
-
-      IMemento processorItem = config.createChild(PROCESSOR_TYPE);
-      processorItem.putString(PROCESSOR_NAME_ATTR, processorName);
-
       Iterator iterator = targets.iterator();
+      InstallationTarget[] currentTargets = processor.getInstallationTargets();
       while (iterator.hasNext()) {
-        IMemento targetItem = processorItem.createChild(TARGET_TYPE);
-        targetItem.putString(TARGET_UID_ATTR, (String) iterator.next());
+        String uid = (String) iterator.next();
+        for (int i = 0; i < currentTargets.length; i++) {
+          if (uid.equals(currentTargets[i].getUID()) && !currentTargets[i].isTransient()) {
+            if (processorItem == null) {
+              processorItem = config.createChild(PROCESSOR_TYPE);
+              processorItem.putString(PROCESSOR_NAME_ATTR, processorName);
+            }
+            IMemento targetItem = processorItem.createChild(TARGET_TYPE);
+            targetItem.putString(TARGET_UID_ATTR, uid);
+          }
+        }
       }
     }
 
     try {
       File configFile = new File(UtilitiesPlugin.getDefault().getStateLocation().toFile(), STORAGE_FILE);
-
       FileOutputStream stream = new FileOutputStream(configFile);
       OutputStreamWriter writer = new OutputStreamWriter(stream, "utf-8");
       config.save(writer);

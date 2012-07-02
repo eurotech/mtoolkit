@@ -45,4 +45,11 @@ public interface InstallationTarget {
    * @return connected or not
    */
   public boolean isConnected();
+
+  /**
+   * Returns if the target can be stored persistently
+   * 
+   * @return the target can be stored persistently
+   */
+  public boolean isTransient();
 }
