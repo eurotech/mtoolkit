@@ -48,6 +48,7 @@ import org.tigris.mtoolkit.common.installation.AbstractInstallationItemProcessor
 import org.tigris.mtoolkit.common.installation.InstallationConstants;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
+import org.tigris.mtoolkit.common.lm.ILC;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -206,6 +207,9 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         if (status != null) {
           if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
             return status;
+          }
+          if(status.matches(IStatus.WARNING) && status.getCode()==ILC.E){
+        	  return status;
           }
         }
         try {

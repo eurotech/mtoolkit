@@ -17,5 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 public interface ILC {
 
+  public static final int E = 1000;
+
   public void verify(IProgressMonitor monitor, Map args) throws CoreException;
 }
