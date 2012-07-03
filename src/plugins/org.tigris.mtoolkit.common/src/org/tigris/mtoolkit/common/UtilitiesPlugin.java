@@ -20,10 +20,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.common.images.UIResources;
-import org.tigris.mtoolkit.common.installation.InstallationHistory;
 
 public class UtilitiesPlugin extends AbstractUIPlugin {
-
   public static final String PLUGIN_ID = "org.tigris.mtoolkit.common"; //$NON-NLS-1$
 
   private static final boolean DEBUG = Boolean.getBoolean("mtoolkit.common.debug");
@@ -53,7 +51,6 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 
   @Override
   public void stop(BundleContext context) throws Exception {
-    InstallationHistory.getDefault().saveHistory();
     super.stop(context);
   }
 
