@@ -365,7 +365,7 @@ public class AndroidUtils {
 
     File dxToolFile = null;
     String dxTool = null;
-    dxTool = MessageFormat.format("{0}/platform-tools/lib/dx.jar", new String[] { androidSDK });
+    dxTool = MessageFormat.format("{0}/platform-tools/lib/dx.jar", new Object[] { androidSDK });
     dxToolFile = new File(dxTool);
     if (dxToolFile.exists()) {
       return dxToolFile;
@@ -373,7 +373,7 @@ public class AndroidUtils {
     String[] androidPlatforms = getAndroidPlatforms(androidSDK);
     for (int i = 0; i < androidPlatforms.length; i++) {
       String androidPlatform = androidPlatforms[i];
-      dxTool = MessageFormat.format("{0}/platforms/{1}/tools/lib/dx.jar", new String[] { androidSDK, androidPlatform });
+      dxTool = MessageFormat.format("{0}/platforms/{1}/tools/lib/dx.jar", new Object[] { androidSDK, androidPlatform });
       dxToolFile = new File(dxTool);
       if (dxToolFile.exists()) {
         return dxToolFile;

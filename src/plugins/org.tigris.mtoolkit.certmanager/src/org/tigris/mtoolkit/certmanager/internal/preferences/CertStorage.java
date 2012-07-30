@@ -21,7 +21,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.tigris.mtoolkit.certmanager.internal.CertManagerPlugin;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 
-public class CertStorage implements ICertificateModifyListener {
+public final class CertStorage implements ICertificateModifyListener {
 	private static final String ATTR_CERT_COUNT = "cert_count"; //$NON-NLS-1$
 	private static final String ATTR_CERT_LAST_UID = "cert_last_uid"; //$NON-NLS-1$
 	private static final String ATTR_CERT_ALIAS = "cert_alias"; //$NON-NLS-1$
@@ -32,8 +32,9 @@ public class CertStorage implements ICertificateModifyListener {
 	private static final String ATTR_CERT_UID = "cert_uid"; //$NON-NLS-1$
 	private static final String SECURE_STORAGE_NODE = "org.tigris.mtoolkit.certmanager"; //$NON-NLS-1$
 
-	private List certificates = new ArrayList();
-	private List listeners;
+	private List<ICertificateListener> listeners;
+	private List<ICertificateDescriptor> certificates = new ArrayList<ICertificateDescriptor>();
+
 	private long lastUid = 0;
 
 	private static CertStorage defaultInstance;
@@ -80,7 +81,7 @@ public class CertStorage implements ICertificateModifyListener {
 
 	public void addListener(ICertificateListener listener) {
 		if (listeners == null) {
-			listeners = new ArrayList();
+			listeners = new ArrayList<ICertificateListener>();
 		}
 		listeners.add(listener);
 	}
@@ -91,20 +92,24 @@ public class CertStorage implements ICertificateModifyListener {
 		}
 		listeners.remove(listener);
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.certmanager.internal.preferences.ICertificateModifyListener#certificateChanged(org.tigris.mtoolkit.common.certificates.ICertificateDescriptor)
+	 */
 	public void certificateChanged(ICertificateDescriptor cert) {
 		if (certificates.contains(cert)) {
 			fireCertificateChanged(cert);
 		}
 	}
 
+
 	private void fireCertificateAdded(ICertificateDescriptor cert) {
 		if (listeners == null) {
 			return;
 		}
-		Iterator iterator = listeners.iterator();
+		Iterator<ICertificateListener> iterator = listeners.iterator();
 		while (iterator.hasNext()) {
-			((ICertificateListener) iterator.next()).certificateAdded(cert);
+			iterator.next().certificateAdded(cert);
 		}
 	}
 
@@ -112,9 +117,9 @@ public class CertStorage implements ICertificateModifyListener {
 		if (listeners == null) {
 			return;
 		}
-		Iterator iterator = listeners.iterator();
+		Iterator<ICertificateListener> iterator = listeners.iterator();
 		while (iterator.hasNext()) {
-			((ICertificateListener) iterator.next()).certificateChanged(cert);
+			iterator.next().certificateChanged(cert);
 		}
 	}
 
@@ -122,9 +127,9 @@ public class CertStorage implements ICertificateModifyListener {
 		if (listeners == null) {
 			return;
 		}
-		Iterator iterator = listeners.iterator();
+		Iterator<ICertificateListener> iterator = listeners.iterator();
 		while (iterator.hasNext()) {
-			((ICertificateListener) iterator.next()).certificateRemoved(cert);
+			iterator.next().certificateRemoved(cert);
 		}
 	}
 
@@ -132,9 +137,9 @@ public class CertStorage implements ICertificateModifyListener {
 		if (listeners == null) {
 			return;
 		}
-		Iterator iterator = listeners.iterator();
+		Iterator<ICertificateListener> iterator = listeners.iterator();
 		while (iterator.hasNext()) {
-			((ICertificateListener) iterator.next()).certificateStorageRefreshed();
+			iterator.next().certificateStorageRefreshed();
 		}
 	}
 
@@ -160,11 +165,10 @@ public class CertStorage implements ICertificateModifyListener {
 		}
 		store.setValue(ATTR_CERT_COUNT, newCount);
 		store.setValue(ATTR_CERT_LAST_UID, lastUid);
-		Iterator iterator = certificates.iterator();
+		Iterator<ICertificateDescriptor> iterator = certificates.iterator();
 		int id = 0;
 		while (iterator.hasNext()) {
-			ICertificateDescriptor cert = (ICertificateDescriptor) iterator.next();
-			saveCertificate(store, secureStore, cert, id);
+			saveCertificate(store, secureStore, iterator.next(), id);
 			id++;
 		}
 	}

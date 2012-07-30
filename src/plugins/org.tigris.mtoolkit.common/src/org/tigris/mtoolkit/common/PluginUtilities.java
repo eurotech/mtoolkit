@@ -139,11 +139,11 @@ public class PluginUtilities {
   }
 
   /**
-  * Validate specified absolute or relative path for correctness on current platform
-  * 
-  * @param path
-  * @return
-  */
+   * Validate specified absolute or relative path for correctness on current platform
+   * 
+   * @param path
+   * @return
+   */
   public static boolean isValidPath(String path) {
     if (path == null || path.length() == 0) {
       return false;
@@ -407,7 +407,7 @@ public class PluginUtilities {
             .getMessage();
       }
       this.message = JFaceResources.format(JFaceResources.getString("SafeRunnableDialog_reason"), new Object[] { //$NON-NLS-1$
-          status.getMessage(), reason });
+        status.getMessage(), reason });
     }
 
     /**
@@ -430,6 +430,7 @@ public class PluginUtilities {
      * org.eclipse.jface.dialogs.ErrorDialog#createDialogArea(org.eclipse
      * .swt.widgets.Composite)
      */
+    @Override
     protected Control createDialogArea(Composite parent) {
       Control area = super.createDialogArea(parent);
       createStatusList((Composite) area);
@@ -520,6 +521,7 @@ public class PluginUtilities {
          * org.eclipse.jface.viewers.CellLabelProvider#update(org.eclipse
          * .jface.viewers.ViewerCell)
          */
+        @Override
         public void update(ViewerCell cell) {
           cell.setText(((IStatus) cell.getElement()).getMessage());
 
@@ -589,6 +591,7 @@ public class PluginUtilities {
          * org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse
          * .jface.viewers.Viewer, java.lang.Object, java.lang.Object)
          */
+        @Override
         public int compare(Viewer testViewer, Object e1, Object e2) {
           String message1 = ((IStatus) e1).getMessage();
           String message2 = ((IStatus) e2).getMessage();
@@ -646,6 +649,7 @@ public class PluginUtilities {
      * 
      * @see org.eclipse.jface.dialogs.ErrorDialog#shouldShowDetailsButton()
      */
+    @Override
     protected boolean shouldShowDetailsButton() {
       return true;
     }
@@ -677,14 +681,17 @@ public class PluginUtilities {
       this.details = details;
     }
 
+    @Override
     protected int getShellStyle() {
       return super.getShellStyle() | SWT.RESIZE;
     }
 
+    @Override
     protected Image getImage() {
       return super.getErrorImage();
     }
 
+    @Override
     protected void buttonPressed(int id) {
       if (id == IDialogConstants.DETAILS_ID) {
         // was the details button pressed?
@@ -694,11 +701,13 @@ public class PluginUtilities {
       }
     }
 
+    @Override
     protected void configureShell(Shell shell) {
       super.configureShell(shell);
       shell.setText(title);
     }
 
+    @Override
     protected void createButtonsForButtonBar(Composite parent) {
       // create OK and Details buttons
       createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
@@ -721,6 +730,7 @@ public class PluginUtilities {
       detailsButton = createButton(parent, IDialogConstants.DETAILS_ID, IDialogConstants.SHOW_DETAILS_LABEL, false);
     }
 
+    @Override
     protected Control createDialogArea(Composite parent) {
       createMessageArea(parent);
       createDetailsArea(parent);
@@ -742,6 +752,7 @@ public class PluginUtilities {
       return composite;
     }
 
+    @Override
     protected void createDialogAndButtonArea(Composite parent) {
       super.createDialogAndButtonArea(parent);
       if (this.dialogArea instanceof Composite) {
@@ -788,6 +799,7 @@ public class PluginUtilities {
    * @param bundleName  bundle symbolic name
    * @return  Version for specified bundle
    */
+  @SuppressWarnings("cast")
   public static Version getBundleVersion(String bundleName) {
     return new Version((String) Platform.getBundle(bundleName).getHeaders().get(Constants.BUNDLE_VERSION));
   }

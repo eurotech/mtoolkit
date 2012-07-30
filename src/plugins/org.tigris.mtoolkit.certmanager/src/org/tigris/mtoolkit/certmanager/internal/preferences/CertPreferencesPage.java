@@ -46,7 +46,7 @@ import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
 
-public class CertPreferencesPage extends PreferencePage implements
+public final class CertPreferencesPage extends PreferencePage implements
 		IWorkbenchPreferencePage, IMToolkitPreferencePage {
 	private TableViewer certificatesViewer;
 	private Button btnAdd;
@@ -212,6 +212,7 @@ public class CertPreferencesPage extends PreferencePage implements
 
 	private void removeCertificate() {
 		IStructuredSelection selection = (IStructuredSelection) certificatesViewer.getSelection();
+		@SuppressWarnings("rawtypes")
 		Iterator it = selection.iterator();
 		while (it.hasNext()) {
 			ICertificateDescriptor cert = (ICertificateDescriptor) it.next();
