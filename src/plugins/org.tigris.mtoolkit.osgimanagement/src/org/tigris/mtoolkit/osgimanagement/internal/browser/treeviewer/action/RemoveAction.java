@@ -21,13 +21,16 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class RemoveAction extends SelectionProviderAction implements IStateAction {
-
+public final class RemoveAction extends SelectionProviderAction implements IStateAction {
 	public RemoveAction(ISelectionProvider provider, String label) {
 		super(provider, label);
+		this.setText(label + "@Delete");
 	}
-
-	// run method
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.action.Action#run()
+	 */
+	@Override
 	public void run() {
 		int count = getStructuredSelection().size();
 		String msg = "Are you sure you want to remove ";
@@ -49,11 +52,9 @@ public class RemoveAction extends SelectionProviderAction implements IStateActio
 		}
 	}
 
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
-
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
 	public void updateState(IStructuredSelection selection) {
 		if (selection.size() == 0) {
 			setEnabled(false);
@@ -75,5 +76,14 @@ public class RemoveAction extends SelectionProviderAction implements IStateActio
 			}
 		}
 		this.setEnabled(enabled);
+	}
+	
+	// override to react properly to selection change
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	@Override
+	public void selectionChanged(IStructuredSelection selection) {
+		updateState(selection);
 	}
 }

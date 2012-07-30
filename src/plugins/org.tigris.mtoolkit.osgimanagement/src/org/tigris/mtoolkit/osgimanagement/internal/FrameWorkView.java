@@ -339,19 +339,6 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 		GridData gridDataTree = new GridData(GridData.FILL_BOTH);
 		tree = new TreeViewer(parent, SWT.MULTI);
 		tree.getTree().setLayoutData(gridDataTree);
-		tree.getTree().addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				super.keyPressed(e);
-				if (e.keyCode == SWT.DEL) {
-					removeFrameworkAction.updateState((IStructuredSelection) tree.getSelection());
-					if (removeFrameworkAction.isEnabled()) {
-						e.doit = false;
-						removeFrameworkAction.run();
-					}
-				}
-			}
-		});
 		tree.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				Model node = (Model) ((TreeSelection) event.getSelection()).getFirstElement();
@@ -541,7 +528,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 
 			ParameterizedCommand pscmd = new ParameterizedCommand(scmd, null);
 
-			KeySequence keySequence = KeySequence.getInstance(shortcutCombination); //$NON-NLS-1$
+			KeySequence keySequence = KeySequence.getInstance(shortcutCombination);
 			Binding newKey = new KeyBinding(keySequence, pscmd, defaultSchemeId, sampleContextId, null, null, null,
 					Binding.USER);
 
@@ -1095,7 +1082,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 			} finally {
 				// TODO: Change this to not set the selection on elements which
 				// are out of the filter
-			    tree.setSelection(selection);
+				tree.setSelection(selection);
 				tree.getTree().setRedraw(true);
 				ignoreSelectionEvents = false;
 			}
@@ -1274,14 +1261,14 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 		for (int i = 0; i < elements.length; i++) {
 			String clazz = elements[i].getAttribute("class");
 			if (clazz != null) {
-  			try {
-  				Object provider = elements[i].createExecutableExtension("class");
-  				if (provider instanceof ISystemBundlesProvider) {
-  					providers.add(provider);
-  				}
-  			} catch (CoreException e) {
-  				FrameworkPlugin.error("Exception while intializing system bundles provider elements", e);
-			}
+				try {
+					Object provider = elements[i].createExecutableExtension("class");
+					if (provider instanceof ISystemBundlesProvider) {
+						providers.add(provider);
+					}
+				} catch (CoreException e) {
+					FrameworkPlugin.error("Exception while intializing system bundles provider elements", e);
+				}
 			}
 		}
 	}
