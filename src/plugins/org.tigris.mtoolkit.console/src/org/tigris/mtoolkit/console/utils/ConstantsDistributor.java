@@ -11,9 +11,6 @@
 package org.tigris.mtoolkit.console.utils;
 
 public interface ConstantsDistributor {
-
-	static final String DEFAULT_IP = "127.0.0.1"; //$NON-NLS-1$
-
 	static final String SERVER_ICON_DISCONNECTED = "servernc.gif"; //$NON-NLS-1$
 	static final String SERVER_ICON_CONNECTED = "server.gif"; //$NON-NLS-1$
 

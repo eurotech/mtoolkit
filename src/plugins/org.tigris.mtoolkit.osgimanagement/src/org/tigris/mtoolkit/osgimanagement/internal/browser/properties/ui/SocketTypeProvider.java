@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
 import java.net.InetAddress;
@@ -26,7 +36,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistributor {
-
 	private final String TRANSPORT_TYPE = "socket";
 
 	private Text idText;
@@ -36,13 +45,14 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 
 	// Initialize ui values from storage
 	public void setProperties(IMemento config) {
-		if (config == null) return;
+		if (config == null)
+			return;
 		String idString = config.getString(Framework.FRAMEWORK_ID);
 		if (idString == null || idString.length() == 0) {
-			idString = "127.0.0.1";
+			idString = DEFAULT_IP;
 		}
 		idText.setText(idString);
-		
+
 		Integer port = config.getInteger(DeviceConnector.PROP_PMP_PORT);
 		if (port == null) {
 			port = new Integer(1450);
@@ -67,6 +77,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 			idText.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					validateJob = new Job("Validate address") {
+						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							final String ip[] = new String[1];
 							PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -89,7 +100,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 				}
 			});
 		}
-		
+
 		Label portLabel = new Label(contentPanel, SWT.NONE);
 		portLabel.setText("Port:");
 		portLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
@@ -110,19 +121,18 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 				}
 			});
 		}
-		
+
 		return contentPanel;
 	}
 
 	private Job validateJob;
-	
 
 	public String validate() {
 		String ip = getTransportID();
 		String result = validate(ip);
 		return result == null ? validatePort(portText.getText()) : result;
 	}
-	
+
 	public String validate(String ip) {
 		if (ip.trim().equals("")) {
 			return "Type framework address";
@@ -147,8 +157,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		}
 		return null;
 	}
-	
-	
+
 	public String getTransportID() {
 		return idText.getText().trim();
 	}
@@ -156,7 +165,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 	public String getTransportType() {
 		return TRANSPORT_TYPE;
 	}
-	
+
 	private Integer getTransportPort() {
 		return Integer.decode(portText.getText().trim());
 	}
@@ -166,7 +175,8 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		aConnProps.put("framework-connection-immediate", Boolean.FALSE);
 		aConnProps.put(Framework.FRAMEWORK_ID, config.getString(Framework.FRAMEWORK_ID));
 		Integer port = config.getInteger(DeviceConnector.PROP_PMP_PORT);
-		if (port == null) port = new Integer(1450);
+		if (port == null)
+			port = new Integer(1450);
 		aConnProps.put(DeviceConnector.PROP_PMP_PORT, port);
 		return aConnProps;
 	}
