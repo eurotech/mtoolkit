@@ -18,49 +18,67 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 
-public class ConsolePageParticipant implements IConsolePageParticipant, IPropertyChangeListener {
+public final class ConsolePageParticipant implements IConsolePageParticipant, IPropertyChangeListener {
+  private RemoteConsole console;
+  private RemoveConsoleAction removeAction;
+  private RemoveAllConsoleAction removeAllAction;
 
-	private RemoteConsole console;
-	private RemoveConsoleAction removeAction;
-	private RemoveAllConsoleAction removeAllAction;
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IConsolePageParticipant#activated()
+   */
+  public void activated() {
+  }
 
-	public void activated() {
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IConsolePageParticipant#deactivated()
+   */
+  public void deactivated() {
+  }
 
-	public void deactivated() {
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IConsolePageParticipant#dispose()
+   */
+  public void dispose() {
+    this.console.removePropertyChangeListener(this);
+    removeAllAction.dispose();
+    removeAction.dispose();
+  }
 
-	public void dispose() {
-		this.console.removePropertyChangeListener(this);
-		removeAllAction.dispose();
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IConsolePageParticipant#init(org.eclipse.ui.part.IPageBookViewPage, org.eclipse.ui.console.IConsole)
+   */
+  public void init(IPageBookViewPage page, IConsole console) {
+    if (!(console instanceof RemoteConsole)) {
+      return;
+    }
+    this.console = (RemoteConsole) console;
+    this.console.addPropertyChangeListener(this);
 
-	public void init(IPageBookViewPage page, IConsole console) {
-		if (!(console instanceof RemoteConsole))
-			return;
-		this.console = (RemoteConsole) console;
-		this.console.addPropertyChangeListener(this);
+    removeAction = new RemoveConsoleAction(this.console);
+    removeAllAction = new RemoveAllConsoleAction();
 
-		removeAction = new RemoveConsoleAction(this.console);
-		removeAllAction = new RemoveAllConsoleAction();
+    configureToolBar(page.getSite().getActionBars().getToolBarManager());
+  }
 
-		configureToolBar(page.getSite().getActionBars().getToolBarManager());
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+   */
+  public Object getAdapter(Class adapter) {
+    return null;
+  }
 
-	private void configureToolBar(IToolBarManager mng) {
-		mng.appendToGroup(IConsoleConstants.LAUNCH_GROUP, removeAction);
-		mng.appendToGroup(IConsoleConstants.LAUNCH_GROUP, removeAllAction);
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
+   */
+  public void propertyChange(PropertyChangeEvent event) {
+    if (event.getProperty().equals(RemoteConsole.P_DISCONNECTED)) {
+      removeAction.updateState();
+      removeAllAction.updateState();
+    }
+  }
 
-	public Object getAdapter(Class adapter) {
-		return null;
-	}
-
-	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(RemoteConsole.P_DISCONNECTED)) {
-			removeAction.updateState();
-			removeAllAction.updateState();
-		}
-	}
-
+  private void configureToolBar(IToolBarManager mng) {
+    mng.appendToGroup(IConsoleConstants.LAUNCH_GROUP, removeAction);
+    mng.appendToGroup(IConsoleConstants.LAUNCH_GROUP, removeAllAction);
+  }
 }
