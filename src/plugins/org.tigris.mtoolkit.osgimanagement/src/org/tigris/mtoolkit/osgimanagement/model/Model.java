@@ -109,7 +109,7 @@ public abstract class Model implements Comparable, IActionFilter {
     }
   }
 
-  public Model[] getChildren() {
+  public synchronized Model[] getChildren() {
     if (elementList == null) {
       return new Model[0];
     }
