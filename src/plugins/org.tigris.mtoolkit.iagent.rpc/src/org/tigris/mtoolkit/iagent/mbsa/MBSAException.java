@@ -38,7 +38,7 @@ public class MBSAException extends Exception {
 		return code;
 	}
 
-	public Throwable getCause() {
+	public synchronized Throwable getCause() {
 		return cause;
 	}
 

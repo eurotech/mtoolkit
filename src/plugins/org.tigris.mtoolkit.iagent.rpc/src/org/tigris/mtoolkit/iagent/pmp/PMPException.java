@@ -50,7 +50,7 @@ public class PMPException extends Exception {
 	/**
 	 * Returns the basic exception.
 	 */
-	public Throwable getCause() {
+	public synchronized Throwable getCause() {
 		return cause;
 	}
 
