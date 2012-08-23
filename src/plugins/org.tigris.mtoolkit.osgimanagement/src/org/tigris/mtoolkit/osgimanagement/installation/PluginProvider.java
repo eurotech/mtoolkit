@@ -39,9 +39,7 @@ import org.eclipse.pde.internal.core.natures.PDE;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Version;
-import org.tigris.mtoolkit.common.IPluginExporter;
 import org.tigris.mtoolkit.common.PDEUtils;
-import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.export.PluginExportManager;
@@ -435,26 +433,24 @@ public final class PluginProvider implements InstallationItemProvider {
 				}
 			}
 
-			if (pluginsToBeExported.isEmpty())
+			if (pluginsToBeExported.isEmpty()) {
 				// shortcut if we don't have anything for export
 				return Status.OK_STATUS;
-
-			final IPluginExporter exporter = PluginExporter.getInstance();
-			if (exporter == null) {
-				monitor.done();
-				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
-						"Plugins could no be exported by " + this.getClass());
 			}
-
-			// cleanOutputFolder();
 			monitor.worked(2);
 
 			IPath destinationPath = FrameworkPlugin.getDefault().getStateLocation();// .append("plugins");
 
-			PluginExportManager exportManager = initExportManager(exporter, pluginsToBeExported);
+			PluginExportManager exportManager = PluginExportManager.create();
+			for (int i = 0; i < pluginsToBeExported.size(); i++) {
+				IPluginModelBase iPluginModelBase = (IPluginModelBase) pluginsToBeExported.get(i);
+				exportManager.addBundle(iPluginModelBase);
+			}
+
 			IStatus result = exportManager.export(destinationPath.toString(), monitor);
-			if (!result.isOK())
+			if (!result.isOK()) {
 				return result;
+			}
 
 			// set the exported location of PluginItem-s
 			for (int i = 0; i < items.size(); i++) {
@@ -472,17 +468,6 @@ public final class PluginProvider implements InstallationItemProvider {
 			monitor.done();
 		}
 		return Status.OK_STATUS;
-	}
-
-	private PluginExportManager initExportManager(IPluginExporter exporter, List pluginsToBeExported) {
-		PluginExportManager exportManager = PluginExportManager.create(exporter);
-
-		for (int i = 0; i < pluginsToBeExported.size(); i++) {
-			IPluginModelBase iPluginModelBase = (IPluginModelBase) pluginsToBeExported.get(i);
-			exportManager.addBundle(iPluginModelBase);
-		}
-
-		return exportManager;
 	}
 
 	private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
