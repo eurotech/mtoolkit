@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="component">
-   <implementation class="org.tigris.mtoolkit.common.certmanager.CertificateProvider"/>
-   <service>
-      <provide interface="org.tigris.mtoolkit.common.certificates.ICertificateProvider"/>
-   </service>
-</scr:component>
