@@ -16,6 +16,16 @@
       </page>
    </extension>
    
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"
+			class="org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"
+            id="org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"
+            name="%CertPreferencesPage.name">
+      </page>
+   </extension>
+   
     <extension
          point="org.eclipse.ui.menus">
       <menuContribution
@@ -57,4 +67,5 @@
          </with>
       </definition>
    </extension>
+   
 </plugin>

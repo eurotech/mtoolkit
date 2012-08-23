@@ -173,8 +173,7 @@ public final class CertUtils {
     boolean hasError = false;
     try {
       if (preparationProps == null) {
-        throw new CoreException(new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID,
-            "Signing properties are not initialized!"));
+        throw new CoreException(new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, "Signing properties are not initialized!"));
       }
       int count = getCertificatesCount(preparationProps);
       if (count <= 0) {
@@ -224,7 +223,7 @@ public final class CertUtils {
 
   public static IStatus signJar(File file, File signedFile, IProgressMonitor monitor, Map properties) {
     if (properties == null) {
-      return UtilitiesPlugin.newStatus(IStatus.ERROR,  "Signing properties are not initialized");
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "Signing properties are not initialized");
     }
     int count = getCertificatesCount(properties);
     if (count == 0) {
@@ -260,8 +259,7 @@ public final class CertUtils {
    * @return the jarsigner location
    */
   public static String getJarsignerLocation() {
-    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
-        "org.tigris.mtoolkit.certmanager");
+    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(), "org.tigris.mtoolkit.common");
     String location = preferenceStore.getString("jarsigner.location");
     if (location == null || location.length() == 0) {
       location = getDefaultJarsignerLocation();
@@ -303,8 +301,8 @@ public final class CertUtils {
       public void run() {
         Shell shell = display.getActiveShell();
         String nl = System.getProperty("line.separator");
-        MessageDialog dialog = new MessageDialog(shell, "Warning", null, "The signing operation failed. Reason:" + nl
-            + error + nl + "Continue without signing?", MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
+        MessageDialog dialog = new MessageDialog(shell, "Warning", null, "The signing operation failed. Reason:" + nl + error
+            + nl + "Continue without signing?", MessageDialog.WARNING, new String[] { "Yes", "No" }, 0);
         if (dialog.open() == Window.OK) {
           result[0] = new Boolean(true);
         }
@@ -397,18 +395,16 @@ public final class CertUtils {
    *          the key store pass. If null then the same pass as store pass will
    *          be used.
    */
-  private static IStatus signJar(
-      String jarName, String signedJar, IProgressMonitor monitor, String alias, String storeLocation, String storeType,
-      String storePass, String keyPass) {
+  private static IStatus signJar(String jarName, String signedJar, IProgressMonitor monitor, String alias, String storeLocation,
+      String storeType, String storePass, String keyPass) {
     String jarSigner = getJarsignerLocation();
     if (jarSigner == null) {
-      return UtilitiesPlugin.newStatus(
-          IStatus.ERROR, "The location of jarsigner tool was not correctly specified in Preferences.");
+      return UtilitiesPlugin.newStatus(IStatus.ERROR,
+          "The location of jarsigner tool was not correctly specified in Preferences.");
     }
     File f = new File(jarSigner);
     if (!f.exists()) {
-      return UtilitiesPlugin.newStatus(IStatus.ERROR, "The jarsigner tool was not found at \"" + jarSigner
-          + "\"");
+      return UtilitiesPlugin.newStatus(IStatus.ERROR, "The jarsigner tool was not found at \"" + jarSigner + "\"");
     }
     List list = new ArrayList();
     list.add(jarSigner);
@@ -462,8 +458,7 @@ public final class CertUtils {
     }
     if (result != 0) {
       if (retries == 0) {
-        return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content. Operation timed out. Alias: "
-            + alias);
+        return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content. Operation timed out. Alias: " + alias);
       }
       return UtilitiesPlugin.newStatus(IStatus.ERROR, "Cannot sign provided content. Alias: " + alias
           + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputReader.getOutput());
@@ -471,8 +466,8 @@ public final class CertUtils {
     String outputMsg = outputReader.getOutput();
     //return the warnings
     if (outputMsg.indexOf("Warning") != -1 && outputMsg.indexOf("will expire") == -1) {//skip the unnecessary warning for the '6 months'
-      return UtilitiesPlugin.newStatus(IStatus.WARNING, "Signing warning found. Alias: " + alias
-          + ". Jarsigner return code: " + result + ". Jarsigner output: " + outputMsg.replaceAll("\r\n", " "));
+      return UtilitiesPlugin.newStatus(IStatus.WARNING, "Signing warning found. Alias: " + alias + ". Jarsigner return code: "
+          + result + ". Jarsigner output: " + outputMsg.replaceAll("\r\n", " "));
     }
     return Status.OK_STATUS;
   }
@@ -505,13 +500,11 @@ public final class CertUtils {
    *           in case of signing error
    * @since 6.1
    */
-  private static IStatus signJars(File files[], File signedFiles[], IProgressMonitor monitor, Map properties)
-      throws IOException {
+  private static IStatus signJars(File files[], File signedFiles[], IProgressMonitor monitor, Map properties) throws IOException {
     if (files == null || signedFiles == null || files.length != signedFiles.length) {
       return new Status(IStatus.ERROR, UtilitiesPlugin.PLUGIN_ID, "Invalid or missing sinning information.");
     }
-    MultiStatus operationStatus =
-        new MultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.WARNING, "Signing warnings found.", null);
+    MultiStatus operationStatus = new MultiStatus(UtilitiesPlugin.PLUGIN_ID, IStatus.WARNING, "Signing warnings found.", null);
     for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
       IStatus status = signJar(files[i], signedFiles[i], monitor, properties);
       if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
@@ -730,8 +723,8 @@ public final class CertUtils {
         dpFilesToSign.add(fileToSign);
         dpSignedFiles.add(signedFile);
       }
-      CertUtils.signDpFiles((File[]) dpFilesToSign.toArray(new File[] {}),
-          (File[]) dpSignedFiles.toArray(new File[] {}), monitor, properties);
+      CertUtils.signDpFiles((File[]) dpFilesToSign.toArray(new File[] {}), (File[]) dpSignedFiles.toArray(new File[] {}),
+          monitor, properties);
 
     } catch (IOException ioe) {
       hasError = true;
@@ -768,10 +761,8 @@ public final class CertUtils {
         jarFilesToSign.add(fileToSign);
         jarSignedFiles.add(signedFile);
       }
-      IStatus status =
-          CertUtils.signJars(
-              (File[]) jarFilesToSign.toArray(new File[] {}),
-              (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
+      IStatus status = CertUtils.signJars((File[]) jarFilesToSign.toArray(new File[] {}),
+          (File[]) jarSignedFiles.toArray(new File[] {}), monitor, properties);
       if (status.matches(IStatus.WARNING)) {
         UtilitiesPlugin.log(status);
       } else if (status.matches(IStatus.ERROR)) {
@@ -799,8 +790,8 @@ public final class CertUtils {
     }
   }
 
-  private static void setItemsLocation(List preparedJarFiles, List preparedDpFiles, Map preparedItems,
-      List signedJarFilesList, List signedDpFilesList) {
+  private static void setItemsLocation(List preparedJarFiles, List preparedDpFiles, Map preparedItems, List signedJarFilesList,
+      List signedDpFilesList) {
     int size = signedJarFilesList.size();
     InstallationItem itemToSet;
     for (int i = 0; i < size; i++) {

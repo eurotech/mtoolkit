@@ -31,8 +31,6 @@ import org.eclipse.pde.internal.core.bundle.BundlePluginModel;
 import org.eclipse.pde.internal.core.bundle.WorkspaceBundleModel;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.osgi.framework.Version;
-import org.tigris.mtoolkit.common.IPluginExporter;
-import org.tigris.mtoolkit.common.PluginExporter;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 /**
@@ -156,12 +154,8 @@ public final class PluginExportManager {
     }
   }
 
-  public static PluginExportManager create(IPluginExporter exporter) {
-    return new PluginExportManager(exporter);
-  }
-
   public static PluginExportManager create() {
-    return create(PluginExporter.getInstance());
+    return new PluginExportManager(getExporter());
   }
 
   private String determineLocationAfterExport(IPluginModelBase model, FeatureExportInfo info) {
@@ -192,8 +186,7 @@ public final class PluginExportManager {
 
   private void setBundlesExportLocation(IPluginModelBase model, String location) {
     if (bundlesToExport.get(model) == null) {
-      throw new IllegalStateException(
-          "Internal error: cannot save export location for bundle, which is not in export list");
+      throw new IllegalStateException("Internal error: cannot save export location for bundle, which is not in export list");
     }
     bundlesToExport.put(model, location);
   }
@@ -207,5 +200,12 @@ public final class PluginExportManager {
       }
     }
     return bundles;
+  }
+
+  private static IPluginExporter getExporter() {
+    if (PluginExporter_35.isCompatible()) {
+      return new PluginExporter_35();
+    }
+    return null;
   }
 }

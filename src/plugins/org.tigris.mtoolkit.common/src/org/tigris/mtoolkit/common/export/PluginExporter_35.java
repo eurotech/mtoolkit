@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.common;
+package org.tigris.mtoolkit.common.export;
 
 import java.io.File;
 
@@ -26,14 +26,19 @@ import org.eclipse.pde.internal.ui.PDEPluginImages;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressConstants;
+import org.tigris.mtoolkit.common.BasePluginExporter;
+import org.tigris.mtoolkit.common.Messages;
+import org.tigris.mtoolkit.common.PluginUtilities;
+import org.tigris.mtoolkit.common.ReflectionUtils;
 import org.tigris.mtoolkit.common.ReflectionUtils.InvocationException;
+import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 /**
  * 
  * @noextend This class is not intended to be subclassed by clients.
  *
  */
-public class PluginExporter_35 extends BasePluginExporter implements IPluginExporter {
+class PluginExporter_35 extends BasePluginExporter implements IPluginExporter {
 
   /**
    * @since 5.0
@@ -45,6 +50,7 @@ public class PluginExporter_35 extends BasePluginExporter implements IPluginExpo
       final Object op = createExportOperation(fInfo);
 
       ((Job) op).addJobChangeListener(new JobChangeAdapter() {
+        @Override
         public void done(IJobChangeEvent event) {
           setResult(handleOperationResult(fInfo, op, event.getResult()));
         }
@@ -62,7 +68,7 @@ public class PluginExporter_35 extends BasePluginExporter implements IPluginExpo
 
     final Object op = ReflectionUtils.newInstance(
         "org.eclipse.pde.internal.core.exports.PluginExportOperation", new Class[] { //$NON-NLS-1$
-        FeatureExportInfo.class, String.class }, new Object[] { fInfo, "" });
+            FeatureExportInfo.class, String.class }, new Object[] { fInfo, "" });
 
     ((Job) op).setUser(true);
 

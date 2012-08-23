@@ -49,7 +49,7 @@ import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.images.UIResources;
 
 public final class CertificatesPanel {
-  private static final String MTOOLKIT_PAGE_ID = "org.tigris.mtoolkit.certmanager.internal.preferences.CertPreferencesPage"; //$NON-NLS-1$
+  private static final String MTOOLKIT_PAGE_ID = "org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"; //$NON-NLS-1$
 
   private Composite signContentGroup;
   private Label lblCertificates;
@@ -110,6 +110,7 @@ public final class CertificatesPanel {
     tblCertificates.setLinesVisible(true);
     tblCertificates.setHeaderVisible(true);
     tblCertificates.addSelectionListener(new SelectionAdapter() {
+      @Override
       public void widgetSelected(SelectionEvent e) {
         if (e.detail == SWT.CHECK) {
           fireModifyEvent();
@@ -207,6 +208,7 @@ public final class CertificatesPanel {
       link.setLayoutData(new GridData());
       link.setText(Messages.CertificatesPanel_lblNoCertificates);
       link.addSelectionListener(new SelectionAdapter() {
+        @Override
         public void widgetSelected(SelectionEvent e) {
           Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
           PreferencesUtil.createPreferenceDialogOn(shell, MTOOLKIT_PAGE_ID, null, null).open();
@@ -298,6 +300,7 @@ public final class CertificatesPanel {
       return columnText;
     }
 
+    @Override
     public void dispose() {
       iconCertMissing.dispose();
     }

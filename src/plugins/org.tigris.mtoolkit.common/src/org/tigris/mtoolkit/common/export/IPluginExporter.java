@@ -8,15 +8,31 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.common;
+package org.tigris.mtoolkit.common.export;
 
-public class PluginExporter {
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 
-  public static IPluginExporter getInstance() {
-    if (PluginExporter_35.isCompatible()) {
-      return new PluginExporter_35();
-    }
-    return null;
-  }
+public interface IPluginExporter {
 
+	/**
+	 * @since 5.0
+	 */
+	void asyncExportPlugins(Object info);
+	
+	/**
+	 * @since 5.0
+	 */
+	IStatus syncExportPlugins(Object info, IProgressMonitor monitor);
+
+	boolean hasFinished();
+
+	IStatus getResult();
+
+	String getQualifier();
+	
+	/**
+	 * @since 5.0
+	 */
+	IStatus join(long timeout) throws InterruptedException;
 }
