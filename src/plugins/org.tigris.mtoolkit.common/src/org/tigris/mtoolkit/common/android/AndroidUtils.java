@@ -218,7 +218,8 @@ public class AndroidUtils {
    * @since 6.0
    */
   public static String getAndroidSdkLocation() {
-    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
+    @SuppressWarnings("deprecation")
+	ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
         "com.android.ide.eclipse.adt");
     return preferenceStore.getString("com.android.ide.eclipse.adt.sdk");
   }

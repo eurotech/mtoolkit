@@ -259,7 +259,8 @@ public final class CertUtils {
    * @return the jarsigner location
    */
   public static String getJarsignerLocation() {
-    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(), "org.tigris.mtoolkit.common");
+    @SuppressWarnings("deprecation")
+	ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(), "org.tigris.mtoolkit.common");
     String location = preferenceStore.getString("jarsigner.location");
     if (location == null || location.length() == 0) {
       location = getDefaultJarsignerLocation();
