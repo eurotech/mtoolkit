@@ -10,27 +10,20 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.certificates;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DecorationOverlayIcon;
-import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -46,10 +39,14 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.tigris.mtoolkit.common.Messages;
-import org.tigris.mtoolkit.common.images.UIResources;
+import org.tigris.mtoolkit.common.certmanager.internal.preferences.CertLabelProvider;
 
 public final class CertificatesPanel {
   private static final String MTOOLKIT_PAGE_ID = "org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"; //$NON-NLS-1$
+  /**
+   * @since 5.0
+   */
+  public static final int EVENT_CONTENT_MODIFIED = 1;
 
   private Composite signContentGroup;
   private Label lblCertificates;
@@ -57,11 +54,6 @@ public final class CertificatesPanel {
   private CheckboxTableViewer certificatesViewer;
   private Link link;
   private Set listeners = new HashSet();
-
-  /**
-   * @since 5.0
-   */
-  public static final int EVENT_CONTENT_MODIFIED = 1;
 
   public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan) {
     this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
@@ -110,6 +102,9 @@ public final class CertificatesPanel {
     tblCertificates.setLinesVisible(true);
     tblCertificates.setHeaderVisible(true);
     tblCertificates.addSelectionListener(new SelectionAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+       */
       @Override
       public void widgetSelected(SelectionEvent e) {
         if (e.detail == SWT.CHECK) {
@@ -129,7 +124,29 @@ public final class CertificatesPanel {
     column.setText(Messages.CertificatesPanel_tblCertColLocation);
 
     certificatesViewer = new CheckboxTableViewer(tblCertificates);
-    certificatesViewer.setContentProvider(new CertContentProvider());
+    certificatesViewer.setContentProvider(new IStructuredContentProvider() {
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+       */
+      public Object[] getElements(Object inputElement) {
+        if (inputElement instanceof Object[]) {
+          return ((Object[]) inputElement);
+        }
+        return new Object[0];
+      }
+
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+       */
+      public void dispose() {
+      }
+
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+       */
+      public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+      }
+    });
     certificatesViewer.setLabelProvider(new CertLabelProvider());
 
   }
@@ -202,12 +219,14 @@ public final class CertificatesPanel {
 
   private void setNoCertificatesAvailable() {
     setCertificateControlsVisible(false);
-
     if (link == null) {
       link = new Link(signContentGroup, SWT.NONE);
       link.setLayoutData(new GridData());
       link.setText(Messages.CertificatesPanel_lblNoCertificates);
       link.addSelectionListener(new SelectionAdapter() {
+        /* (non-Javadoc)
+         * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+         */
         @Override
         public void widgetSelected(SelectionEvent e) {
           Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
@@ -257,68 +276,6 @@ public final class CertificatesPanel {
 
     if (signContentGroup.getParent() != null) {
       signContentGroup.getParent().layout();
-    }
-  }
-
-  private class CertLabelProvider extends LabelProvider implements ITableLabelProvider {
-    private Image iconCertMissing;
-
-    public CertLabelProvider() {
-      super();
-
-      Image iconCert = UIResources.getImage(UIResources.CERTIFICATE_ICON);
-      ImageDescriptor overlay = UIResources.getImageDescriptor(UIResources.OVR_ERROR_ICON);
-      iconCertMissing = new DecorationOverlayIcon(iconCert, overlay, IDecoration.BOTTOM_LEFT).createImage();
-    }
-
-    public Image getColumnImage(Object element, int columnIndex) {
-      if (!(element instanceof ICertificateDescriptor) || columnIndex > 0) {
-        return null;
-      }
-      ICertificateDescriptor cert = (ICertificateDescriptor) element;
-      File keystore = new File(cert.getStoreLocation());
-      if (!keystore.exists() || !keystore.isFile()) {
-        return iconCertMissing;
-      }
-      return UIResources.getImage(UIResources.CERTIFICATE_ICON);
-    }
-
-    public String getColumnText(Object element, int columnIndex) {
-      if (!(element instanceof ICertificateDescriptor)) {
-        return null;
-      }
-      ICertificateDescriptor cert = (ICertificateDescriptor) element;
-      String columnText = null;
-      switch (columnIndex) {
-      case 0:
-        columnText = cert.getAlias();
-        break;
-      case 1:
-        columnText = cert.getStoreLocation();
-        break;
-      }
-      return columnText;
-    }
-
-    @Override
-    public void dispose() {
-      iconCertMissing.dispose();
-    }
-  }
-
-  private class CertContentProvider implements IStructuredContentProvider {
-
-    public Object[] getElements(Object inputElement) {
-      if (inputElement instanceof Object[]) {
-        return ((Object[]) inputElement);
-      }
-      return new Object[0];
-    }
-
-    public void dispose() {
-    }
-
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     }
   }
 }
