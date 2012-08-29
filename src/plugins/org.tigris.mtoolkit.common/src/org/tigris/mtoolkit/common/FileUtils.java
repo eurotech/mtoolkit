@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -233,16 +233,7 @@ public class FileUtils {
     return name.substring(name.lastIndexOf('.') + 1, name.length()).toLowerCase();
   }
 
-  public static void close(InputStream stream) {
-    if (stream != null) {
-      try {
-        stream.close();
-      } catch (IOException e) {
-      }
-    }
-  }
-
-  public static void close(OutputStream stream) {
+  public static void close(Closeable stream) {
     if (stream != null) {
       try {
         stream.close();
