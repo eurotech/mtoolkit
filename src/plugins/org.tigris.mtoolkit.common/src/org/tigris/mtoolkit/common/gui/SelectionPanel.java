@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
 package org.tigris.mtoolkit.common.gui;
 
 import java.util.ArrayList;
@@ -66,6 +76,7 @@ public class SelectionPanel extends Composite {
       }
     });
     list.setSorter(new ViewerSorter() {
+      @Override
       public int compare(Viewer viewer, Object e1, Object e2) {
         String name1 = null;
         String name2 = null;
@@ -92,9 +103,9 @@ public class SelectionPanel extends Composite {
     list.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
     filterText = new Text(this, SWT.BORDER | SWT.SINGLE);
     filterText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    filterText.setMessage("<type filter here>");
-
+    filterText.setMessage("type filter text");
     list.addFilter(new ViewerFilter() {
+      @Override
       public Object[] filter(Viewer viewer, Object parent, Object[] elements) {
         String filter = filterText.getText().trim().toLowerCase();
         if ("".equals(filter)) {
@@ -109,6 +120,7 @@ public class SelectionPanel extends Composite {
         return out.toArray();
       }
 
+      @Override
       public boolean select(Viewer viewer, Object parentElement, Object element) {
         String filter = filterText.getText().trim().toLowerCase();
         return match(element, filter, viewer);
@@ -178,6 +190,7 @@ public class SelectionPanel extends Composite {
     Button btnSelect = new Button(buttonsPanel, SWT.PUSH);
     btnSelect.setText("Select all");
     btnSelect.addSelectionListener(new SelectionAdapter() {
+      @Override
       public void widgetSelected(SelectionEvent event) {
         if (listItems.length > 0) {
           selectAll(true);
@@ -191,6 +204,7 @@ public class SelectionPanel extends Composite {
     Button btnDeselect = new Button(buttonsPanel, SWT.PUSH);
     btnDeselect.setText("Deselect all");
     btnDeselect.addSelectionListener(new SelectionAdapter() {
+      @Override
       public void widgetSelected(SelectionEvent event) {
         if (listItems.length > 0) {
           selectAll(false);

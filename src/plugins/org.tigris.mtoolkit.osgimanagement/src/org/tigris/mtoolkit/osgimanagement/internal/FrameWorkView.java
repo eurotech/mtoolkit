@@ -265,7 +265,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 		filterPanel.setLayout(filterLayout);
 
 		filterField = new Text(filterPanel, SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH | SWT.ICON_CANCEL);
-		filterField.setMessage("type filter here");
+		filterField.setMessage("type filter text");
 
 		filterField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
