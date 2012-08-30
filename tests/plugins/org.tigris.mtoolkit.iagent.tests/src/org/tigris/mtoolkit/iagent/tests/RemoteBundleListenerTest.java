@@ -69,7 +69,7 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
 			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
 			events.clear();
-			bundle.uninstall();
+			bundle.uninstall(null);
 			foundEvents = findEvents(RemoteBundleEvent.STOPPING,
 				RemoteBundleEvent.STOPPED,
 				RemoteBundleEvent.UNRESOLVED,
@@ -108,7 +108,7 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
 			}
 			assertNotNull(foundEvent);
 			assertRemoteBundle(foundEvent.getBundle(), bundle.getBundleId());
-			bundle.uninstall();
+			bundle.uninstall(null);
 			bundle = null;
 		} finally {
 			commands.removeRemoteBundleListener(this);

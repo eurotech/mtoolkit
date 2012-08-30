@@ -71,7 +71,7 @@ public class DeploymentTestCase extends TestCase {
 				if (remoteBundles[i].getState() != Bundle.UNINSTALLED
 								&& bLocation.equals(remoteBundles[i].getLocation())) {
 					try {
-						remoteBundles[i].uninstall();
+						remoteBundles[i].uninstall(null);
 					} catch (Exception e) {
 					}
 					break;

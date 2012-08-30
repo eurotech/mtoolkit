@@ -38,7 +38,7 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
 	protected void tearDown() throws Exception {
 		try {
 			if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
-				bundle.uninstall();
+				bundle.uninstall(null);
 			}
 		} catch (Exception e) {
 		}

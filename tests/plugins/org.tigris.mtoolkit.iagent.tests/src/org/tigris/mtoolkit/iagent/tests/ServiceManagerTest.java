@@ -54,7 +54,7 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
 		assertTrue(bundle.getState() != Bundle.ACTIVE);
 		assertFalse(isServicePresent(TEST_SERVICE_CLASS, null));
 
-		bundle.uninstall();
+		bundle.uninstall(null);
 		bundle = null;
 	}
 
@@ -93,8 +93,8 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
 		bundle1.stop(0);
 		sleep(SLEEP_INTERVAL);
 		assertTrue("Unexpected event(s) appear(s)!", events.size() == 0);
-		bundle1.uninstall();
-		bundle2.uninstall();
+		bundle1.uninstall(null);
+		bundle2.uninstall(null);
 	}
 
 	public static void assertEquals(Object[] expected, Object[] actual) {

@@ -31,7 +31,7 @@ public class RemoteServiceTest extends ServiceManagerTestCase {
 
 	protected void tearDown() throws Exception {
 		bundle.stop(0);
-		bundle.uninstall();
+		bundle.uninstall(null);
 		bundle = null;
 		super.tearDown();
 	}
@@ -53,7 +53,7 @@ public class RemoteServiceTest extends ServiceManagerTestCase {
 		RemoteBundle b2 = installBundle("test_listener_service.jar");
 		b2.start(0);
 		assertTrue("Service property not modified!", "Modify".equals(service.getProperties().get("TEST_PROPERTY")));
-		b2.uninstall();
+		b2.uninstall(null);
 		b2 = null;
 	}
 
@@ -66,7 +66,7 @@ public class RemoteServiceTest extends ServiceManagerTestCase {
 		b2.stop(0);
 		bundles = service.getUsingBundles();
 		assertFalse("Stoped service listener bundle found in UsingBundles!", findBundle(b2, bundles));
-		b2.uninstall();
+		b2.uninstall(null);
 		b2 = null;
 	}
 

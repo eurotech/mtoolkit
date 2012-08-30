@@ -32,7 +32,7 @@ public class RemoteBundleTest extends DeploymentTestCase {
 	protected void tearDown() throws Exception {
 		if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
 			try {
-				bundle.uninstall();
+				bundle.uninstall(null);
 			} catch (Exception e) {
 			}
 		}
@@ -111,7 +111,7 @@ public class RemoteBundleTest extends DeploymentTestCase {
 	public void testUninstall() throws IAgentException {
 		assertTrue(bundle.getState() != Bundle.UNINSTALLED);
 
-		bundle.uninstall();
+		bundle.uninstall(null);
 
 		assertEquals(Bundle.UNINSTALLED, bundle.getState());
 	}
@@ -212,7 +212,7 @@ public class RemoteBundleTest extends DeploymentTestCase {
 	}
 
 	private void uninstallBundleSilently(RemoteBundle bundle) throws IAgentException {
-		bundle.uninstall();
+		bundle.uninstall(null);
 		assertTrue(((RemoteBundleImpl) bundle).uninstalled);
 		((RemoteBundleImpl) bundle).uninstalled = false;
 	}
@@ -220,7 +220,7 @@ public class RemoteBundleTest extends DeploymentTestCase {
 	public void testIllegalStateUninstall() throws IAgentException {
 		uninstallBundleSilently(bundle);
 		try {
-			bundle.uninstall();
+			bundle.uninstall(null);
 			fail("Should throw IllegalStateException");
 		} catch (IAgentException e) {
 		}

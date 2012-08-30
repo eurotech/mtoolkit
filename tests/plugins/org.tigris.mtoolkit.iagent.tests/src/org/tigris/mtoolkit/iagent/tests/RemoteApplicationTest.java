@@ -39,7 +39,7 @@ public class RemoteApplicationTest extends ApplicationTestCase {
 		assertEquals("RUNNING", app.getState());
 		app.stop();
 		assertEquals("INSTALLED", app.getState());
-		oneAppBundle.uninstall();
+		oneAppBundle.uninstall(null);
 		assertEquals("UNINSTALLED", app.getState());
 	}
 }

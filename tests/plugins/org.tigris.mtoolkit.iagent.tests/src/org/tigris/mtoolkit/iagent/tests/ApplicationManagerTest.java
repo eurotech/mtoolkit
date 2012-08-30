@@ -37,7 +37,7 @@ public class ApplicationManagerTest extends ApplicationTestCase {
 		}
 		assertTrue("Our application must have been found", found);
 		
-		oneAppBundle.uninstall();
+		oneAppBundle.uninstall(null);
 		apps = appManager.listApplications();
 		assertNotNull("listApplications() must not return null result", apps);
 		int lengthAfterUninstall = apps.length;

@@ -64,8 +64,8 @@ public class RemoteServiceListenerTest extends ServiceManagerTestCase implements
 		bundle1.stop(0);
 		sleep(SLEEP_INTERVAL);
 		assertTrue("Unexpected event(s) appear(s)!", events.size() == 0);
-		bundle1.uninstall();
-		bundle2.uninstall();
+		bundle1.uninstall(null);
+		bundle2.uninstall(null);
 	}
 
 	public static void assertEquals(Object[] expected, Object[] actual) {
