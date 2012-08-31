@@ -29,18 +29,15 @@ public final class Messages extends NLS {
 	public static String install_action_label;
 	public static String deinstall_action_label;
 
-	public static String deployment_package_filter_label;
 	public static String start_action_label;
 	public static String stop_action_label;
 	public static String update_action_label;
-	public static String service_properties_action_label;
 	public static String goto_service_action_label;
 	public static String bundles_node_label;
 	public static String bundles_view_action_label;
 	public static String services_view_action_label;
 	public static String show_bundle_id_action_label;
 	public static String show_bundle_version_action_label;
-	public static String show_bundle_properties_action_label;
 	public static String find_action_label;
 	public static String find_action_run_string;
 	public static String in_frameworks_view;
@@ -52,28 +49,13 @@ public final class Messages extends NLS {
 	public static String framework_properties_title;
 	public static String service_properties_title;
 	public static String bundle_properties_title;
-	public static String service_label;
-	public static String headers_label;
-	public static String install_dialog_title;
 	public static String connecting_operation_title;
 	public static String preparing_operation_title;
-	public static String install_operation_title;
-	public static String update_dialog_title;
-	public static String install_dp_dialog_title;
-	public static String install_confirm_title;
-	public static String package_analyze_title;
-
-	public static String name_column_label;
 
 	public static String new_framework_default_name;
 	public static String root_element_name;
 	public static String connect_properties_group_label;
 	public static String framework_name_label;
-	public static String framework_ip_label;
-
-	public static String install_label;
-	public static String update_label;
-	public static String install_dp_label;
 
 	public static String install_bundle_title;
 	public static String update_bundle_title;
@@ -85,12 +67,7 @@ public final class Messages extends NLS {
 	public static String registered_in;
 	public static String used_by;
 	public static String missing_version;
-	public static String ok_button_label;
 
-	public static String overwriting_file_confirmation_text;
-	public static String cancel_button_label;
-	public static String apply_button_label;
-	public static String browse_button_label;
 	public static String connect_button_label;
 	public static String enable_frameworks_autoconnect;
 	public static String show_bundle_categories;
@@ -100,49 +77,26 @@ public final class Messages extends NLS {
 	public static String enable_info_log;
 	public static String autostart_bundles_on_install;
 	public static String use_activation_policy;
-	public static String connect_error_message;
 	public static String pmp_connect_error_message;
 	public static String duplicate_framework_name_message;
 	public static String incorrect_framework_name_message;
-	public static String incorrect_framework_properties_message;
-	public static String duplicate_bundle_confirm_message;
-	public static String duplicate_dp_confirm_message;
-	public static String file_not_exists;
 	public static String no_reason_message;
 	public static String no_exception_message;
-
-	public static String no_plugin_exporter_available;
-	public static String bundle_deinstalled_message;
 
 	public static String bundle_startup_failure;
 
 	public static String bundle_update_failure;
 
 	public static String bundle_filter_label;
-	public static String bundle_installation_failure;
 	public static String bundle_start_failure;
 
 	public static String bundle_stop_failure;
 
-	public static String bundle_installed_message;
-
-	public static String bundle_is_uninstalled;
-	public static String bundle_updated_message;
-	public static String dp_deinstalled_message;
-	public static String dp_installed_message;
-	public static String dpackages_node_label;
-	public static String uninstall_failed;
-	public static String uninstall_forced;
 	public static String cant_get_bundle_version;
 	public static String framework_ip_changed_title;
 	public static String framework_ip_changed_message;
-	public static String missing_manifest;
-	public static String find_button_label;
 	public static String close_button_label;
-	public static String find_text;
 	public static String BundlesAction_ToolTip;
-	public static String DPAction_ToolTip;
-	public static String retrieve_framework_info;
 	public static String retrieve_bundles_info;
 	public static String retrieve_services_info;
 	public static String stop_bundle;
@@ -157,7 +111,6 @@ public final class Messages extends NLS {
 	public static String rcp_bundle_missing_message;
 	public static String get_iagent_button_label;
 	public static String save_as_dialog_title;
-	public static String install_file_dialog_title;
 
 	public static String framework_not_instrumented;
 	public static String framework_not_instrumented_msg;
@@ -169,14 +122,6 @@ public final class Messages extends NLS {
 	public static String connection_failed;
 
 	public static String show_service_properties_in_tree;
-
-	public static String question_dialog_title;
-
-	public static String text_files_filter_label;
-
-	public static String Toolbar_Bundles_Label;
-
-	public static String start_bundle_failure_title;
 
 	public static String stop_system_bundle;
 
