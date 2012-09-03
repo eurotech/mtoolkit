@@ -101,7 +101,7 @@ public class SelectionPanel extends Composite {
     });
     list.setLabelProvider(new LabelProvider());
     list.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
-    filterText = new Text(this, SWT.BORDER | SWT.SINGLE);
+    filterText = new Text(this, SWT.BORDER | SWT.SINGLE | SWT.SEARCH | SWT.ICON_CANCEL);
     filterText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     filterText.setMessage("type filter text");
     list.addFilter(new ViewerFilter() {
