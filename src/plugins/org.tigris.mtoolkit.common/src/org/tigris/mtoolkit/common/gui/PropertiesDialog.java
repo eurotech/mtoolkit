@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Shell;
  * @since 5.0
  */
 public abstract class PropertiesDialog extends TrayDialog {
-
 	private PropertiesPage mainControl;
 	private String title;
 	private String tableTitle;
@@ -39,11 +38,11 @@ public abstract class PropertiesDialog extends TrayDialog {
 		this.tableTitle = tableTitle;
 	}
 
-	public Control createDialogArea(Composite parent) {
+	@Override
+  public Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout());
 		GridData mGD = new GridData(GridData.FILL_BOTH);
-		mGD.heightHint = 470;
 		mGD.heightHint = 240;
 		container.setLayoutData(mGD);
 		mainControl = createMainControl(container);
@@ -67,7 +66,8 @@ public abstract class PropertiesDialog extends TrayDialog {
 
 	protected abstract void attachHelp(Composite container);
 
-	protected void createButtonsForButtonBar(Composite parent) {
+	@Override
+  protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL,
 				true);
 	}
