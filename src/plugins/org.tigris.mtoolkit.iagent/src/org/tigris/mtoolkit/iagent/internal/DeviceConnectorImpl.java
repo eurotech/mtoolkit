@@ -53,7 +53,7 @@ import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
  * 
  */
 public class DeviceConnectorImpl extends DeviceConnector implements EventListener, ConnectionListener,
-		DeviceConnectorSpi {
+DeviceConnectorSpi {
 	private LightServiceRegistry serviceRegistry;
 	private VMManagerImpl runtimeCommands;
 	private DeploymentManagerImpl deploymentCommands;
@@ -199,10 +199,11 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 				deploymentCommands.removeListeners();
 			if (serviceManager != null)
 				serviceManager.removeListeners();
-			if (connectionManager != null)
+			if (connectionManager != null) {
 				connectionManager.removeListeners();
-			debug("[closeConnection] Closing underlying connections...");
-			connectionManager.closeConnections();
+				debug("[closeConnection] Closing underlying connections...");
+				connectionManager.closeConnections();
+			}
 			debug("[closeConnection] DeviceConnector closed successfully");
 		} catch (Throwable t) {
 			IAgentLog.error("[DeviceConnectorImpl][closeConnection] Failed to close underlying connections", t);
