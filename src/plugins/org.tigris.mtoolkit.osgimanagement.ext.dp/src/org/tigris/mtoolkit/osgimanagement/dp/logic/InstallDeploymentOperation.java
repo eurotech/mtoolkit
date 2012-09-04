@@ -24,6 +24,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -35,9 +36,8 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
-public class InstallDeploymentOperation {
-
-  private Framework framework;
+public final class InstallDeploymentOperation {
+  private final Framework framework;
 
   public InstallDeploymentOperation(Framework framework) {
     this.framework = framework;
@@ -45,6 +45,7 @@ public class InstallDeploymentOperation {
 
   public void startJob(final File sourceFile, IProgressMonitor monitor) {
     RemoteDeploymentOperation operation = new RemoteDeploymentOperation("Installing deployment package...", framework) {
+      @Override
       protected IStatus doOperation(IProgressMonitor monitor) {
         RemoteDP remoteDP = null;
         try {
@@ -56,10 +57,10 @@ public class InstallDeploymentOperation {
         } catch (Exception e) {
           return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e);
         }
-
         return Status.OK_STATUS;
       }
 
+      @Override
       protected String getMessage(IStatus operationStatus) {
         return "Deployment package installation failed";
       }
@@ -74,18 +75,19 @@ public class InstallDeploymentOperation {
     try {
       jar = new JarFile(sourceFile);
       Manifest manifest = jar.getManifest();
-      if (manifest == null)
+      if (manifest == null) {
         throw new IllegalArgumentException(NLS.bind("Source file \"{0}\" doesn't have valid manifest", sourceFile));
+      }
       String symbolicName = manifest.getMainAttributes().getValue("DeploymentPackage-SymbolicName");
-      if (symbolicName == null)
+      if (symbolicName == null) {
         throw new IllegalArgumentException(NLS.bind("Source file \"{0}\" doesn't have valid manifest", sourceFile));
+      }
       String version = manifest.getMainAttributes().getValue("DeploymentPackage-Version");
-      if (version == null)
+      if (version == null) {
         throw new IllegalArgumentException(NLS.bind("Source file \"{0}\" doesn't have valid manifest", sourceFile));
+      }
       DeviceConnector connector = framework.getConnector();
       if (connector == null) {
-        //        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Connection lost", null);
-        //processError("Connection lost", true);
         throw new IAgentException("Connection lost", IStatus.ERROR);
       }
       RemoteDP remoteDP = connector.getDeploymentManager().getDeploymentPackage(symbolicName);
@@ -103,10 +105,15 @@ public class InstallDeploymentOperation {
                 break;
               }
             }
-            DeploymentPackage packageNode = DPModelProvider.findDP(dpNode, symbolicName);
-            if (packageNode == null)
+            if (dpNode == null) {
               throw new IllegalArgumentException(
                   "Local representation of the remote OSGi framework is stale. Refresh and try again.");
+            }
+            DeploymentPackage packageNode = DPModelProvider.findDP(dpNode, symbolicName);
+            if (packageNode == null) {
+              throw new IllegalArgumentException(
+                  "Local representation of the remote OSGi framework is stale. Refresh and try again.");
+            }
             UninstallDeploymentOperation uninstallJob = new UninstallDeploymentOperation(packageNode);
             monitor.subTask(uninstallJob.getName());
             IStatus status = uninstallJob.uninstallDeploymentPackage(false);
@@ -123,19 +130,8 @@ public class InstallDeploymentOperation {
       throw new IllegalArgumentException(NLS.bind("Failed to prepare file \"{0}\" Cause:", sourceFile.getName(),
           e.getMessage()));
     } finally {
-      if (fis != null) {
-        try {
-          fis.close();
-        } catch (IOException e) {
-        }
-        if (jar != null) {
-          try {
-            jar.close();
-          } catch (IOException e) {
-          }
-        }
-      }
-
+      FileUtils.close(fis);
+      FileUtils.close(jar);
     }
     return dp;
   }
@@ -180,7 +176,6 @@ public class InstallDeploymentOperation {
         });
       }
     }
-    //dumpToLog(IStatus.ERROR, message, null);
   }
 
   // Get active shell
@@ -191,5 +186,4 @@ public class InstallDeploymentOperation {
     }
     return display.getActiveShell();
   }
-
 }
