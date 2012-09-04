@@ -22,7 +22,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.zip.DeflaterOutputStream;
 
@@ -49,10 +48,8 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
 public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements RemoteBundleAdmin,
-		SynchronousBundleListener {
-
+SynchronousBundleListener {
 	public static final String SYNCH_BUNDLE_EVENTS = "synch_bundle_event";
-	public static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
 	public static final String EVENT_TYPE_KEY = "type";
 	public static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
 
@@ -62,7 +59,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 	private ServiceRegistration registration;
 	private BundleContext bc;
 
-	private Set loadedSymbolicNames;
 	private Bundle systemBundle;
 
 	private BundleManagerDelegate defaultDelegate;
@@ -513,7 +509,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 		Bundle[] hostBundles = admin.getHosts(bundle);
 		long[] bids = convertBundlesToIds(hostBundles);
 		DebugUtils
-				.debug(this, "[getHostBundles] Host bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
+		.debug(this, "[getHostBundles] Host bundles successfully gotten: " + DebugUtils.convertForDebug(bids));
 		return bids;
 	}
 
@@ -558,24 +554,11 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 			Dictionary convEvent = convertBundleEvent(event);
 			DebugUtils.debug(this,
 					"[bundleChanged] Sending event through existing pmpConnection. eventType: " + event.getType());
-			String symbolicName = event.getBundle().getSymbolicName();
-			if (event.getType() == BundleEvent.INSTALLED && symbolicName != null && isBundleSystem(symbolicName)) {
-				// post event if new bundle is installed whose symbolic name is
-				// in the system bundles symbolic names
-				synchronizer.enqueue(new EventData(new Long(event.getBundle().getBundleId()), SYSTEM_BUNDLE_EVENT));
-			}
 			synchronizer.enqueue(new EventData(convEvent, SYNCH_BUNDLE_EVENTS));
 			DebugUtils.debug(this, "[bundleChanged] Bundle successfully changed");
 		} else {
 			DebugUtils.debug(this, "[bundleChanged] Event synchronizer was disabled.");
 		}
-	}
-
-	private boolean isBundleSystem(String symbolicName) {
-		if (loadedSymbolicNames != null)
-			return loadedSymbolicNames.contains(symbolicName);
-		else
-			return false;
 	}
 
 	private Dictionary convertBundleEvent(BundleEvent bEvent) {

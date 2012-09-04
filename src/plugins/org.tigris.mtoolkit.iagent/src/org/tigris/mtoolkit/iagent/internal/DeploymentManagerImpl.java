@@ -42,10 +42,8 @@ import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 
 public class DeploymentManagerImpl implements DeploymentManager, EventListener, ConnectionListener {
-
 	private static final String DEPLOYMENT_EVENT = "d_event";
 	private static final String SYNCH_BUNDLE_EVENT = "synch_bundle_event";
-	private static final String SYSTEM_BUNDLE_EVENT = "system_bundle_event";
 	private static final String EVENT_TYPE_KEY = "type";
 	private static final String EVENT_DEPLOYMENT_PACKAGE_KEY = "deployment.package";
 	private static final String EVENT_BUNDLE_ID_KEY = "bundle.id";
@@ -429,24 +427,8 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 			}
 			debug("[removeListeners] bundle listeners removed");
 		}
-		PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION, false);
-		if (connection != null) {
-			debug("[removeListeners] PMP connection is available. remove evnet listener for system bundle events...");
-			connection.removeEventListener(this, new String[] { SYSTEM_BUNDLE_EVENT });
-		}
 	}
-
-	private final void debug(String message) {
-		DebugUtils.debug(this, message);
-	}
-
-	private final void info(String message) {
-		DebugUtils.info(this, message);
-	}
-
-	private final void error(String message, Throwable e) {
-		DebugUtils.error(this, message, e);
-	}
+	
 
 	public BundleSnapshot[] getBundlesSnapshot(Dictionary properties) throws IAgentException {
 		debug("[getBundlesSnapshot] >>>");
@@ -483,4 +465,16 @@ public class DeploymentManagerImpl implements DeploymentManager, EventListener, 
 		return result;
 	}
 
+
+	private final void debug(String message) {
+		DebugUtils.debug(this, message);
+	}
+
+	private final void info(String message) {
+		DebugUtils.info(this, message);
+	}
+
+	private final void error(String message, Throwable e) {
+		DebugUtils.error(this, message, e);
+	}
 }
