@@ -45,8 +45,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 	private static final int FAILURE_FAIL = 2;
 	private static final int FAILURE_REUSE = 3;
 
-	protected int maxStringLength;
-	protected int maxArrayLength;
 	private ServerSocket socket;
 	protected volatile boolean run; // for what's this !?
 
