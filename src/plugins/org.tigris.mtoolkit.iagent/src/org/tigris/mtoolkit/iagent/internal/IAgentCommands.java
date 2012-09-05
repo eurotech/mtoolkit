@@ -159,4 +159,9 @@ public interface IAgentCommands {
 	 * InstAgent command to get PMP listening port.
 	 */
 	public static final int IAGENT_CMD_GET_PMP_LISTENING_PORT = 0x0002000E;
+
+	/**
+	 * InstAgent command to get server process ID
+	 */
+	public static final int IAGENT_CMD_GET_PID = 0x0002FFFF;
 }
