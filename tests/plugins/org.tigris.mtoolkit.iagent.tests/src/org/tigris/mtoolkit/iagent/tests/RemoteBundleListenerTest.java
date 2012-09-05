@@ -22,157 +22,155 @@ import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
 
 public class RemoteBundleListenerTest extends DeploymentTestCase implements RemoteBundleListener {
 
-	private static final int SLEEP_INTERVAL = 1000;
-	private List events = new ArrayList();
-	private Object sleeper = new Object();
+  private static final int SLEEP_INTERVAL = 1000;
+  private List events = new ArrayList();
+  private Object sleeper = new Object();
 
-	public void testBundleListener() throws IAgentException {
-		commands.addRemoteBundleListener(this);
+  public void testBundleListener() throws IAgentException {
+    commands.addRemoteBundleListener(this);
 
-		try {
-			RemoteBundle bundle = installBundle("test_register_service.jar");
-			bundle.resolve();
+    try {
+      RemoteBundle bundle = installBundle("test_register_service.jar");
+      bundle.resolve();
 
-			RemoteBundleEvent[] foundEvents = findEvents(RemoteBundleEvent.INSTALLED, RemoteBundleEvent.RESOLVED);
-			assertNotNull(foundEvents);
-			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
+      RemoteBundleEvent[] foundEvents = findEvents(RemoteBundleEvent.INSTALLED, RemoteBundleEvent.RESOLVED);
+      assertNotNull(foundEvents);
+      assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-			events.clear();
-			bundle.start(0);
-			foundEvents = findEvents(RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
-			assertNotNull(foundEvents);
-			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
+      events.clear();
+      bundle.start(0);
+      foundEvents = findEvents(RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
+      assertNotNull(foundEvents);
+      assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-			events.clear();
-			bundle.stop(0);
-			foundEvents = findEvents(RemoteBundleEvent.STOPPING, RemoteBundleEvent.STOPPED);
-			assertNotNull(foundEvents);
-			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
+      events.clear();
+      bundle.stop(0);
+      foundEvents = findEvents(RemoteBundleEvent.STOPPING, RemoteBundleEvent.STOPPED);
+      assertNotNull(foundEvents);
+      assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-			events.clear();
-			bundle.start(0);
-			foundEvents = findEvents(RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
-			assertNotNull(foundEvents);
-			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
+      events.clear();
+      bundle.start(0);
+      foundEvents = findEvents(RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
+      assertNotNull(foundEvents);
+      assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-			events.clear();
-			bundle.update(getClass().getClassLoader().getResourceAsStream("test_register_service.jar"));
-			foundEvents = findEvents(RemoteBundleEvent.STOPPING,
-				RemoteBundleEvent.STOPPED,
-				RemoteBundleEvent.UNRESOLVED,
-				RemoteBundleEvent.UPDATED);
-			assertNotNull(foundEvents);
-			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
+      events.clear();
+      bundle.update(getClass().getClassLoader().getResourceAsStream("test_register_service.jar"));
+      foundEvents = findEvents(RemoteBundleEvent.STOPPING, RemoteBundleEvent.STOPPED, RemoteBundleEvent.UNRESOLVED,
+          RemoteBundleEvent.UPDATED);
+      assertNotNull(foundEvents);
+      assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-			foundEvents = findEvents(RemoteBundleEvent.RESOLVED, RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
-			assertNotNull(foundEvents);
-			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
+      foundEvents = findEvents(RemoteBundleEvent.RESOLVED, RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
+      assertNotNull(foundEvents);
+      assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-			events.clear();
-			bundle.uninstall(null);
-			foundEvents = findEvents(RemoteBundleEvent.STOPPING,
-				RemoteBundleEvent.STOPPED,
-				RemoteBundleEvent.UNRESOLVED,
-				RemoteBundleEvent.UNINSTALLED);
-			assertNotNull(foundEvents);
-			assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
+      events.clear();
+      bundle.uninstall(null);
+      foundEvents = findEvents(RemoteBundleEvent.STOPPING, RemoteBundleEvent.STOPPED, RemoteBundleEvent.UNRESOLVED,
+          RemoteBundleEvent.UNINSTALLED);
+      assertNotNull(foundEvents);
+      assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-			assertEquals(0, events.size());
+      assertEquals(0, events.size());
 
-			bundle = null;
-		} finally {
-			commands.removeRemoteBundleListener(this);
-		}
-	}
+      bundle = null;
+    } finally {
+      commands.removeRemoteBundleListener(this);
+    }
+  }
 
-	public void testLazyStartedEvent() throws Exception {
-		// Requires: R4.1 specification
-		commands.addRemoteBundleListener(this);
+  public void testLazyStartedEvent() throws Exception {
+    // Requires: R4.1 specification
+    commands.addRemoteBundleListener(this);
 
-		try {
-			RemoteBundle bundle = installBundle("test.bundle.b3_1.0.0.jar");
-			assertNotNull(bundle);
-			bundle.resolve();
+    try {
+      events.clear();
+      RemoteBundle bundle = installBundle("test.bundle.b3_1.0.0.jar");
+      assertNotNull(bundle);
+      bundle.resolve();
 
-			assertEquals(Bundle.RESOLVED, bundle.getState());
+      assertEquals(Bundle.RESOLVED, bundle.getState());
 
-			bundle.start(Bundle.START_ACTIVATION_POLICY | Bundle.START_TRANSIENT);
+      bundle.start(Bundle.START_ACTIVATION_POLICY | Bundle.START_TRANSIENT);
 
-			assertEquals(Bundle.STARTING, bundle.getState());
+      assertEquals(Bundle.STARTING, bundle.getState());
+      try {
+        Thread.sleep(3000);
+      } catch (Exception e) {
+        // TODO: handle exception
+      }
 
-			RemoteBundleEvent foundEvent = findEvent(RemoteBundleEvent.LAZY_STARTED);
-			try {
-				Thread.sleep(3000);
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-			assertNotNull(foundEvent);
-			assertRemoteBundle(foundEvent.getBundle(), bundle.getBundleId());
-			bundle.uninstall(null);
-			bundle = null;
-		} finally {
-			commands.removeRemoteBundleListener(this);
-		}
-	}
+      RemoteBundleEvent foundEvent = findEvent(RemoteBundleEvent.LAZY_STARTED);
 
-	private void assertRemoteBundle(RemoteBundle bundle, long bundleId) throws IAgentException {
-		assertNotNull(bundle);
-		assertEquals(bundleId, bundle.getBundleId());
-	}
+      assertNotNull(foundEvent);
+      assertRemoteBundle(foundEvent.getBundle(), bundle.getBundleId());
+      bundle.uninstall(null);
+      bundle = null;
+    } finally {
+      commands.removeRemoteBundleListener(this);
+    }
+  }
 
-	public void bundleChanged(RemoteBundleEvent event) {
-		synchronized (sleeper) {
-			System.out.println("============ Adding event: " + event);
-			events.add(event);
-			sleeper.notifyAll();
-		}
-	}
+  private void assertRemoteBundle(RemoteBundle bundle, long bundleId) throws IAgentException {
+    assertNotNull(bundle);
+    assertEquals(bundleId, bundle.getBundleId());
+  }
 
-	private RemoteBundleEvent findEvent(int type1) {
-		RemoteBundleEvent[] events = findEvents(new int[] { type1 });
-		return events != null ? events[0] : null;
-	}
+  public void bundleChanged(RemoteBundleEvent event) {
+    synchronized (sleeper) {
+      System.out.println("============ Adding event: " + event);
+      events.add(event);
+      sleeper.notifyAll();
+    }
+  }
 
-	private RemoteBundleEvent[] findEvents(int type1, int type2) {
-		return findEvents(new int[] { type1, type2 });
-	}
+  private RemoteBundleEvent findEvent(int type1) {
+    RemoteBundleEvent[] events = findEvents(new int[] { type1 });
+    return events != null ? events[0] : null;
+  }
 
-	private RemoteBundleEvent[] findEvents(int type1, int type2, int type3) {
-		return findEvents(new int[] { type1, type2, type3 });
-	}
+  private RemoteBundleEvent[] findEvents(int type1, int type2) {
+    return findEvents(new int[] { type1, type2 });
+  }
 
-	private RemoteBundleEvent[] findEvents(int type1, int type2, int type3, int type4) {
-		return findEvents(new int[] { type1, type2, type3, type4 });
-	}
+  private RemoteBundleEvent[] findEvents(int type1, int type2, int type3) {
+    return findEvents(new int[] { type1, type2, type3 });
+  }
 
-	private RemoteBundleEvent[] findEvents(int[] types) {
-		if (types == null)
-			return null;
-		synchronized (sleeper) {
-			List foundEvents = new ArrayList();
-			int count = 0;
-			while (events.size() < types.length && count++ < 5) {
-				try {
-					sleeper.wait(SLEEP_INTERVAL);
-				} catch (InterruptedException e) {
-					// ignore
-				}
-			}
-			System.out.println("============== events.size() = " + events.size());
-			for (Iterator it = events.iterator(); it.hasNext();) {
-				RemoteBundleEvent event = (RemoteBundleEvent) it.next();
-				for (int i = 0; i < types.length; i++) {
-					if ((event).getType() == types[i]) {
-						it.remove();
-						foundEvents.add(event);
-						break; // break the inner for
-					}
-				}
-			}
-			if (foundEvents.size() == types.length)
-				return (RemoteBundleEvent[]) foundEvents.toArray(new RemoteBundleEvent[foundEvents.size()]);
-		}
-		return null;
-	}
+  private RemoteBundleEvent[] findEvents(int type1, int type2, int type3, int type4) {
+    return findEvents(new int[] { type1, type2, type3, type4 });
+  }
+
+  private RemoteBundleEvent[] findEvents(int[] types) {
+    if (types == null)
+      return null;
+    synchronized (sleeper) {
+      List foundEvents = new ArrayList();
+      int count = 0;
+      while (events.size() < types.length && count++ < 5) {
+        try {
+          sleeper.wait(SLEEP_INTERVAL);
+        } catch (InterruptedException e) {
+          // ignore
+        }
+      }
+      System.out.println("============== events.size() = " + events.size());
+      for (Iterator it = events.iterator(); it.hasNext();) {
+        RemoteBundleEvent event = (RemoteBundleEvent) it.next();
+        for (int i = 0; i < types.length; i++) {
+          if ((event).getType() == types[i]) {
+            it.remove();
+            foundEvents.add(event);
+            break; // break the inner for
+          }
+        }
+      }
+      if (foundEvents.size() == types.length)
+        return (RemoteBundleEvent[]) foundEvents.toArray(new RemoteBundleEvent[foundEvents.size()]);
+    }
+    return null;
+  }
 
 }
