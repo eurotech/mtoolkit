@@ -13,12 +13,11 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 
-public class ModelProviderElement {
-
-	private String extension;
-	private String clazz;
+public final class ModelProviderElement {
+	private final String clazz;
+	private final String extension;
+	private final IConfigurationElement confElement;
 	private ContentTypeModelProvider provider;
-	private IConfigurationElement confElement;
 
 	public ModelProviderElement(IConfigurationElement configurationElement) {
 		confElement = configurationElement;
@@ -38,10 +37,36 @@ public class ModelProviderElement {
 		return provider;
 	}
 
-	public boolean equals(ModelProviderElement otherElement) {
-		if (this.clazz.equals(otherElement.clazz) && this.extension.equals(otherElement.extension))
-			return true;
-		return false;
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof ModelProviderElement)) {
+			return false;
+		}
+		ModelProviderElement otherElement = (ModelProviderElement) other;
+		if (!this.clazz.equals(otherElement.clazz)) {
+			return false;
+		}
+		if (this.extension == null) {
+			return otherElement.extension == null;
+		}
+		return this.extension.equals(otherElement.extension);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		if (extension == null) {
+			return this.clazz.hashCode();
+		}
+		return this.clazz.hashCode() ^ this.extension.hashCode();
+	}
 }
