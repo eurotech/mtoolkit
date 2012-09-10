@@ -110,4 +110,9 @@ public abstract class Framework extends Model {
 	public void removeConnectionListener(FrameworkConnectionListener l) {
 		listeners.remove(l);
 	}
+
+	public abstract List getSignCertificateUids();
+
+	public abstract void setSignCertificateUids(List uids);
+
 }

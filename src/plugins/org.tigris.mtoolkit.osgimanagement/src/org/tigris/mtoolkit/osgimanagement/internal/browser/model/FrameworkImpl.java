@@ -79,7 +79,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public final class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener,
-		RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
+RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	private boolean showServicePropertiesInTree = false;
 
@@ -507,16 +507,16 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 		FrameworkImpl fw = (FrameworkImpl) bundle.findFramework();
 		bundleHash.remove(new Long(id));
 		frameworkSystemBundles.remove(new Long(id));
-			if (FrameworkPreferencesPage.isBundlesCategoriesShown()) {
-				Category category = (Category) bundle.getParent();
-				category.removeElement(bundle);
-				if (category.getSize() == 0) {
-					categoryHash.remove(category.getName());
-					category.getParent().removeElement(category);
-				}
-			} else {
-				fw.getBundlesNode().removeElement(bundle);
+		if (FrameworkPreferencesPage.isBundlesCategoriesShown()) {
+			Category category = (Category) bundle.getParent();
+			category.removeElement(bundle);
+			if (category.getSize() == 0) {
+				categoryHash.remove(category.getName());
+				category.getParent().removeElement(category);
 			}
+		} else {
+			fw.getBundlesNode().removeElement(bundle);
+		}
 		removeBundleInServicesView(id);
 	}
 
@@ -1283,9 +1283,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 	}
 
 	private void addServiceNodes(ServiceObject servObj, Bundle bundle/*
-																	 * , boolean
-																	 * first
-																	 */) throws IAgentException {
+	 * , boolean
+	 * first
+	 */) throws IAgentException {
 		if (bundle.getState() == org.osgi.framework.Bundle.ACTIVE
 				|| bundle.getState() == org.osgi.framework.Bundle.STARTING
 				|| bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.ACTIVE
@@ -1298,7 +1298,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 				for (int i = 0; i < servObj.getObjectClass().length; i++) {
 					ObjectClass hashService = new ObjectClass(servObj.getObjectClass()[i] + " ["
 							+ servObj.getRemoteService().getServiceId() + "]", new Long(servObj.getRemoteService()
-							.getServiceId()), servObj.getRemoteService());
+									.getServiceId()), servObj.getRemoteService());
 					BundlesCategory hashRegisteredCategory = new BundlesCategory(BundlesCategory.REGISTERED);
 					hashService.addElement(hashRegisteredCategory);
 					hashRegisteredCategory.addElement(new Bundle(bundle));
@@ -1481,7 +1481,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 	@Override
 	public Map getSigningProperties() {
 		Map properties = new Hashtable();
-		List certUids = getSignCertificateUids(getConfig());
+		List certUids = getSignCertificateUids();
 		Iterator signIterator = certUids.iterator();
 		int certId = 0;
 		while (signIterator.hasNext()) {
@@ -1533,12 +1533,13 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 		}
 	}
 
-	public List getSignCertificateUids(IMemento config) {
-		String keys[] = config.getAttributeKeys();
+	@Override
+	public List getSignCertificateUids() {
+		String keys[] = configs.getAttributeKeys();
 		List result = new ArrayList();
 		for (int i = 0; i < keys.length; i++) {
 			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
-				String uid = config.getString(keys[i]);
+				String uid = configs.getString(keys[i]);
 				if (uid != null && uid.trim().length() > 0) {
 					result.add(uid.trim());
 				}
@@ -1547,17 +1548,18 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 		return result;
 	}
 
-	public void setSignCertificateUids(IMemento config, List uids) {
-		String keys[] = config.getAttributeKeys();
+	@Override
+	public void setSignCertificateUids(List uids) {
+		String keys[] = configs.getAttributeKeys();
 		for (int i = 0; i < keys.length; i++) {
 			if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
-				config.putString(keys[i], ""); //$NON-NLS-1$
+				configs.putString(keys[i], ""); //$NON-NLS-1$
 			}
 		}
 		Iterator iterator = uids.iterator();
 		int num = 0;
 		while (iterator.hasNext()) {
-			config.putString(FRAMEWORK_SIGN_CERTIFICATE_ID + num, (String) iterator.next());
+			configs.putString(FRAMEWORK_SIGN_CERTIFICATE_ID + num, (String) iterator.next());
 			num++;
 		}
 	}

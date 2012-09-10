@@ -57,6 +57,7 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 	}
 
 	// Create page contents
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Control main = super.createDialogArea(parent);
 		setTitle("Framework details");
@@ -99,6 +100,7 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 		return resultButton;
 	}
 
+	@Override
 	protected void okPressed() {
 		boolean correct = fwPanel.validate();
 		if (correct) {
@@ -124,7 +126,7 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 		fwPanel.initialize(config);
 
 		// Signing Certificates
-		certificatesPanel.initialize(fw.getSignCertificateUids(config));
+		certificatesPanel.initialize(fw.getSignCertificateUids());
 	}
 
 	// Called when target options are changed
@@ -164,7 +166,7 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 		boolean connChanged = fwPanel.save(config);
 
 		// Signing Certificates
-		fw.setSignCertificateUids(config, certificatesPanel.getSignCertificateUids());
+		fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
 
 		if (connectButton != null) {
 			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
@@ -172,6 +174,7 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 		return connChanged;
 	}
 
+	@Override
 	public void setErrorMessage(String newErrorMessage) {
 		super.setErrorMessage(newErrorMessage);
 		Button ok = getButton(OK);

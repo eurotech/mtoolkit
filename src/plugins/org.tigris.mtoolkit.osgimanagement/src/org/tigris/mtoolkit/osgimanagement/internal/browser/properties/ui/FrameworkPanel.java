@@ -109,7 +109,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 
 		selectedProvider = (DeviceTypeProviderElement) deviceTypesProviders.get(index);
 		showDeviceTypePanel(selectedProvider);
-		
+
 		DeviceConnector connector = fw.getConnector();
 		if (connector != null) {
 			String transportType = (String) connector.getProperties().get(DeviceConnector.TRANSPORT_TYPE);
@@ -314,9 +314,9 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 						FrameworkPlugin.error("Failed to initialize device type provider", ex);
 					}
 					if (newProvider.props == null) {
-						newProvider.props = cloneMemento(defaultConfig); 
+						newProvider.props = cloneMemento(defaultConfig);
 					}
-					// switching to the new provider		
+					// switching to the new provider
 					selectedProvider = newProvider;
 					showDeviceTypePanel(selectedProvider);
 				}
@@ -353,7 +353,8 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 			FrameworkPlugin.error("Failed to initialize device type provider", e);
 		}
 
-		if (fw.isConnected() && fw.autoConnected) {
+		if (fw.isAutoConnected()) {
+			deviceTypeCombo.setEnabled(false);
 			try {
 				selectedProvider.getProvider().setEditable(false);
 			} catch (CoreException e) {
