@@ -42,18 +42,18 @@ import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.certmanager.internal.preferences.CertLabelProvider;
 
 public final class CertificatesPanel {
-  private static final String MTOOLKIT_PAGE_ID = "org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"; //$NON-NLS-1$
+  private static final String MTOOLKIT_PAGE_ID       = "org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"; //$NON-NLS-1$
   /**
    * @since 5.0
    */
-  public static final int EVENT_CONTENT_MODIFIED = 1;
+  public static final int     EVENT_CONTENT_MODIFIED = 1;
 
-  private Composite signContentGroup;
-  private Label lblCertificates;
-  private Table tblCertificates;
+  private Composite           signContentGroup;
+  private Label               lblCertificates;
+  private Table               tblCertificates;
   private CheckboxTableViewer certificatesViewer;
-  private Link link;
-  private Set listeners = new HashSet();
+  private Link                link;
+  private Set                 listeners              = new HashSet();
 
   public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan) {
     this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
@@ -152,11 +152,11 @@ public final class CertificatesPanel {
   }
 
   /**
-   * Initializes the signing certificates with the given list of certificate
-   * ids (of type String). This method could be called multiple times.
+   * Initializes the signing certificates with the given list of certificate ids
+   * (of type String). This method could be called multiple times.
    * 
    * @param signUids
-   *            list with certificate ids or <code>null</code>
+   *          list with certificate ids or <code>null</code>
    */
   public void initialize(List signUids) {
     ICertificateDescriptor certificates[] = CertUtils.getCertificates();
@@ -203,6 +203,13 @@ public final class CertificatesPanel {
     if (listener != null) {
       listeners.remove(listener);
     }
+  }
+
+  /**
+   * @since 6.1
+   */
+  public void setEditable(boolean editable) {
+    certificatesViewer.getControl().setEnabled(editable);
   }
 
   private void fireModifyEvent() {
