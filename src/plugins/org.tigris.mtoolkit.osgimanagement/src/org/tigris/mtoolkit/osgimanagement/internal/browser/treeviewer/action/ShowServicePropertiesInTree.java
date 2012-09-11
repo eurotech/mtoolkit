@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2009 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.util.ArrayList;
@@ -13,14 +23,17 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class ShowServicePropertiesInTree extends SelectionProviderAction implements IStateAction {
-
-	private List frameworks = new ArrayList();
+public final class ShowServicePropertiesInTree extends SelectionProviderAction implements IStateAction {
+	private final List frameworks = new ArrayList();
 
 	public ShowServicePropertiesInTree(ISelectionProvider provider, String label) {
 		super(provider, label);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.action.Action#run()
+	 */
+	@Override
 	public void run() {
 		boolean newState = !((FrameworkImpl) frameworks.get(0)).isShownServicePropertiss();
 
@@ -40,10 +53,17 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		updateState(selection);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+	 */
 	public void updateState(IStructuredSelection selection) {
 		TreeItem[] items = ((TreeViewer) getSelectionProvider()).getTree().getItems();
 		boolean srvcPropertiesShown = (frameworks.isEmpty()) ? false : ((FrameworkImpl) frameworks.get(0))
@@ -62,7 +82,6 @@ public class ShowServicePropertiesInTree extends SelectionProviderAction impleme
 				}
 			}
 		}
-
 		// all nodes of the tree have been removed
 		if (frameworks.isEmpty()) {
 			setEnabled(false);
