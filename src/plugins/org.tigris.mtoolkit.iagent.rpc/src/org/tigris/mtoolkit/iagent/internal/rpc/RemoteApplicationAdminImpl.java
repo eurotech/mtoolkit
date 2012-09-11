@@ -42,385 +42,415 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implements RemoteApplicationAdmin,
 ServiceTrackerCustomizer {
 
-	private static final String OSGI_APPLICATION_PACKAGE = "org.osgi.service.application.";
-	private static final String APPLICATION_DESCRIPTOR = OSGI_APPLICATION_PACKAGE + "ApplicationDescriptor";
-	private static final String APPLICATION_HANDLE = OSGI_APPLICATION_PACKAGE + "ApplicationHandle";
+  private static final String OSGI_APPLICATION_PACKAGE = "org.osgi.service.application.";
+  private static final String APPLICATION_DESCRIPTOR   = OSGI_APPLICATION_PACKAGE + "ApplicationDescriptor";
+  private static final String APPLICATION_HANDLE       = OSGI_APPLICATION_PACKAGE + "ApplicationHandle";
 
-	public static final String SYNCH_APPLICATION_EVENT = "synch_application_event";
-	private static final String EVENT_TYPE_KEY = "type";
-	private static final String EVENT_APPLICATION_ID_KEY = "application_id";
+  public static final String  SYNCH_APPLICATION_EVENT  = "synch_application_event";
+  private static final String EVENT_TYPE_KEY           = "type";
+  private static final String EVENT_APPLICATION_ID_KEY = "application_id";
 
-	private static final int APP_INSTALLED = 1 << 0;
-	private static final int APP_UNINSTALLED = 1 << 4;
-	private static final int APP_STARTED = 1 << 2;
-	private static final int APP_STOPPED = 1 << 3;
+  private static final int    APP_INSTALLED            = 1 << 0;
+  private static final int    APP_UNINSTALLED          = 1 << 4;
+  private static final int    APP_STARTED              = 1 << 2;
+  private static final int    APP_STOPPED              = 1 << 3;
 
-	private static final String UNINSTALLED_STATE = "UNINSTALLED";
-	private static final String INSTALLED_STATE = "INSTALLED";
-	private static final String MIXED_STATE = "MIXED";
-	private static final String ERROR_STATE = "ERROR";
-	private static final String UNKNOWN_STATE = "UNKNOWN";
+  private static final String UNINSTALLED_STATE        = "UNINSTALLED";
+  private static final String INSTALLED_STATE          = "INSTALLED";
+  private static final String MIXED_STATE              = "MIXED";
+  private static final String ERROR_STATE              = "ERROR";
+  private static final String UNKNOWN_STATE            = "UNKNOWN";
 
-	private ServiceRegistration registration;
-	private BundleContext bc;
-	private ServiceTracker applicationTracker;
-	private ServiceTracker handlesTracker;
-	private boolean suppressEventFiring = false;
-	private boolean applicationSupport = false;
+  private ServiceRegistration registration;
+  private BundleContext       bc;
+  private ServiceTracker      applicationTracker;
+  private ServiceTracker      handlesTracker;
+  private boolean             suppressEventFiring      = false;
+  private boolean             applicationSupport       = false;
 
-	public Class[] remoteInterfaces() {
-		return new Class[] { RemoteApplicationAdmin.class };
-	}
+  public Class[] remoteInterfaces() {
+    return new Class[] {
+        RemoteApplicationAdmin.class
+    };
+  }
 
-	public void register(BundleContext bundleContext) {
-		this.bc = bundleContext;
+  public void register(BundleContext bundleContext) {
+    this.bc = bundleContext;
 
-		suppressEventFiring = true;
-		try {
-			applicationTracker = new ServiceTracker(bc, APPLICATION_DESCRIPTOR, this);
-			applicationTracker.open(true);
+    suppressEventFiring = true;
+    try {
+      applicationTracker = new ServiceTracker(bc, APPLICATION_DESCRIPTOR, this);
+      applicationTracker.open(true);
 
-			handlesTracker = new ServiceTracker(bc, APPLICATION_HANDLE, this);
-			handlesTracker.open(true);
-		} finally {
-			suppressEventFiring = false;
-		}
+      handlesTracker = new ServiceTracker(bc, APPLICATION_HANDLE, this);
+      handlesTracker.open(true);
+    } finally {
+      suppressEventFiring = false;
+    }
 
-		registration = bc.registerService(RemoteApplicationAdmin.class.getName(), this, null);
-	}
+    registration = bc.registerService(RemoteApplicationAdmin.class.getName(), this, null);
+  }
 
-	public void unregister(BundleContext bc) {
-		if (registration != null) {
-			registration.unregister();
-			registration = null;
-		}
+  public void unregister(BundleContext bc) {
+    if (registration != null) {
+      registration.unregister();
+      registration = null;
+    }
 
-		if (applicationTracker != null) {
-			applicationTracker.close();
-			applicationTracker = null;
-		}
-		if (handlesTracker != null) {
-			handlesTracker.close();
-			handlesTracker = null;
-		}
+    if (applicationTracker != null) {
+      applicationTracker.close();
+      applicationTracker = null;
+    }
+    if (handlesTracker != null) {
+      handlesTracker.close();
+      handlesTracker = null;
+    }
 
-		setApplicationSupport(false);
+    setApplicationSupport(false);
 
-		this.bc = null;
-	}
+    this.bc = null;
+  }
 
-	private void setApplicationSupport(boolean enabled) {
-		applicationSupport = enabled;
-		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-		if (capMan != null) {
-			capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(enabled));
-		}
-	}
+  private void setApplicationSupport(boolean enabled) {
+    applicationSupport = enabled;
+    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+    if (capMan != null) {
+      capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(enabled));
+    }
+  }
 
-	private void fireApplicationEvent(String id, int type) {
-		Dictionary event = convertApplicationEvent(id, type);
-		EventSynchronizer synchronizer = Activator.getSynchronizer();
-		if (synchronizer != null)
-			synchronizer.enqueue(new EventData(event, SYNCH_APPLICATION_EVENT));
-	}
+  private void fireApplicationEvent(String id, int type) {
+    Dictionary event = convertApplicationEvent(id, type);
+    EventSynchronizer synchronizer = Activator.getSynchronizer();
+    if (synchronizer != null) {
+      synchronizer.enqueue(new EventData(event, SYNCH_APPLICATION_EVENT));
+    }
+  }
 
-	public String[] getApplications() {
-		ServiceReference[] refs = applicationTracker.getServiceReferences();
-		if (refs == null)
-			return new String[0];
-		debug("[getApplications] " + refs.length + " applications available.");
-		String[] ids = new String[refs.length];
-		for (int i = 0; i < refs.length; i++) {
-			ids[i] = (String) refs[i].getProperty(Constants.SERVICE_PID);
-		}
-		debug("[getApplications] Application ids: " + DebugUtils.convertForDebug(ids));
-		return ids;
-	}
+  public String[] getApplications() {
+    ServiceReference[] refs = applicationTracker.getServiceReferences();
+    if (refs == null) {
+      return new String[0];
+    }
+    if (DebugUtils.DEBUG_ENABLED) {
+      debug("[getApplications] " + refs.length + " applications available.");
+    }
+    String[] ids = new String[refs.length];
+    for (int i = 0; i < refs.length; i++) {
+      ids[i] = (String) refs[i].getProperty(Constants.SERVICE_PID);
+    }
+    if (DebugUtils.DEBUG_ENABLED) {
+      debug("[getApplications] Application ids: " + DebugUtils.convertForDebug(ids));
+    }
+    return ids;
+  }
 
-	private final void debug(String message) {
-		DebugUtils.debug(this, message);
-	}
+  private final void debug(String message) {
+    DebugUtils.debug(this, message);
+  }
 
-	private final void error(String message, Throwable e) {
-		DebugUtils.error(this, message, e);
-	}
+  private final void error(String message, Throwable e) {
+    DebugUtils.error(this, message, e);
+  }
 
-	public Object start(String applicationID, Map properties) {
-		Object descriptor = findApplicationDescriptor(applicationID);
-		if (descriptor == null)
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application with ID \"" + applicationID
-					+ "\" is not installed.");
-		Object result = launchFromDescriptor(descriptor, properties);
-		return result;
-	}
+  public Object start(String applicationID, Map properties) {
+    Object descriptor = findApplicationDescriptor(applicationID);
+    if (descriptor == null) {
+      return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application with ID \"" + applicationID
+          + "\" is not installed.");
+    }
+    Object result = launchFromDescriptor(descriptor, properties);
+    return result;
+  }
 
-	public Object stop(String applicationID) {
-		Object[] handles = handlesTracker.getServices();
-		if (handles == null)
-			return null;
-		for (int i = 0; i < handles.length; i++) {
-			String id = getApplicationIdFromHandle(handles[i]);
-			if (id != null && id.equals(applicationID)) {
-				Object result = destroyHandle(handles[i]);
-				if (result != null)
-					return result;
-			}
-		}
-		return null;
-	}
+  public Object stop(String applicationID) {
+    Object[] handles = handlesTracker.getServices();
+    if (handles == null) {
+      return null;
+    }
+    for (int i = 0; i < handles.length; i++) {
+      String id = getApplicationIdFromHandle(handles[i]);
+      if (id != null && id.equals(applicationID)) {
+        Object result = destroyHandle(handles[i]);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    return null;
+  }
 
-	private Object launchFromDescriptor(Object descriptor, Map properties) {
-		try {
-			invokeMethod1(descriptor, "launch", Map.class, properties);
-			return null;
-		} catch (Exception e) {
-			if (e instanceof ApplicationException) {
-				return new Error(ExceptionCodeHelper.fromApplicationExceptionCode(((ApplicationException) e)
-						.getErrorCode()), "Application start failed: " + DebugUtils.toString(e),
-						DebugUtils.getStackTrace(e));
-			} else {
-				return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application start failed: "
-						+ DebugUtils.toString(e), DebugUtils.getStackTrace(e));
-			}
-		}
-	}
+  private Object launchFromDescriptor(Object descriptor, Map properties) {
+    try {
+      invokeMethod1(descriptor, "launch", Map.class, properties);
+      return null;
+    } catch (Exception e) {
+      if (e instanceof ApplicationException) {
+        return new Error(ExceptionCodeHelper.fromApplicationExceptionCode(((ApplicationException) e).getErrorCode()),
+            "Application start failed: " + DebugUtils.toString(e), DebugUtils.getStackTrace(e));
+      } else {
+        return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application start failed: " + DebugUtils.toString(e),
+            DebugUtils.getStackTrace(e));
+      }
+    }
+  }
 
-	private Object destroyHandle(Object handle) {
-		try {
-			invokeMethod0(handle, "destroy");
-			return null;
-		} catch (Exception e) {
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application stop failed: "
-					+ DebugUtils.toString(e), DebugUtils.getStackTrace(e));
-		}
-	}
+  private Object destroyHandle(Object handle) {
+    try {
+      invokeMethod0(handle, "destroy");
+      return null;
+    } catch (Exception e) {
+      return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application stop failed: " + DebugUtils.toString(e),
+          DebugUtils.getStackTrace(e));
+    }
+  }
 
-	private Object findApplicationDescriptor(String applicationID) {
-		ServiceReference ref = findDescriptorReference(applicationID);
-		if (ref != null)
-			return applicationTracker.getService(ref);
-		return null;
-	}
+  private Object findApplicationDescriptor(String applicationID) {
+    ServiceReference ref = findDescriptorReference(applicationID);
+    if (ref != null) {
+      return applicationTracker.getService(ref);
+    }
+    return null;
+  }
 
-	private ServiceReference findDescriptorReference(String applicationId) {
-		ServiceReference[] refs = applicationTracker.getServiceReferences();
-		if (refs == null)
-			return null;
-		for (int i = 0; i < refs.length; i++) {
-			String id = getApplicationIdFromReference(refs[i]);
-			if (applicationId.equals(id))
-				return refs[i];
-		}
-		return null;
-	}
+  private ServiceReference findDescriptorReference(String applicationId) {
+    ServiceReference[] refs = applicationTracker.getServiceReferences();
+    if (refs == null) {
+      return null;
+    }
+    for (int i = 0; i < refs.length; i++) {
+      String id = getApplicationIdFromReference(refs[i]);
+      if (applicationId.equals(id)) {
+        return refs[i];
+      }
+    }
+    return null;
+  }
 
-	public String getState(String applicationId) {
-		Object descriptor = findApplicationDescriptor(applicationId);
-		if (descriptor == null)
-			return UNINSTALLED_STATE;
-		Object[] handles = findHandles(applicationId);
-		if (handles.length == 0)
-			return INSTALLED_STATE;
-		if (handles.length == 1)
-			return getHandleState(handles[0]);
-		if (handles.length > 1)
-			return MIXED_STATE;
-		return UNKNOWN_STATE;
-	}
+  public String getState(String applicationId) {
+    Object descriptor = findApplicationDescriptor(applicationId);
+    if (descriptor == null) {
+      return UNINSTALLED_STATE;
+    }
+    Object[] handles = findHandles(applicationId);
+    if (handles.length == 0) {
+      return INSTALLED_STATE;
+    }
+    if (handles.length == 1) {
+      return getHandleState(handles[0]);
+    }
+    if (handles.length > 1) {
+      return MIXED_STATE;
+    }
+    return UNKNOWN_STATE;
+  }
 
-	private String getHandleState(Object handle) {
-		try {
-			return (String) invokeMethod0(handle, "getState");
-		} catch (Exception e) {
-			error("Failed to get application state", e);
-			return ERROR_STATE;
-		}
-	}
+  private String getHandleState(Object handle) {
+    try {
+      return (String) invokeMethod0(handle, "getState");
+    } catch (Exception e) {
+      error("Failed to get application state", e);
+      return ERROR_STATE;
+    }
+  }
 
-	private Object[] findHandles(String applicationId) {
-		Object[] handles = handlesTracker.getServices();
-		if (handles == null)
-			return new Object[0];
-		List filtered = new ArrayList(handles.length);
-		for (int i = 0; i < handles.length; i++) {
-			String id = getApplicationIdFromHandle(handles[i]);
-			if (id != null && id.equals(applicationId)) {
-				filtered.add(handles[i]);
-			}
-		}
-		return filtered.toArray();
-	}
+  private Object[] findHandles(String applicationId) {
+    Object[] handles = handlesTracker.getServices();
+    if (handles == null) {
+      return new Object[0];
+    }
+    List filtered = new ArrayList(handles.length);
+    for (int i = 0; i < handles.length; i++) {
+      String id = getApplicationIdFromHandle(handles[i]);
+      if (id != null && id.equals(applicationId)) {
+        filtered.add(handles[i]);
+      }
+    }
+    return filtered.toArray();
+  }
 
-	private Dictionary convertApplicationEvent(String applicationId, int type) {
-		Dictionary event = new Hashtable();
-		event.put(EVENT_TYPE_KEY, new Integer(type));
-		event.put(EVENT_APPLICATION_ID_KEY, applicationId);
-		return event;
-	}
+  private Dictionary convertApplicationEvent(String applicationId, int type) {
+    Dictionary event = new Hashtable();
+    event.put(EVENT_TYPE_KEY, new Integer(type));
+    event.put(EVENT_APPLICATION_ID_KEY, applicationId);
+    return event;
+  }
 
-	private String getApplicationIdFromReference(ServiceReference ref) {
-		return (String) ref.getProperty(Constants.SERVICE_PID);
-	}
+  private String getApplicationIdFromReference(ServiceReference ref) {
+    return (String) ref.getProperty(Constants.SERVICE_PID);
+  }
 
-	private String getApplicationIdFromHandle(Object obj) {
-		try {
-			Object descriptor = invokeMethod0(obj, "getApplicationDescriptor");
-			return getApplicationIdFromDescriptor(descriptor);
-		} catch (Exception e) {
-			error("Failed to get application descriptor from " + obj, e);
-			return null;
-		}
-	}
+  private String getApplicationIdFromHandle(Object obj) {
+    try {
+      Object descriptor = invokeMethod0(obj, "getApplicationDescriptor");
+      return getApplicationIdFromDescriptor(descriptor);
+    } catch (Exception e) {
+      error("Failed to get application descriptor from " + obj, e);
+      return null;
+    }
+  }
 
-	private String getApplicationIdFromDescriptor(Object obj) {
-		try {
-			return (String) invokeMethod0(obj, "getApplicationId");
-		} catch (Exception e) {
-			error("Failed to get application id from " + obj, e);
-			return null;
-		}
-	}
+  private String getApplicationIdFromDescriptor(Object obj) {
+    try {
+      return (String) invokeMethod0(obj, "getApplicationId");
+    } catch (Exception e) {
+      error("Failed to get application id from " + obj, e);
+      return null;
+    }
+  }
 
-	private Object invokeMethod0(Object obj, String method) throws Exception {
-		return invokeMethodn(obj, method, null, null);
-	}
+  private Object invokeMethod0(Object obj, String method) throws Exception {
+    return invokeMethodn(obj, method, null, null);
+  }
 
-	private Object invokeMethod1(Object obj, String method, Class paramType, Object param) throws Exception {
-		return invokeMethodn(obj, method, new Class[] { paramType }, new Object[] { param });
-	}
+  private Object invokeMethod1(Object obj, String method, Class paramType, Object param) throws Exception {
+    return invokeMethodn(obj, method, new Class[] {
+        paramType
+    }, new Object[] {
+        param
+    });
+  }
 
-	private Object invokeMethodn(Object obj, String method, Class[] paramTypes, Object[] param) throws Exception {
-		Class clazz = obj.getClass();
-		try {
-			Method m = clazz.getMethod(method, paramTypes);
-			return m.invoke(obj, param);
-		} catch (InvocationTargetException e) {
-			if (e.getTargetException() instanceof Exception)
-				throw (Exception) e.getTargetException();
-			throw e;
-		}
-	}
+  private Object invokeMethodn(Object obj, String method, Class[] paramTypes, Object[] param) throws Exception {
+    Class clazz = obj.getClass();
+    try {
+      Method m = clazz.getMethod(method, paramTypes);
+      return m.invoke(obj, param);
+    } catch (InvocationTargetException e) {
+      if (e.getTargetException() instanceof Exception) {
+        throw (Exception) e.getTargetException();
+      }
+      throw e;
+    }
+  }
 
-	private boolean testObjectClass(Object value, String className) {
-		if (value instanceof String[]) {
-			String[] classes = (String[]) value;
-			for (int i = 0; i < classes.length; i++) {
-				if (classes[i].equals(className))
-					return true;
-			}
-			return false;
-		} else {
-			return className.equals(value);
-		}
-	}
+  private boolean testObjectClass(Object value, String className) {
+    if (value instanceof String[]) {
+      String[] classes = (String[]) value;
+      for (int i = 0; i < classes.length; i++) {
+        if (classes[i].equals(className)) {
+          return true;
+        }
+      }
+      return false;
+    } else {
+      return className.equals(value);
+    }
+  }
 
-	public Object addingService(ServiceReference reference) {
-		if (!applicationSupport) {
-			setApplicationSupport(true);
-		}
-		Object service = bc.getService(reference);
-		if (!suppressEventFiring) {
-			if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
-				String id = getApplicationIdFromDescriptor(service);
-				if (id != null)
-					fireApplicationEvent(id, APP_INSTALLED);
-			} else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
-				String id = getApplicationIdFromHandle(service);
-				if (id != null)
-					fireApplicationEvent(id, APP_STARTED);
-			}
-		}
-		return service;
-	}
+  public Object addingService(ServiceReference reference) {
+    if (!applicationSupport) {
+      setApplicationSupport(true);
+    }
+    Object service = bc.getService(reference);
+    if (!suppressEventFiring) {
+      if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
+        String id = getApplicationIdFromDescriptor(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_INSTALLED);
+        }
+      } else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
+        String id = getApplicationIdFromHandle(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_STARTED);
+        }
+      }
+    }
+    return service;
+  }
 
-	public void modifiedService(ServiceReference reference, Object service) {
-		// do nothing
-	}
+  public void modifiedService(ServiceReference reference, Object service) {
+    // do nothing
+  }
 
-	public void removedService(ServiceReference reference, Object service) {
-		bc.ungetService(reference);
-		if (!suppressEventFiring) {
-			if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
-				String id = getApplicationIdFromDescriptor(service);
-				if (id != null)
-					fireApplicationEvent(id, APP_UNINSTALLED);
-			} else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
-				String id = getApplicationIdFromHandle(service);
-				if (id != null)
-					fireApplicationEvent(id, APP_STOPPED);
-			}
-		}
-	}
+  public void removedService(ServiceReference reference, Object service) {
+    bc.ungetService(reference);
+    if (!suppressEventFiring) {
+      if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
+        String id = getApplicationIdFromDescriptor(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_UNINSTALLED);
+        }
+      } else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
+        String id = getApplicationIdFromHandle(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_STOPPED);
+        }
+      }
+    }
+  }
 
-	public Object getProperties(String applicationId) {
-		Object descriptor = findApplicationDescriptor(applicationId);
-		if (descriptor == null) {
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application has been uninstalled");
-		}
-		try {
-			Object result = invokeMethod1(descriptor, "getProperties", String.class, null);
-			if (result instanceof Map) {
-				Map map = convertProperties((Map) result);
-				ServiceReference sr = findDescriptorReference(applicationId);
-				if (sr != null) {
-					map.putAll(getReferenceProperties(sr));
-				}
-				return map;
-			}
-		} catch (Exception e) {
-			return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN,
-					"Cannot get properties: " + DebugUtils.toString(e), DebugUtils.getStackTrace(e));
-		}
-		return new Hashtable();
-	}
+  public Object getProperties(String applicationId) {
+    Object descriptor = findApplicationDescriptor(applicationId);
+    if (descriptor == null) {
+      return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application has been uninstalled");
+    }
+    try {
+      Object result = invokeMethod1(descriptor, "getProperties", String.class, null);
+      if (result instanceof Map) {
+        Map map = convertProperties((Map) result);
+        ServiceReference sr = findDescriptorReference(applicationId);
+        if (sr != null) {
+          map.putAll(getReferenceProperties(sr));
+        }
+        return map;
+      }
+    } catch (Exception e) {
+      return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Cannot get properties: " + DebugUtils.toString(e),
+          DebugUtils.getStackTrace(e));
+    }
+    return new Hashtable();
+  }
 
-	protected ServiceRegistration getServiceRegistration() {
-		return registration;
-	}
+  protected ServiceRegistration getServiceRegistration() {
+    return registration;
+  }
 
-	private Map getReferenceProperties(ServiceReference ref) {
-		Map props = new Hashtable();
-		String[] keys = ref.getPropertyKeys();
-		for (int i = 0; i < keys.length; i++) {
-			Object value = ref.getProperty(keys[i]);
-			if (value != null)
-				props.put(keys[i], convertObject(ref.getProperty(keys[i])));
-		}
-		return props;
-	}
+  private Map getReferenceProperties(ServiceReference ref) {
+    Map props = new Hashtable();
+    String[] keys = ref.getPropertyKeys();
+    for (int i = 0; i < keys.length; i++) {
+      Object value = ref.getProperty(keys[i]);
+      if (value != null) {
+        props.put(keys[i], convertObject(ref.getProperty(keys[i])));
+      }
+    }
+    return props;
+  }
 
-	private Map convertProperties(Map props) {
-		Map result = new Hashtable();
-		Set keys = props.keySet();
-		Iterator iterator = keys.iterator();
-		while (iterator.hasNext()) {
-			Object key = iterator.next();
-			Object value = props.get(key);
-			if (value != null) {
-				result.put(key, convertObject(value));
-			}
-		}
-		return result;
-	}
+  private Map convertProperties(Map props) {
+    Map result = new Hashtable();
+    Set keys = props.keySet();
+    Iterator iterator = keys.iterator();
+    while (iterator.hasNext()) {
+      Object key = iterator.next();
+      Object value = props.get(key);
+      if (value != null) {
+        result.put(key, convertObject(value));
+      }
+    }
+    return result;
+  }
 
-	private Object convertObject(Object obj) {
-		if (obj instanceof URL) {
-			/*
-			 * XXX: Special cases for URLs, because we cannot guarantee that the
-			 * remote side has the same scheme handlers. The other option would
-			 * be to limit the transferable types, but the possible types are a
-			 * lot, so we do it only for the types we have problems with.
-			 */
-			return obj.toString();
-		} else if (obj instanceof URL[]) {
-			URL[] urls = (URL[]) obj;
-			String[] result = new String[urls.length];
-			for (int i = 0; i < result.length; i++)
-				result[i] = urls[i].toString();
-			return result;
-		} else {
-			return obj;
-		}
-	}
+  private Object convertObject(Object obj) {
+    if (obj instanceof URL) {
+      /*
+       * XXX: Special cases for URLs, because we cannot guarantee that the
+       * remote side has the same scheme handlers. The other option would
+       * be to limit the transferable types, but the possible types are a
+       * lot, so we do it only for the types we have problems with.
+       */
+      return obj.toString();
+    } else if (obj instanceof URL[]) {
+      URL[] urls = (URL[]) obj;
+      String[] result = new String[urls.length];
+      for (int i = 0; i < result.length; i++) {
+        result[i] = urls[i].toString();
+      }
+      return result;
+    } else {
+      return obj;
+    }
+  }
 
 }

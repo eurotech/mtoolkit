@@ -19,88 +19,96 @@ import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
-	private static final int DEFAULT_PMP_PORT = 1450;
+  private static final int     DEFAULT_PMP_PORT = 1450;
 
-	protected boolean running = false;
+  protected boolean            running          = false;
 
-	protected static ClassLoader loader;
+  protected static ClassLoader loader;
 
-	public PMPServiceImpl() {
-		numSessions = 0;
-		loader = getClass().getClassLoader();
-		running = true;
-	}
+  public PMPServiceImpl() {
+    numSessions = 0;
+    loader = getClass().getClassLoader();
+    running = true;
+  }
 
-	public void destroy() {
-		synchronized (this) {
-			if (!running)
-				return;
-			running = false;
-		}
-		DebugUtils.info(this, "Disconnecting Clients ...");
-		closeConnections("PMP Service has been stopped.");
-		if (connDispatcher != null)
-			connDispatcher.stopEvent();
-		super.close();
-	}
+  public void destroy() {
+    synchronized (this) {
+      if (!running) {
+        return;
+      }
+      running = false;
+    }
+    DebugUtils.info(this, "Disconnecting Clients ...");
+    closeConnections("PMP Service has been stopped.");
+    if (connDispatcher != null) {
+      connDispatcher.stopEvent();
+    }
+    super.close();
+  }
 
-	public String getName() {
-		return "PMPService"; //$NON-NLS-1$
-	}
+  public String getName() {
+    return "PMPService"; //$NON-NLS-1$
+  }
 
-	public PMPConnection connect(Transport transport, Dictionary properties) throws PMPException {
-		if (!running) {
-			throw new PMPException("Stopping pmpservice");
-		}
-		try {
-			DebugUtils.info(this, "Creating new connection for " + transport);
-			Object pmpPort = properties.get(PROP_PMP_PORT);
-			int port = -1;
-			if (pmpPort != null && pmpPort instanceof Integer) {
-				port = ((Integer) pmpPort).intValue();
-			}
-			if (port < 0) {
-				port = DEFAULT_PMP_PORT;
-			}
+  public PMPConnection connect(Transport transport, Dictionary properties) throws PMPException {
+    if (!running) {
+      throw new PMPException("Stopping pmpservice");
+    }
+    try {
+      DebugUtils.info(this, "Creating new connection for " + transport);
+      Object pmpPort = properties.get(PROP_PMP_PORT);
+      int port = -1;
+      if (pmpPort != null && pmpPort instanceof Integer) {
+        port = ((Integer) pmpPort).intValue();
+      }
+      if (port < 0) {
+        port = DEFAULT_PMP_PORT;
+      }
 
-			PMPSessionThread st = null;
-			st = new PMPSessionThread(this, transport.createConnection(port), createSessionId());
+      PMPSessionThread st = null;
+      st = new PMPSessionThread(this, transport.createConnection(port), createSessionId());
 
-			Connection con = st.getConnection();
-			con.connect();
-			addElement(st);
-			return con;
-		} catch (Exception exc) {
-			DebugUtils.debug(this, "Error creating connection for " + transport, exc);
-			if (exc instanceof PMPException)
-				throw (PMPException) exc;
-			throw new PMPException(exc.getMessage(), exc);
-		}
-	}
+      Connection con = st.getConnection();
+      con.connect();
+      addElement(st);
+      return con;
+    } catch (Exception exc) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "Error creating connection for " + transport, exc);
+      }
+      if (exc instanceof PMPException) {
+        throw (PMPException) exc;
+      }
+      throw new PMPException(exc.getMessage(), exc);
+    }
+  }
 
-	protected void removeElement(PMPSessionThread ss) {
-		super.removeElement(ss);
-		if ((connDispatcher != null) && ss.connected) {
-			connDispatcher.addEvent(false, ss);
-		}
-	}
+  protected void removeElement(PMPSessionThread ss) {
+    super.removeElement(ss);
+    if ((connDispatcher != null) && ss.connected) {
+      connDispatcher.addEvent(false, ss);
+    }
+  }
 
-	protected static boolean checkInstance(Class[] interfaces, Class serviceClass) {
-		if (interfaces == null)
-			return false;
-		boolean toRet = false;
-		for (int i = 0; i < interfaces.length; i++) {
-			if (interfaces[i] == null)
-				continue;
-			toRet = true;
-			if (!interfaces[i].isAssignableFrom(serviceClass))
-				return false;
-		}
-		return toRet;
-	}
+  protected static boolean checkInstance(Class[] interfaces, Class serviceClass) {
+    if (interfaces == null) {
+      return false;
+    }
+    boolean toRet = false;
+    for (int i = 0; i < interfaces.length; i++) {
+      if (interfaces[i] == null) {
+        continue;
+      }
+      toRet = true;
+      if (!interfaces[i].isAssignableFrom(serviceClass)) {
+        return false;
+      }
+    }
+    return toRet;
+  }
 
-	public String getRole() {
-		return "Client";
-	}
+  public String getRole() {
+    return "Client";
+  }
 
 }

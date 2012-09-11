@@ -23,93 +23,109 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 
 public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
 
-	private List eventQueue = new LinkedList();
-	private volatile boolean running;
-	private PMPServer server;
-	private ServiceRegistration registration;
-	private BundleContext bc;
-	private Thread eventsThread;
+  private List                eventQueue = new LinkedList();
+  private volatile boolean    running;
+  private PMPServer           server;
+  private ServiceRegistration registration;
+  private BundleContext       bc;
+  private Thread              eventsThread;
 
-	EventSynchronizerImpl(BundleContext bc) {
-		eventsThread = ThreadUtils.createThread(this, "IAgent RPC Event Thread");
-		this.bc = bc;
-		eventsThread.setDaemon(true);
+  EventSynchronizerImpl(BundleContext bc) {
+    eventsThread = ThreadUtils.createThread(this, "IAgent RPC Event Thread");
+    this.bc = bc;
+    eventsThread.setDaemon(true);
 
-		registration = bc.registerService(EventSynchronizer.class.getName(), this, null);
-	}
+    registration = bc.registerService(EventSynchronizer.class.getName(), this, null);
+  }
 
-	void setPMPServer(PMPServer server) {
-		// TODO: Make event synchronizer listen for PMP servers
-		if (server == null)
-			throw new IllegalArgumentException("Cannot pass null as a parameter");
-		if (this.server != null)
-			throw new IllegalStateException("Event synchronizer already initialized");
-		this.server = server;
-	}
+  void setPMPServer(PMPServer server) {
+    // TODO: Make event synchronizer listen for PMP servers
+    if (server == null) {
+      throw new IllegalArgumentException("Cannot pass null as a parameter");
+    }
+    if (this.server != null) {
+      throw new IllegalStateException("Event synchronizer already initialized");
+    }
+    this.server = server;
+  }
 
-	public void start() {
-		if (server == null)
-			throw new IllegalStateException("Event synchronizer is not fully initialized");
-		running = true;
-		eventsThread.start();
-	}
+  public void start() {
+    if (server == null) {
+      throw new IllegalStateException("Event synchronizer is not fully initialized");
+    }
+    running = true;
+    eventsThread.start();
+  }
 
-	public void run() {
-		while (running) {
-			EventData eventData = null;
-			synchronized (this) {
-				try {
-					while (eventQueue.isEmpty() && running) {
-						debug("[run] event queue is empty >> thread will wait");
-						wait();
-					}
-				} catch (InterruptedException e) {
-					running = false;
-					return;
-				}
-				if (!running)
-					return;
-				eventData = (EventData) eventQueue.remove(0);
-			}
-			Object convEvent = eventData.getConvertedEvent();
-			String eventType = eventData.getEventType();
-			debug("[run] sending event: " + eventData);
-			server.event(convEvent, eventType);
-		}
-	}
+  public void run() {
+    while (running) {
+      EventData eventData = null;
+      synchronized (this) {
+        try {
+          while (eventQueue.isEmpty() && running) {
+            if (DebugUtils.DEBUG_ENABLED) {
+              debug("[run] event queue is empty >> thread will wait");
+            }
+            wait();
+          }
+        } catch (InterruptedException e) {
+          running = false;
+          return;
+        }
+        if (!running) {
+          return;
+        }
+        eventData = (EventData) eventQueue.remove(0);
+      }
+      Object convEvent = eventData.getConvertedEvent();
+      String eventType = eventData.getEventType();
+      if (DebugUtils.DEBUG_ENABLED) {
+        debug("[run] sending event: " + eventData);
+      }
+      server.event(convEvent, eventType);
+    }
+  }
 
-	public void enqueue(EventData eventData) {
-		debug("[enqueue] >>> eventData: " + eventData);
-		if (!running) {
-			debug("[enqueue] Not running anymore. Skipping...");
-			return;
-		}
-		synchronized (this) {
-			eventQueue.add(eventData);
-			notify();
-		}
-	}
+  public void enqueue(EventData eventData) {
+    if (DebugUtils.DEBUG_ENABLED) {
+      debug("[enqueue] >>> eventData: " + eventData);
+    }
+    if (!running) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        debug("[enqueue] Not running anymore. Skipping...");
+      }
+      return;
+    }
+    synchronized (this) {
+      eventQueue.add(eventData);
+      notify();
+    }
+  }
 
-	public void stopDispatching() {
-		synchronized (this) {
-			running = false;
-			notifyAll();
-		}
-		unregister(bc);
-	}
+  public void stopDispatching() {
+    synchronized (this) {
+      running = false;
+      notifyAll();
+    }
+    unregister(bc);
+  }
 
-	public void unregister(BundleContext bc) {
-		debug("[unregister] Unregistering EventSynchronizer...");
+  public void unregister(BundleContext bc) {
+    if (DebugUtils.DEBUG_ENABLED) {
+      debug("[unregister] Unregistering EventSynchronizer...");
+    }
 
-		if (registration != null) {
-			registration.unregister();
-			registration = null;
-		}
-		this.bc = null;
-		debug("[unregister] EventSynchronizer unregistered.");
-	}
+    if (registration != null) {
+      registration.unregister();
+      registration = null;
+    }
+    this.bc = null;
+    if (DebugUtils.DEBUG_ENABLED) {
+      debug("[unregister] EventSynchronizer unregistered.");
+    }
+  }
 
-	private final void debug(String message) {
-		DebugUtils.debug(this, message);
-	}
+  private final void debug(String message) {
+    DebugUtils.debug(this, message);
+  }
 }
