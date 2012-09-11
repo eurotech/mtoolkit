@@ -35,15 +35,18 @@ import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistributor {
+public final class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistributor {
 	private final String TRANSPORT_TYPE = "socket";
 
 	private Text idText;
 	private Text portText;
-
 	private DeviceTypeProviderValidator validator;
 
-	// Initialize ui values from storage
+	private Job validateJob;
+
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider#setProperties(org.eclipse.ui.IMemento)
+	 */
 	public void setProperties(IMemento config) {
 		if (config == null)
 			return;
@@ -60,6 +63,9 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		portText.setText(port.toString());
 	}
 
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider#createPanel(org.eclipse.swt.widgets.Composite, org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator)
+	 */
 	public Control createPanel(Composite parent, DeviceTypeProviderValidator validator) {
 		this.validator = validator;
 		Composite contentPanel = new Composite(parent, SWT.NULL);
@@ -76,6 +82,9 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		if (validator != null) {
 			idText.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
+					if (validateJob != null) {
+						validateJob.cancel();
+					}
 					validateJob = new Job("Validate address") {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
@@ -96,7 +105,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 							return Status.OK_STATUS;
 						}
 					};
-					validateJob.schedule();
+					validateJob.schedule(400);
 				}
 			});
 		}
@@ -125,15 +134,57 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		return contentPanel;
 	}
 
-	private Job validateJob;
-
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider#validate()
+	 */
 	public String validate() {
 		String ip = getTransportID();
 		String result = validate(ip);
 		return result == null ? validatePort(portText.getText()) : result;
 	}
 
-	public String validate(String ip) {
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider#getTransportType()
+	 */
+	public String getTransportType() {
+		return TRANSPORT_TYPE;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider#load(org.eclipse.ui.IMemento)
+	 */
+	public Dictionary load(IMemento config) {
+		Dictionary aConnProps = new Hashtable();
+		aConnProps.put("framework-connection-immediate", Boolean.FALSE);
+		aConnProps.put(Framework.FRAMEWORK_ID, config.getString(Framework.FRAMEWORK_ID));
+		Integer port = config.getInteger(DeviceConnector.PROP_PMP_PORT);
+		if (port == null)
+			port = new Integer(1450);
+		aConnProps.put(DeviceConnector.PROP_PMP_PORT, port);
+		return aConnProps;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider#save(org.eclipse.ui.IMemento)
+	 */
+	public void save(IMemento config) {
+		config.putString(Framework.FRAMEWORK_ID, getTransportID());
+		config.putInteger(DeviceConnector.PROP_PMP_PORT, getTransportPort().intValue());
+	}
+
+	/* (non-Javadoc)
+	 * @see org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider#setEditable(boolean)
+	 */
+	public void setEditable(boolean editable) {
+		idText.setEditable(editable);
+		portText.setEditable(editable);
+	}
+
+	private String getTransportID() {
+		return idText.getText().trim();
+	}
+
+	private String validate(String ip) {
 		if (ip.trim().equals("")) {
 			return "Type framework address";
 		}
@@ -146,7 +197,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		return null;
 	}
 
-	public String validatePort(String port) {
+	private String validatePort(String port) {
 		if (port.trim().equals("")) {
 			return "Type port number";
 		}
@@ -158,36 +209,7 @@ public class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistribu
 		return null;
 	}
 
-	public String getTransportID() {
-		return idText.getText().trim();
-	}
-
-	public String getTransportType() {
-		return TRANSPORT_TYPE;
-	}
-
 	private Integer getTransportPort() {
 		return Integer.decode(portText.getText().trim());
-	}
-
-	public Dictionary load(IMemento config) {
-		Dictionary aConnProps = new Hashtable();
-		aConnProps.put("framework-connection-immediate", Boolean.FALSE);
-		aConnProps.put(Framework.FRAMEWORK_ID, config.getString(Framework.FRAMEWORK_ID));
-		Integer port = config.getInteger(DeviceConnector.PROP_PMP_PORT);
-		if (port == null)
-			port = new Integer(1450);
-		aConnProps.put(DeviceConnector.PROP_PMP_PORT, port);
-		return aConnProps;
-	}
-
-	public void save(IMemento config) {
-		config.putString(Framework.FRAMEWORK_ID, getTransportID());
-		config.putInteger(DeviceConnector.PROP_PMP_PORT, getTransportPort().intValue());
-	}
-
-	public void setEditable(boolean editable) {
-		idText.setEditable(editable);
-		portText.setEditable(editable);
 	}
 }
