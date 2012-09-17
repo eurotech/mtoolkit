@@ -396,7 +396,6 @@ public final class PluginProvider implements InstallationItemProvider {
 		} finally {
 			monitor.done();
 		}
-		monitor.done();
 		return Status.OK_STATUS;
 	}
 
