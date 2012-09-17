@@ -19,6 +19,7 @@
 
    <requires>
       <import feature="org.tigris.mtoolkit" version="3.4.0.qualifier"/>
+      <import feature="org.eclipse.m2e.feature" version="1.0.100" match="greaterOrEqual"/>
    </requires>
 
    <plugin
