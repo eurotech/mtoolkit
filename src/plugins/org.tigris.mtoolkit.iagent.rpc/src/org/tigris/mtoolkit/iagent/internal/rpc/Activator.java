@@ -91,8 +91,13 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
     synchronizer.setPMPServer(pmpServer);
     synchronizer.start();
 
-    if (Boolean.getBoolean(IAGENT_CONTROLLER_PROP) || !MBS_COMMS_V3.equals(System.getProperty(MBS_COMMS_PROP))) {
+    final String controller = System.getProperty(IAGENT_CONTROLLER_PROP);
+    if (Boolean.valueOf(controller).booleanValue()) {
       registerControllerSupport(context);
+    } else {
+      if (!"false".equals(controller) && !MBS_COMMS_V3.equals(System.getProperty(MBS_COMMS_PROP))) {
+        registerControllerSupport(context);
+      }
     }
   }
 
