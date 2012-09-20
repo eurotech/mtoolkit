@@ -106,19 +106,18 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     try {
       socket = new ServerSocket(port);
     } catch (IOException e) {
-      DebugUtils.error(this, "Failed to open PMP server on " + port + ".", e);
       int failureAction = determineFailureAction();
       switch (failureAction) {
       case FAILURE_RANDOM:
-        DebugUtils.info(this, "Failure action set to 'random'. Retrying...");
+        DebugUtils.debug(this, "Failure action set to 'random'. Retrying...");
         socket = new ServerSocket(0);
         port = socket.getLocalPort();
-        DebugUtils.info(this, "PMP server listening on " + port);
+        DebugUtils.debug(this, "PMP server listening on " + port);
         break;
       case FAILURE_RETRY:
         Integer timeoutProp = Integer.getInteger("iagent.pmp.bindFailureAction.retryTimeout");
         int timeout = timeoutProp != null ? timeoutProp.intValue() : 10000;
-        DebugUtils.info(this, "Failure action set to 'retry'. Retrying with timeout " + timeout);
+        DebugUtils.debug(this, "Failure action set to 'retry'. Retrying with timeout " + timeout);
         try {
           Thread.sleep(timeout);
         } catch (InterruptedException e1) {
@@ -129,7 +128,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
       case FAILURE_FAIL:
         throw e;
       case FAILURE_REUSE:
-        DebugUtils.info(this, "Failure action set to 'reuse'. Retrying...");
+        DebugUtils.debug(this, "Failure action set to 'reuse'. Retrying...");
         ServerSocket serverSock = new ServerSocket();
         serverSock.setReuseAddress(true);
         serverSock.bind(new InetSocketAddress(port));

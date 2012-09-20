@@ -33,258 +33,267 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 
 public class Activator implements BundleActivator, ServiceTrackerCustomizer, FrameworkListener {
+  private static final String           EVENT_ADMIN_CLASS      = "org.osgi.service.event.EventAdmin";
+  private static final String           DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
 
-	private static final String DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
-	private static final String EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
+  private static final String           MBS_COMMS_PROP         = "mbs.comms";
+  private static final String           MBS_COMMS_V3           = "comms3";
+  private static final String           IAGENT_CONTROLLER_PROP = "iagent.controller";
 
-	private RemoteBundleAdminImpl bundleAdmin;
-	private RemoteApplicationAdminImpl applicationAdmin;
-	private RemoteDeploymentAdminImpl deploymentAdmin;
-	private RemoteServiceAdminImpl serviceAdmin;
-	private RemoteConsoleServiceBase console;
-	private PMPServer pmpServer;
-	private ServiceRegistration pmpServiceReg;
-	private ServiceRegistration pmpServerReg;
-	private static BundleContext context;
-	private static Activator instance;
-	private EventSynchronizerImpl synchronizer;
-	private VMCommander vmCommander;
-	private RemoteCapabilitiesManagerImpl capabilitiesManager;
+  private static Activator              instance;
+  private static BundleContext          context;
 
-	private ServiceTracker deploymentAdminTrack;
-	private ServiceTracker eventAdminTracker;
+  private RemoteBundleAdminImpl         bundleAdmin;
+  private RemoteApplicationAdminImpl    applicationAdmin;
+  private RemoteDeploymentAdminImpl     deploymentAdmin;
+  private RemoteServiceAdminImpl        serviceAdmin;
+  private RemoteConsoleServiceBase      console;
+  private ServiceRegistration           pmpServiceReg;
+  private ServiceRegistration           pmpServerReg;
+  private EventSynchronizerImpl         synchronizer;
+  private RemoteCapabilitiesManagerImpl capabilitiesManager;
 
-	public void start(BundleContext context) throws Exception {
-		Activator.context = context;
-		instance = this;
-		DebugUtils.initialize(context);
+  private PMPServer                     pmpServer;
+  private VMCommander                   vmCommander;
 
-		synchronizer = new EventSynchronizerImpl(context);
+  private ServiceTracker                deploymentAdminTrack;
+  private ServiceTracker                eventAdminTracker;
 
-		capabilitiesManager = new RemoteCapabilitiesManagerImpl();
-		capabilitiesManager.register(context);
+  public void start(BundleContext context) throws Exception {
+    Activator.context = context;
+    instance = this;
+    DebugUtils.initialize(context);
 
-		bundleAdmin = new RemoteBundleAdminImpl();
-		bundleAdmin.register(context);
+    synchronizer = new EventSynchronizerImpl(context);
 
-		registerApplicationAdmin(context);
+    capabilitiesManager = new RemoteCapabilitiesManagerImpl();
+    capabilitiesManager.register(context);
 
-		deploymentAdminTrack = new ServiceTracker(context, DEPLOYMENT_ADMIN_CLASS, this);
-		deploymentAdminTrack.open(true);
+    bundleAdmin = new RemoteBundleAdminImpl();
+    bundleAdmin.register(context);
 
-		eventAdminTracker = new ServiceTracker(context, EVENT_ADMIN_CLASS, this);
-		eventAdminTracker.open(true);
+    registerApplicationAdmin(context);
 
-		serviceAdmin = new RemoteServiceAdminImpl();
-		serviceAdmin.register(context);
+    deploymentAdminTrack = new ServiceTracker(context, DEPLOYMENT_ADMIN_CLASS, this);
+    deploymentAdminTrack.open(true);
 
-		registerConsole(context);
+    eventAdminTracker = new ServiceTracker(context, EVENT_ADMIN_CLASS, this);
+    eventAdminTracker.open(true);
 
-		pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
-		pmpServer = PMPServerFactory.createServer(context, 1450, null);
-		pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, null);
-		synchronizer.setPMPServer(pmpServer);
-		synchronizer.start();
+    serviceAdmin = new RemoteServiceAdminImpl();
+    serviceAdmin.register(context);
 
-		boolean registerVMController = !"false".equals(System.getProperty("iagent.controller"));
-		if (registerVMController)
-			registerControllerSupport(context);
-	}
+    registerConsole(context);
 
-	private void registerControllerSupport(BundleContext context) {
-		Bundle sysBundle = context.getBundle(0);
-		switch(sysBundle.getState()) {
-		case Bundle.ACTIVE:
-			startController(context);
-			break;
-		case Bundle.STARTING:
-			context.addFrameworkListener(this);
-			break;
-		}
-	}
+    pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
+    pmpServer = PMPServerFactory.createServer(context, 1450, null);
+    pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, null);
+    synchronizer.setPMPServer(pmpServer);
+    synchronizer.start();
 
-	private void startController(BundleContext context) {
-		boolean shutdownOnDisconnect = Boolean.getBoolean("iagent.shutdownOnDisconnect");
-		vmCommander = new VMCommander(context, pmpServer, shutdownOnDisconnect);
-	}
+    if (Boolean.getBoolean(IAGENT_CONTROLLER_PROP) || !MBS_COMMS_V3.equals(System.getProperty(MBS_COMMS_PROP))) {
+      registerControllerSupport(context);
+    }
+  }
 
-	private void registerConsole(BundleContext context) {
-		// trying Equinox console
-		try {
-			console = new EquinoxRemoteConsole();
-			console.register(context);
-			return;
-		} catch (Throwable t) {
-			console = null;
-		}
-		// trying mBS Console
-		try {
-			console = new ProSystRemoteConsole();
-			console.register(context);
-			return;
-		} catch (Throwable t) {
-			console = null;
-		}
-	}
+  private void registerControllerSupport(BundleContext context) {
+    Bundle sysBundle = context.getBundle(0);
+    switch (sysBundle.getState()) {
+    case Bundle.ACTIVE:
+      startController(context);
+      break;
+    case Bundle.STARTING:
+      context.addFrameworkListener(this);
+      break;
+    }
+  }
 
-	private void unregisterConsole() {
-		if (console != null) {
-			console.unregister();
-		}
-	}
+  private void startController(BundleContext context) {
+    boolean shutdownOnDisconnect = Boolean.getBoolean("iagent.shutdownOnDisconnect");
+    vmCommander = new VMCommander(context, pmpServer, shutdownOnDisconnect);
+  }
 
-	private void registerApplicationAdmin(BundleContext context) {
-		try {
-			applicationAdmin = new RemoteApplicationAdminImpl();
-			applicationAdmin.register(context);
-		} catch (Throwable t) {
-			applicationAdmin = null;
-		}
-	}
+  private void registerConsole(BundleContext context) {
+    // trying Equinox console
+    try {
+      console = new EquinoxRemoteConsole();
+      console.register(context);
+      return;
+    } catch (Throwable t) {
+      console = null;
+    }
+    // trying mBS Console
+    try {
+      console = new ProSystRemoteConsole();
+      console.register(context);
+      return;
+    } catch (Throwable t) {
+      console = null;
+    }
+  }
 
-	private void unregisterApplicationAdmin(BundleContext context) {
-		if (applicationAdmin != null) {
-			applicationAdmin.unregister(context);
-			applicationAdmin = null;
-		}
-	}
+  private void unregisterConsole() {
+    if (console != null) {
+      console.unregister();
+    }
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext context) throws Exception {
+  private void registerApplicationAdmin(BundleContext context) {
+    try {
+      applicationAdmin = new RemoteApplicationAdminImpl();
+      applicationAdmin.register(context);
+    } catch (Throwable t) {
+      applicationAdmin = null;
+    }
+  }
 
-		unregisterConsole();
+  private void unregisterApplicationAdmin(BundleContext context) {
+    if (applicationAdmin != null) {
+      applicationAdmin.unregister(context);
+      applicationAdmin = null;
+    }
+  }
 
-		pmpServerReg.unregister();
-		pmpServer.close();
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+   */
+  public void stop(BundleContext context) throws Exception {
 
-		pmpServiceReg.unregister();
+    unregisterConsole();
 
-		if (synchronizer != null) {
-			synchronizer.stopDispatching();
-			synchronizer.unregister(context);
-		}
+    pmpServerReg.unregister();
+    pmpServer.close();
 
-		if (bundleAdmin != null) {
-			bundleAdmin.unregister(context);
-			bundleAdmin = null;
-		}
+    pmpServiceReg.unregister();
 
-		unregisterApplicationAdmin(context);
+    if (synchronizer != null) {
+      synchronizer.stopDispatching();
+      synchronizer.unregister(context);
+    }
 
-		if (deploymentAdminTrack != null) {
-			deploymentAdminTrack.close();
-			deploymentAdminTrack = null;
-		}
+    if (bundleAdmin != null) {
+      bundleAdmin.unregister(context);
+      bundleAdmin = null;
+    }
 
-		if (eventAdminTracker != null) {
-			eventAdminTracker.close();
-			eventAdminTracker = null;
-		}
+    unregisterApplicationAdmin(context);
 
-		if (serviceAdmin != null) {
-			serviceAdmin.unregister(context);
-			serviceAdmin = null;
-		}
+    if (deploymentAdminTrack != null) {
+      deploymentAdminTrack.close();
+      deploymentAdminTrack = null;
+    }
 
-		if (vmCommander != null) {
-			context.removeFrameworkListener(this);
-			vmCommander.close();
-			vmCommander = null;
-		}
+    if (eventAdminTracker != null) {
+      eventAdminTracker.close();
+      eventAdminTracker = null;
+    }
 
-		if (capabilitiesManager != null) {
-			capabilitiesManager.unregister(context);
-			capabilitiesManager = null;
-		}
+    if (serviceAdmin != null) {
+      serviceAdmin.unregister(context);
+      serviceAdmin = null;
+    }
 
-		DebugUtils.dispose();
-		instance = null;
-		Activator.context = null;
-	}
+    if (vmCommander != null) {
+      context.removeFrameworkListener(this);
+      vmCommander.close();
+      vmCommander = null;
+    }
 
-	private boolean registerDeploymentAdmin(Object admin) {
-		if (deploymentAdmin == null) {
-			try {
-				deploymentAdmin = new RemoteDeploymentAdminImpl();
-				deploymentAdmin.register(context, admin);
-				return true;
-			} catch (Throwable t) {
-				deploymentAdmin = null;
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
+    if (capabilitiesManager != null) {
+      capabilitiesManager.unregister(context);
+      capabilitiesManager = null;
+    }
 
-	private boolean unregisterDeploymentAdmin(Object admin) {
-		if (deploymentAdmin != null && deploymentAdmin.getDeploymentAdmin() == admin) {
-			deploymentAdmin.unregister(context);
-			deploymentAdmin = null;
-			return true;
-		}
-		return false;
-	}
+    DebugUtils.dispose();
+    instance = null;
+    Activator.context = null;
+  }
 
-	// TODO: Rework dependency support
-	public Object addingService(ServiceReference arg0) {
-		String[] classes = (String[]) arg0.getProperty("objectClass");
-		for (int i = 0; i < classes.length; i++)
-			if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
-				Object admin = context.getService(arg0);
-				registerDeploymentAdmin(admin);
-				return admin;
-			} else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
-				setCapability(Capabilities.EVENT_SUPPORT, true);
-				return new Object();
-			}
-		return null;
-	}
+  private boolean registerDeploymentAdmin(Object admin) {
+    if (deploymentAdmin == null) {
+      try {
+        deploymentAdmin = new RemoteDeploymentAdminImpl();
+        deploymentAdmin.register(context, admin);
+        return true;
+      } catch (Throwable t) {
+        deploymentAdmin = null;
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
 
-	public void modifiedService(ServiceReference arg0, Object arg1) {
-	}
+  private boolean unregisterDeploymentAdmin(Object admin) {
+    if (deploymentAdmin != null && deploymentAdmin.getDeploymentAdmin() == admin) {
+      deploymentAdmin.unregister(context);
+      deploymentAdmin = null;
+      return true;
+    }
+    return false;
+  }
 
-	public void removedService(ServiceReference ref, Object obj) {
-		String[] classes = (String[]) ref.getProperty("objectClass");
-		for (int i = 0; i < classes.length; i++) {
-			if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
-				if (unregisterDeploymentAdmin(obj)) {
-					Object admin = deploymentAdminTrack.getService();
-					if (admin != null)
-						registerDeploymentAdmin(admin);
-				}
-			} else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
-				if (eventAdminTracker.getService() == null)
-					setCapability(Capabilities.EVENT_SUPPORT, false);
-			}
-		}
-	}
+  // TODO: Rework dependency support
+  public Object addingService(ServiceReference arg0) {
+    String[] classes = (String[]) arg0.getProperty("objectClass");
+    for (int i = 0; i < classes.length; i++) {
+      if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
+        Object admin = context.getService(arg0);
+        registerDeploymentAdmin(admin);
+        return admin;
+      } else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
+        setCapability(Capabilities.EVENT_SUPPORT, true);
+        return new Object();
+      }
+    }
+    return null;
+  }
 
-	public static EventSynchronizer getSynchronizer() {
-		return instance != null ? instance.synchronizer : null;
-	}
+  public void modifiedService(ServiceReference arg0, Object arg1) {
+  }
 
-	public static RemoteCapabilitiesManager getCapabilitiesManager() {
-		return instance != null ? instance.capabilitiesManager : null;
-	}
+  public void removedService(ServiceReference ref, Object obj) {
+    String[] classes = (String[]) ref.getProperty("objectClass");
+    for (int i = 0; i < classes.length; i++) {
+      if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
+        if (unregisterDeploymentAdmin(obj)) {
+          Object admin = deploymentAdminTrack.getService();
+          if (admin != null) {
+            registerDeploymentAdmin(admin);
+          }
+        }
+      } else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
+        if (eventAdminTracker.getService() == null) {
+          setCapability(Capabilities.EVENT_SUPPORT, false);
+        }
+      }
+    }
+  }
 
-	private void setCapability(String capability, boolean value) {
-		if (capabilitiesManager != null) {
-			capabilitiesManager.setCapability(capability, new Boolean(value));
-		}
-	}
+  public static EventSynchronizer getSynchronizer() {
+    return instance != null ? instance.synchronizer : null;
+  }
 
-	public void frameworkEvent(FrameworkEvent event) {
-		if (event.getType() == FrameworkEvent.STARTED)
-			startController(context);
-	}
+  public static RemoteCapabilitiesManager getCapabilitiesManager() {
+    return instance != null ? instance.capabilitiesManager : null;
+  }
 
-	public static BundleContext getBundleContext() {
-		return context;
-	}
+  private void setCapability(String capability, boolean value) {
+    if (capabilitiesManager != null) {
+      capabilitiesManager.setCapability(capability, new Boolean(value));
+    }
+  }
+
+  public void frameworkEvent(FrameworkEvent event) {
+    if (event.getType() == FrameworkEvent.STARTED) {
+      startController(context);
+    }
+  }
+
+  public static BundleContext getBundleContext() {
+    return context;
+  }
 }
