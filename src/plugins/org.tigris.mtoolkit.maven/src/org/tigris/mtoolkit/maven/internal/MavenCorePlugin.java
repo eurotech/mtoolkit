@@ -13,7 +13,6 @@ package org.tigris.mtoolkit.maven.internal;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -54,14 +53,10 @@ public class MavenCorePlugin extends AbstractUIPlugin {
     return plugin;
   }
 
-  public static IPath getMetadataLocation() {
-    return getDefault().getStateLocation();
-  }
-
   /**
    * Returns an image descriptor for the image file at the given plug-in
    * relative path
-   * 
+   *
    * @param path
    *          the path
    * @return the image descriptor
@@ -80,16 +75,12 @@ public class MavenCorePlugin extends AbstractUIPlugin {
     log(newStatus(IStatus.ERROR, message, t));
   }
 
-  public static void warning(String message, Throwable t) {
+  public static void warning(String message, Throwable t) { // NO_UCD
     log(newStatus(IStatus.WARNING, message, t));
   }
 
   public static void log(IStatus status) {
     getDefault().getLog().log(status);
-  }
-
-  public static void throwException(int severity, String message, Throwable t) throws CoreException {
-    throw newException(severity, message, t);
   }
 
   public static CoreException newException(int severity, String message, Throwable t) {
@@ -100,17 +91,19 @@ public class MavenCorePlugin extends AbstractUIPlugin {
     return new CoreException(status);
   }
 
-  public static void debug(String message) {
+  public static void debug(String message) { // NO_UCD
     debug(message, null);
   }
 
   public static void debug(String message, Throwable t) {
-    if (!DEBUG)
+    if (!DEBUG) {
       return;
+    }
     System.out.println(DEBUG_TAG.concat(message));
-    if (t != null)
+    if (t != null) {
       // TODO: Add line prefix while dumping the stack trace
       t.printStackTrace(System.out);
+    }
   }
 
   public static IStatus newStatus(int severity, String message, Throwable t) {
@@ -121,12 +114,12 @@ public class MavenCorePlugin extends AbstractUIPlugin {
     return new Status(severity, PLUGIN_ID, code, message, t);
   }
 
-  public static IStatus newStatus(String message, Throwable t, List<IStatus> children) {
+  public static IStatus newStatus(String message, Throwable t, List<IStatus> children) { // NO_UCD
     IStatus[] statuses = children.toArray(new IStatus[children.size()]);
     return new MultiStatus(PLUGIN_ID, 0, statuses, message, t);
   }
 
-  public static CoreException newException(int severity, int code, String message, Throwable t) {
+  public static CoreException newException(int severity, int code, String message, Throwable t) { // NO_UCD
     return newException(newStatus(severity, code, message, t));
   }
 
