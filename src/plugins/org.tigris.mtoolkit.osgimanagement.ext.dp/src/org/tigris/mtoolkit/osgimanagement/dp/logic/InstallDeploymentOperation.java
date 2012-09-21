@@ -22,14 +22,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.DPModelProvider;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -41,31 +39,6 @@ public final class InstallDeploymentOperation {
 
   public InstallDeploymentOperation(Framework framework) {
     this.framework = framework;
-  }
-
-  public void startJob(final File sourceFile, IProgressMonitor monitor) {
-    RemoteDeploymentOperation operation = new RemoteDeploymentOperation("Installing deployment package...", framework) {
-      @Override
-      protected IStatus doOperation(IProgressMonitor monitor) {
-        RemoteDP remoteDP = null;
-        try {
-          remoteDP = install(sourceFile, monitor);
-          if (remoteDP == null) {
-            return new Status(Status.ERROR, Activator.PLUGIN_ID, NLS.bind("Unable to install the source file \"{0}\"",
-                sourceFile));
-          }
-        } catch (Exception e) {
-          return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e);
-        }
-        return Status.OK_STATUS;
-      }
-
-      @Override
-      protected String getMessage(IStatus operationStatus) {
-        return "Deployment package installation failed";
-      }
-    };
-    operation.schedule();
   }
 
   public RemoteDP install(File sourceFile, IProgressMonitor monitor) throws IAgentException, IllegalArgumentException {
@@ -153,37 +126,12 @@ public final class InstallDeploymentOperation {
             null,
             NLS.bind(
                 "The deployment package \"{0}\" exists on the remote framework with the same version. If you want to update it, the remote version of the deployment package needs to be uninstalled first",
-                symbolicName), MessageDialog.QUESTION, new String[] { "Uninstall Remote Version", "Cancel" }, 0);
+                symbolicName), MessageDialog.QUESTION, new String[] {
+                "Uninstall Remote Version", "Cancel"
+            }, 0);
         result[0] = dialog.open();
       }
     });
     return result[0] == 0;
-  }
-
-  public static void processError(final String message, boolean showDialog) {
-    if (showDialog) {
-      Display display = PlatformUI.getWorkbench().getDisplay();
-      if (!display.isDisposed()) {
-        display.asyncExec(new Runnable() {
-          public void run() {
-            Shell shell = getShell();
-            if (shell != null) {
-              if (!shell.isDisposed()) {
-                MessageDialog.openError(shell, "Error", message);
-              }
-            }
-          }
-        });
-      }
-    }
-  }
-
-  // Get active shell
-  public static Shell getShell() {
-    Display display = PlatformUI.getWorkbench().getDisplay();
-    if (display.isDisposed()) {
-      return null;
-    }
-    return display.getActiveShell();
   }
 }
