@@ -36,8 +36,6 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
   private static final String           EVENT_ADMIN_CLASS      = "org.osgi.service.event.EventAdmin";
   private static final String           DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
 
-  private static final String           MBS_COMMS_PROP         = "mbs.comms";
-  private static final String           MBS_COMMS_V3           = "comms3";
   private static final String           IAGENT_CONTROLLER_PROP = "iagent.controller";
 
   private static Activator              instance;
@@ -91,13 +89,8 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
     synchronizer.setPMPServer(pmpServer);
     synchronizer.start();
 
-    final String controller = System.getProperty(IAGENT_CONTROLLER_PROP);
-    if (Boolean.valueOf(controller).booleanValue()) {
+    if (Boolean.valueOf(System.getProperty(IAGENT_CONTROLLER_PROP)).booleanValue()) {
       registerControllerSupport(context);
-    } else {
-      if (!"false".equals(controller) && !MBS_COMMS_V3.equals(System.getProperty(MBS_COMMS_PROP))) {
-        registerControllerSupport(context);
-      }
     }
   }
 
@@ -161,7 +154,7 @@ public class Activator implements BundleActivator, ServiceTrackerCustomizer, Fra
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
