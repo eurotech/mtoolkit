@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Dictionary;
@@ -31,7 +30,6 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 
 public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
-
   /** constant used for the pmp configuration */
 
   public static final String URI            = "uri";
@@ -43,7 +41,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
   private static final int   FAILURE_RANDOM = 0;
   private static final int   FAILURE_RETRY  = 1;
   private static final int   FAILURE_FAIL   = 2;
-  private static final int   FAILURE_REUSE  = 3;
 
   private ServerSocket       socket;
   protected volatile boolean run;                               // for what's this !?
@@ -95,9 +92,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     if ("fail".equals(failureActionProp)) {
       return FAILURE_FAIL;
     }
-    if ("reuse".equals(failureActionProp)) {
-      return FAILURE_REUSE;
-    }
     return FAILURE_RANDOM;
   }
 
@@ -127,12 +121,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
         break;
       case FAILURE_FAIL:
         throw e;
-      case FAILURE_REUSE:
-        DebugUtils.debug(this, "Failure action set to 'reuse'. Retrying...");
-        ServerSocket serverSock = new ServerSocket();
-        serverSock.setReuseAddress(true);
-        serverSock.bind(new InetSocketAddress(port));
-        socket = serverSock;
       }
     }
     ThreadUtils.createThread(this, "IAgent Server Thread").start();
