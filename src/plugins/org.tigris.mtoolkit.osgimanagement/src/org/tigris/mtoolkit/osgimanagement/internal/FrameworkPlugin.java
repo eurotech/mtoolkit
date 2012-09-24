@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Hashtable;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
@@ -35,155 +34,143 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 
-public class FrameworkPlugin extends AbstractUIPlugin {
+public final class FrameworkPlugin extends AbstractUIPlugin {
+  private static FrameworkPlugin instance      = null;
 
-	private static FrameworkPlugin instance = null;
-	private static Hashtable storage = new Hashtable();
+  public static final String     PLUGIN_ID     = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
+  public static final String     IAGENT_RPC_ID = "org.tigris.mtoolkit.iagent.rpc";
 
-	public static final String PLUGIN_ID = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
-	public static final String IAGENT_RPC_ID = "org.tigris.mtoolkit.iagent.rpc";
+  public static String           fileDialogLastSelection;
 
-	public static String fileDialogLastSelection;
+  public FrameworkPlugin() {
+    super();
+    if (instance == null) {
+      instance = this;
+    }
+  }
 
-	public FrameworkPlugin() {
-		super();
-		if (instance == null)
-			instance = this;
-	}
+  // Returns default instance
+  public static FrameworkPlugin getDefault() {
+    return instance;
+  }
 
-	// Returns default instance
-	public static FrameworkPlugin getDefault() {
-		return instance;
-	}
+  @Override
+  public void stop(BundleContext context) throws Exception {
+    super.stop(context);
+    FrameworkConnectorFactory.deinit();
+    instance = null;
+  }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		super.stop(context);
-		FrameworkConnectorFactory.deinit();
-		instance = null;
-	}
+  @Override
+  public void start(BundleContext context) throws Exception {
+    super.start(context);
+    FrameworkConnectorFactory.init();
+    FrameWorkView.restoreModel();
+    fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+  }
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		FrameworkConnectorFactory.init();
-		FrameWorkView.restoreModel();
-		fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
-	}
+  public String getId() {
+    return PLUGIN_ID;
+  }
 
-	public String getId() {
-		return PLUGIN_ID;
-	}
+  public static void error(IAgentException e) {
+    log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
+  }
 
-	public static void putInStorage(Object key, Object value) {
-		if (value == null) {
-			storage.remove(key);
-		} else {
-			storage.put(key, value);
-		}
-	}
+  public static void error(String message, Throwable t) {
+    log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
+  }
 
-	public static Object getFromStorage(Object key) {
-		return storage.get(key);
-	}
+  public static void warning(String message, Throwable t) {
+    log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
+  }
 
-	public static void error(IAgentException e) {
-		log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
-	}
+  @Override
+  protected void initializeImageRegistry(ImageRegistry reg) {
+    super.initializeImageRegistry(reg);
+  }
 
-	public static void error(String message, Throwable t) {
-		log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
-	}
+  public static void log(IStatus status) {
+    FrameworkPlugin fwPlugin = getDefault();
+    if (fwPlugin == null) {
+      System.out.println(formatStatus(status));
+      return;
+    }
+    ILog fwLog = fwPlugin.getLog();
+    if (fwLog == null) {
+      System.out.println(formatStatus(status));
+      return;
+    }
+    fwLog.log(status);
+  }
 
-	public static void warning(String message, Throwable t) {
-		log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
-	}
+  public static File saveFile(InputStream input, String name) throws IOException {
+    IPath statePath = Platform.getStateLocation(instance.getBundle());
+    File file = new File(statePath.toFile(), name);
+    if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+      throw new IOException("Failed to create bundle state folder");
+    }
+    FileOutputStream stream = new FileOutputStream(file);
+    try {
+      byte[] buf = new byte[8192];
+      int read;
+      while ((read = input.read(buf)) != -1) {
+        stream.write(buf, 0, read);
+      }
+    } finally {
+      stream.close();
+    }
+    return file;
+  }
 
-	@Override
-	protected void initializeImageRegistry(ImageRegistry reg) {
-		super.initializeImageRegistry(reg);
-	}
+  private static String formatStatus(IStatus status) {
+    String statusText = status.toString();
+    if (status.getException() == null) {
+      return statusText;
+    }
+    StringWriter swriter = new StringWriter();
+    PrintWriter pwriter = new PrintWriter(swriter);
+    status.getException().printStackTrace(pwriter);
+    pwriter.flush();
+    return statusText + System.getProperty("line.separator") + swriter.toString();
+  }
 
-	public static void log(IStatus status) {
-		FrameworkPlugin fwPlugin = getDefault();
-		if (fwPlugin == null) {
-			System.out.println(formatStatus(status));
-			return;
-		}
-		ILog fwLog = fwPlugin.getLog();
-		if (fwLog == null) {
-			System.out.println(formatStatus(status));
-			return;
-		}
-		fwLog.log(status);
-	}
-
-	public static File saveFile(InputStream input, String name) throws IOException {
-		IPath statePath = Platform.getStateLocation(instance.getBundle());
-		File file = new File(statePath.toFile(), name);
-		if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-			throw new IOException("Failed to create bundle state folder");
-		}
-		FileOutputStream stream = new FileOutputStream(file);
-		try {
-			byte[] buf = new byte[8192];
-			int read;
-			while ((read = input.read(buf)) != -1) {
-				stream.write(buf, 0, read);
-			}
-		} finally {
-			stream.close();
-		}
-		return file;
-	}
-
-	private static String formatStatus(IStatus status) {
-		String statusText = status.toString();
-		if (status.getException() == null)
-			return statusText;
-		StringWriter swriter = new StringWriter();
-		PrintWriter pwriter = new PrintWriter(swriter);
-		status.getException().printStackTrace(pwriter);
-		pwriter.flush();
-		return statusText + System.getProperty("line.separator") + swriter.toString();
-	}
-
-	public static InputStream getIAgentBundleAsStream() {
-		Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
-		Bundle selectedIAgent = null;
-		String selectedVersion = null;
-		for (int i = 0; i < bundles.length; i++) {
-			Bundle bundle = bundles[i];
-			if (IAGENT_RPC_ID.equals(bundle.getSymbolicName())) {
-				@SuppressWarnings("cast")
-				String version = (String) bundle.getHeaders("").get(Constants.BUNDLE_VERSION);
-				if (version == null) {
-					if (selectedVersion == null) {
-						// if the iagent don't have a version
-						// use the bundle with highest ID
-						selectedIAgent = bundle;
-					}
-				} else {
-					if (selectedVersion == null || version.compareTo(selectedVersion) >= 0) {
-						// if we have a version
-						// we want the bundle with highest version and highest
-						// ID
-						selectedIAgent = bundle;
-						selectedVersion = version;
-					}
-				}
-			}
-		}
-		if (selectedIAgent != null) {
-			try {
-				File bundleFile = FileLocator.getBundleFile(selectedIAgent);
-				if (bundleFile.isFile()) {
-					return new FileInputStream(bundleFile);
-				}
-			} catch (IOException e) {
-				getDefault().getLog().log(Util.newStatus(IStatus.ERROR, "Failed to find IAgent RPC bundle", e));
-			}
-		}
-		return null;
-	}
+  public static InputStream getIAgentBundleAsStream() {
+    Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
+    Bundle selectedIAgent = null;
+    String selectedVersion = null;
+    for (int i = 0; i < bundles.length; i++) {
+      Bundle bundle = bundles[i];
+      if (IAGENT_RPC_ID.equals(bundle.getSymbolicName())) {
+        @SuppressWarnings("cast")
+        String version = (String) bundle.getHeaders("").get(Constants.BUNDLE_VERSION);
+        if (version == null) {
+          if (selectedVersion == null) {
+            // if the iagent don't have a version
+            // use the bundle with highest ID
+            selectedIAgent = bundle;
+          }
+        } else {
+          if (selectedVersion == null || version.compareTo(selectedVersion) >= 0) {
+            // if we have a version
+            // we want the bundle with highest version and highest
+            // ID
+            selectedIAgent = bundle;
+            selectedVersion = version;
+          }
+        }
+      }
+    }
+    if (selectedIAgent != null) {
+      try {
+        File bundleFile = FileLocator.getBundleFile(selectedIAgent);
+        if (bundleFile.isFile()) {
+          return new FileInputStream(bundleFile);
+        }
+      } catch (IOException e) {
+        getDefault().getLog().log(Util.newStatus(IStatus.ERROR, "Failed to find IAgent RPC bundle", e));
+      }
+    }
+    return null;
+  }
 }

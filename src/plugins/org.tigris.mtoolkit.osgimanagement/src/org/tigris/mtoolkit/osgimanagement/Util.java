@@ -43,7 +43,9 @@ public class Util {
   }
 
   public static IStatus newStatus(String message, IStatus e) {
-    return new MultiStatus(FrameworkPlugin.PLUGIN_ID, 0, new IStatus[] { e }, message, null);
+    return new MultiStatus(FrameworkPlugin.PLUGIN_ID, 0, new IStatus[] {
+      e
+    }, message, null);
   }
 
   public static IStatus newStatus(int severity, String message, Throwable t) {
@@ -60,13 +62,6 @@ public class Util {
       }
     }
     return msg;
-  }
-
-  /**
-   * @since 6.0
-   */
-  public static void throwException(int severity, String message, Throwable t) throws CoreException {
-    throw newException(severity, message, t);
   }
 
   /**
@@ -110,10 +105,14 @@ public class Util {
   /**
    * @since 6.0
    */
-  public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel, boolean multiple) {
+  public static File[] openFileSelectionDialog(Shell shell, String title, String filter, String filterLabel,
+      boolean multiple) {
     FileDialog dialog = new FileDialog(shell, SWT.OPEN | (multiple ? SWT.MULTI : SWT.SINGLE));
-    String[] filterArr = { filter, "*.*" }; //$NON-NLS-1$
-    String[] namesArr = { filterLabel, Messages.all_files_filter_label };
+    String[] filterArr = {
+        filter, "*.*"}; //$NON-NLS-1$
+    String[] namesArr = {
+        filterLabel, Messages.all_files_filter_label
+    };
     dialog.setFilterExtensions(filterArr);
     dialog.setFilterNames(namesArr);
     if (FrameworkPlugin.fileDialogLastSelection != null) {
@@ -142,12 +141,5 @@ public class Util {
       return fws[0];
     }
     return null;
-  }
-
-  /**
-   * @since 6.1
-   */
-  public static void connectFramework(Framework fw) {
-    FrameworkConnectorFactory.connectFrameWork(fw);
   }
 }
