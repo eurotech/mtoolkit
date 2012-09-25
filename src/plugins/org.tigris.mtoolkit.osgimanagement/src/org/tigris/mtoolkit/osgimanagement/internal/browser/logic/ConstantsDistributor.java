@@ -11,11 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
 public interface ConstantsDistributor {
-
   static final String DEFAULT_IP = "localhost"; //$NON-NLS-1$
-
-  static final int LIST_DIALOG_WIDTH = 350;
-  static final int LIST_DIALOG_HEIGHT = 200;
 
   static final String FRAMEWORK_NAME = "framework_name_key"; //$NON-NLS-1$
   static final String TRANSPORT_PROVIDER_ID = "transport_type_key"; //$NON-NLS-1$
@@ -43,6 +39,4 @@ public interface ConstantsDistributor {
   static final String BUNDLE_ACTIVE_VALUE = "active"; //$NON-NLS-1$
 
   static final String NODE_NAME = "node_name"; //$NON-NLS-1$
-
-  static final String INSTALL_TO_DLG_ICON = "selection_dlg.gif"; //$NON-NLS-1$
 }
