@@ -19,11 +19,9 @@ import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
-import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public abstract class RemoteDeploymentOperation extends Job {
-
-	private DeploymentPackage pack;
+  private final DeploymentPackage pack;
 	protected Dialog dialog;
 
 	public RemoteDeploymentOperation(String name, DeploymentPackage pack) {
@@ -31,17 +29,13 @@ public abstract class RemoteDeploymentOperation extends Job {
 		this.pack = pack;
 		setRule(new DPOperationSchedulingRule(pack.findFramework()));
 	}
-	
-	public RemoteDeploymentOperation(String name, Framework fw) {
-		super(name);
-		setRule(new DPOperationSchedulingRule(fw));
-	}
 
 	protected DeploymentPackage getDeploymentPackage() {
 		return pack;
 	}
 
-	protected IStatus run(IProgressMonitor monitor) {
+	@Override
+  protected IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask(getName(), 1);
 		IStatus operationResult = Status.OK_STATUS;
 		try {
@@ -52,9 +46,10 @@ public abstract class RemoteDeploymentOperation extends Job {
 		} finally {
 			monitor.done();
 		}
-		if (!operationResult.isOK())
-			StatusManager.getManager().handle(operationResult,
+		if (!operationResult.isOK()) {
+      StatusManager.getManager().handle(operationResult,
 				StatusManager.SHOW | StatusManager.LOG);
+    }
 		return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
 	}
 
