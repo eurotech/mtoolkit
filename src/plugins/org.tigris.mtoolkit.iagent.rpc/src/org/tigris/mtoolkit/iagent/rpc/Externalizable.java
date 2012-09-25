@@ -14,8 +14,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Interface for custum serialization. Classes that implements this interface
- * must have public emty constructor so deserialization can be done.
+ * Interface for custom serialization. Classes that implements this interface
+ * must have public no-arg constructor so deserialization can be done.
  */
 public interface Externalizable {
 
@@ -24,9 +24,9 @@ public interface Externalizable {
 	 */
 	public void writeObject(OutputStream oStream) throws Exception;
 
-	/**
-	 * Use this method to deserializion of object state.
-	 */
+	  /**
+   * Use this method to deserialization of object state.
+   */
 	public void readObject(InputStream iStream) throws Exception;
 
 }
