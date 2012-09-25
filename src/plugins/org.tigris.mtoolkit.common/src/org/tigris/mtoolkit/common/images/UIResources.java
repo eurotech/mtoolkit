@@ -13,15 +13,9 @@ package org.tigris.mtoolkit.common.images;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.PaletteData;
-import org.eclipse.swt.graphics.RGB;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 public class UIResources {
-
-	protected static final ImageData DEFAULT_IMAGE_DATA = new ImageData(6, 6, 1, new PaletteData(new RGB[] { new RGB(255, 0, 0) }));
-
 	/**
 	 * @since 5.0
 	 */
@@ -62,8 +56,9 @@ public class UIResources {
 		UtilitiesPlugin plugin = UtilitiesPlugin.getDefault();
 		if (plugin != null) {
 			ImageRegistry registry = plugin.getImageRegistry();
-			if (registry != null)
-				return registry;
+			if (registry != null) {
+        return registry;
+      }
 		}
 		throw new IllegalStateException("Plugin's image registry not available. Most probably it failed to startup properly");
 	}
