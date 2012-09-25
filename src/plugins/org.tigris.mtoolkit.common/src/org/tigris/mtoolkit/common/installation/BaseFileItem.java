@@ -25,11 +25,6 @@ import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 
 public class BaseFileItem implements InstallationItem {
-
-  /**
-   * @since 6.0
-   */
-  protected InstallationItemProvider provider;
   protected File baseFile;
   protected String mimeType;
   protected File preparedFile;
@@ -40,10 +35,12 @@ public class BaseFileItem implements InstallationItem {
   }
 
   public InputStream getInputStream() throws IOException {
-    if (preparedFile != null)
+    if (preparedFile != null) {
       return new FileInputStream(preparedFile);
-    if (baseFile != null)
+    }
+    if (baseFile != null) {
       return new FileInputStream(baseFile);
+    }
     throw new IllegalStateException(
         "Installation item is not initialized properly with the generated artifact location");
   }
@@ -52,10 +49,12 @@ public class BaseFileItem implements InstallationItem {
    * @since 6.0
    */
   public String getLocation() {
-    if (preparedFile != null)
+    if (preparedFile != null) {
       return preparedFile.getAbsolutePath();
-    if (baseFile != null)
+    }
+    if (baseFile != null) {
       return baseFile.getAbsolutePath();
+    }
     throw new IllegalStateException("Installation item wasn't initialized correctly, missing location to base file");
   }
 
