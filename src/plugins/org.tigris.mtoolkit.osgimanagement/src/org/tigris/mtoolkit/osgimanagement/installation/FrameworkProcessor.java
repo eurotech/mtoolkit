@@ -70,16 +70,15 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
  * @since 5.0
  */
 public final class FrameworkProcessor extends AbstractInstallationItemProcessor {
-  private static final Map properties;
-  private static final String PROP_JVM_NAME = "jvm.name";
-  private static final String ANDROID_TRANSPORT_TYPE = "android";
+  private static final Map                               properties;
+  private static final String                            PROP_JVM_NAME              = "jvm.name";
+  private static final String                            ANDROID_TRANSPORT_TYPE     = "android";
 
-  private static final String EXTENSION_POINT_PROCESSORS = "org.tigris.mtoolkit.osgimanagement.frameworkProcessorExtensions";
-  private static final FrameworkProcessorExtension bundlesProcessor = new BundlesProcessor();
-  private static final List<FrameworkProcessorExtension> extensions = new ArrayList<FrameworkProcessorExtension>();
+  private static final String                            EXTENSION_POINT_PROCESSORS = "org.tigris.mtoolkit.osgimanagement.frameworkProcessorExtensions";
+  private static final FrameworkProcessorExtension       bundlesProcessor           = new BundlesProcessor();
+  private static final List<FrameworkProcessorExtension> extensions                 = new ArrayList<FrameworkProcessorExtension>();
 
-  private static FrameworkProcessor defaultinstance;
-  private boolean useAdditionalProcessors = true;
+  private boolean                                        useAdditionalProcessors    = true;
 
   static {
     Map props = new HashMap(1, 1);
@@ -100,13 +99,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     }
   }
 
-  public static FrameworkProcessor getDefault() {
-    if (defaultinstance == null) {
-      defaultinstance = new FrameworkProcessor();
-    }
-    return defaultinstance;
-  }
-
   public boolean getUseAdditionalProcessors() {
     return useAdditionalProcessors;
   }
@@ -117,7 +109,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
    * getInstallationTargets()
    */
@@ -135,7 +127,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
    * getGeneralTargetName()
    */
@@ -145,7 +137,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
    * getGeneralTargetImageDescriptor()
    */
@@ -155,7 +147,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
    * getProperties()
    */
@@ -166,7 +158,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
    * getSupportedMimeTypes()
    */
@@ -208,8 +200,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
             return status;
           }
-          if(status.matches(IStatus.WARNING) && status.getCode()==ILC.E){
-        	  return status;
+          if (status.matches(IStatus.WARNING) && status.getCode() == ILC.E) {
+            return status;
           }
         }
         try {
@@ -335,8 +327,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   }
 
   // TODO This method should not be revealed.
-  public IStatus processItemsInternal(List<InstallationItem> itemsToInstall, Map preparationProps,
-      Framework framework, List<RemotePackage> installed, IProgressMonitor monitor) {
+  public IStatus processItemsInternal(List<InstallationItem> itemsToInstall, Map preparationProps, Framework framework,
+      List<RemotePackage> installed, IProgressMonitor monitor) {
     Map<FrameworkProcessorExtension, List<InstallationItem>> installationMap = new HashMap<FrameworkProcessorExtension, List<InstallationItem>>();
     for (InstallationItem item : itemsToInstall) {
       FrameworkProcessorExtension processor;
@@ -411,7 +403,9 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     } else if (processors.length == 1) {
       return processors[0];
     }
-    final FrameworkProcessorExtension processor[] = new FrameworkProcessorExtension[] { processors[0] };
+    final FrameworkProcessorExtension processor[] = new FrameworkProcessorExtension[] {
+      processors[0]
+    };
     try {
       final IWorkbench workbench = PlatformUI.getWorkbench();
       final FrameworkProcessorExtension prArr[] = new FrameworkProcessorExtension[processors.length];
@@ -424,7 +418,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       display.syncExec(new Runnable() {
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Runnable#run()
          */
         public void run() {
@@ -450,7 +444,9 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           dialog.setMessage(NLS.bind("Select installation processor for {0}", item.getName()));
           dialog.setContentProvider(new ArrayContentProvider());
           dialog.setInput(prArr);
-          dialog.setInitialSelections(new Object[] { prArr[0] });
+          dialog.setInitialSelections(new Object[] {
+            prArr[0]
+          });
           if (dialog.open() == Window.CANCEL) {
             monitor.setCanceled(true);
           } else {
@@ -559,7 +555,9 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   }
 
   private static final class BundlesProcessor implements FrameworkProcessorExtension {
-    public static final String[] SUPPORTED_MIME_TYPES = new String[] { MIME_JAR, MIME_ZIP };
+    public static final String[] SUPPORTED_MIME_TYPES = new String[] {
+                                                          MIME_JAR, MIME_ZIP
+                                                      };
 
     /* (non-Javadoc)
      * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#getName()
@@ -610,8 +608,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       for (InstallationItem item : items) {
         Boolean checkDepends = (Boolean) preparationProps.get(InstallationConstants.CHECK_DEPENDENCIES);
         if ((checkDepends == null || checkDepends.booleanValue()) && (item instanceof PluginItem)) {
-          IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework, processMonitor.newChild(1),
-              dependencies, preparationProps);
+          IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework,
+              processMonitor.newChild(1), dependencies, preparationProps);
           if (status != null) {
             if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
               throw new CoreException(status);
@@ -626,7 +624,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   }
 
   private static final class ExtensionWrapper implements Comparable<ExtensionWrapper> {
-    int priority;
+    int                         priority;
     FrameworkProcessorExtension processor;
 
     public ExtensionWrapper(int priority, FrameworkProcessorExtension processor) {
@@ -636,7 +634,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     public int compareTo(ExtensionWrapper o) {
