@@ -190,15 +190,15 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
     if (fw == null) {
       return false;
     }
-    Dictionary connectorProperties = fw.getConnectorProperties();
-    if (connectorProperties == null) {
+    Dictionary remoteProperties = fw.getRemoteDeviceProperties();
+    if (remoteProperties == null) {
       return false;
     }
-    Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+    Object support = remoteProperties.get(Capabilities.CAPABILITIES_SUPPORT);
     if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
       return true;
     } else {
-      support = connectorProperties.get(Capabilities.APPLICATION_SUPPORT);
+      support = remoteProperties.get(Capabilities.APPLICATION_SUPPORT);
       if (support != null && Boolean.parseBoolean(support.toString())) {
         return true;
       }

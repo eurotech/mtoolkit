@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,25 +28,19 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
-import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.UIHelper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
@@ -85,28 +78,6 @@ public class ActionsManager {
     } while (frameWorkMap.containsKey(frameWorkName));
 
     return frameWorkName;
-  }
-
-  public static void bundlePropertiesAction(Bundle bundle, TreeViewer parentView) {
-    try {
-      RemoteBundle rBundle = bundle.getRemoteBundle();
-      Shell shell = parentView.getTree().getShell();
-      PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
-        @Override
-        protected void attachHelp(Composite container) {
-          PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_BUNDLE);
-        }
-
-      };
-      Dictionary headers = rBundle.getHeaders(null);
-      propertiesDialog.create();
-      propertiesDialog.getMainControl().setData(headers);
-      propertiesDialog.open();
-    } catch (IAgentException e) {
-      e.printStackTrace();
-      BrowserErrorHandler.processError(e, true);
-      return;
-    }
   }
 
   public static void deinstallBundleAction(Bundle bundle) {

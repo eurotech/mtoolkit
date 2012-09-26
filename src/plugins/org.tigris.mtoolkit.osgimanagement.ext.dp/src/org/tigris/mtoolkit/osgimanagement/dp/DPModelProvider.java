@@ -194,8 +194,9 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
   }
 
   public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
-    if (connector == null)
+    if (connector == null) {
       return;
+    }
     if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
       Object property = e.getProperty();
       if (Capabilities.DEPLOYMENT_SUPPORT.equals(property)) {
@@ -237,15 +238,15 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
     if (fw == null) {
       return false;
     }
-    Dictionary connectorProperties = fw.getConnectorProperties();
-    if (connectorProperties == null) {
+    Dictionary remoteProperties = fw.getRemoteDeviceProperties();
+    if (remoteProperties == null) {
       return false;
     }
-    Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+    Object support = remoteProperties.get(Capabilities.CAPABILITIES_SUPPORT);
     if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
       return true;
     } else {
-      support = connectorProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
+      support = remoteProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
       if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
         return true;
       }

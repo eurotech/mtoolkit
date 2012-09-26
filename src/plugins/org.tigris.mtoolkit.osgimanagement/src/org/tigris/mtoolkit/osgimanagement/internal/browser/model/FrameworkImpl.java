@@ -118,8 +118,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 	public Model getBundlesNode() {
 		if (bundles == null) {
 			bundles = new SimpleNode(Messages.bundles_node_label);
-			if (getViewType() == BUNDLES_VIEW)
-				addElement(bundles);
+			if (getViewType() == BUNDLES_VIEW) {
+        addElement(bundles);
+      }
 		}
 		return bundles;
 	}
@@ -176,25 +177,33 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 		}
 	}
 
-	private void updateSupportedModels() {
-		if (connector != null) {
-			Dictionary connectorProperties = connector.getProperties();
-			Object support = connectorProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-			if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
-				supportBundles = true;
-				supportServices = true;
-			} else {
-				support = connectorProperties.get(Capabilities.BUNDLE_SUPPORT);
-				if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
-					supportBundles = true;
-				}
-				support = connectorProperties.get(Capabilities.SERVICE_SUPPORT);
-				if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
-					supportServices = true;
-				}
-			}
-		}
-	}
+  private void updateSupportedModels() {
+    if (connector != null) {
+      Dictionary remoteProperties;
+      Object support;
+      try {
+        remoteProperties = connector.getRemoteProperties();
+        support = remoteProperties.get(Capabilities.CAPABILITIES_SUPPORT);
+      } catch (IAgentException e) {
+        support = null;
+        remoteProperties = new Hashtable();
+      }
+
+      if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
+        supportBundles = true;
+        supportServices = true;
+      } else {
+        support = remoteProperties.get(Capabilities.BUNDLE_SUPPORT);
+        if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+          supportBundles = true;
+        }
+        support = remoteProperties.get(Capabilities.SERVICE_SUPPORT);
+        if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
+          supportServices = true;
+        }
+      }
+    }
+  }
 
 	private void removeRemoteListeners() {
 		try {
@@ -213,14 +222,16 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 	private boolean buildModel(SubMonitor sMonitor) {
 		try {
 			addBundles(sMonitor);
-			if (sMonitor.isCanceled())
-				return false;
+			if (sMonitor.isCanceled()) {
+        return false;
+      }
 
 			obtainModelProviders();
 
 			addServices(sMonitor);
-			if (sMonitor.isCanceled())
-				return false;
+			if (sMonitor.isCanceled()) {
+        return false;
+      }
 
 			int modelTotal = 0;
 			if (modelProviders.size() > 0) {
@@ -232,8 +243,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 				monitor.setTaskName("Retrieve additional providers data");
 				ContentTypeModelProvider manager = ((ModelProviderElement) modelProviders.get(i)).getProvider();
 				/* Model node = */manager.connect(this, connector, monitor);
-				if (monitor.isCanceled())
-					return false;
+				if (monitor.isCanceled()) {
+          return false;
+        }
 			}
 
 		} catch (IAgentException e) {
@@ -260,8 +272,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 					frameworkSystemBundles = new HashMap();
 					systemBundlesList = null;
 
-					if (sMonitor != null && sMonitor.isCanceled())
-						return false;
+					if (sMonitor != null && sMonitor.isCanceled()) {
+            return false;
+          }
 					updateSupportedModels();
 					addRemoteListeners();
 					updateElement();
@@ -281,8 +294,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 	}
 
 	public void disconnect() {
-		if (!isConnected())
-			return;
+		if (!isConnected()) {
+      return;
+    }
 		synchronized (Framework.getLockObject(connector)) {
 			connectedFlag = false;
 			if (connector != null) {
@@ -332,8 +346,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 	}
 
 	public Bundle findBundleForService(long id) throws IAgentException {
-		if (bundleHash == null)
-			return null;
+		if (bundleHash == null) {
+      return null;
+    }
 		Object bundles[] = bundleHash.values().toArray();
 		for (int i = 0; i < bundles.length; i++) {
 			Model serviceCategories[] = ((Bundle) bundles[i]).getChildren();
@@ -394,8 +409,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 	}
 
 	public void setViewType(int viewType) {
-		if (this.viewType == viewType)
-			return;
+		if (this.viewType == viewType) {
+      return;
+    }
 		synchronized (Framework.getLockObject(connector)) {
 		}
 
@@ -426,15 +442,17 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	protected boolean isShowBundlesID() {
 		TreeRoot root = (TreeRoot) getParent();
-		if (root != null)
-			return root.isShowBundlesID();
+		if (root != null) {
+      return root.isShowBundlesID();
+    }
 		return false;
 	}
 
 	protected boolean isShowBundlesVersion() {
 		TreeRoot root = (TreeRoot) getParent();
-		if (root != null)
-			return root.isShowBundlesVersion();
+		if (root != null) {
+      return root.isShowBundlesVersion();
+    }
 		return false;
 	}
 
@@ -530,8 +548,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 				for (int k = 0; k < bundles.length; k++) {
 					if (((Bundle) bundles[k]).getID() == id) {
 						children[j].removeElement(bundles[k]);
-						if (j == 0)
-							servicesViewVector.removeElementAt(i);
+						if (j == 0) {
+              servicesViewVector.removeElementAt(i);
+            }
 						break;
 					}
 				}
@@ -595,8 +614,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 	public void bundleChanged(RemoteBundleEvent e) {
 		BrowserErrorHandler.debug(getDebugBundleChangedMsg(e));
 		synchronized ((Framework.getLockObject(connector))) {
-			if (!isConnected())
-				return;
+			if (!isConnected()) {
+        return;
+      }
 
 			final int type = e.getType();
 			final RemoteBundle rBundle = e.getBundle();
@@ -754,8 +774,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	public void serviceChanged(final RemoteServiceEvent e) {
 		BrowserErrorHandler.debug(getDebugServiceChangedMsg(e));
-		if (!isConnected())
-			return;
+		if (!isConnected()) {
+      return;
+    }
 
 		synchronized (Framework.getLockObject(connector)) {
 
@@ -1004,7 +1025,7 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	/**
 	 * Called when connecting to framework
-	 * 
+	 *
 	 * @param monitor
 	 * @throws IAgentException
 	 */
@@ -1040,8 +1061,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 					BrowserErrorHandler.processError(e, getConnector(), userDisconnect);
 				}
 			}
-			if (monitor.isCanceled())
-				return;
+			if (monitor.isCanceled()) {
+        return;
+      }
 			monitor.worked(work);
 		}
 		retrieveServicesInfo(rBundlesArray, sMonitor);
@@ -1073,8 +1095,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 					BrowserErrorHandler.processError(e, getConnector(), userDisconnect);
 				}
 			}
-			if (monitor.isCanceled())
-				return;
+			if (monitor.isCanceled()) {
+        return;
+      }
 			monitor.worked(work);
 		}
 	}
@@ -1088,8 +1111,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 			for (int i = 0; i < rBundlesArray.length; i++) {
 				retrieveServicesInfo(rBundlesArray[i], null, null);
-				if (monitor.isCanceled())
-					return;
+				if (monitor.isCanceled()) {
+          return;
+        }
 				monitor.worked(work);
 			}
 		}
@@ -1145,8 +1169,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	private void addBundle(RemoteBundle rBundle, Dictionary headers, int state) throws IAgentException {
 		try {
-			if (bundleHash.containsKey(new Long(rBundle.getBundleId())))
-				return;
+			if (bundleHash.containsKey(new Long(rBundle.getBundleId()))) {
+        return;
+      }
 
 			if (headers == null) {
 				headers = rBundle.getHeaders(null);
@@ -1227,22 +1252,26 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	private String getBundleName(RemoteBundle bundle, Dictionary headers) throws IAgentException {
 		String bundleName = ""; //$NON-NLS-1$
-		if (headers == null)
-			headers = bundle.getHeaders(null);
+		if (headers == null) {
+      headers = bundle.getHeaders(null);
+    }
 		bundleName = (String) headers.get(Constants.BUNDLE_SYMBOLICNAME);
 		if (bundleName == null || bundleName.equals("")) { //$NON-NLS-1$
 			bundleName = (String) headers.get(Constants.BUNDLE_NAME);
 		}
 		if (bundleName == null || bundleName.equals("")) { //$NON-NLS-1$
 			bundleName = bundle.getLocation();
-			if (bundleName.indexOf('/') != -1)
-				bundleName = bundleName.substring(bundleName.lastIndexOf('/'));
-			if (bundleName.indexOf('\\') != -1)
-				bundleName = bundleName.substring(bundleName.lastIndexOf('\\'));
+			if (bundleName.indexOf('/') != -1) {
+        bundleName = bundleName.substring(bundleName.lastIndexOf('/'));
+      }
+			if (bundleName.indexOf('\\') != -1) {
+        bundleName = bundleName.substring(bundleName.lastIndexOf('\\'));
+      }
 		}
 		int delimIndex = bundleName.indexOf(';');
-		if (delimIndex != -1)
-			bundleName = bundleName.substring(0, delimIndex);
+		if (delimIndex != -1) {
+      bundleName = bundleName.substring(0, delimIndex);
+    }
 		return bundleName;
 	}
 
@@ -1272,8 +1301,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 		for (int i = 0; i < servicesVector.size(); i++) {
 			ServiceObject servObj = (ServiceObject) servicesVector.elementAt(i);
 			addServiceNodes(servObj);
-			if (monitor.isCanceled())
-				return;
+			if (monitor.isCanceled()) {
+        return;
+      }
 		}
 	}
 
@@ -1475,7 +1505,7 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 	 * Returns map, containing information for certificates which shall be used
 	 * for signing the content, installed to this framework. If no signing is
 	 * required, then empty Map is returned.
-	 * 
+	 *
 	 * @return the map with certificate properties
 	 */
 	@Override
@@ -1517,8 +1547,9 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 			}
 
 			ModelProviderElement providerElement = new ModelProviderElement(elements[i]);
-			if (providers.contains(providerElement))
-				continue;
+			if (providers.contains(providerElement)) {
+        continue;
+      }
 
 			try {
 				Object provider = elements[i].createExecutableExtension("class");
@@ -1649,7 +1680,7 @@ RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class adapter) {

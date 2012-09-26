@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
+import org.tigris.mtoolkit.iagent.IAgentException;
 
 /**
  * @since 5.0
@@ -38,7 +39,7 @@ public abstract class Framework extends Model {
 	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
 	protected final List listeners = new ArrayList();
 
-	private Dictionary connectorProperties = null;
+  private Dictionary         remoteProperties = null;
 	private long timeStamp;
 
 	/**
@@ -53,16 +54,20 @@ public abstract class Framework extends Model {
 		return connector;
 	}
 
-	public synchronized Dictionary getConnectorProperties() {
-		if (connector == null) {
-			return null;
-		}
-		if (connectorProperties == null || System.currentTimeMillis() - timeStamp > 30 * 1000) {
-			connectorProperties = connector.getProperties();
-			timeStamp = System.currentTimeMillis();
-		}
-		return connectorProperties;
-	}
+  public synchronized Dictionary getRemoteDeviceProperties() {
+    if (connector == null) {
+      return null;
+    }
+    if (remoteProperties == null || System.currentTimeMillis() - timeStamp > 30 * 1000) {
+      try {
+        remoteProperties = connector.getRemoteProperties();
+      } catch (IAgentException e) {
+        return null;
+      }
+      timeStamp = System.currentTimeMillis();
+    }
+    return remoteProperties;
+  }
 
 	public boolean isConnected() {
 		return connectedFlag;
@@ -83,14 +88,14 @@ public abstract class Framework extends Model {
 	 * Returns map, containing information for certificates which shall be used
 	 * for signing the content, installed to this framework. If no signing is
 	 * required, then empty Map is returned.
-	 * 
+	 *
 	 * @return the map with certificate properties
 	 */
 	public abstract Map getSigningProperties();
 
 	/**
 	 * Returns the symbolic names of the framework system bundles.
-	 * 
+	 *
 	 * @return the set with the symbolic names
 	 */
 	public abstract Set getSystemBundlesNames();

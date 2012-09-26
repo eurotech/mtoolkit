@@ -48,9 +48,9 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 /**
- * 
+ *
  * DeviceConnector implementation
- * 
+ *
  */
 public class DeviceConnectorImpl extends DeviceConnector implements EventListener, ConnectionListener,
 DeviceConnectorSpi {
@@ -76,7 +76,7 @@ DeviceConnectorSpi {
 
 	/**
 	 * Creates new DeviceConnector with specified transport object
-	 * 
+	 *
 	 * @param transport
 	 * @param aConManager
 	 * @param monitor
@@ -85,8 +85,9 @@ DeviceConnectorSpi {
 	 */
 	public DeviceConnectorImpl(Transport transport, Dictionary props, IAProgressMonitor monitor) throws IAgentException {
 		debug("[Constructor] >>> connection properties: " + DebugUtils.convertForDebug(props));
-		if (props == null)
-			throw new IllegalArgumentException("Connection properties hashtable could not be null!");
+		if (props == null) {
+      throw new IllegalArgumentException("Connection properties hashtable could not be null!");
+    }
 		this.connectionProperties = props;
 		setTransportProps(transport);
 
@@ -195,10 +196,12 @@ DeviceConnectorSpi {
 				}
 				managers = null;
 			}
-			if (deploymentCommands != null)
-				deploymentCommands.removeListeners();
-			if (serviceManager != null)
-				serviceManager.removeListeners();
+			if (deploymentCommands != null) {
+        deploymentCommands.removeListeners();
+      }
+			if (serviceManager != null) {
+        serviceManager.removeListeners();
+      }
 			if (connectionManager != null) {
 				connectionManager.removeListeners();
 				debug("[closeConnection] Closing underlying connections...");
@@ -261,33 +264,38 @@ DeviceConnectorSpi {
 
 	public Dictionary getProperties() {
 		Dictionary props = cloneDictionary(connectionProperties);
-		if (isActive) {
-			try {
-				// We shall not create PMP connection here, only check for
-				// active PMP connection.
-				// The connector can be active with only controller connection,
-				// which can be used
-				// later to create PMP connection to different port.
-				PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION, false);
-				if (connection != null) {
-					RemoteObject service = connection.getRemoteAdmin(RemoteCapabilitiesProvider.class.getName());
-					if (service != null) {
-						Map devCapabilities = (Map) methodGetCapabilities.call(service);
-						Iterator iterator = devCapabilities.keySet().iterator();
-						while (iterator.hasNext()) {
-							String property = (String) iterator.next();
-							props.put(property, devCapabilities.get(property));
-						}
-					}
-					props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.TRUE);
-				}
-			} catch (Exception e) {
-				IAgentLog.error("[DeviceConnectorImpl][getProperties] Failed to get Remote Capabilities", e);
-				props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.FALSE);
-			}
-		}
 		return props;
 	}
+
+  public Dictionary getRemoteProperties() throws IAgentException {
+    Dictionary props = new Hashtable();
+    if (isActive) {
+      try {
+        // We shall not create PMP connection here, only check for
+        // active PMP connection.
+        // The connector can be active with only controller connection,
+        // which can be used
+        // later to create PMP connection to different port.
+        PMPConnection connection = (PMPConnection) getConnection(ConnectionManager.PMP_CONNECTION, false);
+        if (connection != null) {
+          RemoteObject service = connection.getRemoteAdmin(RemoteCapabilitiesProvider.class.getName());
+          if (service != null) {
+            Map devCapabilities = (Map) methodGetCapabilities.call(service);
+            Iterator iterator = devCapabilities.keySet().iterator();
+            while (iterator.hasNext()) {
+              String property = (String) iterator.next();
+              props.put(property, devCapabilities.get(property));
+            }
+          }
+          props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.TRUE);
+        }
+      } catch (Exception e) {
+        IAgentLog.error("[DeviceConnectorImpl][getRemoteProperties] Failed to get Remote Capabilities", e);
+        props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.FALSE);
+      }
+    }
+    return props;
+  }
 
 	private Dictionary cloneDictionary(Dictionary source) {
 		Dictionary dest = new Hashtable();
@@ -412,8 +420,9 @@ DeviceConnectorSpi {
 	}
 
 	private LightServiceRegistry getServiceRegistry() {
-		if (serviceRegistry == null)
-			serviceRegistry = new LightServiceRegistry(DeviceConnectorImpl.class.getClassLoader());
+		if (serviceRegistry == null) {
+      serviceRegistry = new LightServiceRegistry(DeviceConnectorImpl.class.getClassLoader());
+    }
 		return serviceRegistry;
 	}
 
@@ -424,8 +433,9 @@ DeviceConnectorSpi {
 						+ "] received, but DeviceConnector is closed");
 				throw new IAgentException("The connection is closed", IAgentErrors.ERROR_DISCONNECTED);
 			}
-			if (managers == null)
-				managers = new HashMap(4);
+			if (managers == null) {
+        managers = new HashMap(4);
+      }
 			IAgentManager manager = (IAgentManager) managers.get(className);
 			if (manager == null) {
 				LightServiceRegistry registry = getServiceRegistry();
