@@ -10,130 +10,79 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.console.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Hashtable;
-
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.tigris.mtoolkit.iagent.IAgentException;
 
 public class OSGiConsolePlugin extends AbstractUIPlugin {
+  private static OSGiConsolePlugin instance  = null;
+  public static final String       PLUGIN_ID = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
 
-	private static OSGiConsolePlugin instance = null;
-	private static Hashtable storage = new Hashtable();
+  public OSGiConsolePlugin() {
+    super();
+    if (instance == null) {
+      instance = this;
+    }
+  }
 
-	public static final String PLUGIN_ID = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
-	public static final String IAGENT_RPC_ID = "org.tigris.mtoolkit.iagent.rpc";
+  // Returns default instance
+  public static OSGiConsolePlugin getDefault() {
+    return instance;
+  }
 
-	public static String fileDialogLastSelection;
+  @Override
+  public void stop(BundleContext context) throws Exception {
+    super.stop(context);
+    instance = null;
+  }
 
-	public OSGiConsolePlugin() {
-		super();
-		if (instance == null)
-			instance = this;
-	}
+  // Initialize perspectives
+  @Override
+  public void start(BundleContext context) throws Exception {
+    super.start(context);
+  }
 
-	// Returns default instance
-	public static OSGiConsolePlugin getDefault() {
-		return instance;
-	}
+  public String getId() {
+    return PLUGIN_ID;
+  }
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		super.stop(context);
-		instance = null;
-	}
+  @Override
+  protected void initializeImageRegistry(ImageRegistry reg) { // NO_UCD
+    super.initializeImageRegistry(reg);
+  }
 
-	// Initialize perspectives
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
-	}
+  public static void error(String message, Throwable t) {
+    getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
+  }
 
-	public String getId() {
-		return PLUGIN_ID;
-	}
+  public static void warning(String message, Throwable t) { // NO_UCD
+    getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
+  }
 
-	public static void putInStorage(Object key, Object value) {
-		if (value == null) {
-			storage.remove(key);
-		} else {
-			storage.put(key, value);
-		}
-	}
+  public static void log(IStatus status) {
+    getDefault().getLog().log(status);
+  }
 
-	public static Object getFromStorage(Object key) {
-		return storage.get(key);
-	}
+  public static IStatus handleIAgentException(IAgentException e) {
+    return newStatus(IStatus.ERROR, getErrorMessage(e), e.getCauseException());
+  }
 
-	public static void error(IAgentException e) {
-		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
-	}
+  public static IStatus newStatus(int severity, String message, Throwable t) {
+    return new Status(severity, OSGiConsolePlugin.PLUGIN_ID, message, t);
+  }
 
-	public static void error(String message, Throwable t) {
-		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, message, t));
-	}
-
-	public static void warning(String message, Throwable t) {
-		getDefault().getLog().log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
-	}
-
-	@Override
-	protected void initializeImageRegistry(ImageRegistry reg) {
-		super.initializeImageRegistry(reg);
-	}
-
-	public static void log(IStatus status) {
-		getDefault().getLog().log(status);
-	}
-
-	public static InputStream getIAgentBundleAsStream() {
-		Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
-		Bundle selectedIAgent = null;
-		String selectedVersion = null;
-		for (int i = 0; i < bundles.length; i++) {
-			Bundle bundle = bundles[i];
-			if (IAGENT_RPC_ID.equals(bundle.getSymbolicName())) {
-				@SuppressWarnings("cast")
-				String version = (String) bundle.getHeaders("").get(Constants.BUNDLE_VERSION);
-				if (version == null) {
-					if (selectedVersion == null) {
-						// if the iagent don't have a version
-						// use the bundle with highest ID
-						selectedIAgent = bundle;
-					}
-				} else {
-					if (selectedVersion == null || version.compareTo(selectedVersion) >= 0) {
-						// if we have a version
-						// we want the bundle with highest version and highest
-						// ID
-						selectedIAgent = bundle;
-						selectedVersion = version;
-					}
-				}
-			}
-		}
-		if (selectedIAgent != null) {
-			try {
-				File bundleFile = FileLocator.getBundleFile(selectedIAgent);
-				if (bundleFile.isFile()) {
-					return new FileInputStream(bundleFile);
-				}
-			} catch (IOException e) {
-				getDefault().getLog().log(Util.newStatus(IStatus.ERROR, "Failed to find IAgent RPC bundle", e));
-			}
-		}
-		return null;
-	}
+  private static String getErrorMessage(IAgentException e) {
+    String msg = e.getMessage();
+    if (msg == null) {
+      msg = "Operation failed.";
+      Throwable cause = e.getCauseException();
+      if (cause != null && cause.getMessage() != null) {
+        msg += " " + cause.getMessage(); //$NON-NLS-1$
+      }
+    }
+    return msg;
+  }
 }

@@ -33,10 +33,8 @@ import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.part.IPageBookViewPage;
-import org.tigris.mtoolkit.console.utils.ConstantsDistributor;
 import org.tigris.mtoolkit.console.utils.Messages;
 import org.tigris.mtoolkit.console.utils.OSGiConsolePlugin;
-import org.tigris.mtoolkit.console.utils.Util;
 import org.tigris.mtoolkit.console.utils.images.ImageHolder;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -45,200 +43,233 @@ import org.tigris.mtoolkit.iagent.VMManager;
 
 @SuppressWarnings("deprecation")
 public final class RemoteConsole extends IOConsole implements IConsole {
+  public static final String    P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected";
 
-	private final Date timestamp;
-	private final Listener listener = new Listener();
-	private final IProcess process;
+  private final Date            timestamp      = new Date();
+  private final Listener        listener       = new Listener();
+  private final IProcess        process;
 
-	private DeviceConnector connector;
-	private ConsoleReader reader;
-	private IOConsoleOutputStream output;
-	private String name;
+  private DeviceConnector       connector;
+  private ConsoleReader         reader;
+  private IOConsoleOutputStream output;
+  private String                name;
 
-	public static final String P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected";
+  public RemoteConsole(DeviceConnector dc, String name, IProcess iProcess) {
+    super("", "osgiManagementConsole", ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true);
+    this.name = name;
+    this.connector = dc;
+    this.process = iProcess;
+    DeviceConnector.addDeviceConnectionListener(listener);
+    setAttribute("mtoolkit.console.connector", connector);
+  }
 
-	public RemoteConsole(DeviceConnector dc, String name, IProcess iProcess) {
-		super("", "osgiManagementConsole", ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED),
-				true);
-		this.name = name;
-		this.connector = dc;
-		this.process = iProcess;
-		timestamp = new Date();
-		DeviceConnector.addDeviceConnectionListener(listener);
-		setAttribute("mtoolkit.console.connector", connector);
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.AbstractConsole#getImageDescriptor()
+   */
+  @Override
+  public ImageDescriptor getImageDescriptor() {
+    if (isDisconnected()) {
+      return ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_DISCONNECTED);
+    }
+    return ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED);
+  }
 
-	public ImageDescriptor getImageDescriptor() {
-		if (isDisconnected()) {
-			return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
-		}
-		return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IOConsole#createPage(org.eclipse.ui.console.IConsoleView)
+   */
+  @Override
+  public IPageBookViewPage createPage(IConsoleView view) {
+    IPageBookViewPage createPage = super.createPage(view);
+    synchronized (RemoteConsole.this) {
+      if (reader != null) {
+        return createPage;
+      }
+    }
+    Job job = new Job(Messages.redirect_console_output) {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        synchronized (RemoteConsole.this) {
+          if (reader == null && connector != null && connector.isActive()) {
+            reader = redirectInput(RemoteConsole.this, connector);
+            output = newOutputStream();
+            redirectOutput(output, connector);
+          }
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    job.schedule();
+    setName(computeName());
+    return createPage;
+  }
 
-	public IPageBookViewPage createPage(IConsoleView view) {
-		IPageBookViewPage createPage = super.createPage(view);
-		synchronized (RemoteConsole.this) {
-			if (reader != null) {
-				return createPage;
-			}
-		}
-		Job job = new Job(Messages.redirect_console_output) {
-			protected IStatus run(IProgressMonitor monitor) {
-				synchronized (RemoteConsole.this) {
-					if (reader == null && connector != null && connector.isActive()) {
-						reader = redirectInput(RemoteConsole.this, connector);
-						output = newOutputStream();
-						redirectOutput(output, connector);
-					}
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.schedule();
+  public IProcess getProcess() {
+    return process;
+  }
 
-		setName(computeName());
-		return createPage;
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.ui.console.IConsole#getStream(java.lang.String)
+   */
+  public IOConsoleOutputStream getStream(String streamIdentifier) {
+    return output;
+  }
 
-	public void setConsoleName(String name) {
-		this.name = name;
-		setName(computeName());
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.ui.console.IConsole#addLink(org.eclipse.debug.ui.console.IConsoleHyperlink, int, int)
+   */
+  public void addLink(IConsoleHyperlink link, int offset, int length) {
+  }
 
-	private String computeName() {
-		String fwName = name;
-		String timeStamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp);
-		return (isDisconnected() ? "<disconnected> " : "") + fwName + " [Remote Framework] (" + timeStamp + ")";
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.ui.console.IConsole#addLink(org.eclipse.ui.console.IHyperlink, int, int)
+   */
+  public void addLink(IHyperlink link, int offset, int length) {
+  }
 
-	public void disconnect() {
-		DeviceConnector.removeDeviceConnectionListener(listener);
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.ui.console.IConsole#connect(org.eclipse.debug.core.model.IStreamsProxy)
+   */
+  public void connect(IStreamsProxy streamsProxy) {
+  }
 
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		if (!display.isDisposed()) {
-			display.asyncExec(new Runnable() {
-				public void run() {
-					setName(computeName());
-				}
-			});
-		}
+  /* (non-Javadoc)
+   * @see org.eclipse.debug.ui.console.IConsole#connect(org.eclipse.debug.core.model.IStreamMonitor, java.lang.String)
+   */
+  public void connect(IStreamMonitor streamMonitor, String streamIdentifer) {
+  }
 
-		synchronized (RemoteConsole.this) {
-			if (reader != null) {
-				reader.dispose();
-			}
-			if (output != null) {
-				if (connector != null && connector.isActive()) {
-					try {
-						VMManager vmManager = connector.getVMManager();
-						if (vmManager.isVMActive()) {
-							vmManager.redirectFrameworkOutput(null);
-						}
-					} catch (IAgentException e) {
-						OSGiConsolePlugin.error("Failed to reset framework output", e);
-					}
-				}
-				try {
-					output.close();
-				} catch (IOException e) {
-				}
-			}
-			connector = null;
-		}
+  public IRegion getRegion(IConsoleHyperlink link) {
+    return super.getRegion(link);
+  }
 
-		firePropertyChange(this, P_DISCONNECTED, Boolean.FALSE, Boolean.TRUE);
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IOConsole#dispose()
+   */
+  @Override
+  protected void dispose() {
+    Job disconnectJob = new Job("Disconnecting console...") {
+      @Override
+      protected IStatus run(IProgressMonitor monitor) {
+        disconnect();
+        if (monitor.isCanceled()) {
+          return Status.CANCEL_STATUS;
+        }
+        return Status.OK_STATUS;
+      }
+    };
+    disconnectJob.setSystem(true);
+    disconnectJob.schedule();
+    super.dispose();
+  }
 
-		// Do not call dispose here because console remains in the view
-		// (disconnected).
-		// Some IOConsole operations run in jobs and if the the console is
-		// disposed,
-		// they may not be scheduled. E.g. making console read only may not be
-		// executed
-		// when the console is disposed. The console will be disposed when it is
-		// removed.
-	}
+  public boolean isDisconnected() {
+    synchronized (RemoteConsole.this) {
+      return connector == null || !connector.isActive();
+    }
+  }
 
-	public boolean isDisconnected() {
-		synchronized (RemoteConsole.this) {
-			return connector == null || !connector.isActive();
-		}
-	}
+  public void setConsoleName(String name) {
+    this.name = name;
+    setName(computeName());
+  }
 
-	protected void dispose() {
-		Job disconnectJob = new Job("Disconnecting console...") {
-			protected IStatus run(IProgressMonitor monitor) {
-				disconnect();
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		disconnectJob.setSystem(true);
-		disconnectJob.schedule();
-		super.dispose();
-	}
+  public void disconnect() {
+    DeviceConnector.removeDeviceConnectionListener(listener);
 
-	private class Listener implements DeviceConnectionListener {
-		public void connected(DeviceConnector connector) {
-		}
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    if (!display.isDisposed()) {
+      display.asyncExec(new Runnable() {
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
+          setName(computeName());
+        }
+      });
+    }
 
-		public void disconnected(DeviceConnector connector) {
-			DeviceConnector connector1 = null;
-			synchronized (RemoteConsole.this) {
-				connector1 = RemoteConsole.this.connector;
-			}
-			if (connector != null && connector.equals(connector1)) {
-				disconnect();
-			}
-		}
-	}
+    synchronized (RemoteConsole.this) {
+      if (reader != null) {
+        reader.dispose();
+      }
+      if (output != null) {
+        if (connector != null && connector.isActive()) {
+          try {
+            VMManager vmManager = connector.getVMManager();
+            if (vmManager.isVMActive()) {
+              vmManager.redirectFrameworkOutput(null);
+            }
+          } catch (IAgentException e) {
+            OSGiConsolePlugin.error("Failed to reset framework output", e);
+          }
+        }
+        try {
+          output.close();
+        } catch (IOException e) {
+        }
+      }
+      connector = null;
+    }
 
-	public IProcess getProcess() {
-		return process;
-	}
+    firePropertyChange(this, P_DISCONNECTED, Boolean.FALSE, Boolean.TRUE);
 
-	public IOConsoleOutputStream getStream(String streamIdentifier) {
-		return output;
-	}
+    // Do not call dispose here because console remains in the view
+    // (disconnected).
+    // Some IOConsole operations run in jobs and if the the console is
+    // disposed,
+    // they may not be scheduled. E.g. making console read only may not be
+    // executed
+    // when the console is disposed. The console will be disposed when it is
+    // removed.
+  }
 
+  private String computeName() {
+    String fwName = name;
+    String timeStamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp);
+    return (isDisconnected() ? "<disconnected> " : "") + fwName + " [Remote Framework] (" + timeStamp + ")";
+  }
 
-	public void addLink(IConsoleHyperlink link, int offset, int length) {
-	}
+  private static ConsoleReader redirectInput(RemoteConsole console, DeviceConnector connector) {
+    try {
+      return new ConsoleReader(console, connector.getVMManager());
+    } catch (IAgentException e) {
+      OSGiConsolePlugin.error("Exception while redirecting console input", e);
+    }
+    return null;
+  }
 
-	public void addLink(IHyperlink link, int offset, int length) {
-	}
+  private static void redirectOutput(IOConsoleOutputStream output, DeviceConnector connector) {
+    try {
+      connector.getVMManager().redirectFrameworkOutput(output);
+    } catch (IAgentException e) {
+      try {
+        IStatus status = OSGiConsolePlugin.handleIAgentException(e);
+        output.write(NLS.bind("Failed to redirect framework output: {0}", status.getMessage()));
+      } catch (IOException e1) {
+        OSGiConsolePlugin.error("Exception while writing to console", e1);
+      }
+      OSGiConsolePlugin.log(OSGiConsolePlugin.handleIAgentException(e));
+    }
+  }
 
-	public void connect(IStreamsProxy streamsProxy) {
-	}
+  private class Listener implements DeviceConnectionListener {
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
+     */
+    public void connected(DeviceConnector connector) {
+    }
 
-	public void connect(IStreamMonitor streamMonitor, String streamIdentifer) {
-	}
-
-	public IRegion getRegion(IConsoleHyperlink link) {
-		return super.getRegion(link);
-	}
-
-	private static ConsoleReader redirectInput(RemoteConsole console, DeviceConnector connector) {
-		try {
-			return new ConsoleReader(console, connector.getVMManager());
-		} catch (IAgentException e) {
-			OSGiConsolePlugin.error("Exception while redirecting console input", e);
-		}
-		return null;
-	}
-
-	private static void redirectOutput(IOConsoleOutputStream output, DeviceConnector connector) {
-		try {
-			connector.getVMManager().redirectFrameworkOutput(output);
-		} catch (IAgentException e) {
-			try {
-				IStatus status = Util.handleIAgentException(e);
-				output.write(NLS.bind("Failed to redirect framework output: {0}", status.getMessage()));
-			} catch (IOException e1) {
-				OSGiConsolePlugin.error("Exception while writing to console", e1);
-			}
-			OSGiConsolePlugin.log(Util.handleIAgentException(e));
-		}
-	}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
+     */
+    public void disconnected(DeviceConnector connector) {
+      DeviceConnector connector1 = null;
+      synchronized (RemoteConsole.this) {
+        connector1 = RemoteConsole.this.connector;
+      }
+      if (connector != null && connector.equals(connector1)) {
+        disconnect();
+      }
+    }
+  }
 }

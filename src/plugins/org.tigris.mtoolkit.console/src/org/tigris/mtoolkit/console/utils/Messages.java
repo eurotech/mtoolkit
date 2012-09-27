@@ -6,36 +6,19 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *    IBM - initial API and implementation
+ *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
 
 package org.tigris.mtoolkit.console.utils;
 
-import java.lang.reflect.Field;
-
 import org.eclipse.osgi.util.NLS;
 
 public final class Messages extends NLS {
-
 	private static final String BUNDLE_NAME = "org.tigris.mtoolkit.console.utils.ConsoleMessages";//$NON-NLS-1$
 
 	public static String redirect_console_output;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
-	}
-
-	public static String get(String fieldName) {
-		try {
-			Field f = Messages.class.getField(fieldName);
-			if (f != null)
-				return (String) f.get(null);
-			else
-				return null;
-		} catch (IllegalAccessException e) {
-			return null;
-		} catch (NoSuchFieldException e) {
-			return null;
-		}
 	}
 }

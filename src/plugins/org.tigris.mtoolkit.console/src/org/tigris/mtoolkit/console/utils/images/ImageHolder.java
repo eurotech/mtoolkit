@@ -16,32 +16,39 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.tigris.mtoolkit.console.utils.OSGiConsolePlugin;
 
-public class ImageHolder {
+public final class ImageHolder {
+  public static final String  SERVER_ICON_DISCONNECTED = "servernc.gif"; //$NON-NLS-1$
+  public static final String  SERVER_ICON_CONNECTED    = "server.gif";  //$NON-NLS-1$
 
-	private static final String IMAGES_PATH = "/images/";
+  private static final String IMAGES_PATH              = "/images/";    //$NON-NLS-1$
 
-	public static Image getImage(String key) {
-		ImageRegistry imgRegistry = OSGiConsolePlugin.getDefault().getImageRegistry();
-		Image image = imgRegistry.get(key);
-		if (image == null)
-			createImage(key, imgRegistry);
-		return imgRegistry.get(key);
-	}
+  private ImageHolder() {
+  }
 
-	public static ImageDescriptor getImageDescriptor(String key) {
-		ImageRegistry imgRegistry = OSGiConsolePlugin.getDefault().getImageRegistry();
-		ImageDescriptor descriptor = imgRegistry.getDescriptor(key);
-		if (descriptor == null) {
-			descriptor = createImage(key, imgRegistry);
-		}
-		return descriptor;
-	}
+  public static Image getImage(String key) { // NO_UCD
+    ImageRegistry imgRegistry = OSGiConsolePlugin.getDefault().getImageRegistry();
+    Image image = imgRegistry.get(key);
+    if (image == null) {
+      createImage(key, imgRegistry);
+    }
+    return imgRegistry.get(key);
+  }
 
-	private static ImageDescriptor createImage(String key, ImageRegistry imgRegistry) {
-		ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, key);
-		if (descriptor == null)
-			descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, IMAGES_PATH + key);
-		imgRegistry.put(key, descriptor);
-		return descriptor;
-	}
+  public static ImageDescriptor getImageDescriptor(String key) {
+    ImageRegistry imgRegistry = OSGiConsolePlugin.getDefault().getImageRegistry();
+    ImageDescriptor descriptor = imgRegistry.getDescriptor(key);
+    if (descriptor == null) {
+      descriptor = createImage(key, imgRegistry);
+    }
+    return descriptor;
+  }
+
+  private static ImageDescriptor createImage(String key, ImageRegistry imgRegistry) {
+    ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, key);
+    if (descriptor == null) {
+      descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(OSGiConsolePlugin.PLUGIN_ID, IMAGES_PATH + key);
+    }
+    imgRegistry.put(key, descriptor);
+    return descriptor;
+  }
 }
