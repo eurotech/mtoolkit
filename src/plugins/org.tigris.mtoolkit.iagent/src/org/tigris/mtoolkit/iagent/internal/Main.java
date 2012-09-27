@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2009 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal;
 
 import java.util.HashMap;
@@ -60,8 +70,9 @@ public class Main {
 		} catch (IAgentException e) {
 			e.printStackTrace();
 			System.out.println(e.getErrorCode() + " : " + e.getMessage());
-			if (ERROR_MESSAGES.get(new Integer(e.getErrorCode())) != null)
-				System.out.println("Details: " + ERROR_MESSAGES.get(new Integer(e.getErrorCode())));
+			if (ERROR_MESSAGES.get(new Integer(e.getErrorCode())) != null) {
+        System.out.println("Details: " + ERROR_MESSAGES.get(new Integer(e.getErrorCode())));
+      }
 		}
 	}
 
@@ -92,11 +103,11 @@ public class Main {
 		DeviceConnector connector = connectVM(ip);
 		try {
 			Map props = connector.getVMManager().getPlatformProperties();
-			if (props == null)
-				System.out.println("Internal error: platform properties cannot be null!");
-			else if (props.size() == 0)
-				System.out.println("No platform properties are found.");
-			else {
+			if (props == null) {
+        System.out.println("Internal error: platform properties cannot be null!");
+      } else if (props.size() == 0) {
+        System.out.println("No platform properties are found.");
+      } else {
 				System.out.println("Platform properties:");
 				for (Iterator i = props.entrySet().iterator(); i.hasNext();) {
 					Map.Entry entry = (Entry) i.next();
