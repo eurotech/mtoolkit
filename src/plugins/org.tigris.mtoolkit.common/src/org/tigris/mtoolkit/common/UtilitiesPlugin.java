@@ -22,25 +22,26 @@ import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.common.images.UIResources;
 
 public class UtilitiesPlugin extends AbstractUIPlugin {
-  public static final String PLUGIN_ID = "org.tigris.mtoolkit.common"; //$NON-NLS-1$
+  public static final String     PLUGIN_ID = "org.tigris.mtoolkit.common";               //$NON-NLS-1$
 
-  private static final boolean DEBUG = Boolean.getBoolean("mtoolkit.common.debug");
-  private static final String DEBUG_TAG = "[Common] ";
+  private static final boolean   DEBUG     = Boolean.getBoolean("mtoolkit.common.debug");
+  private static final String    DEBUG_TAG = "[Common] ";
 
   private static UtilitiesPlugin inst;
 
-  private BundleContext bundleContext;
+  private BundleContext          bundleContext;
 
   /**
    * Creates the Utilities plugin and caches its default instance
    * 
    * @param descriptor
-   *            the plugin descriptor which the receiver is made from
+   *          the plugin descriptor which the receiver is made from
    */
   public UtilitiesPlugin() {
     super();
-    if (inst == null)
+    if (inst == null) {
       inst = this;
+    }
   }
 
   @Override
@@ -73,8 +74,9 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 
   public IWorkbenchPage getActivePage() {
     IWorkbenchWindow window = getWorkbench().getActiveWorkbenchWindow();
-    if (window == null)
+    if (window == null) {
       return null;
+    }
     return getWorkbench().getActiveWorkbenchWindow().getActivePage();
   }
 
@@ -83,11 +85,19 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
    * relative path
    * 
    * @param path
-   *            the path
+   *          the path
    * @return the image descriptor
    */
   public static ImageDescriptor getImageDescriptor(String path) {
     return imageDescriptorFromPlugin(PLUGIN_ID, path);
+  }
+
+  public static IStatus newStatus(int severity, String message) {
+    return new Status(severity, PLUGIN_ID, message);
+  }
+
+  public static IStatus newStatus(int severity, String message, Throwable t) {
+    return new Status(severity, PLUGIN_ID, message, t);
   }
 
   @Override
@@ -103,7 +113,7 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
   /**
    * @since 5.0
    */
-  public static void warning(String message, Throwable t) {
+  public static void warning(String message, Throwable t) { // NO_UCD
     log(newStatus(IStatus.WARNING, message, t));
   }
 
@@ -117,13 +127,6 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
   /**
    * @since 5.0
    */
-  public static void throwException(int severity, String message, Throwable t) throws CoreException {
-    throw newException(severity, message, t);
-  }
-
-  /**
-   * @since 5.0
-   */
   public static CoreException newException(int severity, String message, Throwable t) {
     return new CoreException(newStatus(severity, message, t));
   }
@@ -131,35 +134,28 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
   /**
    * @since 5.0
    */
-  public static void debug(String message) {
+  public static void debug(String message) { // NO_UCD
     debug(message, null);
   }
 
   /**
    * @since 5.0
    */
-  public static void debug(String message, Throwable t) {
-    if (!DEBUG)
+  public static void debug(String message, Throwable t) { // NO_UCD
+    if (!DEBUG) {
       return;
+    }
     System.out.println(DEBUG_TAG.concat(message));
-    if (t != null)
+    if (t != null) {
       // TODO: Add line prefix while dumping the stack trace
       t.printStackTrace(System.out);
-  }
-
-  public static IStatus newStatus(int severity, String message) {
-    return new Status(severity, PLUGIN_ID, message);
-  }
-
-  public static IStatus newStatus(int severity, String message, Throwable t) {
-    return new Status(severity, PLUGIN_ID, message, t);
+    }
   }
 
   /**
    * @since 5.0
    */
-  public static IStatus newStatus(int severity, int code, String message, Throwable t) {
+  public static IStatus newStatus(int severity, int code, String message, Throwable t) { // NO_UCD
     return new Status(severity, PLUGIN_ID, code, message, t);
   }
-
 }
