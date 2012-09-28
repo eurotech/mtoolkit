@@ -604,20 +604,22 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       SubMonitor processMonitor = SubMonitor.convert(monitor, items.size() + 1);
       processMonitor.setTaskName("Installing bundles...");
       processMonitor.worked(1);
-      List<InstallationItem> dependencies = new ArrayList<InstallationItem>();
-      for (InstallationItem item : items) {
-        Boolean checkDepends = (Boolean) preparationProps.get(InstallationConstants.CHECK_DEPENDENCIES);
-        if ((checkDepends == null || checkDepends.booleanValue()) && (item instanceof PluginItem)) {
-          IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework,
-              processMonitor.newChild(1), dependencies, preparationProps);
-          if (status != null) {
-            if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
-              throw new CoreException(status);
+      Boolean checkDepends = (Boolean) preparationProps.get(InstallationConstants.CHECK_DEPENDENCIES);
+      if (checkDepends == null || checkDepends.booleanValue()) {
+        List<InstallationItem> dependencies = new ArrayList<InstallationItem>();
+        for (InstallationItem item : items) {
+          if (item instanceof PluginItem) {
+            IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework,
+                processMonitor.newChild(1), dependencies, preparationProps);
+            if (status != null) {
+              if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
+                throw new CoreException(status);
+              }
             }
           }
         }
+        items.addAll(dependencies);
       }
-      items.addAll(dependencies);
       monitor.done();
       return true;
     }
