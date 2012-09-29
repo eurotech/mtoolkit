@@ -65,137 +65,128 @@ import org.tigris.mtoolkit.util.PackageHeaders;
  * file. This section gives possibility to add, remove, edit and move the
  * created <code>PackageHeaders</code>.
  */
-public class HeadersSection extends DPPFormSection implements
-SelectionListener, ISelectionChangedListener {
-
+public class HeadersSection extends DPPFormSection implements SelectionListener, ISelectionChangedListener {
   /** Holds the title of this section */
-  public static final String SECTION_TITLE = "DPPEditor.HeadersSection.title";
+  public static final String SECTION_TITLE             = "DPPEditor.HeadersSection.title";
   /** Holds the description of this section */
-  public static final String SECTION_DESC = "DPPEditor.HeadersSection.desc";
+  public static final String SECTION_DESC              = "DPPEditor.HeadersSection.desc";
   /** The New button's label */
-  public static final String NEW_BUTTON = "DPPEditor.New_Button";
+  public static final String NEW_BUTTON                = "DPPEditor.New_Button";
   /** The Remove button's label */
-  public static final String REMOVE_BUTTON = "DPPEditor.Remove_Button";
-  /** The Up button's label */
-  public static final String UP_BUTTON = "DPPEditor.Up_Button";
-  /** The Down button's label */
-  public static final String DOWN_BUTTON = "DPPEditor.Down_Button";
+  public static final String REMOVE_BUTTON             = "DPPEditor.Remove_Button";
 
   /** Message inform the user that Symbolic name and Version cannot be renamed */
-  public static final String WARNING_VALUES_MSG = "DPPEditor.HeadersSection.SymNameVerWarning";
+  public static final String WARNING_VALUES_MSG        = "DPPEditor.HeadersSection.SymNameVerWarning";
   /** Equals headers values error message */
-  public static final String EQUAL_VALUES_MSG1 = "DPPEditor.HeadersSection.EqualValuesMsg1";
+  public static final String EQUAL_VALUES_MSG1         = "DPPEditor.HeadersSection.EqualValuesMsg1";
   /** Message ask to enter different header to continue */
-  public static final String EQUAL_VALUES_MSG2 = "DPPEditor.HeadersSection.EqualValuesMsg2";
+  public static final String EQUAL_VALUES_MSG2         = "DPPEditor.HeadersSection.EqualValuesMsg2";
   /**
-   * Message announced of the incorrect value of the deployment package fix
-   * pack header
+   * Message announced of the incorrect value of the deployment package fix pack
+   * header
    */
-  public static final String WRONG_FIXPACK_HEADER = "DPPEditor.HeadersSection.WrongFixPackHeader";
+  public static final String WRONG_FIXPACK_HEADER      = "DPPEditor.HeadersSection.WrongFixPackHeader";
   /**
-   * Message announced of the incorrect value of the deployment package
-   * version
+   * Message announced of the incorrect value of the deployment package version
    */
-  public static final String WRONG_VERSION = "DPPEditor.HeadersSection.WrongVersion";
+  public static final String WRONG_VERSION             = "DPPEditor.HeadersSection.WrongVersion";
   /**
-   * Message announced of the incorrect value of the deployment package
-   * symbolic name header
+   * Message announced of the incorrect value of the deployment package symbolic
+   * name header
    */
-  public static final String WRONG_SYMBOLIC_NAME = "DPPEditor.HeadersSection.WrongSymbolicName";
+  public static final String WRONG_SYMBOLIC_NAME       = "DPPEditor.HeadersSection.WrongSymbolicName";
   /**
-   * Message announced of the incorrect value of the deployment package
-   * symbolic name header
+   * Message announced of the incorrect value of the deployment package symbolic
+   * name header
    */
   public static final String WRONG_SYMBOLIC_NAME_SPACE = "DPPEditor.HeadersSection.WrongSymbolicNameSpace";
   /**
-   * Message announced of the incorrect value of the deployment package
-   * symbolic name header
+   * Message announced of the incorrect value of the deployment package symbolic
+   * name header
    */
   public static final String WRONG_SYMBOLIC_IDENTIFIER = "DPPEditor.HeadersSection.WrongSymbolicIdentifier";
   /** Message announced that deployment package headers cannot contains spaces */
-  public static final String ERROR_SPACE_CONTAINT = "DPPEditor.HeadersSection.ErrorSpace";
+  public static final String ERROR_SPACE_CONTAINT      = "DPPEditor.HeadersSection.ErrorSpace";
   /** The error message that header key is not valid */
-  public static final String ERROR_IVALID_KEY = "DPPEditor.HeadersSection.ErrorKey";
+  public static final String ERROR_IVALID_KEY          = "DPPEditor.HeadersSection.ErrorKey";
 
   /** Constant that indicates the add header action */
-  private static final int ADD_HEADER = 0;
+  private static final int   ADD_HEADER                = 0;
   /** Constant that indicates the remove header action */
-  private static final int REMOVE_HEADER = 1;
+  private static final int   REMOVE_HEADER             = 1;
   /** Constant that indicates the move up header action */
-  private static final int UP_HEADER = 2;
+  private static final int   UP_HEADER                 = 2;
   /** Constant that indicates the move down header action */
-  private static final int DOWN_HEADER = 3;
+  private static final int   DOWN_HEADER               = 3;
   /**
    * The String array, that holds all values of the headers key of the
    * <code>PackageHeaders</code>
    */
-  private String[] data = { "", /*
-   * DPPConstants.dpSymbolicNameHeader,
-   * DPPConstants.dpVersionHeader,
-   */
-      DPPConstants.dpFixPackHeader, DPPConstants.dpCopyrightHeader,
-      DPPConstants.dpAddressHeader, DPPConstants.dpDescriptionHeader,
-      DPPConstants.dpDocURLHeader, DPPConstants.dpVendorHeader,
-      DPPConstants.dpLicenseHeader, DPPConstants.dpIcon,
-      DPPConstants.dpName, DPPConstants.dpRequiredStorage };
+  private String[]           data                      = {
+      "", /*
+          * DPPConstants.dpSymbolicNameHeader,
+          * DPPConstants.dpVersionHeader,
+          */
+      DPPConstants.dpFixPackHeader, DPPConstants.dpCopyrightHeader, DPPConstants.dpAddressHeader,
+      DPPConstants.dpDescriptionHeader, DPPConstants.dpDocURLHeader, DPPConstants.dpVendorHeader,
+      DPPConstants.dpLicenseHeader, DPPConstants.dpIcon, DPPConstants.dpName, DPPConstants.dpRequiredStorage
+                                                       };
 
   /** The parent composite in which all components will be added */
-  private Composite container;
+  private Composite          container;
   /**
    * The TableViewer, which table contains all <code>Header</code>s object of
    * the <code>PackageHeaders</code> for the given Deployment package file.
    */
-  private TableViewer headerTable;
+  private TableViewer        headerTable;
   /**
    * The button, which action adds new header into table of all headers of the
    * package headers
    */
-  private Button newButton;
+  private Button             newButton;
   /** The button, which action removes selected in the table header */
-  private Button removeButton;
+  private Button             removeButton;
 
   /**
-   * A cell editor that presents a list of items in a combo box for the
-   * header's key of the <code>PackageHeaders</code>.
+   * A cell editor that presents a list of items in a combo box for the header's
+   * key of the <code>PackageHeaders</code>.
    */
   private ComboBoxCellEditor keyCellEditor;
   /**
-   * This table holds the correlation between the combo box values and their
-   * int value, which is needed to the label provider to shows the chosen
-   * value.
+   * This table holds the correlation between the combo box values and their int
+   * value, which is needed to the label provider to shows the chosen value.
    */
-  private Hashtable comboValues = new Hashtable();
+  private Hashtable          comboValues               = new Hashtable();
   /**
    * A combo box for the header's key property of the
    * <code>PackageHeaders</code>
    */
-  private CCombo keyCombo;
+  private CCombo             keyCombo;
 
   /** The <code>boolean</code> flag that shows if the table is editable or not */
-  private boolean isTableEditable = true;
+  private boolean            isTableEditable           = true;
   /**
    * The deployment package file model, which <code>PackageHeaders</code> this
    * section presents.
    */
-  private DPPFileModel model;
+  private DPPFileModel       model;
   /** The parents form page */
-  private HeadersFormPage page;
+  private HeadersFormPage    page;
 
   /**
    * A cell modifier is used to access the data model from a cell editor.
    */
   class KeyModifier implements ICellModifier {
     /**
-     * Checks whether the given property of the given element can be
-     * modified.
-     * 
+     * Checks whether the given property of the given element can be modified.
+     *
      * @param object
-     *            the element
+     *          the element
      * @param property
-     *            the property
+     *          the property
      * @return <code>true</code> if the property can be modified, and
      *         <code>false</code> otherwise
-     * 
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
      *      java.lang.String)
      */
@@ -203,8 +194,7 @@ SelectionListener, ISelectionChangedListener {
       Header header = (Header) object;
       String key = header.getKey();
       if (property.equals("key")) {
-        if (key.equals(DPPConstants.dpSymbolicNameHeader)
-            || key.equals(DPPConstants.dpVersionHeader)) {
+        if (key.equals(DPPConstants.dpSymbolicNameHeader) || key.equals(DPPConstants.dpVersionHeader)) {
           return false;
         }
       }
@@ -218,17 +208,16 @@ SelectionListener, ISelectionChangedListener {
     }
 
     /**
-     * Modifies the value for the given property of the given element. In
-     * this class the properties for which this method works are: key and
-     * value.
-     * 
+     * Modifies the value for the given property of the given element. In this
+     * class the properties for which this method works are: key and value.
+     *
      * @param object
-     *            the model element
+     *          the model element
      * @param property
-     *            the property
+     *          the property
      * @param value
-     *            the new property value
-     * 
+     *          the new property value
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
      *      java.lang.String, java.lang.Object)
      */
@@ -257,36 +246,27 @@ SelectionListener, ISelectionChangedListener {
           return;
         }
         if (newValue.length() > 0 && newValue.trim().equals("")) {
-          showErrorTableDialog(ResourceManager
-              .getString(ERROR_SPACE_CONTAINT));
+          showErrorTableDialog(ResourceManager.getString(ERROR_SPACE_CONTAINT));
           return;
         }
         newValue = newValue.trim();
         if (newValue.indexOf(' ') != -1) {
-          showErrorTableDialog(ResourceManager
-              .getString(ERROR_SPACE_CONTAINT));
+          showErrorTableDialog(ResourceManager.getString(ERROR_SPACE_CONTAINT));
           return;
         }
         if (!DPPUtilities.isValidManifestHeader(newValue)) {
-          DPPErrorHandler.showErrorTableDialog(ResourceManager
-              .getString(ERROR_IVALID_KEY));
+          DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_IVALID_KEY));
           return;
         }
-        if ((!newValue.equals(""))
-            && (itemExists(headerTable, item, newValue) != -1)) {
-          showErrorTableDialog(ResourceManager
-              .getString(EQUAL_VALUES_MSG1)
-              + "\n"
+        if ((!newValue.equals("")) && (itemExists(headerTable, item, newValue) != -1)) {
+          showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n"
               + ResourceManager.getString(EQUAL_VALUES_MSG2));
           return;
         }
-        if (headerKey.equals(DPPConstants.dpSymbolicNameHeader)
-            || headerKey.equals(DPPConstants.dpVersionHeader)
-            || newValue.equals(DPPConstants.dpSymbolicNameHeader)
-            || newValue.equals(DPPConstants.dpVersionHeader)) {
+        if (headerKey.equals(DPPConstants.dpSymbolicNameHeader) || headerKey.equals(DPPConstants.dpVersionHeader)
+            || newValue.equals(DPPConstants.dpSymbolicNameHeader) || newValue.equals(DPPConstants.dpVersionHeader)) {
           if (!headerKey.equals(DPPConstants.dpFixPackHeader)) {
-            showWarningTableDialog(ResourceManager
-                .getString(WARNING_VALUES_MSG));
+            showWarningTableDialog(ResourceManager.getString(WARNING_VALUES_MSG));
           }
           return;
         }
@@ -294,18 +274,15 @@ SelectionListener, ISelectionChangedListener {
           try {
             Version.parseVersion(header.getValue());
           } catch (IllegalArgumentException ex) {
-            showErrorTableDialog(ResourceManager
-                .getString(WRONG_VERSION));
+            showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
             headerTable.editElement(header, 1);
             return;
           }
         } else if (newValue.equals(DPPConstants.dpFixPackHeader)) {
           String headerValue = header.getValue();
-          if (!headerValue.equals("")
-              && !DPPUtilities.isValidFixPack(headerValue)) {
+          if (!headerValue.equals("") && !DPPUtilities.isValidFixPack(headerValue)) {
             if (!DPPUtilities.isValidVersion(headerValue)) {
-              showErrorTableDialog(ResourceManager
-                  .getString(WRONG_FIXPACK_HEADER));
+              showErrorTableDialog(ResourceManager.getString(WRONG_FIXPACK_HEADER));
               return;
             }
           }
@@ -315,11 +292,9 @@ SelectionListener, ISelectionChangedListener {
         }
 
         header.setKey(newValue);
-        DPPFile dppFile = ((DPPFileModel) getFormPage().getModel())
-            .getDPPFile();
+        DPPFile dppFile = ((DPPFileModel) getFormPage().getModel()).getDPPFile();
         PackageHeaders pkgHeaders = dppFile.getPackageHeaders();
-        pkgHeaders.editElement(headerKey, header.getKey(),
-            header.getValue());
+        pkgHeaders.editElement(headerKey, header.getKey(), header.getValue());
         isSet = true;
         removeButton.setEnabled(true);
       } else if (property.equals("value")) {
@@ -329,10 +304,8 @@ SelectionListener, ISelectionChangedListener {
         if (header.getKey().equals(DPPConstants.dpVersionHeader)) {
           int index = newValue.lastIndexOf('.');
           String verTxt = newValue;
-          if (verTxt.indexOf(" ") != -1
-              || (index != -1 && (index == newValue.length()))) {
-            showErrorTableDialog(ResourceManager
-                .getString(WRONG_VERSION));
+          if (verTxt.indexOf(" ") != -1 || (index != -1 && (index == newValue.length()))) {
+            showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
             return;
           }
           if (verTxt.indexOf(" ") == -1) {
@@ -340,39 +313,35 @@ SelectionListener, ISelectionChangedListener {
               Version.parseVersion(verTxt);
               header.setValue(newValue);
             } catch (IllegalArgumentException ex) {
-              showErrorTableDialog(ResourceManager
-                  .getString(WRONG_VERSION));
+              showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
               return;
             }
           }
         } else if (header.getKey().equals(DPPConstants.dpFixPackHeader)) {
-          if ("".equals(newValue)
-              || DPPUtilities.isValidFixPack(newValue)) {
+          if ("".equals(newValue) || DPPUtilities.isValidFixPack(newValue)) {
             header.setValue(newValue);
           } else {
             if (DPPUtilities.isValidVersion(newValue)) {
               header.setValue(newValue);
             } else {
-              showErrorTableDialog(ResourceManager
-                  .getString(WRONG_FIXPACK_HEADER));
+              showErrorTableDialog(ResourceManager.getString(WRONG_FIXPACK_HEADER));
               return;
             }
           }
-        } else if (header.getKey().equals(
-            DPPConstants.dpSymbolicNameHeader)) {
+        } else if (header.getKey().equals(DPPConstants.dpSymbolicNameHeader)) {
           if (!DPPUtilities.isCorrectPackage(newValue)) {
             if (newValue.startsWith(".") || newValue.endsWith(".")) {
-              showErrorTableDialog(ResourceManager.format(
-                  WRONG_SYMBOLIC_NAME,
-                  new Object[] { newValue }));
+              showErrorTableDialog(ResourceManager.format(WRONG_SYMBOLIC_NAME, new Object[] {
+                newValue
+              }));
             } else if (newValue.indexOf(" ") != -1) {
-              showErrorTableDialog(ResourceManager.format(
-                  WRONG_SYMBOLIC_NAME_SPACE,
-                  new Object[] { newValue }));
+              showErrorTableDialog(ResourceManager.format(WRONG_SYMBOLIC_NAME_SPACE, new Object[] {
+                newValue
+              }));
             } else {
-              showErrorTableDialog(ResourceManager.format(
-                  WRONG_SYMBOLIC_IDENTIFIER,
-                  new Object[] { newValue }));
+              showErrorTableDialog(ResourceManager.format(WRONG_SYMBOLIC_IDENTIFIER, new Object[] {
+                newValue
+              }));
             }
 
             return;
@@ -387,22 +356,23 @@ SelectionListener, ISelectionChangedListener {
       headerTable.update(header, null);
       page.updateDocumentIfSource();
       if (isSet) {
-        model.fireModelChanged(new ModelChangedEvent(
-            IModelChangedEvent.EDIT, new Object[] { header }, null));
+        model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+          header
+        }, null));
       }
     }
 
     /**
-     * Returns the value for the given property of the given element.
-     * Returns empty string if the element does not have the given property.
-     * The values of the property that are allowed are: key and value.
-     * 
+     * Returns the value for the given property of the given element. Returns
+     * empty string if the element does not have the given property. The values
+     * of the property that are allowed are: key and value.
+     *
      * @param object
-     *            the element
+     *          the element
      * @param property
-     *            the property
+     *          the property
      * @return the property value
-     * 
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
      *      java.lang.String)
      */
@@ -438,16 +408,15 @@ SelectionListener, ISelectionChangedListener {
    * A content provider mediates between the viewer's model and the viewer
    * itself.
    */
-  class TableContentProvider extends DefaultContentProvider implements
-  IStructuredContentProvider {
+  class TableContentProvider extends DefaultContentProvider implements IStructuredContentProvider {
     /**
-     * Returns the elements to display in the viewer when its input is set
-     * to the given element.
-     * 
+     * Returns the elements to display in the viewer when its input is set to
+     * the given element.
+     *
      * @param parent
-     *            the input element
+     *          the input element
      * @return the array of elements to display in the viewer
-     * 
+     *
      * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
      */
     public Object[] getElements(Object parent) {
@@ -458,8 +427,7 @@ SelectionListener, ISelectionChangedListener {
         Object[] result = new Object[pkgHeadersVector.size()];
         for (int i = 0; i < pkgHeadersVector.size(); i++) {
           Header header = (Header) pkgHeadersVector.elementAt(i);
-          if (header.getKey().equals(
-              DPPConstants.dpSymbolicNameHeader)) {
+          if (header.getKey().equals(DPPConstants.dpSymbolicNameHeader)) {
             String value = header.getValue();
             if (value == null || value.equals("")) {
               value = dppFile.getFile().getName();
@@ -470,8 +438,7 @@ SelectionListener, ISelectionChangedListener {
               pkgHeaders.setSymbolicName(value);
               header.setValue(value);
             }
-          } else if (header.getKey().equals(
-              DPPConstants.dpVersionHeader)) {
+          } else if (header.getKey().equals(DPPConstants.dpVersionHeader)) {
             String value = header.getValue();
             if (value == null || value.equals("")) {
               value = "1.0";
@@ -488,22 +455,20 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * A label provider sets for the value of the given column index the value
-   * of the element, that corresponding with this index.
+   * A label provider sets for the value of the given column index the value of
+   * the element, that corresponding with this index.
    */
-  class TableLabelProvider extends LabelProvider implements
-  ITableLabelProvider {
+  class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
     /**
      * Returns the label text for the given column of the given element.
-     * 
+     *
      * @param obj
-     *            the object representing the entire row
+     *          the object representing the entire row
      * @param index
-     *            the zero-based index of the column in which the label
-     *            appears
+     *          the zero-based index of the column in which the label appears
      * @return String or <code>null</code> if there is no text for the given
      *         object at index
-     * 
+     *
      * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
      *      int)
      */
@@ -523,7 +488,7 @@ SelectionListener, ISelectionChangedListener {
     /**
      * Returns the label image for the given column of the given element. In
      * this case the return image is <code>null</code>
-     * 
+     *
      * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object,
      *      int)
      */
@@ -535,9 +500,9 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Creates the new instance of the FormSection and the form which is the
    * parent of this section.
-   * 
+   *
    * @param page
-   *            the parent form page
+   *          the parent form page
    */
   public HeadersSection(HeadersFormPage page) {
     super(page);
@@ -549,15 +514,16 @@ SelectionListener, ISelectionChangedListener {
   /**
    * This method is called from the <code>createControl</code> method and puts
    * all custom components in this package headers form section.
-   * 
+   *
    * @param parent
-   *            a composite control which will be the parent of the created
-   *            client composite which will be holds all custom controls
+   *          a composite control which will be the parent of the created client
+   *          composite which will be holds all custom controls
    * @return Returns the composite control which will be holds all custom
    *         controls
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#createClient(org.eclipse.swt.widgets.Composite)
    */
+  @Override
   public Composite createClient(Composite parent) {
     container = FormWidgetFactory.createComposite(parent);
     GridLayout layout = new GridLayout();
@@ -573,28 +539,28 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Creates the table viewer and the table for this table viewer. Also
-   * creates all providers and listeners that the table needed to.
-   * 
+   * Creates the table viewer and the table for this table viewer. Also creates
+   * all providers and listeners that the table needed to.
+   *
    * @param parent
-   *            a parent composite in which all components will be added
+   *          a parent composite in which all components will be added
    */
   private void createTable(Composite parent) {
     Composite container = FormWidgetFactory.createComposite(parent);
     container.setLayout(new GridLayout());
     container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-    Table table = FormWidgetFactory.createTable(container, SWT.SINGLE
-        | SWT.FULL_SELECTION);
+    Table table = FormWidgetFactory.createTable(container, SWT.SINGLE | SWT.FULL_SELECTION);
     table.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyReleased(KeyEvent ev) {
         if (ev.keyCode == 27) {
           if (ev.getSource() instanceof Table) {
             Table table = (Table) ev.getSource();
-            if (table.getSelectionIndex() < 0)
+            if (table.getSelectionIndex() < 0) {
               return;
-            TableItem item = table.getItem(table
-                .getSelectionIndex());
+            }
+            TableItem item = table.getItem(table.getSelectionIndex());
             final Header header = (Header) item.getData();
             if (header.getKey().equals("")) {
               packageHeadersChange(header, REMOVE_HEADER);
@@ -610,7 +576,8 @@ SelectionListener, ISelectionChangedListener {
 
     String[] columnTitles = {
         ResourceManager.getString("DPPEditor.HeadersSection.ColKey"),
-        ResourceManager.getString("DPPEditor.HeadersSection.ColValue") };
+        ResourceManager.getString("DPPEditor.HeadersSection.ColValue")
+    };
     for (int i = 0; i < columnTitles.length; i++) {
       TableColumn tableColumn = new TableColumn(table, SWT.NULL);
       tableColumn.setText(columnTitles[i]);
@@ -638,9 +605,12 @@ SelectionListener, ISelectionChangedListener {
     comboValues.put(DPPConstants.dpRequiredStorage, "10");
 
     keyCellEditor = new ComboBoxCellEditor(table, data, SWT.NULL);
-    CellEditor[] editors = new CellEditor[] { keyCellEditor,
-        new TextCellEditor(table) };
-    String[] properties = { "key", "value" };
+    CellEditor[] editors = new CellEditor[] {
+        keyCellEditor, new TextCellEditor(table)
+    };
+    String[] properties = {
+        "key", "value"
+    };
     headerTable.setCellEditors(editors);
     headerTable.setCellModifier(new KeyModifier());
     headerTable.setColumnProperties(properties);
@@ -654,10 +624,9 @@ SelectionListener, ISelectionChangedListener {
 
   /**
    * Creates all navigate button for the created table.
-   * 
+   *
    * @param parent
-   *            a parent composite in which all button components will be
-   *            added
+   *          a parent composite in which all button components will be added
    */
   private void createButtons(Composite parent) {
     Composite buttonComposite = FormWidgetFactory.createComposite(parent);
@@ -666,10 +635,9 @@ SelectionListener, ISelectionChangedListener {
     buttonComposite.setLayout(layout);
     buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    newButton = FormWidgetFactory.createButton(buttonComposite,
-        ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
-    removeButton = FormWidgetFactory.createButton(buttonComposite,
-        ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
+    newButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
+    removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""),
+        SWT.PUSH);
 
     newButton.addSelectionListener(this);
     GridData gd = new GridData(GridData.FILL_VERTICAL);
@@ -687,9 +655,10 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Initializes the all custom created controls with the given
    * <code>Object</code>
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#initialize(java.lang.Object)
    */
+  @Override
   public void initialize(Object input) {
     model = (DPPFileModel) input;
     if (model != null) {
@@ -700,19 +669,21 @@ SelectionListener, ISelectionChangedListener {
 
   /**
    * Sets that this form section is changed and need to be saved.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#commitChanges(boolean)
    */
+  @Override
   public void commitChanges(boolean onSave) {
     setDirty(false);
   }
 
   /**
-   * Removes added to this page model ModelChangeListener and calls dispose
-   * for the every component from the this FormSection.
-   * 
+   * Removes added to this page model ModelChangeListener and calls dispose for
+   * the every component from the this FormSection.
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#dispose()
    */
+  @Override
   public void dispose() {
     DPPFileModel model = (DPPFileModel) getFormPage().getModel();
     if (model != null) {
@@ -722,11 +693,11 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Sets the focus to the table of the package headers and refresh the
-   * viewer.
-   * 
+   * Sets the focus to the table of the package headers and refresh the viewer.
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#setFocus()
    */
+  @Override
   public void setFocus() {
     headerTable.getTable().setFocus();
     TableItem[] items = headerTable.getTable().getItems();
@@ -752,11 +723,11 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Updates the values of this FormSection with the value gets from the
-   * model.
-   * 
+   * Updates the values of this FormSection with the value gets from the model.
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#update()
    */
+  @Override
   public void update() {
     this.update(getFormPage().getModel());
   }
@@ -764,9 +735,9 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Updates the values of this form section with the values from the given
    * input object.
-   * 
+   *
    * @param input
-   *            the object from which new values will be get
+   *          the object from which new values will be get
    */
   public void update(Object input) {
     DPPFileModel model = (DPPFileModel) input;
@@ -791,7 +762,7 @@ SelectionListener, ISelectionChangedListener {
   // ISelectionListener Implementation
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
    * .swt.events.SelectionEvent)
@@ -801,7 +772,7 @@ SelectionListener, ISelectionChangedListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
    * .events.SelectionEvent)
@@ -819,8 +790,7 @@ SelectionListener, ISelectionChangedListener {
       CCombo combo = (CCombo) obj;
       int index = combo.getSelectionIndex();
       String item = combo.getItem(index);
-      Object object = ((IStructuredSelection) headerTable.getSelection())
-          .getFirstElement();
+      Object object = ((IStructuredSelection) headerTable.getSelection()).getFirstElement();
       if (object != null && object instanceof Header) {
         Header header = (Header) object;
         if (combo == keyCombo) {
@@ -838,37 +808,27 @@ SelectionListener, ISelectionChangedListener {
               break;
             }
           }
-          if (oldKey.equals(DPPConstants.dpSymbolicNameHeader)
-              || oldKey.equals(DPPConstants.dpVersionHeader)) {
-            showWarningTableDialog(ResourceManager
-                .getString(WARNING_VALUES_MSG));
+          if (oldKey.equals(DPPConstants.dpSymbolicNameHeader) || oldKey.equals(DPPConstants.dpVersionHeader)) {
+            showWarningTableDialog(ResourceManager.getString(WARNING_VALUES_MSG));
             combo.select(newIndex);
             return;
           }
-          TableItem[] selection = headerTable.getTable()
-              .getSelection();
+          TableItem[] selection = headerTable.getTable().getSelection();
           int itemExists = itemExists(headerTable, selection[0], item);
           if (itemExists == -1) {
             String value = header.getValue();
-            if (item.equals(DPPConstants.dpVersionHeader)
-                && !DPPUtilities.isValidVersion(value)) {
-              showErrorTableDialog(ResourceManager
-                  .getString(WRONG_VERSION));
+            if (item.equals(DPPConstants.dpVersionHeader) && !DPPUtilities.isValidVersion(value)) {
+              showErrorTableDialog(ResourceManager.getString(WRONG_VERSION));
               return;
             }
-            if (item.equals(DPPConstants.dpFixPackHeader)
-                && !value.equals("")
-                && !DPPUtilities.isValidFixPack(value)) {
+            if (item.equals(DPPConstants.dpFixPackHeader) && !value.equals("") && !DPPUtilities.isValidFixPack(value)) {
               if (!DPPUtilities.isValidVersion(value)) {
-                showErrorTableDialog(ResourceManager
-                    .getString(WRONG_FIXPACK_HEADER));
+                showErrorTableDialog(ResourceManager.getString(WRONG_FIXPACK_HEADER));
                 return;
               }
             }
           } else {
-            showErrorTableDialog(ResourceManager
-                .getString(EQUAL_VALUES_MSG1)
-                + "\n"
+            showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n"
                 + ResourceManager.getString(EQUAL_VALUES_MSG2));
             combo.removeSelectionListener(this);
             combo.select(newIndex);
@@ -881,10 +841,9 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Creates the new <code>Header</code> object, which is presented in the
-   * table as a new table row. Adds this header in the
-   * <code>PackageHeaders</code> and adds it to the Deployment package file,
-   * which headers presents this table.
+   * Creates the new <code>Header</code> object, which is presented in the table
+   * as a new table row. Adds this header in the <code>PackageHeaders</code> and
+   * adds it to the Deployment package file, which headers presents this table.
    */
   private void handleNew() {
     Table table = headerTable.getTable();
@@ -921,8 +880,7 @@ SelectionListener, ISelectionChangedListener {
    * presents this table.
    */
   private void handleRemove() {
-    Object object = ((IStructuredSelection) headerTable.getSelection())
-        .getFirstElement();
+    Object object = ((IStructuredSelection) headerTable.getSelection()).getFirstElement();
     if (object != null && object instanceof Header) {
       Header header = (Header) object;
       // deployment package symbolic name ant deployment package version
@@ -940,7 +898,7 @@ SelectionListener, ISelectionChangedListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org
    * .eclipse.jface.viewers.SelectionChangedEvent)
@@ -955,8 +913,7 @@ SelectionListener, ISelectionChangedListener {
       Object first = selection.getFirstElement();
       if (first instanceof Header) {
         String key = ((Header) first).getKey().trim();
-        if (key.equals(DPPConstants.dpSymbolicNameHeader.trim())
-            || key.equals(DPPConstants.dpVersionHeader.trim())) {
+        if (key.equals(DPPConstants.dpSymbolicNameHeader.trim()) || key.equals(DPPConstants.dpVersionHeader.trim())) {
           removeButton.setEnabled(false);
         } else {
           if (isTableEditable) {
@@ -970,18 +927,19 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Called when there is a change in the model this model listener is
    * registered with.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.base.DPPFormSection#modelChanged(org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent)
    */
+  @Override
   public void modelChanged(IModelChangedEvent event) {
   }
 
   /**
    * Sets the management buttons to be enabled or disabled, depending on the
    * given <code>boolean</code> flag.
-   * 
+   *
    * @param editable
-   *            the new enabled state of the buttons
+   *          the new enabled state of the buttons
    */
   public void setEditable(boolean editable) {
     isTableEditable = editable;
@@ -990,25 +948,15 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Refreshes the header viewer completely with information freshly obtained
-   * from the viewer's model.
-   */
-  public void headersChanged() {
-    if (headerTable != null) {
-      headerTable.refresh();
-    }
-  }
-
-  /**
-   * Adds, removes, moves up or down the given <code>Header</code>, depending
-   * on the given key. Notifies all existing
-   * <code>IModelChangedListener</code>'s of a change of the model.
-   * 
+   * Adds, removes, moves up or down the given <code>Header</code>, depending on
+   * the given key. Notifies all existing <code>IModelChangedListener</code>'s
+   * of a change of the model.
+   *
    * @param header
-   *            the <code>Header</code>, on which will be done the action
+   *          the <code>Header</code>, on which will be done the action
    * @param key
-   *            the type of the action. This type can be one of the followed
-   *            values: ADD_HEADER, REMOVE_HEADER, UP_HEADER and DOWN_HEADER
+   *          the type of the action. This type can be one of the followed
+   *          values: ADD_HEADER, REMOVE_HEADER, UP_HEADER and DOWN_HEADER
    */
   private void packageHeadersChange(Header header, int key) {
     DPPFileModel model = (DPPFileModel) getFormPage().getModel();
@@ -1017,13 +965,15 @@ SelectionListener, ISelectionChangedListener {
     switch (key) {
     case ADD_HEADER:
       pkgHeaders.addElement(header.getKey(), header.getValue());
-      model.fireModelChanged(new ModelChangedEvent(
-          IModelChangedEvent.ADD, new Object[] { header }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.ADD, new Object[] {
+        header
+      }, null));
       break;
     case REMOVE_HEADER:
       pkgHeaders.removeElement(header.getKey());
-      model.fireModelChanged(new ModelChangedEvent(
-          IModelChangedEvent.REMOVE, new Object[] { header }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.REMOVE, new Object[] {
+        header
+      }, null));
       break;
     case UP_HEADER:
       Vector vector = new Vector();
