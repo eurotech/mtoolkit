@@ -68,104 +68,99 @@ import org.tigris.mtoolkit.util.ResourceInfo;
  * file. This section gives possibility to add, remove, edit and move the
  * created <code>ResourceInfo</code>s.
  */
-public class ResourcesSection extends DPPFormSection implements
-SelectionListener, ISelectionChangedListener {
-
+public class ResourcesSection extends DPPFormSection implements SelectionListener, ISelectionChangedListener {
   /** Holds the title of the section */
-  public static final String SECTION_TITLE = "DPPEditor.ResourcesSection.title";
+  public static final String  SECTION_TITLE                      = "DPPEditor.ResourcesSection.title";
   /** Holds the description of the section */
-  public static final String SECTION_DESC = "DPPEditor.ResourcesSection.desc";
+  public static final String  SECTION_DESC                       = "DPPEditor.ResourcesSection.desc";
   /** The New button's label */
-  public static final String NEW_BUTTON = "DPPEditor.New_Button";
+  public static final String  NEW_BUTTON                         = "DPPEditor.New_Button";
   /** The Remove button's label */
-  public static final String REMOVE_BUTTON = "DPPEditor.Remove_Button";
+  public static final String  REMOVE_BUTTON                      = "DPPEditor.Remove_Button";
   /** The Up button's label */
-  public static final String UP_BUTTON = "DPPEditor.Up_Button";
+  public static final String  UP_BUTTON                          = "DPPEditor.Up_Button";
   /** The Down button's label */
-  public static final String DOWN_BUTTON = "DPPEditor.Down_Button";
+  public static final String  DOWN_BUTTON                        = "DPPEditor.Down_Button";
 
   /** Equals resource path values error message */
-  public static final String EQUAL_VALUES_MSG1 = "DPPEditor.ResourcesSection.EqualValuesMsg1";
+  public static final String  EQUAL_VALUES_MSG1                  = "DPPEditor.ResourcesSection.EqualValuesMsg1";
   /** Message ask to enter different resource path to continue */
-  public static final String EQUAL_VALUES_MSG2 = "DPPEditor.ResourcesSection.EqualValuesMsg2";
-  /** Message announced of the incorrect value of the resource path */
-  public static final String WRONG_RESOURCE_PATH = "DPPEditor.ResourcesSection.WrongPath";
+  public static final String  EQUAL_VALUES_MSG2                  = "DPPEditor.ResourcesSection.EqualValuesMsg2";
   /** Message announced when Resource's name already exists in Name column */
-  public static final String ERROR_RESOURCE_NAME_ALREADY_EXISTS = "DPPEditor.ResourcesSection.ResourceNameAlreadyExists";
+  public static final String  ERROR_RESOURCE_NAME_ALREADY_EXISTS = "DPPEditor.ResourcesSection.ResourceNameAlreadyExists";
   /** Message announced when file is not specified in the Resource Path colon */
-  private static final String ERROR_INVALID_FILE_NAME = "DPPEditor.ResourcesSection.InvalidFileName";
+  private static final String ERROR_INVALID_FILE_NAME            = "DPPEditor.ResourcesSection.InvalidFileName";
 
   /** Constant that indicates the add resource action */
-  private static final int ADD_RESOURCE = 0;
+  private static final int    ADD_RESOURCE                       = 0;
   /** Constant that indicates the remove resource action */
-  private static final int REMOVE_RESOURCE = 1;
+  private static final int    REMOVE_RESOURCE                    = 1;
   /** Constant that indicates the move up resource action */
-  private static final int UP_RESOURCE = 2;
+  private static final int    UP_RESOURCE                        = 2;
   /** Constant that indicates the move down resource action */
-  private static final int DOWN_RESOURCE = 3;
+  private static final int    DOWN_RESOURCE                      = 3;
 
   /** The parent composite in which all components will be added */
-  private Composite container;
+  private Composite           container;
   /**
-   * The TableViewer, which table contains all <code>ResourceInfo</code>s
-   * object for the given Deployment package file.
+   * The TableViewer, which table contains all <code>ResourceInfo</code>s object
+   * for the given Deployment package file.
    */
-  private TableViewer resourcesTable;
+  private TableViewer         resourcesTable;
   /** The button, which action adds new resource into table of all resources */
-  private Button newButton;
+  private Button              newButton;
   /** The button, which action removes selected in the table resource */
-  private Button removeButton;
+  private Button              removeButton;
   /** The button, which action moves up the selected in the table resource */
-  private Button upButton;
+  private Button              upButton;
   /** The button, which action moves down the selected in the table resource */
-  private Button downButton;
+  private Button              downButton;
 
   /**
-   * A cell editor that presents a list of items in a combo box for the
-   * missing property of the <code>ResourceInfo</code>.
+   * A cell editor that presents a list of items in a combo box for the missing
+   * property of the <code>ResourceInfo</code>.
    */
-  private ComboBoxCellEditor cellEditor;
+  private ComboBoxCellEditor  cellEditor;
   /** A combo box for the missing property of the <code>ResourceInfo</code> */
-  private CCombo comboEditor;
+  private CCombo              comboEditor;
   /**
-   * A cell editor that presents a list of items in a combo box for the
-   * resource processor property of the <code>ResourceInfo</code>.
+   * A cell editor that presents a list of items in a combo box for the resource
+   * processor property of the <code>ResourceInfo</code>.
    */
-  private ComboBoxCellEditor processorsCellEditor;
+  private ComboBoxCellEditor  processorsCellEditor;
   /**
    * A combo box for the resource processor property of the
    * <code>ResourceInfo</code>
    */
-  private CCombo processorsCombo;
+  private CCombo              processorsCombo;
   /**
    * The String array, that holds all values of the resource processor of the
    * <code>ResourceInfo</code>
    */
-  private String[] items;
+  private String[]            items;
   /**
-   * This table holds the correlation between the combo box values and their
-   * int value, which is needed to the label provider to shows the chosen
-   * value.
+   * This table holds the correlation between the combo box values and their int
+   * value, which is needed to the label provider to shows the chosen value.
    */
-  private Hashtable comboValues;
+  private Hashtable           comboValues;
   /**
    * Items in dpeditor.resourceprcessors which are entered through
    * PreferencesPage.
    */
-  private String[] itemsFromProperty;
+  private String[]            itemsFromProperty;
   /** Items which user enters in the combo manually. */
-  private String[] itemsEnteredByUser;
+  private String[]            itemsEnteredByUser;
   /** The <code>boolean</code> flag that shows if the table is editable or not */
-  private boolean isTableEditable = true;
+  private boolean             isTableEditable                    = true;
   /**
    * The deployment package file model, which <code>ResourceIndo</code>s this
    * section presents.
    */
-  private DPPFileModel model;
+  private DPPFileModel        model;
   /** The parents form page */
-  private ResourcesFormPage page;
+  private ResourcesFormPage   page;
   /** Path to resources in DP entered by user in Resources Section */
-  private String customPath = "resources/";
+  private String              customPath                         = "resources/";
 
   /**
    * A cell modifier is used to access the data model from a cell editor.
@@ -173,16 +168,15 @@ SelectionListener, ISelectionChangedListener {
 
   class KeyModifier implements ICellModifier {
     /**
-     * Checks whether the given property of the given element can be
-     * modified.
-     * 
+     * Checks whether the given property of the given element can be modified.
+     *
      * @param object
-     *            the element
+     *          the element
      * @param property
-     *            the property
+     *          the property
      * @return <code>true</code> if the property can be modified, and
      *         <code>false</code> otherwise
-     * 
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
      *      java.lang.String)
      */
@@ -197,8 +191,8 @@ SelectionListener, ISelectionChangedListener {
         return true;
       }
 
-      if (newValue.indexOf(":") != -1 || newValue.endsWith("/") || newValue.endsWith("\\")
-          || newValue.equals("\\") || newValue.equals("/") || !PluginUtilities.isValidPath(newValue)) {
+      if (newValue.indexOf(":") != -1 || newValue.endsWith("/") || newValue.endsWith("\\") || newValue.equals("\\")
+          || newValue.equals("/") || !PluginUtilities.isValidPath(newValue)) {
         DPPErrorHandler.showErrorTableDialog(ResourceManager
             .getString("DPPEditor.ResourcesSection.InvalidResourceName"));
         resourcesTable.getTable().setFocus();
@@ -216,24 +210,25 @@ SelectionListener, ISelectionChangedListener {
     }
 
     /**
-     * Modifies the value for the given property of the given element. In
-     * this class the properties for which this method works are: resource,
-     * name, resource_processor, missing.
-     * 
+     * Modifies the value for the given property of the given element. In this
+     * class the properties for which this method works are: resource, name,
+     * resource_processor, missing.
+     *
      * @param object
-     *            the model element
+     *          the model element
      * @param property
-     *            the property
+     *          the property
      * @param value
-     *            the new property value
-     * 
+     *          the new property value
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
      *      java.lang.String, java.lang.Object)
      */
     public void modify(Object object, String property, Object value) {
       TableItem item = (TableItem) object;
-      if (item == null)
+      if (item == null) {
         return;
+      }
       ResourceInfo resource = (ResourceInfo) item.getData();
       String newValue = value.toString();
       boolean isSet = false;
@@ -241,32 +236,26 @@ SelectionListener, ISelectionChangedListener {
       String filename = null;
 
       if (property.equals("resource")) {
-        if (newValue.equals(resource.getResourcePath())
-            && (!newValue.equals(""))) {
+        if (newValue.equals(resource.getResourcePath()) && (!newValue.equals(""))) {
           return;
         }
         DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
         IProject project = model.getFile().getProject();
         String location = project.getLocation().toOSString();
-        if (newValue.toLowerCase().startsWith(
-            location.toLowerCase() + File.separator)) {
+        if (newValue.toLowerCase().startsWith(location.toLowerCase() + File.separator)) {
           newValue = "<.>" + newValue.substring(location.length());
         }
         int itemExists = itemExists(resourcesTable, item, newValue);
-        if (itemExists != -1
-            && (!newValue.equals("") || newValue.equals(""))) {
-          showErrorTableDialog(ResourceManager
-              .getString(EQUAL_VALUES_MSG1)
-              + "\n"
+        if (itemExists != -1 && (!newValue.equals("") || newValue.equals(""))) {
+          showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n"
               + ResourceManager.getString(EQUAL_VALUES_MSG2));
           return;
         }
-        if (newValue.equals(""))
+        if (newValue.equals("")) {
           return;
-        if ((newValue.charAt(newValue.length() - 1) == '\\')
-            || (newValue.charAt(newValue.length() - 1) == '/')) {
-          DPPErrorHandler.showErrorTableDialog(ResourceManager
-              .getString(ERROR_INVALID_FILE_NAME));
+        }
+        if ((newValue.charAt(newValue.length() - 1) == '\\') || (newValue.charAt(newValue.length() - 1) == '/')) {
+          DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_INVALID_FILE_NAME));
           return;
         }
         filename = getName(newValue);
@@ -277,8 +266,7 @@ SelectionListener, ISelectionChangedListener {
           customPath = (tempSTR == null) ? "" : tempSTR;
         }
         if (DPPUtil.isAlreadyInTheTable(customPath + filename, item, 1)) {
-          DPPErrorHandler.showErrorTableDialog(ResourceManager
-              .getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
+          DPPErrorHandler.showErrorTableDialog(ResourceManager.getString(ERROR_RESOURCE_NAME_ALREADY_EXISTS));
           return;
         }
         resource.setResourcePath(newValue);
@@ -294,8 +282,7 @@ SelectionListener, ISelectionChangedListener {
         } else if (val == 0) {
           newValue = "true";
         }
-        if (newValue.equals("" + resource.isMissing())
-            && (!newValue.equals(""))) {
+        if (newValue.equals("" + resource.isMissing()) && (!newValue.equals(""))) {
           return;
         }
         isSet = true;
@@ -315,8 +302,7 @@ SelectionListener, ISelectionChangedListener {
           newValue = processorsCombo.getText();
 
         }
-        if (newValue.equals("")
-            || newValue.equals(resource.getResourceProcessor())) {
+        if (newValue.equals("") || newValue.equals(resource.getResourceProcessor())) {
           return;
         }
         boolean isAlreadyInTheCombo = false;
@@ -347,9 +333,9 @@ SelectionListener, ISelectionChangedListener {
       resourcesTable.update(resource, null);
       page.updateDocumentIfSource();
       if (isSet) {
-        model.fireModelChanged(new ModelChangedEvent(
-            IModelChangedEvent.EDIT, new Object[] { resource },
-            null));
+        model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+          resource
+        }, null));
       }
     }
 
@@ -363,7 +349,9 @@ SelectionListener, ISelectionChangedListener {
         temp[temp.length - 1] = newValue;
         itemsEnteredByUser = temp;
       } else {
-        itemsEnteredByUser = new String[] { newValue };
+        itemsEnteredByUser = new String[] {
+          newValue
+        };
       }
       refreshItems();
     }
@@ -372,12 +360,14 @@ SelectionListener, ISelectionChangedListener {
       TableItem currentItem = (TableItem) object;
       Table table = resourcesTable.getTable();
       int size = table.getItems().length;
-      if (size == 0)
+      if (size == 0) {
         return "resources/";
+      }
       for (int i = 0; i < size; i++) {
         if (currentItem == table.getItem(i)) {
-          if (i == 0)
+          if (i == 0) {
             return "resources/";
+          }
           TableItem upper = table.getItem(i - 1);
           String upperPath = getPath(upper.getText(1));
           return (upperPath == null) ? "resources/" : upperPath;
@@ -387,30 +377,28 @@ SelectionListener, ISelectionChangedListener {
     }
 
     /**
-     * Returns the value for the given property of the given element.
-     * Returns empty string if the element does not have the given property.
-     * The values of the property that are allowed are: resource, name,
-     * resource_processor, missing.
-     * 
+     * Returns the value for the given property of the given element. Returns
+     * empty string if the element does not have the given property. The values
+     * of the property that are allowed are: resource, name, resource_processor,
+     * missing.
+     *
      * @param object
-     *            the element
+     *          the element
      * @param property
-     *            the property
+     *          the property
      * @return the property value
-     * 
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
      *      java.lang.String)
      */
     public Object getValue(Object object, String property) {
       ResourceInfo resource = (ResourceInfo) object;
       if (property.equals("resource")) {
-        String resPath = DPPUtilities.getStringValue(resource
-            .getResourcePath());
+        String resPath = DPPUtilities.getStringValue(resource.getResourcePath());
         DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
         IFile ifile = model.getFile();
         IProject project = ifile.getProject();
-        String location = project.getLocation().toOSString()
-            + File.separator;
+        String location = project.getLocation().toOSString() + File.separator;
         if (resPath.toLowerCase().startsWith(location.toLowerCase())) {
           resPath = "<.>" + resPath.substring(location.length());
         }
@@ -423,8 +411,7 @@ SelectionListener, ISelectionChangedListener {
         }
         return new Integer(1);
       } else if (property.equals("resource_processor")) {
-        String resProperty = System
-            .getProperty("dpeditor.resourceprcessors");
+        String resProperty = System.getProperty("dpeditor.resourceprcessors");
         comboValues = new Hashtable();
         if (items == null || itemsEnteredByUser == null) {
           // loading file
@@ -447,8 +434,7 @@ SelectionListener, ISelectionChangedListener {
         } else {
           refreshItems();
         }
-        String key = DPPUtilities.getStringValue(resource
-            .getResourceProcessor());
+        String key = DPPUtilities.getStringValue(resource.getResourceProcessor());
         String value = (String) comboValues.get(key);
         processorsCellEditor.setItems(items);
         for (int i = 0; i < items.length; i++) {
@@ -464,7 +450,9 @@ SelectionListener, ISelectionChangedListener {
             int size = items.length;
             if (size == 0) {
               size = 1;
-              items = new String[] { "" };
+              items = new String[] {
+                ""
+              };
             }
             processorsCellEditor.setItems(items);
             value = "" + size;
@@ -500,16 +488,15 @@ SelectionListener, ISelectionChangedListener {
    * A content provider mediates between the viewer's model and the viewer
    * itself.
    */
-  class TableContentProvider extends DefaultContentProvider implements
-  IStructuredContentProvider {
+  class TableContentProvider extends DefaultContentProvider implements IStructuredContentProvider {
     /**
-     * Returns the elements to display in the viewer when its input is set
-     * to the given element.
-     * 
+     * Returns the elements to display in the viewer when its input is set to
+     * the given element.
+     *
      * @param parent
-     *            the input element
+     *          the input element
      * @return the array of elements to display in the viewer
-     * 
+     *
      * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
      */
     public Object[] getElements(Object parent) {
@@ -527,22 +514,20 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * A label provider sets for the value of the given column index the value
-   * of the element, that corresponding with this index.
+   * A label provider sets for the value of the given column index the value of
+   * the element, that corresponding with this index.
    */
-  class TableLabelProvider extends LabelProvider implements
-  ITableLabelProvider {
+  class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
     /**
      * Returns the label text for the given column of the given element.
-     * 
+     *
      * @param obj
-     *            the object representing the entire row
+     *          the object representing the entire row
      * @param index
-     *            the zero-based index of the column in which the label
-     *            appears
+     *          the zero-based index of the column in which the label appears
      * @return String or <code>null</code> if there is no text for the given
      *         object at index
-     * 
+     *
      * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
      *      int)
      */
@@ -550,23 +535,19 @@ SelectionListener, ISelectionChangedListener {
       if (obj instanceof ResourceInfo) {
         ResourceInfo resource = (ResourceInfo) obj;
         if (index == 0) {
-          String resPath = DPPUtilities.getStringValue(resource
-              .getResourcePath());
-          DPPFileModel model = ((DPPFileModel) getFormPage()
-              .getModel());
+          String resPath = DPPUtilities.getStringValue(resource.getResourcePath());
+          DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
           IFile ifile = model.getFile();
           IProject project = ifile.getProject();
           String location = project.getLocation().toOSString();
-          if (resPath.toLowerCase().startsWith(
-              location.toLowerCase() + File.separator)) {
+          if (resPath.toLowerCase().startsWith(location.toLowerCase() + File.separator)) {
             resPath = "<.>" + resPath.substring(location.length());
           }
           return resPath;
         } else if (index == 1) {
           return DPPUtilities.getStringValue(resource.getName());
         } else if (index == 2) {
-          return DPPUtilities.getStringValue(resource
-              .getResourceProcessor());
+          return DPPUtilities.getStringValue(resource.getResourceProcessor());
         } else if (index == 3) {
           return new Boolean(resource.isMissing()).toString();
         } else if (index == 4) {
@@ -579,7 +560,7 @@ SelectionListener, ISelectionChangedListener {
     /**
      * Returns the label image for the given column of the given element. In
      * this case the return image is <code>null</code>
-     * 
+     *
      * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object,
      *      int)
      */
@@ -591,9 +572,9 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Creates the new instance of the FormSection and the form which is the
    * parent of this section.
-   * 
+   *
    * @param page
-   *            the parent form page
+   *          the parent form page
    */
   public ResourcesSection(ResourcesFormPage page) {
     super(page);
@@ -605,15 +586,16 @@ SelectionListener, ISelectionChangedListener {
   /**
    * This method is called from the <code>createControl</code> method and puts
    * all custom components in this resources form section.
-   * 
+   *
    * @param parent
-   *            a composite control which will be the parent of the created
-   *            client composite which will be holds all custom controls
+   *          a composite control which will be the parent of the created client
+   *          composite which will be holds all custom controls
    * @return Returns the composite control which will be holds all custom
    *         controls
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#createClient(org.eclipse.swt.widgets.Composite)
    */
+  @Override
   public Composite createClient(Composite parent) {
     container = FormWidgetFactory.createComposite(parent);
     GridLayout layout = new GridLayout();
@@ -629,32 +611,30 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Creates the table viewer and the table for this table viewer. Also
-   * creates all providers and listeners that the table needed to.
-   * 
+   * Creates the table viewer and the table for this table viewer. Also creates
+   * all providers and listeners that the table needed to.
+   *
    * @param parent
-   *            a parent composite in which all components will be added
+   *          a parent composite in which all components will be added
    */
   private void createTable(Composite parent) {
     Composite container = FormWidgetFactory.createComposite(parent);
     container.setLayout(new GridLayout());
     container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-    Table table = FormWidgetFactory.createTable(container, SWT.SINGLE
-        | SWT.FULL_SELECTION);
+    Table table = FormWidgetFactory.createTable(container, SWT.SINGLE | SWT.FULL_SELECTION);
     table.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyReleased(KeyEvent ev) {
         if (ev.keyCode == 27) {
           if (ev.getSource() instanceof Table) {
             Table table = (Table) ev.getSource();
-            if (table.getSelectionIndex() < 0)
+            if (table.getSelectionIndex() < 0) {
               return;
-            TableItem item = table.getItem(table
-                .getSelectionIndex());
-            final ResourceInfo resource = (ResourceInfo) item
-                .getData();
-            if (DPPUtilities.getStringValue(
-                resource.getResourcePath()).equals("")) {
+            }
+            TableItem item = table.getItem(table.getSelectionIndex());
+            final ResourceInfo resource = (ResourceInfo) item.getData();
+            if (DPPUtilities.getStringValue(resource.getResourcePath()).equals("")) {
               resourceInfoChange(resource, REMOVE_RESOURCE);
             }
           }
@@ -669,12 +649,10 @@ SelectionListener, ISelectionChangedListener {
     String[] columnTitles = {
         ResourceManager.getString("DPPEditor.ResourcesSection.ColPath"),
         ResourceManager.getString("DPPEditor.ResourcesSection.ColName"),
-        ResourceManager
-        .getString("DPPEditor.ResourcesSection.ColResProcessor"),
-        ResourceManager
-        .getString("DPPEditor.ResourcesSection.ColMissing"),
-        ResourceManager
-        .getString("DPPEditor.ResourcesSection.ColCustomHeaders") };
+        ResourceManager.getString("DPPEditor.ResourcesSection.ColResProcessor"),
+        ResourceManager.getString("DPPEditor.ResourcesSection.ColMissing"),
+        ResourceManager.getString("DPPEditor.ResourcesSection.ColCustomHeaders")
+    };
     for (int i = 0; i < columnTitles.length; i++) {
       TableColumn tableColumn = new TableColumn(table, SWT.NULL);
       tableColumn.setText(columnTitles[i]);
@@ -689,24 +667,25 @@ SelectionListener, ISelectionChangedListener {
     resourcesTable.setLabelProvider(new TableLabelProvider());
     resourcesTable.addSelectionChangedListener(this);
 
-    String[] sData = { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
+    String[] sData = {
+        "true", "false"}; //$NON-NLS-1$ //$NON-NLS-2$
     cellEditor = new ComboBoxCellEditor(table, sData, SWT.READ_ONLY);
     String property = System.getProperty("dpeditor.resourceprcessors");
     comboValues = new Hashtable();
     items = getItemsFromProperty(property);
     processorsCellEditor = new ComboBoxCellEditor(table, items, SWT.NULL);
     CellEditor[] editors = new CellEditor[] {
-        new CustomCellEditor(container, resourcesTable, table,
-            CustomCellEditor.TEXT_BUTTON_TYPE,
+        new CustomCellEditor(container, resourcesTable, table, CustomCellEditor.TEXT_BUTTON_TYPE,
             CustomCellEditor.RESOURCE_PATH),
-            new TextCellEditor(table),
-            processorsCellEditor,
-            cellEditor,
-            new CustomCellEditor(container, resourcesTable, table,
-                CustomCellEditor.DIALOG_TYPE,
-                CustomCellEditor.RESOURCE_HEADER) };
-    String[] properties = { "resource", "name", "resource_processor",
-        "missing", "custom" };
+        new TextCellEditor(table),
+        processorsCellEditor,
+        cellEditor,
+        new CustomCellEditor(container, resourcesTable, table, CustomCellEditor.DIALOG_TYPE,
+            CustomCellEditor.RESOURCE_HEADER)
+    };
+    String[] properties = {
+        "resource", "name", "resource_processor", "missing", "custom"
+    };
     resourcesTable.setCellEditors(editors);
     resourcesTable.setCellModifier(new KeyModifier());
     resourcesTable.setColumnProperties(properties);
@@ -726,10 +705,9 @@ SelectionListener, ISelectionChangedListener {
 
   /**
    * Creates all navigate button for the created table.
-   * 
+   *
    * @param parent
-   *            a parent composite in which all button components will be
-   *            added
+   *          a parent composite in which all button components will be added
    */
   private void createButtons(Composite parent) {
     Composite buttonComposite = FormWidgetFactory.createComposite(parent);
@@ -738,14 +716,11 @@ SelectionListener, ISelectionChangedListener {
     buttonComposite.setLayout(layout);
     buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    newButton = FormWidgetFactory.createButton(buttonComposite,
-        ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
-    removeButton = FormWidgetFactory.createButton(buttonComposite,
-        ResourceManager.getString(REMOVE_BUTTON, ""), SWT.PUSH);
-    upButton = FormWidgetFactory.createButton(buttonComposite,
-        ResourceManager.getString(UP_BUTTON, ""), SWT.PUSH);
-    downButton = FormWidgetFactory.createButton(buttonComposite,
-        ResourceManager.getString(DOWN_BUTTON, ""), SWT.PUSH);
+    newButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
+    removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""),
+        SWT.PUSH);
+    upButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(UP_BUTTON, ""), SWT.PUSH);
+    downButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(DOWN_BUTTON, ""), SWT.PUSH);
 
     newButton.addSelectionListener(this);
     GridData gd = new GridData(GridData.FILL_VERTICAL);
@@ -775,9 +750,10 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Initializes the all custom created controls with the given
    * <code>Object</code>
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#initialize(java.lang.Object)
    */
+  @Override
   public void initialize(Object input) {
     model = (DPPFileModel) input;
     if (model != null) {
@@ -790,18 +766,20 @@ SelectionListener, ISelectionChangedListener {
 
   /**
    * Sets that this form section is changed and need to be saved.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#commitChanges(boolean)
    */
+  @Override
   public void commitChanges(boolean onSave) {
     setDirty(false);
   }
 
   /**
    * Sets the focus to the table of the resources and refresh the viewer.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#setFocus()
    */
+  @Override
   public void setFocus() {
     resourcesTable.getTable().setFocus();
     resourcesTable.refresh();
@@ -834,9 +812,9 @@ SelectionListener, ISelectionChangedListener {
 
   /**
    * Returns the String array representation of the given property values.
-   * 
+   *
    * @param property
-   *            the property value
+   *          the property value
    * @return the String array, which presents the all items of the given
    *         property
    */
@@ -867,7 +845,7 @@ SelectionListener, ISelectionChangedListener {
   // ISelectionListener Implementation
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
    * .swt.events.SelectionEvent)
@@ -877,7 +855,7 @@ SelectionListener, ISelectionChangedListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
    * .events.SelectionEvent)
@@ -900,34 +878,31 @@ SelectionListener, ISelectionChangedListener {
       if (combo == comboEditor) {
         int index = combo.getSelectionIndex();
         String item = combo.getItem(index);
-        Object object = ((IStructuredSelection) resourcesTable
-            .getSelection()).getFirstElement();
+        Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
         if (object != null && object instanceof ResourceInfo) {
           ResourceInfo resourceInfo = (ResourceInfo) object;
           boolean oldMissing = resourceInfo.isMissing();
           boolean newMissing = item.equals("true");
-          if ((oldMissing && !newMissing)
-              || (!oldMissing && newMissing)) {
+          if ((oldMissing && !newMissing) || (!oldMissing && newMissing)) {
             resourceInfo.setMissing(newMissing);
-            model.fireModelChanged(new ModelChangedEvent(
-                IModelChangedEvent.EDIT,
-                new Object[] { resourceInfo }, null));
+            model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+              resourceInfo
+            }, null));
           }
           resourcesChanged();
         }
       } else if (combo == processorsCombo) {
         int index = combo.getSelectionIndex();
         String item = combo.getItem(index);
-        Object object = ((IStructuredSelection) resourcesTable
-            .getSelection()).getFirstElement();
+        Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
         if (object != null && object instanceof ResourceInfo) {
           ResourceInfo resourceInfo = (ResourceInfo) object;
           String oldProcessor = resourceInfo.getResourceProcessor();
           if (oldProcessor == null || !oldProcessor.equals(item)) {
             resourceInfo.setResourceProcessor(item);
-            model.fireModelChanged(new ModelChangedEvent(
-                IModelChangedEvent.EDIT,
-                new Object[] { resourceInfo }, null));
+            model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+              resourceInfo
+            }, null));
           }
           resourcesChanged();
         }
@@ -936,9 +911,9 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Creates the new <code>ResourceInfo</code> object, which is presented in
-   * the table as a new table row. Adds this resource into the Deployment
-   * package file, which resources presents this table.
+   * Creates the new <code>ResourceInfo</code> object, which is presented in the
+   * table as a new table row. Adds this resource into the Deployment package
+   * file, which resources presents this table.
    */
   private void handleNew() {
     Table table = resourcesTable.getTable();
@@ -961,7 +936,7 @@ SelectionListener, ISelectionChangedListener {
     boolean found = false;
     int i = 0;
 
-    while(i < size) {
+    while (i < size) {
       TableItem currentItem = table.getItem(i++);
       if (currentItem.getText(0).equalsIgnoreCase("") && !currentItem.getData().equals(resource)) {
         found = true;
@@ -984,18 +959,20 @@ SelectionListener, ISelectionChangedListener {
 
   private String getPath(String str) {
 
-    if (str == null)
+    if (str == null) {
       return null;
-    if (str.equals(""))
+    }
+    if (str.equals("")) {
       return "";
+    }
     // remove separators and white spaces in the begining
     int i = 0;
-    while (str.charAt(i) == '\\' || str.charAt(i) == '/'
-        || str.charAt(i) == ' ') {
+    while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
 
       ++i;
-      if (i == (str.length()))
+      if (i == (str.length())) {
         break;
+      }
     }
     if (i < str.length()) {
       str = str.substring(i);
@@ -1021,16 +998,18 @@ SelectionListener, ISelectionChangedListener {
 
   private String getName(String str) {
 
-    if (str == null)
+    if (str == null) {
       return null;
-    if (str.equals(""))
+    }
+    if (str.equals("")) {
       return "";
+    }
     int i = 0;
-    while (str.charAt(i) == '\\' || str.charAt(i) == '/'
-        || str.charAt(i) == ' ') {
+    while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
       ++i;
-      if (i == (str.length()))
+      if (i == (str.length())) {
         break;
+      }
     }
     if (i < str.length()) {
       str = str.substring(i);
@@ -1059,8 +1038,7 @@ SelectionListener, ISelectionChangedListener {
    * resources presents this table.
    */
   private void handleRemove() {
-    Object object = ((IStructuredSelection) resourcesTable.getSelection())
-        .getFirstElement();
+    Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
     if (object != null && object instanceof ResourceInfo) {
       ResourceInfo resource = (ResourceInfo) object;
       resourceInfoChange(resource, REMOVE_RESOURCE);
@@ -1072,12 +1050,11 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Moves up the selected resource and moves up the resource in the
-   * Deployment package file, which resources presents this table.
+   * Moves up the selected resource and moves up the resource in the Deployment
+   * package file, which resources presents this table.
    */
   private void handleUp() {
-    Object object = ((IStructuredSelection) resourcesTable.getSelection())
-        .getFirstElement();
+    Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
     if (object != null && object instanceof ResourceInfo) {
       ResourceInfo resource = (ResourceInfo) object;
       resourceInfoChange(resource, UP_RESOURCE);
@@ -1093,8 +1070,7 @@ SelectionListener, ISelectionChangedListener {
    * Deployment package file, which resources presents this table.
    */
   private void handleDown() {
-    Object object = ((IStructuredSelection) resourcesTable.getSelection())
-        .getFirstElement();
+    Object object = ((IStructuredSelection) resourcesTable.getSelection()).getFirstElement();
     if (object != null && object instanceof ResourceInfo) {
       ResourceInfo resource = (ResourceInfo) object;
       resourceInfoChange(resource, DOWN_RESOURCE);
@@ -1107,7 +1083,7 @@ SelectionListener, ISelectionChangedListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org
    * .eclipse.jface.viewers.SelectionChangedEvent)
@@ -1133,9 +1109,10 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Called when there is a change in the model this model listener is
    * registered with.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.base.DPPFormSection#modelChanged(org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent)
    */
+  @Override
   public void modelChanged(IModelChangedEvent event) {
     if (event.getChangeType() == IModelChangedEvent.WORLD_CHANGED) {
       resourcesTable.refresh();
@@ -1159,8 +1136,8 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Sets up and down button to be enable or disable, depending on the
-   * selection in the table.
+   * Sets up and down button to be enable or disable, depending on the selection
+   * in the table.
    */
   public void setMoveEnable() {
     Table table = resourcesTable.getTable();
@@ -1177,9 +1154,9 @@ SelectionListener, ISelectionChangedListener {
   /**
    * Sets the management buttons to be enabled or disabled, depending on the
    * given <code>boolean</code> flag.
-   * 
+   *
    * @param editable
-   *            the new enabled state of the buttons
+   *          the new enabled state of the buttons
    */
   public void setEditable(boolean editable) {
     isTableEditable = editable;
@@ -1190,8 +1167,8 @@ SelectionListener, ISelectionChangedListener {
   }
 
   /**
-   * Refreshes the resource viewer completely with information freshly
-   * obtained from the viewer's model.
+   * Refreshes the resource viewer completely with information freshly obtained
+   * from the viewer's model.
    */
   public void resourcesChanged() {
     if (resourcesTable != null) {
@@ -1203,14 +1180,13 @@ SelectionListener, ISelectionChangedListener {
    * Adds, removes, moves up or down the given <code>ResourceInfo</code>,
    * depending on the given key. Notifies all existing
    * <code>IModelChangedListener</code>'s of a change of the model.
-   * 
+   *
    * @param info
-   *            the <code>ResourceInfo</code>, on which will be done the
-   *            action
+   *          the <code>ResourceInfo</code>, on which will be done the action
    * @param key
-   *            the type of the action. This type can be one of the followed
-   *            values: ADD_RESOURCE, REMOVE_RESOURCE, UP_RESOURCE and
-   *            DOWN_RESOURCE
+   *          the type of the action. This type can be one of the followed
+   *          values: ADD_RESOURCE, REMOVE_RESOURCE, UP_RESOURCE and
+   *          DOWN_RESOURCE
    */
   private void resourceInfoChange(ResourceInfo info, int key) {
     DPPFileModel model = ((DPPFileModel) getFormPage().getModel());
@@ -1218,27 +1194,32 @@ SelectionListener, ISelectionChangedListener {
     switch (key) {
     case ADD_RESOURCE:
       infos.addElement(info);
-      model.fireModelChanged(new ModelChangedEvent(
-          IModelChangedEvent.ADD, new Object[] { info }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.ADD, new Object[] {
+        info
+      }, null));
       break;
     case REMOVE_RESOURCE:
       infos.removeElement(info);
-      model.fireModelChanged(new ModelChangedEvent(
-          IModelChangedEvent.REMOVE, new Object[] { info }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.REMOVE, new Object[] {
+        info
+      }, null));
       break;
     case UP_RESOURCE:
       DPPUtilities.moveElement(infos, info, true);
-      model.fireModelChanged(new ModelChangedEvent(
-          IModelChangedEvent.INSERT, new Object[] { info }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] {
+        info
+      }, null));
       break;
     case DOWN_RESOURCE:
       DPPUtilities.moveElement(infos, info, false);
-      model.fireModelChanged(new ModelChangedEvent(
-          IModelChangedEvent.INSERT, new Object[] { info }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] {
+        info
+      }, null));
       break;
     }
   }
 
+  @Override
   public void update() {
     resourcesTable.refresh();
   }

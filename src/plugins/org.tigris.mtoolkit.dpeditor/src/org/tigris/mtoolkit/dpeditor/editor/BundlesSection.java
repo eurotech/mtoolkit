@@ -75,69 +75,66 @@ import org.tigris.mtoolkit.util.DPPUtilities;
  * created <code>BundleInfo</code>s.
  */
 public class BundlesSection extends DPPFormSection implements SelectionListener, ISelectionChangedListener,
-ICheckStateListener {
-
+    ICheckStateListener {
   /** Holds the title of this section */
-  public static final String SECTION_TITLE = "DPPEditor.BundlesSection.title";
+  public static final String SECTION_TITLE                       = "DPPEditor.BundlesSection.title";
   /** Holds the description of the section */
-  public static final String SECTION_DESC = "DPPEditor.BundlesSection.desc";
+  public static final String SECTION_DESC                        = "DPPEditor.BundlesSection.desc";
   /** The New button's label */
-  public static final String NEW_BUTTON = "DPPEditor.New_Button";
+  public static final String NEW_BUTTON                          = "DPPEditor.New_Button";
   /** The Remove button's label */
-  public static final String REMOVE_BUTTON = "DPPEditor.Remove_Button";
+  public static final String REMOVE_BUTTON                       = "DPPEditor.Remove_Button";
   /** The Up button's label */
-  public static final String UP_BUTTON = "DPPEditor.Up_Button";
+  public static final String UP_BUTTON                           = "DPPEditor.Up_Button";
   /** The Down button's label */
-  public static final String DOWN_BUTTON = "DPPEditor.Down_Button";
+  public static final String DOWN_BUTTON                         = "DPPEditor.Down_Button";
 
   /** Equals bundle path values error message */
-  public static final String EQUAL_VALUES_MSG1 = "DPPEditor.BundlesSection.EqualValuesMsg1";
-  /** Message ask to enter different bundle path to continue */
-  public static final String EQUAL_VALUES_MSG2 = "DPPEditor.BundlesSection.EqualValuesMsg2";
+  public static final String EQUAL_VALUES_MSG1                   = "DPPEditor.BundlesSection.EqualValuesMsg1";
   /** Message announced of the incorrect value of the bundle version */
-  public static final String WRONG_BUNDLE_VERSION = "DPPEditor.BundlesSection.WrongVersion";
+  public static final String WRONG_BUNDLE_VERSION                = "DPPEditor.BundlesSection.WrongVersion";
   /** Message announced of the incorrect value of the bundle path */
-  public static final String WRONG_BUNDLE_PATH = "DPPEditor.BundlesSection.WrongPath";
+  public static final String WRONG_BUNDLE_PATH                   = "DPPEditor.BundlesSection.WrongPath";
   /** Message announced for invalid bundle name */
-  public static final String ERROR_INVALID_BUNDLE_NAME = "DPPEditor.BundlesSection.InvalidBundleName";
+  public static final String ERROR_INVALID_BUNDLE_NAME           = "DPPEditor.BundlesSection.InvalidBundleName";
   /** Message announced when bundle name do not end with ".jar". */
   public static final String ERROR_BUNDLE_NAME_NOT_ENDS_WITH_JAR = "DPPEditor.BundlesSection.BundleNameNotEndsWithJar";
   /** Message announced when bundle name already exists in the table. */
-  public static final String ERROR_BUNDLE_NAME_ALREADY_EXISTS = "DPPEditor.BundlesSection.BundleNameAlreadyExists";
+  public static final String ERROR_BUNDLE_NAME_ALREADY_EXISTS    = "DPPEditor.BundlesSection.BundleNameAlreadyExists";
   /** Constant that indicates the add bundle action */
-  private static final int ADD_BUNDLE = 0;
+  private static final int   ADD_BUNDLE                          = 0;
   /** Constant that indicates the remove bundle action */
-  private static final int REMOVE_BUNDLE = 1;
+  private static final int   REMOVE_BUNDLE                       = 1;
   /** Constant that indicates the move up bundle action */
-  private static final int UP_BUNDLE = 2;
+  private static final int   UP_BUNDLE                           = 2;
   /** Constant that indicates the move down bundle action */
-  private static final int DOWN_BUNDLE = 3;
+  private static final int   DOWN_BUNDLE                         = 3;
 
   /** The parent composite in which all components will be added */
-  private Composite container;
+  private Composite          container;
   /**
    * The TableViewer, which table contains all <code>BundleInfo</code>s object
    * for the given Deployment package file.
    */
-  private TableViewer bundlesTable;
+  private TableViewer        bundlesTable;
   /** The button, which action adds new bundle into table of all bundles */
-  private Button newButton;
+  private Button             newButton;
   /** The button, which action removes selected in the table bundle */
-  private Button removeButton;
+  private Button             removeButton;
   /** The button, which action moves up the selected in the table bundle */
-  private Button upButton;
+  private Button             upButton;
   /** The button, which action moves down the selected in the table bundle */
-  private Button downButton;
+  private Button             downButton;
 
   /** The <code>boolean</code> flag that shows if the table is editable or not */
-  private boolean isTableEditable = true;
+  private boolean            isTableEditable                     = true;
   /**
    * The deployment package file model, which <code>BundleIndo</code>s this
    * section presents.
    */
-  private DPPFileModel model;
+  private DPPFileModel       model;
   /** The parents form page */
-  private BundlesFormPage page;
+  private BundlesFormPage    page;
 
   /**
    * A cell editor that presents a list of items in a combo box for the
@@ -145,32 +142,31 @@ ICheckStateListener {
    */
   private ComboBoxCellEditor customizerCellEditor;
   /** A combo box for the customizer property of the <code>BundleInfo</code> */
-  private CCombo customizerCombo;
+  private CCombo             customizerCombo;
   /**
-   * A cell editor that presents a list of items in a combo box for the
-   * missing property of the <code>BundleInfo</code>.
+   * A cell editor that presents a list of items in a combo box for the missing
+   * property of the <code>BundleInfo</code>.
    */
   private ComboBoxCellEditor missingCellEditor;
   /** A combo box for the missing property of the <code>BundleInfo</code> */
-  private CCombo missingCombo;
+  private CCombo             missingCombo;
   /** Path to bundles entered by user in Bundles Section */
-  private String bundlesCustomPath = "bundles/";
+  private String             bundlesCustomPath                   = "bundles/";
 
   /**
    * A cell modifier is used to access the data model from a cell editor.
    */
   class KeyModifier implements ICellModifier {
     /**
-     * Checks whether the given property of the given element can be
-     * modified.
-     * 
+     * Checks whether the given property of the given element can be modified.
+     *
      * @param object
-     *            the element
+     *          the element
      * @param property
-     *            the property
+     *          the property
      * @return <code>true</code> if the property can be modified, and
      *         <code>false</code> otherwise
-     * 
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
      *      java.lang.String)
      */
@@ -200,18 +196,18 @@ ICheckStateListener {
     }
 
     /**
-     * Modifies the value for the given property of the given element. In
-     * this class the properties for which this method works are: bundle,
-     * name, bundle_name, version, customizer, missing, custom.
-     * 
+     * Modifies the value for the given property of the given element. In this
+     * class the properties for which this method works are: bundle, name,
+     * bundle_name, version, customizer, missing, custom.
+     *
      * @param object
-     *            the model element
+     *          the model element
      * @param property
-     *            the property
+     *          the property
      * @param value
-     *            the new property value
+     *          the new property value
      * @return
-     * 
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
      *      java.lang.String, java.lang.Object)
      */
@@ -267,13 +263,13 @@ ICheckStateListener {
         }
 
         if (selProject == null) {
-          DPPErrorHandler.processError(
-              ResourceManager.format("DPPEditor.ProjectError", new String[] { newValue }), true);
+          DPPErrorHandler.processError(ResourceManager.format("DPPEditor.ProjectError", new String[] {
+            newValue
+          }), true);
           bundlesTable.getTable().setFocus();
           return false;
         } else if (!DPPUtil.isPluginProject(selProject)) {
-          DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.WrongProject"),
-              true);
+          DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.WrongProject"), true);
           bundlesTable.getTable().setFocus();
           return false;
         }
@@ -298,8 +294,7 @@ ICheckStateListener {
             if (bundleModel != null) {
               bundle.setBundleSymbolicName(DPPUtil.parseSymbolicName(bundleModel.getBundle()
                   .getManifestHeader("Bundle-SymbolicName").getValue()));
-              bundle.setBundleVersion(bundleModel.getBundle().getManifestHeader("Bundle-Version")
-                  .getValue());
+              bundle.setBundleVersion(bundleModel.getBundle().getManifestHeader("Bundle-Version").getValue());
             }
           } catch (Throwable t) {
             t.printStackTrace();
@@ -312,15 +307,14 @@ ICheckStateListener {
 
       String symbolicName = bundle.getBundleSymbolicName();
       if (symbolicName == null) {
-        DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.SymbolicNameisEmpty"),
-            true);
+        DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.SymbolicNameisEmpty"), true);
         bundlesTable.getTable().setFocus();
         return false;
       }
 
       if (!symbolicName.equals("") && DPPUtil.isAlreadyInTheTable(symbolicName, item, 2)) {
-        DPPErrorHandler.processError(
-            ResourceManager.getString("DPPEditor.BundlesSection.SymbolicNameAlreadyExists"), true);
+        DPPErrorHandler.processError(ResourceManager.getString("DPPEditor.BundlesSection.SymbolicNameAlreadyExists"),
+            true);
         bundlesTable.getTable().setFocus();
         return false;
       }
@@ -342,8 +336,7 @@ ICheckStateListener {
       }
 
       if (!PluginUtilities.isValidPath(newValue) || newValue.indexOf(":") != -1) {
-        DPPErrorHandler.showErrorTableDialog(ResourceManager
-            .getString("DPPEditor.BundlesSection.InvalidBundleName"));
+        DPPErrorHandler.showErrorTableDialog(ResourceManager.getString("DPPEditor.BundlesSection.InvalidBundleName"));
         bundlesTable.getTable().setFocus();
         return false;
       }
@@ -439,7 +432,9 @@ ICheckStateListener {
       bundlesTable.update(bundle, null);
       page.updateDocumentIfSource();
       if (isSet) {
-        model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] { bundle }, null));
+        model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+          bundle
+        }, null));
       }
     }
 
@@ -462,17 +457,17 @@ ICheckStateListener {
     }
 
     /**
-     * Returns the value for the given property of the given element.
-     * Returns empty string if the element does not have the given property.
-     * The values of the property that are allowed are: bundle, name,
-     * bundle_name, version, customizer, missing, custom.
-     * 
+     * Returns the value for the given property of the given element. Returns
+     * empty string if the element does not have the given property. The values
+     * of the property that are allowed are: bundle, name, bundle_name, version,
+     * customizer, missing, custom.
+     *
      * @param object
-     *            the element
+     *          the element
      * @param property
-     *            the property
+     *          the property
      * @return the property value
-     * 
+     *
      * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
      *      java.lang.String)
      */
@@ -517,13 +512,13 @@ ICheckStateListener {
    */
   class TableContentProvider extends DefaultContentProvider implements IStructuredContentProvider {
     /**
-     * Returns the elements to display in the viewer when its input is set
-     * to the given element.
-     * 
+     * Returns the elements to display in the viewer when its input is set to
+     * the given element.
+     *
      * @param parent
-     *            the input element
+     *          the input element
      * @return the array of elements to display in the viewer
-     * 
+     *
      * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
      */
     public Object[] getElements(Object parent) {
@@ -541,21 +536,20 @@ ICheckStateListener {
   }
 
   /**
-   * A label provider sets for the value of the given column index the value
-   * of the element, that corresponding with this index.
+   * A label provider sets for the value of the given column index the value of
+   * the element, that corresponding with this index.
    */
   class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
     /**
      * Returns the label text for the given column of the given element.
-     * 
+     *
      * @param obj
-     *            the object representing the entire row
+     *          the object representing the entire row
      * @param index
-     *            the zero-based index of the column in which the label
-     *            appears
+     *          the zero-based index of the column in which the label appears
      * @return String or <code>null</code> if there is no text for the given
      *         object at index
-     * 
+     *
      * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
      *      int)
      */
@@ -592,7 +586,7 @@ ICheckStateListener {
     /**
      * Returns the label image for the given column of the given element. In
      * this case the return image is <code>null</code>
-     * 
+     *
      * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object,
      *      int)
      */
@@ -604,9 +598,9 @@ ICheckStateListener {
   /**
    * Creates the new instance of the FormSection and the form which is the
    * parent of this section.
-   * 
+   *
    * @param page
-   *            the parent form page
+   *          the parent form page
    */
   public BundlesSection(BundlesFormPage page) {
     super(page);
@@ -618,15 +612,16 @@ ICheckStateListener {
   /**
    * This method is called from the <code>createControl</code> method and puts
    * all custom components in this bundles form section.
-   * 
+   *
    * @param parent
-   *            a composite control which will be the parent of the created
-   *            client composite which will be holds all custom controls
+   *          a composite control which will be the parent of the created client
+   *          composite which will be holds all custom controls
    * @return Returns the composite control which will be holds all custom
    *         controls
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#createClient(org.eclipse.swt.widgets.Composite)
    */
+  @Override
   public Composite createClient(Composite parent) {
     container = FormWidgetFactory.createComposite(parent);
     GridLayout layout = new GridLayout();
@@ -642,11 +637,11 @@ ICheckStateListener {
   }
 
   /**
-   * Creates the table viewer and the table for this table viewer. Also
-   * creates all providers and listeners that the table needed to.
-   * 
+   * Creates the table viewer and the table for this table viewer. Also creates
+   * all providers and listeners that the table needed to.
+   *
    * @param parent
-   *            a parent composite in which all components will be added
+   *          a parent composite in which all components will be added
    */
   private void createTable(Composite parent) {
     Composite container = FormWidgetFactory.createComposite(parent);
@@ -655,12 +650,14 @@ ICheckStateListener {
 
     Table table = FormWidgetFactory.createTable(container, SWT.SINGLE | SWT.FULL_SELECTION);
     table.addKeyListener(new KeyAdapter() {
+      @Override
       public void keyReleased(KeyEvent ev) {
         if (ev.keyCode == 27) {
           if (ev.getSource() instanceof Table) {
             Table table = (Table) ev.getSource();
-            if (table.getSelectionIndex() < 0)
+            if (table.getSelectionIndex() < 0) {
               return;
+            }
             TableItem item = table.getItem(table.getSelectionIndex());
             final BundleInfo bundle = (BundleInfo) item.getData();
             item.setChecked(bundle.isCustomizer());
@@ -676,13 +673,15 @@ ICheckStateListener {
     table.setHeaderVisible(true);
     table.setLinesVisible(true);
 
-    String[] columnTitles = { ResourceManager.getString("DPPEditor.BundlesSection.ColPath"),
+    String[] columnTitles = {
+        ResourceManager.getString("DPPEditor.BundlesSection.ColPath"),
         ResourceManager.getString("DPPEditor.BundlesSection.ColName"),
         ResourceManager.getString("DPPEditor.BundlesSection.ColSymbolicName"),
         ResourceManager.getString("DPPEditor.BundlesSection.ColVersion"),
         ResourceManager.getString("DPPEditor.BundlesSection.ColCustomizer"),
         ResourceManager.getString("DPPEditor.BundlesSection.ColMissing"),
-        ResourceManager.getString("DPPEditor.BundlesSection.ColCustomHeaders") };
+        ResourceManager.getString("DPPEditor.BundlesSection.ColCustomHeaders")
+    };
     for (int i = 0; i < columnTitles.length; i++) {
       TableColumn tableColumn = new TableColumn(table, SWT.NULL);
       tableColumn.setText(columnTitles[i]);
@@ -697,21 +696,25 @@ ICheckStateListener {
     bundlesTable.setLabelProvider(new TableLabelProvider());
     bundlesTable.addSelectionChangedListener(this);
 
-    String[] data = { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
+    String[] data = {
+        "true", "false"}; //$NON-NLS-1$ //$NON-NLS-2$
     customizerCellEditor = new ComboBoxCellEditor(table, data, SWT.READ_ONLY);
     missingCellEditor = new ComboBoxCellEditor(table, data, SWT.READ_ONLY);
-    String[] properties = { "bundle", "name", "bundle_name", "version", "customizer", "missing", "custom" };
+    String[] properties = {
+        "bundle", "name", "bundle_name", "version", "customizer", "missing", "custom"
+    };
     bundlesTable.setColumnProperties(properties);
     CellEditor[] editors = new CellEditor[] {
         new CustomCellEditor(container, bundlesTable, table, CustomCellEditor.TEXT_BUTTON_TYPE,
             CustomCellEditor.BUNDLE_PATH), new TextCellEditor(table),
-            new TextCellEditor(table),
-            new TextCellEditor(table),
-            customizerCellEditor,
-            missingCellEditor,
-            // customizer, missing,
-            new CustomCellEditor(container, bundlesTable, table, CustomCellEditor.DIALOG_TYPE,
-                CustomCellEditor.BUNDLE_HEADER) };
+        new TextCellEditor(table),
+        new TextCellEditor(table),
+        customizerCellEditor,
+        missingCellEditor,
+        // customizer, missing,
+        new CustomCellEditor(container, bundlesTable, table, CustomCellEditor.DIALOG_TYPE,
+            CustomCellEditor.BUNDLE_HEADER)
+    };
     bundlesTable.setCellEditors(editors);
     bundlesTable.setCellModifier(new KeyModifier());
 
@@ -730,10 +733,9 @@ ICheckStateListener {
 
   /**
    * Creates all navigate button for the created table.
-   * 
+   *
    * @param parent
-   *            a parent composite in which all button components will be
-   *            added
+   *          a parent composite in which all button components will be added
    */
   private void createButtons(Composite parent) {
     Composite buttonComposite = FormWidgetFactory.createComposite(parent);
@@ -742,13 +744,11 @@ ICheckStateListener {
     buttonComposite.setLayout(layout);
     buttonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-    newButton = FormWidgetFactory
-        .createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
+    newButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(NEW_BUTTON, ""), SWT.PUSH);
     removeButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(REMOVE_BUTTON, ""),
         SWT.PUSH);
     upButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(UP_BUTTON, ""), SWT.PUSH);
-    downButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(DOWN_BUTTON, ""),
-        SWT.PUSH);
+    downButton = FormWidgetFactory.createButton(buttonComposite, ResourceManager.getString(DOWN_BUTTON, ""), SWT.PUSH);
 
     newButton.addSelectionListener(this);
     GridData gd = new GridData(GridData.FILL_VERTICAL);
@@ -778,9 +778,10 @@ ICheckStateListener {
   /**
    * Initializes the all custom created controls with the given
    * <code>Object</code>
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#initialize(java.lang.Object)
    */
+  @Override
   public void initialize(Object input) {
     model = (DPPFileModel) input;
     if (model != null) {
@@ -793,18 +794,20 @@ ICheckStateListener {
 
   /**
    * Sets that this form section is changed and need to be saved.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#commitChanges(boolean)
    */
+  @Override
   public void commitChanges(boolean onSave) {
     setDirty(false);
   }
 
   /**
    * Sets the focus to the table of the bundles and refresh the viewer.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.forms.FormSection#setFocus()
    */
+  @Override
   public void setFocus() {
     bundlesTable.getTable().setFocus();
     bundlesTable.refresh();
@@ -847,7 +850,7 @@ ICheckStateListener {
   // ISelectionListener Implementation
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
    * .swt.events.SelectionEvent)
@@ -857,7 +860,7 @@ ICheckStateListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
    * .events.SelectionEvent)
@@ -887,16 +890,18 @@ ICheckStateListener {
           boolean newCustomizer = item.equals("true");
           if ((oldCustomizer && !newCustomizer) || (!oldCustomizer && newCustomizer)) {
             bundleInfo.setCustomizer(newCustomizer);
-            model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT,
-                new Object[] { bundleInfo }, null));
+            model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+              bundleInfo
+            }, null));
           }
         } else if (combo == missingCombo) {
           boolean oldMissing = bundleInfo.isMissing();
           boolean newMissing = item.equals("true");
           if ((oldMissing && !newMissing) || (!oldMissing && newMissing)) {
             bundleInfo.setMissing(newMissing);
-            model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT,
-                new Object[] { bundleInfo }, null));
+            model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+              bundleInfo
+            }, null));
           }
         }
         bundlesChanged();
@@ -931,7 +936,7 @@ ICheckStateListener {
     boolean found = false;
     int i = 0;
 
-    while(i < size) {
+    while (i < size) {
       TableItem currentItem = table.getItem(i++);
       if (currentItem.getText(0).equalsIgnoreCase("") && !currentItem.getData().equals(bundle)) {
         found = true;
@@ -954,10 +959,12 @@ ICheckStateListener {
 
   private String getName(String str) {
 
-    if (str == null)
+    if (str == null) {
       return null;
-    if (str.equals(""))
+    }
+    if (str.equals("")) {
       return "";
+    }
     if (str.endsWith(".project")) {
       if (Math.max(str.lastIndexOf('\\'), str.lastIndexOf('/')) != Math.max(str.indexOf('\\'), str.indexOf('/'))) {
         str = str.substring(0, Math.max(str.lastIndexOf('\\'), str.lastIndexOf('/')));
@@ -968,8 +975,9 @@ ICheckStateListener {
     int i = 0;
     while (str.charAt(i) == '\\' || str.charAt(i) == '/' || str.charAt(i) == ' ') {
       ++i;
-      if (i == (str.length()))
+      if (i == (str.length())) {
         break;
+      }
     }
 
     if (i < str.length()) {
@@ -994,9 +1002,9 @@ ICheckStateListener {
   }
 
   /**
-   * Removes from the bundles table the selected <code>BundleInfo</code>
-   * object. Removes this bundle from the Deployment package file, which
-   * bundles presents this table.
+   * Removes from the bundles table the selected <code>BundleInfo</code> object.
+   * Removes this bundle from the Deployment package file, which bundles
+   * presents this table.
    */
   private void handleRemove() {
     Object object = ((IStructuredSelection) bundlesTable.getSelection()).getFirstElement();
@@ -1026,8 +1034,8 @@ ICheckStateListener {
   }
 
   /**
-   * Moves down the selected bundle and moves down the bundle in the
-   * Deployment package file, which bundles presents this table.
+   * Moves down the selected bundle and moves down the bundle in the Deployment
+   * package file, which bundles presents this table.
    */
   private void handleDown() {
     Object object = ((IStructuredSelection) bundlesTable.getSelection()).getFirstElement();
@@ -1043,7 +1051,7 @@ ICheckStateListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org
    * .eclipse.jface.viewers.SelectionChangedEvent)
@@ -1069,9 +1077,10 @@ ICheckStateListener {
   /**
    * Called when there is a change in the model this model listener is
    * registered with.
-   * 
+   *
    * @see org.tigris.mtoolkit.dpeditor.editor.base.DPPFormSection#modelChanged(org.tigris.mtoolkit.dpeditor.editor.model.IModelChangedEvent)
    */
+  @Override
   public void modelChanged(IModelChangedEvent event) {
     if (event.getChangeType() == IModelChangedEvent.WORLD_CHANGED) {
       bundlesTable.refresh();
@@ -1095,8 +1104,8 @@ ICheckStateListener {
   }
 
   /**
-   * Sets up and down button to be enable or disable, depending on the
-   * selection in the table.
+   * Sets up and down button to be enable or disable, depending on the selection
+   * in the table.
    */
   public void setMoveEnable() {
     Table table = bundlesTable.getTable();
@@ -1113,9 +1122,9 @@ ICheckStateListener {
   /**
    * Sets the management buttons to be enabled or disabled, depending on the
    * given <code>boolean</code> flag.
-   * 
+   *
    * @param editable
-   *            the new enabled state of the buttons
+   *          the new enabled state of the buttons
    */
   public void setEditable(boolean editable) {
     isTableEditable = editable;
@@ -1127,7 +1136,7 @@ ICheckStateListener {
 
   /**
    * Notifies of a change to the checked state of an element.
-   * 
+   *
    * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
    */
   public void checkStateChanged(CheckStateChangedEvent event) {
@@ -1147,12 +1156,12 @@ ICheckStateListener {
    * Adds, removes, moves up or down the given <code>BundleInfo</code>,
    * depending on the given key. Notifies all existing
    * <code>IModelChangedListener</code>'s of a change of the model.
-   * 
+   *
    * @param bundle
-   *            the <code>BundleInfo</code>, on which will be done the action
+   *          the <code>BundleInfo</code>, on which will be done the action
    * @param key
-   *            the type of the action. This type can be one of the followed
-   *            values: ADD_BUNDLE, REMOVE_BUNDLE, UP_BUNDLE and DOWN_BUNDLE
+   *          the type of the action. This type can be one of the followed
+   *          values: ADD_BUNDLE, REMOVE_BUNDLE, UP_BUNDLE and DOWN_BUNDLE
    */
   private void bundleInfoChange(BundleInfo bundle, int key) {
     DPPFile dppFile = ((DPPFileModel) getFormPage().getModel()).getDPPFile();
@@ -1160,23 +1169,32 @@ ICheckStateListener {
     switch (key) {
     case ADD_BUNDLE:
       infos.addElement(bundle);
-      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.ADD, new Object[] { bundle }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.ADD, new Object[] {
+        bundle
+      }, null));
       break;
     case REMOVE_BUNDLE:
       infos.removeElement(bundle);
-      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.REMOVE, new Object[] { bundle }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.REMOVE, new Object[] {
+        bundle
+      }, null));
       break;
     case UP_BUNDLE:
       DPPUtilities.moveElement(infos, bundle, true);
-      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] { bundle }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] {
+        bundle
+      }, null));
       break;
     case DOWN_BUNDLE:
       DPPUtilities.moveElement(infos, bundle, false);
-      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] { bundle }, null));
+      model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.INSERT, new Object[] {
+        bundle
+      }, null));
       break;
     }
   }
 
+  @Override
   public void update() {
     bundlesTable.refresh();
   }
