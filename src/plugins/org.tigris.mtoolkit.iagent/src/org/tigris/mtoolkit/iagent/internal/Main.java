@@ -12,9 +12,7 @@ package org.tigris.mtoolkit.iagent.internal;
 
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
@@ -56,10 +54,6 @@ public class Main {
 				statusVM(ip);
 				return;
 			}
-			if ("props".equals(command)) {
-				propsVM(ip);
-				return;
-			}
 			if ("ls".equals(command)) {
 				listContent(ip);
 				return;
@@ -94,26 +88,6 @@ public class Main {
 		try {
 			connector.getVMManager().stopVM();
 			System.out.println("Remote virtual machine successfully stopped.");
-		} finally {
-			connector.closeConnection();
-		}
-	}
-
-	private static void propsVM(String ip) throws IAgentException {
-		DeviceConnector connector = connectVM(ip);
-		try {
-			Map props = connector.getVMManager().getPlatformProperties();
-			if (props == null) {
-        System.out.println("Internal error: platform properties cannot be null!");
-      } else if (props.size() == 0) {
-        System.out.println("No platform properties are found.");
-      } else {
-				System.out.println("Platform properties:");
-				for (Iterator i = props.entrySet().iterator(); i.hasNext();) {
-					Map.Entry entry = (Entry) i.next();
-					System.out.println("\t" + entry.getKey() + " = " + entry.getValue());
-				}
-			}
 		} finally {
 			connector.closeConnection();
 		}

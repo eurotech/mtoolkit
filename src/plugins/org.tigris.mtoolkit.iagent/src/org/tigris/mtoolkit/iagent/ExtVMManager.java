@@ -21,9 +21,6 @@ import java.util.Map;
  * @since 4.0
  */
 public interface ExtVMManager {
-
-	public Map getPlatformProperties() throws IAgentException;
-
 	/**
 	 * @since 4.1
 	 */

@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.iagent;
 
 import java.io.OutputStream;
-import java.util.Map;
 
 /**
  * Provides control over the virtual machine. Every method of this class will
@@ -21,7 +20,6 @@ import java.util.Map;
  * 
  */
 public interface VMManager {
-
 	public boolean isVMActive() throws IAgentException;
 
 	/**
@@ -177,12 +175,5 @@ public interface VMManager {
 	 * @throws IAgentException
 	 */
 	public String getSystemProperty(String propertyName) throws IAgentException;
-
-	/**
-	 * 
-	 * @return
-	 * @throws IAgentException
-	 */
-	public Map getPlatformProperties() throws IAgentException;
 
 }
