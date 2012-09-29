@@ -25,13 +25,12 @@ import org.eclipse.core.runtime.Path;
 import org.tigris.mtoolkit.common.PluginUtilities;
 
 public class DPPUtilities {
-
-  private static final String POINT_STRING = "."; //$NON-NLS-1$
-  public static final String INSTALLED_PLATFORM = System.getProperty("os.name");
-  public static final char[] INVALID_RESOURCE_CHARACTERS;
+  private static final String  POINT_STRING       = ".";                                 //$NON-NLS-1$
+  public static final String   INSTALLED_PLATFORM = System.getProperty("os.name");
+  public static final char[]   INVALID_RESOURCE_CHARACTERS;
   public static final String[] INVALID_RESOURCE_NAMES;
 
-  public static boolean DEBUG = Boolean.getBoolean("dpeditor.debug");
+  public static boolean        DEBUG              = Boolean.getBoolean("dpeditor.debug");
 
   static {
     char[] chars = null;
@@ -39,21 +38,26 @@ public class DPPUtilities {
     if (System.getProperty("os.name", "windows").toLowerCase().indexOf("win") != -1) {
       // taken from
       // http://support.microsoft.com/support/kb/articles/q177/5/06.asp
-      chars = new char[] { '"', '*', '/', ':', '<', '>', '?', '\\', '|' };
+      chars = new char[] {
+      '"', '*', '/', ':', '<', '>', '?', '\\', '|'
+      };
       // list taken from
       // http://support.microsoft.com/support/kb/articles/Q216/6/54.ASP
-      names = new String[] { "aux", "clock$", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-          "com5", "com6", "com7", "com8", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-          "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-          "lpt3", "lpt4", "lpt5", "lpt6", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-          "lpt7", "lpt8", "lpt9", "nul", "prn" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+      names = new String[] {
+      "aux", "clock$", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+      "com5", "com6", "com7", "com8", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      "lpt3", "lpt4", "lpt5", "lpt6", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      "lpt7", "lpt8", "lpt9", "nul", "prn"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
     } else {
       // only front slash and null char are invalid on UNIXes
       // taken from
       // http://www.faqs.org/faqs/unix-faq/faq/part2/section-2.html
       // backslash and colon are illegal path segments regardless of
       // filesystem.
-      chars = new char[] { '\0', '/', ':', '\\' };
+      chars = new char[] {
+      '\0', '/', ':', '\\'
+      };
     }
     INVALID_RESOURCE_CHARACTERS = chars;
     INVALID_RESOURCE_NAMES = names == null ? new String[0] : names;
@@ -72,25 +76,12 @@ public class DPPUtilities {
     }
   }
 
-  public static Vector getVectorFromString(String str, String separator) {
-    Vector result = new Vector();
-    if ((str == null) || (str.equals(""))) {
-      return result;
-    }
-    StringTokenizer tokens = new StringTokenizer(str, separator);
-    while (tokens.hasMoreElements()) {
-      String next = tokens.nextToken();
-      result.addElement(next.trim());
-    }
-    return result;
-  }
-
   /**
    * Checks if given package name is correct package name and can be set as a
    * package.
    * 
    * @param packageName
-   *            the package name, which will be tested.
+   *          the package name, which will be tested.
    * @return <code>true</code> if the package name may be the package of java
    *         file, <code>false</code> otherwise.
    */
@@ -119,7 +110,7 @@ public class DPPUtilities {
    * identifier as other than the first character.
    * 
    * @param name
-   *            the name, which character will be tested.
+   *          the name, which character will be tested.
    * @return <code>true</code> if the name may be part of a Java identifier;
    *         <code>false</code> otherwise.
    */
@@ -144,9 +135,9 @@ public class DPPUtilities {
   /**
    * @return how many times does c meet in s
    * @param s
-   *            - the string to count in
+   *          - the string to count in
    * @param c
-   *            - the character to be counted
+   *          - the character to be counted
    */
   public static int numberOfRepetitions(String s, char c) {
     int counts = 0;
@@ -155,62 +146,12 @@ public class DPPUtilities {
     int firstInd;
     while ((firstInd = check.indexOf(c)) != -1) {
       counts++;
-      if (firstInd == len)
+      if (firstInd == len) {
         break;
+      }
       check = check.substring(firstInd + 1);
     }
     return counts;
-  }
-
-  /**
-   * Checks if the given file path is correct file name
-   * 
-   * @param f
-   *            the file path
-   * @return <code>true</code> if the given file name is valid file name,
-   *         <code>false</code> otherwise
-   */
-  public static boolean isCorrectFileName(String f) {
-    int lastDot = f.lastIndexOf('*');
-    if (lastDot > -1)
-      return false;
-    lastDot = f.lastIndexOf('.');
-    if (lastDot > -1) {
-      int indSlash_1 = f.indexOf('/');
-      if (indSlash_1 > -1) {
-        if (f.indexOf('\\') > -1) {
-          return false;
-        }
-      }
-      File file = new File(f);
-      boolean result = file.isFile();
-      if (!result) {
-        try {
-          File parent = file.getParentFile();
-          if (parent != null)
-            parent.mkdirs();
-          result = file.createNewFile();
-        } catch (IOException e) {
-          result = false;
-        }
-        if (result) {
-          File parentF = file.getParentFile();
-          file.delete();
-          while (parentF != null) {
-            String[] list = parentF.list();
-            File tmp = parentF.getParentFile();
-            if (list.length == 0) {
-              parentF.delete();
-            } else {
-              break;
-            }
-            parentF = tmp;
-          }
-        }
-      }
-      return result;
-    }
-    return isCorrectFileName(f + ".");
   }
 
   /**
@@ -218,16 +159,17 @@ public class DPPUtilities {
    * the other one.
    * 
    * @param source
-   *            the <code>String</code> in which be made replacement
+   *          the <code>String</code> in which be made replacement
    * @param toReplace
-   *            the text will be replace
+   *          the text will be replace
    * @param newString
-   *            the new text that will be set in the string
+   *          the new text that will be set in the string
    * @return the <code>String</code> with the replace string
    */
   public static String replaceString(String source, String toReplace, String newString) {
-    if (source == null)
+    if (source == null) {
       return null;
+    }
     StringBuffer buf = new StringBuffer();
     int inx = source.indexOf(toReplace);
     int oldinx = 0;
@@ -270,12 +212,13 @@ public class DPPUtilities {
    * Validate specified cersions range for correctness
    * 
    * @param interval
-   *            - interval or single version
+   *          - interval or single version
    * @return
    */
   public static boolean isValidVersionRange(String interval) {
-    if (isValidVersion(interval))
+    if (isValidVersion(interval)) {
       return true;
+    }
     char first = interval.charAt(0);
     if (first != '[' && first != '(') {
       return false;
@@ -334,12 +277,14 @@ public class DPPUtilities {
     int newIndex = index;
     if (up) {
       newIndex -= 1;
-      if (newIndex < 0)
+      if (newIndex < 0) {
         newIndex = index;
+      }
     } else {
       newIndex += 1;
-      if (newIndex > elements.size())
+      if (newIndex > elements.size()) {
         newIndex = index;
+      }
     }
     if (newIndex < index) {
       elements.insertElementAt(movedElement, newIndex);
@@ -405,7 +350,7 @@ public class DPPUtilities {
    *	qualifier ::= (alpha|digit|'_'|'-')+
    *	digit ::= [0..9]
    *	alpha ::= [a..zA..Z]
-   * 
+   *
    * example: test_1plugin1.2.1_21._1.1.3_3_3_1.0.0.201109091503_changed.jar
    */
   public static String getNameWithoutVersion(String fileName) {
@@ -423,19 +368,19 @@ public class DPPUtilities {
         while (nameTokens.hasMoreTokens()) {
           String currToken = nameTokens.nextToken();
 
-          String currVersionSector = currTokenIndex == 0 ? currToken.substring(
-              currToken.lastIndexOf('_') + 1, currToken.length()) : currToken;
+          String currVersionSector = currTokenIndex == 0 ? currToken.substring(currToken.lastIndexOf('_') + 1,
+              currToken.length()) : currToken;
 
-              if (currTokenIndex == 0 && currVersionSector.equals(currToken)) {
-                return fileName;
-              }
+          if (currTokenIndex == 0 && currVersionSector.equals(currToken)) {
+            return fileName;
+          }
 
-              if (currVersionSector.matches(currTokenIndex != 3 ? "[\\d]+" : "[\\w-]+")) {
-                versionLenth += 1 + currVersionSector.length();
-                currTokenIndex++;
-              } else {
-                return fileName;
-              }
+          if (currVersionSector.matches(currTokenIndex != 3 ? "[\\d]+" : "[\\w-]+")) {
+            versionLenth += 1 + currVersionSector.length();
+            currTokenIndex++;
+          } else {
+            return fileName;
+          }
         }
         return fileName.substring(0, fileName.length() - versionLenth);
       }
@@ -547,38 +492,19 @@ public class DPPUtilities {
   }
 
   /**
-   * Validate specified path name for correctness
-   * 
-   * @param pathName
-   * @return
-   */
-  public static boolean isValidPath(String pathName) {
-    if (!containsArticles(pathName)) {
-      for (int i = 0; i < pathName.length(); i++) {
-        for (int c = 0; c < INVALID_RESOURCE_CHARACTERS.length; c++) {
-          if (INVALID_RESOURCE_CHARACTERS[c] == pathName.charAt(i)) {
-            return false;
-          }
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-
-  /**
    * Checks if the given file name and extension are contains invalid chars
    * 
    * @param fileName
-   *            the name of the file
+   *          the name of the file
    * @param fileExt
-   *            the extension of the file
-   * @return <code>true</code> if the given file name and extension not
-   *         contains invalid chars, <code>false</code> otherwise
+   *          the extension of the file
+   * @return <code>true</code> if the given file name and extension not contains
+   *         invalid chars, <code>false</code> otherwise
    */
   public static boolean isCorrectStringFileName(String fileName, String fileExt) {
     for (int i = 0; i < INVALID_RESOURCE_CHARACTERS.length; i++) {
-      if ((fileName.indexOf(INVALID_RESOURCE_CHARACTERS[i]) != -1) || (fileExt.indexOf(INVALID_RESOURCE_CHARACTERS[i]) != -1)) {
+      if ((fileName.indexOf(INVALID_RESOURCE_CHARACTERS[i]) != -1)
+          || (fileExt.indexOf(INVALID_RESOURCE_CHARACTERS[i]) != -1)) {
         return false;
       }
     }
@@ -589,9 +515,9 @@ public class DPPUtilities {
    * Checks if the given name is valid name for the file.
    * 
    * @param f
-   *            the file name
+   *          the file name
    * @param extension
-   *            the extension of the file
+   *          the extension of the file
    * @return <code>true</code> if the given name is valid file name,
    *         <code>false</code> otherwise
    */
@@ -600,8 +526,9 @@ public class DPPUtilities {
       extension = "." + extension;
     }
     int lastDot = f.lastIndexOf('*');
-    if (lastDot > -1)
+    if (lastDot > -1) {
       return false;
+    }
     String temp = f;
     do {
       f = temp;
@@ -624,8 +551,9 @@ public class DPPUtilities {
     boolean result = true;
     while (stringToken.hasMoreTokens() && result) {
       String nextToken = stringToken.nextToken();
-      if (nextToken.equals(".") || nextToken.equals(".."))
+      if (nextToken.equals(".") || nextToken.equals("..")) {
         return false;
+      }
       result = result & isCorrectStringFileName(nextToken, extension);
     }
 
@@ -691,13 +619,15 @@ public class DPPUtilities {
 
   // from org.osgi.framework.Version
   private static class Version {
-    private int major;
-    private int minor;
-    private int micro;
+    private int    major;
+    private int    minor;
+    private int    micro;
     private String qualifier;
 
     public Version(String version) {
-      int[] arrVer = new int[] { 0, 0, 0 };
+      int[] arrVer = new int[] {
+          0, 0, 0
+      };
       int begin = 0;
       int end = version.length();
       String qualifier = "";
@@ -706,8 +636,9 @@ public class DPPUtilities {
       try {
         label: do {
           int i = begin;
-          while (i < end && version.charAt(i) != '.')
+          while (i < end && version.charAt(i) != '.') {
             i++;
+          }
           switch (index) {
           case 0:
           case 1:
@@ -720,8 +651,9 @@ public class DPPUtilities {
             qualifier = version.substring(begin, end);
             break label;
           }
-          if (i == end)
+          if (i == end) {
             break;
+          }
           begin = ++i;
         } while (true);
       } catch (NumberFormatException nfe) {
@@ -791,7 +723,8 @@ public class DPPUtilities {
 
     for (int i = 0; i < key.length(); i++) {
       int code = key.charAt(i);
-      if (!(code >= '0' && code <= '9') && !(code >= 'A' && code <= 'Z') && !(code >= 'a' && code <= 'z') && (code != '-' && code != '_')) {
+      if (!(code >= '0' && code <= '9') && !(code >= 'A' && code <= 'Z') && !(code >= 'a' && code <= 'z')
+          && (code != '-' && code != '_')) {
         isValid = false;
         break;
       }
@@ -810,7 +743,8 @@ public class DPPUtilities {
     if (PluginUtilities.isValidPath(str)) {
       IPath path = new Path(str);
       return path.segmentCount() > 1 ? path.removeLastSegments(1).toString() + "/" : "";
-    } else
+    } else {
       return null;
+    }
   }
 }

@@ -63,33 +63,35 @@ import org.tigris.mtoolkit.util.DeploymentPackageGenerator;
 
 public class DPPUtil {
 
-  public static final int TYPE_QUICK_BUILD_DPP = 0;
-  public static final int TYPE_EXPORT_DPP = 1;
-  public static final int TYPE_EXPORT_ANT = 2;
-  private final static String[] jobText = new String[] { "QuickBuild", "BuildExportWizard", "AntExportWizard" };
-  public static String fileDialogLastSelection;
+  public static final int                    TYPE_QUICK_BUILD_DPP = 0;
+  public static final int                    TYPE_EXPORT_DPP      = 1;
+  public static final int                    TYPE_EXPORT_ANT      = 2;
+  private final static String[]              jobText              = new String[] {
+      "QuickBuild", "BuildExportWizard", "AntExportWizard"
+                                                                  };
+  public static String                       fileDialogLastSelection;
 
-  static List errorTable = new ArrayList();
+  static List                                errorTable           = new ArrayList();
 
-  private static Point displayLoc = null;
+  private static Point                       displayLoc           = null;
   private static CertificatesPasswordsDialog certDialog;
-  private static ChangeBundleJarNameDialog changeBundleNameDialog;
+  private static ChangeBundleJarNameDialog   changeBundleNameDialog;
 
   /**
    * Performs specified by type export
-   * 
+   *
    * @param dppFile
-   *            source file to export from
+   *          source file to export from
    * @param monitor
-   *            progress monitor
+   *          progress monitor
    * @param project
-   *            plug-in or other project (dpp file source project)
+   *          plug-in or other project (dpp file source project)
    * @param type
-   *            type of export (quick build, export dp, export xml)
+   *          type of export (quick build, export dp, export xml)
    * @throws InvocationTargetException
    */
-  public static IStatus generateDeploymentPackage(final DPPFile dppFile, IProgressMonitor monitor, final IContainer project,
-      int type) throws InvocationTargetException {
+  public static IStatus generateDeploymentPackage(final DPPFile dppFile, IProgressMonitor monitor,
+      final IContainer project, int type) throws InvocationTargetException {
     BuildInfo buildInfo = dppFile.getBuildInfo();
     String dppFileName = dppFile.getFile().getAbsolutePath();
     if (dppFileName.endsWith(".dpp")) {
@@ -137,7 +139,9 @@ public class DPPUtil {
           }
         }
         if (!isFromWorkspace) {
-          String errorMsg = ResourceManager.format("DPPEditor.ProjectError", new String[] { path });
+          String errorMsg = ResourceManager.format("DPPEditor.ProjectError", new String[] {
+            path
+          });
           DPPErrorHandler.processError(errorMsg, true);
           return UtilitiesPlugin.newStatus(Status.ERROR, errorMsg);
         }
@@ -155,7 +159,8 @@ public class DPPUtil {
     if (!DPActivator.getDefault().isAcceptAutomaticallyChanges()) {
       shellControl.getDisplay().syncExec(new Runnable() {
         public void run() {
-          changeBundleNameDialog = new ChangeBundleJarNameDialog(DPPErrorHandler.getShell(), displayLoc, shellControl.getSize());
+          changeBundleNameDialog = new ChangeBundleJarNameDialog(DPPErrorHandler.getShell(), displayLoc, shellControl
+              .getSize());
           changeBundleNameDialog.setDPPFile(dppFile);
           changeBundleNameDialog.open();
         }
@@ -347,8 +352,9 @@ public class DPPUtil {
     if (path.startsWith("<.>" + File.separator)) {
       path = projectLocation + path.substring(3);
     }
-    if (!(new File(path)).exists())
+    if (!(new File(path)).exists()) {
       return;
+    }
     Manifest mf = null;
     if (path.endsWith(".jar")) {
       try {
@@ -378,8 +384,9 @@ public class DPPUtil {
         }
       }
     }
-    if (mf == null)
+    if (mf == null) {
       return;
+    }
     String value = DPPUtil.parseSymbolicName(mf.getMainAttributes().getValue("Bundle-SymbolicName"));
     if (value != null) {
       info.setBundleSymbolicName(value);
@@ -391,8 +398,8 @@ public class DPPUtil {
   }
 
   public static String parseSymbolicName(String symbolicName) {
-    return symbolicName != null && symbolicName.indexOf(";") != -1 ? symbolicName.substring(0, symbolicName.indexOf(';'))
-        : symbolicName;
+    return symbolicName != null && symbolicName.indexOf(";") != -1 ? symbolicName.substring(0,
+        symbolicName.indexOf(';')) : symbolicName;
   }
 
   // wait flag
@@ -486,7 +493,8 @@ public class DPPUtil {
     IProjectDescription descr = null;
     try {
       if (!isOpen) {
-        descr = ResourcesPlugin.getWorkspace().loadProjectDescription(selProject.getProject().getLocation().append(".project"));
+        descr = ResourcesPlugin.getWorkspace().loadProjectDescription(
+            selProject.getProject().getLocation().append(".project"));
       } else {
         descr = selProject.getDescription();
       }
@@ -523,140 +531,57 @@ public class DPPUtil {
   }
 
   /**
-   * Shows the error dialog with the given parent, title, message, reason.
-   * 
-   * @param parent
-   *            the parent shell of the error dialog
-   * @param title
-   *            the title of the error dialog
-   * @param message
-   *            the message of the error dialog
-   * @param reason
-   *            the reason to show this error dialog
-   */
-  public static void showErrorDialog(Shell parent, String title, String message, String reason) {
-    showDialog(parent, title, message, reason, null, null, IStatus.ERROR);
-  }
-
-  /**
    * Shows the error dialog with the given parent, title, message, reason and
    * exception.
-   * 
+   *
    * @param parent
-   *            the parent shell of the error dialog
+   *          the parent shell of the error dialog
    * @param title
-   *            the title of the error dialog
+   *          the title of the error dialog
    * @param message
-   *            the message of the error dialog
+   *          the message of the error dialog
    * @param reason
-   *            the reason to show this error dialog
+   *          the reason to show this error dialog
    * @param e
-   *            the exception
+   *          the exception
    */
   public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e) {
     showDialog(parent, title, message, reason, e, null, IStatus.ERROR);
   }
 
   /**
-   * Shows the error dialog with the given parent, title, message, reason and
-   * exception.
-   * 
-   * @param parent
-   *            the parent shell of the error dialog
-   * @param title
-   *            the title of the error dialog
-   * @param message
-   *            the message of the error dialog
-   * @param reason
-   *            the reason to show this error dialog
-   * @param e
-   *            the exception
-   * @param nested
-   *            the nested exception
-   */
-  public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e, Throwable nested) {
-    showDialog(parent, title, message, reason, e, nested, IStatus.ERROR);
-  }
-
-  /**
-   * Shows the warning dialog with the given parent, title, message and
-   * reason.
-   * 
-   * @param parent
-   *            the parent shell of the warning dialog
-   * @param title
-   *            the title of the warning dialog
-   * @param message
-   *            the message of the warning dialog
-   * @param reason
-   *            the reason to show this warning dialog
-   */
-  public static void showWarningDialog(Shell parent, String title, String message, String reason) {
-    showDialog(parent, title, message, reason, null, null, IStatus.WARNING);
-  }
-
-  /**
-   * Shows the information dialog with the given parent, title, message and
-   * reason.
-   * 
-   * @param parent
-   *            the parent shell of the information dialog
-   * @param title
-   *            the title of the information dialog
-   * @param message
-   *            the message of the information dialog
-   * @param reason
-   *            the reason to show this information dialog
-   */
-  public static void showInformationDialog(Shell parent, String title, String message, String reason) {
-    showDialog(parent, title, message, reason, null, null, IStatus.INFO);
-  }
-
-  /**
-   * Shows the dialog with the given parent, title, message and reason.
-   * 
-   * @param parent
-   *            the parent shell of the dialog
-   * @param title
-   *            the title of the dialog
-   * @param message
-   *            the message of the dialog
-   * @param reason
-   *            the reason to show this dialog
-   */
-  public static void showMessageDialog(Shell parent, String title, String message, String reason) {
-    showDialog(parent, title, message, reason, null, null, IStatus.OK);
-  }
-
-  /**
    * Shows the dialog with the given parent, title, message, reason, exception
    * and code of the status.
-   * 
+   *
    * @param parent
-   *            the parent shell of the dialog
+   *          the parent shell of the dialog
    * @param title
-   *            the title of the dialog
+   *          the title of the dialog
    * @param message
-   *            the message of the dialog
+   *          the message of the dialog
    * @param reason
-   *            the reason to be shown this dialog
+   *          the reason to be shown this dialog
    * @param e
-   *            the exception
+   *          the exception
    * @param nested
-   *            the nested exception
+   *          the nested exception
    * @param code
-   *            the severity; one of <code>Status.OK</code>,
-   *            <code>Status.ERROR</code>, <code>Status.INFO</code>,
-   *            <code>Status.WARNING</code>, or <code>Status.CANCEL</code>
+   *          the severity; one of <code>Status.OK</code>,
+   *          <code>Status.ERROR</code>, <code>Status.INFO</code>,
+   *          <code>Status.WARNING</code>, or <code>Status.CANCEL</code>
    */
-  private static void showDialog(Shell parent, String title, String message, String reason, Throwable e, Throwable nested,
-      int code) {
-    if (title == null)
+  private static void showDialog(Shell parent, String title, String message, String reason, Throwable e,
+      Throwable nested, int code) {
+    if (title == null) {
       title = ""; //$NON-NLS-1$
-    if (message == null)
+    }
+    if (message == null) {
       message = ""; //$NON-NLS-1$
+    }
     if (reason == null)
+     {
       reason = ResourceManager.getString("MessageDialog.no_details", "No Details."); //$NON-NLS-1$  //$NON-NLS-2$
+    }
     errorTable.clear();
     String ex = null;
     if (e != null) {

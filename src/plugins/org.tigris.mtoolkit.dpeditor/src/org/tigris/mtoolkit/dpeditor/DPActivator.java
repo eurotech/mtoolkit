@@ -20,6 +20,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -27,165 +29,180 @@ import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 
 public class DPActivator extends AbstractUIPlugin {
 
-	// The plug-in ID
-	public static final String PLUGIN_ID = "deploymenEditor";
+  // The plug-in ID
+  public static final String PLUGIN_ID                  = "deploymenEditor";
 
-	// The shared instance
-	private static DPActivator plugin;
+  // The shared instance
+  private static DPActivator plugin;
 
-	private boolean acceptAutomaticallyChanges = false;
+  private boolean            acceptAutomaticallyChanges = false;
 
-	/**
-	 * The constructor
-	 */
-	public DPActivator() {
-	}
+  /**
+   * The constructor
+   */
+  public DPActivator() {
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
-	 * )
-	 */
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-		loadDPProperties();
-		DPPUtil.fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext
+   * )
+   */
+  @Override
+  public void start(BundleContext context) throws Exception {
+    super.start(context);
+    plugin = this;
+    loadDPProperties();
+    DPPUtil.fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
-	 * )
-	 */
-	public void stop(BundleContext context) throws Exception {
-		saveDPProperties();
-		plugin = null;
-		super.stop(context);
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext
+   * )
+   */
+  @Override
+  public void stop(BundleContext context) throws Exception {
+    saveDPProperties();
+    plugin = null;
+    super.stop(context);
+  }
 
-	private void loadDPProperties() {
+  private void loadDPProperties() {
 
-		DPActivator dpActivator = DPActivator.getDefault();
-		if (dpActivator != null) {
-			acceptAutomaticallyChanges = getPreferenceStore().getBoolean("dpeditor.accept");
-			System.setProperty("dpeditor.accept", (new Boolean(acceptAutomaticallyChanges)).toString());
-			String resourceProcessors = getPreferenceStore().getString("dpeditor.resourceprcessors");
-			Vector readRP = readResourceProcessors();
-			if (readRP != null && readRP.size() != 0) {
-				for (int i = 0; i < readRP.size(); i++) {
-					String resourceProcessor = (String) readRP.elementAt(i);
-					if (resourceProcessors.indexOf(resourceProcessor) == -1) {
-						resourceProcessors += (resourceProcessors.equals("") ? "" : ";") + resourceProcessor;
-					}
-				}
-			}
-			System.setProperty("dpeditor.resourceprcessors", resourceProcessors);
-		}
-	}
+    DPActivator dpActivator = DPActivator.getDefault();
+    if (dpActivator != null) {
+      acceptAutomaticallyChanges = getPreferenceStore().getBoolean("dpeditor.accept");
+      System.setProperty("dpeditor.accept", (new Boolean(acceptAutomaticallyChanges)).toString());
+      String resourceProcessors = getPreferenceStore().getString("dpeditor.resourceprcessors");
+      Vector readRP = readResourceProcessors();
+      if (readRP != null && readRP.size() != 0) {
+        for (int i = 0; i < readRP.size(); i++) {
+          String resourceProcessor = (String) readRP.elementAt(i);
+          if (resourceProcessors.indexOf(resourceProcessor) == -1) {
+            resourceProcessors += (resourceProcessors.equals("") ? "" : ";") + resourceProcessor;
+          }
+        }
+      }
+      System.setProperty("dpeditor.resourceprcessors", resourceProcessors);
+    }
+  }
 
-	private void saveDPProperties() {
-		String accept = "dpeditor.accept";
-		String proc = "dpeditor.resourceprcessors";
-		IPreferenceStore ips = getPreferenceStore();
+  private void saveDPProperties() {
+    String accept = "dpeditor.accept";
+    String proc = "dpeditor.resourceprcessors";
+    IPreferenceStore ips = getPreferenceStore();
 
-		if (System.getProperty(accept) != null) {
-			ips.setValue(accept, System.getProperty(accept));
-		} else {
-			ips.setValue(accept, "false");
-		}
-		ips.setValue(proc, System.getProperty(proc));
+    if (System.getProperty(accept) != null) {
+      ips.setValue(accept, System.getProperty(accept));
+    } else {
+      ips.setValue(accept, "false");
+    }
+    ips.setValue(proc, System.getProperty(proc));
 
-	}
+  }
 
-	/**
-	 * Returns the shared instance
-	 * 
-	 * @return the shared instance
-	 */
-	public static DPActivator getDefault() {
-		return plugin;
-	}
+  /**
+   * Returns the shared instance
+   *
+   * @return the shared instance
+   */
+  public static DPActivator getDefault() {
+    return plugin;
+  }
 
-	public static Vector readResourceProcessors() {
-		try {
-			Vector result = new Vector();
-			Enumeration installRPs = getInstallRPs();
-			if (installRPs != null) {
-				while (installRPs.hasMoreElements()) {
-					URL nextURL = (URL) installRPs.nextElement();
-					InputStream inputStream = nextURL.openConnection().getInputStream();
-					String content = readFile(inputStream);
-					Vector v = tokenize(content, "\n");
-					for (int i = 0; i < v.size(); i++) {
-						String element = (String) v.elementAt(i);
-						if (!result.contains(element)) {
-							result.addElement(element);
-						}
-					}
-				}
-			}
-			return result;
-		} catch (MalformedURLException ex) {
-		} catch (IOException ioex) {
-		}
-		return null;
-	}
+  public static Vector readResourceProcessors() {
+    try {
+      Vector result = new Vector();
+      Enumeration installRPs = getInstallRPs();
+      if (installRPs != null) {
+        while (installRPs.hasMoreElements()) {
+          URL nextURL = (URL) installRPs.nextElement();
+          InputStream inputStream = nextURL.openConnection().getInputStream();
+          String content = readFile(inputStream);
+          Vector v = tokenize(content, "\n");
+          for (int i = 0; i < v.size(); i++) {
+            String element = (String) v.elementAt(i);
+            if (!result.contains(element)) {
+              result.addElement(element);
+            }
+          }
+        }
+      }
+      return result;
+    } catch (MalformedURLException ex) {
+    } catch (IOException ioex) {
+    }
+    return null;
+  }
 
-	private static Enumeration getInstallRPs() throws MalformedURLException {
-		DPActivator dpActivator = DPActivator.getDefault();
-		Enumeration installPath = dpActivator.getBundle().findEntries("/", "ResourceProcessors.txt", false);
-		return installPath;
-	}
+  private static Enumeration getInstallRPs() throws MalformedURLException {
+    DPActivator dpActivator = DPActivator.getDefault();
+    Enumeration installPath = dpActivator.getBundle().findEntries("/", "ResourceProcessors.txt", false);
+    return installPath;
+  }
 
-	private static String readFile(InputStream reader) {
-		String fileContents = new String();
-		if (reader == null) {
-			return fileContents;
-		}
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		byte[] buffer = new byte[4096];
-		int n;
-		do {
-			try {
-				n = reader.read(buffer);
-			} catch (Exception ex) {
-				n = -1;
-			}
-			if (n != -1) {
-				baos.write(buffer, 0, n);
-			}
-		} while (n > 0);
-		fileContents = baos.toString();
-		try {
-			reader.close();
-			baos.close();
-		} catch (Exception ex) {
-		}
-		return fileContents;
-	}
+  private static String readFile(InputStream reader) {
+    String fileContents = new String();
+    if (reader == null) {
+      return fileContents;
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    byte[] buffer = new byte[4096];
+    int n;
+    do {
+      try {
+        n = reader.read(buffer);
+      } catch (Exception ex) {
+        n = -1;
+      }
+      if (n != -1) {
+        baos.write(buffer, 0, n);
+      }
+    } while (n > 0);
+    fileContents = baos.toString();
+    try {
+      reader.close();
+      baos.close();
+    } catch (Exception ex) {
+    }
+    return fileContents;
+  }
 
-	public static Vector tokenize(String str, String delim) {
-		Vector tokenizedStr = new Vector();
-		if (str != null && str.trim().length() != 0) {
-			StringTokenizer tokenizer = new StringTokenizer(str.trim(), delim);
-			while (tokenizer.hasMoreElements()) {
-				tokenizedStr.addElement(((String) tokenizer.nextElement()).trim());
-			}
-		}
-		return tokenizedStr;
-	}
+  public static Vector tokenize(String str, String delim) {
+    Vector tokenizedStr = new Vector();
+    if (str != null && str.trim().length() != 0) {
+      StringTokenizer tokenizer = new StringTokenizer(str.trim(), delim);
+      while (tokenizer.hasMoreElements()) {
+        tokenizedStr.addElement(((String) tokenizer.nextElement()).trim());
+      }
+    }
+    return tokenizedStr;
+  }
 
-	public boolean isAcceptAutomaticallyChanges() {
-		String value = System.getProperty("dpeditor.accept");
-		if (value == null || value.equals("") || (!value.equals("true") && !value.equals("false"))) {
-			value = "true";
-		}
-		acceptAutomaticallyChanges = new Boolean(value).booleanValue();
-		return acceptAutomaticallyChanges;
-	}
+  public boolean isAcceptAutomaticallyChanges() {
+    String value = System.getProperty("dpeditor.accept");
+    if (value == null || value.equals("") || (!value.equals("true") && !value.equals("false"))) {
+      value = "true";
+    }
+    acceptAutomaticallyChanges = new Boolean(value).booleanValue();
+    return acceptAutomaticallyChanges;
+  }
+
+  public static void error(String message, Throwable t) {
+    log(newStatus(IStatus.ERROR, message, t));
+  }
+
+  public static IStatus newStatus(int severity, String message, Throwable t) {
+    return new Status(severity, PLUGIN_ID, message, t);
+  }
+
+  public static void log(IStatus status) {
+    getDefault().getLog().log(status);
+  }
+
 }
