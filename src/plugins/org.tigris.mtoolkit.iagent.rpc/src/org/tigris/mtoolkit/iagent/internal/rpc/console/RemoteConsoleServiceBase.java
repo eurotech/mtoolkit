@@ -10,12 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc.console;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -34,217 +30,170 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 
-public abstract class RemoteConsoleServiceBase implements RemoteConsole {
+public abstract class RemoteConsoleServiceBase implements RemoteConsole, EventListener {
+  private ServiceRegistration registration;
+  protected final Map         dispatchers = new HashMap();
 
-	private Map dispatchers = new HashMap();
-	private ServiceRegistration registration;
+  public void register(BundleContext context) {
+    registration = context.registerService(RemoteConsole.class.getName(), this, null);
 
-	private PrintStream oldSystemOut;
-	private PrintStream oldSystemErr;
-	private PrintStream newSystemStream = new PrintStream(new RedirectedSystemOutput());
+    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+    if (capMan != null) {
+      capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(true));
+    }
+  }
 
-	private boolean replacedSystemOutputs = false;
+  public void unregister() {
+    registration.unregister();
+    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+    if (capMan != null) {
+      capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(false));
+    }
+  }
 
-	private EventListener closeConnectionHandler = new EventListener() {
-		public void event(Object event, String evType) {
-			if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType)) {
-				doReleaseConsole((PMPConnection) event);
-			}
-		}
-	};
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.EventListener#event(java.lang.Object, java.lang.String)
+   */
+  public void event(Object event, String evType) {
+    if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType)) {
+      doReleaseConsole((PMPConnection) event);
+    }
+  }
 
-	public void register(BundleContext context) {
-		registration = context.registerService(RemoteConsole.class.getName(), this, null);
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteConsole#registerOutput(org.tigris.mtoolkit.iagent.pmp.RemoteObject)
+   */
+  public void registerOutput(RemoteObject remoteObject) throws PMPException {
+    PMPConnection conn = InvocationThread.getContext().getConnection();
+    WriteDispatcher dispatcher = createDispatcher(conn, new CircularBuffer(), remoteObject);
+    dispatcher.start();
+    conn.addEventListener(this, new String[] {
+      PMPConnection.FRAMEWORK_DISCONNECTED
+    });
+    synchronized (dispatchers) {
+      WriteDispatcher oldDispatcher = (WriteDispatcher) dispatchers.put(conn, dispatcher);
+      if (oldDispatcher != null) {
+        oldDispatcher.finish();
+      }
+    }
+  }
 
-		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-		if (capMan != null) {
-			capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(true));
-		}
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteConsole#releaseConsole()
+   */
+  public synchronized final void releaseConsole() {
+    PMPConnection conn = InvocationThread.getContext().getConnection();
+    doReleaseConsole(conn);
+  }
 
-	public void unregister() {
-		registration.unregister();
-		restoreSystemOutputs();
+  protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
+      throws PMPException {
+    return new WriteDispatcher(conn, buffer, remoteObject);
+  }
 
-		RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-		if (capMan != null) {
-			capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(false));
-		}
-	}
+  protected void doReleaseConsole(PMPConnection conn) {
+    synchronized (dispatchers) {
+      WriteDispatcher dispatcher = (WriteDispatcher) dispatchers.remove(conn);
+      if (dispatcher != null) {
+        dispatcher.finish();
+      }
+    }
+  }
 
-	public void registerOutput(RemoteObject remoteObject) throws PMPException {
-		PMPConnection conn = InvocationThread.getContext().getConnection();
-		WriteDispatcher dispatcher = createDispatcher(conn, new CircularBuffer(), remoteObject);
-		dispatcher.start();
-		conn.addEventListener(closeConnectionHandler, new String[] { PMPConnection.FRAMEWORK_DISCONNECTED });
-		synchronized (dispatchers) {
-			WriteDispatcher oldDispatcher = (WriteDispatcher) dispatchers.put(conn, dispatcher);
-			if (oldDispatcher != null)
-				oldDispatcher.finish();
-			replaceSystemOutputs();
-		}
-	}
+  protected void print(String msg) {
+    // TODO: Handle different encodings
+    byte[] msgBytes = msg.getBytes();
+    print(msgBytes, 0, msgBytes.length);
+  }
 
-	protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
-			throws PMPException {
-		return new WriteDispatcher(conn, buffer, remoteObject);
-	}
+  protected void print(byte[] buf, int off, int len) {
+    PMPConnection conn = InvocationThread.getContext().getConnection();
+    WriteDispatcher dispatcher;
+    synchronized (dispatchers) {
+      dispatcher = (WriteDispatcher) dispatchers.get(conn);
+      if (dispatcher == null) {
+        return;
+      }
+    }
+    dispatcher.buffer.write(buf, off, len);
+    synchronized (dispatcher) {
+      dispatcher.notifyAll();
+    }
+  }
 
-	public synchronized void releaseConsole() {
-		PMPConnection conn = InvocationThread.getContext().getConnection();
-		doReleaseConsole(conn);
-	}
+  protected WriteDispatcher getDispatcher(PMPConnection conn) {
+    synchronized (dispatchers) {
+      return (WriteDispatcher) dispatchers.get(conn);
+    }
+  }
 
-	private void doReleaseConsole(PMPConnection conn) {
-		synchronized (dispatchers) {
-			WriteDispatcher dispatcher = (WriteDispatcher) dispatchers.remove(conn);
-			if (dispatcher != null)
-				dispatcher.finish();
-			if (dispatchers.size() == 0)
-				restoreSystemOutputs();
-		}
-	}
+  protected List/* <WriteDispatcher> */getDispatchers() {
+    synchronized (dispatchers) {
+      return new ArrayList(dispatchers.values());
+    }
+  }
 
-	protected void print(String msg) {
-		// TODO: Handle different encodings
-		byte[] msgBytes = msg.getBytes();
-		print(msgBytes, 0, msgBytes.length);
-	}
+  protected class WriteDispatcher implements Runnable {
+    public PMPConnection     conn;
+    public CircularBuffer    buffer;
+    public RemoteMethod      method;
+    public RemoteObject      object;
+    private Thread           dispatcherThread;
 
-	protected void print(byte[] buf, int off, int len) {
-		PMPConnection conn = InvocationThread.getContext().getConnection();
-		WriteDispatcher dispatcher;
-		synchronized (dispatchers) {
-			dispatcher = (WriteDispatcher) dispatchers.get(conn);
-			if (dispatcher == null)
-				return;
-		}
-		dispatcher.buffer.write(buf, off, len);
-		synchronized (dispatcher) {
-			dispatcher.notifyAll();
-		}
-	}
+    private volatile boolean running = true;
 
-	protected synchronized void replaceSystemOutputs() {
-		if (replacedSystemOutputs)
-			return;
-		oldSystemOut = System.out;
-		oldSystemErr = System.err;
-		System.setOut(newSystemStream);
-		System.setErr(newSystemStream);
-		replacedSystemOutputs = true;
-	}
+    public WriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object) throws PMPException {
+      dispatcherThread = ThreadUtils.createThread(this, "Remote Console Dispatcher");
+      this.conn = conn;
+      this.buffer = buffer;
+      this.object = object;
+      method = object.getMethod("write", new String[] {
+          byte[].class.getName(), Integer.TYPE.getName(), Integer.TYPE.getName()
+      });
+    }
 
-	protected synchronized void restoreSystemOutputs() {
-		if (replacedSystemOutputs) {
-			if (System.out == newSystemStream)
-				System.setOut(oldSystemOut);
-			if (System.err == newSystemStream)
-				System.setErr(oldSystemErr);
-			replacedSystemOutputs = false;
-		}
-	}
+    public void start() {
+      dispatcherThread.start();
+    }
 
-	private class RedirectedSystemOutput extends OutputStream {
+    /* (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
+    public void run() {
+      while (true) {
+        synchronized (this) {
+          while (buffer.available() <= 0 && running && conn.isConnected()) {
+            try {
+              wait();
+            } catch (InterruptedException e) {
+            }
+          }
+        }
+        if (!running || !conn.isConnected()) {
+          try {
+            object.dispose();
+          } catch (PMPException e) {
+            // TODO: Log exception
+          }
+          return;
+        }
+        byte[] buf = new byte[1024];
+        while (buffer.available() > 0) {
+          int read = buffer.read(buf);
+          try {
+            method.invoke(new Object[] {
+                buf, new Integer(0), new Integer(read)
+            }, true);
+          } catch (PMPException e) {
+            // TODO: Log exception
+          }
+        }
+      }
+    }
 
-		private byte[] singleByte = new byte[1];
-
-		public synchronized void write(byte[] var0, int var1, int var2) throws IOException {
-			oldSystemOut.write(var0, var1, var2);
-			synchronized (dispatchers) {
-				for (Iterator it = dispatchers.values().iterator(); it.hasNext();) {
-					WriteDispatcher dispatcher = (WriteDispatcher) it.next();
-					dispatcher.buffer.write(var0, var1, var2);
-					synchronized (dispatcher) {
-						dispatcher.notifyAll();
-					}
-				}
-			}
-		}
-
-		public synchronized void write(byte[] var0) throws IOException {
-			write(var0, 0, var0.length);
-		}
-
-		public synchronized void write(int arg0) throws IOException {
-			singleByte[0] = (byte) (arg0 & 0xFF);
-			write(singleByte, 0, 1);
-		}
-
-		public synchronized void flush() throws IOException {
-			oldSystemOut.flush();
-		}
-
-	}
-
-	protected WriteDispatcher getDispatcher(PMPConnection conn) {
-		synchronized (dispatchers) {
-			return (WriteDispatcher) dispatchers.get(conn);
-		}
-	}
-
-	protected List/* <WriteDispatcher> */getDispatchers() {
-		synchronized (dispatchers) {
-			return new ArrayList(dispatchers.values());
-		}
-	}
-
-	protected class WriteDispatcher implements Runnable {
-
-		public PMPConnection conn;
-		public CircularBuffer buffer;
-		public RemoteMethod method;
-		public RemoteObject object;
-		private Thread dispatcherThread;
-
-		private volatile boolean running = true;
-
-		public WriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object) throws PMPException {
-			dispatcherThread = ThreadUtils.createThread(this, "Remote Console Dispatcher");
-			this.conn = conn;
-			this.buffer = buffer;
-			this.object = object;
-			method = object.getMethod("write", new String[] { byte[].class.getName(),
-					Integer.TYPE.getName(),
-					Integer.TYPE.getName() });
-		}
-
-		public void start() {
-			dispatcherThread.start();
-		}
-
-		public void run() {
-			while (true) {
-				synchronized (this) {
-					while (buffer.available() <= 0 && running && conn.isConnected())
-						try {
-							wait();
-						} catch (InterruptedException e) {
-						}
-				}
-				if (!running || !conn.isConnected()) {
-					try {
-						object.dispose();
-					} catch (PMPException e) {
-						// TODO: Log exception
-					}
-					return;
-				}
-				byte[] buf = new byte[1024];
-				while (buffer.available() > 0) {
-					int read = buffer.read(buf);
-					try {
-						method.invoke(new Object[] { buf, new Integer(0), new Integer(read) }, true);
-					} catch (PMPException e) {
-						// TODO: Log exception
-					}
-				}
-			}
-		}
-
-		public synchronized void finish() {
-			running = false;
-			notifyAll();
-		}
-	}
+    public synchronized void finish() {
+      running = false;
+      notifyAll();
+    }
+  }
 }
