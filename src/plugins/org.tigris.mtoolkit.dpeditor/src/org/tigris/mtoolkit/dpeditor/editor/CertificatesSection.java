@@ -209,7 +209,6 @@ public class CertificatesSection extends DPPFormSection implements SelectionList
             && itemWithSpecifiedAliasAndKeystoreExists(certsTable, item.getText(0), newValue) != -1) {
           showErrorTableDialog(ResourceManager.getString(EQUAL_VALUES_MSG1) + "\n"
               + ResourceManager.getString(EQUAL_VALUES_MSG2));
-          // certificateInfoChange(cert, REMOVE_CERTIFICATE);
           return;
         }
 
@@ -515,7 +514,7 @@ public class CertificatesSection extends DPPFormSection implements SelectionList
     certsTable.setLabelProvider(new TableLabelProvider());
     certsTable.addSelectionChangedListener(this);
 
-    cellEditor = new ComboBoxCellEditor(table, sData);
+    cellEditor = new ComboBoxCellEditor(table, sData, SWT.NULL);
     CellEditor[] editors = new CellEditor[] {
         new TextCellEditor(table),
         new CustomCellEditor(container, certsTable, table, CustomCellEditor.TEXT_BUTTON_TYPE,
@@ -675,17 +674,17 @@ public class CertificatesSection extends DPPFormSection implements SelectionList
       int index = combo.getSelectionIndex();
       String item = combo.getItem(index);
       Object object = ((IStructuredSelection) certsTable.getSelection()).getFirstElement();
-      if (object != null && object instanceof CertificateInfo) {
+      if (object instanceof CertificateInfo && combo == comboEditor) {
         CertificateInfo certInfo = (CertificateInfo) object;
-        if (combo == comboEditor) {
-          String oldType = certInfo.getStoreType();
-          oldType = oldType == null ? "" : oldType;
-          if (!oldType.equals(item)) {
-            model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
-              certInfo
-            }, null));
-          }
+        String oldType = certInfo.getStoreType();
+        oldType = oldType == null ? "" : oldType;
+        if (!oldType.equals(item)) {
+          certInfo.setStoreType(item);
+          model.fireModelChanged(new ModelChangedEvent(IModelChangedEvent.EDIT, new Object[] {
+            certInfo
+          }, null));
         }
+        certificatesChanged();
       }
     }
   }
