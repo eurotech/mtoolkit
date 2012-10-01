@@ -21,149 +21,150 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 
 public class RemoteCapabilitiesTest extends DeploymentTestCase implements RemoteDevicePropertyListener {
+  private static final String TEST_CAP_BUNDLE   = "test.bundle.capabilities.setter_1.0.0.jar";
+  private static final String CAPABILITY_1      = "test.bundle.capabilities.setter.cap1";
+  private static final String CAPABILITY_2      = "test.bundle.capabilities.setter.cap2";
+  private static final String CAPABILITY_REMAIN = "test.bundle.capabilities.setter.cap.remain";
 
-	private static final String TEST_CAP_BUNDLE = "test.bundle.capabilities.setter_1.0.0.jar";
-	private static final String CAPABILITY_1 = "test.bundle.capabilities.setter.cap1";
-	private static final String CAPABILITY_2 = "test.bundle.capabilities.setter.cap2";
-	private static final String CAPABILITY_REMAIN = "test.bundle.capabilities.setter.cap.remain";
+  RemoteBundle                bundle;
+  Map                         properties        = new Hashtable();
 
-	RemoteBundle bundle;
-	Map properties = new Hashtable();
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    bundle = installBundle(TEST_CAP_BUNDLE);
+  }
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		bundle = installBundle(TEST_CAP_BUNDLE);
-	}
+  @Override
+  protected void tearDown() throws Exception {
+    try {
+      if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
+        bundle.uninstall(null);
+      }
+    } catch (Exception e) {
+    }
+    super.tearDown();
+  }
 
-	protected void tearDown() throws Exception {
-		try {
-			if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
-				bundle.uninstall(null);
-			}
-		} catch (Exception e) {
-		}
-		super.tearDown();
-	}
+  public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
+    properties.put(e.getProperty(), e.getValue());
+  }
 
-	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
-		properties.put(e.getProperty(), e.getValue());
-	}
+  public void testGetCapabilities() throws IAgentException {
+    try {
+      Dictionary props = connector.getProperties();
+      Object cap1Value = props.get(CAPABILITY_1);
+      if (cap1Value != null) {
+        assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
+      }
+      Object cap2Value = props.get(CAPABILITY_2);
+      if (cap2Value != null) {
+        assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
+      }
 
-	public void testGetCapabilities() throws IAgentException {
-		try {
-			Dictionary props = connector.getProperties();
-			Object cap1Value = props.get(CAPABILITY_1);
-			if (cap1Value != null) {
-				assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
-			}
-			Object cap2Value = props.get(CAPABILITY_2);
-			if (cap2Value != null) {
-				assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
-			}
+      bundle.start(0);
 
-			bundle.start(0);
+      props = connector.getRemoteProperties();
+      cap1Value = props.get(CAPABILITY_1);
+      assertEquals("Capability 1 should be available.", new Boolean(true), cap1Value);
+      cap2Value = props.get(CAPABILITY_2);
+      assertEquals("Capability 2 should be available.", new Boolean(true), cap2Value);
 
-			props = connector.getProperties();
-			cap1Value = props.get(CAPABILITY_1);
-			assertEquals("Capability 1 should be available.", new Boolean(true), cap1Value);
-			cap2Value = props.get(CAPABILITY_2);
-			assertEquals("Capability 2 should be available.", new Boolean(true), cap2Value);
+      bundle.stop(0);
 
-			bundle.stop(0);
+      props = connector.getProperties();
+      cap1Value = props.get(CAPABILITY_1);
+      if (cap1Value != null) {
+        assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
+      }
+      cap2Value = props.get(CAPABILITY_2);
+      if (cap2Value != null) {
+        assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
+      }
+    } finally {
+      try {
+        if (bundle != null && bundle.getState() != Bundle.RESOLVED) {
+          bundle.stop(0);
+        }
+      } catch (Exception e) {
+      }
+    }
+  }
 
-			props = connector.getProperties();
-			cap1Value = props.get(CAPABILITY_1);
-			if (cap1Value != null) {
-				assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
-			}
-			cap2Value = props.get(CAPABILITY_2);
-			if (cap2Value != null) {
-				assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
-			}
-		} finally {
-			try {
-				if (bundle != null && bundle.getState() != Bundle.RESOLVED) {
-					bundle.stop(0);
-				}
-			} catch (Exception e) {
-			}
-		}
-	}
+  public void testCapEvents() throws Exception {
+    try {
+      properties.clear();
+      connector.addRemoteDevicePropertyListener(this);
 
-	public void testCapEvents() throws Exception {
-		try {
-			properties.clear();
-			connector.addRemoteDevicePropertyListener(this);
+      bundle.start(0);
 
-			bundle.start(0);
+      // Events are processed asynchronously, wait prop change events to be delivered
+      Thread.sleep(3000);
 
-			// Events are processed asynchronously, wait prop change events to be delivered
-			Thread.sleep(3000);
+      Object cap1Value = properties.get(CAPABILITY_1);
+      assertEquals("Capability 1 should be set.", new Boolean(true), cap1Value);
+      Object cap2Value = properties.get(CAPABILITY_2);
+      assertEquals("Capability 2 should be set.", new Boolean(true), cap2Value);
 
-			Object cap1Value = properties.get(CAPABILITY_1);
-			assertEquals("Capability 1 should be set.", new Boolean(true), cap1Value);
-			Object cap2Value = properties.get(CAPABILITY_2);
-			assertEquals("Capability 2 should be set.", new Boolean(true), cap2Value);
+      bundle.stop(0);
+      Thread.sleep(3000);
 
-			bundle.stop(0);
-			Thread.sleep(3000);
+      cap1Value = properties.get(CAPABILITY_1);
+      if (cap1Value != null) {
+        assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
+      }
+      cap2Value = properties.get(CAPABILITY_2);
+      if (cap2Value != null) {
+        assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
+      }
 
-			cap1Value = properties.get(CAPABILITY_1);
-			if (cap1Value != null) {
-				assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
-			}
-			cap2Value = properties.get(CAPABILITY_2);
-			if (cap2Value != null) {
-				assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
-			}
+      // Testing properly removing of listeners
+      connector.removeRemoteDevicePropertyListener(this);
 
-			// Testing properly removing of listeners
-			connector.removeRemoteDevicePropertyListener(this);
+      bundle.start(0);
+      Thread.sleep(3000);
 
-			bundle.start(0);
-			Thread.sleep(3000);
+      cap1Value = properties.get(CAPABILITY_1);
+      if (cap1Value != null) {
+        assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
+      }
+      cap2Value = properties.get(CAPABILITY_2);
+      if (cap2Value != null) {
+        assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
+      }
+    } finally {
+      try {
+        if (bundle != null && bundle.getState() != Bundle.RESOLVED) {
+          bundle.stop(0);
+        }
+        connector.removeRemoteDevicePropertyListener(this);
+      } catch (Exception e) {
+      }
+    }
+  }
 
-			cap1Value = properties.get(CAPABILITY_1);
-			if (cap1Value != null) {
-				assertEquals("Capability 1 should not be available.", new Boolean(false), cap1Value);
-			}
-			cap2Value = properties.get(CAPABILITY_2);
-			if (cap2Value != null) {
-				assertEquals("Capability 2 should not be available.", new Boolean(false), cap2Value);
-			}
-		} finally {
-			try {
-				if (bundle != null && bundle.getState() != Bundle.RESOLVED) {
-					bundle.stop(0);
-				}
-				connector.removeRemoteDevicePropertyListener(this);
-			} catch (Exception e) {
-			}
-		}
-	}
+  public void testGetCapabilitiesReconnect() throws Exception {
+    try {
+      bundle.start(0);
 
-	public void testGetCapabilitiesReconnect() throws Exception {
-		try {
-			bundle.start(0);
+      Dictionary props = connector.getRemoteProperties();
+      Object capRemainValue = props.get(CAPABILITY_REMAIN);
+      assertEquals("Capability 3 should be available.", new Boolean(true), capRemainValue);
 
-			Dictionary props = connector.getProperties();
-			Object capRemainValue = props.get(CAPABILITY_REMAIN);
-			assertEquals("Capability 3 should be available.", new Boolean(true), capRemainValue);
+      // Disconnect and connect again
+      tearDown();
+      setUp();
 
-			// Disconnect and connect again
-			tearDown();
-			setUp();
-
-			props = connector.getProperties();
-			capRemainValue = props.get(CAPABILITY_REMAIN);
-			assertEquals("Capability 3 should be available.", new Boolean(true), capRemainValue);
-		} finally {
-			try {
-				if (bundle != null && bundle.getState() != Bundle.RESOLVED) {
-					bundle.stop(0);
-				}
-			} catch (Exception e) {
-			}
-		}
-	}
+      props = connector.getRemoteProperties();
+      capRemainValue = props.get(CAPABILITY_REMAIN);
+      assertEquals("Capability 3 should be available.", new Boolean(true), capRemainValue);
+    } finally {
+      try {
+        if (bundle != null && bundle.getState() != Bundle.RESOLVED) {
+          bundle.stop(0);
+        }
+      } catch (Exception e) {
+      }
+    }
+  }
 }
