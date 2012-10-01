@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2005, 2012 ProSyst Software GmbH and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     ProSyst Software GmbH - initial API and implementation
+ *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal;
 
 import java.lang.reflect.Array;
@@ -21,49 +31,50 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 
 public class DeviceConnectorSWTWrapper extends DeviceConnector implements DeviceConnectorSpi {
+  private static final boolean IAGENT_UI_ACCESS = Boolean.getBoolean("osgimanagement.iagent.access.warn");
 
-	private DeviceConnector delegate;
-	private Thread displayThread;
-	private static final boolean IAGENT_UI_ACCESS = Boolean.getBoolean("osgimanagement.iagent.access.warn");
+  private DeviceConnector      delegate;
+  private Thread               displayThread;
 
-	public DeviceConnectorSWTWrapper(DeviceConnector delegate, Display display) {
-		this.delegate = delegate;
-		this.displayThread = display.getThread();
-	}
+  public DeviceConnectorSWTWrapper(DeviceConnector delegate, Display display) {
+    this.delegate = delegate;
+    this.displayThread = display.getThread();
+  }
 
-	@Override
+  @Override
   public void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
-		delegate.addRemoteDevicePropertyListener(listener);
-	}
+    delegate.addRemoteDevicePropertyListener(listener);
+  }
 
-	@Override
+  @Override
   public void closeConnection() throws IAgentException {
-		checkThread();
-		delegate.closeConnection();
-	}
+    checkThread();
+    delegate.closeConnection();
+  }
 
-	private void checkThread() {
-		if (IAGENT_UI_ACCESS && Thread.currentThread() == displayThread) {
-      FrameworkPlugin.warning("Access to IAgent API in UI thread is detected", new Exception("Access to IAgent API in UI thread is detected"));
+  private void checkThread() {
+    if (IAGENT_UI_ACCESS && Thread.currentThread() == displayThread) {
+      FrameworkPlugin.warning("Access to IAgent API in UI thread is detected", new Exception(
+          "Access to IAgent API in UI thread is detected"));
     }
-	}
+  }
 
-	@Override
+  @Override
   public DeploymentManager getDeploymentManager() throws IAgentException {
-		checkThread();
-		return (DeploymentManager) wrapObject(delegate.getDeploymentManager());
-	}
+    checkThread();
+    return (DeploymentManager) wrapObject(delegate.getDeploymentManager());
+  }
 
-	@Override
+  @Override
   public Object getManager(String className) throws IAgentException {
-		checkThread();
-		return wrapObject(delegate.getManager(className));
-	}
+    checkThread();
+    return wrapObject(delegate.getManager(className));
+  }
 
-	@Override
+  @Override
   public Dictionary getProperties() {
-		return delegate.getProperties();
-	}
+    return delegate.getProperties();
+  }
 
   @Override
   public Dictionary getRemoteProperties() throws IAgentException {
@@ -71,104 +82,105 @@ public class DeviceConnectorSWTWrapper extends DeviceConnector implements Device
     return delegate.getRemoteProperties();
   }
 
-	@Override
+  @Override
   public ServiceManager getServiceManager() throws IAgentException {
-		checkThread();
-		return (ServiceManager) wrapObject(delegate.getServiceManager());
-	}
+    checkThread();
+    return (ServiceManager) wrapObject(delegate.getServiceManager());
+  }
 
-	@Override
+  @Override
   public VMManager getVMManager() throws IAgentException {
-		checkThread();
-		return (VMManager) wrapObject(delegate.getVMManager());
-	}
+    checkThread();
+    return (VMManager) wrapObject(delegate.getVMManager());
+  }
 
-	@Override
+  @Override
   public boolean isActive() {
-		return delegate.isActive();
-	}
+    return delegate.isActive();
+  }
 
-	@Override
+  @Override
   public void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
-		delegate.removeRemoteDevicePropertyListener(listener);
-	}
+    delegate.removeRemoteDevicePropertyListener(listener);
+  }
 
-	private Object wrapObject(Object delegate) {
-		if (delegate == null) {
+  private Object wrapObject(Object delegate) {
+    if (delegate == null) {
       return delegate;
     }
-		if (isJavaClasslibDescendant(delegate.getClass())) {
+    if (isJavaClasslibDescendant(delegate.getClass())) {
       return delegate;
     }
-		if (delegate.getClass().isArray()) {
-			int length = Array.getLength(delegate);
-			Object result = Array.newInstance(delegate.getClass().getComponentType(), length);
-			Object[] arr = (Object[]) delegate;
-			for (int i = 0; i < arr.length; i++) {
-				Array.set(result, i, wrapObject(arr[i]));
-			}
-			return result;
-		} else {
-			Class[] interfaces = delegate.getClass().getInterfaces();
-			interfaces = removeDuplicates(interfaces);
-			if (interfaces.length == 0) {
+    if (delegate.getClass().isArray()) {
+      int length = Array.getLength(delegate);
+      Object result = Array.newInstance(delegate.getClass().getComponentType(), length);
+      Object[] arr = (Object[]) delegate;
+      for (int i = 0; i < arr.length; i++) {
+        Array.set(result, i, wrapObject(arr[i]));
+      }
+      return result;
+    } else {
+      Class[] interfaces = delegate.getClass().getInterfaces();
+      interfaces = removeDuplicates(interfaces);
+      if (interfaces.length == 0) {
         return delegate;
       }
-			return Proxy.newProxyInstance(DeviceConnector.class.getClassLoader(), interfaces, new DelegatingHandler(delegate));
-		}
-	}
+      return Proxy
+          .newProxyInstance(DeviceConnector.class.getClassLoader(), interfaces, new DelegatingHandler(delegate));
+    }
+  }
 
-	private boolean isJavaClasslibDescendant(Class clazz) {
-		while (clazz != null) {
-			if (clazz.getName().startsWith("java")) {
+  private boolean isJavaClasslibDescendant(Class clazz) {
+    while (clazz != null) {
+      if (clazz.getName().startsWith("java")) {
         return true;
       }
-			clazz = clazz.getSuperclass();
-		}
-		return false;
-	}
+      clazz = clazz.getSuperclass();
+    }
+    return false;
+  }
 
-	private Class[] removeDuplicates(Class[] interfaces) {
-		Set allInterfaces = new HashSet();
-		allInterfaces.addAll(Arrays.asList(interfaces));
-		return (Class[]) allInterfaces.toArray(new Class[allInterfaces.size()]);
-	}
+  private Class[] removeDuplicates(Class[] interfaces) {
+    Set allInterfaces = new HashSet();
+    allInterfaces.addAll(Arrays.asList(interfaces));
+    return (Class[]) allInterfaces.toArray(new Class[allInterfaces.size()]);
+  }
 
-	@Override
+  @Override
   public boolean equals(Object obj) {
-		if (obj instanceof DeviceConnectorSWTWrapper) {
+    if (obj instanceof DeviceConnectorSWTWrapper) {
       return delegate.equals(((DeviceConnectorSWTWrapper) obj).delegate);
     }
-		return delegate.equals(obj);
-	}
+    return delegate.equals(obj);
+  }
 
-	@Override
+  @Override
   public int hashCode() {
-		return delegate.hashCode();
-	}
+    return delegate.hashCode();
+  }
 
-	private class DelegatingHandler implements InvocationHandler {
+  private class DelegatingHandler implements InvocationHandler {
 
-		private Object delegate;
+    private Object delegate;
 
-		public DelegatingHandler(Object delegate) {
-			this.delegate = delegate;
-		}
+    public DelegatingHandler(Object delegate) {
+      this.delegate = delegate;
+    }
 
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			checkThread();
-			String methodName = method.getName();
-			Class[] parameterTypes = method.getParameterTypes();
-			Object result = ReflectionUtils.invokeProtectedMethod(delegate, methodName, parameterTypes, args);
-			return wrapObject(result);
-		}
-	}
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      checkThread();
+      String methodName = method.getName();
+      Class[] parameterTypes = method.getParameterTypes();
+      Object result = ReflectionUtils.invokeProtectedMethod(delegate, methodName, parameterTypes, args);
+      return wrapObject(result);
+    }
+  }
 
-	public ConnectionManager getConnectionManager() {
-		return (ConnectionManager) wrapObject(((DeviceConnectorSpi) delegate).getConnectionManager());
-	}
+  public ConnectionManager getConnectionManager() {
+    return (ConnectionManager) wrapObject(((DeviceConnectorSpi) delegate).getConnectionManager());
+  }
 
-	public DeviceConnector getDeviceConnector() {
-		return this;
-	}
+  public DeviceConnector getDeviceConnector() {
+    return this;
+  }
 }
