@@ -15,12 +15,13 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.maven.internal.MavenCorePlugin;
 
-
-public class ImageHolder {
-
+public final class ImageHolder {
   private static final String OBJECT_PATH = "/icons/obj16/";
 
-  public static final String POM_ICON = OBJECT_PATH + "pom.gif";
+  public static final String  POM_ICON    = OBJECT_PATH + "pom.gif";
+
+  private ImageHolder() {
+  }
 
   public static void initializeImageRegistry(ImageRegistry registry) {
     registry.put(POM_ICON, MavenCorePlugin.getImageDescriptor(POM_ICON));
@@ -30,18 +31,18 @@ public class ImageHolder {
     MavenCorePlugin plugin = MavenCorePlugin.getDefault();
     if (plugin != null) {
       ImageRegistry registry = plugin.getImageRegistry();
-      if (registry != null)
+      if (registry != null) {
         return registry;
+      }
     }
     throw new IllegalStateException("Plugin's image registry is not available.");
   }
 
-  public static Image getImage(String id) {
+  public static Image getImage(String id) { // NO_UCD
     return getImageRegistry().get(id);
   }
 
   public static ImageDescriptor getImageDescriptor(String id) {
     return getImageRegistry().getDescriptor(id);
   }
-
 }

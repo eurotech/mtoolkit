@@ -71,7 +71,7 @@ public class MavenCorePlugin extends AbstractUIPlugin {
     ImageHolder.initializeImageRegistry(reg);
   }
 
-  public static void error(String message, Throwable t) {
+  public static void error(String message, Throwable t) { // NO_UCD
     log(newStatus(IStatus.ERROR, message, t));
   }
 
