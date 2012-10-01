@@ -54,460 +54,433 @@ import org.tigris.mtoolkit.util.DPPUtilities;
 /**
  * Create the page of the <code>BuildExportWizard</code>
  */
-public class BuildPage extends WizardPage implements ModifyListener,
-		KeyListener, SelectionListener {
+public class BuildPage extends WizardPage implements ModifyListener, KeyListener, SelectionListener {
+  /** Browse button label */
+  public static final String BROWSE_BUTTON     = "DPPEditor.BuildSection.DP_Browse_Button_Text";
+  /** .dpp file label */
+  public static final String DPP_FILE_LABEL    = "BuildExportWizard.DPPFileNameLabel";          //$NON-NLS-1$
+  /** Deployment package file label */
+  public static final String DP_FILE_LABEL     = "BuildExportWizard.DPFileNameLabel";
+  /** Text field for the deployment package file name */
+  private Text               dpFileText;
+  /** The Browse button for the .dpp file */
+  private Text               dppFileText;
+  /** The Browse button for the deployment package file name */
+  private Button             dpFileButton;
+  /** The Browse button for the .dpp file */
+  private Button             dppFileButton;
+  /** The given deployment package file */
+  private DPPFile            dppFile;
+  /** Build location of the previous loaded .dpp file */
+  private String             prevBuildLocation = "";
 
-	/** Browse button label */
-	public static final String BROWSE_BUTTON = "DPPEditor.BuildSection.DP_Browse_Button_Text";
+  /**
+   * Constructor of the BuildPage. Creates the new wizard page with given name,
+   * title and description
+   *
+   * @param pageName
+   *          the name of the page
+   * @param title
+   *          the title for this wizard page or <code>null</code> if none
+   * @param description
+   *          the description of the page
+   */
+  protected BuildPage(String pageName, String title, String description) {
+    super(pageName, title, null);
+    setDescription(description);
+    setPageComplete(false);
+  }
 
-	/** Build location label */
-	public static final String BUILD_LOCATION_LABEL = "DPPEditor.BuildSection.Build_Location_Label"; //$NON-NLS-1$
-	/** .dpp file label */
-	public static final String DPP_FILE_LABEL = "BuildExportWizard.DPPFileNameLabel"; //$NON-NLS-1$
-	/** Deployment package file label */
-	public static final String DP_FILE_LABEL = "BuildExportWizard.DPFileNameLabel";
-	/** Text field for the deployment package file name */
-	private Text dpFileText;
-	/** The Browse button for the .dpp file */
-	private Text dppFileText;
-	/** The Browse button for the deployment package file name */
-	private Button dpFileButton;
-	/** The Browse button for the .dpp file */
-	private Button dppFileButton;
-	/** The given deployment package file */
-	private DPPFile dppFile;
-	/** Build location of the previous loaded .dpp file */
-	private String prevBuildLocation = "";
+  /**
+   * Creates the fields of this page
+   *
+   * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+   */
+  public void createControl(Composite parent) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.BUILD_WIZARD);
+    Composite composite = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    layout.numColumns = 1;
+    composite.setLayout(layout);
+    createFields(composite);
 
-	/**
-	 * Constructor of the BuildPage. Creates the new wizard page with given
-	 * name, title and description
-	 * 
-	 * @param pageName
-	 *            the name of the page
-	 * @param title
-	 *            the title for this wizard page or <code>null</code> if none
-	 * @param description
-	 *            the description of the page
-	 */
-	protected BuildPage(String pageName, String title, String description) {
-		super(pageName, title, null);
-		setDescription(description);
-		setPageComplete(false);
-	}
+    setControl(composite);
+  }
 
-	/**
-	 * Creates the fields of this page
-	 * 
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
-	public void createControl(Composite parent) {
-		PlatformUI.getWorkbench().getHelpSystem()
-				.setHelp(parent, IHelpContextIds.BUILD_WIZARD);
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 1;
-		composite.setLayout(layout);
-		createFields(composite);
+  /**
+   * Creates label with the given parent and text.
+   *
+   * @param parent
+   *          the parent of the label
+   * @param text
+   *          the text of the label
+   * @return created label
+   */
+  public Label createLabel(Composite parent, String text) {
+    Label label = new Label(parent, SWT.NONE);
+    if (text != null) {
+      label.setText(text);
+    }
+    return label;
+  }
 
-		setControl(composite);
-	}
+  /**
+   * Creates text field with the given parent, text and tool tip
+   *
+   * @param parent
+   *          the parent of the text field
+   * @param label
+   *          the text of the label of the text field
+   * @param tooltip
+   *          the tool tip text of the label
+   * @return created text field
+   */
+  protected Text createText(Composite parent, String label, String tooltip) {
+    Label l = createLabel(parent, label);
+    if (tooltip != null) {
+      l.setToolTipText(tooltip);
+    }
+    Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
+    text.setText("");
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    text.setLayoutData(gd);
+    text.addKeyListener(this);
+    text.addModifyListener(this);
+    return text;
+  }
 
-	/**
-	 * Creates label with the given parent and text.
-	 * 
-	 * @param parent
-	 *            the parent of the label
-	 * @param text
-	 *            the text of the label
-	 * @return created label
-	 */
-	public Label createLabel(Composite parent, String text) {
-		Label label = new Label(parent, SWT.NONE);
-		if (text != null) {
-			label.setText(text);
-		}
-		return label;
-	}
+  /**
+   * Creates the button with given parent, text and style.
+   *
+   * @param parent
+   *          the parent of the button
+   * @param text
+   *          button's text
+   * @param style
+   *          button's style
+   * @return
+   */
+  public Button createButton(Composite parent, String text, int style) {
+    Button button = new Button(parent, style | SWT.NONE);
+    if (text != null) {
+      button.setText(text);
+    }
+    return button;
+  }
 
-	/**
-	 * Creates text field with the given parent, text and tool tip
-	 * 
-	 * @param parent
-	 *            the parent of the text field
-	 * @param label
-	 *            the text of the label of the text field
-	 * @param tooltip
-	 *            the tool tip text of the label
-	 * @return created text field
-	 */
-	protected Text createText(Composite parent, String label, String tooltip) {
-		Label l = createLabel(parent, label);
-		if (tooltip != null) {
-			l.setToolTipText(tooltip);
-		}
-		Text text = new Text(parent, SWT.BORDER | SWT.SINGLE);
-		text.setText("");
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		text.setLayoutData(gd);
-		text.addKeyListener(this);
-		text.addModifyListener(this);
-		return text;
-	}
+  /**
+   * Creates all fields of this wizard page
+   *
+   * @param container
+   *          the parent container
+   */
+  private void createFields(Composite container) {
+    container.setLayout(new GridLayout(3, false));
+    Label selectDPPFilelbl = new Label(container, SWT.NONE);
+    selectDPPFilelbl.setText(ResourceManager.getString("BuildExportWizard.SelectDPPFileLabel"));
+    GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+    gd.horizontalSpan = 3;
+    selectDPPFilelbl.setLayoutData(gd);
 
-	/**
-	 * Creates the button with given parent, text and style.
-	 * 
-	 * @param parent
-	 *            the parent of the button
-	 * @param text
-	 *            button's text
-	 * @param style
-	 *            button's style
-	 * @return
-	 */
-	public Button createButton(Composite parent, String text, int style) {
-		Button button = new Button(parent, style | SWT.NONE);
-		if (text != null) {
-			button.setText(text);
-		}
-		return button;
-	}
+    dppFileText = createText(container,
+        ResourceManager.getString(DPP_FILE_LABEL, ""), ResourceManager.getString(DPP_FILE_LABEL, "")); //$NON-NLS-1$
+    dppFileButton = createButton(container, ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
+    dppFileButton.addSelectionListener(this);
 
-	/**
-	 * Creates all fields of this wizard page
-	 * 
-	 * @param container
-	 *            the parent container
-	 */
-	private void createFields(Composite container) {
-		container.setLayout(new GridLayout(3, false));
-		Label selectDPPFilelbl = new Label(container, SWT.NONE);
-		selectDPPFilelbl.setText(ResourceManager
-				.getString("BuildExportWizard.SelectDPPFileLabel"));
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.horizontalSpan = 3;
-		selectDPPFilelbl.setLayoutData(gd);
+    Label exportDestinationLabel = new Label(container, SWT.NONE);
+    gd = new GridData(GridData.FILL_HORIZONTAL);
+    exportDestinationLabel.setText(ResourceManager.getString("BuildExportWizard.ExportDestinationLabel"));
+    exportDestinationLabel.setLayoutData(gd);
+    gd.horizontalSpan = 3;
 
-		dppFileText = createText(
-				container,
-				ResourceManager.getString(DPP_FILE_LABEL, ""), ResourceManager.getString(DPP_FILE_LABEL, "")); //$NON-NLS-1$
-		dppFileButton = createButton(container,
-				ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
-		dppFileButton.addSelectionListener(this);
+    dpFileText = createText(container,
+        ResourceManager.getString(DP_FILE_LABEL, ""), ResourceManager.getString(DP_FILE_LABEL, "")); //$NON-NLS-1$
+    dpFileButton = createButton(container, ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
+    dpFileButton.addSelectionListener(this);
+    if (dppFile != null) {
+      IPath path = new Path(dppFile.getFile().getAbsolutePath());
+      IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocation(path);
+      if (files.length != 0) {
+        dppFileText.setText(files[0].getFullPath().toString());
+      }
+    }
+  }
 
-		Label exportDestinationLabel = new Label(container, SWT.NONE);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		exportDestinationLabel.setText(ResourceManager
-				.getString("BuildExportWizard.ExportDestinationLabel"));
-		exportDestinationLabel.setLayoutData(gd);
-		gd.horizontalSpan = 3;
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.eclipse.swt.events.ModifyListener#modifyText(org.eclipse.swt.events
+   * .ModifyEvent)
+   */
+  public void modifyText(ModifyEvent e) {
+    if (e.getSource().equals(dppFileText)) {
+      if (!handleDPPFileSelected()) {
+        return;
+      } else {
+        setErrorMessage(null);
+        setPageComplete(true);
+      }
 
-		dpFileText = createText(
-				container,
-				ResourceManager.getString(DP_FILE_LABEL, ""), ResourceManager.getString(DP_FILE_LABEL, "")); //$NON-NLS-1$
-		dpFileButton = createButton(container,
-				ResourceManager.getString(BROWSE_BUTTON), SWT.PUSH);
-		dpFileButton.addSelectionListener(this);
-		if (dppFile != null) {
-			IPath path = new Path(dppFile.getFile().getAbsolutePath());
-			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
-					.findFilesForLocation(path);
-			if (files.length != 0) {
-				dppFileText.setText(files[0].getFullPath().toString());
-			}
-		}
-	}
+      BuildInfo buildInfo = this.dppFile.getBuildInfo();
+      if (buildInfo == null) {
+        return;
+      }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.swt.events.ModifyListener#modifyText(org.eclipse.swt.events
-	 * .ModifyEvent)
-	 */
-	public void modifyText(ModifyEvent e) {
-		if (e.getSource().equals(dppFileText)) {
-			if (!handleDPPFileSelected()) {
-				return;
-			}else{
-				setErrorMessage(null);
-				setPageComplete(true);
-			}
+      String newBuildLocation = buildInfo.getDpFileName();
+      String dpTextValue = dpFileText.getText();
+      try {
+        String canonicalPathToDPFile = new File(dpTextValue).getCanonicalPath();
+        if (canonicalPathToDPFile.equals(prevBuildLocation) || dpTextValue.equals("")) {
+          dpFileText.setText(newBuildLocation);
+        }
 
-			BuildInfo buildInfo = this.dppFile.getBuildInfo();
-			if (buildInfo == null) {
-				return;
-			}
+        prevBuildLocation = (new File(newBuildLocation)).getCanonicalPath();
+      } catch (IOException e1) {
+      }
+    }
 
-			String newBuildLocation = buildInfo.getDpFileName();
-			String dpTextValue = dpFileText.getText();
-			try {
-				String canonicalPathToDPFile = new File(dpTextValue).getCanonicalPath();
-				if (canonicalPathToDPFile.equals(prevBuildLocation) || dpTextValue.equals("")) {
-					dpFileText.setText(newBuildLocation);
-				}
+    if (e.getSource().equals(dpFileText)) {
+      File exportFile = new File(DPPUtilities.replaceString(dpFileText.getText(), "<.>", dppFile.getProjectLocation()));
+      // refresh warning meassage
+      if (DPPUtil.isValidExportDestination(exportFile)) {
+        setErrorMessage(null);
+        setPageComplete(true);
+      } else {
+        setPageComplete(false);
+        setErrorMessage(ResourceManager.getString("BuildExportWizard.errorInvalidExportDestination"));
+      }
+    }
+  }
 
-				prevBuildLocation = (new File(newBuildLocation)).getCanonicalPath();
-			} catch (IOException e1) {
-			}
-		}
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.eclipse.swt.events.KeyListener#keyPressed(org.eclipse.swt.events.
+   * KeyEvent )
+   */
+  public void keyPressed(KeyEvent e) {
+  }
 
-		if (e.getSource().equals(dpFileText)) {
-			File exportFile = new File(DPPUtilities.replaceString(dpFileText.getText(), "<.>",
-					dppFile.getProjectLocation()));
-			// refresh warning meassage
-			if (DPPUtil.isValidExportDestination(exportFile)) {
-				setErrorMessage(null);
-				setPageComplete(true);
-			} else {
-				setPageComplete(false);
-				setErrorMessage(ResourceManager.getString("BuildExportWizard.errorInvalidExportDestination"));
-			}
-		}
-	}
+  private boolean handleDPPFileSelected() {
+    // check if selected .dpp file is valid
+    String dppFileRelativeLocation = dppFileText.getText();
+    // relative location according to project
+    if (dppFileRelativeLocation.equals("")) {
+      setPageComplete(false);
+      String newMessage = ResourceManager.getString("BuildExportWizard.errorDPPFileNotSpecified");
+      setErrorMessage(newMessage);
+      return false;
+    }
+    if (!dppFileRelativeLocation.endsWith(".dpp")) {
+      setPageComplete(false);
+      String newMessage = ResourceManager.getString("BuildExportWizard.errorNotDPPFile");
+      setErrorMessage(newMessage);
+      return false;
+    }
+    IPath path = new Path(dppFileRelativeLocation);
+    boolean exist = ResourcesPlugin.getWorkspace().getRoot().exists(path);
+    if (!exist) {
+      setPageComplete(false);
+      String newMessage = ResourceManager.getString("BuildExportWizard.errorFileNotFoundInWorkspace");
+      setErrorMessage(newMessage);
+      return false;
+    }
+    boolean isSync = ResourcesPlugin.getWorkspace().getRoot().getFile(path).isSynchronized(0);
+    if (!isSync) {
+      setPageComplete(false);
+      String newMessage = ResourceManager.getString("BuildExportWizard.errorNotSynchronized");
+      setErrorMessage(newMessage);
+      return false;
+    }
+    try {
+      IFile f = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+      String absPath = f.getLocation().toOSString();
+      String project = f.getProject().getLocation().toOSString();
+      this.dppFile = new DPPFile(new File(absPath), project);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false;
+    }
+    return true;
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.swt.events.KeyListener#keyPressed(org.eclipse.swt.events.
-	 * KeyEvent )
-	 */
-	public void keyPressed(KeyEvent e) {
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events
+   * .KeyEvent )
+   */
+  public void keyReleased(KeyEvent e) {
+    keyReleaseOccured(e);
+  }
 
-	private boolean handleDPPFileSelected() {
-		// check if selected .dpp file is valid
-		String dppFileRelativeLocation = dppFileText.getText();
-		// relative location according to project
-		if (dppFileRelativeLocation.equals("")) {
-			setPageComplete(false);
-			String newMessage = ResourceManager
-					.getString("BuildExportWizard.errorDPPFileNotSpecified");
-			setErrorMessage(newMessage);
-			return false;
-		}
-		if (!dppFileRelativeLocation.endsWith(".dpp")) {
-			setPageComplete(false);
-			String newMessage = ResourceManager
-					.getString("BuildExportWizard.errorNotDPPFile");
-			setErrorMessage(newMessage);
-			return false;
-		}
-		IPath path = new Path(dppFileRelativeLocation);
-		boolean exist = ResourcesPlugin.getWorkspace().getRoot().exists(path);
-		if (!exist) {
-			setPageComplete(false);
-			String newMessage = ResourceManager
-					.getString("BuildExportWizard.errorFileNotFoundInWorkspace");
-			setErrorMessage(newMessage);
-			return false;
-		}
-		boolean isSync = ResourcesPlugin.getWorkspace().getRoot().getFile(path)
-				.isSynchronized(0);
-		if (!isSync) {
-			setPageComplete(false);
-			String newMessage = ResourceManager
-					.getString("BuildExportWizard.errorNotSynchronized");
-			setErrorMessage(newMessage);
-			return false;
-		}
-		try {
-			IFile f = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-			String absPath = f.getLocation().toOSString();
-			String project = f.getProject().getLocation().toOSString();
-			this.dppFile = new DPPFile(new File(absPath), project);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		return true;
-	}
+  /**
+   * If escape is pressed restore old value of the text field
+   *
+   * @param e
+   *          the key event
+   */
+  protected void keyReleaseOccured(KeyEvent e) {
+    if (e.character == '\u001b') { // Escape character
+      if (e.getSource() instanceof Text) {
+        Text text = (Text) e.getSource();
+        String value = text.getText();
+        text.setText(value); // restore old
+      }
+    }
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events
-	 * .KeyEvent )
-	 */
-	public void keyReleased(KeyEvent e) {
-		keyReleaseOccured(e);
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
+   * .swt.events.SelectionEvent)
+   */
+  public void widgetDefaultSelected(SelectionEvent e) {
+  }
 
-	/**
-	 * If escape is pressed restore old value of the text field
-	 * 
-	 * @param e
-	 *            the key event
-	 */
-	protected void keyReleaseOccured(KeyEvent e) {
-		if (e.character == '\u001b') { // Escape character
-			if (e.getSource() instanceof Text) {
-				Text text = (Text) e.getSource();
-				String value = text.getText();
-				text.setText(value); // restore old
-			}
-		}
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
+   * .events.SelectionEvent)
+   */
+  public void widgetSelected(SelectionEvent e) {
+    if (e.getSource() == dppFileButton) {
+      handleDPPBrowseButtonPressed();
+    }
+    if (e.getSource() == dpFileButton) {
+      handleDPBrowseButtonPressed();
+    }
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
-	 * .swt.events.SelectionEvent)
-	 */
-	public void widgetDefaultSelected(SelectionEvent e) {
-	}
+  private void handleDPPBrowseButtonPressed() {
+    ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(getShell(), new WorkbenchLabelProvider(),
+        new WorkbenchContentProvider());
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
-	 * .events.SelectionEvent)
-	 */
-	public void widgetSelected(SelectionEvent e) {
-		if (e.getSource() == dppFileButton) {
-			handleDPPBrowseButtonPressed();
-		}
-		if (e.getSource() == dpFileButton) {
-			handleDPBrowseButtonPressed();
-		}
-	}
+    dialog.setValidator(new FileValidator());
+    dialog.setAllowMultiple(false);
+    dialog.setTitle(ResourceManager.getString("BuildExportWizard.DPPFileSelectDialog_title"));
+    dialog.setMessage(ResourceManager.getString("BuildExportWizard.DPPFileSelectDialog_message"));
+    dialog.addFilter(new FileExtensionFilter("dpp")); //$NON-NLS-1$
+    dialog.setInput(PDEPlugin.getWorkspace().getRoot());
+    setInitialSelection(dialog);
+    if (dialog.open() == Window.OK) {
+      IFile file = (IFile) dialog.getFirstResult();
+      String value = file.getFullPath().toString();
+      if (value != null) {
+        dppFileText.setText(value);
+      }
+    }
+  }
 
-	private void handleDPPBrowseButtonPressed() {
-		ElementTreeSelectionDialog dialog = new ElementTreeSelectionDialog(
-				getShell(), new WorkbenchLabelProvider(),
-				new WorkbenchContentProvider());
+  private void setInitialSelection(ElementTreeSelectionDialog dialog) {
 
-		dialog.setValidator(new FileValidator());
-		dialog.setAllowMultiple(false);
-		dialog.setTitle(ResourceManager
-				.getString("BuildExportWizard.DPPFileSelectDialog_title"));
-		dialog.setMessage(ResourceManager
-				.getString("BuildExportWizard.DPPFileSelectDialog_message"));
-		dialog.addFilter(new FileExtensionFilter("dpp")); //$NON-NLS-1$
-		dialog.setInput(PDEPlugin.getWorkspace().getRoot());
-		setInitialSelection(dialog);
-		if (dialog.open() == Window.OK) {
-			IFile file = (IFile) dialog.getFirstResult();
-			String value = file.getFullPath().toString();
-			if (value != null) {
-				dppFileText.setText(value);
-			}
-		}
-	}
+    if (dppFileText == null) {
+      return;
+    }
+    String value = dppFileText.getText();
+    if (value.equals("")) {
+      return;
+    }
+    IPath path = new Path(value);
+    if (path.isEmpty()) {
+      return;
+    }
+    if (!ResourcesPlugin.getWorkspace().getRoot().exists(path)) {
+      return;
+    }
+    if (path.segmentCount() == 1) { // project
+      dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot().getProject(value));
+    }
+    if (path.segmentCount() >= 2) {
+      IFile f = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+      if (f.exists()) { // file
+        dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot().getFile(path));
+      } else { // folder
+        dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot().getFolder(path));
+      }
+    }
+  }
 
-	private void setInitialSelection(ElementTreeSelectionDialog dialog) {
+  private void handleDPBrowseButtonPressed() {
+    FileDialog dialog = new FileDialog(getContainer().getShell(), SWT.SAVE);
+    dialog.setFilterExtensions(new String[] {
+      "*.dp"}); //$NON-NLS-1$
+    String filterPath = dpFileText.getText();
+    dialog.setFilterPath(filterPath);
+    dialog.setText("Save");
+    String selectedFileName = dialog.open();
+    if (selectedFileName != null) {
+      DPPUtil.fileDialogLastSelection = selectedFileName;
+      dpFileText.setText(selectedFileName);
+    }
+  }
 
-		if (dppFileText == null) {
-			return;
-		}
-		String value = dppFileText.getText();
-		if (value.equals("")) {
-			return;
-		}
-		IPath path = new Path(value);
-		if (path.isEmpty()) {
-			return;
-		}
-		if (!ResourcesPlugin.getWorkspace().getRoot().exists(path)) {
-			return;
-		}
-		if (path.segmentCount() == 1) { // project
-			dialog.setInitialSelection(ResourcesPlugin.getWorkspace().getRoot()
-					.getProject(value));
-		}
-		if (path.segmentCount() >= 2) {
-			IFile f = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-			if (f.exists()) { // file
-				dialog.setInitialSelection(ResourcesPlugin.getWorkspace()
-						.getRoot().getFile(path));
-			} else { // folder
-				dialog.setInitialSelection(ResourcesPlugin.getWorkspace()
-						.getRoot().getFolder(path));
-			}
-		}
-	}
+  /**
+   * Sets the given deployment package file.
+   *
+   * @param dppFile
+   *          the deployment package file
+   * @param project
+   *          the project of the deployment package file
+   */
+  public void setDPPFileProject(DPPFile dppFile, IProject project) {
+    this.dppFile = dppFile;
+  }
 
-	private void handleDPBrowseButtonPressed() {
-		FileDialog dialog = new FileDialog(getContainer().getShell(), SWT.SAVE);
-		dialog.setFilterExtensions(new String[] { "*.dp" }); //$NON-NLS-1$
-		String filterPath = dpFileText.getText();
-		dialog.setFilterPath(filterPath);
-		dialog.setText("Save");
-		String selectedFileName = dialog.open();
-		if (selectedFileName != null) {
-			DPPUtil.fileDialogLastSelection = selectedFileName;
-			dpFileText.setText(selectedFileName);
-		}
-	}
+  /**
+   * Returns the deployment package file.
+   */
+  public DPPFile getDPPFile() {
+    return dppFile;
+  }
 
-	/**
-	 * Sets the given deployment package file.
-	 * 
-	 * @param dppFile
-	 *            the deployment package file
-	 * @param project
-	 *            the project of the deployment package file
-	 */
-	public void setDPPFileProject(DPPFile dppFile, IProject project) {
-		this.dppFile = dppFile;
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.eclipse.jface.wizard.WizardPage#getShell()
+   */
+  @Override
+  public Shell getShell() {
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    Shell shell = display.getActiveShell();
+    return shell;
+  }
 
-	/**
-	 * Returns the deployment package file.
-	 */
-	public DPPFile getDPPFile() {
-		return dppFile;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.WizardPage#getShell()
-	 */
-	public Shell getShell() {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		Shell shell = display.getActiveShell();
-		return shell;
-	}
-
-	/**
-	 * Sets the chosen deployment package file in the BuildInfo of the given
-	 * deployment package file.
-	 * 
-	 */
-	public boolean performFinish() {
-		String customBuildPath = dpFileText.getText();
-		customBuildPath = customBuildPath.trim();
-		File file = new File(customBuildPath);
-		if (file.exists()) {
-			StringBuffer sb = new StringBuffer();
-			sb.append(ResourceManager
-					.getString("BuildExportWizard.errorFileAlreadyExist1"));
-			sb.append(" ");
-			sb.append(customBuildPath);
-			sb.append(" ");
-			sb.append(ResourceManager
-					.getString("BuildExportWizard.errorFileAlreadyExist2"));
-			boolean replaceFile = MessageDialog
-					.openQuestion(null, ResourceManager
-							.getString("AntExportWizard.ConfirmReplace"), sb
-							.toString());
-			if (replaceFile) {
-				this.dppFile.restoreFromFile();
-				this.dppFile.getBuildInfo().setDpFileName(customBuildPath);
-				return true;
-			}
-			return false;
-		}
-		this.dppFile.restoreFromFile();
-		this.dppFile.getBuildInfo().setDpFileName(customBuildPath);
-		return true;
-	}
+  /**
+   * Sets the chosen deployment package file in the BuildInfo of the given
+   * deployment package file.
+   *
+   */
+  public boolean performFinish() {
+    String customBuildPath = dpFileText.getText();
+    customBuildPath = customBuildPath.trim();
+    File file = new File(customBuildPath);
+    if (file.exists()) {
+      StringBuffer sb = new StringBuffer();
+      sb.append(ResourceManager.getString("BuildExportWizard.errorFileAlreadyExist1"));
+      sb.append(" ");
+      sb.append(customBuildPath);
+      sb.append(" ");
+      sb.append(ResourceManager.getString("BuildExportWizard.errorFileAlreadyExist2"));
+      boolean replaceFile = MessageDialog.openQuestion(null,
+          ResourceManager.getString("AntExportWizard.ConfirmReplace"), sb.toString());
+      if (replaceFile) {
+        this.dppFile.restoreFromFile();
+        this.dppFile.getBuildInfo().setDpFileName(customBuildPath);
+        return true;
+      }
+      return false;
+    }
+    this.dppFile.restoreFromFile();
+    this.dppFile.getBuildInfo().setDpFileName(customBuildPath);
+    return true;
+  }
 
 }
