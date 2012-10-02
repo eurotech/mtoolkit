@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -25,43 +24,8 @@ import org.eclipse.core.runtime.Path;
 import org.tigris.mtoolkit.common.PluginUtilities;
 
 public class DPPUtilities {
-  private static final String  POINT_STRING       = ".";                                 //$NON-NLS-1$
-  public static final String   INSTALLED_PLATFORM = System.getProperty("os.name");
-  public static final char[]   INVALID_RESOURCE_CHARACTERS;
-  public static final String[] INVALID_RESOURCE_NAMES;
-
-  public static boolean        DEBUG              = Boolean.getBoolean("dpeditor.debug");
-
-  static {
-    char[] chars = null;
-    String[] names = null;
-    if (System.getProperty("os.name", "windows").toLowerCase().indexOf("win") != -1) {
-      // taken from
-      // http://support.microsoft.com/support/kb/articles/q177/5/06.asp
-      chars = new char[] {
-      '"', '*', '/', ':', '<', '>', '?', '\\', '|'
-      };
-      // list taken from
-      // http://support.microsoft.com/support/kb/articles/Q216/6/54.ASP
-      names = new String[] {
-      "aux", "clock$", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-      "com5", "com6", "com7", "com8", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-      "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-      "lpt3", "lpt4", "lpt5", "lpt6", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-      "lpt7", "lpt8", "lpt9", "nul", "prn"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-    } else {
-      // only front slash and null char are invalid on UNIXes
-      // taken from
-      // http://www.faqs.org/faqs/unix-faq/faq/part2/section-2.html
-      // backslash and colon are illegal path segments regardless of
-      // filesystem.
-      chars = new char[] {
-      '\0', '/', ':', '\\'
-      };
-    }
-    INVALID_RESOURCE_CHARACTERS = chars;
-    INVALID_RESOURCE_NAMES = names == null ? new String[0] : names;
-  }
+  private static final String POINT_STRING = ".";                                 //$NON-NLS-1$
+  public static boolean       DEBUG        = Boolean.getBoolean("dpeditor.debug");
 
   public static void debug(String s) {
     if (DEBUG) {
@@ -79,7 +43,7 @@ public class DPPUtilities {
   /**
    * Checks if given package name is correct package name and can be set as a
    * package.
-   * 
+   *
    * @param packageName
    *          the package name, which will be tested.
    * @return <code>true</code> if the package name may be the package of java
@@ -108,7 +72,7 @@ public class DPPUtilities {
   /**
    * Determines if the specified name characters may be part of a Java
    * identifier as other than the first character.
-   * 
+   *
    * @param name
    *          the name, which character will be tested.
    * @return <code>true</code> if the name may be part of a Java identifier;
@@ -157,7 +121,7 @@ public class DPPUtilities {
   /**
    * Replace in given <code>String</code> all appearance of the one string to
    * the other one.
-   * 
+   *
    * @param source
    *          the <code>String</code> in which be made replacement
    * @param toReplace
@@ -185,7 +149,7 @@ public class DPPUtilities {
 
   /**
    * Validate specified version name for correctness
-   * 
+   *
    * @param versionName
    * @return
    */
@@ -200,7 +164,7 @@ public class DPPUtilities {
 
   /**
    * Validate specified fix pack range for correctness
-   * 
+   *
    * @param fixPack
    * @return
    */
@@ -210,7 +174,7 @@ public class DPPUtilities {
 
   /**
    * Validate specified cersions range for correctness
-   * 
+   *
    * @param interval
    *          - interval or single version
    * @return
@@ -244,7 +208,7 @@ public class DPPUtilities {
 
   /**
    * This method parses exception from String into List items
-   * 
+   *
    * @param str
    * @return
    */
@@ -479,85 +443,6 @@ public class DPPUtilities {
         e.printStackTrace();
       }
     }
-  }
-
-  public static boolean containsArticles(String pathName) {
-    if (INSTALLED_PLATFORM.toLowerCase().indexOf("win") >= 0) {
-      // on windows, filename suffixes are not relevant to name validity
-      int dot = pathName.indexOf('.');
-      pathName = dot == -1 ? pathName : pathName.substring(0, dot);
-      return Arrays.binarySearch(INVALID_RESOURCE_NAMES, pathName.toLowerCase()) >= 0;
-    }
-    return false;
-  }
-
-  /**
-   * Checks if the given file name and extension are contains invalid chars
-   * 
-   * @param fileName
-   *          the name of the file
-   * @param fileExt
-   *          the extension of the file
-   * @return <code>true</code> if the given file name and extension not contains
-   *         invalid chars, <code>false</code> otherwise
-   */
-  public static boolean isCorrectStringFileName(String fileName, String fileExt) {
-    for (int i = 0; i < INVALID_RESOURCE_CHARACTERS.length; i++) {
-      if ((fileName.indexOf(INVALID_RESOURCE_CHARACTERS[i]) != -1)
-          || (fileExt.indexOf(INVALID_RESOURCE_CHARACTERS[i]) != -1)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Checks if the given name is valid name for the file.
-   * 
-   * @param f
-   *          the file name
-   * @param extension
-   *          the extension of the file
-   * @return <code>true</code> if the given name is valid file name,
-   *         <code>false</code> otherwise
-   */
-  public static boolean isCorrectFileName(String f, String extension) {
-    if (!extension.startsWith(".") && !extension.equals("")) {
-      extension = "." + extension;
-    }
-    int lastDot = f.lastIndexOf('*');
-    if (lastDot > -1) {
-      return false;
-    }
-    String temp = f;
-    do {
-      f = temp;
-      temp = replaceString(f, "//", "/");
-    } while (!temp.equals(f));
-    lastDot = f.lastIndexOf('.');
-    if (!extension.equals("")) {
-      if (lastDot < 0) {
-        return isCorrectFileName(f + "." + extension, extension);
-      }
-      String ext = f.substring(lastDot);
-      if (!extension.equals("") && !new File(extension).equals(new File(ext))) {
-        return false;
-      }
-    }
-    StringTokenizer stringToken = new StringTokenizer(f, "/\\");
-    if (!stringToken.hasMoreTokens()) {
-      return false;
-    }
-    boolean result = true;
-    while (stringToken.hasMoreTokens() && result) {
-      String nextToken = stringToken.nextToken();
-      if (nextToken.equals(".") || nextToken.equals("..")) {
-        return false;
-      }
-      result = result & isCorrectStringFileName(nextToken, extension);
-    }
-
-    return result;
   }
 
   public static Vector convertToVector(String str) {

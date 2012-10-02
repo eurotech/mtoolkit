@@ -59,6 +59,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.osgi.framework.Version;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.dpeditor.IHelpContextIds;
 import org.tigris.mtoolkit.dpeditor.util.DPPErrorHandler;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
@@ -69,75 +70,74 @@ import org.tigris.mtoolkit.util.DPPUtilities;
 /**
  * Create the page of the <code>NewDPPWizard</code>
  */
-public class NewDPPPage extends WizardPage implements ModifyListener,
-KeyListener, SelectionListener {
+public class NewDPPPage extends WizardPage implements ModifyListener, KeyListener, SelectionListener {
 
   /** Browse button label */
-  public static final String BROWSE_BUTTON = ResourceManager.getString("DPPEditor.Browse_Button"); //$NON-NLS-1$
+  public static final String BROWSE_BUTTON         = ResourceManager.getString("DPPEditor.Browse_Button"); //$NON-NLS-1$
   /** Browse button label */
-  public static final String BROWSE_BUTTON2 = ResourceManager.getString("DPPEditor.Browse_Button2"); //$NON-NLS-1$
+  public static final String BROWSE_BUTTON2        = ResourceManager.getString("DPPEditor.Browse_Button2"); //$NON-NLS-1$
 
   /** Target folder label */
-  public static final String TARGET_FOLDER_LABEL = "NewDPPWizard.target_folder_label"; //$NON-NLS-1$
+  public static final String TARGET_FOLDER_LABEL   = "NewDPPWizard.target_folder_label";                   //$NON-NLS-1$
   /** Deployment package file name label */
-  public static final String DPP_FILE_NAME_LABEL = "NewDPPWizard.file_name_label"; //$NON-NLS-1$
+  public static final String DPP_FILE_NAME_LABEL   = "NewDPPWizard.file_name_label";                       //$NON-NLS-1$
   /** Deployment package symbolic name label */
-  public static final String SYMBOLIC_NAME_LABEL = "NewDPPWizard.symbolic_name_label"; //$NON-NLS-1$
+  public static final String SYMBOLIC_NAME_LABEL   = "NewDPPWizard.symbolic_name_label";                   //$NON-NLS-1$
   /** Deployment package version label */
-  public static final String VERSION_LABEL = "NewDPPWizard.version_label"; //$NON-NLS-1$
+  public static final String VERSION_LABEL         = "NewDPPWizard.version_label";                         //$NON-NLS-1$
   /** Option label */
-  public static final String OPTION_LABEL = "NewDPPWizard.option_label"; //$NON-NLS-1$
+  public static final String OPTION_LABEL          = "NewDPPWizard.option_label";                          //$NON-NLS-1$
   /** Option check box label */
-  public static final String OPTION_CHECKBOX_LABEL = "NewDPPWizard.option_checkbox_label"; //$NON-NLS-1$
+  public static final String OPTION_CHECKBOX_LABEL = "NewDPPWizard.option_checkbox_label";                 //$NON-NLS-1$
 
   /** Text field for the target folder */
-  private Text targetFolText;
+  private Text               targetFolText;
   /** The browse button for the target folder */
-  private Button targetFolButton;
+  private Button             targetFolButton;
   /**
    * The string value of the target folder loaded when the target folder sets
    * from the selected element
    */
-  private String targetFolTxt = "";
+  private String             targetFolTxt          = "";
   /** Text field for the deployment package file name */
-  private Text fileNameText;
+  private Text               fileNameText;
   /** Text field for the deployment package symbolic name */
-  private Text symbolicNameText;
+  private Text               symbolicNameText;
   /**
    * The <code>boolean</code> flag shows if the symbolic name text must be set
    * the text from the deployment package file name text field
    */
-  private boolean symbolicNameFlag = false;
+  private boolean            symbolicNameFlag      = false;
   /** Text field for the deployment package version */
-  private Text versionText;
+  private Text               versionText;
   /** The container of the selection */
-  private IContainer parentFolder;
+  private IContainer         parentFolder;
   /** The option check box button */
-  private Button optionButton;
+  private Button             optionButton;
   /** The option text field */
-  private Text optionText;
+  private Text               optionText;
   /** The option browse button */
-  private Button optionBrowseButton;
+  private Button             optionBrowseButton;
 
   /** The selected project */
-  private IProject prj;
+  private IProject           prj;
 
   /**
    * The <code>boolean</code> flag shows if the wizard is just open and if the
    * wizard is just open do not makes one validation of the values
    */
-  private boolean firstTimeOpen = true;
+  private boolean            firstTimeOpen         = true;
 
   /**
-   * Constructor of the NewDPPPage. Creates the new wizard page with given
-   * name, title and description
-   * 
+   * Constructor of the NewDPPPage. Creates the new wizard page with given name,
+   * title and description
+   *
    * @param pageName
-   *            the name of the page
+   *          the name of the page
    * @param title
-   *            the title for this wizard page or <code>null</code> if none
+   *          the title for this wizard page or <code>null</code> if none
    * @param description
-   *            the description of the page
+   *          the description of the page
    */
   protected NewDPPPage(String pageName, String title, String description) {
     super(pageName, title, null);
@@ -147,7 +147,7 @@ KeyListener, SelectionListener {
 
   /**
    * Creates the fields of this page
-   * 
+   *
    * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
    */
   public void createControl(Composite parent) {
@@ -161,11 +161,11 @@ KeyListener, SelectionListener {
 
   /**
    * Creates label with the given parent and text.
-   * 
+   *
    * @param parent
-   *            the parent of the label
+   *          the parent of the label
    * @param text
-   *            the text of the label
+   *          the text of the label
    * @return created label
    */
   public Label createLabel(Composite parent, String text) {
@@ -179,13 +179,13 @@ KeyListener, SelectionListener {
   /**
    * Creates label with the given text in front of the created text field with
    * the given parent and tool tip
-   * 
+   *
    * @param parent
-   *            the parent of the text field
+   *          the parent of the text field
    * @param label
-   *            the text of the label of the text field
+   *          the text of the label of the text field
    * @param tooltip
-   *            the tool tip text of the label
+   *          the tool tip text of the label
    * @return created text field
    */
   protected Text createTextLabel(Composite parent, String label, String tooltip) {
@@ -199,9 +199,9 @@ KeyListener, SelectionListener {
 
   /**
    * Creates text field with the given parent.
-   * 
+   *
    * @param parent
-   *            the parent of the text field
+   *          the parent of the text field
    * @return created text field
    */
   protected Text createText(Composite parent) {
@@ -217,13 +217,13 @@ KeyListener, SelectionListener {
 
   /**
    * Creates the button with given parent, text and style.
-   * 
+   *
    * @param parent
-   *            the parent of the button
+   *          the parent of the button
    * @param text
-   *            button's text
+   *          button's text
    * @param style
-   *            button's style
+   *          button's style
    * @return
    */
   public Button createButton(Composite parent, String text, int style) {
@@ -236,11 +236,11 @@ KeyListener, SelectionListener {
 
   /**
    * Creates the check box button with given parent and text.
-   * 
+   *
    * @param parent
-   *            the parent of the button
+   *          the parent of the button
    * @param text
-   *            button's text
+   *          button's text
    * @return the created check box button
    */
   protected Button createCheckBox(Composite parent, String label) {
@@ -255,9 +255,9 @@ KeyListener, SelectionListener {
 
   /**
    * Creates all fields of this wizard page
-   * 
+   *
    * @param container
-   *            the parent container
+   *          the parent container
    */
   private void createFields(Composite container) {
     Composite composite = new Composite(container, SWT.NONE);
@@ -330,7 +330,7 @@ KeyListener, SelectionListener {
   /**
    * Validates all fields of the page, sets error message if needed and call
    * <code>setPageComplete</code> method of this page
-   * 
+   *
    * @see org.eclipse.swt.events.ModifyListener#modifyText(org.eclipse.swt.events.ModifyEvent)
    */
   public void modifyText(ModifyEvent e) {
@@ -343,7 +343,7 @@ KeyListener, SelectionListener {
     Object source = e.getSource();
     if (source == fileNameText) {
       String text = fileNameText.getText();
-      isNameOK = DPPUtilities.isCorrectFileName(text, "dpp");
+      isNameOK = PluginUtilities.isValidFileName(text + ".dpp");
       if (!isNameOK) {
         newMessage = ResourceManager.getString("NewDPPPage.error_file_name");
       }
@@ -368,11 +368,17 @@ KeyListener, SelectionListener {
       if (symbText != null) {
         if (!DPPUtilities.isCorrectPackage(symbText)) {
           if (symbText.startsWith(".") || symbText.endsWith(".")) {
-            newMessage = ResourceManager.format("NewDPPPage.error_sn", new Object[] { symbText });
+            newMessage = ResourceManager.format("NewDPPPage.error_sn", new Object[] {
+              symbText
+            });
           } else if (symbText.indexOf(" ") != -1) {
-            newMessage = ResourceManager.format("NewDPPPage.error_sn_space", new Object[] { symbText });
+            newMessage = ResourceManager.format("NewDPPPage.error_sn_space", new Object[] {
+              symbText
+            });
           } else {
-            newMessage = ResourceManager.format("NewDPPPage.error_sn_identifier", new Object[] { symbText });
+            newMessage = ResourceManager.format("NewDPPPage.error_sn_identifier", new Object[] {
+              symbText
+            });
           }
           isSymbolicOK = false;
         }
@@ -421,12 +427,13 @@ KeyListener, SelectionListener {
     if (newMessage == null || !newMessage.equals("")) {
       setErrorMessage(newMessage);
     }
-    setPageComplete(!folText.equals("") && isNameOK && !nameText.equals("") && isVersionOK && notFileExists && isSymbolicOK);
+    setPageComplete(!folText.equals("") && isNameOK && !nameText.equals("") && isVersionOK && notFileExists
+        && isSymbolicOK);
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.KeyListener#keyPressed(org.eclipse.swt.events.
    * KeyEvent )
@@ -436,7 +443,7 @@ KeyListener, SelectionListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events
    * .KeyEvent )
@@ -447,9 +454,9 @@ KeyListener, SelectionListener {
 
   /**
    * If escape is pressed restore old value of the text field
-   * 
+   *
    * @param e
-   *            the key event
+   *          the key event
    */
   protected void keyReleaseOccured(KeyEvent e) {
     if (e.character == '\u001b') { // Escape character
@@ -463,7 +470,7 @@ KeyListener, SelectionListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse
    * .swt.events.SelectionEvent)
@@ -473,7 +480,7 @@ KeyListener, SelectionListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt
    * .events.SelectionEvent)
@@ -495,16 +502,19 @@ KeyListener, SelectionListener {
   /**
    * Opens file dialog, set chosen file in to the given text field, change the
    * container of this selection and project if this needed.
-   * 
+   *
    * @param fileText
-   *            the text field in which will be set the selected file
+   *          the text field in which will be set the selected file
    * @param browseButton
-   *            the pushed button
+   *          the pushed button
    */
   protected void browseAction(Text fileText, Button browseButton) {
     String selectedPath = null;
-    Class[] acceptedClasses = new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaElement.class, IJavaProject.class };
+    Class[] acceptedClasses = new Class[] {
+        IJavaModel.class, IPackageFragmentRoot.class, IJavaElement.class, IJavaProject.class
+    };
     ViewerFilter filter = new TypedViewerFilter(acceptedClasses) {
+      @Override
       public boolean select(Viewer viewer, Object parent, Object element) {
         if (element instanceof IPackageFragmentRoot) {
           try {
@@ -580,8 +590,12 @@ KeyListener, SelectionListener {
    */
   private void optionBrowseAction() {
     String selectedFile = null;
-    String[] extNames = new String[] { "*.dpp" };
-    String[] ext = new String[] { "*.dpp" };
+    String[] extNames = new String[] {
+      "*.dpp"
+    };
+    String[] ext = new String[] {
+      "*.dpp"
+    };
     String fileExt = ".dpp";
     FileDialog dialog = new FileDialog(DPPErrorHandler.getShell(), SWT.OPEN);
     dialog.setFilterNames(extNames);
@@ -630,9 +644,9 @@ KeyListener, SelectionListener {
 
   /**
    * Sets the given container.
-   * 
+   *
    * @param parentFol
-   *            the new container
+   *          the new container
    */
   public void setParentFolder(IContainer parentFol) {
     this.parentFolder = parentFol;
@@ -651,9 +665,9 @@ KeyListener, SelectionListener {
 
   /**
    * Sets the project.
-   * 
+   *
    * @param prj
-   *            the new project
+   *          the new project
    */
   public void setProject(IProject prj) {
     this.prj = prj;
@@ -668,9 +682,10 @@ KeyListener, SelectionListener {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.eclipse.jface.wizard.WizardPage#getShell()
    */
+  @Override
   public Shell getShell() {
     Display display = PlatformUI.getWorkbench().getDisplay();
     Shell shell = display.getActiveShell();
@@ -715,8 +730,8 @@ KeyListener, SelectionListener {
   }
 
   /**
-   * Returns the selected dpp file, which properties will be set to the
-   * created dpp file.
+   * Returns the selected dpp file, which properties will be set to the created
+   * dpp file.
    */
   public String getDPPPropertyFile() {
     String result = null;
@@ -729,7 +744,6 @@ KeyListener, SelectionListener {
     return result;
   }
 
-
   public boolean performFinish() {
     return true;
   }
@@ -739,6 +753,7 @@ KeyListener, SelectionListener {
    * method returns the value of an internal state variable set by
    * <code>setPageComplete</code>. Subclasses may extend.
    */
+  @Override
   public boolean isPageComplete() {
     boolean result = super.isPageComplete();
     String folText = targetFolText == null ? "" : targetFolText.getText();
@@ -762,17 +777,23 @@ KeyListener, SelectionListener {
 
     boolean notFileExists = true;
     if (!firstTimeOpen) {
-      isNameOK = DPPUtilities.isCorrectFileName(nameText, "dpp");
+      isNameOK = PluginUtilities.isValidFileName(nameText + ".dpp");
       if (symbolicNameText != null) {
         String symbText = symbolicNameText.getText();
         symbText = symbolicNameText.getText();
         if (!DPPUtilities.isCorrectPackage(symbText)) {
           if (symbText.startsWith(".") || symbText.endsWith(".")) {
-            newMessage = ResourceManager.format("NewDPPPage.error_sn", new Object[] { symbText });
+            newMessage = ResourceManager.format("NewDPPPage.error_sn", new Object[] {
+              symbText
+            });
           } else if (symbText.indexOf(" ") != -1) {
-            newMessage = ResourceManager.format("NewDPPPage.error_sn_space", new Object[] { symbText });
+            newMessage = ResourceManager.format("NewDPPPage.error_sn_space", new Object[] {
+              symbText
+            });
           } else {
-            newMessage = ResourceManager.format("NewDPPPage.error_sn_identifier", new Object[] { symbText });
+            newMessage = ResourceManager.format("NewDPPPage.error_sn_identifier", new Object[] {
+              symbText
+            });
           }
           isSymbolicOK = false;
         }
@@ -849,7 +870,8 @@ KeyListener, SelectionListener {
     if (newMessage == null || !newMessage.equals("")) {
       setErrorMessage(newMessage);
     }
-    result = (!folText.equals("") && isNameOK && !nameText.equals("") && isVersionOK && notFileExists && isTargetOK && isSymbolicOK && isDeriveOk);
+    result = (!folText.equals("") && isNameOK && !nameText.equals("") && isVersionOK && notFileExists && isTargetOK
+        && isSymbolicOK && isDeriveOk);
     return result;
   }
 
