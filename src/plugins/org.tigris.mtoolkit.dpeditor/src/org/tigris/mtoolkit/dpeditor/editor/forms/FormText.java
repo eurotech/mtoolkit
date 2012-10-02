@@ -42,7 +42,7 @@ public class FormText {
 	/**
 	 * Constructor of the FormText. Sets the given Text field and his value.
 	 * Adds the needed listeners to the given Text field.
-	 * 
+	 *
 	 * @param text
 	 *            the text field
 	 */
@@ -53,9 +53,9 @@ public class FormText {
 	}
 
 	/**
-	 * Adds the given <code>IFormTextListener<code> into the 
+	 * Adds the given <code>IFormTextListener<code> into the
 	 * <code>Vector</code> with all listeners.
-	 * 
+	 *
 	 * @param listener
 	 *            the <code>IFormTextListener</code> which will be added
 	 */
@@ -69,7 +69,8 @@ public class FormText {
 	 */
 	private void addListeners() {
 		text.addKeyListener(new KeyAdapter() {
-			public void keyReleased(KeyEvent e) {
+			@Override
+      public void keyReleased(KeyEvent e) {
 				keyReleaseOccured(e);
 			}
 		});
@@ -79,7 +80,8 @@ public class FormText {
 			}
 		});
 		text.addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
+			@Override
+      public void focusLost(FocusEvent e) {
 				if (dirty) {
 					commit();
 				}
@@ -107,8 +109,9 @@ public class FormText {
 	 * only if this is needed.
 	 */
 	protected void editOccured(/* ModifyEvent e */) {
-		if (ignoreModify)
-			return;
+		if (ignoreModify) {
+      return;
+    }
 		dirty = true;
 		for (Iterator iter = listeners.iterator(); iter.hasNext();) {
 			((IFormTextListener) iter.next()).textDirty(this);
@@ -117,7 +120,7 @@ public class FormText {
 
 	/**
 	 * Returns the text control.
-	 * 
+	 *
 	 * @return Returns the text control
 	 */
 	public Text getControl() {
@@ -126,7 +129,7 @@ public class FormText {
 
 	/**
 	 * Returns the text value which is typed in the text field.
-	 * 
+	 *
 	 * @return the value of the text field
 	 */
 	public String getValue() {
@@ -136,7 +139,7 @@ public class FormText {
 	/**
 	 * Returns if the text field is changed or not. Returns <code>true</code> if
 	 * the text in this text control is changed, <code>false</code> otherwise.
-	 * 
+	 *
 	 * @return Returns if the text field is changed
 	 */
 	public boolean isDirty() {
@@ -146,7 +149,7 @@ public class FormText {
 	/**
 	 * Commits changes in the text field if the Enter is pressed and sets the
 	 * old value of the text field if the Escape is pressed.
-	 * 
+	 *
 	 * @param e
 	 *            the occurred key event
 	 */
@@ -165,7 +168,7 @@ public class FormText {
 	/**
 	 * Removes the given <code>IFormTextListener</code> from the list of all
 	 * listeners.
-	 * 
+	 *
 	 * @param listener
 	 *            the removed listener
 	 */
@@ -175,7 +178,7 @@ public class FormText {
 
 	/**
 	 * Sets is this FormText changing or not.
-	 * 
+	 *
 	 * @param newDirty
 	 *            <code>true</code> if the FormText is changing, otherwise
 	 *            <code>false</code>
@@ -186,7 +189,7 @@ public class FormText {
 
 	/**
 	 * Sets provided text.
-	 * 
+	 *
 	 * @param value
 	 *            the text which will be appeared in the text field
 	 */
@@ -200,7 +203,7 @@ public class FormText {
 	/**
 	 * Sets provided text and sets the flag to be ignore the modification or
 	 * not.
-	 * 
+	 *
 	 * @param value
 	 *            the text which will be appeared in the text field
 	 * @param blockNotification
@@ -217,7 +220,7 @@ public class FormText {
 	 * Enables the receiver if the argument is <code>true</code>, and disables
 	 * it otherwise. A disabled control is typically not selectable from the
 	 * user interface and draws with an inactive or "grayed" look.
-	 * 
+	 *
 	 * @param editable
 	 *            the new enabled state
 	 */
@@ -229,11 +232,11 @@ public class FormText {
 	 * Causes the receiver to have the <em>keyboard focus</em>, such that all
 	 * keyboard events will be delivered to it. Focus reassignment will respect
 	 * applicable platform constraints.
-	 * 
+	 *
 	 * @return <code>true</code> if the control got focus, and
 	 *         <code>false</code> if it was unable to.
 	 */
-	public boolean setFocus() {
+  public boolean setFocus() { // NO_UCD
 		return text.setFocus();
 	}
 }
