@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,19 +30,18 @@ import org.eclipse.pde.internal.core.bundle.BundlePluginModel;
 import org.eclipse.pde.internal.core.bundle.WorkspaceBundleModel;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.osgi.framework.Version;
-import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 /**
  * @since 5.0
  */
 public final class PluginExportManager {
-  private static final String EXPORTED_FILENAME_EXTENSION = ".jar";
-  private static final String EXPORT_FILENAME_SEPARATOR = "_";
-  private static final String EMPTY_VERSION = Version.emptyVersion.toString();
-  private static final Object NOT_EXPORTED = new Object();
+  private static final String           EXPORTED_FILENAME_EXTENSION = ".jar";
+  private static final String           EXPORT_FILENAME_SEPARATOR   = "_";
+  private static final String           EMPTY_VERSION               = Version.emptyVersion.toString();
+  private static final Object           NOT_EXPORTED                = new Object();
 
-  private IPluginExporter exporter;
-  private Map/*<IPluginModelBase,String>*/bundlesToExport = new HashMap();
+  private IPluginExporter               exporter;
+  private Map<IPluginModelBase, Object> bundlesToExport             = new HashMap();
 
   private PluginExportManager(IPluginExporter exporter) {
     this.exporter = exporter;
@@ -56,15 +54,6 @@ public final class PluginExportManager {
     } else {
       bundlesToExport.put(model, NOT_EXPORTED);
     }
-  }
-
-  public void addBundle(String symbolicName, String version) throws CoreException {
-    IPluginModelBase bundleModel = findModel(symbolicName, version);
-    if (bundleModel == null) {
-      throw UtilitiesPlugin.newException(IStatus.ERROR, "Cannot find bundle " + symbolicName + " (" + version
-          + ") in current target platform", null);
-    }
-    addBundle(bundleModel);
   }
 
   public static IPluginModelBase findModel(String symbolicName, String version) {
@@ -94,14 +83,6 @@ public final class PluginExportManager {
       return null;
     }
     return (String) bundlesToExport.get(model);
-  }
-
-  public String getLocation(String symbolicName, String version) {
-    IPluginModelBase bundleModel = findModel(symbolicName, version);
-    if (bundleModel == null) {
-      return null;
-    }
-    return getLocation(bundleModel);
   }
 
   public IStatus export(String location, IProgressMonitor monitor) {
@@ -186,7 +167,8 @@ public final class PluginExportManager {
 
   private void setBundlesExportLocation(IPluginModelBase model, String location) {
     if (bundlesToExport.get(model) == null) {
-      throw new IllegalStateException("Internal error: cannot save export location for bundle, which is not in export list");
+      throw new IllegalStateException(
+          "Internal error: cannot save export location for bundle, which is not in export list");
     }
     bundlesToExport.put(model, location);
   }
