@@ -24,8 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.core.plugin.ModelEntry;
-import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.bundle.BundlePluginModel;
 import org.eclipse.pde.internal.core.bundle.WorkspaceBundleModel;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
@@ -54,28 +52,6 @@ public final class PluginExportManager {
     } else {
       bundlesToExport.put(model, NOT_EXPORTED);
     }
-  }
-
-  public static IPluginModelBase findModel(String symbolicName, String version) {
-    ModelEntry entry = PluginRegistry.findEntry(symbolicName);
-    if (entry == null) {
-      return null;
-    }
-    if (version == null) {
-      IPluginModelBase model = entry.getModel();
-      if (model == null || !model.isEnabled()) {
-        return null;
-      }
-      return model;
-    }
-    IPluginModelBase[] activeModels = entry.getActiveModels();
-    for (int i = 0; i < activeModels.length; i++) {
-      IPluginModelBase model = activeModels[i];
-      if (new Version(version).compareTo(new Version(model.getPluginBase().getVersion())) == 0) {
-        return model;
-      }
-    }
-    return null;
   }
 
   public String getLocation(IPluginModelBase model) {
