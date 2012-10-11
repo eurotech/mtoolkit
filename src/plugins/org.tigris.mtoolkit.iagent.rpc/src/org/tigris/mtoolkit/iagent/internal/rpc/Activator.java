@@ -235,7 +235,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
     vmCommander = new VMCommander(context, pmpServer, shutdownOnDisconnect);
   }
 
-  private void registerConsole(BundleContext context) {
+  private synchronized void registerConsole(BundleContext context) {
     // always trying mBS console first
     try {
       console = new ProSystRemoteConsole();
@@ -251,9 +251,10 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
     }
   }
 
-  private void unregisterConsole() {
+  private synchronized void unregisterConsole() {
     if (console != null) {
       console.unregister();
+      console = null;
     }
   }
 

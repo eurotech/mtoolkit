@@ -10,14 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc.console;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
 
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -27,25 +23,18 @@ import org.eclipse.osgi.framework.internal.core.FrameworkCommandProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.rpc.Remote;
-import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 
-//TODO This class needs rework
-public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase implements Remote {
+public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase {
   private ServiceTracker           providersTrack;
   private BundleContext            context;
-
   private FrameworkCommandProvider frameworkProvider;
   private boolean                  fwProviderInitializationTried = false;
 
-  private PrintStream              oldSystemOut;
-  private PrintStream              oldSystemErr;
-  private PrintStream              newSystemStream;
-  private boolean                  replacedSystemOutputs         = false;
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#register(org.osgi.framework.BundleContext)
+   */
   public void register(BundleContext bundleContext) {
     // make sure we are on equinox
     Framework.class.getName();
@@ -54,24 +43,25 @@ public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase impleme
     super.register(bundleContext);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#unregister()
+   */
   public void unregister() {
     super.unregister();
-    restoreSystemOutputs();
     providersTrack.close();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#registerOutput(org.tigris.mtoolkit.iagent.pmp.RemoteObject)
+   */
   public void registerOutput(RemoteObject remoteObject) throws PMPException {
     super.registerOutput(remoteObject);
-    replaceSystemOutputs();
     printPrompt();
   }
 
-  public Class[] remoteInterfaces() {
-    return new Class[] {
-      RemoteConsole.class
-    };
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteConsole#executeCommand(java.lang.String)
+   */
   public void executeCommand(String line) {
     try {
       if (line == null || line.trim().length() == 0) {
@@ -87,43 +77,6 @@ public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase impleme
       }
     } finally {
       printPrompt();
-    }
-  }
-
-  protected void doReleaseConsole(PMPConnection conn) {
-    synchronized (dispatchers) {
-      WriteDispatcher dispatcher = (WriteDispatcher) dispatchers.remove(conn);
-      if (dispatcher != null) {
-        dispatcher.finish();
-      }
-      if (dispatchers.size() == 0) {
-        restoreSystemOutputs();
-      }
-    }
-  }
-
-  private synchronized void replaceSystemOutputs() {
-    if (!replacedSystemOutputs) {
-      if (newSystemStream == null) {
-        newSystemStream = new PrintStream(new RedirectedSystemOutput());
-      }
-      oldSystemOut = System.out;
-      oldSystemErr = System.err;
-      System.setOut(newSystemStream);
-      System.setErr(newSystemStream);
-      replacedSystemOutputs = true;
-    }
-  }
-
-  private synchronized void restoreSystemOutputs() {
-    if (replacedSystemOutputs) {
-      if (System.out == newSystemStream) {
-        System.setOut(oldSystemOut);
-      }
-      if (System.err == newSystemStream) {
-        System.setErr(oldSystemErr);
-      }
-      replacedSystemOutputs = false;
     }
   }
 
@@ -226,44 +179,5 @@ public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase impleme
     Method method = obj.getClass().getDeclaredMethod(methodName, null);
     method.setAccessible(true);
     return method.invoke(obj, null);
-  }
-
-  private class RedirectedSystemOutput extends OutputStream {
-    private final byte[] singleByte = new byte[1];
-
-    public synchronized void write(byte[] var0, int var1, int var2) throws IOException {
-      oldSystemOut.write(var0, var1, var2);
-      synchronized (dispatchers) {
-        for (Iterator it = dispatchers.values().iterator(); it.hasNext();) {
-          WriteDispatcher dispatcher = (WriteDispatcher) it.next();
-          dispatcher.buffer.write(var0, var1, var2);
-          synchronized (dispatcher) {
-            dispatcher.notifyAll();
-          }
-        }
-      }
-    }
-
-    /* (non-Javadoc)
-     * @see java.io.OutputStream#write(byte[])
-     */
-    public synchronized void write(byte[] var0) throws IOException {
-      write(var0, 0, var0.length);
-    }
-
-    /* (non-Javadoc)
-     * @see java.io.OutputStream#write(int)
-     */
-    public synchronized void write(int arg0) throws IOException {
-      singleByte[0] = (byte) (arg0 & 0xFF);
-      write(singleByte, 0, 1);
-    }
-
-    /* (non-Javadoc)
-     * @see java.io.OutputStream#flush()
-     */
-    public synchronized void flush() throws IOException {
-      oldSystemOut.flush();
-    }
   }
 }

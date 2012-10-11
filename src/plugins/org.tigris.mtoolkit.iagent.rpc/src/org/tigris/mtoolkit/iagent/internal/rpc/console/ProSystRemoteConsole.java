@@ -24,22 +24,11 @@ import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.rpc.Remote;
-import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 
 import com.prosyst.util.parser.ParserService;
 
-public final class ProSystRemoteConsole extends RemoteConsoleServiceBase implements Remote {
+public final class ProSystRemoteConsole extends RemoteConsoleServiceBase {
   private ServiceTracker parserServiceTrack;
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
-   */
-  public Class[] remoteInterfaces() {
-    return new Class[] {
-      RemoteConsole.class
-    };
-  }
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#register(org.osgi.framework.BundleContext)
@@ -47,7 +36,6 @@ public final class ProSystRemoteConsole extends RemoteConsoleServiceBase impleme
   public void register(BundleContext bundleContext) {
     // check we are on mBS
     ParserService.class.getName();
-
     parserServiceTrack = new ServiceTracker(bundleContext, ParserService.class.getName(), null) {
       public void removedService(ServiceReference reference, Object service) {
         super.removedService(reference, service);
@@ -56,17 +44,7 @@ public final class ProSystRemoteConsole extends RemoteConsoleServiceBase impleme
 
     };
     parserServiceTrack.open();
-
     super.register(bundleContext);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#createDispatcher(org.tigris.mtoolkit.iagent.pmp.PMPConnection,
-   *  org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer, org.tigris.mtoolkit.iagent.pmp.RemoteObject)
-   */
-  protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
-      throws PMPException {
-    return new ProSystWriteDispatcher(conn, buffer, remoteObject);
   }
 
   /* (non-Javadoc)
@@ -89,6 +67,14 @@ public final class ProSystRemoteConsole extends RemoteConsoleServiceBase impleme
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#createDispatcher(org.tigris.mtoolkit.iagent.pmp.PMPConnection, org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer, org.tigris.mtoolkit.iagent.pmp.RemoteObject)
+   */
+  protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
+      throws PMPException {
+    return new ProSystWriteDispatcher(conn, buffer, remoteObject);
+  }
+
   private void parserServiceRemoved(ServiceReference ref, Object service) {
     List dispatchers = getDispatchers();
     for (Iterator it = dispatchers.iterator(); it.hasNext();) {
@@ -102,7 +88,7 @@ public final class ProSystRemoteConsole extends RemoteConsoleServiceBase impleme
   private final class ProSystWriteDispatcher extends WriteDispatcher {
     private ServiceReference parserServiceReference;
     private ParserService    parserInstance;
-    private final Object     parserServiceLock = new Object();
+    private Object           parserServiceLock = new Object();
 
     public ProSystWriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object) throws PMPException {
       super(conn, buffer, object);
@@ -128,6 +114,12 @@ public final class ProSystRemoteConsole extends RemoteConsoleServiceBase impleme
       }
     }
 
+    public void parserServiceRemoved(ServiceReference ref) {
+      if (ref == parserServiceReference) {
+        releaseParserService();
+      }
+    }
+
     private void initParserInstance() {
       parserServiceReference = parserServiceTrack.getServiceReference();
       if (parserServiceReference != null) {
@@ -148,17 +140,11 @@ public final class ProSystRemoteConsole extends RemoteConsoleServiceBase impleme
         }
       }
     }
-
-    public void parserServiceRemoved(ServiceReference ref) {
-      if (ref == parserServiceReference) {
-        releaseParserService();
-      }
-    }
   }
 
   private final class DispatcherOutput extends OutputStream {
-    private final WriteDispatcher dispatcher;
-    private final byte[]          singleByte = new byte[1];
+    private WriteDispatcher dispatcher;
+    private byte[]          singleByte = new byte[1];
 
     DispatcherOutput(WriteDispatcher dispatcher) {
       this.dispatcher = dispatcher;
