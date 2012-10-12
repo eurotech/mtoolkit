@@ -31,7 +31,6 @@ import org.tigris.mtoolkit.iagent.rpc.Remote;
 
 public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
   /** constant used for the pmp configuration */
-
   public static final String URI            = "uri";
 
   public static final String PORT           = "port";
@@ -103,15 +102,21 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
       int failureAction = determineFailureAction();
       switch (failureAction) {
       case FAILURE_RANDOM:
-        DebugUtils.debug(this, "Failure action set to 'random'. Retrying...");
+        if (DebugUtils.DEBUG_ENABLED) {
+          DebugUtils.debug(this, "Failure action set to 'random'. Retrying...");
+        }
         socket = new ServerSocket(0);
         port = socket.getLocalPort();
-        DebugUtils.debug(this, "PMP server listening on " + port);
+        if (DebugUtils.DEBUG_ENABLED) {
+          DebugUtils.debug(this, "PMP server listening on " + port);
+        }
         break;
       case FAILURE_RETRY:
         Integer timeoutProp = Integer.getInteger("iagent.pmp.bindFailureAction.retryTimeout");
         int timeout = timeoutProp != null ? timeoutProp.intValue() : 10000;
-        DebugUtils.debug(this, "Failure action set to 'retry'. Retrying with timeout " + timeout);
+        if (DebugUtils.DEBUG_ENABLED) {
+          DebugUtils.debug(this, "Failure action set to 'retry'. Retrying with timeout " + timeout);
+        }
         try {
           Thread.sleep(timeout);
         } catch (InterruptedException e1) {
