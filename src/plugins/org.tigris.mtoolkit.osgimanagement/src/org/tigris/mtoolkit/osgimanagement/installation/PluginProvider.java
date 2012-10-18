@@ -56,448 +56,417 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
  */
 public final class PluginProvider implements InstallationItemProvider {
 
-	public class PluginItem implements InstallationItem {
-		private IPluginModelBase pluginBase;
-		private InstallationItemProvider provider;
-		private File preparedItem;
+  public class PluginItem implements InstallationItem {
+    private IPluginModelBase         pluginBase;
+    private InstallationItemProvider provider;
+    private File                     preparedItem;
 
-		/**
-		 * @since 6.0
-		 */
-		public PluginItem(IPluginModelBase pluginBase, InstallationItemProvider provider) {
-			this.pluginBase = pluginBase;
-			this.provider = provider;
-		}
+    /**
+     * @since 6.0
+     */
+    public PluginItem(IPluginModelBase pluginBase, InstallationItemProvider provider) {
+      this.pluginBase = pluginBase;
+      this.provider = provider;
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.tigris.mtoolkit.common.installation.InstallationItem#getMimeType
-		 * ()
-		 */
-		public String getMimeType() {
-			return "application/java-archive";
-		}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.installation.InstallationItem#getMimeType()
+     */
+    public String getMimeType() {
+      return "application/java-archive";
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.tigris.mtoolkit.common.installation.InstallationItem#getInputStream
-		 * ()
-		 */
-		public InputStream getInputStream() throws IOException {
-			String location = getLocation();
-			if (location == null) {
-				throw new IOException("Installation item is not prepared.");
-			}
-			return new FileInputStream(location);
-		}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.installation.InstallationItem#getInputStream()
+     */
+    public InputStream getInputStream() throws IOException {
+      String location = getLocation();
+      if (location == null) {
+        throw new IOException("Installation item is not prepared.");
+      }
+      return new FileInputStream(location);
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.tigris.mtoolkit.common.installation.InstallationItem#prepare(
-		 * org.eclipse.core.runtime.IProgressMonitor, java.util.Map)
-		 */
-		public IStatus prepare(IProgressMonitor monitor, Map properties) {
-			if (pluginBase == null) {
-				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
-						"Can not parse the manifest file for the plugin");
-			}
-			BundleDescription description = pluginBase.getBundleDescription();
-			if (description == null) {
-				return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "This is not valid OSGI plug-in project.");
-			}
-			List items = new ArrayList();
-			items.add(this);
-			if (monitor.isCanceled()) {
-				return Status.CANCEL_STATUS;
-			}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.installation.InstallationItem#prepare(org.eclipse.core.runtime.IProgressMonitor, java.util.Map)
+     */
+    public IStatus prepare(IProgressMonitor monitor, Map properties) {
+      if (pluginBase == null) {
+        return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Can not parse the manifest file for the plugin");
+      }
+      BundleDescription description = pluginBase.getBundleDescription();
+      if (description == null) {
+        return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "This is not valid OSGI plug-in project.");
+      }
+      List items = new ArrayList();
+      items.add(this);
+      if (monitor.isCanceled()) {
+        return Status.CANCEL_STATUS;
+      }
 
-			return provider.prepareItems(items, properties, monitor);
-		}
+      return provider.prepareItems(items, properties, monitor);
+    }
 
-		/**
-		 * @since 6.0
-		 */
-		public String getLocation() {
-			if (preparedItem != null) {
-				return preparedItem.getAbsolutePath();
-			}
-			if (pluginBase.getUnderlyingResource() == null) {
-				// target platform bundle -> directly get the location
-				return pluginBase.getInstallLocation();
-			}
-			return null;
-		}
+    /**
+     * @since 6.0
+     */
+    public String getLocation() {
+      if (preparedItem != null) {
+        return preparedItem.getAbsolutePath();
+      }
+      if (pluginBase.getUnderlyingResource() == null) {
+        // target platform bundle -> directly get the location
+        return pluginBase.getInstallLocation();
+      }
+      return null;
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.tigris.mtoolkit.common.installation.InstallationItem#getName()
-		 */
-		public String getName() {
-			BundleDescription description = pluginBase.getBundleDescription();
-			return (description != null) ? description.getName() : null;
-		}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.installation.InstallationItem#getName()
+     */
+    public String getName() {
+      BundleDescription description = pluginBase.getBundleDescription();
+      return (description != null) ? description.getName() : null;
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.tigris.mtoolkit.common.installation.InstallationItem#dispose()
-		 */
-		public void dispose() {
-			if (preparedItem != null) {
-				if (preparedItem.delete()) {
-					preparedItem = null;
-				}
-			}
-		}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.installation.InstallationItem#dispose()
+     */
+    public void dispose() {
+      if (preparedItem != null) {
+        if (preparedItem.delete()) {
+          preparedItem = null;
+        }
+      }
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-		 */
-		public Object getAdapter(Class adapter) {
-			if (adapter.equals(IBaseModel.class)) {
-				return pluginBase;
-			} else {
-				return null;
-			}
-		}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+     */
+    public Object getAdapter(Class adapter) {
+      if (adapter.equals(IBaseModel.class)) {
+        return pluginBase;
+      } else {
+        return null;
+      }
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.tigris.mtoolkit.common.installation.InstallationItem#getChildren
-		 * ()
-		 */
-		public InstallationItem[] getChildren() {
-			return null;
-		}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.installation.InstallationItem#getChildren()
+     */
+    public InstallationItem[] getChildren() {
+      return null;
+    }
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.tigris.mtoolkit.common.installation.InstallationItem#setLocation
-		 * (java.io.File)
-		 */
-		public void setLocation(File file) {
-			if (preparedItem != null && !preparedItem.equals(file)) {
-				// delete the previous prepared item
-				preparedItem.delete();
-			}
-			preparedItem = file;
-		}
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.installation.InstallationItem#setLocation(java.io.File)
+     */
+    public void setLocation(File file) {
+      if (preparedItem != null && !preparedItem.equals(file)) {
+        // delete the previous prepared item
+        preparedItem.delete();
+      }
+      preparedItem = file;
+    }
 
-		/**
-		 * @since 6.0
-		 */
-		public IPluginModelBase getPlugin() {
-			return pluginBase;
-		}
+    /**
+     * @since 6.0
+     */
+    public IPluginModelBase getPlugin() {
+      return pluginBase;
+    }
 
-		/**
-		 * This method checks for required bundles for specified plugin missing
-		 * on target framework. A dialog with missing bundles is shown to user
-		 * to select and install necessary bundles.
-		 * 
-		 * @param framework
-		 *            - target framework
-		 * @param bundlesToInstall
-		 * @return IStatus
-		 */
-		IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall,
-				Map preparationProps) {
-			if (monitor.isCanceled()) {
-				return Status.CANCEL_STATUS;
-			}
+    /**
+     * This method checks for required bundles for specified plugin missing on
+     * target framework. A dialog with missing bundles is shown to user to
+     * select and install necessary bundles.
+     *
+     * @param framework
+     *          - target framework
+     * @param bundlesToInstall
+     * @return IStatus
+     */
+    IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall,
+        Map preparationProps) {
+      if (monitor.isCanceled()) {
+        return Status.CANCEL_STATUS;
+      }
 
-			if (!framework.isConnected()) {
-				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
-						"Connection to framework was lost.");
-			}
-			// find missing bundle dependencies
-			BundleDescription descr = pluginBase.getBundleDescription();
-			if (descr == null) {
-				String path = "";
-				try {
-					path = " for: " + pluginBase.getUnderlyingResource().getProject().getName();
-				} catch (Throwable t) {
-				}
-				return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Missing bundle description"
-						+ path);
-			}
-			BundleDescription[] required = descr.getResolvedRequires();
-			final Vector dependencies = new Vector();
-			for (int i = 0; i < required.length; i++) {
-				String symbName = required[i].getSymbolicName();
-				Version ver = required[i].getVersion();
-				Set ids = framework.getBundlesKeys();
-				Iterator iter = ids.iterator();
-				boolean found = false;
-				while (iter.hasNext()) {
-					Bundle bundle = framework.findBundle(iter.next());
-					try {
-						if (bundle.getName().equals(symbName) && bundle.getVersion().compareTo(ver.toString()) >= 0) {
-							found = true;
-							break;
-						}
-					} catch (IAgentException e) {
-						FrameworkPlugin.error(e);
-					}
-				}
-				if (!found) {
-					dependencies.addElement(required[i]);
-				}
-			}
+      if (!framework.isConnected()) {
+        return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Connection to framework was lost.");
+      }
+      // find missing bundle dependencies
+      BundleDescription descr = pluginBase.getBundleDescription();
+      if (descr == null) {
+        String path = "";
+        try {
+          path = " for: " + pluginBase.getUnderlyingResource().getProject().getName();
+        } catch (Throwable t) {
+        }
+        return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Missing bundle description" + path);
+      }
+      BundleDescription[] required = descr.getResolvedRequires();
+      final Vector dependencies = new Vector();
+      for (int i = 0; i < required.length; i++) {
+        String symbName = required[i].getSymbolicName();
+        Version ver = required[i].getVersion();
+        Set ids = framework.getBundlesKeys();
+        Iterator iter = ids.iterator();
+        boolean found = false;
+        while (iter.hasNext()) {
+          Bundle bundle = framework.findBundle(iter.next());
+          try {
+            if (bundle.getName().equals(symbName) && bundle.getVersion().compareTo(ver.toString()) >= 0) {
+              found = true;
+              break;
+            }
+          } catch (IAgentException e) {
+            FrameworkPlugin.error(e);
+          }
+        }
+        if (!found) {
+          dependencies.addElement(required[i]);
+        }
+      }
 
-			// ask user which dependencies to install
-			if (dependencies.size() > 0) {
-				final boolean result[] = new boolean[1];
-				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						DependenciesSelectionDialog dependenciesDialog = new DependenciesSelectionDialog(Display
-								.getDefault().getActiveShell(), dependencies);
-						dependenciesDialog.open();
-						if (dependenciesDialog.getReturnCode() == Window.OK) {
-							Object[] selected = dependenciesDialog.getSelected();
-							dependencies.removeAllElements();
-							for (int i = 0; i < selected.length; i++) {
-								dependencies.addElement(selected[i]);
-							}
-						} else {
-							result[0] = true;
-						}
-					}
-				});
-				if (result[0]) {
-					return Status.CANCEL_STATUS;
-				}
-				// install dependencies
-				for (int i = 0; i < dependencies.size(); i++) {
-					descr = (BundleDescription) dependencies.elementAt(i);
-					final InstallationItem installationItem = getInstallationItem(descr);
-					if (installationItem != null) {
-						IStatus preparationStatus = installationItem.prepare(monitor, preparationProps);
-						if (preparationStatus != null) {
-							if (preparationStatus.matches(IStatus.ERROR) || preparationStatus.matches(IStatus.CANCEL)) {
-								return preparationStatus;
-							}
-						}
-						bundlesToInstall.add(installationItem);
-					}
-				}
-			}
-			return Status.OK_STATUS;
-		}
-	}
+      // ask user which dependencies to install
+      if (dependencies.size() > 0) {
+        final boolean result[] = new boolean[1];
+        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+          public void run() {
+            DependenciesSelectionDialog dependenciesDialog = new DependenciesSelectionDialog(Display.getDefault()
+                .getActiveShell(), dependencies);
+            dependenciesDialog.open();
+            if (dependenciesDialog.getReturnCode() == Window.OK) {
+              Object[] selected = dependenciesDialog.getSelected();
+              dependencies.removeAllElements();
+              for (int i = 0; i < selected.length; i++) {
+                dependencies.addElement(selected[i]);
+              }
+            } else {
+              result[0] = true;
+            }
+          }
+        });
+        if (result[0]) {
+          return Status.CANCEL_STATUS;
+        }
+        // install dependencies
+        for (int i = 0; i < dependencies.size(); i++) {
+          descr = (BundleDescription) dependencies.elementAt(i);
+          final InstallationItem installationItem = getInstallationItem(descr);
+          if (installationItem != null) {
+            IStatus preparationStatus = installationItem.prepare(monitor, preparationProps);
+            if (preparationStatus != null) {
+              if (preparationStatus.matches(IStatus.ERROR) || preparationStatus.matches(IStatus.CANCEL)) {
+                return preparationStatus;
+              }
+            }
+            bundlesToInstall.add(installationItem);
+          }
+        }
+      }
+      return Status.OK_STATUS;
+    }
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#
-	 * getInstallationItem(java.lang.Object)
-	 */
-	public InstallationItem getInstallationItem(Object resource) {
-		IPluginModelBase model = null;
-		if (resource instanceof IJavaProject) {
-			IProject project = ((IJavaProject) resource).getProject();
-			model = PluginRegistry.findModel(project);
-		} else if (resource instanceof IProject) {
-			IProject project = ((IProject) resource).getProject();
-			model = PluginRegistry.findModel(project);
-		} else if (resource instanceof BundleDescription) {
-			model = PDEUtils.findBundle((BundleDescription) resource);
-		} else {
-			model = (IPluginModelBase) resource;
-		}
-		if (model == null) {
-			return null;
-		}
-		return new PluginItem(model, this);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#getInstallationItem(java.lang.Object)
+   */
+  public InstallationItem getInstallationItem(Object resource) {
+    IPluginModelBase model = null;
+    if (resource instanceof IJavaProject) {
+      IProject project = ((IJavaProject) resource).getProject();
+      model = PluginRegistry.findModel(project);
+    } else if (resource instanceof IProject) {
+      IProject project = ((IProject) resource).getProject();
+      model = PluginRegistry.findModel(project);
+    } else if (resource instanceof BundleDescription) {
+      BundleDescription desc = (BundleDescription) resource;
+      if (desc.isResolved()) {
+        resource = PDEUtils.findBundle(desc);
+      }
+    }
+    if (resource instanceof IPluginModelBase) {
+      IPluginModelBase plugin = (IPluginModelBase) resource;
+      if (plugin.isValid() && plugin.isEnabled()) {
+        model = plugin;
+      }
+    }
+    if (model == null) {
+      return null;
+    }
+    return new PluginItem(model, this);
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#isCapable
-	 * (java.lang.Object)
-	 */
-	public boolean isCapable(Object resource) {
-		if (resource instanceof IProject || resource instanceof IJavaProject) {
-			IProject project = null;
-			if (resource instanceof IJavaProject) {
-				project = ((IJavaProject) resource).getProject();
-			} else {
-				project = ((IProject) resource).getProject();
-			}
-			if (project.isOpen()) {
-				return PDE.hasPluginNature(project);
-			}
-		} else if (resource instanceof IPluginModelBase) {
-			return true;
-		}
-		return false;
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#isCapable(java.lang.Object)
+   */
+  public boolean isCapable(Object resource) {
+    if (resource instanceof IProject || resource instanceof IJavaProject) {
+      IProject project = null;
+      if (resource instanceof IJavaProject) {
+        project = ((IJavaProject) resource).getProject();
+      } else {
+        project = ((IProject) resource).getProject();
+      }
+      if (project.isOpen()) {
+        return PDE.hasPluginNature(project);
+      }
+    } else if (resource instanceof BundleDescription) {
+      BundleDescription desc = (BundleDescription) resource;
+      if (desc.isResolved()) {
+        resource = PDEUtils.findBundle(desc);
+      }
+    }
+    if (resource instanceof IPluginModelBase) {
+      IPluginModelBase plugin = (IPluginModelBase) resource;
+      if (plugin.isValid() && plugin.isEnabled()) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#init
-	 * (org.eclipse.core.runtime.IConfigurationElement)
-	 */
-	public void init(IConfigurationElement element) throws CoreException {
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#init(org.eclipse.core.runtime.IConfigurationElement)
+   */
+  public void init(IConfigurationElement element) throws CoreException {
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#prepareItems
-	 * (java.util.List, java.util.Map,
-	 * org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	public IStatus prepareItems(List/* <InstallationItem> */items, Map properties, IProgressMonitor monitor) {
-		try {
-			IStatus result = export(items, monitor);
-			if (!result.isOK())
-				return result;
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#prepareItems(java.util.List, java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
+   */
+  public IStatus prepareItems(List/* <InstallationItem> */items, Map properties, IProgressMonitor monitor) {
+    try {
+      IStatus result = export(items, monitor);
+      if (!result.isOK()) {
+        return result;
+      }
 
-			List<PluginItem> pluginItems = new ArrayList<PluginItem>();
-			// post process exported bundles
-			for (int i = 0; i < items.size(); i++) {
-				Object item = items.get(i);
-				if (item instanceof PluginItem) {
-					pluginItems.add((PluginItem) item);
-				}
-				if (monitor.isCanceled()) {
-					return Status.CANCEL_STATUS;
-				}
-			}
+      List<PluginItem> pluginItems = new ArrayList<PluginItem>();
+      // post process exported bundles
+      for (int i = 0; i < items.size(); i++) {
+        Object item = items.get(i);
+        if (item instanceof PluginItem) {
+          pluginItems.add((PluginItem) item);
+        }
+        if (monitor.isCanceled()) {
+          return Status.CANCEL_STATUS;
+        }
+      }
 
-			IStatus postProcessStatus = postProcess(pluginItems, properties, monitor);
-			if (!postProcessStatus.isOK()) {
-				FrameworkPlugin.getDefault().getLog().log(postProcessStatus);
-			}
-			if (postProcessStatus.matches(IStatus.CANCEL)) {
-				return postProcessStatus;
-			}
-		} finally {
-			monitor.done();
-		}
-		return Status.OK_STATUS;
-	}
+      IStatus postProcessStatus = postProcess(pluginItems, properties, monitor);
+      if (!postProcessStatus.isOK()) {
+        FrameworkPlugin.getDefault().getLog().log(postProcessStatus);
+      }
+      if (postProcessStatus.matches(IStatus.CANCEL)) {
+        return postProcessStatus;
+      }
+    } finally {
+      monitor.done();
+    }
+    return Status.OK_STATUS;
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.tigris.mtoolkit.common.installation.InstallationItemProvider#getName
-	 * ()
-	 */
-	public String getName() {
-		return "Plug-ins provider";
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see
+   * org.tigris.mtoolkit.common.installation.InstallationItemProvider#getName
+   * ()
+   */
+  public String getName() {
+    return "Plug-ins provider";
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#
-	 * getImageDescriptor()
-	 */
-	public ImageDescriptor getImageDescriptor() {
-		return UIResources.getImageDescriptor(UIResources.PLUGIN_ICON);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProvider#getImageDescriptor()
+   */
+  public ImageDescriptor getImageDescriptor() {
+    return UIResources.getImageDescriptor(UIResources.PLUGIN_ICON);
+  }
 
-	private IStatus export(List items, final IProgressMonitor monitor) {
-		try {
-			monitor.beginTask("Exporting...", 10);
+  private IStatus export(List items, final IProgressMonitor monitor) {
+    try {
+      monitor.beginTask("Exporting...", 10);
 
-			ArrayList pluginsToBeExported = new ArrayList();
-			for (int i = 0; i < items.size(); i++) {
-				Object item = items.get(i);
-				if (item instanceof PluginItem) {
-					pluginsToBeExported.add(((PluginItem) item).getPlugin());
-				}
-			}
+      ArrayList pluginsToBeExported = new ArrayList();
+      for (int i = 0; i < items.size(); i++) {
+        Object item = items.get(i);
+        if (item instanceof PluginItem) {
+          pluginsToBeExported.add(((PluginItem) item).getPlugin());
+        }
+      }
 
-			if (pluginsToBeExported.isEmpty()) {
-				// shortcut if we don't have anything for export
-				return Status.OK_STATUS;
-			}
-			monitor.worked(2);
+      if (pluginsToBeExported.isEmpty()) {
+        // shortcut if we don't have anything for export
+        return Status.OK_STATUS;
+      }
+      monitor.worked(2);
 
-			IPath destinationPath = FrameworkPlugin.getDefault().getStateLocation();// .append("plugins");
+      IPath destinationPath = FrameworkPlugin.getDefault().getStateLocation();// .append("plugins");
 
-			PluginExportManager exportManager = PluginExportManager.create();
-			for (int i = 0; i < pluginsToBeExported.size(); i++) {
-				IPluginModelBase iPluginModelBase = (IPluginModelBase) pluginsToBeExported.get(i);
-				exportManager.addBundle(iPluginModelBase);
-			}
+      PluginExportManager exportManager = PluginExportManager.create();
+      for (int i = 0; i < pluginsToBeExported.size(); i++) {
+        IPluginModelBase iPluginModelBase = (IPluginModelBase) pluginsToBeExported.get(i);
+        exportManager.addBundle(iPluginModelBase);
+      }
 
-			IStatus result = exportManager.export(destinationPath.toString(), monitor);
-			if (!result.isOK()) {
-				return result;
-			}
+      IStatus result = exportManager.export(destinationPath.toString(), monitor);
+      if (!result.isOK()) {
+        return result;
+      }
 
-			// set the exported location of PluginItem-s
-			for (int i = 0; i < items.size(); i++) {
-				Object item = items.get(i);
-				if (item instanceof PluginItem) {
-					PluginItem pluginItem = (PluginItem) item;
-					if (pluginItem.getPlugin().getUnderlyingResource() != null) {
-						// Set location only for exported plug-ins. Plug-ins
-						// from TP will not be exported.
-						pluginItem.setLocation(new File(exportManager.getLocation(pluginItem.getPlugin())));
-					}
-				}
-			}
-		} finally {
-			monitor.done();
-		}
-		return Status.OK_STATUS;
-	}
+      // set the exported location of PluginItem-s
+      for (int i = 0; i < items.size(); i++) {
+        Object item = items.get(i);
+        if (item instanceof PluginItem) {
+          PluginItem pluginItem = (PluginItem) item;
+          if (pluginItem.getPlugin().getUnderlyingResource() != null) {
+            // Set location only for exported plug-ins. Plug-ins
+            // from TP will not be exported.
+            pluginItem.setLocation(new File(exportManager.getLocation(pluginItem.getPlugin())));
+          }
+        }
+      }
+    } finally {
+      monitor.done();
+    }
+    return Status.OK_STATUS;
+  }
 
-	private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
-		File file[] = new File[items.size()];
-		try {
-			for (int i = 0; i < items.size(); i++) {
-				PluginItem item = items.get(i);
-				String exportLocation = item.getLocation();
-				if (exportLocation == null || !(file[i] = new File(exportLocation)).exists()) {
-					return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(),
-							"Plugin is not exported properly.");
-				}
-				if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))
-						&& !AndroidUtils.isConvertedToDex(file[i])) {
-					File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/"
-							+ file[i].getName());
-					convertedFile.getParentFile().mkdirs();
-					AndroidUtils.convertToDex(file[i], convertedFile, monitor);
-					item.setLocation(convertedFile);
-				}
-				IStatus status = CertUtils.signItems(new InstallationItem[] { item }, monitor, properties);
-				if (status != null) {
-					if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
-						return status;
-					}
-				}
-			}
-		} catch (IOException ioe) {
-			monitor.done();
-			return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
-		}
-		return Status.OK_STATUS;
-	}
+  private IStatus postProcess(List<PluginItem> items, Map properties, IProgressMonitor monitor) {
+    File file[] = new File[items.size()];
+    try {
+      for (int i = 0; i < items.size(); i++) {
+        PluginItem item = items.get(i);
+        String exportLocation = item.getLocation();
+        if (exportLocation == null || !(file[i] = new File(exportLocation)).exists()) {
+          return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Plugin is not exported properly.");
+        }
+        if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))
+            && !AndroidUtils.isConvertedToDex(file[i])) {
+          File convertedFile = new File(FrameworkPlugin.getDefault().getStateLocation() + "/dex/" + file[i].getName());
+          convertedFile.getParentFile().mkdirs();
+          AndroidUtils.convertToDex(file[i], convertedFile, monitor);
+          item.setLocation(convertedFile);
+        }
+        IStatus status = CertUtils.signItems(new InstallationItem[] {
+          item
+        }, monitor, properties);
+        if (status != null) {
+          if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
+            return status;
+          }
+        }
+      }
+    } catch (IOException ioe) {
+      monitor.done();
+      return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
+    }
+    return Status.OK_STATUS;
+  }
 }
