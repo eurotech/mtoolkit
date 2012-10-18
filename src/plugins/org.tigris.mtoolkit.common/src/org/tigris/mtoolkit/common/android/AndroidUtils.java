@@ -125,9 +125,9 @@ public class AndroidUtils {
    */
   public static void convertDpToDex(File dpFile, File outputFile, IProgressMonitor monitor) throws IOException {
     File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.extracted");
-    FileUtils.deleteDir(tmpDir);
+    FileUtils.delete(tmpDir);
     File dexDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.dex");
-    FileUtils.deleteDir(dexDir);
+    FileUtils.delete(dexDir);
 
     JarInputStream jis = null;
     JarOutputStream jos = null;
@@ -288,7 +288,7 @@ public class AndroidUtils {
    */
   public static boolean isDpConvertedToDex(File dpFile) {
     File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation().toFile(), "tmp.extracted");
-    FileUtils.deleteDir(tmpDir);
+    FileUtils.delete(tmpDir);
 
     JarInputStream jis = null;
     try {

@@ -25,7 +25,7 @@ public class FileUtils {
 
   /**
    * Extracts zip file.
-   * 
+   *
    * @param zipFile
    *          the zip file to extract
    * @param destinationDir
@@ -75,7 +75,7 @@ public class FileUtils {
 
   /**
    * Makes zip file.
-   * 
+   *
    * @param src
    *          the source file or directory
    * @param zipFile
@@ -112,20 +112,24 @@ public class FileUtils {
 
   private static String getPrefix(String originalPrefix) {
     // check for empty prefix
-    if (originalPrefix == null || "".equals(originalPrefix))
+    if (originalPrefix == null || "".equals(originalPrefix)) {
       return "";
+    }
     // if there is a leading slash, remove it
     if (originalPrefix.startsWith("/")) {
-      if (originalPrefix.length() == 1)
+      if (originalPrefix.length() == 1) {
         return "";
+      }
       originalPrefix = originalPrefix.substring(1);
     }
-    if (!originalPrefix.endsWith("/"))
+    if (!originalPrefix.endsWith("/")) {
       originalPrefix = originalPrefix.concat("/");
+    }
     return originalPrefix;
   }
 
-  private static void addFileToArchive(File archiveBase, File file, ZipOutputStream zip, String prefix) throws IOException {
+  private static void addFileToArchive(File archiveBase, File file, ZipOutputStream zip, String prefix)
+      throws IOException {
     if (file.isFile()) {
       String name = getEntryName(archiveBase, file, prefix);
       FileInputStream input = new FileInputStream(file);
@@ -163,12 +167,14 @@ public class FileUtils {
   private static String getRelativePath(File base, File file) throws IOException {
     String basePath = base.getAbsolutePath();
     String filePath = file.getAbsolutePath();
-    if (!filePath.startsWith(basePath))
+    if (!filePath.startsWith(basePath)) {
       throw new IOException("Cannot add file to archive from different directory: " + filePath);
+    }
     String relativePath = filePath.substring(basePath.length());
     relativePath = relativePath.replace(File.separatorChar, '/');
-    if (relativePath.startsWith("/"))
+    if (relativePath.startsWith("/")) {
       relativePath = relativePath.substring(1);
+    }
     return relativePath;
   }
 
@@ -205,26 +211,29 @@ public class FileUtils {
    * Deletes all files and subdirectories under dir. Returns true if all
    * deletions were successful. If a deletion fails, the method stops attempting
    * to delete and returns false.
-   * 
-   * @param dir
+   *
+   * @param file
    * @return
    */
-  public static boolean deleteDir(File dir) {
-    if (dir.isDirectory()) {
-      File[] children = dir.listFiles();
+  public static boolean delete(File file) {
+    if (file.isDirectory()) {
+      File[] children = file.listFiles();
+      if (children == null) {
+        return false;
+      }
       for (int i = 0; i < children.length; i++) {
-        boolean success = deleteDir(children[i]);
+        boolean success = delete(children[i]);
         if (!success) {
           return false;
         }
       }
     }
-    return dir.delete();
+    return file.delete();
   }
 
   /**
    * Returns file extension in lower case.
-   * 
+   *
    * @param file
    * @return
    */
@@ -243,10 +252,11 @@ public class FileUtils {
   }
 
   public static void close(ZipFile zip) {
-    if (zip != null)
+    if (zip != null) {
       try {
         zip.close();
       } catch (IOException e) {
       }
+    }
   }
 }

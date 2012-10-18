@@ -554,7 +554,7 @@ public final class CertUtils {
   private static IStatus signDp(File dpFile, File signedFile, IProgressMonitor monitor, Map properties) throws IOException {
     SubMonitor subMonitor = SubMonitor.convert(monitor);
     File tmpDir = new File(UtilitiesPlugin.getDefault().getStateLocation() + "/tmp.extracted");
-    FileUtils.deleteDir(tmpDir);
+    FileUtils.delete(tmpDir);
 
     JarInputStream jis = null;
     JarOutputStream jos = null;
@@ -621,7 +621,7 @@ public final class CertUtils {
         } catch (IOException e) {
         }
       }
-      FileUtils.deleteDir(tmpDir);
+      FileUtils.delete(tmpDir);
     }
   }
 
