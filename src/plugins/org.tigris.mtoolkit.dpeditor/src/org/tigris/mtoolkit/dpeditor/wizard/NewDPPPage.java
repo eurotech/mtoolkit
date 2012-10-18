@@ -159,6 +159,17 @@ public class NewDPPPage extends WizardPage implements ModifyListener, KeyListene
     setControl(composite);
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
+   */
+  @Override
+  public void setVisible(boolean aVisible) {
+    super.setVisible(aVisible);
+    if (aVisible) {
+      fileNameText.setFocus();
+    }
+  }
+
   /**
    * Creates label with the given parent and text.
    *
