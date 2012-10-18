@@ -10,17 +10,11 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.dpeditor.editor.base;
 
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.ui.IEditorPart;
 import org.tigris.mtoolkit.dpeditor.editor.forms.IFormPage;
 
 public interface IDPPEditorPage extends IEditorPart, IFormPage {
-	boolean contextMenuAboutToShow(IMenuManager manager);
+  boolean performGlobalAction(String id);
 
-	IAction getAction(String id);
-
-	boolean performGlobalAction(String id);
-
-	void update();
+  void update();
 }

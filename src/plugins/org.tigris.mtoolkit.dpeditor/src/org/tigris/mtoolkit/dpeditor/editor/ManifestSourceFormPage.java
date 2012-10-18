@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.dpeditor.editor;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Composite;
@@ -68,7 +67,8 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * Note: overriden to return always true because the isEditable() isn't
 	 * enough to guarentee the contents read-only property
 	 */
-	public boolean isEditorInputReadOnly() {
+	@Override
+  public boolean isEditorInputReadOnly() {
 		return true;
 	}
 
@@ -90,7 +90,8 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * Note: Overriden so we can filter out the actions contained in the String
 	 * array filterActionsIds
 	 */
-	public void setAction(String actionID, IAction action) {
+	@Override
+  public void setAction(String actionID, IAction action) {
 		for (int i = 0; i < filterActionsIds.length; i++) {
 			if (actionID.equals(filterActionsIds[i])) {
 				return;
@@ -136,7 +137,8 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * org.eclipse.ui.texteditor.AbstractTextEditor#init(org.eclipse.ui.IEditorSite
 	 * , org.eclipse.ui.IEditorInput)
 	 */
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+	@Override
+  public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 
 		setDocumentProvider(getEditor().getDocumentProvider());
 		super.init(site, input);
@@ -160,7 +162,8 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * 
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#close(boolean)
 	 */
-	public void close(boolean save) {
+	@Override
+  public void close(boolean save) {
 		editor.close(save);
 	}
 
@@ -170,21 +173,11 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * 
 	 * @see org.eclipse.ui.editors.text.TextEditor#dispose()
 	 */
-	public void dispose() {
+	@Override
+  public void dispose() {
 		editor = null;
 		doc = null;
 		super.dispose();
-	}
-
-	/*
-	 * Checks whether this page can shows the context menu. Returns
-	 * <code>false</code>, which means that there no context menu.
-	 * 
-	 * @seeorg.tigris.mtoolkit.dpeditor.editor.base.IDPPEditorPage#
-	 * contextMenuAboutToShow (org.eclipse.jface.action.IMenuManager)
-	 */
-	public boolean contextMenuAboutToShow(IMenuManager manager) {
-		return false;
 	}
 
 	/*
@@ -201,7 +194,8 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * 
 	 * @see org.eclipse.ui.part.WorkbenchPart#getTitle()
 	 */
-	public String getTitle() {
+	@Override
+  public String getTitle() {
 		return ResourceManager.getString(PAGE_TITLE, "");
 	}
 
@@ -249,7 +243,8 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * 
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#isEditable()
 	 */
-	public boolean isEditable() {
+	@Override
+  public boolean isEditable() {
 		return false;
 	}
 
@@ -272,7 +267,8 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * 
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
-	public void createPartControl(Composite parent) {
+	@Override
+  public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		Control[] children = parent.getChildren();
 		control = children[children.length - 1];
@@ -288,11 +284,13 @@ public class ManifestSourceFormPage extends TextEditor implements
 	 * 
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#firePropertyChange(int)
 	 */
-	protected void firePropertyChange(int type) {
+	@Override
+  protected void firePropertyChange(int type) {
 		if (type == PROP_DIRTY) {
 			getEditor().fireSaveNeeded();
-		} else
-			super.firePropertyChange(type);
+		} else {
+      super.firePropertyChange(type);
+    }
 	}
 
 	/**

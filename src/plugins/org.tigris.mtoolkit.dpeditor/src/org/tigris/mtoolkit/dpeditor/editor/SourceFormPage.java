@@ -13,7 +13,6 @@ package org.tigris.mtoolkit.dpeditor.editor;
 import java.io.ByteArrayOutputStream;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -202,17 +201,6 @@ public class SourceFormPage extends TextEditor implements IDPPEditorPage {
     }
     editor = null;
     super.dispose();
-  }
-
-  /*
-   * Checks whether this page can shows the context menu. Returns
-   * <code>false</code>, which means that there no context menu.
-   *
-   * @seeorg.tigris.mtoolkit.dpeditor.editor.base.IDPPEditorPage#
-   * contextMenuAboutToShow (org.eclipse.jface.action.IMenuManager)
-   */
-  public boolean contextMenuAboutToShow(IMenuManager manager) {
-    return false;
   }
 
   /*

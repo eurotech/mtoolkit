@@ -11,8 +11,6 @@
 package org.tigris.mtoolkit.dpeditor.editor.base;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
@@ -208,16 +206,6 @@ public abstract class DPPFormPage extends EditorPart implements IDPPEditorPage {
 
   // IBundleEditorPage implementation
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.tigris.mtoolkit.dpeditor.editor.base.IDPPEditorPage#
-   * contextMenuAboutToShow (org.eclipse.jface.action.IMenuManager)
-   */
-  public boolean contextMenuAboutToShow(IMenuManager manager) {
-    return true;
-  }
-
   /**
    * Creates the SWT controls of this form page - all sections for this page.
    *
@@ -361,12 +349,5 @@ public abstract class DPPFormPage extends EditorPart implements IDPPEditorPage {
       return false;
     }
     return form.doGlobalAction(id);
-  }
-
-  /**
-   * @see org.tigris.mtoolkit.dpeditor.editor.base.IDPPEditorPage#getAction(java.lang.String)
-   */
-  public IAction getAction(String id) {
-    return null;
   }
 }

@@ -22,356 +22,360 @@ import org.tigris.mtoolkit.common.PluginUtilities;
  * information or errors message.
  */
 public class DPPErrorHandler {
+  public static String ERROR_MSG = "DPPEditor.Error";
+  private static Shell shell;
 
-	public static String ERROR_MSG = "DPPEditor.Error";
-	private static Shell shell;
+  private DPPErrorHandler() {
+  }
 
-	/**
-	 * Process given exception with no reason given.
-	 * 
-	 * @param e
-	 *            the occurred error
-	 */
-	public static void processError(final Throwable e) {
-		processError(e, false);
-	}
+  /**
+   * Process given exception with no reason given.
+   *
+   * @param e
+   *          the occurred error
+   */
+  public static void processError(final Throwable e) {
+    processError(e, false);
+  }
 
-	/**
-	 * Process given exception with no reason given and logs this error into the
-	 * OSGi Log. Shows the error message dialog, depending on the given
-	 * <code>boolean</code> flag.
-	 * 
-	 * @param e
-	 *            the occurred error
-	 * @param showDialog
-	 *            if <code>true</code> shows error message dialog, otherwise
-	 *            does not shows the dialog
-	 */
-	public static void processError(Throwable e, boolean showDialog) {
-		processError(e, e.getMessage(), ResourceManager.getString("DPPErrorHandler.no_reason"), showDialog, true);
-	}
+  /**
+   * Process given exception with no reason given and logs this error into the
+   * OSGi Log. Shows the error message dialog, depending on the given
+   * <code>boolean</code> flag.
+   *
+   * @param e
+   *          the occurred error
+   * @param showDialog
+   *          if <code>true</code> shows error message dialog, otherwise does
+   *          not shows the dialog
+   */
+  public static void processError(Throwable e, boolean showDialog) {
+    processError(e, e.getMessage(), ResourceManager.getString("DPPErrorHandler.no_reason"), showDialog, true);
+  }
 
-	/**
-	 * Process given exception with reason, logs this error into the OSGi Log
-	 * and shows the error message dialog.
-	 * 
-	 * @param e
-	 *            the occurred error
-	 * @param reason
-	 *            the reason
-	 */
-	public static void processError(Throwable e, String reason) {
-		processError(e, e.getMessage(), reason, true);
-	}
+  /**
+   * Process given exception with reason, logs this error into the OSGi Log and
+   * shows the error message dialog.
+   *
+   * @param e
+   *          the occurred error
+   * @param reason
+   *          the reason
+   */
+  public static void processError(Throwable e, String reason) {
+    processError(e, e.getMessage(), reason, true);
+  }
 
-	/**
-	 * Process given exception with reason and logs this error into the OSGi
-	 * Log.
-	 * 
-	 * @param e
-	 *            the occurred error
-	 * @param reason
-	 *            the reason
-	 * @param showDialog
-	 *            if <code>true</code> shows error message dialog, otherwise
-	 *            does not shows the dialog
-	 */
-	public static void processError(Throwable e, String reason, boolean showDialog) {
-		processError(e, e.getMessage(), reason, showDialog, true);
-	}
+  /**
+   * Process given exception with reason and logs this error into the OSGi Log.
+   *
+   * @param e
+   *          the occurred error
+   * @param reason
+   *          the reason
+   * @param showDialog
+   *          if <code>true</code> shows error message dialog, otherwise does
+   *          not shows the dialog
+   */
+  public static void processError(Throwable e, String reason, boolean showDialog) {
+    processError(e, e.getMessage(), reason, showDialog, true);
+  }
 
-	/**
-	 * Process given exception with reason and shows the error message dialog.
-	 * 
-	 * @param e
-	 *            the occurred error
-	 * @param message
-	 *            a human-readable message
-	 * @param reason
-	 *            the reason
-	 * @param dumpOSGiLog
-	 *            if is <code>true</code> logs this error in OSGi Log
-	 */
-	public static void processError(Throwable e, String message, String reason, boolean dumpOSGiLog) {
-		processError(e, message, reason, true, dumpOSGiLog);
-	}
+  /**
+   * Process given exception with reason and shows the error message dialog.
+   *
+   * @param e
+   *          the occurred error
+   * @param message
+   *          a human-readable message
+   * @param reason
+   *          the reason
+   * @param dumpOSGiLog
+   *          if is <code>true</code> logs this error in OSGi Log
+   */
+  public static void processError(Throwable e, String message, String reason, boolean dumpOSGiLog) {
+    processError(e, message, reason, true, dumpOSGiLog);
+  }
 
-	/**
-	 * Process given exception with reason.
-	 * 
-	 * @param e
-	 *            the occurred error
-	 * @param message
-	 *            a human-readable message
-	 * @param reason
-	 *            the reason
-	 * @param showDialog
-	 *            if <code>true</code> shows error message dialog, otherwise
-	 *            does not shows the dialog
-	 * @param dumpOSGiLog
-	 *            if is <code>true</code> logs this error in OSGi Log
-	 */
-	public static void processError(final Throwable e, final String message, final String reason, final boolean showDialog, final boolean dumpOSGiLog) {
-		// Display.getDefault().syncExec(new Runnable() {
-		// public void run() {
-		// Shell shell = getAnyShell();
-		// if (shell != null && showDialog) {
-		// if (!shell.isDisposed()) {
-		// PluginUtilities.showErrorDialog(shell,
-		// ResourceManager.getString("DPPErrorHandler.error"),
-		// message, reason, e);
-		// }
-		// }
-		// dumpToLog(IStatus.ERROR, message, e);
-		// //Log to OSGi set
-		// if (dumpOSGiLog) {
-		// LogView logview = LogView.getLogView();
-		// if (logview == null ? false : logview.isCreated()) {
-		// logview.logError(message, e);
-		// }
-		// }
-		// }
-		// });
+  /**
+   * Process given exception with reason.
+   *
+   * @param e
+   *          the occurred error
+   * @param message
+   *          a human-readable message
+   * @param reason
+   *          the reason
+   * @param showDialog
+   *          if <code>true</code> shows error message dialog, otherwise does
+   *          not shows the dialog
+   * @param dumpOSGiLog
+   *          if is <code>true</code> logs this error in OSGi Log
+   */
+  public static void processError(final Throwable e, final String message, final String reason,
+      final boolean showDialog, final boolean dumpOSGiLog) {
+    // Display.getDefault().syncExec(new Runnable() {
+    // public void run() {
+    // Shell shell = getAnyShell();
+    // if (shell != null && showDialog) {
+    // if (!shell.isDisposed()) {
+    // PluginUtilities.showErrorDialog(shell,
+    // ResourceManager.getString("DPPErrorHandler.error"),
+    // message, reason, e);
+    // }
+    // }
+    // dumpToLog(IStatus.ERROR, message, e);
+    // //Log to OSGi set
+    // if (dumpOSGiLog) {
+    // LogView logview = LogView.getLogView();
+    // if (logview == null ? false : logview.isCreated()) {
+    // logview.logError(message, e);
+    // }
+    // }
+    // }
+    // });
 
-	}
+  }
 
-	/**
-	 * Logs the message as an information message. If given <code>boolean</code>
-	 * flag for shows dialog is <code>true</code> open a standard information
-	 * dialog.
-	 * 
-	 * @param text
-	 *            a human-readable message
-	 * @param showDialog
-	 *            if <code>true</code> shows information message dialog,
-	 *            otherwise does not shows the dialog
-	 */
-	public static void processInfo(final String text, final boolean showDialog) {
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				Shell shell = getAnyShell();
-				if (shell != null && showDialog) {
-					if (!shell.isDisposed()) {
-						MessageDialog.openInformation(shell, ResourceManager.getString("DPPErrorHandler.information"), text);
-					}
-				}
-				dumpToLog(IStatus.INFO, text, null);
-				processInfo(text);
-			}
-		});
-	}
+  /**
+   * Logs the message as an information message. If given <code>boolean</code>
+   * flag for shows dialog is <code>true</code> open a standard information
+   * dialog.
+   *
+   * @param text
+   *          a human-readable message
+   * @param showDialog
+   *          if <code>true</code> shows information message dialog, otherwise
+   *          does not shows the dialog
+   */
+  public static void processInfo(final String text, final boolean showDialog) { // NO_UCD
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        Shell shell = getAnyShell();
+        if (shell != null && showDialog) {
+          if (!shell.isDisposed()) {
+            MessageDialog.openInformation(shell, ResourceManager.getString("DPPErrorHandler.information"), text);
+          }
+        }
+        dumpToLog(IStatus.INFO, text, null);
+        processInfo(text);
+      }
+    });
+  }
 
-	/**
-	 * Logs the message as an information message.
-	 * 
-	 * @param text
-	 *            a human-readable message
-	 */
-	public static void processInfo(final String text) {
-		// // Log to OSGi set
-		// Display.getDefault().syncExec(new Runnable() {
-		// public void run() {
-		// LogView logview = LogView.getLogView();
-		// if (logview == null ? false : logview.isCreated()) {
-		// logview.logInfo(text);
-		// }
-		// }
-		// });
-		// dumpToLog(IStatus.INFO, text, null);
-	}
+  /**
+   * Logs the message as an information message.
+   *
+   * @param text
+   *          a human-readable message
+   */
+  public static void processInfo(final String text) {
+    // // Log to OSGi set
+    // Display.getDefault().syncExec(new Runnable() {
+    // public void run() {
+    // LogView logview = LogView.getLogView();
+    // if (logview == null ? false : logview.isCreated()) {
+    // logview.logInfo(text);
+    // }
+    // }
+    // });
+    // dumpToLog(IStatus.INFO, text, null);
+  }
 
-	/**
-	 * Process given exception with reason.
-	 * 
-	 * @param message
-	 *            a human-readable message
-	 * @param showDialog
-	 *            if <code>true</code> shows error message dialog, otherwise
-	 *            does not shows the dialog
-	 */
-	public static void processError(final String message, final boolean showDialog) {
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				Shell shell = getAnyShell();
-				if (shell != null && showDialog) {
-					if (!shell.isDisposed()) {
-						MessageDialog.openError(shell, ResourceManager.getString("DPPErrorHandler.error"), message);
-					}
-				}
-				dumpToLog(IStatus.ERROR, message, null);
-			}
-		});
-	}
+  /**
+   * Process given exception with reason.
+   *
+   * @param message
+   *          a human-readable message
+   * @param showDialog
+   *          if <code>true</code> shows error message dialog, otherwise does
+   *          not shows the dialog
+   */
+  public static void processError(final String message, final boolean showDialog) {
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        Shell shell = getAnyShell();
+        if (shell != null && showDialog) {
+          if (!shell.isDisposed()) {
+            MessageDialog.openError(shell, ResourceManager.getString("DPPErrorHandler.error"), message);
+          }
+        }
+        dumpToLog(IStatus.ERROR, message, null);
+      }
+    });
+  }
 
-	public static void processError(final String message, final String details) {
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				Shell shell = getAnyShell();
-				if (shell != null) {
-					if (!shell.isDisposed()) {
-						PluginUtilities.showDetailsErrorDialog(shell, ResourceManager.getString("DPPErrorHandler.error"), message, details);
-					}
-				}
-				dumpToLog(IStatus.ERROR, message, null);
-			}
-		});
-	}
+  public static void processError(final String message, final String details) { // NO_UCD
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        Shell shell = getAnyShell();
+        if (shell != null) {
+          if (!shell.isDisposed()) {
+            PluginUtilities.showDetailsErrorDialog(shell, ResourceManager.getString("DPPErrorHandler.error"), message,
+                details);
+          }
+        }
+        dumpToLog(IStatus.ERROR, message, null);
+      }
+    });
+  }
 
-	/**
-	 * Logs the message as a warning message. If given <code>boolean</code> flag
-	 * for shows dialog is <code>true</code> open a standard information dialog.
-	 * 
-	 * @param text
-	 *            a human-readable message
-	 * @param showDialog
-	 *            if <code>true</code> shows information message dialog,
-	 *            otherwise does not shows the dialog
-	 */
-	public static void processWarning(final String text, final boolean showDialog) {
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				Shell shell = getAnyShell();
-				if (shell != null && showDialog) {
-					if (!shell.isDisposed()) {
-						MessageDialog.openInformation(shell, ResourceManager.getString("DPPErrorHandler.warning"), text);
-					}
-				}
-				dumpToLog(IStatus.INFO, text, null);
-				processWarning(text);
-			}
-		});
-	}
+  /**
+   * Logs the message as a warning message. If given <code>boolean</code> flag
+   * for shows dialog is <code>true</code> open a standard information dialog.
+   *
+   * @param text
+   *          a human-readable message
+   * @param showDialog
+   *          if <code>true</code> shows information message dialog, otherwise
+   *          does not shows the dialog
+   */
+  public static void processWarning(final String text, final boolean showDialog) {
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        Shell shell = getAnyShell();
+        if (shell != null && showDialog) {
+          if (!shell.isDisposed()) {
+            MessageDialog.openInformation(shell, ResourceManager.getString("DPPErrorHandler.warning"), text);
+          }
+        }
+        dumpToLog(IStatus.INFO, text, null);
+        processWarning(text);
+      }
+    });
+  }
 
-	/**
-	 * Logs the message as a warning message.
-	 * 
-	 * @param text
-	 *            a human-readable message
-	 */
-	public static void processWarning(final String text) {
-		// Display.getDefault().syncExec(new Runnable() {
-		// public void run() {
-		// // Log to OSGi set
-		// LogView logview = LogView.getLogView();
-		// if (logview == null ? false : logview.isCreated()) {
-		// logview.logWarning(text);
-		// }
-		// }
-		// });
-	}
+  /**
+   * Logs the message as a warning message.
+   *
+   * @param text
+   *          a human-readable message
+   */
+  public static void processWarning(final String text) {
+    // Display.getDefault().syncExec(new Runnable() {
+    // public void run() {
+    // // Log to OSGi set
+    // LogView logview = LogView.getLogView();
+    // if (logview == null ? false : logview.isCreated()) {
+    // logview.logWarning(text);
+    // }
+    // }
+    // });
+  }
 
-	/**
-	 * Opens a Yes/No question dialog for the given message text.
-	 * 
-	 * @param text
-	 *            a human-readable message of the Yes/No question dialog
-	 * @return <code>true</code> if the user presses the OK button of the
-	 *         question dialog, <code>false</code> otherwise
-	 */
-	public static boolean processQuestion(String text) {
-		return processQuestion(text, true);
-	}
+  /**
+   * Opens a Yes/No question dialog for the given message text.
+   *
+   * @param text
+   *          a human-readable message of the Yes/No question dialog
+   * @return <code>true</code> if the user presses the OK button of the question
+   *         dialog, <code>false</code> otherwise
+   */
+  public static boolean processQuestion(String text) { // NO_UCD
+    return processQuestion(text, true);
+  }
 
-	/**
-	 * Opens a Yes/No question dialog for the given message text.
-	 * 
-	 * @param text
-	 *            a human-readable message of the Yes/No question dialog
-	 * @param showDialog
-	 *            if this parameter is <code>true</code> the question dialog
-	 *            will be shown, otherwise the dialog will not appear
-	 * @return <code>true</code> if the user presses the OK button of the
-	 *         question dialog, <code>false</code> otherwise
-	 */
-	public static boolean processQuestion(final String text, final boolean showDialog) {
-		final boolean result[] = new boolean[1];
-		result[0] = false;
+  /**
+   * Opens a Yes/No question dialog for the given message text.
+   *
+   * @param text
+   *          a human-readable message of the Yes/No question dialog
+   * @param showDialog
+   *          if this parameter is <code>true</code> the question dialog will be
+   *          shown, otherwise the dialog will not appear
+   * @return <code>true</code> if the user presses the OK button of the question
+   *         dialog, <code>false</code> otherwise
+   */
+  public static boolean processQuestion(final String text, final boolean showDialog) {
+    final boolean result[] = new boolean[1];
+    result[0] = false;
 
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				Shell shell = getAnyShell();
-				if (shell != null && showDialog) {
-					if (!shell.isDisposed()) {
-						result[0] = MessageDialog.openQuestion(shell, ResourceManager.getString("DPPErrorHandler.question"), text);
-					}
-				}
-			}
-		});
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      public void run() {
+        Shell shell = getAnyShell();
+        if (shell != null && showDialog) {
+          if (!shell.isDisposed()) {
+            result[0] = MessageDialog.openQuestion(shell, ResourceManager.getString("DPPErrorHandler.question"), text);
+          }
+        }
+      }
+    });
 
-		return result[0];
-	}
+    return result[0];
+  }
 
-	/**
-	 * Dump to eclipse system log.
-	 * 
-	 * @param severity
-	 *            the severity of created status
-	 * @param text
-	 *            a human-readable message, localized to the created status
-	 * @param t
-	 *            a low-level exception, or <code>null</code> if not applicable
-	 */
-	private static void dumpToLog(int severity, String text, Throwable t) {
-		// if (text == null) {
-		// text = "";
-		// }
-		// Status status = new Status(severity, BundlesPlugin.PLUGIN_ID, 0,
-		// text,
-		// t);
-		// BundlesPlugin.getDefault().getLog().log(status);
-	}
+  /**
+   * Dump to eclipse system log.
+   *
+   * @param severity
+   *          the severity of created status
+   * @param text
+   *          a human-readable message, localized to the created status
+   * @param t
+   *          a low-level exception, or <code>null</code> if not applicable
+   */
+  private static void dumpToLog(int severity, String text, Throwable t) {
+    // if (text == null) {
+    // text = "";
+    // }
+    // Status status = new Status(severity, BundlesPlugin.PLUGIN_ID, 0,
+    // text,
+    // t);
+    // BundlesPlugin.getDefault().getLog().log(status);
+  }
 
-	/**
-	 * Get active shell.
-	 * 
-	 * @return the active display shell
-	 */
-	public static Shell getShell() {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		if (display.isDisposed()) {
-			return null;
-		}
-		final Display displ = display;
-		displ.syncExec(new Runnable() {
-			public void run() {
-				Shell shell = displ.getActiveShell();
-				if (shell == null) {
-					shell = new Shell(displ);
-				}
-				DPPErrorHandler.shell = shell;
-			}
-		});
+  /**
+   * Get active shell.
+   *
+   * @return the active display shell
+   */
+  public static Shell getShell() {
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    if (display.isDisposed()) {
+      return null;
+    }
+    final Display displ = display;
+    displ.syncExec(new Runnable() {
+      public void run() {
+        Shell shell = displ.getActiveShell();
+        if (shell == null) {
+          shell = new Shell(displ);
+        }
+        DPPErrorHandler.shell = shell;
+      }
+    });
 
-		return shell;
-	}
+    return shell;
+  }
 
-	/**
-	 * Gets active shell.
-	 * 
-	 * @return the active shell
-	 */
-	public static Shell getAnyShell() {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		Shell shell = display.getActiveShell();
-		if (shell == null) {
-			Shell shells[] = display.getShells();
-			if (shells.length > 0)
-				shell = shells[0];
-		}
-		return shell;
-	}
+  /**
+   * Gets active shell.
+   *
+   * @return the active shell
+   */
+  public static Shell getAnyShell() {
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    Shell shell = display.getActiveShell();
+    if (shell == null) {
+      Shell shells[] = display.getShells();
+      if (shells.length > 0) {
+        shell = shells[0];
+      }
+    }
+    return shell;
+  }
 
-	/**
-	 * Opens a standard error dialog with the given message.
-	 * 
-	 * @param message
-	 *            the message of the error dialog
-	 */
-	public static void showErrorTableDialog(final String message) {
-		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				MessageDialog.openError(DPPErrorHandler.getAnyShell(), ResourceManager.getString(ERROR_MSG, ""), message);
-			}
-		});
-	}
+  /**
+   * Opens a standard error dialog with the given message.
+   *
+   * @param message
+   *          the message of the error dialog
+   */
+  public static void showErrorTableDialog(final String message) {
+    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+      public void run() {
+        MessageDialog.openError(DPPErrorHandler.getAnyShell(), ResourceManager.getString(ERROR_MSG, ""), message);
+      }
+    });
+  }
 }

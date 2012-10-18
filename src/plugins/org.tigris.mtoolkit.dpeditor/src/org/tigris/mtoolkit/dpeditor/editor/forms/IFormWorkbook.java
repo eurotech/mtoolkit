@@ -26,8 +26,6 @@ public interface IFormWorkbook {
 
 	public IFormPage getOldPage();
 
-	boolean isFirstPageSelected();
-
 	void removeFormSelectionListener(IFormSelectionListener listener);
 
 	public void removePage(IFormPage page);
