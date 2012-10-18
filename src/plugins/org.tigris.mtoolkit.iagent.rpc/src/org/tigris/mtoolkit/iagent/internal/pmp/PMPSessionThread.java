@@ -27,7 +27,6 @@ import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 
 public class PMPSessionThread implements Runnable {
-
   protected PMPOutputStream     os;
   protected PMPInputStream      is;
   protected String              url;
@@ -64,103 +63,103 @@ public class PMPSessionThread implements Runnable {
 
   protected static final int    PING_REQ_OP                    = 0;
   protected static final byte[] PING                           = {
-    (byte) PING_REQ_OP
-  };                              // 00000000
+                                                                 (byte) PING_REQ_OP
+                                                               };                              // 00000000
   protected static final int    PING_REPLY_OP                  = 144;
   protected static final byte[] PING_REPLY                     = {
-    (byte) PING_REPLY_OP
-  };                              // - 16
+                                                                 (byte) PING_REPLY_OP
+                                                               };                              // - 16
   // 10000110
 
   protected static final int    CONNECT_REPLY_OP               = 1;
   protected static final byte[] CONNECT_REPLY                  = {
-    (byte) CONNECT_REPLY_OP
-  };                              // 00000001
+                                                                 (byte) CONNECT_REPLY_OP
+                                                               };                              // 00000001
   protected static final int    REFERENCE_REPLY_OP             = 2;
   protected static final byte[] REFERENCE                      = {
-    (byte) REFERENCE_REPLY_OP
-  };                              // 00000010
+                                                                 (byte) REFERENCE_REPLY_OP
+                                                               };                              // 00000010
   protected static final int    SERIALIZED_OBJ_REPLY_OP        = 4;
   protected static final byte[] SERIALIZED                     = {
-    (byte) SERIALIZED_OBJ_REPLY_OP
-  };                              // 00000100
+                                                                 (byte) SERIALIZED_OBJ_REPLY_OP
+                                                               };                              // 00000100
   protected static final int    EVENT_LISTENER_REPLY_OP        = 8;
   protected static final byte[] EV_REPLY                       = {
-    (byte) EVENT_LISTENER_REPLY_OP
-  };                              // 00001000
+                                                                 (byte) EVENT_LISTENER_REPLY_OP
+                                                               };                              // 00001000
   protected static final int    EVENT_LISTENER_FAILED_REPLY_OP = 24;
   protected static final byte[] EV_FAILED                      = {
-    (byte) EVENT_LISTENER_FAILED_REPLY_OP
-  };                              // 8+16
+                                                                 (byte) EVENT_LISTENER_FAILED_REPLY_OP
+                                                               };                              // 8+16
   // 00011000
   protected static final int    NEW_EVENT_REQ_OP               = 16;
   protected static final byte[] EVENT                          = {
-    (byte) NEW_EVENT_REQ_OP
-  };                              // 00010000
+                                                                 (byte) NEW_EVENT_REQ_OP
+                                                               };                              // 00010000
 
   protected static final int    GET_METHODS_REPLY_OP           = 32;
   protected static final byte[] METHODS                        = {
-    (byte) GET_METHODS_REPLY_OP
-  };                              // 00100000
+                                                                 (byte) GET_METHODS_REPLY_OP
+                                                               };                              // 00100000
   protected static final int    GET_METHOD_REPLY_OP            = 96;
   protected static final byte[] METHOD                         = {
-    (byte) GET_METHOD_REPLY_OP
-  };                              // 32+64
+                                                                 (byte) GET_METHOD_REPLY_OP
+                                                               };                              // 32+64
   // 01100000
   protected static final int    DISCONNECT_REQ_OP              = 64;
   protected static final byte[] DISCONNECT                     = {
-    (byte) DISCONNECT_REQ_OP
-  };                              // 01000000
+                                                                 (byte) DISCONNECT_REQ_OP
+                                                               };                              // 01000000
 
   protected static final int    CONNECT_REQ_OP                 = 129;
   protected static final byte[] CONNECT                        = {
-    (byte) CONNECT_REQ_OP
-  };                              // -1
+                                                                 (byte) CONNECT_REQ_OP
+                                                               };                              // -1
   // 10000001
   protected static final int    GET_REFERENCE_REQ_OP           = 130;
   protected static final byte[] GET_REF                        = {
-    (byte) GET_REFERENCE_REQ_OP
-  };                              // -2
+                                                                 (byte) GET_REFERENCE_REQ_OP
+                                                               };                              // -2
   // 10000010
   protected static final int    GET_REFERENCE_BY_ID_REQ_OP     = 134;
   protected static final byte[] GET_REF_BY_ID                  = {
-    (byte) GET_REFERENCE_BY_ID_REQ_OP
-  };                              // -(2+4)
+                                                                 (byte) GET_REFERENCE_BY_ID_REQ_OP
+                                                               };                              // -(2+4)
   // 10000110
 
   protected static final int    INVOKE_METHOD_REQ_OP           = 132;
   protected static final byte[] INVOKE                         = {
-    (byte) INVOKE_METHOD_REQ_OP
-  };                              // -4
+                                                                 (byte) INVOKE_METHOD_REQ_OP
+                                                               };                              // -4
   // 10000100
   protected static final int    INVOKE_METHOD_WITH_REFS_REQ_OP = 140;
   protected static final byte[] INVOKE_R                       = {
-    (byte) INVOKE_METHOD_WITH_REFS_REQ_OP
-  };                              // -
+                                                                 (byte) INVOKE_METHOD_WITH_REFS_REQ_OP
+                                                               };                              // -
   // (4+8)
   // 10001100
 
   protected static final int    ADD_LISTENER_REQ_OP            = 136;
   protected static final byte[] ADD_LS                         = {
-    (byte) ADD_LISTENER_REQ_OP
-  };                              // -8
+                                                                 (byte) ADD_LISTENER_REQ_OP
+                                                               };                              // -8
   // 10001000
   protected static final int    REMOVE_LISTENER_REQ_OP         = 152;
   protected static final byte[] REMOVE_LS                      = {
-    (byte) REMOVE_LISTENER_REQ_OP
-  };                              // -(8+16)
+                                                                 (byte) REMOVE_LISTENER_REQ_OP
+                                                               };                              // -(8+16)
   // 10011000
 
   protected static final int    GET_METHOD_REQ_OP              = 160;
   protected static final byte[] GET_METHOD                     = {
-    (byte) GET_METHOD_REQ_OP
-  };                              // -32
+                                                                 (byte) GET_METHOD_REQ_OP
+                                                               };                              // -32
   // 10100000
 
   protected static final int    DISPOSE_REQ_OP                 = 192;
   protected static final byte[] DISPOSE                        = {
-    (byte) DISPOSE_REQ_OP
-  };                              // -64
+                                                                 (byte) DISPOSE_REQ_OP
+                                                               };                              // -64
   // 11000000
 
   private static final String   ERRMSG1                        = "Protocol Error";
@@ -212,21 +211,21 @@ public class PMPSessionThread implements Runnable {
   public void run() {
     try {
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("Thread started.");
+        DebugUtils.debug(this, "Thread started.");
       }
       while (running) {
         try {
           msgID = is.nextMessage();
           if (DebugUtils.DEBUG_ENABLED) {
-            debug("MID " + msgID + " : " + this + " : " + this.hashCode());
+            DebugUtils.debug(this, "MID " + msgID + " : " + this + " : " + this.hashCode());
           }
           opID = is.read();
           if (DebugUtils.DEBUG_ENABLED) {
-            debug("Operation: " + opID);
+            DebugUtils.debug(this, "Operation: " + opID);
           }
           switch (opID) {
           case -1:
-            error(ERRMSG1, null);
+            DebugUtils.error(this, ERRMSG1, null);
             try {
               os.begin((short) -1);
               os.write(DISCONNECT);
@@ -254,11 +253,13 @@ public class PMPSessionThread implements Runnable {
             if (errMsg == null || errMsg.length() == 0) {
               // normal disconnect
               if (DebugUtils.DEBUG_ENABLED) {
-                debug(DSCMSG1);
+                DebugUtils.debug(this, DSCMSG1);
               }
             } else {
               // error disconnect
-              info(DSCMSG2 + errMsg);
+              if (DebugUtils.DEBUG_ENABLED) {
+                DebugUtils.debug(this, DSCMSG2 + errMsg);
+              }
             }
             disconnect(errMsg, false);
             break;
@@ -308,17 +309,17 @@ public class PMPSessionThread implements Runnable {
           }
         } catch (IOException exc) {
           if (!isConBroken(exc)) {
-            error("An unexpected error occurred: " + exc.toString(), exc);
+            DebugUtils.error(this, "An unexpected error occurred: " + exc.toString(), exc);
           }
           disconnect("Disconnecting...", false);
         } catch (Exception exc) {
           if (DebugUtils.DEBUG_ENABLED) {
-            debug("Runtime Exception " + exc);
+            DebugUtils.debug(this, "Runtime Exception " + exc);
           }
         }
       }
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("Thread ended.");
+        DebugUtils.debug(this, "Thread ended.");
       }
     } finally {
       disconnect("Closing Connection ", true);
@@ -331,7 +332,7 @@ public class PMPSessionThread implements Runnable {
     }
     if (answer == null) {
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("No Such Message ID " + msgID);
+        DebugUtils.debug(this, "No Such Message ID " + msgID);
       }
       return false;
     }
@@ -377,7 +378,7 @@ public class PMPSessionThread implements Runnable {
     connection.disconnected(errMsg);
     peer.removeElement(this);
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("Disconnecting Client " + ((url != null) ? url : transportConnection.toString()));
+      DebugUtils.debug(this, "Disconnecting Client " + ((url != null) ? url : transportConnection.toString()));
     }
 
     peer.fireConnectionEvent(false, this);
@@ -389,7 +390,7 @@ public class PMPSessionThread implements Runnable {
         os.end(false);
       } catch (Throwable exc) {
         if (DebugUtils.DEBUG_ENABLED) {
-          debug("Can't Send Disconnect: " + exc.toString());
+          DebugUtils.debug(this, "Can't Send Disconnect: " + exc.toString());
         }
       }
     }
@@ -398,7 +399,7 @@ public class PMPSessionThread implements Runnable {
       os.close();
       is.close();
     } catch (Exception exc) {
-      error("Close Error", exc);
+      DebugUtils.error(this, "Close Error", exc);
     }
     if (toAnswer) {
       try {
@@ -446,7 +447,7 @@ public class PMPSessionThread implements Runnable {
           PMPData.writeString(ioExc.toString(), os);
           os.end(false);
         } catch (Exception exc) {
-          error(ERRMSG2, exc);
+          DebugUtils.error(this, ERRMSG2, exc);
           os.unlock();
         }
       }
@@ -461,7 +462,7 @@ public class PMPSessionThread implements Runnable {
       os.write(0); // failure
       os.end(false);
     } catch (Exception exc) {
-      error(ERRMSG2, exc);
+      DebugUtils.error(this, ERRMSG2, exc);
       os.unlock();
     }
     peer.fireConnectionEvent(true, this);
@@ -489,7 +490,7 @@ public class PMPSessionThread implements Runnable {
       throw ioExc;
     }
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("Getting Service " + clazz + " " + filter + ((bid == 0) ? "" : " " + bid));
+      DebugUtils.debug(this, "Getting Service " + clazz + " " + filter + ((bid == 0) ? "" : " " + bid));
     }
     String errMsg = null;
     int objID = 0;
@@ -512,7 +513,7 @@ public class PMPSessionThread implements Runnable {
       }
       os.end(false);
     } catch (Exception exc) {
-      error(ERRMSG2, exc);
+      DebugUtils.error(this, ERRMSG2, exc);
       os.unlock();
     }
   }
@@ -523,7 +524,7 @@ public class PMPSessionThread implements Runnable {
       return;
     }
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("Method Invocation Request ...");
+      DebugUtils.debug(this, "Method Invocation Request ...");
     }
     int objID = 0;
     int methodID = 0;
@@ -572,7 +573,7 @@ public class PMPSessionThread implements Runnable {
       boolean refs = (opID == 12);
       for (int i = 0; i < args.length; i++) {
         if (DebugUtils.DEBUG_ENABLED) {
-          debug("Reading Argument " + i + " : ");
+          DebugUtils.debug(this, "Reading Argument " + i + " : ");
         }
         boolean readReal = true;
         if (refs) {
@@ -603,7 +604,7 @@ public class PMPSessionThread implements Runnable {
           }
         }
         if (DebugUtils.DEBUG_ENABLED) {
-          debug("Argument " + i + " Is: " + args[i]);
+          DebugUtils.debug(this, "Argument " + i + " Is: " + args[i]);
         }
       }
     } catch (Exception ioExc) {
@@ -616,7 +617,7 @@ public class PMPSessionThread implements Runnable {
   }
 
   protected void writeInvocationError(String errMsg, short msgId) {
-    error(errMsg, null);
+    DebugUtils.error(this, errMsg, null);
     try {
       os.begin(msgId);
       os.write(SERIALIZED);
@@ -624,7 +625,7 @@ public class PMPSessionThread implements Runnable {
       PMPData.writeString(errMsg, os);
       os.end(false);
     } catch (Exception exc) {
-      error(ERRMSG2, exc);
+      DebugUtils.error(this, ERRMSG2, exc);
       os.unlock();
     }
   }
@@ -637,12 +638,12 @@ public class PMPSessionThread implements Runnable {
     int objID = -1;
     String methodName = null;
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("Get Method Request ...");
+      DebugUtils.debug(this, "Get Method Request ...");
     }
     try {
       objID = PMPData.readInt(is);
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("Requested Object ID: " + objID);
+        DebugUtils.debug(this, "Requested Object ID: " + objID);
       }
       methodName = PMPData.readString(is, maxS);
     } catch (IOException ioExc) {
@@ -654,7 +655,7 @@ public class PMPSessionThread implements Runnable {
 
     boolean all = methodName.equals(""); //$NON-NLS-1$
     if (DebugUtils.DEBUG_ENABLED) {
-      debug((all ? "All Methods Requested" : "Requested Method Name: " + methodName));
+      DebugUtils.debug(this, (all ? "All Methods Requested" : "Requested Method Name: " + methodName));
     }
     ObjectInfo info = (ObjectInfo) objects.get(new Integer(objID));
     if (info == null) {
@@ -679,7 +680,7 @@ public class PMPSessionThread implements Runnable {
         }
         os.end(false);
       } catch (Exception exc) {
-        error(ERRMSG2, exc);
+        DebugUtils.error(this, ERRMSG2, exc);
         os.unlock();
       }
     } else {
@@ -710,24 +711,24 @@ public class PMPSessionThread implements Runnable {
       try {
         os.write(METHOD);
         if (DebugUtils.DEBUG_ENABLED) {
-          debug("Remote Method ID: " + methodID);
+          DebugUtils.debug(this, "Remote Method ID: " + methodID);
         }
         PMPData.writeInt(1, os);
         PMPData.writeInt(methodID, os);
         if (DebugUtils.DEBUG_ENABLED) {
-          debug("Method To Return: " + methods[0]);
+          DebugUtils.debug(this, "Method To Return: " + methods[0]);
         }
         PMPData.writeString(methods[0].getReturnType().getName(), os);
         os.end(false);
       } catch (Exception exc) {
-        error(ERRMSG2, exc);
+        DebugUtils.error(this, ERRMSG2, exc);
         os.unlock();
       }
     }
   }
 
   private void writeGetMethodError(String errMsg) {
-    info(errMsg);
+    DebugUtils.info(this, errMsg);
     try {
       os.begin(msgID);
       os.write(METHOD);
@@ -736,7 +737,7 @@ public class PMPSessionThread implements Runnable {
       PMPData.writeString(errMsg, os);
       os.end(false);
     } catch (Exception exc) {
-      error(ERRMSG1, exc);
+      DebugUtils.error(this, ERRMSG1, exc);
       os.unlock();
     }
   }
@@ -775,7 +776,7 @@ public class PMPSessionThread implements Runnable {
       os.write(EV_REPLY);
       os.end(false);
     } catch (Exception exc) {
-      error(ERRMSG1, exc);
+      DebugUtils.error(this, ERRMSG1, exc);
       os.unlock();
     }
   }
@@ -789,11 +790,11 @@ public class PMPSessionThread implements Runnable {
     try {
       objID = PMPData.readInt(is);
     } catch (IOException exc) {
-      error(ERRMSG3, exc);
+      DebugUtils.error(this, ERRMSG3, exc);
       return;
     }
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("Disposing objID " + objID);
+      DebugUtils.debug(this, "Disposing objID " + objID);
     }
     synchronized (objects) {
       ObjectInfo info = (ObjectInfo) objects.remove(new Integer(objID));
@@ -837,32 +838,18 @@ public class PMPSessionThread implements Runnable {
   }
 
   private void writeEventFailed(String errMsg) {
-    error(errMsg, null);
+    DebugUtils.error(this, errMsg, null);
     try {
       os.begin(msgID);
       os.write(EV_FAILED);
       PMPData.writeString(errMsg, os);
       os.end(false);
     } catch (Exception exc) {
-      error(ERRMSG1, exc);
+      DebugUtils.error(this, ERRMSG1, exc);
       os.unlock();
     }
 
   }
-
-  protected final void debug(String msg) {
-    DebugUtils.debug(this, msg);
-  }
-
-  protected final void error(String msg, Throwable exc) {
-    DebugUtils.error(this, msg, exc);
-  }
-
-  protected final void info(String msg) {
-    DebugUtils.info(this, msg);
-  }
-
-  String uri;
 
   protected void ping_repl() {
     try {
@@ -888,7 +875,7 @@ public class PMPSessionThread implements Runnable {
 
   private void connectReplay() {
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("answer " + answer);
+      DebugUtils.debug(this, "answer " + answer);
     }
     if (!prepareAnswerReply()) {
       return;
@@ -937,7 +924,7 @@ public class PMPSessionThread implements Runnable {
       answer.errMsg = exc.toString();
     }
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("objID: " + answer.objID);
+      DebugUtils.debug(this, "objID: " + answer.objID);
     }
     synchronized (answer) {
       answer.received = true;
@@ -957,11 +944,11 @@ public class PMPSessionThread implements Runnable {
     }
     try {
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("method result");
+        DebugUtils.debug(this, "method result");
       }
       int type = is.read();
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("type: " + type);
+        DebugUtils.debug(this, "type: " + type);
       }
       if (type == -1) {
         answer.errMsg = "Read Error";
@@ -973,7 +960,7 @@ public class PMPSessionThread implements Runnable {
         }
       } else if (type == 1) {
         if (DebugUtils.DEBUG_ENABLED) {
-          debug("return expected: " + answer.expectsReturn);
+          DebugUtils.debug(this, "return expected: " + answer.expectsReturn);
         }
         if (answer.expectsReturn) {
           try {
@@ -999,12 +986,12 @@ public class PMPSessionThread implements Runnable {
     }
     try {
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("get methods ...");
+        DebugUtils.debug(this, "get methods ...");
       }
       int length;
       length = PMPData.readInt(is);
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("methods length: " + length);
+        DebugUtils.debug(this, "methods length: " + length);
       }
       if (length == 1) {
         if ((opID & 64) != 0) {
@@ -1012,7 +999,7 @@ public class PMPSessionThread implements Runnable {
           answer.methodID = PMPData.readInt(is);
           answer.returnType = PMPData.readString(is, maxS);
           if (DebugUtils.DEBUG_ENABLED) {
-            debug("method id: " + answer.methodID + "; return type: " + answer.returnType);
+            DebugUtils.debug(this, "method id: " + answer.methodID + "; return type: " + answer.returnType);
           }
           if (answer.returnType == null) {
             answer.errMsg = "Read Error";
@@ -1098,14 +1085,14 @@ public class PMPSessionThread implements Runnable {
       if (connection.evMngr != null) {
         String sEvType = PMPData.readString(is, maxS);
         if (DebugUtils.DEBUG_ENABLED) {
-          debug(sEvType);
+          DebugUtils.debug(this, sEvType);
         }
         ClassLoader loader = connection.evMngr.getClassLoader(sEvType);
         Object event = PMPData.readObject(null, loader, is, new String(), maxA, -1, null);
         connection.evMngr.postEvent(sEvType, event);
       }
     } catch (IOException ioExc) {
-      error("error receiving event", ioExc);
+      DebugUtils.error(this, "error receiving event", ioExc);
     }
   }
 

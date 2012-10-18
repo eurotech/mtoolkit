@@ -38,7 +38,9 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
       }
       running = false;
     }
-    DebugUtils.info(this, "Disconnecting Clients ...");
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "Disconnecting Clients ...");
+    }
     closeConnections("PMP Service has been stopped.");
     if (connDispatcher != null) {
       connDispatcher.stopEvent();
@@ -55,7 +57,9 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
       throw new PMPException("Stopping pmpservice");
     }
     try {
-      DebugUtils.info(this, "Creating new connection for " + transport);
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "Creating new connection for " + transport);
+      }
       Object pmpPort = properties.get(PROP_PMP_PORT);
       int port = -1;
       if (pmpPort != null && pmpPort instanceof Integer) {

@@ -91,7 +91,7 @@ class RemoteObjectImpl implements RemoteObject {
     }
     try {
       if (DebugUtils.DEBUG_ENABLED) {
-        c.debug("FINILIZE CALLED" + IOR);
+        DebugUtils.debug(c, "FINILIZE CALLED" + IOR);
       }
       dispose();
     } catch (Exception exc) {

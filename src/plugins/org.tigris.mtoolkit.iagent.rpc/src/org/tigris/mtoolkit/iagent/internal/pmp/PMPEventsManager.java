@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
@@ -22,237 +23,253 @@ import org.tigris.mtoolkit.iagent.pmp.PMPException;
  * This implementation uses the PMP Service to receive remote events.
  */
 class PMPEventsManager implements Runnable {
+  private PMPOutputStream os;
+  private PMPEvent        first;
+  private PMPEvent        last    = null;
+  private boolean         waiting = false;
+  private Thread          pmpEventsThread;
 
-	private PMPOutputStream os;
-	private PMPEvent first;
-	private PMPEvent last = null;
-	private boolean waiting = false;
-	private Thread pmpEventsThread;
+  PMPSessionThread        session;
 
-	PMPSessionThread session;
+  public PMPEventsManager(PMPSessionThread session) {
+    pmpEventsThread = ThreadUtils.createThread(this, "PMP Events Manager Thread [" + session.sessionID + "]"); //$NON-NLS-1$
+    this.session = session;
+    this.os = session.os;
+  }
 
-	public PMPEventsManager(PMPSessionThread session) {
-		pmpEventsThread = ThreadUtils.createThread(this, "PMP Events Manager Thread [" + session.sessionID + "]"); //$NON-NLS-1$
-		this.session = session;
-		this.os = session.os;
-	}
+  private boolean go = true;
 
-	private boolean go = true;
+  public void start() {
+    pmpEventsThread.start();
+  }
 
-	public void start() {
-		pmpEventsThread.start();
-	}
+  public void run() {
+    while (go || first != null) {
+      if (first == null) {
+        synchronized (this) {
+          if (first == null) {
+            waiting = true;
+            try {
+              wait();
+              if (!go && first == null) {
+                if (DebugUtils.DEBUG_ENABLED) {
+                  DebugUtils.debug(session, "Event Manager: Thread ended.");
+                }
+                return;
+              }
+            } catch (Exception exc) {
+              continue;
+            } finally {
+              waiting = false;
+            }
+          }
+        }
+      }
+      PMPEvent theEvent;
+      synchronized (this) {
+        if (first.next != null) {
+          theEvent = getEvent(false);
+        } else {
+          theEvent = getEvent(true);
+        }
+      }
+      deliverEvent(theEvent);
+    }
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(session, "Event Manager: Thread ended (2).");
+    }
+  }
 
-	public void run() {
-		while (go || first != null) {
-			if (first == null) {
-				synchronized (this) {
-					if (first == null) {
-						waiting = true;
-						try {
-							wait();
-							if (!go && first == null) {
-								session.debug("Event Manager: Thread ended.");
-								return;
-							}
-						} catch (Exception exc) {
-							continue;
-						} finally {
-							waiting = false;
-						}
-					}
-				}
-			}
-			PMPEvent theEvent;
-			synchronized (this) {
-				if (first.next != null) {
-					theEvent = getEvent(false);
-				} else {
-					theEvent = getEvent(true);
-				}
-			}
-			deliverEvent(theEvent);
-		}
-		session.debug("Event Manager: Thread ended (2).");
-	}
+  public void stopEvents() {
+    go = false;
+    synchronized (this) {
+      notify();
+    }
+  }
 
-	public void stopEvents() {
-		go = false;
-		synchronized (this) {
-			notify();
-		}
-	}
+  private PMPEvent getEvent(boolean one) {
+    PMPEvent tmp = first;
+    first = first.next;
+    if (one) {
+      last = null;
+    }
+    return tmp;
+  }
 
-	private PMPEvent getEvent(boolean one) {
-		PMPEvent tmp = first;
-		first = first.next;
-		if (one)
-			last = null;
-		return tmp;
-	}
+  private synchronized void addEvent(PMPEvent theEvent) {
+    if (!go) {
+      return;
+    }
+    if (last == null) {
+      first = last = theEvent;
+      if (waiting) {
+        notify();
+      }
+    } else {
+      last = last.next = theEvent;
+    }
+  }
 
-	private synchronized void addEvent(PMPEvent theEvent) {
-		if (!go)
-			return;
-		if (last == null) {
-			first = last = theEvent;
-			if (waiting) {
-				notify();
-			}
-		} else {
-			last = last.next = theEvent;
-		}
-	}
+  private void deliverEvent(PMPEvent event) {
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(session, "Delivering event : " + event);
+    }
+    if (event instanceof ListenerEvent) {
+      if (!go)
+      // don't deliver listener events to the server, the connection
+      // has been closed
+        return;
+      ListenerEvent levent = (ListenerEvent) event;
+      switch (levent.op) {
+      case ListenerEvent.ADD_LISTENER_OP:
+        addEventListener0(event.eventType);
+        break;
+      case ListenerEvent.REMOVE_LISTENER_OP:
+        removeEventListener0((EventListener) event.data, event.eventType);
+        break;
+      }
+    } else {
+      Vector cloned = null;
+      PMPEvent pmpEvent = event;
+      synchronized (listeners) {
+        Vector ls = (Vector) listeners.get(pmpEvent.eventType);
+        if (ls == null || ls.size() == 0) {
+          return;
+        }
+        cloned = (Vector) ls.clone();
+      }
+      for (int i = 0; i < cloned.size(); i++) {
+        try {
+          ((EventListener) cloned.elementAt(i)).event(pmpEvent.data, pmpEvent.eventType);
+        } catch (Exception exc) {
+        }
+      }
+    }
+  }
 
-	private void deliverEvent(PMPEvent event) {
-		session.debug("Delivering event : " + event);
-		if (event instanceof ListenerEvent) {
-			if (!go)
-				// don't deliver listener events to the server, the connection
-				// has been closed
-				return;
-			ListenerEvent levent = (ListenerEvent) event;
-			switch (levent.op) {
-			case ListenerEvent.ADD_LISTENER_OP:
-				addEventListener0(event.eventType);
-				break;
-			case ListenerEvent.REMOVE_LISTENER_OP:
-				removeEventListener0((EventListener) event.data, event.eventType);
-				break;
-			}
-		} else {
-			Vector cloned = null;
-			PMPEvent pmpEvent = event;
-			synchronized (listeners) {
-				Vector ls = (Vector) listeners.get(pmpEvent.eventType);
-				if (ls == null || ls.size() == 0)
-					return;
-				cloned = (Vector) ls.clone();
-			}
-			for (int i = 0; i < cloned.size(); i++) {
-				try {
-					((EventListener) cloned.elementAt(i)).event(pmpEvent.data, pmpEvent.eventType);
-				} catch (Exception exc) {
-				}
-			}
-		}
-	}
+  private Hashtable listeners = new Hashtable(10);
 
-	private Hashtable listeners = new Hashtable(10);
+  /**
+   * Registers an {@link EventListener
+   * org.tigris.mtoolkit.iagent.internal.event.EventListener}
+   * 
+   * @param el
+   *          the EventListener
+   * @exception Exception
+   */
+  public void addEventListener(EventListener el, String type) {
+    if (el == null) {
+      throw new NullPointerException("Can't add null listener");
+    }
+    synchronized (listeners) {
+      Vector ls = (Vector) listeners.get(type);
+      if (ls == null) {
+        ls = new Vector();
+        ls.addElement(el);
+        listeners.put(type, ls);
+        if (!PMPConnection.FRAMEWORK_DISCONNECTED.equals(type))
+          addEvent(new ListenerEvent(ListenerEvent.ADD_LISTENER_OP, type, el));
+      } else if (!ls.contains(el)) {
+        ls.addElement(el);
+      }
+    }
+  }
 
-	/**
-	 * Registers an {@link EventListener
-	 * org.tigris.mtoolkit.iagent.internal.event.EventListener}
-	 * 
-	 * @param el
-	 *            the EventListener
-	 * @exception Exception
-	 */
-	public void addEventListener(EventListener el, String type) {
-		if (el == null)
-			throw new NullPointerException("Can't add null listener");
-		synchronized (listeners) {
-			Vector ls = (Vector) listeners.get(type);
-			if (ls == null) {
-				ls = new Vector();
-				ls.addElement(el);
-				listeners.put(type, ls);
-				if (!PMPConnection.FRAMEWORK_DISCONNECTED.equals(type))
-					addEvent(new ListenerEvent(ListenerEvent.ADD_LISTENER_OP, type, el));
-			} else if (!ls.contains(el))
-				ls.addElement(el);
-		}
-	}
+  private void addEventListener0(String type) {
+    try {
+      PMPAnswer answer = new PMPAnswer(session);
+      os.begin(answer);
+      os.write(PMPSessionThread.ADD_LS);
+      PMPData.writeString(type, os);
+      os.end(true);
+      answer.get(session.is.timeout);
+    } catch (Exception exc) { // PMPException, IOException
+      DebugUtils.error(session, "error registering event listener", exc);
+    }
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(session, "Adding remote listener of type: " + type);
+    }
+  }
 
-	private void addEventListener0(String type) {
-		try {
-			PMPAnswer answer = new PMPAnswer(session);
-			os.begin(answer);
-			os.write(PMPSessionThread.ADD_LS);
-			PMPData.writeString(type, os);
-			os.end(true);
-			answer.get(session.is.timeout);
-		} catch (Exception exc) { // PMPException, IOException
-			session.error("error registering event listener", exc);
-		}
-		session.debug("Adding remote listener of type: " + type);
-	}
+  /**
+   * Unregisters a {@link EventListener
+   * org.tigris.mtoolkit.iagent.internal.event.EventListener}
+   * 
+   * @param el
+   *          the EventListener
+   */
+  public void removeEventListener(EventListener el, String type) {
+    if (el == null) {
+      throw new NullPointerException("Can't remove null listener");
+    }
+    addEvent(new ListenerEvent(ListenerEvent.REMOVE_LISTENER_OP, type, el));
+  }
 
-	/**
-	 * Unregisters a {@link EventListener
-	 * org.tigris.mtoolkit.iagent.internal.event.EventListener}
-	 * 
-	 * @param el
-	 *            the EventListener
-	 */
-	public void removeEventListener(EventListener el, String type) {
-		if (el == null)
-			throw new NullPointerException("Can't remove null listener");
-		addEvent(new ListenerEvent(ListenerEvent.REMOVE_LISTENER_OP, type, el));
-	}
+  private void removeEventListener0(EventListener el, String evType) {
+    // synchronize over listeners vector, otherwise the add/remove listener
+    // operations can be executed in reverse order on the remote side,
+    // resulting in no more events
+    try {
+      boolean sendRemove = false;
+      synchronized (listeners) {
+        Vector ls = (Vector) listeners.get(evType);
+        if (ls != null) {
+          ls.removeElement(el);
+          if (ls.size() == 0) {
+            listeners.remove(evType);
+            sendRemove = true;
+          }
+        }
+      }
+      // the code below is not in the synchronized block, because can 
+      // cause the following deadlock: PMPSessionThread.readEvent() calls
+      // getClassLoader() and blocks if listeners is locked by this
+      // thread, thus the PMPAnswer cannot be read until listeners is 
+      // unlocked.
+      // The add/remove listener operations are guaranteed to be executed
+      // in the order they come in the events queue because:
+      // 1. deliverEvent() calls this method sequentially and no other
+      // operation can be executed until this method returns.
+      // 2. This method cannot finish until answer.get() returns - it 
+      // blocks until the answer is received from the remote side.
+      if (sendRemove) {
+        if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType)) {
+          return;
+        }
+        PMPAnswer answer = new PMPAnswer(session);
+        os.begin(answer);
+        os.write(PMPSessionThread.REMOVE_LS);
+        PMPData.writeString(evType, os);
+        os.end(true);
+        answer.get(session.is.timeout);
+        if (!answer.success) {
+          throw new PMPException(answer.errMsg);
+        }
+      }
+    } catch (Exception exc) { // PMPException, IOException
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(session, "error unregitering event listener");
+      }
+    }
+  }
 
-	private void removeEventListener0(EventListener el, String evType) {
-		// synchronize over listeners vector, otherwise the add/remove listener
-		// operations can be executed in reverse order on the remote side,
-		// resulting in no more events
-		try {
-			boolean sendRemove = false;
-			synchronized (listeners) {
-				Vector ls = (Vector) listeners.get(evType);
-				if (ls != null) {
-					ls.removeElement(el);
-					if (ls.size() == 0) {
-						listeners.remove(evType);
-						sendRemove = true;
-					}
-				}
-			}
-			// the code below is not in the synchronized block, because can 
-			// cause the following deadlock: PMPSessionThread.readEvent() calls
-			// getClassLoader() and blocks if listeners is locked by this
-			// thread, thus the PMPAnswer cannot be read until listeners is 
-			// unlocked.
-			// The add/remove listener operations are guaranteed to be executed
-			// in the order they come in the events queue because:
-			// 1. deliverEvent() calls this method sequentially and no other
-			// operation can be executed until this method returns.
-			// 2. This method cannot finish until answer.get() returns - it 
-			// blocks until the answer is received from the remote side.
-			if (sendRemove) {
-				if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType))
-					return;
-				PMPAnswer answer = new PMPAnswer(session);
-				os.begin(answer);
-				os.write(PMPSessionThread.REMOVE_LS);
-				PMPData.writeString(evType, os);
-				os.end(true);
-				answer.get(session.is.timeout);
-				if (!answer.success) {
-					throw new PMPException(answer.errMsg);
-				}
-			}
-		} catch (Exception exc) { // PMPException, IOException
-			session.debug("error unregitering event listener");
-		}
-	}
+  /**
+   * Posts a custom event.
+   * 
+   * @param evType
+   *          the event's type
+   * @param event
+   *          the event
+   */
+  public void postEvent(String evType, Object event) {
+    PMPEvent e = new PMPEvent(evType, event);
+    addEvent(e);
+  }
 
-	/**
-	 * Posts a custom event.
-	 * 
-	 * @param evType
-	 *            the event's type
-	 * @param event
-	 *            the event
-	 */
-	public void postEvent(String evType, Object event) {
-		PMPEvent e = new PMPEvent(evType, event);
-		addEvent(e);
-	}
-
-	protected ClassLoader getClassLoader(String type) {
-		synchronized (listeners) {
-			Vector v = (Vector) listeners.get(type);
-			return v == null ? null : v.elementAt(0).getClass().getClassLoader();
-		}
-	}
+  protected ClassLoader getClassLoader(String type) {
+    synchronized (listeners) {
+      Vector v = (Vector) listeners.get(type);
+      return v == null ? null : v.elementAt(0).getClass().getClassLoader();
+    }
+  }
 }

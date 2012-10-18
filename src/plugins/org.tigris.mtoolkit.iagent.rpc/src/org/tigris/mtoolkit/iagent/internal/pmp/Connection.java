@@ -22,7 +22,6 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
  */
 
 class Connection implements PMPConnection {
-
   protected PMPInputStream   is;
   protected PMPOutputStream  os;
   protected PMPSessionThread reader;
@@ -72,7 +71,7 @@ class Connection implements PMPConnection {
   public void disconnect(String errMsg) {
     if (!connected) {
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("already disconnected ...");
+        DebugUtils.debug(this, "already disconnected ...");
       }
       return;
     }
@@ -82,7 +81,7 @@ class Connection implements PMPConnection {
   protected void disconnected(String errMsg) {
     errMsg = errMsg == null ? new String() : errMsg;
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("Connection: disconnecting " + errMsg);
+      DebugUtils.debug(this, "Connection: disconnecting " + errMsg);
     }
     connected = false;
     postDisconnectedEvent(errMsg);
@@ -93,7 +92,9 @@ class Connection implements PMPConnection {
     if (evMngr != null) {
       evMngr.postEvent(PMPConnection.FRAMEWORK_DISCONNECTED, this);
       evMngr.stopEvents();
-      reader.debug("Connection: Events manager stopped.");
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(reader, "Connection: Events manager stopped.");
+      }
     }
   }
 
@@ -343,7 +344,7 @@ class Connection implements PMPConnection {
       // else return null;
     } catch (Exception exc) {
       if (DebugUtils.DEBUG_ENABLED) {
-        debug(exc);
+        DebugUtils.debug(this, "", exc);
       }
       if (msgID >= 100) {
         os.unlock();
@@ -362,18 +363,10 @@ class Connection implements PMPConnection {
                     ? PMPData.TYPES2[8] : name.equals(PMPData.TYPES1[7]) ? PMPData.TYPES2[7] : null;
   }
 
-  protected void debug(String s) {
-    DebugUtils.debug(this, s);
-  }
-
-  protected void debug(Exception t) {
-    DebugUtils.debug(this, "", t);
-  }
-
   /** Called to assign object id to a new remote object */
   private int addRemoteObject(Object obj) {
     Class[] interfaces = {
-        obj.getClass()
+      obj.getClass()
     };
     return reader.addRemoteObject(obj, interfaces);
   }
@@ -398,7 +391,9 @@ class Connection implements PMPConnection {
     }
     if (evMngr == null) {
       evMngr = new PMPEventsManager(reader);
-      reader.debug("Connection: Start events manager.");
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(reader, "Connection: Start events manager.");
+      }
       evMngr.start();
     }
     if (eventTypes != null && eventTypes.length != 0) {

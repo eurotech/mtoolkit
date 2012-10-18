@@ -150,7 +150,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
           addElement(newSession);
         }
       } catch (Exception exc) {
-        error("Error Accepting Client", exc);
+        DebugUtils.error(this, "Error Accepting Client", exc);
       }
     }
   }
@@ -163,16 +163,15 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
       run = false;
     }
     closeConnections("PMP Server has been stopped.");
-    try {
-      info("Closing PMP Socket for " + uri);
-    } catch (Throwable exc) {
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "Closing PMP Socket for " + uri);
     }
     if (socket != null) {
       try {
         socket.close();
         socket = null;
       } catch (Exception exc) {
-        error("Error Closing PMP Socket", exc);
+        DebugUtils.error(this, "Error Closing PMP Socket", exc);
         socket = null;
       }
     }
@@ -222,18 +221,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     }
   }
 
-  protected void debug(String msg) {
-    DebugUtils.debug(this, msg);
-  }
-
-  protected void error(String msg, Throwable exc) {
-    DebugUtils.error(this, msg, exc);
-  }
-
-  protected void info(String msg) {
-    DebugUtils.info(this, msg);
-  }
-
   protected ObjectInfo getService(String clazz, String filter) {
     Object service = null;
     ServiceReference sRef = null;
@@ -258,7 +245,8 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
       }
       context.ungetService(refs[i]);
       if (DebugUtils.DEBUG_ENABLED) {
-        debug(service + " is not instance of " + Remote.class.getName() + " or one of its remote interfaces");
+        DebugUtils.debug(this, service + " is not instance of " + Remote.class.getName()
+            + " or one of its remote interfaces");
       }
       service = null;
       interfaces = null;
