@@ -13,26 +13,25 @@ package org.tigris.mtoolkit.common.export;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
-public interface IPluginExporter {
+interface IPluginExporter {
+  boolean hasFinished();
 
-	/**
-	 * @since 5.0
-	 */
-	void asyncExportPlugins(Object info);
-	
-	/**
-	 * @since 5.0
-	 */
-	IStatus syncExportPlugins(Object info, IProgressMonitor monitor);
+  IStatus getResult();
 
-	boolean hasFinished();
+  String getQualifier();
 
-	IStatus getResult();
+  /**
+   * @since 5.0
+   */
+  void asyncExportPlugins(Object info);
 
-	String getQualifier();
-	
-	/**
-	 * @since 5.0
-	 */
-	IStatus join(long timeout) throws InterruptedException;
+  /**
+   * @since 5.0
+   */
+  IStatus syncExportPlugins(Object info, IProgressMonitor monitor);
+
+  /**
+   * @since 5.0
+   */
+  IStatus join(long timeout) throws InterruptedException;
 }
