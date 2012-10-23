@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IconAndMessageDialog;
@@ -62,17 +64,17 @@ public class PluginUtilities {
 
   private static SafeRunnableDialog errorDialog;
 
-  public static final String INSTALLED_PLATFORM = Platform.getOS();
+  public static final String        INSTALLED_PLATFORM = Platform.getOS();
 
-  public static final char[] INVALID_RESOURCE_CHARACTERS;
-  public static final String[] INVALID_RESOURCE_NAMES;
+  public static final char[]        INVALID_RESOURCE_CHARACTERS;
+  public static final String[]      INVALID_RESOURCE_NAMES;
 
-  public static final String VERSION_3_4_0 = "3.4.0";
-  public static final String VERSION_3_5_0 = "3.5.0";
+  public static final String        VERSION_3_4_0      = "3.4.0";
+  public static final String        VERSION_3_5_0      = "3.5.0";
   /**
    * @since 5.0
    */
-  public static final String VERSION_3_6_0 = "3.6.0";
+  public static final String        VERSION_3_6_0      = "3.6.0";
 
   static {
     char[] chars = null;
@@ -80,21 +82,26 @@ public class PluginUtilities {
     if (INSTALLED_PLATFORM.equals(Platform.OS_WIN32)) {
       // taken from
       // http://support.microsoft.com/support/kb/articles/q177/5/06.asp
-      chars = new char[] { '"', '*', '/', ':', '<', '>', '?', '\\', '|' };
+      chars = new char[] {
+      '"', '*', '/', ':', '<', '>', '?', '\\', '|'
+      };
       // list taken from
       // http://support.microsoft.com/support/kb/articles/Q216/6/54.ASP
-      names = new String[] { "aux", "clock$", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-          "com5", "com6", "com7", "com8", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-          "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-          "lpt3", "lpt4", "lpt5", "lpt6", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-          "lpt7", "lpt8", "lpt9", "nul", "prn" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+      names = new String[] {
+      "aux", "clock$", "com1", "com2", "com3", "com4", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+      "com5", "com6", "com7", "com8", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      "com9", "con", "lpt1", "lpt2", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      "lpt3", "lpt4", "lpt5", "lpt6", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+      "lpt7", "lpt8", "lpt9", "nul", "prn"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
     } else {
       // only front slash and null char are invalid on UNIXes
       // taken from
       // http://www.faqs.org/faqs/unix-faq/faq/part2/section-2.html
       // backslash and colon are illegal path segments regardless of
       // filesystem.
-      chars = new char[] { '\0', '/', ':', '\\' };
+      chars = new char[] {
+      '\0', '/', ':', '\\'
+      };
     }
     INVALID_RESOURCE_CHARACTERS = chars;
     INVALID_RESOURCE_NAMES = names == null ? new String[0] : names;
@@ -103,7 +110,7 @@ public class PluginUtilities {
   /**
    * @param pathName
    * @return
-   * 
+   *
    */
   public static boolean containsArticles(String pathName) {
     if (INSTALLED_PLATFORM.equals(Platform.OS_WIN32)) {
@@ -117,7 +124,7 @@ public class PluginUtilities {
 
   /**
    * Validate specified file name for correctness on current platform
-   * 
+   *
    * @param fileName
    * @return
    */
@@ -139,8 +146,9 @@ public class PluginUtilities {
   }
 
   /**
-   * Validate specified absolute or relative path for correctness on current platform
-   * 
+   * Validate specified absolute or relative path for correctness on current
+   * platform
+   *
    * @param path
    * @return
    */
@@ -169,7 +177,7 @@ public class PluginUtilities {
 
   /**
    * Validate specified version name for correctness
-   * 
+   *
    * @param versionName
    * @return
    */
@@ -228,7 +236,7 @@ public class PluginUtilities {
     print(shell, styledText);
   }
 
-  static List errorTable = new ArrayList();
+  static List   errorTable     = new ArrayList();
   static String line_Separator = System.getProperty("line.separator"); //$NON-NLS-1$
 
   public static void showErrorDialog(Shell parent, String title, String message, String reason) {
@@ -270,12 +278,15 @@ public class PluginUtilities {
 
   private static void showDialog(Shell parent, String title, String message, String reason, Throwable e,
       Throwable nested, int code) {
-    if (title == null)
+    if (title == null) {
       title = ""; //$NON-NLS-1$
-    if (message == null)
+    }
+    if (message == null) {
       message = ""; //$NON-NLS-1$
-    if (reason == null)
+    }
+    if (reason == null) {
       reason = Messages.MessageDialog_NoDetails;
+    }
     errorTable.clear();
     String ex = null;
     if (e != null) {
@@ -323,7 +334,7 @@ public class PluginUtilities {
 
   /**
    * This method parses exception from String into List items
-   * 
+   *
    * @param str
    * @return
    */
@@ -352,13 +363,13 @@ public class PluginUtilities {
   }
 
   /**
-   * This method is used for compare two strings. It is used for comparing
-   * file names, because only on Windows OS letters case are independenet.
-   * 
+   * This method is used for compare two strings. It is used for comparing file
+   * names, because only on Windows OS letters case are independenet.
+   *
    * @param str1
-   *            - the first string
+   *          - the first string
    * @param str2
-   *            - the second string
+   *          - the second string
    * @return <code>TRUE</code> if string equals, otherwise returns
    *         <code>FALSE</code>
    */
@@ -381,13 +392,13 @@ public class PluginUtilities {
 
     private TableViewer statusListViewer;
 
-    private Collection statuses = new ArrayList();
+    private Collection  statuses = new ArrayList();
 
     /**
      * Create a new instance of the receiver on a status.
-     * 
+     *
      * @param status
-     *            The status to display.
+     *          The status to display.
      */
     SafeRunnableDialog(IStatus status) {
 
@@ -407,7 +418,8 @@ public class PluginUtilities {
             .getMessage();
       }
       this.message = JFaceResources.format(JFaceResources.getString("SafeRunnableDialog_reason"), new Object[] { //$NON-NLS-1$
-        status.getMessage(), reason });
+              status.getMessage(), reason
+          });
     }
 
     /**
@@ -416,8 +428,9 @@ public class PluginUtilities {
      */
     void refresh() {
 
-      if (AUTOMATED_MODE)
+      if (AUTOMATED_MODE) {
         return;
+      }
 
       createStatusList((Composite) dialogArea);
       updateEnablements();
@@ -425,7 +438,7 @@ public class PluginUtilities {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.jface.dialogs.ErrorDialog#createDialogArea(org.eclipse
      * .swt.widgets.Composite)
@@ -439,9 +452,9 @@ public class PluginUtilities {
 
     /**
      * Create the status list if required.
-     * 
+     *
      * @param parent
-     *            the Control to create it in.
+     *          the Control to create it in.
      */
     private void createStatusList(Composite parent) {
       if (isMultipleStatusDialog()) {
@@ -468,9 +481,9 @@ public class PluginUtilities {
 
     /**
      * This method sets the message in the message label.
-     * 
+     *
      * @param messageString
-     *            - the String for the message area
+     *          - the String for the message area
      */
     private void setMessage(String messageString) {
       // must not set null text in a label
@@ -482,11 +495,11 @@ public class PluginUtilities {
     }
 
     /**
-     * Create an area that allow the user to select one of multiple jobs
-     * that have reported errors
-     * 
+     * Create an area that allow the user to select one of multiple jobs that
+     * have reported errors
+     *
      * @param parent
-     *            - the parent of the area
+     *          - the parent of the area
      */
     private void createStatusListArea(Composite parent) {
       // Display a list of jobs that have reported errors
@@ -509,14 +522,14 @@ public class PluginUtilities {
 
     /**
      * Return the label provider for the status list.
-     * 
+     *
      * @return CellLabelProvider
      */
     private CellLabelProvider getStatusListLabelProvider() {
       return new CellLabelProvider() {
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see
          * org.eclipse.jface.viewers.CellLabelProvider#update(org.eclipse
          * .jface.viewers.ViewerCell)
@@ -531,14 +544,14 @@ public class PluginUtilities {
 
     /**
      * Return the content provider for the statuses.
-     * 
+     *
      * @return IStructuredContentProvider
      */
     private IStructuredContentProvider getStatusContentProvider() {
       return new IStructuredContentProvider() {
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see
          * org.eclipse.jface.viewers.IStructuredContentProvider#getElements
          * (java.lang.Object)
@@ -549,7 +562,7 @@ public class PluginUtilities {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.eclipse.jface.viewers.IContentProvider#dispose()
          */
         public void dispose() {
@@ -558,7 +571,7 @@ public class PluginUtilities {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see
          * org.eclipse.jface.viewers.IContentProvider#inputChanged(org
          * .eclipse.jface.viewers.Viewer, java.lang.Object,
@@ -579,14 +592,14 @@ public class PluginUtilities {
 
     /**
      * Return a viewer sorter for looking at the jobs.
-     * 
+     *
      * @return ViewerSorter
      */
     private ViewerComparator getViewerComparator() {
       return new ViewerComparator() {
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see
          * org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse
          * .jface.viewers.Viewer, java.lang.Object, java.lang.Object)
@@ -595,10 +608,12 @@ public class PluginUtilities {
         public int compare(Viewer testViewer, Object e1, Object e2) {
           String message1 = ((IStatus) e1).getMessage();
           String message2 = ((IStatus) e2).getMessage();
-          if (message1 == null)
+          if (message1 == null) {
             return 1;
-          if (message2 == null)
+          }
+          if (message2 == null) {
             return -1;
+          }
 
           return message1.compareTo(message2);
         }
@@ -617,9 +632,9 @@ public class PluginUtilities {
     }
 
     /**
-     * Get the single selection. Return null if the selection is not just
-     * one element.
-     * 
+     * Get the single selection. Return null if the selection is not just one
+     * element.
+     *
      * @return IStatus or <code>null</code>.
      */
     private IStatus getSingleSelection() {
@@ -646,7 +661,7 @@ public class PluginUtilities {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.jface.dialogs.ErrorDialog#shouldShowDetailsButton()
      */
     @Override
@@ -656,7 +671,7 @@ public class PluginUtilities {
 
     /**
      * Add the status to the receiver.
-     * 
+     *
      * @param status
      */
     public void addStatus(IStatus status) {
@@ -668,11 +683,11 @@ public class PluginUtilities {
 
   public static class DetailsErrorDialog extends IconAndMessageDialog {
 
-    private String title;
-    private Button detailsButton;
-    private String details;
+    private String  title;
+    private Button  detailsButton;
+    private String  details;
     private boolean open;
-    private Text detailsArea;
+    private Text    detailsArea;
 
     public DetailsErrorDialog(Shell parentShell, String title, String message, String details) {
       super(parentShell);
@@ -795,9 +810,10 @@ public class PluginUtilities {
 
   /**
    * Returns specified bundle version
-   * 
-   * @param bundleName  bundle symbolic name
-   * @return  Version for specified bundle
+   *
+   * @param bundleName
+   *          bundle symbolic name
+   * @return Version for specified bundle
    */
   @SuppressWarnings("cast")
   public static Version getBundleVersion(String bundleName) {
@@ -806,10 +822,12 @@ public class PluginUtilities {
 
   /**
    * Returns true if bundle version is greater or equal to specified version
-   * 
-   * @param bundleName bundle symbolic name
-   * @param version  version to check - like PluginUtilities.VERSION_3_5_0)
-   * @return  true if bundle version is greater or equal to specified version
+   *
+   * @param bundleName
+   *          bundle symbolic name
+   * @param version
+   *          version to check - like PluginUtilities.VERSION_3_5_0)
+   * @return true if bundle version is greater or equal to specified version
    */
   public static boolean compareVersion(String bundleName, String version) {
     Version bundleVersion = getBundleVersion(bundleName);
@@ -829,4 +847,11 @@ public class PluginUtilities {
     return shell;
   }
 
+  public static IStringVariableManager getStringVariableManager() {
+    VariablesPlugin plugin = VariablesPlugin.getDefault();
+    if (plugin == null) {
+      return null;
+    }
+    return plugin.getStringVariableManager();
+  }
 }
