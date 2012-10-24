@@ -182,7 +182,7 @@ public final class PluginProvider implements InstallationItemProvider {
      * This method checks for required bundles for specified plugin missing on
      * target framework. A dialog with missing bundles is shown to user to
      * select and install necessary bundles.
-     *
+     * 
      * @param framework
      *          - target framework
      * @param bundlesToInstall
@@ -291,7 +291,7 @@ public final class PluginProvider implements InstallationItemProvider {
     }
     if (resource instanceof IPluginModelBase) {
       IPluginModelBase plugin = (IPluginModelBase) resource;
-      if (plugin.isValid() && plugin.isEnabled()) {
+      if (plugin.isEnabled() && plugin.getBundleDescription() != null) {
         model = plugin;
       }
     }
@@ -323,7 +323,7 @@ public final class PluginProvider implements InstallationItemProvider {
     }
     if (resource instanceof IPluginModelBase) {
       IPluginModelBase plugin = (IPluginModelBase) resource;
-      if (plugin.isValid() && plugin.isEnabled()) {
+      if (plugin.isEnabled() && plugin.getBundleDescription() != null) {
         return true;
       }
     }
