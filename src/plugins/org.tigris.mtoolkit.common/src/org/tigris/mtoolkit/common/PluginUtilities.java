@@ -56,7 +56,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
@@ -110,7 +112,7 @@ public class PluginUtilities {
   /**
    * @param pathName
    * @return
-   *
+   * 
    */
   public static boolean containsArticles(String pathName) {
     if (INSTALLED_PLATFORM.equals(Platform.OS_WIN32)) {
@@ -124,7 +126,7 @@ public class PluginUtilities {
 
   /**
    * Validate specified file name for correctness on current platform
-   *
+   * 
    * @param fileName
    * @return
    */
@@ -148,7 +150,7 @@ public class PluginUtilities {
   /**
    * Validate specified absolute or relative path for correctness on current
    * platform
-   *
+   * 
    * @param path
    * @return
    */
@@ -177,7 +179,7 @@ public class PluginUtilities {
 
   /**
    * Validate specified version name for correctness
-   *
+   * 
    * @param versionName
    * @return
    */
@@ -334,7 +336,7 @@ public class PluginUtilities {
 
   /**
    * This method parses exception from String into List items
-   *
+   * 
    * @param str
    * @return
    */
@@ -365,7 +367,7 @@ public class PluginUtilities {
   /**
    * This method is used for compare two strings. It is used for comparing file
    * names, because only on Windows OS letters case are independenet.
-   *
+   * 
    * @param str1
    *          - the first string
    * @param str2
@@ -396,7 +398,7 @@ public class PluginUtilities {
 
     /**
      * Create a new instance of the receiver on a status.
-     *
+     * 
      * @param status
      *          The status to display.
      */
@@ -452,7 +454,7 @@ public class PluginUtilities {
 
     /**
      * Create the status list if required.
-     *
+     * 
      * @param parent
      *          the Control to create it in.
      */
@@ -481,7 +483,7 @@ public class PluginUtilities {
 
     /**
      * This method sets the message in the message label.
-     *
+     * 
      * @param messageString
      *          - the String for the message area
      */
@@ -497,7 +499,7 @@ public class PluginUtilities {
     /**
      * Create an area that allow the user to select one of multiple jobs that
      * have reported errors
-     *
+     * 
      * @param parent
      *          - the parent of the area
      */
@@ -522,7 +524,7 @@ public class PluginUtilities {
 
     /**
      * Return the label provider for the status list.
-     *
+     * 
      * @return CellLabelProvider
      */
     private CellLabelProvider getStatusListLabelProvider() {
@@ -544,7 +546,7 @@ public class PluginUtilities {
 
     /**
      * Return the content provider for the statuses.
-     *
+     * 
      * @return IStructuredContentProvider
      */
     private IStructuredContentProvider getStatusContentProvider() {
@@ -592,7 +594,7 @@ public class PluginUtilities {
 
     /**
      * Return a viewer sorter for looking at the jobs.
-     *
+     * 
      * @return ViewerSorter
      */
     private ViewerComparator getViewerComparator() {
@@ -634,7 +636,7 @@ public class PluginUtilities {
     /**
      * Get the single selection. Return null if the selection is not just one
      * element.
-     *
+     * 
      * @return IStatus or <code>null</code>.
      */
     private IStatus getSingleSelection() {
@@ -671,7 +673,7 @@ public class PluginUtilities {
 
     /**
      * Add the status to the receiver.
-     *
+     * 
      * @param status
      */
     public void addStatus(IStatus status) {
@@ -810,7 +812,7 @@ public class PluginUtilities {
 
   /**
    * Returns specified bundle version
-   *
+   * 
    * @param bundleName
    *          bundle symbolic name
    * @return Version for specified bundle
@@ -822,7 +824,7 @@ public class PluginUtilities {
 
   /**
    * Returns true if bundle version is greater or equal to specified version
-   *
+   * 
    * @param bundleName
    *          bundle symbolic name
    * @param version
@@ -839,12 +841,15 @@ public class PluginUtilities {
    * @since 5.0
    */
   public static Shell getActiveWorkbenchShell() {
-    Shell shell = null;
-    IWorkbenchWindow aWindow = UtilitiesPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
-    if (aWindow != null) {
-      shell = aWindow.getShell();
+    final IWorkbench workbench = PlatformUI.getWorkbench();
+    if (workbench == null) {
+      return null;
     }
-    return shell;
+    IWorkbenchWindow aWindow = workbench.getActiveWorkbenchWindow();
+    if (aWindow != null) {
+      return aWindow.getShell();
+    }
+    return null;
   }
 
   public static IStringVariableManager getStringVariableManager() {
