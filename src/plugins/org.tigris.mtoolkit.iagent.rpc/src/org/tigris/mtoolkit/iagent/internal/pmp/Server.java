@@ -107,9 +107,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
         }
         socket = new ServerSocket(0);
         port = socket.getLocalPort();
-        if (DebugUtils.DEBUG_ENABLED) {
-          DebugUtils.debug(this, "PMP server listening on " + port);
-        }
         break;
       case FAILURE_RETRY:
         Integer timeoutProp = Integer.getInteger("iagent.pmp.bindFailureAction.retryTimeout");
@@ -128,6 +125,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
         throw e;
       }
     }
+    DebugUtils.info(this, "PMP server listening on " + port);
     ThreadUtils.createThread(this, "IAgent Server Thread").start();
   }
 
