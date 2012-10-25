@@ -60,7 +60,7 @@ public final class ConnectFrameworkJob extends Job {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.
    * IProgressMonitor)
    */
@@ -102,7 +102,7 @@ public final class ConnectFrameworkJob extends Job {
     try {
       if (connector != null && connector.isActive()) {
         FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl) fw, fw.getName(),
-            ((FrameworkImpl) fw).autoConnected);
+            ((FrameworkImpl) fw).isAutoConnected());
       } else {
         IMemento config = ((FrameworkImpl) fw).getConfig();
         String id = null;
@@ -179,7 +179,7 @@ public final class ConnectFrameworkJob extends Job {
     display.syncExec(new Runnable() {
       /*
        * (non-Javadoc)
-       * 
+       *
        * @see java.lang.Runnable#run()
        */
       public void run() {
@@ -195,7 +195,7 @@ public final class ConnectFrameworkJob extends Job {
     display.asyncExec(new Runnable() {
       /*
        * (non-Javadoc)
-       * 
+       *
        * @see java.lang.Runnable#run()
        */
       public void run() {
@@ -219,9 +219,10 @@ public final class ConnectFrameworkJob extends Job {
           InputStream iagentInput = FrameworkPlugin.getIAgentBundleAsStream();
           OutputStream output = null;
           try {
-            if (iagentInput == null)
+            if (iagentInput == null) {
               // TODO: Add dialog here
               return;
+            }
 
             FileDialog saveDialog = new FileDialog(display.getActiveShell(), SWT.SAVE);
             saveDialog.setText(Messages.save_as_dialog_title);
@@ -231,8 +232,9 @@ public final class ConnectFrameworkJob extends Job {
             // X
             saveDialog.setFileName("iagent.rpc.jar");
             String path = saveDialog.open();
-            if (path == null)
+            if (path == null) {
               return;
+            }
             output = new FileOutputStream(path);
 
             int bytesRead = 0;
@@ -245,16 +247,18 @@ public final class ConnectFrameworkJob extends Job {
           } catch (IOException e1) {
             StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle", e1));
           } finally {
-            if (output != null)
+            if (output != null) {
               try {
                 output.close();
               } catch (IOException e) {
               }
-            if (iagentInput != null)
+            }
+            if (iagentInput != null) {
               try {
                 iagentInput.close();
               } catch (IOException e) {
               }
+            }
           }
         }
       }

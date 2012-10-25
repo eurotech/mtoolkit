@@ -132,10 +132,9 @@ public class PMPConnectionListener implements ConnectionListener {
           return Status.OK_STATUS;
         } finally {
           sMonitor.done();
-          if (!fw.isConnected() && fw.autoConnected) {
+          if (!fw.isConnected() && fw.isAutoConnected()) {
             fw.dispose();
           }
-
         }
       }
     };

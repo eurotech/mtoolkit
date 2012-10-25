@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.ui.IMemento;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -24,35 +23,37 @@ import org.tigris.mtoolkit.iagent.IAgentException;
  * @since 5.0
  */
 public abstract class Framework extends Model {
-	public final static int BUNDLES_VIEW = 0;
-	public final static int SERVICES_VIEW = 1;
+  // framework IP or other ID
+  public static final String FRAMEWORK_ID     = "framework_id_key"; //$NON-NLS-1$
 
-	/**
-	 * @since 6.0
-	 */
-	public boolean autoConnected;
-	protected DeviceConnector connector;
-	protected boolean connectedFlag;
-	protected int viewType;
-	protected List modelProviders = new ArrayList();
-	// framework IP or other ID
-	public static final String FRAMEWORK_ID = "framework_id_key"; //$NON-NLS-1$
-	protected final List listeners = new ArrayList();
+  public final static int    BUNDLES_VIEW     = 0;
+  public final static int    SERVICES_VIEW    = 1;
 
+  protected DeviceConnector  connector;
+  protected boolean          connectedFlag;
+  protected int              viewType;
+  protected List             modelProviders   = new ArrayList();
+  protected final List       listeners        = new ArrayList();
+
+  /**
+   * @since 6.0
+   */
+  private final boolean      autoConnected;
+
+  private long               timeStamp;
   private Dictionary         remoteProperties = null;
-	private long timeStamp;
 
-	/**
-	 * @since 6.0
-	 */
-	public Framework(String name, boolean autoConnected) {
-		super(name);
-		this.autoConnected = autoConnected;
-	}
+  /**
+   * @since 6.0
+   */
+  public Framework(String name, boolean autoConnected) {
+    super(name);
+    this.autoConnected = autoConnected;
+  }
 
-	public DeviceConnector getConnector() {
-		return connector;
-	}
+  public DeviceConnector getConnector() {
+    return connector;
+  }
 
   public synchronized Dictionary getRemoteDeviceProperties() {
     if (connector == null) {
@@ -69,55 +70,47 @@ public abstract class Framework extends Model {
     return remoteProperties;
   }
 
-	public boolean isConnected() {
-		return connectedFlag;
-	}
+  public boolean isConnected() {
+    return connectedFlag;
+  }
 
-	/**
-	 * @since 6.0
-	 */
-	public boolean isAutoConnected() {
-		return autoConnected;
-	}
+  /**
+   * @since 6.0
+   */
+  public boolean isAutoConnected() {
+    return autoConnected;
+  }
 
-	public int getViewType() {
-		return viewType;
-	}
+  public int getViewType() {
+    return viewType;
+  }
 
-	/**
-	 * Returns map, containing information for certificates which shall be used
-	 * for signing the content, installed to this framework. If no signing is
-	 * required, then empty Map is returned.
-	 *
-	 * @return the map with certificate properties
-	 */
-	public abstract Map getSigningProperties();
+  public void addConnectionListener(FrameworkConnectionListener l) {
+    listeners.add(l);
+  }
 
-	/**
-	 * Returns the symbolic names of the framework system bundles.
-	 *
-	 * @return the set with the symbolic names
-	 */
-	public abstract Set getSystemBundlesNames();
+  public void removeConnectionListener(FrameworkConnectionListener l) {
+    listeners.remove(l);
+  }
 
-	public abstract Model createModel(String mimeType, String id, String version);
+  public static Object getLockObject(DeviceConnector connector) {
+    return connector.lockObj;
+  }
 
-	public static Object getLockObject(DeviceConnector connector) {
-		return connector.lockObj;
-	}
+  public abstract Model createModel(String mimeType, String id, String version);
 
-	public abstract IMemento getConfig();
+  public abstract IMemento getConfig();
 
-	public void addConnectionListener(FrameworkConnectionListener l) {
-		listeners.add(l);
-	}
+  public abstract List getSignCertificateUids();
 
-	public void removeConnectionListener(FrameworkConnectionListener l) {
-		listeners.remove(l);
-	}
+  public abstract void setSignCertificateUids(List uids);
 
-	public abstract List getSignCertificateUids();
-
-	public abstract void setSignCertificateUids(List uids);
-
+  /**
+   * Returns map, containing information for certificates which shall be used
+   * for signing the content, installed to this framework. If no signing is
+   * required, then empty Map is returned.
+   *
+   * @return the map with certificate properties
+   */
+  public abstract Map getSigningProperties();
 }

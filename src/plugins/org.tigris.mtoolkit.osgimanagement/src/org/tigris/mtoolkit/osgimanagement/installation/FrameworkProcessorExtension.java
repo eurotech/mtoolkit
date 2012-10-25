@@ -21,10 +21,10 @@ import org.tigris.mtoolkit.iagent.RemotePackage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public interface FrameworkProcessorExtension {
-  static final int PRIORITY_LOW = 0;
-  static final int PRIORITY_NORMAL = 5;
-  static final int PRIORITY_HIGH = 10;
-  static final int PRIORITY_NOT_SUPPPORTED = -1;
+  static final int PRIORITY_LOW            = 0; // NO_UCD
+  static final int PRIORITY_NORMAL         = 5; // NO_UCD
+  static final int PRIORITY_HIGH           = 10; // NO_UCD
+  static final int PRIORITY_NOT_SUPPPORTED = -1; // NO_UCD
 
   String getName();
 
@@ -34,9 +34,6 @@ public interface FrameworkProcessorExtension {
 
   int getPriority(InstallationItem item);
 
-  boolean processItems(List<InstallationItem> items,
-      List<RemotePackage> installed,
-      Map props,
-      Framework framework,
+  boolean processItems(List<InstallationItem> items, List<RemotePackage> installed, Map props, Framework framework,
       IProgressMonitor monitor) throws CoreException;
 }

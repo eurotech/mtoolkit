@@ -35,152 +35,152 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class PropertySheet extends TitleAreaDialog implements ConstantsDistributor, FrameworkPanel.ErrorMonitor {
 
-	public Button connectButton;
+  public Button             connectButton;
 
-	private FrameworkPanel fwPanel;
-	private CertificatesPanel certificatesPanel;
+  private FrameworkPanel    fwPanel;
+  private CertificatesPanel certificatesPanel;
 
-	private FrameworkImpl fw;
+  private FrameworkImpl     fw;
 
-	private Composite mainContent;
+  private Composite         mainContent;
 
-	private boolean addFramework;
+  private boolean           addFramework;
 
-	private Model parent;
+  private Model             parent;
 
-	public PropertySheet(Model parent, FrameworkImpl element, boolean newFramework) {
-		super(PluginUtilities.getActiveWorkbenchShell());
-		this.addFramework = newFramework;
-		this.parent = parent;
-		this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
-		fw = element;
-	}
+  public PropertySheet(Model parent, FrameworkImpl element, boolean newFramework) {
+    super(PluginUtilities.getActiveWorkbenchShell());
+    this.addFramework = newFramework;
+    this.parent = parent;
+    this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
+    fw = element;
+  }
 
-	// Create page contents
-	@Override
-	protected Control createDialogArea(Composite parent) {
-		Control main = super.createDialogArea(parent);
-		setTitle("Framework details");
-		setMessage("Edit framework details");
+  // Create page contents
+  @Override
+  protected Control createDialogArea(Composite parent) {
+    Control main = super.createDialogArea(parent);
+    setTitle("Framework details");
+    setMessage("Edit framework details");
 
-		parent.getShell().setText(addFramework ? Messages.add_framework_title : Messages.framework_properties_title);
+    parent.getShell().setText(addFramework ? Messages.add_framework_title : Messages.framework_properties_title);
 
-		mainContent = new Composite((Composite) main, SWT.NONE);
-		mainContent.setLayout(new GridLayout());
-		GridData mainGD = new GridData(GridData.FILL_BOTH);
-		mainGD.minimumWidth = 300;
-		mainContent.setLayoutData(mainGD);
+    mainContent = new Composite((Composite) main, SWT.NONE);
+    mainContent.setLayout(new GridLayout());
+    GridData mainGD = new GridData(GridData.FILL_BOTH);
+    mainGD.minimumWidth = 300;
+    mainContent.setLayoutData(mainGD);
 
-		// Framework Panel
-		fwPanel = new FrameworkPanel(mainContent, fw, this.parent);
-		fwPanel.setErrorMonitor(this);
+    // Framework Panel
+    fwPanel = new FrameworkPanel(mainContent, fw, this.parent);
+    fwPanel.setErrorMonitor(this);
 
-		// Signing Certificates
-		certificatesPanel = new CertificatesPanel(mainContent, 1, 1);
+    // Signing Certificates
+    certificatesPanel = new CertificatesPanel(mainContent, 1, 1);
 
-		// Autoconnect checkbox
-		if (!fw.autoConnected && fw.getParent() == null) {
-			connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
-			connectButton.setEnabled(!fw.isConnected());
-		}
+    // Autoconnect checkbox
+    if (!fw.isAutoConnected() && fw.getParent() == null) {
+      connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
+      connectButton.setEnabled(!fw.isConnected());
+    }
 
-		init();
+    init();
 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_ADD_REMOVE);
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_ADD_REMOVE);
 
-		return mainContent;
-	}
+    return mainContent;
+  }
 
-	private Button createCheckboxButton(String label, Composite parent) {
-		Button resultButton = new Button(parent, SWT.CHECK);
-		GridData grid = new GridData(GridData.FILL_HORIZONTAL);
-		resultButton.setText(label);
-		resultButton.setLayoutData(grid);
-		resultButton.setSelection(false);
-		return resultButton;
-	}
+  private Button createCheckboxButton(String label, Composite parent) {
+    Button resultButton = new Button(parent, SWT.CHECK);
+    GridData grid = new GridData(GridData.FILL_HORIZONTAL);
+    resultButton.setText(label);
+    resultButton.setLayoutData(grid);
+    resultButton.setSelection(false);
+    return resultButton;
+  }
 
-	@Override
-	protected void okPressed() {
-		boolean correct = fwPanel.validate();
-		if (correct) {
-			setFWSettings();
-			if (connectButton != null && !connectButton.isDisposed() && connectButton.getSelection()) {
-				FrameworkConnectorFactory.connectFrameWork(fw);
-			}
-			super.okPressed();
-		}
-	}
+  @Override
+  protected void okPressed() {
+    boolean correct = fwPanel.validate();
+    if (correct) {
+      setFWSettings();
+      if (connectButton != null && !connectButton.isDisposed() && connectButton.getSelection()) {
+        FrameworkConnectorFactory.connectFrameWork(fw);
+      }
+      super.okPressed();
+    }
+  }
 
-	private void init() {
-		IMemento config = fw.getConfig();
+  private void init() {
+    IMemento config = fw.getConfig();
 
-		if (connectButton != null) {
-			Boolean connect = config.getBoolean(CONNECT_TO_FRAMEWORK);
-			if (connect != null) {
-				connectButton.setSelection(connect.booleanValue());
-			}
-		}
+    if (connectButton != null) {
+      Boolean connect = config.getBoolean(CONNECT_TO_FRAMEWORK);
+      if (connect != null) {
+        connectButton.setSelection(connect.booleanValue());
+      }
+    }
 
-		// Framework Panel
-		fwPanel.initialize(config);
+    // Framework Panel
+    fwPanel.initialize(config);
 
-		// Signing Certificates
-		certificatesPanel.initialize(fw.getSignCertificateUids());
-	}
+    // Signing Certificates
+    certificatesPanel.initialize(fw.getSignCertificateUids());
+  }
 
-	// Called when target options are changed
-	private void setFWSettings() {
-		boolean connChanged = saveConfig(fw.getConfig());
-		fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
+  // Called when target options are changed
+  private void setFWSettings() {
+    boolean connChanged = saveConfig(fw.getConfig());
+    fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
 
-		if (addFramework) {
-			parent.addElement(fw);
-			addFramework = false;
-		} else {
-			DeviceConnector connector = fw.getConnector();
-			if (connector != null) {
-				if (fw.isConnected() && connChanged) {
-					Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-					MessageDialog.openInformation(shell, Messages.framework_ip_changed_title,
-							Messages.framework_ip_changed_message);
-				}
-			}
-			fw.updateElement();
-			FrameWorkView fwView = FrameWorkView.getActiveInstance();
-			if (fwView != null) {
-				final TreeViewer tree = fwView.getTree();
-				tree.setSelection(tree.getSelection());
-			}
-		}
-	}
+    if (addFramework) {
+      parent.addElement(fw);
+      addFramework = false;
+    } else {
+      DeviceConnector connector = fw.getConnector();
+      if (connector != null) {
+        if (fw.isConnected() && connChanged) {
+          Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+          MessageDialog.openInformation(shell, Messages.framework_ip_changed_title,
+              Messages.framework_ip_changed_message);
+        }
+      }
+      fw.updateElement();
+      FrameWorkView fwView = FrameWorkView.getActiveInstance();
+      if (fwView != null) {
+        final TreeViewer tree = fwView.getTree();
+        tree.setSelection(tree.getSelection());
+      }
+    }
+  }
 
-	/**
-	 * Save ui values to storage
-	 * 
-	 * @param config
-	 * @return true if connection properties have changed
-	 */
-	protected boolean saveConfig(IMemento config) {
-		// Framework panel
-		boolean connChanged = fwPanel.save(config);
+  /**
+   * Save ui values to storage
+   *
+   * @param config
+   * @return true if connection properties have changed
+   */
+  protected boolean saveConfig(IMemento config) {
+    // Framework panel
+    boolean connChanged = fwPanel.save(config);
 
-		// Signing Certificates
-		fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
+    // Signing Certificates
+    fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
 
-		if (connectButton != null) {
-			config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
-		}
-		return connChanged;
-	}
+    if (connectButton != null) {
+      config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
+    }
+    return connChanged;
+  }
 
-	@Override
-	public void setErrorMessage(String newErrorMessage) {
-		super.setErrorMessage(newErrorMessage);
-		Button ok = getButton(OK);
-		if (ok != null) {
-			ok.setEnabled(newErrorMessage == null);
-		}
-	}
+  @Override
+  public void setErrorMessage(String newErrorMessage) {
+    super.setErrorMessage(newErrorMessage);
+    Button ok = getButton(OK);
+    if (ok != null) {
+      ok.setEnabled(newErrorMessage == null);
+    }
+  }
 
 }

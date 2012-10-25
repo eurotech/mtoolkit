@@ -807,7 +807,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
     IMemento child;
     Model[] children = treeRoot.getChildren();
     for (int i = 0; i < treeRoot.getSize(); i++) {
-      if (!((FrameworkImpl) children[i]).autoConnected) {
+      if (!((FrameworkImpl) children[i]).isAutoConnected()) {
         IMemento config = ((FrameworkImpl) children[i]).getConfig();
         if (config != null) {
           child = rootConfig.createChild(MEMENTO_TYPE);

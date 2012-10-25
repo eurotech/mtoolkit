@@ -30,78 +30,139 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 
-public class DeviceConnectorSWTWrapper extends DeviceConnector implements DeviceConnectorSpi {
-  private static final boolean IAGENT_UI_ACCESS = Boolean.getBoolean("osgimanagement.iagent.access.warn");
-
-  private DeviceConnector      delegate;
-  private Thread               displayThread;
+public final class DeviceConnectorSWTWrapper extends DeviceConnector implements DeviceConnectorSpi {
+  private DeviceConnector delegate;
+  private Thread          displayThread;
 
   public DeviceConnectorSWTWrapper(DeviceConnector delegate, Display display) {
     this.delegate = delegate;
     this.displayThread = display.getThread();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#addRemoteDevicePropertyListener(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener)
+   */
   @Override
   public void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
     delegate.addRemoteDevicePropertyListener(listener);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#closeConnection()
+   */
   @Override
   public void closeConnection() throws IAgentException {
     checkThread();
     delegate.closeConnection();
   }
 
-  private void checkThread() {
-    if (IAGENT_UI_ACCESS && Thread.currentThread() == displayThread) {
-      FrameworkPlugin.warning("Access to IAgent API in UI thread is detected", new Exception(
-          "Access to IAgent API in UI thread is detected"));
-    }
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#getDeploymentManager()
+   */
   @Override
   public DeploymentManager getDeploymentManager() throws IAgentException {
     checkThread();
     return (DeploymentManager) wrapObject(delegate.getDeploymentManager());
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#getManager(java.lang.String)
+   */
   @Override
   public Object getManager(String className) throws IAgentException {
     checkThread();
     return wrapObject(delegate.getManager(className));
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#getProperties()
+   */
   @Override
   public Dictionary getProperties() {
     return delegate.getProperties();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#getRemoteProperties()
+   */
   @Override
   public Dictionary getRemoteProperties() throws IAgentException {
     checkThread();
     return delegate.getRemoteProperties();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#getServiceManager()
+   */
   @Override
   public ServiceManager getServiceManager() throws IAgentException {
     checkThread();
     return (ServiceManager) wrapObject(delegate.getServiceManager());
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#getVMManager()
+   */
   @Override
   public VMManager getVMManager() throws IAgentException {
     checkThread();
     return (VMManager) wrapObject(delegate.getVMManager());
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#isActive()
+   */
   @Override
   public boolean isActive() {
     return delegate.isActive();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#removeRemoteDevicePropertyListener(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener)
+   */
   @Override
   public void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
     delegate.removeRemoteDevicePropertyListener(listener);
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi#getConnectionManager()
+   */
+  public ConnectionManager getConnectionManager() {
+    return (ConnectionManager) wrapObject(((DeviceConnectorSpi) delegate).getConnectionManager());
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi#getDeviceConnector()
+   */
+  public DeviceConnector getDeviceConnector() {
+    return this;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof DeviceConnectorSWTWrapper) {
+      return delegate.equals(((DeviceConnectorSWTWrapper) obj).delegate);
+    }
+    return delegate.equals(obj);
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return delegate.hashCode();
+  }
+
+  private void checkThread() {
+    if (Thread.currentThread() == displayThread) {
+      FrameworkPlugin.warning("Access to IAgent API in UI thread is detected", new Exception(
+          "Access to IAgent API in UI thread is detected"));
+    }
   }
 
   private Object wrapObject(Object delegate) {
@@ -146,27 +207,16 @@ public class DeviceConnectorSWTWrapper extends DeviceConnector implements Device
     return (Class[]) allInterfaces.toArray(new Class[allInterfaces.size()]);
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof DeviceConnectorSWTWrapper) {
-      return delegate.equals(((DeviceConnectorSWTWrapper) obj).delegate);
-    }
-    return delegate.equals(obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return delegate.hashCode();
-  }
-
-  private class DelegatingHandler implements InvocationHandler {
-
+  private final class DelegatingHandler implements InvocationHandler {
     private Object delegate;
 
     public DelegatingHandler(Object delegate) {
       this.delegate = delegate;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
+     */
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       checkThread();
       String methodName = method.getName();
@@ -176,11 +226,4 @@ public class DeviceConnectorSWTWrapper extends DeviceConnector implements Device
     }
   }
 
-  public ConnectionManager getConnectionManager() {
-    return (ConnectionManager) wrapObject(((DeviceConnectorSpi) delegate).getConnectionManager());
-  }
-
-  public DeviceConnector getDeviceConnector() {
-    return this;
-  }
 }

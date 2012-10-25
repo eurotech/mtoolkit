@@ -214,7 +214,7 @@ public class ActionsManager {
   private static void disconnectFramework0(FrameworkImpl fw) {
     try {
       fw.userDisconnect = true;
-      if (fw.autoConnected) {
+      if (fw.isAutoConnected()) {
         fw.disconnect();
       } else {
         // if (fw.monitor != null) {

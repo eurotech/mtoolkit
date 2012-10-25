@@ -56,283 +56,294 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Act
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 public final class FrameworkSelector implements TargetSelectionDialog {
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.tigris.mtoolkit.common.installation.TargetSelectionDialog#getSelectedTarget(org.eclipse.swt.widgets.Shell)
-	 */
-	public InstallationTarget getSelectedTarget(Shell parentShell) {
-		FrameworkSelectionDialog dialog = new FrameworkSelectionDialog(parentShell);
-		if (dialog.open() == Window.OK) {
-			return dialog.getSelectedTarget();
-		}
-		return null;
-	}
+  /*
+   * (non-Javadoc)
+   *
+   * @see org.tigris.mtoolkit.common.installation.TargetSelectionDialog#getSelectedTarget(org.eclipse.swt.widgets.Shell)
+   */
+  public InstallationTarget getSelectedTarget(Shell parentShell) {
+    FrameworkSelectionDialog dialog = new FrameworkSelectionDialog(parentShell);
+    if (dialog.open() == Window.OK) {
+      return dialog.getSelectedTarget();
+    }
+    return null;
+  }
 
-	private static final class FrameworkSelectionDialog extends TitleAreaDialog {
-		private static final String FW_ICON_WIZBAN = "framework_wizban.gif"; //$NON-NLS-1$
+  private static final class FrameworkSelectionDialog extends TitleAreaDialog {
+    private static final String FW_ICON_WIZBAN = "framework_wizban.gif"; //$NON-NLS-1$
 
-		private Button btnAdd;
-		private Button btnEdit;
-		private Button btnRem;
-		private TableViewer frameworkViewer;
-		private InstallationTarget selected = null;
-		private Shell shell;
+    private Button              btnAdd;
+    private Button              btnEdit;
+    private Button              btnRem;
+    private TableViewer         frameworkViewer;
+    private InstallationTarget  selected       = null;
+    private Shell               shell;
 
-		public FrameworkSelectionDialog(Shell shell) {
-			super(shell);
-			this.shell = shell;
-		}
+    public FrameworkSelectionDialog(Shell shell) {
+      super(shell);
+      this.shell = shell;
+    }
 
-		protected Control createContents(Composite parent) {
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_SELECT_DIALOG);
-			Control contents = super.createContents(parent);
-			getShell().setText("Select OSGi framework");
-			setTitle("OSGi Framework");
-			setTitleImage(ImageHolder.getImage(FW_ICON_WIZBAN));
-			setMessage("Select OSGi Framework from the list", IMessageProvider.INFORMATION);
-			updateButtonsState();
-			return contents;
-		}
+    @Override
+    protected Control createContents(Composite parent) {
+      PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_SELECT_DIALOG);
+      Control contents = super.createContents(parent);
+      getShell().setText("Select OSGi framework");
+      setTitle("OSGi Framework");
+      setTitleImage(ImageHolder.getImage(FW_ICON_WIZBAN));
+      setMessage("Select OSGi Framework from the list", IMessageProvider.INFORMATION);
+      updateButtonsState();
+      return contents;
+    }
 
-		protected Control createDialogArea(Composite parent) {
-			Composite composite = new Composite((Composite) super.createDialogArea(parent), SWT.NONE);
+    @Override
+    protected Control createDialogArea(Composite parent) {
+      Composite composite = new Composite((Composite) super.createDialogArea(parent), SWT.NONE);
 
-			GridLayout layout = new GridLayout();
-			layout.numColumns = 2;
-			composite.setLayout(layout);
+      GridLayout layout = new GridLayout();
+      layout.numColumns = 2;
+      composite.setLayout(layout);
 
-			frameworkViewer = new TableViewer(new Table(composite, SWT.SINGLE | SWT.BORDER));
-			GridData gridData = new GridData(GridData.FILL_BOTH);
-			gridData.heightHint = 150;
-			gridData.widthHint = 340;
-			gridData.verticalSpan = 3;
-			frameworkViewer.getTable().setLayoutData(gridData);
-			// frameworkViewer.getTable().setLinesVisible(true);
-			frameworkViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				public void selectionChanged(SelectionChangedEvent event) {
-					updateButtonsState();
-				}
-			});
-			frameworkViewer.addDoubleClickListener(new IDoubleClickListener() {
-				public void doubleClick(DoubleClickEvent event) {
-					close();
-				}
-			});
-			frameworkViewer.setContentProvider(new FrameworkContentProvider());
-			frameworkViewer.setLabelProvider(new FrameworkLabelProvider());
-			frameworkViewer.getTable().addFocusListener(new FocusAdapter() {
-				public void focusGained(FocusEvent e) {
-					int i = frameworkViewer.getTable().getSelectionIndex();
-					// setting the dotted rectangle to the element that is
-					// selected
-					frameworkViewer.getTable().setSelection(i);
-				}
-			});
-			frameworkViewer.getTable().addKeyListener(new KeyAdapter() {
-				public void keyPressed(KeyEvent e) {
-					if (e.character == SWT.DEL) {
-						handleFrameworkRemove();
-					}
-				}
-			});
+      frameworkViewer = new TableViewer(new Table(composite, SWT.SINGLE | SWT.BORDER));
+      GridData gridData = new GridData(GridData.FILL_BOTH);
+      gridData.heightHint = 150;
+      gridData.widthHint = 340;
+      gridData.verticalSpan = 3;
+      frameworkViewer.getTable().setLayoutData(gridData);
+      // frameworkViewer.getTable().setLinesVisible(true);
+      frameworkViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+        public void selectionChanged(SelectionChangedEvent event) {
+          updateButtonsState();
+        }
+      });
+      frameworkViewer.addDoubleClickListener(new IDoubleClickListener() {
+        public void doubleClick(DoubleClickEvent event) {
+          close();
+        }
+      });
+      frameworkViewer.setContentProvider(new FrameworkContentProvider());
+      frameworkViewer.setLabelProvider(new FrameworkLabelProvider());
+      frameworkViewer.getTable().addFocusListener(new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+          int i = frameworkViewer.getTable().getSelectionIndex();
+          // setting the dotted rectangle to the element that is
+          // selected
+          frameworkViewer.getTable().setSelection(i);
+        }
+      });
+      frameworkViewer.getTable().addKeyListener(new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent e) {
+          if (e.character == SWT.DEL) {
+            handleFrameworkRemove();
+          }
+        }
+      });
 
-			frameworkViewer.getTable().addFocusListener(new FocusAdapter() {
-				public void focusGained(FocusEvent e) {
-					Table table = frameworkViewer.getTable();
-					if (table.getItemCount() > 0) {
-						int i = table.getSelectionIndex();
-						if (i != -1) {
-							table.setSelection(i);
-						} else {
-							table.setSelection(0);
-						}
-					}
-					updateButtonsState();
-				}
-			});
+      frameworkViewer.getTable().addFocusListener(new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+          Table table = frameworkViewer.getTable();
+          if (table.getItemCount() > 0) {
+            int i = table.getSelectionIndex();
+            if (i != -1) {
+              table.setSelection(i);
+            } else {
+              table.setSelection(0);
+            }
+          }
+          updateButtonsState();
+        }
+      });
 
-			frameworkViewer.setInput(FrameWorkView.getTreeRoot());
+      frameworkViewer.setInput(FrameWorkView.getTreeRoot());
 
-			btnAdd = new Button(composite, SWT.PUSH);
-			gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_FILL);
-			gridData.widthHint = 72;
-			btnAdd.setLayoutData(gridData);
-			btnAdd.setText("Add...");
-			btnAdd.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					handleFrameworkAdd();
-				}
-			});
+      btnAdd = new Button(composite, SWT.PUSH);
+      gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_FILL);
+      gridData.widthHint = 72;
+      btnAdd.setLayoutData(gridData);
+      btnAdd.setText("Add...");
+      btnAdd.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          handleFrameworkAdd();
+        }
+      });
 
-			btnEdit = new Button(composite, SWT.PUSH);
-			gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_FILL);
-			btnEdit.setLayoutData(gridData);
-			btnEdit.setText("Edit...");
-			btnEdit.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					handleFrameworkEdit();
-				}
-			});
+      btnEdit = new Button(composite, SWT.PUSH);
+      gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_FILL);
+      btnEdit.setLayoutData(gridData);
+      btnEdit.setText("Edit...");
+      btnEdit.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          handleFrameworkEdit();
+        }
+      });
 
-			btnRem = new Button(composite, SWT.PUSH);
-			gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_FILL);
-			btnRem.setLayoutData(gridData);
-			btnRem.setText("Remove");
-			btnRem.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					handleFrameworkRemove();
-				}
-			});
+      btnRem = new Button(composite, SWT.PUSH);
+      gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_FILL);
+      btnRem.setLayoutData(gridData);
+      btnRem.setText("Remove");
+      btnRem.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          handleFrameworkRemove();
+        }
+      });
 
-			return composite;
-		}
+      return composite;
+    }
 
-		public boolean close() {
-			IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
-			Object element = selection.getFirstElement();
-			if (element instanceof FrameworkImpl) {
-				selected = new FrameworkTarget((FrameworkImpl) element);
-			}
+    @Override
+    public boolean close() {
+      IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
+      Object element = selection.getFirstElement();
+      if (element instanceof FrameworkImpl) {
+        selected = new FrameworkTarget((FrameworkImpl) element);
+      }
 
-			return super.close();
-		}
+      return super.close();
+    }
 
-		private void updateButtonsState() {
-			int selected = frameworkViewer.getTable().getSelectionIndex();
+    private void updateButtonsState() {
+      int selected = frameworkViewer.getTable().getSelectionIndex();
 
-			btnEdit.setEnabled(selected != -1);
-			btnRem.setEnabled(selected != -1
-					&& !((FrameworkImpl) frameworkViewer.getTable().getSelection()[0].getData()).autoConnected);
+      btnEdit.setEnabled(selected != -1);
+      btnRem.setEnabled(selected != -1
+          && !((FrameworkImpl) frameworkViewer.getTable().getSelection()[0].getData()).isAutoConnected());
 
-			Button btnOK = getButton(IDialogConstants.OK_ID);
-			if (btnOK != null) {
-				btnOK.setEnabled(selected != -1);
-			}
-		}
+      Button btnOK = getButton(IDialogConstants.OK_ID);
+      if (btnOK != null) {
+        btnOK.setEnabled(selected != -1);
+      }
+    }
 
-		private void handleFrameworkAdd() {
-			ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot());
-		}
+    private void handleFrameworkAdd() {
+      ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot());
+    }
 
-		private void handleFrameworkRemove() {
-			IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
-			Object element = selection.getFirstElement();
-			if (element instanceof FrameworkImpl) {
-				FrameworkImpl framework = (FrameworkImpl) element;
-				if (!framework.autoConnected) {
-					if (framework.isConnected()) {
-						ActionsManager.disconnectFrameworkAction(framework);
-					}
-					ActionsManager.removeFrameworkAction(framework);
-				}
-			}
-		}
+    private void handleFrameworkRemove() {
+      IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
+      Object element = selection.getFirstElement();
+      if (element instanceof FrameworkImpl) {
+        FrameworkImpl framework = (FrameworkImpl) element;
+        if (!framework.isAutoConnected()) {
+          if (framework.isConnected()) {
+            ActionsManager.disconnectFrameworkAction(framework);
+          }
+          ActionsManager.removeFrameworkAction(framework);
+        }
+      }
+    }
 
-		private void handleFrameworkEdit() {
-			IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
-			Object element = selection.getFirstElement();
-			if (element instanceof FrameworkImpl) {
-				FrameworkImpl framework = (FrameworkImpl) element;
-				ActionsManager.frameworkPropertiesAction(framework, frameworkViewer);
-			}
-		}
+    private void handleFrameworkEdit() {
+      IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
+      Object element = selection.getFirstElement();
+      if (element instanceof FrameworkImpl) {
+        FrameworkImpl framework = (FrameworkImpl) element;
+        ActionsManager.frameworkPropertiesAction(framework, frameworkViewer);
+      }
+    }
 
-		private class FrameworkContentProvider implements IStructuredContentProvider, ContentChangeListener {
-			private Viewer viewer;
+    private class FrameworkContentProvider implements IStructuredContentProvider, ContentChangeListener {
+      private Viewer viewer;
 
-			public Object[] getElements(Object inputElement) {
-				if (inputElement instanceof TreeRoot) {
-					TreeRoot treeRoot = (TreeRoot) inputElement;
-					Object[] elements = treeRoot.getChildren();
-					List frameworks = new ArrayList();
-					for (int i = 0; i < elements.length; i++) {
-						if (elements[i] instanceof FrameworkImpl) {
-							frameworks.add(elements[i]);
-						}
-					}
-					return frameworks.toArray(new Object[frameworks.size()]);
-				}
-				return null;
-			}
+      public Object[] getElements(Object inputElement) {
+        if (inputElement instanceof TreeRoot) {
+          TreeRoot treeRoot = (TreeRoot) inputElement;
+          Object[] elements = treeRoot.getChildren();
+          List frameworks = new ArrayList();
+          for (int i = 0; i < elements.length; i++) {
+            if (elements[i] instanceof FrameworkImpl) {
+              frameworks.add(elements[i]);
+            }
+          }
+          return frameworks.toArray(new Object[frameworks.size()]);
+        }
+        return null;
+      }
 
-			public void dispose() {
-				Object input;
-				if (viewer != null && (input = viewer.getInput()) instanceof TreeRoot) {
-					((TreeRoot) input).removeListener(this);
-				}
-			}
+      public void dispose() {
+        Object input;
+        if (viewer != null && (input = viewer.getInput()) instanceof TreeRoot) {
+          ((TreeRoot) input).removeListener(this);
+        }
+      }
 
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				this.viewer = viewer;
-				if (oldInput instanceof TreeRoot) {
-					((TreeRoot) oldInput).removeListener(this);
-				}
-				if (newInput instanceof TreeRoot) {
-					((TreeRoot) newInput).addListener(this);
-				}
-			}
+      public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+        this.viewer = viewer;
+        if (oldInput instanceof TreeRoot) {
+          ((TreeRoot) oldInput).removeListener(this);
+        }
+        if (newInput instanceof TreeRoot) {
+          ((TreeRoot) newInput).addListener(this);
+        }
+      }
 
-			public void elementAdded(final ContentChangeEvent event) {
-				if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
-					shell.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							((TableViewer) viewer).add(event.getTarget());
-							viewer.setSelection(new StructuredSelection(event.getTarget()));
-						}
-					});
-				}
-			}
+      public void elementAdded(final ContentChangeEvent event) {
+        if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
+          shell.getDisplay().asyncExec(new Runnable() {
+            public void run() {
+              ((TableViewer) viewer).add(event.getTarget());
+              viewer.setSelection(new StructuredSelection(event.getTarget()));
+            }
+          });
+        }
+      }
 
-			public void elementChanged(final ContentChangeEvent event) {
-				if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
-					shell.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							((TableViewer) viewer).update(event.getTarget(), null);
-						}
-					});
-				}
-			}
+      public void elementChanged(final ContentChangeEvent event) {
+        if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
+          shell.getDisplay().asyncExec(new Runnable() {
+            public void run() {
+              ((TableViewer) viewer).update(event.getTarget(), null);
+            }
+          });
+        }
+      }
 
-			public void elementRemoved(final ContentChangeEvent event) {
-				if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
-					shell.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							((TableViewer) viewer).remove(event.getTarget());
-							// TableViewer.remove() doesn't call selection
-							// change
-							// listeners
-							updateButtonsState();
-						}
-					});
-				}
-			}
-		}
+      public void elementRemoved(final ContentChangeEvent event) {
+        if (viewer instanceof TableViewer && event.getTarget() instanceof FrameworkImpl) {
+          shell.getDisplay().asyncExec(new Runnable() {
+            public void run() {
+              ((TableViewer) viewer).remove(event.getTarget());
+              // TableViewer.remove() doesn't call selection
+              // change
+              // listeners
+              updateButtonsState();
+            }
+          });
+        }
+      }
+    }
 
-		protected class FrameworkLabelProvider extends LabelProvider {
-			public Image getImage(Object element) {
-				if (element instanceof FrameworkImpl) {
-					FrameworkImpl framework = (FrameworkImpl) element;
-					if (framework.isConnected()) {
-						return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_CONNECTED);
-					} else {
-						return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
-					}
-				}
-				return null;
-			}
+    protected class FrameworkLabelProvider extends LabelProvider {
+      @Override
+      public Image getImage(Object element) {
+        if (element instanceof FrameworkImpl) {
+          FrameworkImpl framework = (FrameworkImpl) element;
+          if (framework.isConnected()) {
+            return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_CONNECTED);
+          } else {
+            return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
+          }
+        }
+        return null;
+      }
 
-			public String getText(Object element) {
-				if (element instanceof FrameworkImpl) {
-					FrameworkImpl framework = (FrameworkImpl) element;
-					return framework.getName();
-				}
-				return super.getText(element);
-			}
-		}
+      @Override
+      public String getText(Object element) {
+        if (element instanceof FrameworkImpl) {
+          FrameworkImpl framework = (FrameworkImpl) element;
+          return framework.getName();
+        }
+        return super.getText(element);
+      }
+    }
 
-		public InstallationTarget getSelectedTarget() {
-			return selected;
-		}
-	}
+    public InstallationTarget getSelectedTarget() {
+      return selected;
+    }
+  }
 }

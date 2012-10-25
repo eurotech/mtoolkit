@@ -35,22 +35,20 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public class FrameworkConnectorFactory implements DeviceConnectionListener {
-  public static final int CONNECT_PROGRESS = 1000;
-  public static final int CONNECT_PROGRESS_CONNECTING = (int) (CONNECT_PROGRESS * 0.1);
-  public static final int CONNECT_PROGRESS_BUNDLES = (int) (CONNECT_PROGRESS * 0.3);
-  public static final int CONNECT_PROGRESS_SERVICES = (int) (CONNECT_PROGRESS * 0.2);
-  public static final int CONNECT_PROGRESS_ADDITIONAL = (int) (CONNECT_PROGRESS * 0.4);
-  /**
-   * Job listener, which deletes given file, when the associated job has
-   * finished.
-   * <p>
-   * Use this class, whenever you create temporary file, which is passed to a
-   * job and you want to remove the file, when the job has finished. The file
-   * is removed independently from the exact result of the job execution.
-   * 
-   */
-  private static FrameworkConnectorFactory factory = new FrameworkConnectorFactory();
+public final class FrameworkConnectorFactory implements DeviceConnectionListener {
+  public static final int                  CONNECT_PROGRESS            = 1000;
+  public static final int                  CONNECT_PROGRESS_CONNECTING = (int) (CONNECT_PROGRESS * 0.1);
+  public static final int                  CONNECT_PROGRESS_BUNDLES    = (int) (CONNECT_PROGRESS * 0.3);
+  public static final int                  CONNECT_PROGRESS_SERVICES   = (int) (CONNECT_PROGRESS * 0.2);
+  public static final int                  CONNECT_PROGRESS_ADDITIONAL = (int) (CONNECT_PROGRESS * 0.4);
+
+  private static final boolean             IAGENT_UI_ACCESS            = Boolean
+                                                                           .getBoolean("osgimanagement.iagent.access.warn");
+
+  private static FrameworkConnectorFactory factory                     = new FrameworkConnectorFactory();
+
+  private FrameworkConnectorFactory() {
+  }
 
   public static void init() {
     DeviceConnector.addDeviceConnectionListener(factory);
@@ -65,13 +63,50 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
     job.schedule();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   */
   public void connected(final DeviceConnector connector) {
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   */
+  public void disconnected(DeviceConnector connector) {
+    FrameworkImpl fwArr[] = FrameWorkView.findFramework(connector);
+    if (fwArr == null) {
+      return;
+    }
+    for (int j = 0; j < fwArr.length; j++) {
+      FrameworkImpl fw = fwArr[j];
+      BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
+      synchronized (Framework.getLockObject(connector)) {
+        ActionsManager.disconnectConsole(fw);
+        FrameworkImpl fws[] = FrameWorkView.getFrameworks();
+        if (fws != null) {
+          for (int i = 0; i < fws.length; i++) {
+            fw = fws[i];
+            if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
+              fw.disconnect();
+              fw.setPMPConnectionListener(null);
+              if (fw.isAutoConnected()) {
+                FrameWorkView.getTreeRoot().removeElement(fw);
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
   public static void connectFramework(final DeviceConnector connector, FrameworkImpl fw) {
-    // wrap the connector
-    final Display display = PlatformUI.getWorkbench().getDisplay();
-    final DeviceConnector fConnector = new DeviceConnectorSWTWrapper(connector, display);
+    DeviceConnector fConnector = connector;
+    if (IAGENT_UI_ACCESS) {
+      // wrap the connector
+      final Display display = PlatformUI.getWorkbench().getDisplay();
+      fConnector = new DeviceConnectorSWTWrapper(connector, display);
+    }
     final Dictionary connProps = fConnector.getProperties();
     Boolean temporary = (Boolean) connProps.get("framework-connection-temporary");
     if (temporary != null && temporary.booleanValue()) {
@@ -99,19 +134,18 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
       boolean autoConnected) {
     boolean pmp = false;
     try {
-      pmp = ((DeviceConnectorSpi) connector).getConnectionManager().getActiveConnection(ConnectionManager.PMP_CONNECTION) != null;
+      pmp = ((DeviceConnectorSpi) connector).getConnectionManager().getActiveConnection(
+          ConnectionManager.PMP_CONNECTION) != null;
     } catch (IAgentException e1) {
       e1.printStackTrace();
     }
     final boolean pmpConnected = pmp;
-
     // create and add pmp connection listener to fw
     PMPConnectionListener pmpListener = fw.getPMPConnectionListener();
     if (pmpListener == null || !connector.equals(pmpListener.getConnector())) {
       pmpListener = new PMPConnectionListener(fw, frameworkName, connector, autoConnected);
       fw.setPMPConnectionListener(pmpListener);
     }
-
     final PMPConnectionListener listener = pmpListener;
 
     // force creating of pmp connection
@@ -138,35 +172,6 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
     job.schedule();
   }
 
-  public void disconnected(DeviceConnector connector) {
-    FrameworkImpl fwArr[] = FrameWorkView.findFramework(connector);
-
-    if (fwArr == null /* || !fw.isConnected() */)
-      return;
-
-    for (int j = 0; j < fwArr.length; j++) {
-      FrameworkImpl fw = fwArr[j];
-      BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
-      synchronized (Framework.getLockObject(connector)) {
-        ActionsManager.disconnectConsole(fw);
-        FrameworkImpl fws[] = FrameWorkView.getFrameworks();
-        if (fws != null) {
-          for (int i = 0; i < fws.length; i++) {
-            fw = fws[i];
-            if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
-              fw.disconnect();
-              fw.setPMPConnectionListener(null);
-              if (fw.autoConnected) {
-                FrameWorkView.getTreeRoot().removeElement(fw);
-              }
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
-
   public static String generateFrameworkName(Dictionary connProps) {
     Hashtable frameWorkMap = new Hashtable();
     FrameworkImpl fws[] = FrameWorkView.getFrameworks();
@@ -177,8 +182,8 @@ public class FrameworkConnectorFactory implements DeviceConnectionListener {
     }
 
     Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
-    String defaultFWName = Messages.new_framework_default_name + " (" + connProps.get(DeviceConnector.TRANSPORT_TYPE) + "="
-        + connProps.get(DeviceConnector.TRANSPORT_ID) + ")";
+    String defaultFWName = Messages.new_framework_default_name + " (" + connProps.get(DeviceConnector.TRANSPORT_TYPE)
+        + "=" + connProps.get(DeviceConnector.TRANSPORT_ID) + ")";
     String frameWorkName = defaultFWName;
     String suffix = " ";
     if (ip != null) {
