@@ -146,63 +146,70 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 // TODO:Remove static access to ui widgets and model entries
 public final class FrameWorkView extends ViewPart implements ConstantsDistributor {
-  public static final String                  VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
-                                                                               + ".frameworkview";
-  // get system bundles
-  private static List<ISystemBundlesProvider> systemBundlesProviders       = new ArrayList<ISystemBundlesProvider>();
+  public static final String                        VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
+                                                                                     + ".frameworkview";
+  public static final String                        PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
+  public static final String                        UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                                       //$NON-NLS-1$
+  public static final String                        STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                                         //$NON-NLS-1$
+  public static final String                        START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";                                        //$NON-NLS-1$
+  public static final String                        UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";                                    //$NON-NLS-1$
+  public static final String                        INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";                                      //$NON-NLS-1$
+  public static final String                        DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";                                   //$NON-NLS-1$
+  public static final String                        CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";                                      //$NON-NLS-1$
+  public static final String                        REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";                                       //$NON-NLS-1$
+  public static final String                        ADD_ACTION_IMAGE_PATH        = "add_action.gif";                                          //$NON-NLS-1$
+  public static final String                        BUNDLES_GROUP_IMAGE_PATH     = "bundles_group.gif";                                       //$NON-NLS-1$
+  public static final String                        SEARCH_IMAGE_PATH            = "search_action.gif";
+  public static final String                        REFRESH_IMAGE_PATH           = "refresh_action.gif";
+  public static final String                        CONSOLE_IMAGE_PATH           = "console.gif";
 
-  public static final String                  PROPERTIES_IMAGE_PATH        = "properties.gif";                       //$NON-NLS-1$
-  public static final String                  UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                    //$NON-NLS-1$
-  public static final String                  STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                      //$NON-NLS-1$
-  public static final String                  START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";                     //$NON-NLS-1$
-  public static final String                  UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";                 //$NON-NLS-1$
-  public static final String                  INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";                   //$NON-NLS-1$
-  public static final String                  DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";                //$NON-NLS-1$
-  public static final String                  CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";                   //$NON-NLS-1$
-  public static final String                  REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";                    //$NON-NLS-1$
-  public static final String                  ADD_ACTION_IMAGE_PATH        = "add_action.gif";                       //$NON-NLS-1$
-  public static final String                  BUNDLES_GROUP_IMAGE_PATH     = "bundles_group.gif";                    //$NON-NLS-1$
-  public static final String                  SEARCH_IMAGE_PATH            = "search_action.gif";
-  public static final String                  REFRESH_IMAGE_PATH           = "refresh_action.gif";
-  public static final String                  CONSOLE_IMAGE_PATH           = "console.gif";
+  private static final String                       SYSTEM_BUNDLES_EXT_POINT_ID  = "org.tigris.mtoolkit.osgimanagement.systemBundlesProvider";
 
-  private static final String                 FIND_COMMAND_ID              = FindAction.class.getName();
-  private static final String                 REFRESH_COMMAND_ID           = RefreshAction.class.getName();
-  private static final String                 REMOVE_COMMAND_ID            = RemoveAction.class.getName();
-  private static final String                 PROPERTIES_COMMAND_ID        = CommonPropertiesAction.class.getName();
+  private static final String                       FIND_COMMAND_ID              = FindAction.class.getName();
+  private static final String                       REFRESH_COMMAND_ID           = RefreshAction.class.getName();
+  private static final String                       REMOVE_COMMAND_ID            = RemoveAction.class.getName();
+  private static final String                       PROPERTIES_COMMAND_ID        = CommonPropertiesAction.class
+                                                                                     .getName();
 
-  private static AddAction                    addFrameworkAction;
-  private static RemoveAction                 removeFrameworkAction;
-  private static ConnectAction                connectAction;
-  private static DisconnectAction             disconnectAction;
-  private static InstallBundleAction          installBundleAction;
-  private static DeInstallBundleAction        deinstallBundleAction;
-  private static StartAction                  startAction;
-  private static StopAction                   stopAction;
-  private static UpdateBundleAction           updateBundleAction;
-  private static CommonPropertiesAction       commonPropertiesAction;
-  private static ShowServicePropertiesInTree  showServPropsInTreeAction;
-  private static ShowFrameworkConsole         showConsoleAction;
-  private static RefreshAction                refreshAction;
-  private static ViewAction                   viewServicesAction;
-  private static ViewAction                   viewBundlesAction;
-  private ShowBundleIDAction                  showBundleIDAction;
-  private GotoServiceAction                   gotoServiceAction;
-  private ShowBundleVersionAction             showBundleVersionAction;
-  private FindAction                          findAction;
+  private static AddAction                          addFrameworkAction;
+  private static RemoveAction                       removeFrameworkAction;
+  private static ConnectAction                      connectAction;
+  private static DisconnectAction                   disconnectAction;
+  private static InstallBundleAction                installBundleAction;
+  private static DeInstallBundleAction              deinstallBundleAction;
+  private static StartAction                        startAction;
+  private static StopAction                         stopAction;
+  private static UpdateBundleAction                 updateBundleAction;
+  private static CommonPropertiesAction             commonPropertiesAction;
+  private static ShowServicePropertiesInTree        showServPropsInTreeAction;
+  private static ShowFrameworkConsole               showConsoleAction;
+  private static RefreshAction                      refreshAction;
+  private static ViewAction                         viewServicesAction;
+  private static ViewAction                         viewBundlesAction;
+  private ShowBundleIDAction                        showBundleIDAction;
+  private GotoServiceAction                         gotoServiceAction;
+  private ShowBundleVersionAction                   showBundleVersionAction;
+  private FindAction                                findAction;
 
-  private final FilterJob                     filterJob                    = new FilterJob();
-  private final MyViewerFilter                filter                       = new MyViewerFilter();
+  private final FilterJob                           filterJob                    = new FilterJob();
+  private final MyViewerFilter                      filter                       = new MyViewerFilter();
 
-  private Text                                filterField;
-  private TreeViewer                          tree;
-  private IWorkbenchPage                      activePage;
-  private MenuManager                         mgr;
-  private ToolbarIMenuCreator                 bundlesTB;
-  private static TreeRoot                     treeRoot;
+  private Text                                      filterField;
+  private TreeViewer                                tree;
+  private IWorkbenchPage                            activePage;
+  private MenuManager                               mgr;
+  private ToolbarIMenuCreator                       bundlesTB;
+  private static TreeRoot                           treeRoot;
 
-  private static HashMap                      activeInstances;
-  private String                              notFoundText                 = null;
+  private static HashMap                            activeInstances;
+  private String                                    notFoundText                 = null;
+
+  // System bundles providers
+  private static final List<ISystemBundlesProvider> systemBundlesProviders       = new ArrayList<ISystemBundlesProvider>();
+
+  static {
+    obtainSystemBundlesProviders();
+  }
 
   // Get current shell
   public static Shell getShell() {
@@ -433,8 +440,6 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
     createShortcut(REFRESH_COMMAND_ID, refreshAction, "F5");
     createShortcut(PROPERTIES_COMMAND_ID, commonPropertiesAction, "Alt+Enter");
     createShortcut(REMOVE_COMMAND_ID, removeFrameworkAction, "DEL");
-
-    obtainSystemBundlesProviders();
   }
 
   private void createToolbarAndMenu() {
@@ -494,6 +499,34 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
     toolBar.add(refreshAction);
 
     updateContextMenuStates();
+  }
+
+  public static Set<String> getSystemBundles() {
+    Set<String> systemBundles = new HashSet<String>();
+    for (ISystemBundlesProvider provider : systemBundlesProviders) {
+      Set<String> bundles = provider.getSystemBundlesIDs();
+      if (bundles == null) {
+        continue;
+      }
+      systemBundles.addAll(bundles);
+    }
+    return systemBundles;
+  }
+
+  private static void obtainSystemBundlesProviders() {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint extensionPoint = registry.getExtensionPoint(SYSTEM_BUNDLES_EXT_POINT_ID);
+    IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
+    if (elements == null) {
+      return;
+    }
+    for (int i = 0; i < elements.length; i++) {
+      try {
+        systemBundlesProviders.add((ISystemBundlesProvider) elements[i].createExecutableExtension("class"));
+      } catch (CoreException e) {
+        FrameworkPlugin.error("Exception while intializing system bundles provider elements", e);
+      }
+    }
   }
 
   private void createShortcut(String commandName, final Action action, String shortcutCombination) {
@@ -896,25 +929,6 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
     return fwArr;
   }
 
-  public static Set<String> getSystemBundles() {
-    Set<String> systemBundles = new HashSet<String>();
-    if (systemBundlesProviders != null) {
-      for (int i = 0; i < systemBundlesProviders.size(); i++) {
-        ISystemBundlesProvider provider = systemBundlesProviders.get(i);
-        Set<String> bundles = provider.getSystemBundlesIDs();
-        if (bundles != null) {
-          for (Iterator iterator = bundles.iterator(); iterator.hasNext();) {
-            String bundle = (String) iterator.next();
-            if (!systemBundles.contains(bundle)) {
-              systemBundles.add(bundle);
-            }
-          }
-        }
-      }
-    }
-    return systemBundles;
-  }
-
   private static List actionProviders = new ArrayList();
 
   public static List getActionsProviders() {
@@ -1098,7 +1112,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 
   private void findItem(String text, TreeViewer parentView) {
     if (text.equals("")) {
-      return; 
+      return;
     }
     if (notFoundText != null && text.indexOf(notFoundText) != -1) {
       return;
@@ -1243,28 +1257,4 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
       return true;
     }
   }
-
-  private void obtainSystemBundlesProviders() {
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint extensionPoint = registry
-        .getExtensionPoint("org.tigris.mtoolkit.osgimanagement.systemBundlesProvider");
-    obtainSystemBundlesElements(extensionPoint.getConfigurationElements(), systemBundlesProviders);
-  }
-
-  private void obtainSystemBundlesElements(IConfigurationElement[] elements, List providers) {
-    for (int i = 0; i < elements.length; i++) {
-      String clazz = elements[i].getAttribute("class");
-      if (clazz != null) {
-        try {
-          Object provider = elements[i].createExecutableExtension("class");
-          if (provider instanceof ISystemBundlesProvider) {
-            providers.add(provider);
-          }
-        } catch (CoreException e) {
-          FrameworkPlugin.error("Exception while intializing system bundles provider elements", e);
-        }
-      }
-    }
-  }
-
 }

@@ -95,11 +95,8 @@ public class Util {
     return fw;
   }
 
-  public static Set<String> getSystemBundles(Framework fw) {
-    if (fw == null) {
-      return FrameWorkView.getSystemBundles();
-    }
-    return fw.getSystemBundlesNames();
+  public static Set<String> getSystemBundles() {
+    return FrameWorkView.getSystemBundles();
   }
 
   /**
