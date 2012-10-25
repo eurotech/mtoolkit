@@ -24,22 +24,21 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
-import org.eclipse.pde.internal.core.bundle.BundlePluginModel;
-import org.eclipse.pde.internal.core.bundle.WorkspaceBundleModel;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.osgi.framework.Version;
+import org.tigris.mtoolkit.common.PDEUtils;
 
 /**
  * @since 5.0
  */
 public final class PluginExportManager {
-  private static final String           EXPORTED_FILENAME_EXTENSION = ".jar";
-  private static final String           EXPORT_FILENAME_SEPARATOR   = "_";
-  private static final String           EMPTY_VERSION               = Version.emptyVersion.toString();
-  private static final Object           NOT_EXPORTED                = new Object();
+  private static final String                 EXPORTED_FILENAME_EXTENSION = ".jar";
+  private static final String                 EXPORT_FILENAME_SEPARATOR   = "_";
+  private static final String                 EMPTY_VERSION               = Version.emptyVersion.toString();
+  private static final Object                 NOT_EXPORTED                = new Object();
 
-  private IPluginExporter               exporter;
-  private Map<IPluginModelBase, Object> bundlesToExport             = new HashMap();
+  private final IPluginExporter               exporter;
+  private final Map<IPluginModelBase, Object> bundlesToExport             = new HashMap<IPluginModelBase, Object>();
 
   private PluginExportManager(IPluginExporter exporter) {
     this.exporter = exporter;
@@ -66,14 +65,12 @@ public final class PluginExportManager {
     if (bundlesForExport.size() == 0) {
       return Status.OK_STATUS;
     }
-
     FeatureExportInfo exportInfo = new FeatureExportInfo();
     exportInfo.toDirectory = true;
     exportInfo.useJarFormat = true;
     exportInfo.destinationDirectory = location;
     exportInfo.qualifier = exporter.getQualifier();
     exportInfo.items = bundlesForExport.toArray();
-
     IStatus result = exporter.syncExportPlugins(exportInfo, monitor);
     if (result.isOK()) {
       for (Iterator it = bundlesForExport.iterator(); it.hasNext();) {
@@ -91,15 +88,11 @@ public final class PluginExportManager {
     for (Iterator it = bundlesToExport.entrySet().iterator(); it.hasNext();) {
       Entry entry = (Entry) it.next();
       IPluginModelBase bundle = (IPluginModelBase) entry.getKey();
-      boolean isWorkspaceBundle = false;
-      if (bundle instanceof BundlePluginModel) {
-        isWorkspaceBundle = ((BundlePluginModel) bundle).getBundleModel() instanceof WorkspaceBundleModel;
-      }
-      if (!isWorkspaceBundle) {
+      if (PDEUtils.isTargetPlatformBundle(bundle)) {
         continue;
       }
       String expLocation = (String) entry.getValue();
-      if (expLocation != NOT_EXPORTED) {
+      if (!NOT_EXPORTED.equals(expLocation)) {
         new File(expLocation).delete();
       }
     }
@@ -112,7 +105,10 @@ public final class PluginExportManager {
   }
 
   public static PluginExportManager create() {
-    return new PluginExportManager(getExporter());
+    if (PluginExporter_35.isCompatible()) {
+      return new PluginExportManager(new PluginExporter_35());
+    }
+    throw new IllegalStateException("No plugin export manager available for this eclipse platform");
   }
 
   private String determineLocationAfterExport(IPluginModelBase model, FeatureExportInfo info) {
@@ -158,12 +154,5 @@ public final class PluginExportManager {
       }
     }
     return bundles;
-  }
-
-  private static IPluginExporter getExporter() {
-    if (PluginExporter_35.isCompatible()) {
-      return new PluginExporter_35();
-    }
-    return null;
   }
 }
