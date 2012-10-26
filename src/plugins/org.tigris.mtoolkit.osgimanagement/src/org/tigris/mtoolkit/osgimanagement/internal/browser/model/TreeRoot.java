@@ -17,97 +17,98 @@ import java.util.Iterator;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class TreeRoot extends Model {
+public final class TreeRoot extends Model {
+  private boolean         showBundlesID      = false;
+  private boolean         showBundlesVersion = false;
+  private String          filter             = "";
+  private final ArrayList listeners          = new ArrayList();
 
-	private ArrayList listeners;
-	private boolean showBundlesID = false;
-	private boolean showBundlesVersion = false;
-	private String filter = "";
+  public TreeRoot(String name) {
+    super(name);
+  }
 
-	public TreeRoot(String name) {
-		super(name);
-		listeners = new ArrayList();
-	}
+  public HashMap getFrameWorkMap() {
+    Iterator iter = elementList.iterator();
+    HashMap result = new HashMap(getSize());
+    while (iter.hasNext()) {
+      FrameworkImpl element = (FrameworkImpl) iter.next();
+      result.put(element.getName(), element);
+    }
+    return result;
+  }
 
-	public HashMap getFrameWorkMap() {
-		Iterator iter = elementList.iterator();
-		HashMap result = new HashMap(getSize());
-		while (iter.hasNext()) {
-			FrameworkImpl element = (FrameworkImpl) iter.next();
-			result.put(element.getName(), element);
-		}
-		return result;
-	}
-	
-	public void setFilter(String filter) {
-		if ("".equals(filter))
-			this.filter = "";
-		else
-			this.filter = filter.toLowerCase();
-	}
-	
-	public String getFilter() {
-		return filter;
-	}
-	
-	public int getSelectedChildren() {
-		return selectedChilds;
-	}
+  public void setFilter(String filter) {
+    this.filter = filter.toLowerCase();
+  }
 
-	protected ArrayList getListeners() {
-		synchronized (listeners) {
-			ArrayList result = new ArrayList(listeners);
-			return result;
-		}
-	}
-	
-	public boolean isShowBundlesID() {
-		return showBundlesID;
-	}
+  public String getFilter() {
+    return filter;
+  }
 
-	public void setShowBundlesID(boolean b) {
-		showBundlesID = b;
-	}
+  public int getSelectedChildren() {
+    return selectedChilds;
+  }
 
-	public boolean isShowBundlesVersion() {
-		return showBundlesVersion;
-	}
+  public boolean isShowBundlesID() {
+    return showBundlesID;
+  }
 
-	public void setShowBundlesVersion(boolean b) {
-		showBundlesVersion = b;
-	}
+  public void setShowBundlesID(boolean b) {
+    showBundlesID = b;
+  }
 
-	public void addListener(ContentChangeListener newListener) {
-		synchronized (listeners) {
-			if (!listeners.contains(newListener)) {
-				listeners.add(newListener);
-			}
-		}
-	}
+  public boolean isShowBundlesVersion() {
+    return showBundlesVersion;
+  }
 
-	public void removeListener(ContentChangeListener oldListener) {
-		synchronized (listeners) {
-			listeners.remove(oldListener);
-		}
-	}
+  public void setShowBundlesVersion(boolean b) {
+    showBundlesVersion = b;
+  }
 
-	protected boolean select(Model model) {
-		if ("" == filter) {
-			return true;
-		}
-		if (model instanceof FrameworkImpl) {
-			return false;
-		}
-		if (model instanceof ServicesCategory || model instanceof BundlesCategory) {
-			return false;
-		}
-		String text = model.getLabel();
-		if (text.toLowerCase().indexOf(filter) != -1) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	
+  public void addListener(ContentChangeListener newListener) {
+    synchronized (listeners) {
+      if (!listeners.contains(newListener)) {
+        listeners.add(newListener);
+      }
+    }
+  }
+
+  public void removeListener(ContentChangeListener oldListener) {
+    synchronized (listeners) {
+      listeners.remove(oldListener);
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Model#getListeners()
+   */
+  @Override
+  protected ArrayList getListeners() {
+    synchronized (listeners) {
+      ArrayList result = new ArrayList(listeners);
+      return result;
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Model#select(org.tigris.mtoolkit.osgimanagement.model.Model)
+   */
+  @Override
+  protected boolean select(Model model) {
+    if (filter.length() == 0) {
+      return true;
+    }
+    if (model instanceof FrameworkImpl) {
+      return false;
+    }
+    if (model instanceof ServicesCategory || model instanceof BundlesCategory) {
+      return false;
+    }
+    String text = model.getLabel();
+    if (text.toLowerCase().indexOf(filter) != -1) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

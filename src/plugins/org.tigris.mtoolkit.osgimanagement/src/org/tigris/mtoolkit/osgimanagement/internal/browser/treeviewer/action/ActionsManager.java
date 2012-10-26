@@ -217,21 +217,11 @@ public class ActionsManager {
       if (fw.isAutoConnected()) {
         fw.disconnect();
       } else {
-        // if (fw.monitor != null) {
-        // fw.monitor.setCanceled(true);
-        // }
         // wait if connect operation is still active
-        DeviceConnector connector;
-        if ((connector = fw.getConnector()) != null) {
-          // framework connects synchronously, while holding a lock
-          // wait until the lock is released to know when the connect
-          // op has finished
-          synchronized (Framework.getLockObject(connector)) {
-          }
-        }
+        DeviceConnector connector = fw.getConnector();
         // if the connection fails, connector will be null, so we need
         // to recheck the condition
-        if ((connector = fw.getConnector()) != null) {
+        if (connector != null) {
           connector.closeConnection();
         }
       }

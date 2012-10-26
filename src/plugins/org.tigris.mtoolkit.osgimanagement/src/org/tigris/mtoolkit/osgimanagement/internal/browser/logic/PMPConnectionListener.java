@@ -32,14 +32,13 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
-import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public class PMPConnectionListener implements ConnectionListener {
-  private FrameworkImpl     fw;
-  private String            frameworkName;
-  protected DeviceConnector connector;
-  private boolean           autoConnected;
-  private boolean           instrumenting = false;
+public final class PMPConnectionListener implements ConnectionListener {
+  private final FrameworkImpl   fw;
+  private final DeviceConnector connector;
+  private final String          frameworkName;
+  private final boolean         autoConnected;
+  private boolean               instrumenting = false;
 
   public PMPConnectionListener(FrameworkImpl fw, String frameworkName, DeviceConnector connector, boolean autoConnected) {
     this.fw = fw;
@@ -58,8 +57,7 @@ public class PMPConnectionListener implements ConnectionListener {
     if (e.getType() == ConnectionEvent.DISCONNECTED) {
       disconnected();
     } else if (e.getType() == ConnectionEvent.CONNECTED) {
-      // in case we are instrumenting the framework, we want to ignore
-      // connection events
+      // in case we are instrumenting the framework, we want to ignore connection events
       if (!instrumenting) {
         connected();
       }
@@ -70,12 +68,6 @@ public class PMPConnectionListener implements ConnectionListener {
     if (!autoConnected) {
       ActionsManager.disconnectConsole(fw);
     }
-
-    // if disconnect event received while connect thread is running
-    // block disconnect until connect thread is finished/breaked
-    synchronized (Framework.getLockObject(connector)) {
-    }
-
     fw.disconnect();
   }
 
@@ -84,6 +76,9 @@ public class PMPConnectionListener implements ConnectionListener {
       return;
     }
     Job connectJob = new Job(frameworkName) {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         SubMonitor sMonitor = SubMonitor.convert(monitor, FrameworkConnectorFactory.CONNECT_PROGRESS);
@@ -120,21 +115,17 @@ public class PMPConnectionListener implements ConnectionListener {
           } catch (IAgentException e) {
             return Util.newStatus(IStatus.ERROR, "Connection failed", e);
           }
-
           connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
-
-          if (fw != null) {
-            fw.connect(connector, sMonitor);
-          }
+          fw.connect(connector, sMonitor);
           if (!autoConnected && fw.isConnected()) {
             ConsoleManager.connectConsole(connector, fw.getName());
           }
           return Status.OK_STATUS;
         } finally {
-          sMonitor.done();
           if (!fw.isConnected() && fw.isAutoConnected()) {
             fw.dispose();
           }
+          sMonitor.done();
         }
       }
     };
@@ -158,5 +149,4 @@ public class PMPConnectionListener implements ConnectionListener {
     });
     return result[0] != null && result[0].booleanValue();
   }
-
 }

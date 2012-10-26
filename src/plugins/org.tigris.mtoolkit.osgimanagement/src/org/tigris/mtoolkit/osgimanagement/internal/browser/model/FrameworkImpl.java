@@ -296,10 +296,10 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   public void disconnect() {
-    if (!isConnected()) {
-      return;
-    }
     synchronized (Framework.getLockObject(connector)) {
+      if (!isConnected()) {
+        return;
+      }
       connectedFlag = false;
       if (connector != null) {
         removeRemoteListeners();
@@ -415,15 +415,12 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       return;
     }
     synchronized (Framework.getLockObject(connector)) {
+      this.viewType = viewType;
     }
-
-    this.viewType = viewType;
-
     Model[] children = getChildren();
     for (int i = 0; i < children.length; i++) {
       removeElement(children[i]);
     }
-
     if (viewType == FrameworkImpl.SERVICES_VIEW) {
       for (int i = 0; i < servicesViewVector.size(); i++) {
         addElement((Model) servicesViewVector.elementAt(i));
@@ -435,7 +432,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       }
     }
     updateElement();
-
     for (int i = 0; i < modelProviders.size(); i++) {
       ((ModelProviderElement) modelProviders.get(i)).getProvider().switchView(viewType);
     }
@@ -1024,7 +1020,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   /**
    * Called when connecting to framework
-   *
+   * 
    * @param monitor
    * @throws IAgentException
    */
@@ -1503,7 +1499,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
    * Returns map, containing information for certificates which shall be used
    * for signing the content, installed to this framework. If no signing is
    * required, then empty Map is returned.
-   *
+   * 
    * @return the map with certificate properties
    */
   @Override
