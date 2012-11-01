@@ -293,41 +293,28 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
     });
 
     treeRoot.addListener(new ContentChangeListener() {
+      /* (non-Javadoc)
+       * @see org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener#elementRemoved(org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent)
+       */
       public void elementRemoved(ContentChangeEvent event) {
-        Display display = PlatformUI.getWorkbench().getDisplay();
-        if (display != null && !display.isDisposed()) {
-          display.asyncExec(new Runnable() {
-            public void run() {
-              if (filterField == null || filterField.isDisposed()) {
-                return;
-              }
-              treeRoot.setFilter(filterField.getText());
-            }
-          });
-        }
-
-        filterJob.cancel();
-        filterJob.schedule(300);
+        applyFilter();
       }
 
+      /* (non-Javadoc)
+       * @see org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener#elementChanged(org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent)
+       */
       public void elementChanged(ContentChangeEvent event) {
-        Display display = PlatformUI.getWorkbench().getDisplay();
-        if (display != null && !display.isDisposed()) {
-          display.asyncExec(new Runnable() {
-            public void run() {
-              if (filterField == null || filterField.isDisposed()) {
-                return;
-              }
-              treeRoot.setFilter(filterField.getText());
-            }
-          });
-        }
-
-        filterJob.cancel();
-        filterJob.schedule(300);
+        applyFilter();
       }
 
+      /* (non-Javadoc)
+       * @see org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener#elementAdded(org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent)
+       */
       public void elementAdded(ContentChangeEvent event) {
+        applyFilter();
+      }
+
+      private void applyFilter() {
         Display display = PlatformUI.getWorkbench().getDisplay();
         if (display != null && !display.isDisposed()) {
           display.asyncExec(new Runnable() {
