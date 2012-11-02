@@ -21,61 +21,56 @@ import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
-public class SigningPropertyPage extends PropertyPage {
-	private CertificatesPanel certificatesPanel;
-	private FrameworkImpl fw;
+public final class SigningPropertyPage extends PropertyPage {
+  private FrameworkImpl     fw;
+  private CertificatesPanel certificatesPanel;
 
-	public SigningPropertyPage() {
-		super();
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+   */
+  @Override
+  protected Control createContents(Composite parent) {
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PROPERTY_FRAMEWORK);
+    Composite composite = new Composite(parent, SWT.NONE);
+    GridLayout layout = new GridLayout();
+    layout.marginHeight = 0;
+    layout.marginWidth = 0;
+    composite.setLayout(layout);
+    composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse
-	 * .swt.widgets.Composite)
-	 */
-	@Override
-	protected Control createContents(Composite parent) {
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PROPERTY_FRAMEWORK);
-		Composite composite = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+    fw = (FrameworkImpl) getElement();
 
-		fw = (FrameworkImpl) getElement();
+    certificatesPanel = new CertificatesPanel(composite, 1, 1, GridData.FILL_BOTH);
+    certificatesPanel.initialize(fw.getSignCertificateUids());
+    if (fw.isAutoConnected()) {
+      certificatesPanel.setEditable(false);
+    }
 
-		certificatesPanel = new CertificatesPanel(composite, 1, 1, GridData.FILL_BOTH);// HORIZONTAL);
-		certificatesPanel.initialize(fw.getSignCertificateUids());
-		if (fw.isAutoConnected()) {
-			certificatesPanel.setEditable(false);
-		}
+    return composite;
+  }
 
-		return composite;
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
+   */
+  @Override
+  protected void performDefaults() {
+  }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
-	 */
-	@Override
-	protected void performDefaults() {
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#performOk()
+   */
+  @Override
+  public boolean performOk() {
+    fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
+    return true;
+  }
 
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
-	 */
-	@Override
-	public boolean performOk() {
-		fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
-		return true;
-	}
-
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+   */
+  @Override
+  public void dispose() {
+    fw = null;
+    super.dispose();
+  }
 }

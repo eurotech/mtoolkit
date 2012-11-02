@@ -23,14 +23,37 @@ import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel.ErrorMonitor;
 
-public class FrameworkPropertyPage extends PropertyPage implements ConstantsDistributor, FrameworkPanel.ErrorMonitor {
-
+public final class FrameworkPropertyPage extends PropertyPage implements ConstantsDistributor, ErrorMonitor {
+  private FrameworkImpl  fw;
   private FrameworkPanel fwPanel;
-  private FrameworkImpl fw;
 
-  public FrameworkPropertyPage() {
-    super();
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#performOk()
+   */
+  @Override
+  public boolean performOk() {
+    boolean correct = fwPanel.validate();
+    if (correct) {
+      String oldLabel = fw.getLabel();
+
+      boolean connChanged = fwPanel.save(fw.getConfig());
+      fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
+
+      updateTitle(oldLabel, fw.getLabel());
+
+      DeviceConnector connector = fw.getConnector();
+      if (connector != null) {
+        if (fw.isConnected() && connChanged) {
+          MessageDialog.openInformation(getShell(), Messages.framework_ip_changed_title,
+              Messages.framework_ip_changed_message);
+        }
+      }
+      fw.updateElement();
+    }
+
+    return correct;
   }
 
   /* (non-Javadoc)
@@ -64,38 +87,21 @@ public class FrameworkPropertyPage extends PropertyPage implements ConstantsDist
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.preference.PreferencePage#performOk()
-   */
-  @Override
-  public boolean performOk() {
-    boolean correct = fwPanel.validate();
-    if (correct) {
-      String oldLabel = fw.getLabel();
-
-      boolean connChanged = fwPanel.save(fw.getConfig());
-      fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
-
-      updateTitle(oldLabel, fw.getLabel());
-
-      DeviceConnector connector = fw.getConnector();
-      if (connector != null) {
-        if (fw.isConnected() && connChanged) {
-          MessageDialog.openInformation(getShell(), Messages.framework_ip_changed_title, Messages.framework_ip_changed_message);
-        }
-      }
-      fw.updateElement();
-    }
-
-    return correct;
-  }
-
-  /* (non-Javadoc)
    * @see org.eclipse.jface.preference.PreferencePage#setErrorMessage(java.lang.String)
    */
   @Override
   public void setErrorMessage(String error) {
     super.setErrorMessage(error);
     setValid(error == null);
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+   */
+  @Override
+  public void dispose() {
+    fw = null;
+    super.dispose();
   }
 
   private void updateTitle(String oldName, String newName) {
