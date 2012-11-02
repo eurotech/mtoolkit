@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
@@ -28,10 +27,10 @@ public final class TreeRoot extends Model {
   }
 
   public HashMap getFrameWorkMap() {
-    Iterator iter = elementList.iterator();
-    HashMap result = new HashMap(getSize());
-    while (iter.hasNext()) {
-      FrameworkImpl element = (FrameworkImpl) iter.next();
+    Model[] children = getChildren();
+    HashMap result = new HashMap(children.length);
+    for (int i = 0; i < children.length; i++) {
+      FrameworkImpl element = (FrameworkImpl) children[i];
       result.put(element.getName(), element);
     }
     return result;

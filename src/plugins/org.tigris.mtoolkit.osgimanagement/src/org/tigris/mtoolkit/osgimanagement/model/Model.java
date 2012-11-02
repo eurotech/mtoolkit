@@ -29,7 +29,7 @@ public abstract class Model implements Comparable, IActionFilter {
 
   protected String name;
   protected Model parent;
-  protected Set elementList;
+  protected Set     elementList    = new TreeSet();
   protected boolean selected = false;
   protected int selectedChilds = 0;
   private Vector slaves = new Vector();
@@ -37,7 +37,6 @@ public abstract class Model implements Comparable, IActionFilter {
 
   public Model(String name) {
     this.name = name;
-    elementList = new TreeSet();
   }
 
   public Model(String name, Model master) {
@@ -80,18 +79,20 @@ public abstract class Model implements Comparable, IActionFilter {
   private void filterRecursively(Model element) {
     element.filter();
     Model[] children = element.getChildren();
-    if (children != null && children.length > 0)
+    if (children != null && children.length > 0) {
       for (int i = 0; i < children.length; i++) {
         filterRecursively(children[i]);
       }
+    }
   }
 
   private void fireChildSelected(int delta) {
     synchronized (this) {
       selectedChilds += delta;
     }
-    if (getParent() != null)
+    if (getParent() != null) {
       getParent().fireChildSelected(delta);
+    }
   }
 
   private void setParent(Model parent) {
@@ -110,44 +111,33 @@ public abstract class Model implements Comparable, IActionFilter {
   }
 
   public synchronized Model[] getChildren() {
-    if (elementList == null) {
-      return new Model[0];
-    }
-    Model[] resultArray = new Model[0];
-    resultArray = (Model[]) elementList.toArray(resultArray);
-    return resultArray;
+    return (Model[]) elementList.toArray(new Model[elementList.size()]);
   }
 
   public Model[] getSelectedChildrenRecursively() {
-    if (elementList == null) {
-      return new Model[0];
-    }
     List children = new ArrayList(selectedChilds);
     internalGetSelectedChildrenRecursively(children);
     return (Model[]) children.toArray(new Model[children.size()]);
   }
 
   protected void internalGetSelectedChildrenRecursively(List result) {
-    if (elementList == null)
-      return;
     for (Iterator it = elementList.iterator(); it.hasNext();) {
       Model child = (Model) it.next();
-      if (child.selected)
+      if (child.selected) {
         result.add(child);
+      }
       child.internalGetSelectedChildrenRecursively(result);
     }
   }
 
   public int getSize() {
-    if (elementList == null) {
-      return 0;
-    }
     return elementList.size();
   }
 
   protected ArrayList getListeners() {
-    if (parent == null)
+    if (parent == null) {
       return null;
+    }
     return parent.getListeners();
   }
 
@@ -196,7 +186,7 @@ public abstract class Model implements Comparable, IActionFilter {
   // When name of a element is changed at elementList node is removed and added with its new name.
   public void setName(String name) {
     Model parent = this.getParent();
-    if (parent != null && parent.elementList != null && parent.elementList.remove(this)) {
+    if (parent != null && parent.elementList.remove(this)) {
       this.name = name;
       parent.elementList.add(this);
     }
@@ -209,7 +199,7 @@ public abstract class Model implements Comparable, IActionFilter {
 
   /**
    * Returns human-readable text for using in UI.
-   * 
+   *
    * @return the label
    */
   public String getLabel() {
@@ -230,8 +220,9 @@ public abstract class Model implements Comparable, IActionFilter {
   }
 
   public void removeChildren() {
-    if (getSize() < 1)
+    if (getSize() < 1) {
       return;
+    }
     Model[] elements = getChildren();
     for (int i = 0; i < elements.length; i++) {
       removeElement(elements[i]);
@@ -264,8 +255,9 @@ public abstract class Model implements Comparable, IActionFilter {
   }
 
   protected boolean select(Model model) {
-    if (getParent() != null)
+    if (getParent() != null) {
       return getParent().select(model);
+    }
     return false;
   }
 
@@ -304,8 +296,9 @@ public abstract class Model implements Comparable, IActionFilter {
     int index = 0;
     while (iterator.hasNext()) {
       Model node = (Model) iterator.next();
-      if (node == child)
+      if (node == child) {
         return index;
+      }
       index++;
     }
     return -1;

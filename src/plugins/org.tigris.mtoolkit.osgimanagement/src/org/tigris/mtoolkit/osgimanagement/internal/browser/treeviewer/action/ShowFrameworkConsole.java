@@ -23,42 +23,48 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public class ShowFrameworkConsole extends SelectionProviderAction implements IStateAction {
 
-	private TreeViewer tree;
+  private TreeViewer tree;
 
-	public ShowFrameworkConsole(ISelectionProvider provider, String label, TreeViewer tree) {
-		super(provider, label);
-		this.tree = tree;
-	}
+  public ShowFrameworkConsole(ISelectionProvider provider, String label, TreeViewer tree) {
+    super(provider, label);
+    this.tree = tree;
+  }
 
-	public void run() {
-		IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
-		if (selection.isEmpty())
-			return;	// don't execute for empty selection
-		final FrameworkImpl fw = (FrameworkImpl) ((Model) selection.getFirstElement()).findFramework();
-		ConsoleManager.showConsole(fw.getConnector(), fw.getName());
-	}
+  @Override
+  public void run() {
+    IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
+    if (selection.isEmpty()) {
+      return; // don't execute for empty selection
+    }
+    final FrameworkImpl fw = (FrameworkImpl) ((Model) selection.getFirstElement()).findFramework();
+    if (fw == null) {
+      return; // don't execute when fw has been disconnected
+    }
+    ConsoleManager.showConsole(fw.getConnector(), fw.getName());
+  }
 
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
+  // override to react properly to selection change
+  @Override
+  public void selectionChanged(IStructuredSelection selection) {
+    updateState(selection);
+  }
 
-	public void updateState(IStructuredSelection selection) {
-		boolean enabled = false;
-		FrameworkImpl fw = null;
-		for (Iterator it = selection.iterator(); it.hasNext();) {
-			FrameworkImpl next = (FrameworkImpl) ((Model) it.next()).findFramework();
-			if (fw == null) {
-				// we found a framework, enable console
-				fw = next;
-				enabled = true;
-			} else if (!fw.equals(next)) {
-				// we have another framework, disable console button
-				enabled = false;
-				break;
-			}
-		}
-		// TODO: Disable the button when the framework is disconnected
-		setEnabled(enabled && fw != null && fw.isConnected());// && !fw.autoConnected);
-	}
+  public void updateState(IStructuredSelection selection) {
+    boolean enabled = false;
+    FrameworkImpl fw = null;
+    for (Iterator it = selection.iterator(); it.hasNext();) {
+      FrameworkImpl next = (FrameworkImpl) ((Model) it.next()).findFramework();
+      if (fw == null) {
+        // we found a framework, enable console
+        fw = next;
+        enabled = true;
+      } else if (!fw.equals(next)) {
+        // we have another framework, disable console button
+        enabled = false;
+        break;
+      }
+    }
+    // TODO: Disable the button when the framework is disconnected
+    setEnabled(enabled && fw != null && fw.isConnected());// && !fw.autoConnected);
+  }
 }
