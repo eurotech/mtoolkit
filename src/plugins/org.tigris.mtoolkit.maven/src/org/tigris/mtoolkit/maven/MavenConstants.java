@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.maven;
 
-public class MavenConstants {
+public final class MavenConstants {
+  public static final String   POM_FILE      = "pom.xml";
+  public static final String   POM_PACKAGING = "pom";
+  public static final String[] DEFAULT_GOALS = new String[] {
+                                               "package"
+                                             };
 
-	public static final String POM_FILE = "pom.xml";
-	public static final String[] DEFAULT_GOALS = new String[] { "package" };
-
-	private MavenConstants() {
-	}
+  private MavenConstants() {
+  }
 
 }
