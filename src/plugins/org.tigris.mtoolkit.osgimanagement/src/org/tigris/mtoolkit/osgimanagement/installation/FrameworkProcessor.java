@@ -44,6 +44,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.installation.AbstractInstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationConstants;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
@@ -504,7 +505,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     InputStream input = null;
     try {
       input = item.getInputStream();
-      bundle = FrameworkPlugin.saveFile(input, item.getName());
+      bundle = FileUtils.saveFile(FrameworkPlugin.getFile(item.getName()), input);
       InstallBundleOperation operation = new InstallBundleOperation((FrameworkImpl) framework);
       return operation.installBundle(bundle, monitor);
     } catch (Exception e) {

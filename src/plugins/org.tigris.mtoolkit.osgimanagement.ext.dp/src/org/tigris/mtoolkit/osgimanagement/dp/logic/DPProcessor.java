@@ -30,8 +30,10 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtensi
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public final class DPProcessor implements FrameworkProcessorExtension {
-  public static final String MIME_DP = "application/vnd.osgi.dp";
-  public static final String[] SUPPORTED_MIME_TYPES = new String[] { MIME_DP };
+  public static final String   MIME_DP              = "application/vnd.osgi.dp";
+  public static final String[] SUPPORTED_MIME_TYPES = new String[] {
+                                                      MIME_DP
+                                                    };
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor#getName()
@@ -87,12 +89,13 @@ public final class DPProcessor implements FrameworkProcessorExtension {
     return true;
   }
 
-  private static void processItem(InstallationItem item, Framework framework, IProgressMonitor monitor) throws CoreException {
+  private static void processItem(InstallationItem item, Framework framework, IProgressMonitor monitor)
+      throws CoreException {
     File packageFile = null;
     InputStream input = null;
     try {
       input = item.getInputStream();
-      packageFile = Activator.saveFile(input, item.getName());
+      packageFile = FileUtils.saveFile(Activator.getFile(item.getName()), input);
       InstallDeploymentOperation operation = new InstallDeploymentOperation(framework);
       operation.install(packageFile, monitor);
     } catch (Exception e) {

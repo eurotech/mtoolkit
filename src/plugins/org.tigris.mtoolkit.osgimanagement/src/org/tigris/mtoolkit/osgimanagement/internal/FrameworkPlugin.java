@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.osgimanagement.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -23,7 +22,6 @@ import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -55,18 +53,19 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
   }
 
   @Override
-  public void stop(BundleContext context) throws Exception {
-    super.stop(context);
-    FrameworkConnectorFactory.deinit();
-    instance = null;
-  }
-
-  @Override
   public void start(BundleContext context) throws Exception {
     super.start(context);
+    FrameworkPlugin.instance = this;
     FrameworkConnectorFactory.init();
     FrameWorkView.restoreModel();
     fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+  }
+
+  @Override
+  public void stop(BundleContext context) throws Exception {
+    super.stop(context);
+    FrameworkConnectorFactory.deinit();
+    FrameworkPlugin.instance = null;
   }
 
   public String getId() {
@@ -104,35 +103,9 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     fwLog.log(status);
   }
 
-  public static File saveFile(InputStream input, String name) throws IOException {
-    IPath statePath = Platform.getStateLocation(instance.getBundle());
-    File file = new File(statePath.toFile(), name);
-    if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
-      throw new IOException("Failed to create bundle state folder");
-    }
-    FileOutputStream stream = new FileOutputStream(file);
-    try {
-      byte[] buf = new byte[8192];
-      int read;
-      while ((read = input.read(buf)) != -1) {
-        stream.write(buf, 0, read);
-      }
-    } finally {
-      stream.close();
-    }
-    return file;
-  }
-
-  private static String formatStatus(IStatus status) {
-    String statusText = status.toString();
-    if (status.getException() == null) {
-      return statusText;
-    }
-    StringWriter swriter = new StringWriter();
-    PrintWriter pwriter = new PrintWriter(swriter);
-    status.getException().printStackTrace(pwriter);
-    pwriter.flush();
-    return statusText + System.getProperty("line.separator") + swriter.toString();
+  public static File getFile(String name) {
+    IPath statePath = getDefault().getStateLocation();
+    return new File(statePath.toFile(), name);
   }
 
   public static InputStream getIAgentBundleAsStream() {
@@ -172,5 +145,17 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
       }
     }
     return null;
+  }
+
+  private static String formatStatus(IStatus status) {
+    String statusText = status.toString();
+    if (status.getException() == null) {
+      return statusText;
+    }
+    StringWriter swriter = new StringWriter();
+    PrintWriter pwriter = new PrintWriter(swriter);
+    status.getException().printStackTrace(pwriter);
+    pwriter.flush();
+    return statusText + System.getProperty("line.separator") + swriter.toString();
   }
 }

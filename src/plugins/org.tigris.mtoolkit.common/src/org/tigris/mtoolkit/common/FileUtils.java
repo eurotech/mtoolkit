@@ -28,7 +28,7 @@ public final class FileUtils {
 
   /**
    * Extracts zip file.
-   *
+   * 
    * @param zipFile
    *          the zip file to extract
    * @param destinationDir
@@ -78,7 +78,7 @@ public final class FileUtils {
 
   /**
    * Makes zip file.
-   *
+   * 
    * @param src
    *          the source file or directory
    * @param zipFile
@@ -214,7 +214,7 @@ public final class FileUtils {
    * Deletes all files and subdirectories under dir. Returns true if all
    * deletions were successful. If a deletion fails, the method stops attempting
    * to delete and returns false.
-   *
+   * 
    * @param file
    * @return
    */
@@ -236,13 +236,31 @@ public final class FileUtils {
 
   /**
    * Returns file extension in lower case.
-   *
+   * 
    * @param file
    * @return
    */
   public static String getFileExtension(File file) {
     String name = file.getName();
     return name.substring(name.lastIndexOf('.') + 1, name.length()).toLowerCase();
+  }
+
+  public static File saveFile(File file, InputStream input) throws IOException {
+    if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+      throw new IOException("Failed to create " + file);
+    }
+    FileOutputStream stream = null;
+    try {
+      stream = new FileOutputStream(file);
+      byte[] buf = new byte[4096];
+      int read;
+      while ((read = input.read(buf)) != -1) {
+        stream.write(buf, 0, read);
+      }
+    } finally {
+      close(stream);
+    }
+    return file;
   }
 
   public static void close(Closeable stream) {
