@@ -62,7 +62,7 @@ public final class PDEUtils {
    * @param match
    * @return the bundle or null
    */
-  public static IPluginModelBase findBundle(String symbolicName, String version, boolean enabledOnly, int match) {
+  public static IPluginModelBase findBundle(String symbolicName, String version, boolean enabledOnly, int match) { // NO_UCD
     ModelEntry entry = PluginRegistry.findEntry(symbolicName);
     if (entry == null) {
       return null;
@@ -158,7 +158,7 @@ public final class PDEUtils {
 
   /**
    * Gets bundles from the target based on their enablement
-   * 
+   *
    * @param enabledOnly
    * @return bundles array
    */
@@ -179,7 +179,7 @@ public final class PDEUtils {
 
   /**
    * Gets all enabled bundles from the workspace which are currently valid.
-   * 
+   *
    * @return bundles array
    */
   public static IPluginModelBase[] getWorkspaceBundles() {
@@ -195,7 +195,7 @@ public final class PDEUtils {
 
   /**
    * Gets all active bundles in current context
-   * 
+   *
    * @return bundles array
    */
   public static IPluginModelBase[] getActiveBundles() {
@@ -207,7 +207,7 @@ public final class PDEUtils {
 
   /**
    * Checks if a bundle is from target
-   * 
+   *
    * @return bundle currently belongs to target
    */
   public static boolean isTargetPlatformBundle(IPluginModelBase bundle) {
@@ -218,7 +218,7 @@ public final class PDEUtils {
    * Returns true if the given version number is an empty version as
    * defined by {@link Version}. Used in cases where it would be
    * inappropriate to parse the actual version number.
-   * 
+   *
    * @param version version string to check
    * @return true if empty version
    */
@@ -232,7 +232,7 @@ public final class PDEUtils {
 
   /**
    * Returns bundle version number defined by {@link Version} or empty version if none.
-   * 
+   *
    * @param version version string to check
    * @return input version number or empty version, never null.
    */
@@ -295,15 +295,17 @@ public final class PDEUtils {
     if (base.getId() == null) {
       return false; // guard against invalid plug-ins
     }
-    if (version == null)
+    if (version == null) {
       return base.getId().equals(id);
+    }
     return compare(base.getId(), base.getVersion(), id, version, match);
   }
 
   private static IStatus validateVersion(String versionString) {
     try {
-      if (versionString != null)
+      if (versionString != null) {
         new Version(versionString.trim());
+      }
     } catch (IllegalArgumentException e) {
       UtilitiesPlugin.newException(IStatus.ERROR, "The specified version does not have the correct format", e);
     }
@@ -311,8 +313,9 @@ public final class PDEUtils {
   }
 
   private static boolean compare(String id1, String version1, String id2, String version2, int match) {
-    if (!(id1.equals(id2)))
+    if (!(id1.equals(id2))) {
       return false;
+    }
     try {
       Version v1 = Version.parseVersion(version1);
       Version v2 = Version.parseVersion(version2);
@@ -334,40 +337,52 @@ public final class PDEUtils {
   }
 
   private static boolean isCompatibleWith(Version v1, Version v2) {
-    if (v1.getMajor() != v2.getMajor())
+    if (v1.getMajor() != v2.getMajor()) {
       return false;
-    if (v1.getMinor() > v2.getMinor())
+    }
+    if (v1.getMinor() > v2.getMinor()) {
       return true;
-    if (v1.getMinor() < v2.getMinor())
+    }
+    if (v1.getMinor() < v2.getMinor()) {
       return false;
-    if (v1.getMicro() > v2.getMicro())
+    }
+    if (v1.getMicro() > v2.getMicro()) {
       return true;
-    if (v1.getMicro() < v2.getMicro())
+    }
+    if (v1.getMicro() < v2.getMicro()) {
       return false;
+    }
     return v1.getQualifier().compareTo(v2.getQualifier()) >= 0;
   }
 
   private static boolean isEquivalentTo(Version v1, Version v2) {
-    if (v1.getMajor() != v2.getMajor() || v1.getMinor() != v2.getMinor())
+    if (v1.getMajor() != v2.getMajor() || v1.getMinor() != v2.getMinor()) {
       return false;
-    if (v1.getMicro() > v2.getMicro())
+    }
+    if (v1.getMicro() > v2.getMicro()) {
       return true;
-    if (v1.getMicro() < v2.getMicro())
+    }
+    if (v1.getMicro() < v2.getMicro()) {
       return false;
+    }
     return v1.getQualifier().compareTo(v2.getQualifier()) >= 0;
   }
 
   private static boolean isGreaterOrEqualTo(Version v1, Version v2) {
-    if (v1.getMajor() > v2.getMajor())
+    if (v1.getMajor() > v2.getMajor()) {
       return true;
+    }
     if (v1.getMajor() == v2.getMajor()) {
-      if (v1.getMinor() > v2.getMinor())
+      if (v1.getMinor() > v2.getMinor()) {
         return true;
+      }
       if (v1.getMinor() == v2.getMinor()) {
-        if (v1.getMicro() > v2.getMicro())
+        if (v1.getMicro() > v2.getMicro()) {
           return true;
-        if (v1.getMicro() == v2.getMicro())
+        }
+        if (v1.getMicro() == v2.getMicro()) {
           return v1.getQualifier().compareTo(v2.getQualifier()) >= 0;
+        }
       }
     }
     return false;

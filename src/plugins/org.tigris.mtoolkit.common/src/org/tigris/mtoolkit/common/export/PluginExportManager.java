@@ -27,6 +27,8 @@ import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.internal.core.exports.FeatureExportInfo;
 import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.PDEUtils;
+import org.tigris.mtoolkit.common.internal.export.IPluginExporter;
+import org.tigris.mtoolkit.common.internal.export.PluginExporter_35;
 
 /**
  * @since 5.0

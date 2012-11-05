@@ -15,18 +15,19 @@ import org.eclipse.core.runtime.Platform;
 /**
  * @since 6.1
  */
-public class PlatformUtils {
+public final class PlatformUtils {
+  private PlatformUtils() {
+  }
 
-  public static boolean isWindows() {
+  public static boolean isWindows() { // NO_UCD
     return Platform.OS_WIN32.equals(Platform.getOS());
   }
 
-  public static boolean isLinux() {
+  public static boolean isLinux() { // NO_UCD
     return Platform.OS_LINUX.equals(Platform.getOS());
   }
 
-  public static boolean isMacOSX() {
+  public static boolean isMacOSX() { // NO_UCD
     return Platform.OS_MACOSX.equals(Platform.getOS());
   }
-
 }

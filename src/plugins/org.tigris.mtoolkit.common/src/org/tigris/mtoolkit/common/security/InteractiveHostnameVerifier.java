@@ -19,11 +19,10 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 
 public class InteractiveHostnameVerifier implements HostnameVerifier {
-
   private static org.apache.commons.ssl.HostnameVerifier verifier = org.apache.commons.ssl.HostnameVerifier.DEFAULT_AND_LOCALHOST;
 
-  private UserInteraction interaction;
-  private TemporaryStore tempStore;
+  private final UserInteraction                          interaction;
+  private final TemporaryStore                           tempStore;
 
   public InteractiveHostnameVerifier(UserInteraction interaction, TemporaryStore tempStore) {
     if (interaction == null) {
@@ -33,11 +32,16 @@ public class InteractiveHostnameVerifier implements HostnameVerifier {
     this.tempStore = tempStore;
   }
 
+  /* (non-Javadoc)
+   * @see javax.net.ssl.HostnameVerifier#verify(java.lang.String, javax.net.ssl.SSLSession)
+   */
   public boolean verify(String host, SSLSession session) {
     Certificate[] certChain = null;
     try {
       certChain = session.getPeerCertificates();
-      verifier.check(host, (X509Certificate) certChain[0]);
+      if (certChain != null && certChain.length > 0) {
+        verifier.check(host, (X509Certificate) certChain[0]);
+      }
     } catch (SSLPeerUnverifiedException e) {
       return interaction.confirmConnectionTrust(UserInteraction.VERIFICATION_FAILED, e.getMessage(), host,
           (X509Certificate[]) certChain);

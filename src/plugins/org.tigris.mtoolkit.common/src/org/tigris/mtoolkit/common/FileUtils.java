@@ -21,7 +21,10 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-public class FileUtils {
+public final class FileUtils {
+
+  private FileUtils() {
+  }
 
   /**
    * Extracts zip file.
@@ -82,7 +85,7 @@ public class FileUtils {
    *          the result file
    * @throws IOException
    */
-  public static void makeZip(File src, File zipFile) throws IOException {
+  public static void makeZip(File src, File zipFile) throws IOException { // NO_UCD
     ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile));
     try {
       addToZip(src, src.isDirectory() ? "" : src.getName(), zos);
@@ -95,7 +98,7 @@ public class FileUtils {
     }
   }
 
-  public static void archiveDirectory(File archive, File directory) throws IOException {
+  public static void archiveDirectory(File archive, File directory) throws IOException { // NO_UCD
     archiveDirectory(archive, directory, null);
   }
 

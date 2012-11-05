@@ -40,15 +40,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.printing.PrintDialog;
-import org.eclipse.swt.printing.Printer;
-import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -62,21 +58,16 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
-public class PluginUtilities {
+public final class PluginUtilities {
+  private static final String  INSTALLED_PLATFORM = Platform.getOS();
 
-  private static SafeRunnableDialog errorDialog;
+  public static final char[]   INVALID_RESOURCE_CHARACTERS;
+  public static final String[] INVALID_RESOURCE_NAMES;
 
-  public static final String        INSTALLED_PLATFORM = Platform.getOS();
+  public static final String   VERSION_3_5_0      = "3.5.0";
 
-  public static final char[]        INVALID_RESOURCE_CHARACTERS;
-  public static final String[]      INVALID_RESOURCE_NAMES;
-
-  public static final String        VERSION_3_4_0      = "3.4.0";
-  public static final String        VERSION_3_5_0      = "3.5.0";
-  /**
-   * @since 5.0
-   */
-  public static final String        VERSION_3_6_0      = "3.6.0";
+  private static final List    errorTable         = new ArrayList();
+  private static final String  line_Separator     = System.getProperty("line.separator"); //$NON-NLS-1$
 
   static {
     char[] chars = null;
@@ -109,10 +100,13 @@ public class PluginUtilities {
     INVALID_RESOURCE_NAMES = names == null ? new String[0] : names;
   }
 
+  private PluginUtilities() {
+  }
+
   /**
    * @param pathName
    * @return
-   * 
+   *
    */
   public static boolean containsArticles(String pathName) {
     if (INSTALLED_PLATFORM.equals(Platform.OS_WIN32)) {
@@ -126,7 +120,7 @@ public class PluginUtilities {
 
   /**
    * Validate specified file name for correctness on current platform
-   * 
+   *
    * @param fileName
    * @return
    */
@@ -150,7 +144,7 @@ public class PluginUtilities {
   /**
    * Validate specified absolute or relative path for correctness on current
    * platform
-   * 
+   *
    * @param path
    * @return
    */
@@ -179,11 +173,11 @@ public class PluginUtilities {
 
   /**
    * Validate specified version name for correctness
-   * 
+   *
    * @param versionName
    * @return
    */
-  public static boolean isValidVersion(String versionName) {
+  public static boolean isValidVersion(String versionName) { // NO_UCD
     int ind = versionName.indexOf('.');
     String buffer;
     if (ind == -1) {
@@ -219,59 +213,37 @@ public class PluginUtilities {
     return true;
   }
 
-  public static void print(Shell shell, StyledText styledText) {
-    PrintDialog prDialog = new PrintDialog(shell, SWT.APPLICATION_MODAL);
-    PrinterData printerData = prDialog.open();
-
-    // make print action
-    if (printerData != null) {
-      Printer pr = new Printer(printerData);
-      Runnable runnable = styledText.print(pr);
-      runnable.run();
-      pr.dispose();
-    }
-  }
-
-  public static void print(Shell shell, String strText) {
-    StyledText styledText = new StyledText(shell, SWT.MULTI);
-    styledText.setText(strText);
-    print(shell, styledText);
-  }
-
-  static List   errorTable     = new ArrayList();
-  static String line_Separator = System.getProperty("line.separator"); //$NON-NLS-1$
-
-  public static void showErrorDialog(Shell parent, String title, String message, String reason) {
+  public static void showErrorDialog(Shell parent, String title, String message, String reason) { // NO_UCD
     showDialog(parent, title, message, reason, null, null, IStatus.ERROR);
   }
 
-  public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e) {
+  public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e) { // NO_UCD
     showDialog(parent, title, message, reason, e, null, IStatus.ERROR);
   }
 
-  public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e,
+  public static void showErrorDialog(Shell parent, String title, String message, String reason, Throwable e, // NO_UCD
       Throwable nested) {
     showDialog(parent, title, message, reason, e, nested, IStatus.ERROR);
   }
 
-  public static void showWarningDialog(Shell parent, String title, String message, String reason) {
+  public static void showWarningDialog(Shell parent, String title, String message, String reason) {// NO_UCD
     showDialog(parent, title, message, reason, null, null, IStatus.WARNING);
   }
 
-  public static void showInformationDialog(Shell parent, String title, String message, String reason) {
+  public static void showInformationDialog(Shell parent, String title, String message, String reason) { // NO_UCD
     showDialog(parent, title, message, reason, null, null, IStatus.INFO);
   }
 
-  public static void showMessageDialog(Shell parent, String title, String message, String reason) {
+  public static void showMessageDialog(Shell parent, String title, String message, String reason) { // NO_UCD
     showDialog(parent, title, message, reason, null, null, IStatus.OK);
   }
 
-  public static void showDetailsErrorDialog(Shell parent, String title, String message, String details) {
+  public static void showDetailsErrorDialog(Shell parent, String title, String message, String details) {// NO_UCD
     DetailsErrorDialog err = new DetailsErrorDialog(parent, title, message, details);
     err.open();
   }
 
-  public static int showConfirmationDialog(Shell shell, String title, String message) {
+  public static int showConfirmationDialog(Shell shell, String title, String message) { // NO_UCD
     MessageBox mb = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
     mb.setMessage(message);
     mb.setText(title);
@@ -310,16 +282,9 @@ public class PluginUtilities {
       }
     }
 
-    if (errorDialog == null || errorDialog.getShell() == null) {
-      errorDialog = new SafeRunnableDialog(getStatus(reason, code));
-    }
-
+    SafeRunnableDialog errorDialog = new SafeRunnableDialog(parent, getStatus(reason, code));
     try {
-      if (errorDialog.getShell() == null) {
-        errorDialog.open();
-      } else {
-        errorDialog.addStatus(getStatus(reason, code));
-      }
+      errorDialog.open();
     } catch (Throwable t) {
       t.printStackTrace();
     }
@@ -336,7 +301,7 @@ public class PluginUtilities {
 
   /**
    * This method parses exception from String into List items
-   * 
+   *
    * @param str
    * @return
    */
@@ -364,32 +329,6 @@ public class PluginUtilities {
     return stream.toString();
   }
 
-  /**
-   * This method is used for compare two strings. It is used for comparing file
-   * names, because only on Windows OS letters case are independenet.
-   * 
-   * @param str1
-   *          - the first string
-   * @param str2
-   *          - the second string
-   * @return <code>TRUE</code> if string equals, otherwise returns
-   *         <code>FALSE</code>
-   */
-  public static boolean equalsOSDep(String str1, String str2) {
-    boolean result;
-    if (INSTALLED_PLATFORM.equals(Platform.OS_WIN32)) {
-      result = str1.equalsIgnoreCase(str2);
-    } else {
-      result = str1.equals(str2);
-    }
-    return result;
-  }
-
-  public static void main(String[] args) {
-    String version = "1.0.2.34"; //$NON-NLS-1$
-    System.out.println(isValidVersion(version));
-  }
-
   static class SafeRunnableDialog extends ErrorDialog {
 
     private TableViewer statusListViewer;
@@ -398,13 +337,13 @@ public class PluginUtilities {
 
     /**
      * Create a new instance of the receiver on a status.
-     * 
+     *
      * @param status
      *          The status to display.
      */
-    SafeRunnableDialog(IStatus status) {
+    SafeRunnableDialog(Shell parent, IStatus status) {
 
-      super(null, JFaceResources.getString("error"), status.getMessage(), //$NON-NLS-1$
+      super(parent, JFaceResources.getString("error"), status.getMessage(), //$NON-NLS-1$
           status, IStatus.ERROR);
 
       setShellStyle(SWT.DIALOG_TRIM | SWT.MODELESS | SWT.RESIZE | SWT.MIN | getDefaultOrientation());
@@ -424,20 +363,6 @@ public class PluginUtilities {
           });
     }
 
-    /**
-     * Method which should be invoked when new errors become available for
-     * display
-     */
-    void refresh() {
-
-      if (AUTOMATED_MODE) {
-        return;
-      }
-
-      createStatusList((Composite) dialogArea);
-      updateEnablements();
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -454,7 +379,7 @@ public class PluginUtilities {
 
     /**
      * Create the status list if required.
-     * 
+     *
      * @param parent
      *          the Control to create it in.
      */
@@ -483,7 +408,7 @@ public class PluginUtilities {
 
     /**
      * This method sets the message in the message label.
-     * 
+     *
      * @param messageString
      *          - the String for the message area
      */
@@ -499,7 +424,7 @@ public class PluginUtilities {
     /**
      * Create an area that allow the user to select one of multiple jobs that
      * have reported errors
-     * 
+     *
      * @param parent
      *          - the parent of the area
      */
@@ -524,7 +449,7 @@ public class PluginUtilities {
 
     /**
      * Return the label provider for the status list.
-     * 
+     *
      * @return CellLabelProvider
      */
     private CellLabelProvider getStatusListLabelProvider() {
@@ -546,7 +471,7 @@ public class PluginUtilities {
 
     /**
      * Return the content provider for the statuses.
-     * 
+     *
      * @return IStructuredContentProvider
      */
     private IStructuredContentProvider getStatusContentProvider() {
@@ -594,7 +519,7 @@ public class PluginUtilities {
 
     /**
      * Return a viewer sorter for looking at the jobs.
-     * 
+     *
      * @return ViewerSorter
      */
     private ViewerComparator getViewerComparator() {
@@ -636,7 +561,7 @@ public class PluginUtilities {
     /**
      * Get the single selection. Return null if the selection is not just one
      * element.
-     * 
+     *
      * @return IStatus or <code>null</code>.
      */
     private IStatus getSingleSelection() {
@@ -669,17 +594,6 @@ public class PluginUtilities {
     @Override
     protected boolean shouldShowDetailsButton() {
       return true;
-    }
-
-    /**
-     * Add the status to the receiver.
-     * 
-     * @param status
-     */
-    public void addStatus(IStatus status) {
-      statuses.add(status);
-      refresh();
-
     }
   }
 
@@ -812,7 +726,7 @@ public class PluginUtilities {
 
   /**
    * Returns specified bundle version
-   * 
+   *
    * @param bundleName
    *          bundle symbolic name
    * @return Version for specified bundle
@@ -824,7 +738,7 @@ public class PluginUtilities {
 
   /**
    * Returns true if bundle version is greater or equal to specified version
-   * 
+   *
    * @param bundleName
    *          bundle symbolic name
    * @param version
