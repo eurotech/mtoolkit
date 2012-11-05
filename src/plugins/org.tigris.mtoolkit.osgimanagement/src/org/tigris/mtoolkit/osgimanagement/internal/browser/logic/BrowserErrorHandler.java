@@ -27,276 +27,242 @@ import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferen
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class BrowserErrorHandler {
-	private static boolean internalShell;
-	private static Shell shell;
+public final class BrowserErrorHandler {
+  private static final boolean debug = Boolean.getBoolean("mtoolkit.osgimanagement.debug"); //$NON-NLS-1$
 
-	private static final boolean debug = Boolean.getBoolean("mtoolkit.osgimanagement.debug"); //$NON-NLS-1$
+  private BrowserErrorHandler() {
+  }
 
-	// Process given error as a String message
-	public static void processError(String message) {
-		processError(message, false);
-	}
+  // Process given error as a String message
+  public static void processError(String message) { // NO_UCD
+    processError(message, false);
+  }
 
-	public static void processError(final String message, boolean showDialog) {
-		if (showDialog) {
-			Display display = PlatformUI.getWorkbench().getDisplay();
-			if (!display.isDisposed()) {
-				display.asyncExec(new Runnable() {
-					public void run() {
-						shell = getShell();
-						if (shell != null) {
-							if (!shell.isDisposed()) {
-								MessageDialog.openError(shell, Messages.standard_error_title, message);
-							}
-							manageShell(shell);
-						}
-					}
-				});
-			}
-		}
-		dumpToLog(IStatus.ERROR, message, null);
-	}
+  public static void processError(final String message, boolean showDialog) {
+    if (showDialog) {
+      Display display = PlatformUI.getWorkbench().getDisplay();
+      if (!display.isDisposed()) {
+        display.asyncExec(new Runnable() {
+          /* (non-Javadoc)
+           * @see java.lang.Runnable#run()
+           */
+          public void run() {
+            Shell shell = PluginUtilities.getActiveWorkbenchShell();
+            if (shell != null && !shell.isDisposed()) {
+              MessageDialog.openError(shell, Messages.standard_error_title, message);
+            }
+          }
+        });
+      }
+    }
+    dumpToLog(IStatus.ERROR, message, null);
+  }
 
-	public static void processError(Throwable t, Model unknown) {
-		processError(t, findConnector(unknown), ((FrameworkImpl) unknown.findFramework()).userDisconnect);
-	}
+  public static void processError(Throwable t, Model unknown) {// NO_UCD
+    processError(t, findConnector(unknown), ((FrameworkImpl) unknown.findFramework()).userDisconnect);
+  }
 
-	private static DeviceConnector findConnector(Model node) {
-		DeviceConnector connector = null;
-		Framework fw = node.findFramework();
-		if (fw != null)
-			connector = fw.getConnector();
-		return connector;
-	}
+  private static DeviceConnector findConnector(Model node) {// NO_UCD
+    DeviceConnector connector = null;
+    Framework fw = node.findFramework();
+    if (fw != null) {
+      connector = fw.getConnector();
+    }
+    return connector;
+  }
 
-	// Process given exception with no reason given
-	public static void processError(Throwable t, DeviceConnector connector, boolean user) {
-		if (!user) {
-			processError(t, connector, Messages.no_reason_message);
-		}
-	}
+  // Process given exception with no reason given
+  public static void processError(Throwable t, DeviceConnector connector, boolean user) {// NO_UCD
+    if (!user) {
+      processError(t, connector, Messages.no_reason_message);
+    }
+  }
 
-	public static void processError(Throwable t, DeviceConnector connector, String reason) {
-		boolean display = true;
-		Boolean autoConnected = connector == null	? new Boolean(false)
-		: (Boolean) connector.getProperties().get("framework-connection-immediate"); //$NON-NLS-1$
-		if (autoConnected == null || autoConnected.booleanValue()) {
-			display = false;
-		}
-		processError(t, reason, display);
-	}
+  public static void processError(Throwable t, DeviceConnector connector, String reason) {// NO_UCD
+    boolean display = true;
+    Boolean autoConnected = connector == null ? new Boolean(false) : (Boolean) connector.getProperties().get(
+        "framework-connection-immediate"); //$NON-NLS-1$
+    if (autoConnected == null || autoConnected.booleanValue()) {
+      display = false;
+    }
+    processError(t, reason, display);
+  }
 
-	// Process given exception with no reason given
-	public static void processError(Throwable t, boolean showDialog) {
-		processError(t, Messages.no_reason_message, showDialog);
-	}
+  // Process given exception with no reason given
+  public static void processError(Throwable t, boolean showDialog) {// NO_UCD
+    processError(t, Messages.no_reason_message, showDialog);
+  }
 
-	public static void processError(Throwable t, String reason) {
-		processError(t, reason, true);
-	}
+  public static void processError(Throwable t, String reason) {// NO_UCD
+    processError(t, reason, true);
+  }
 
-	// Process given exception with reason
-	public static void processError(final Throwable t, String info, boolean display) {
+  // Process given exception with reason
+  public static void processError(final Throwable t, String info, boolean display) {// NO_UCD
 
-		// Subsitute missing exception message
-		final String reason[] = new String[1];
-		if (t.getMessage() == null) {
-			reason[0] = Messages.no_exception_message;
-		} else {
-			reason[0] = t.getMessage();
-		}
+    // Subsitute missing exception message
+    final String reason[] = new String[1];
+    if (t.getMessage() == null) {
+      reason[0] = Messages.no_exception_message;
+    } else {
+      reason[0] = t.getMessage();
+    }
 
-		if (display) {
-			if (t instanceof IAgentException || t instanceof IllegalStateException) {
-				String infoCode = ""; //$NON-NLS-1$
-				if (t instanceof IAgentException) {
-					int errorCode = ((IAgentException) t).getErrorCode();
-					if (errorCode != -1 && errorCode != 0) {
-						infoCode = Messages.get(String.valueOf(errorCode).replace('-', '_'));
-					}
-					if (info == null || Messages.no_reason_message.equals(info)) {
-						info = infoCode;
-					}
-				}
-				final String trueMessage = info;
-				Display disp = PlatformUI.getWorkbench().getDisplay();
-				if (!disp.isDisposed()) {
-					disp.asyncExec(new Runnable() {
-						public void run() {
-							shell = getShell();
-							if (shell != null) {
-								if (!shell.isDisposed()) {
-									PluginUtilities.showErrorDialog(shell,
-											Messages.standard_error_title,
-											trueMessage,
-											reason[0],
-											t);
-								}
-								manageShell(shell);
-							}
-						}
-					});
-				}
-			} else {
-				processError(info, display);
-			}
-		}
+    if (display) {
+      if (t instanceof IAgentException || t instanceof IllegalStateException) {
+        String infoCode = ""; //$NON-NLS-1$
+        if (t instanceof IAgentException) {
+          int errorCode = ((IAgentException) t).getErrorCode();
+          if (errorCode != -1 && errorCode != 0) {
+            infoCode = Messages.get(String.valueOf(errorCode).replace('-', '_'));
+          }
+          if (info == null || Messages.no_reason_message.equals(info)) {
+            info = infoCode;
+          }
+        }
+        final String trueMessage = info;
+        Display disp = PlatformUI.getWorkbench().getDisplay();
+        if (!disp.isDisposed()) {
+          disp.asyncExec(new Runnable() {
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+              Shell shell = PluginUtilities.getActiveWorkbenchShell();
+              if (shell != null && !shell.isDisposed()) {
+                PluginUtilities.showErrorDialog(shell, Messages.standard_error_title, trueMessage, reason[0], t);
+              }
+            }
+          });
+        }
+      } else {
+        processError(info, display);
+      }
+    }
 
-		if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
-			dumpToLog(IStatus.ERROR, reason[0], ((IAgentException) t).getCauseException());
-		} else {
-			dumpToLog(IStatus.ERROR, reason[0], t);
-		}
-	}
+    if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
+      dumpToLog(IStatus.ERROR, reason[0], ((IAgentException) t).getCauseException());
+    } else {
+      dumpToLog(IStatus.ERROR, reason[0], t);
+    }
+  }
 
-	public static void processWarning(final String info, boolean display) {
-		if (display) {
-			Display disp = PlatformUI.getWorkbench().getDisplay();
-			if (!disp.isDisposed()) {
-				disp.asyncExec(new Runnable() {
-					public void run() {
-						shell = getShell();
-						if (shell != null) {
-							if (!shell.isDisposed()) {
-								PluginUtilities.showWarningDialog(shell, Messages.standard_error_title, info, null);
-							}
-							manageShell(shell);
-						}
-					}
-				});
-			}
-		}
+  public static void processWarning(final String info, boolean display) {// NO_UCD
+    if (display) {
+      Display disp = PlatformUI.getWorkbench().getDisplay();
+      if (!disp.isDisposed()) {
+        disp.asyncExec(new Runnable() {
+          /* (non-Javadoc)
+           * @see java.lang.Runnable#run()
+           */
+          public void run() {
+            Shell shell = PluginUtilities.getActiveWorkbenchShell();
+            if (shell != null && !shell.isDisposed()) {
+              PluginUtilities.showWarningDialog(shell, Messages.standard_error_title, info, null);
+            }
+          }
+        });
+      }
+    }
 
-		dumpToLog(IStatus.WARNING, info, null);
-	}
+    dumpToLog(IStatus.WARNING, info, null);
+  }
 
-	public static void processWarning(final Throwable t, String info, boolean display) {
-		// Subsitute missing exception message
-		final String reason;
-		if (t.getMessage() == null) {
-			reason = Messages.no_exception_message;
-		} else {
-			reason = t.getMessage();
-		}
+  public static void processWarning(final Throwable t, String info, boolean display) {// NO_UCD
+    // Subsitute missing exception message
+    final String reason;
+    if (t.getMessage() == null) {
+      reason = Messages.no_exception_message;
+    } else {
+      reason = t.getMessage();
+    }
 
-		if (display) {
-			if (t instanceof IAgentException) {
-				int errorCode = ((IAgentException) t).getErrorCode();
-				if (errorCode != -1 && errorCode != 0) {
-					info = Messages.get(String.valueOf(errorCode).replace('-', '_'));
-				}
-				final String trueMessage = info;
-				Display disp = PlatformUI.getWorkbench().getDisplay();
-				if (!disp.isDisposed()) {
-					disp.asyncExec(new Runnable() {
-						public void run() {
-							shell = getShell();
-							if (shell != null) {
-								if (!shell.isDisposed()) {
-									PluginUtilities.showWarningDialog(shell,
-											Messages.standard_error_title,
-											trueMessage,
-											reason);
-								}
-								manageShell(shell);
-							}
-						}
-					});
-				}
-			}
-		}
+    if (display) {
+      if (t instanceof IAgentException) {
+        int errorCode = ((IAgentException) t).getErrorCode();
+        if (errorCode != -1 && errorCode != 0) {
+          info = Messages.get(String.valueOf(errorCode).replace('-', '_'));
+        }
+        final String trueMessage = info;
+        Display disp = PlatformUI.getWorkbench().getDisplay();
+        if (!disp.isDisposed()) {
+          disp.asyncExec(new Runnable() {
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+              Shell shell = PluginUtilities.getActiveWorkbenchShell();
+              if (shell != null && !shell.isDisposed()) {
+                PluginUtilities.showWarningDialog(shell, Messages.standard_error_title, trueMessage, reason);
+              }
+            }
+          });
+        }
+      }
+    }
 
-		if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
-			dumpToLog(IStatus.WARNING, reason, ((IAgentException) t).getCauseException());
-		} else {
-			dumpToLog(IStatus.WARNING, reason, t);
-		}
-	}
+    if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
+      dumpToLog(IStatus.WARNING, reason, ((IAgentException) t).getCauseException());
+    } else {
+      dumpToLog(IStatus.WARNING, reason, t);
+    }
+  }
 
-	public static void processInfo(String text) {
-		processInfo(text, true);
-	}
+  public static void processInfo(String text) {// NO_UCD
+    processInfo(text, true);
+  }
 
-	public static void showInfoDialog(final String text) {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		if (!display.isDisposed()) {
-			display.asyncExec(new Runnable() {
-				public void run() {
-					shell = getShell();
-					if (shell != null) {
-						if (!shell.isDisposed()) {
-							MessageDialog.openInformation(shell, Messages.standard_info_title, text);
-						}
-						manageShell(shell);
-					}
-				}
-			});
-		}
-	}
+  public static void showInfoDialog(final String text) {// NO_UCD
+    Display display = PlatformUI.getWorkbench().getDisplay();
+    if (!display.isDisposed()) {
+      display.asyncExec(new Runnable() {
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
+          Shell shell = PluginUtilities.getActiveWorkbenchShell();
+          if (shell != null && !shell.isDisposed()) {
+            MessageDialog.openInformation(shell, Messages.standard_info_title, text);
+          }
+        }
+      });
+    }
+  }
 
-	public static void processInfo(final String text, boolean display) {
-		if (display) {
-			showInfoDialog(text);
-		}
-		if (FrameworkPreferencesPage.isLogInfoEnabled()) {
-			dumpToLog(IStatus.INFO, text, null);
-		}
-	}
+  public static void processInfo(final String text, boolean display) {// NO_UCD
+    if (display) {
+      showInfoDialog(text);
+    }
+    if (FrameworkPreferencesPage.isLogInfoEnabled()) {
+      dumpToLog(IStatus.INFO, text, null);
+    }
+  }
 
-	// Dump to eclipse system log
-	private static void dumpToLog(int severity, String text, Throwable t) {
-		final FrameworkPlugin plugin = FrameworkPlugin.getDefault();
-		if (plugin == null)
-			return;
-		final ILog log = plugin.getLog();
+  public static void debug(String msg) {// NO_UCD
+    if (debug) {
+      System.out.println("[OSGiManagement][debug] " + msg); //$NON-NLS-1$
+    }
 
-		if (text == null) {
-			text = ""; //$NON-NLS-1$
-		}
+  }
 
-		final IStatus status = new Status(severity, plugin.getId(), 0, text, t);
-		log.log(status);
-	}
+  public static void debug(Throwable t) {// NO_UCD
+    if (debug) {
+      t.printStackTrace(System.out);
+    }
+  }
 
-	// Get active shell
-	public static Shell getShell() {
-		Display display = PlatformUI.getWorkbench().getDisplay();
-		if (display.isDisposed()) {
-			return null;
-		}
-		final Display displ = display;
-		displ.syncExec(new Runnable() {
-			public void run() {
-				Shell shell = displ.getActiveShell();
-				if (shell == null) {
-					shell = new Shell(displ);
-					internalShell = true;
-				}
-				BrowserErrorHandler.shell = shell;
-			}
-		});
+  // Dump to eclipse system log
+  private static void dumpToLog(int severity, String text, Throwable t) {
+    final FrameworkPlugin plugin = FrameworkPlugin.getDefault();
+    if (plugin == null) {
+      return;
+    }
+    final ILog log = plugin.getLog();
 
-		return shell;
-	}
-
-	private static void manageShell(Shell shell) {
-		if (internalShell) {
-			shell.dispose();
-			internalShell = false;
-		}
-	}
-
-	public static void debug(String msg) {
-		if (debug) {
-			System.out.println("[OSGiManagement][debug] " + msg); //$NON-NLS-1$
-		}
-
-	}
-
-	public static void debug(Throwable t) {
-		if (debug) {
-			t.printStackTrace(System.out);
-		}
-	}
+    if (text == null) {
+      text = ""; //$NON-NLS-1$
+    }
+    final IStatus status = new Status(severity, plugin.getId(), 0, text, t);
+    log.log(status);
+  }
 }
