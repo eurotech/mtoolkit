@@ -24,11 +24,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.progress.IProgressConstants;
 
 public class InstallToAction extends Action {
-  protected final Map args;
-  protected final List items;
-  protected final InstallationTarget target;
+  protected final Map                       args;
+  protected final List                      items;
+  protected final InstallationTarget        target;
   protected final InstallationItemProcessor processor;
 
   public InstallToAction(InstallationItemProcessor processor, Map/*<String,Object>*/args, InstallationTarget target,
@@ -43,11 +44,13 @@ public class InstallToAction extends Action {
   /* (non-Javadoc)
    * @see org.eclipse.jface.action.Action#run()
    */
+  @Override
   public void run() {
     Job job = new Job(getActionText()) {
       /* (non-Javadoc)
        * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
        */
+      @Override
       public IStatus run(IProgressMonitor monitor) {
         InstallationHistory.getDefault().promoteHistory(target, processor);
         InstallationHistory.getDefault().saveHistory();
@@ -86,6 +89,8 @@ public class InstallToAction extends Action {
         return status;
       }
     };
+    job.setUser(true);
+    job.setProperty(IProgressConstants.ICON_PROPERTY, processor.getGeneralTargetImageDescriptor());
     job.schedule();
   }
 
@@ -157,7 +162,7 @@ public class InstallToAction extends Action {
 
   public static class Mapping {
     public Object resource;
-    public Map providerSpecificItems;
+    public Map    providerSpecificItems;
 
     public Mapping(Object resource, Map providerSpecificItems) {
       this.resource = resource;
