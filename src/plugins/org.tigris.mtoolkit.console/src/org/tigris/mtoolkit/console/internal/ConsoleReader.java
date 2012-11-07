@@ -17,70 +17,73 @@ import java.io.UnsupportedEncodingException;
 
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleInputStream;
+import org.tigris.mtoolkit.console.utils.Messages;
 import org.tigris.mtoolkit.console.utils.OSGiConsolePlugin;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.VMManager;
 
-public class ConsoleReader implements Runnable {
+public final class ConsoleReader implements Runnable {
+  private volatile boolean     running = true;
+  private IOConsoleInputStream input;
+  private BufferedReader       reader;
+  private VMManager            manager;
+  private Thread               thread;
 
-	private volatile boolean running = true;
-	private IOConsoleInputStream input;
-	private BufferedReader reader;
-	private VMManager manager;
-	private Thread thread;
-	
-	public ConsoleReader(IOConsole console, VMManager manager) {
-		this.manager = manager;
-		this.input = console.getInputStream();
-		try {
-			this.reader = new BufferedReader(new InputStreamReader(this.input, console.getEncoding()));
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalArgumentException("Console has unsupported encoding");
-		}
-		thread = new Thread(this, "Remote Console - " + console.getName());
-		thread.setDaemon(true);
-		thread.start();
-	}
-	
-	public void dispose() {
-		running = false;
-		thread.interrupt();
-		try {
-			input.close();
-		} catch (IOException e) {
-		}
-	}
-	
-	public void run() {
-		while (running) {
-			try {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					manager.executeFrameworkCommand(line);
-				}
-			} catch (IOException e1) {
-				if (running) {
-					try {
-						// just check for IO exception
-						input.available();
-					} catch (IOException e2) {
-						running = false;
-						try {
-							// just to be sure
-							input.close();
-						} catch (IOException e3) {
-						}
-					}
-					if (running) {
-						OSGiConsolePlugin.error("Exception while reading user input", e1);
-					}
-				}
-			} catch (IAgentException e) {
-				if (running) {
-					OSGiConsolePlugin.error("Failed to execute remote command", e);
-				}
-			}
-		}
-	}
+  public ConsoleReader(IOConsole console, VMManager manager) {
+    this.manager = manager;
+    this.input = console.getInputStream();
+    try {
+      this.reader = new BufferedReader(new InputStreamReader(this.input, console.getEncoding()));
+    } catch (UnsupportedEncodingException e) {
+      throw new IllegalArgumentException(Messages.ConsoleReader_Unsupported_Encoding);
+    }
+    thread = new Thread(this, Messages.ConsoleReader_Remote_Console + console.getName());
+    thread.setDaemon(true);
+    thread.start();
+  }
+
+  public void dispose() {
+    running = false;
+    thread.interrupt();
+    try {
+      input.close();
+    } catch (IOException e) {
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Runnable#run()
+   */
+  public void run() {
+    while (running) {
+      try {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          manager.executeFrameworkCommand(line);
+        }
+      } catch (IOException e1) {
+        if (running) {
+          try {
+            // just check for IO exception
+            input.available();
+          } catch (IOException e2) {
+            running = false;
+            try {
+              // just to be sure
+              input.close();
+            } catch (IOException e3) {
+            }
+          }
+          if (running) {
+            OSGiConsolePlugin.error(Messages.ConsoleReader_Error_Reading_User_Input, e1);
+          }
+        }
+      } catch (IAgentException e) {
+        if (running) {
+          OSGiConsolePlugin.error(Messages.ConsoleReader_Command_Execution_Failed, e);
+        }
+      }
+    }
+  }
 
 }

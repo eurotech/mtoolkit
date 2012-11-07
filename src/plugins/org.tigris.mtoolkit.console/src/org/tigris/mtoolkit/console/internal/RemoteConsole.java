@@ -43,7 +43,7 @@ import org.tigris.mtoolkit.iagent.VMManager;
 
 @SuppressWarnings("deprecation")
 public final class RemoteConsole extends IOConsole implements IConsole {
-  public static final String    P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected";
+  public static final String    P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected"; //$NON-NLS-1$
 
   private final Date            timestamp      = new Date();
   private final Listener        listener       = new Listener();
@@ -55,12 +55,12 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   private String                name;
 
   public RemoteConsole(DeviceConnector dc, String name, IProcess iProcess) {
-    super("", "osgiManagementConsole", ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true);
+    super("", "osgiManagementConsole", ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$ //$NON-NLS-2$
     this.name = name;
     this.connector = dc;
     this.process = iProcess;
     DeviceConnector.addDeviceConnectionListener(listener);
-    setAttribute("mtoolkit.console.connector", connector);
+    setAttribute("mtoolkit.console.connector", connector); //$NON-NLS-1$
   }
 
   /* (non-Javadoc)
@@ -147,7 +147,7 @@ public final class RemoteConsole extends IOConsole implements IConsole {
    */
   @Override
   protected void dispose() {
-    Job disconnectJob = new Job("Disconnecting console...") {
+    Job disconnectJob = new Job(Messages.RemoteConsole_Disconnecting_Console) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         disconnect();
@@ -200,7 +200,7 @@ public final class RemoteConsole extends IOConsole implements IConsole {
               vmManager.redirectFrameworkOutput(null);
             }
           } catch (IAgentException e) {
-            OSGiConsolePlugin.error("Failed to reset framework output", e);
+            OSGiConsolePlugin.error(Messages.RemoteConsole_FW_Out_Reset_Failed, e);
           }
         }
         try {
@@ -226,14 +226,15 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   private String computeName() {
     String fwName = name;
     String timeStamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp);
-    return (isDisconnected() ? "<disconnected> " : "") + fwName + " [Remote Framework] (" + timeStamp + ")";
+    return (isDisconnected() ? Messages.RemoteConsole_Disconnected : "") + fwName //$NON-NLS-1$
+        + NLS.bind(Messages.RemoteConsole_Remote_Console_Name, timeStamp);
   }
 
   private static ConsoleReader redirectInput(RemoteConsole console, DeviceConnector connector) {
     try {
       return new ConsoleReader(console, connector.getVMManager());
     } catch (IAgentException e) {
-      OSGiConsolePlugin.error("Exception while redirecting console input", e);
+      OSGiConsolePlugin.error(Messages.RemoteConsole_Redirection_Failed, e);
     }
     return null;
   }
@@ -244,9 +245,9 @@ public final class RemoteConsole extends IOConsole implements IConsole {
     } catch (IAgentException e) {
       try {
         IStatus status = OSGiConsolePlugin.handleIAgentException(e);
-        output.write(NLS.bind("Failed to redirect framework output: {0}", status.getMessage()));
+        output.write(NLS.bind(Messages.RemoteConsole_FW_Redirection_Failed, status.getMessage()));
       } catch (IOException e1) {
-        OSGiConsolePlugin.error("Exception while writing to console", e1);
+        OSGiConsolePlugin.error(Messages.RemoteConsole_Console_Write_Failed, e1);
       }
       OSGiConsolePlugin.log(OSGiConsolePlugin.handleIAgentException(e));
     }

@@ -19,67 +19,83 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleListener;
+import org.tigris.mtoolkit.console.utils.Messages;
 
-public class RemoveAllConsoleAction extends Action implements IConsoleListener {
-	
-	public RemoveAllConsoleAction() {
-		super("Remove All Disconnected");
-		
-		setImageDescriptor(DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_LCL_REMOVE_ALL));
-		setDisabledImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_DLCL_REMOVE_ALL));
-		setHoverImageDescriptor(DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_LCL_REMOVE_ALL));
-		
-		ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(this);
+public final class RemoveAllConsoleAction extends Action implements IConsoleListener {
 
-		updateState();
-	}
+  public RemoveAllConsoleAction() {
+    super(Messages.RemoveAllConsoleAction_Remove_All_Disconnected);
+    setImageDescriptor(DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_LCL_REMOVE_ALL));
+    setDisabledImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_DLCL_REMOVE_ALL));
+    setHoverImageDescriptor(DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_LCL_REMOVE_ALL));
+    ConsolePlugin.getDefault().getConsoleManager().addConsoleListener(this);
+    updateState();
+  }
 
-	public void run() {
-		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
-		for (int i = 0; i < consoles.length; i++) {
-			if (!(consoles[i] instanceof RemoteConsole))
-				continue;
-			if (!((RemoteConsole) consoles[i]).isDisconnected())
-				continue;
-			ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { consoles[i] });
-		}
-	}
-	
-	public void updateState() {
-		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
-		for (int i = 0; i < consoles.length; i++) {
-			if (!(consoles[i] instanceof RemoteConsole))
-				continue;
-			if (!((RemoteConsole) consoles[i]).isDisconnected())
-				continue;
-			setEnabled(true);
-			return;
-		}
-		setEnabled(false);
-		return;
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  @Override
+  public void run() {
+    IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+    for (int i = 0; i < consoles.length; i++) {
+      if (!(consoles[i] instanceof RemoteConsole)) {
+        continue;
+      }
+      if (!((RemoteConsole) consoles[i]).isDisconnected()) {
+        continue;
+      }
+      ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] {
+        consoles[i]
+      });
+    }
+  }
 
-	public void consolesAdded(IConsole[] consoles) {
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IConsoleListener#consolesAdded(org.eclipse.ui.console.IConsole[])
+   */
+  public void consolesAdded(IConsole[] consoles) {
+  }
 
-	public void consolesRemoved(IConsole[] consoles) {
-		for (int i = 0; i < consoles.length; i++) {
-			if (consoles[i] instanceof RemoteConsole) {
-				Display display = PlatformUI.getWorkbench().getDisplay();
-				if (!display.isDisposed()) {
-					display.asyncExec(new Runnable() {
-						public void run() {
-							updateState();
-						}
-					});
-				}
-				break;
-			}
-		}
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.console.IConsoleListener#consolesRemoved(org.eclipse.ui.console.IConsole[])
+   */
+  public void consolesRemoved(IConsole[] consoles) {
+    for (int i = 0; i < consoles.length; i++) {
+      if (consoles[i] instanceof RemoteConsole) {
+        Display display = PlatformUI.getWorkbench().getDisplay();
+        if (!display.isDisposed()) {
+          display.asyncExec(new Runnable() {
+            /* (non-Javadoc)
+             * @see java.lang.Runnable#run()
+             */
+            public void run() {
+              updateState();
+            }
+          });
+        }
+        break;
+      }
+    }
+  }
 
-	public void dispose() {
-		ConsolePlugin.getDefault().getConsoleManager().removeConsoleListener(this);
-	}
+  public void dispose() {
+    ConsolePlugin.getDefault().getConsoleManager().removeConsoleListener(this);
+  }
 
+  public void updateState() {
+    IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+    for (int i = 0; i < consoles.length; i++) {
+      if (!(consoles[i] instanceof RemoteConsole)) {
+        continue;
+      }
+      if (!((RemoteConsole) consoles[i]).isDisconnected()) {
+        continue;
+      }
+      setEnabled(true);
+      return;
+    }
+    setEnabled(false);
+    return;
+  }
 }

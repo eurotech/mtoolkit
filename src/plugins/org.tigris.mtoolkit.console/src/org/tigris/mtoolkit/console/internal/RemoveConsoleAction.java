@@ -16,12 +16,13 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
+import org.tigris.mtoolkit.console.utils.Messages;
 
 public final class RemoveConsoleAction extends Action {
   private RemoteConsole console;
 
   public RemoveConsoleAction(RemoteConsole console) {
-    super("Remove Console");
+    super(Messages.RemoveConsoleAction_Remove_Console);
     this.console = console;
     setImageDescriptor(DebugPluginImages.getImageDescriptor(IDebugUIConstants.IMG_LCL_REMOVE));
     setDisabledImageDescriptor(DebugPluginImages.getImageDescriptor(IInternalDebugUIConstants.IMG_DLCL_REMOVE));
@@ -41,7 +42,9 @@ public final class RemoveConsoleAction extends Action {
     if (console == null || !console.isDisconnected()) {
       return;
     }
-    ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { console });
+    ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] {
+      console
+    });
     updateState();
   }
 
