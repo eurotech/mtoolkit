@@ -43,8 +43,16 @@ public final class DeviceConnectorSWTWrapper extends DeviceConnector implements 
    * @see org.tigris.mtoolkit.iagent.DeviceConnector#addRemoteDevicePropertyListener(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener)
    */
   @Override
-  public void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
+  public void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException { // NO_UCD
     delegate.addRemoteDevicePropertyListener(listener);
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnector#removeRemoteDevicePropertyListener(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener)
+   */
+  @Override
+  public void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException { // NO_UCD
+    delegate.removeRemoteDevicePropertyListener(listener);
   }
 
   /* (non-Javadoc)
@@ -115,14 +123,6 @@ public final class DeviceConnectorSWTWrapper extends DeviceConnector implements 
   @Override
   public boolean isActive() {
     return delegate.isActive();
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.DeviceConnector#removeRemoteDevicePropertyListener(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener)
-   */
-  @Override
-  public void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException {
-    delegate.removeRemoteDevicePropertyListener(listener);
   }
 
   /* (non-Javadoc)
