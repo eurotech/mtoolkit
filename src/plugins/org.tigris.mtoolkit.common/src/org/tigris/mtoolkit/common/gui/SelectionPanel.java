@@ -219,7 +219,7 @@ public class SelectionPanel extends Composite {
   /**
    * Sets to the given value the checked state for all elements. Does not fire events to check state
    * listeners.
-   * 
+   *
    * @param state
    */
   public void selectAll(boolean state) {
@@ -263,7 +263,7 @@ public class SelectionPanel extends Composite {
   /**
    * Returns the viewer used for displaying items. It uses <code>ListItem</code> for holding items.
    * The returned viewer can be used to specify custom label providers, etc.
-   * 
+   *
    * @return the viewer
    * @see ListItem
    */
@@ -279,7 +279,7 @@ public class SelectionPanel extends Composite {
    * Adds a listener for changes to the checked state of elements in this panel. Has no effect if an
    * identical listener is already registered. This panel supports sending events with multiple
    * check changes at once (i.e. from Select All/Deselect All buttons)
-   * 
+   *
    * @param listener
    *          a check state listener
    * @see CheckStateChangedEvent2
@@ -291,11 +291,11 @@ public class SelectionPanel extends Composite {
   /**
    * Removes the given check state listener. Has no effect if an identical listener is not
    * registered.
-   * 
+   *
    * @param listener
    *          a check state listener
    */
-  public void removeCheckStateListener(ICheckStateListener listener) {
+  public void removeCheckStateListener(ICheckStateListener listener) { // NO_UCD
     checkStateListeners.remove(listener);
   }
 
