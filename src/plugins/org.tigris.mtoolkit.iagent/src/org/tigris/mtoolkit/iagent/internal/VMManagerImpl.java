@@ -35,25 +35,24 @@ import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
  * Implementation of VMManager
  *
  */
-public class VMManagerImpl implements VMManager, ConnectionListener {
+public final class VMManagerImpl implements VMManager, ConnectionListener {
+  private static final MethodSignature REGISTER_METHOD     = new MethodSignature("registerOutput", new String[] {
+                                                             RemoteObject.class.getName()
+                                                           }, true);
+  private static final MethodSignature EXECUTE_METHOD      = new MethodSignature("executeCommand", new String[] {
+                                                             MethodSignature.STRING_TYPE
+                                                           }, true);
+  private static final MethodSignature GET_FW_START_LEVEL  = new MethodSignature("getFrameworkStartLevel",
+                                                               MethodSignature.NO_ARGS, true);
+  private static final MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty", new String[] {
+                                                             MethodSignature.STRING_TYPE
+                                                           }, true);
 
-  private static MethodSignature REGISTER_METHOD     = new MethodSignature("registerOutput", new String[] {
-                                                       RemoteObject.class.getName()
-                                                     }, true);
-  private static MethodSignature EXECUTE_METHOD      = new MethodSignature("executeCommand", new String[] {
-                                                       MethodSignature.STRING_TYPE
-                                                     }, true);
-  private static MethodSignature GET_FW_START_LEVEL  = new MethodSignature("getFrameworkStartLevel",
-                                                         MethodSignature.NO_ARGS, true);
-  private static MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty", new String[] {
-                                                       MethodSignature.STRING_TYPE
-                                                     }, true);
+  private DeviceConnectorImpl          connector;
 
-  private DeviceConnectorImpl    connector;
+  private OutputStream                 lastRegisteredOutput;
 
-  private OutputStream           lastRegisteredOutput;
-
-  private LightServiceRegistry   extensionsRegistry;
+  private LightServiceRegistry         extensionsRegistry;
 
   /**
    * Creates new runtime commands with specified transport
@@ -76,7 +75,7 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
         try {
           redirectFrameworkOutput(lastRegisteredOutput);
         } catch (IAgentException e) {
-          info("[connectionChanged] Failed to redirect framework output", e);
+          DebugUtils.info(this, "[connectionChanged] Failed to redirect framework output", e);
         }
       }
     }
@@ -87,14 +86,14 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
   }
 
   public void executeFrameworkCommand(String command) throws IAgentException {
-    debug("[executeFrameworkCommand] >>> command: " + command);
+    DebugUtils.debug(this, "[executeFrameworkCommand] >>> command: " + command);
     EXECUTE_METHOD.call(getPMPConnection().getRemoteParserService(), new Object[] {
       command
     });
   }
 
   public void redirectFrameworkOutput(OutputStream os) throws IAgentException {
-    debug("[redirectFrameworkOutput] >>> os: " + os);
+    DebugUtils.debug(this, "[redirectFrameworkOutput] >>> os: " + os);
     PMPConnection connection = getPMPConnection();
     if (os != null) {
       RemoteObject parser = connection.getRemoteParserService();
@@ -110,44 +109,28 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
 
   public boolean isVMConnectable() throws IAgentException {
     if (!connector.isActive()) {
-      info("[getPMPConnection] DeviceConnector is closed");
+      DebugUtils.info(this, "[getPMPConnection] DeviceConnector is closed");
       throw new IAgentException("Associated DeviceConnector is closed", IAgentErrors.ERROR_DISCONNECTED);
     }
     try {
       PMPConnection connection = getPMPConnection();
       if (connection == null || !connection.isConnected()) {
-        debug("[isVMConnectable] VM is not connectable");
+        DebugUtils.debug(this, "[isVMConnectable] VM is not connectable");
         return false;
       } else {
-        debug("[isVMConnectable] VM is connectable");
+        DebugUtils.debug(this, "[isVMConnectable] VM is connectable");
         return true;
       }
     } catch (IAgentException e) {
-      info("[isVMConnectable] VM is not connectable", e);
+      DebugUtils.info(this, "[isVMConnectable] VM is not connectable", e);
       return false;
     }
   }
 
-  private final void debug(String message) {
-    DebugUtils.debug(this, message);
-  }
-
-  private final void info(String message) {
-    DebugUtils.info(this, message);
-  }
-
-  private final void info(String message, Throwable e) {
-    DebugUtils.info(this, message, e);
-  }
-
   public int getFrameworkStartLevel() throws IAgentException {
-    debug("[getFrameworkStartLevel] >>> ");
+    DebugUtils.debug(this, "[getFrameworkStartLevel] >>> ");
     Integer fwStartLevel = (Integer) GET_FW_START_LEVEL.call(getPMPConnection().getRemoteBundleAdmin());
     return fwStartLevel.intValue();
-  }
-
-  private PMPConnection getPMPConnection() throws IAgentException {
-    return (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
   }
 
   public void instrumentVM() throws IAgentException {
@@ -183,18 +166,11 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
     return true;
   }
 
-  private LightServiceRegistry getExtensionsRegistry() {
-    if (extensionsRegistry == null) {
-      extensionsRegistry = new LightServiceRegistry(VMManagerImpl.class.getClassLoader());
-    }
-    return extensionsRegistry;
-  }
-
   public String[] listRawArgs() throws IAgentException {
-    debug("[listRawArgs] >>>");
+    DebugUtils.debug(this, "[listRawArgs] >>>");
     MBSAConnection connection = getMBSAConnection();
     if (!connection.isConnected()) {
-      info("[listRawArgs] Device is disconnected!");
+      DebugUtils.info(this, "[listRawArgs] Device is disconnected!");
       throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
     }
     MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_LISTRAWARGS, null);
@@ -206,29 +182,29 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
         try {
           bis = new ByteArrayInputStream(rspData);
           String[] args = DataFormater.readStringArray(bis);
-          debug("[listRawArgs] Raw arguments list: " + DebugUtils.convertForDebug(args));
+          DebugUtils.debug(this, "[listRawArgs] Raw arguments list: " + DebugUtils.convertForDebug(args));
           return args;
         } catch (IOException e) {
-          info("[listRawArgs] Error formatting response data!", e);
+          DebugUtils.info(this, "[listRawArgs] Error formatting response data!", e);
           throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
         } finally {
           DataFormater.closeInputStream(bis);
         }
       } else {
-        debug("[listRawArgs] no arguments available");
+        DebugUtils.debug(this, "[listRawArgs] no arguments available");
         return new String[0];
       }
     } else {
-      info("[listRawArgs] Command failure: " + rspStatus);
+      DebugUtils.info(this, "[listRawArgs] Command failure: " + rspStatus);
       throw new IAgentException("Command failure: " + rspStatus, rspStatus);
     }
   }
 
   public void addRawArgument(String aRawArgument) throws IAgentException {
-    debug("[addRawArgument] >>> aRawArgument: " + aRawArgument);
+    DebugUtils.debug(this, "[addRawArgument] >>> aRawArgument: " + aRawArgument);
     MBSAConnection connection = getMBSAConnection();
     if (!connection.isConnected()) {
-      info("[addRawArgument] Device is disconnected!");
+      DebugUtils.info(this, "[addRawArgument] Device is disconnected!");
       throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
     }
     if (aRawArgument == null) {
@@ -239,25 +215,25 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
       bos = new ByteArrayOutputStream(256);
       DataFormater.writeString(bos, aRawArgument);
     } catch (IOException e) {
-      info("[addRawArgument] Error processing arguments!", e);
+      DebugUtils.info(this, "[addRawArgument] Error processing arguments!", e);
       throw new IAgentException("Error processing arguments!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
     }
     MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_ADDRAWARGUMENT, bos.toByteArray());
     DataFormater.closeOutputStream(bos);
     int rspStatus = tCallBack.getRspStatus();
     if (rspStatus < 0) {
-      info("[addRawArgument] Command failure: " + rspStatus);
+      DebugUtils.info(this, "[addRawArgument] Command failure: " + rspStatus);
       throw new IAgentException("Command failure: " + rspStatus, rspStatus);
     } else {
-      debug("[addRawArgument] argument addition successful");
+      DebugUtils.debug(this, "[addRawArgument] argument addition successful");
     }
   }
 
   public boolean removeRawArgument(String aRawArgument) throws IAgentException {
-    debug("[removeRawArgument] >>> aRawArgument: " + aRawArgument);
+    DebugUtils.debug(this, "[removeRawArgument] >>> aRawArgument: " + aRawArgument);
     MBSAConnection connection = getMBSAConnection();
     if (!connection.isConnected()) {
-      info("[removeRawArgument] Device is disconnected!");
+      DebugUtils.info(this, "[removeRawArgument] Device is disconnected!");
       throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
     }
     if (aRawArgument == null) {
@@ -268,7 +244,7 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
       bos = new ByteArrayOutputStream(256);
       DataFormater.writeString(bos, aRawArgument);
     } catch (IOException e) {
-      info("[removeRawArgument] Error processing arguments!", e);
+      DebugUtils.info(this, "[removeRawArgument] Error processing arguments!", e);
       throw new IAgentException("Error processing arguments!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
     }
     MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_REMOVERAWARGUMENT,
@@ -277,72 +253,83 @@ public class VMManagerImpl implements VMManager, ConnectionListener {
     int rspStatus = tCallBack.getRspStatus();
     if (rspStatus < 0) {
       if (rspStatus == IAgentErrors.ERR_RUNTIME_ARG_NOT_FOUND) {
-        debug("[removeRawArgument] Runtime argument cannot be found");
+        DebugUtils.debug(this, "[removeRawArgument] Runtime argument cannot be found");
         return false;
       }
-      info("[removeRawArgument] Command failure: " + rspStatus);
+      DebugUtils.info(this, "[removeRawArgument] Command failure: " + rspStatus);
       throw new IAgentException("Failed to remove VM argument: " + rspStatus, rspStatus);
     } else {
-      debug("[removeRawArgument] argument removal successful");
+      DebugUtils.debug(this, "[removeRawArgument] argument removal successful");
     }
     return true;
   }
 
   public void resetArgs() throws IAgentException {
-    debug("[resetArgs] >>>");
+    DebugUtils.debug(this, "[resetArgs] >>>");
     MBSAConnection connection = getMBSAConnection();
     if (!connection.isConnected()) {
-      info("[resetArgs] Device is disconnected!");
+      DebugUtils.info(this, "[resetArgs] Device is disconnected!");
       throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
     }
     MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_RESETARGS, null);
     int rspStatus = tCallBack.getRspStatus();
     if (rspStatus < 0) {
-      info("[resetArgs] Command failure: " + rspStatus);
+      DebugUtils.info(this, "[resetArgs] Command failure: " + rspStatus);
       throw new IAgentException("Failed to reset VM arguments: " + rspStatus, rspStatus);
     }
-    debug("[resetArgs] Arguments successfully reset");
+    DebugUtils.debug(this, "[resetArgs] Arguments successfully reset");
   }
 
   public void startVM() throws IAgentException {
-    debug("[startVM] >>>");
+    DebugUtils.debug(this, "[startVM] >>>");
     MBSAConnection connection = getMBSAConnection();
     if (!connection.isConnected()) {
-      info("[startVM] Device is disconnected!");
+      DebugUtils.info(this, "[startVM] Device is disconnected!");
       throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
     }
     MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_STARTVM, null);
     int rspStatus = tCallBack.getRspStatus();
     if (rspStatus < 0) {
-      info("[startVM] Command failure: " + rspStatus);
+      DebugUtils.info(this, "[startVM] Command failure: " + rspStatus);
       throw new IAgentException("Failed to start VM: " + rspStatus, rspStatus);
     }
-    debug("[startVM] VM successfully started");
+    DebugUtils.debug(this, "[startVM] VM successfully started");
   }
 
   public void stopVM() throws IAgentException {
-    debug("[stopVM] >>>");
+    DebugUtils.debug(this, "[stopVM] >>>");
     MBSAConnection connection = getMBSAConnection();
     if (!connection.isConnected()) {
-      info("[stopVM] Device is disconnected!");
+      DebugUtils.info(this, "[stopVM] Device is disconnected!");
       throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
     }
     MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_STOPVM, null);
     int rspStatus = tCallBack.getRspStatus();
     if (rspStatus < 0) {
-      info("[stopVM] Command failure: " + rspStatus);
+      DebugUtils.info(this, "[stopVM] Command failure: " + rspStatus);
       throw new IAgentException("Failed to stop VM: " + rspStatus, rspStatus);
     }
-    debug("[stopVM] VM successfully stopped");
-  }
-
-  private MBSAConnection getMBSAConnection() throws IAgentException {
-    return (MBSAConnection) connector.getConnection(ConnectionManager.MBSA_CONNECTION);
+    DebugUtils.debug(this, "[stopVM] VM successfully stopped");
   }
 
   public String getSystemProperty(String propertyName) throws IAgentException {
     return (String) GET_SYSTEM_PROPERTY.call(getPMPConnection().getRemoteBundleAdmin(), new Object[] {
       propertyName
     });
+  }
+
+  private LightServiceRegistry getExtensionsRegistry() {
+    if (extensionsRegistry == null) {
+      extensionsRegistry = new LightServiceRegistry(VMManagerImpl.class.getClassLoader());
+    }
+    return extensionsRegistry;
+  }
+
+  private MBSAConnection getMBSAConnection() throws IAgentException {
+    return (MBSAConnection) connector.getConnection(ConnectionManager.MBSA_CONNECTION);
+  }
+
+  private PMPConnection getPMPConnection() throws IAgentException {
+    return (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
   }
 }
