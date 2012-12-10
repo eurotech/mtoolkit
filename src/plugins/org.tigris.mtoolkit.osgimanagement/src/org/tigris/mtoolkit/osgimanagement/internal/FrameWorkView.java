@@ -67,6 +67,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
@@ -192,7 +193,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
   private FindAction                                findAction;
 
   private final FilterJob                           filterJob                    = new FilterJob();
-  private final MyViewerFilter                      filter                       = new MyViewerFilter();
+  private final ViewerFilter                        filter                       = new FrameworksViewerFilter();
 
   private Text                                      filterField;
   private TreeViewer                                tree;

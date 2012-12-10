@@ -14,14 +14,15 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class MyViewerFilter extends ViewerFilter {
-
-	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if (element instanceof Model) {
-			boolean selected = ((Model) element).isVisible();
-			return selected;
-		}
-		return true;
-	}
-
+public final class FrameworksViewerFilter extends ViewerFilter {
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+   */
+  @Override
+  public boolean select(Viewer viewer, Object parentElement, Object element) {
+    if (element instanceof Model) {
+      return ((Model) element).isVisible();
+    }
+    return true;
+  }
 }
