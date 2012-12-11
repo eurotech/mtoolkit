@@ -35,13 +35,18 @@ import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.ProcessOutputReader;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
-public class AndroidUtils {
+public final class AndroidUtils {
 
-  private static final String[] DEX_COMPATIBLE_EXTENSIONS = new String[] { ".jar", ".zip" };
+  private static final String[] DEX_COMPATIBLE_EXTENSIONS = new String[] {
+      ".jar", ".zip"
+                                                          };
+
+  private AndroidUtils() {
+  }
 
   /**
    * Converts jar file to dex format.
-   * 
+   *
    * @param file
    *          the file to be converted.
    * @param outputFile
@@ -55,8 +60,9 @@ public class AndroidUtils {
   public static void convertToDex(File file, File outputFile, IProgressMonitor monitor) throws IOException {
     File dxToolFile = getDxToolLocation();
 
-    if (dxToolFile == null)
+    if (dxToolFile == null) {
       throw new IOException("Unable to find DEX tool. Check whether Android SDK location is set in preferences.");
+    }
 
     List command = new ArrayList();
     command.add("java");
@@ -117,7 +123,7 @@ public class AndroidUtils {
 
   /**
    * Converts dp file to android dex format
-   * 
+   *
    * @param dpFile
    * @param outputFile
    * @param monitor
@@ -196,30 +202,20 @@ public class AndroidUtils {
         jos.closeEntry();
       }
     } finally {
-      if (jis != null) {
-        try {
-          jis.close();
-        } catch (IOException e) {
-        }
-      }
-      if (jos != null) {
-        try {
-          jos.close();
-        } catch (IOException e) {
-        }
-      }
+      FileUtils.close(jis);
+      FileUtils.close(jos);
     }
   }
 
   /**
    * Returns Android SDK location or null if location is not set in preferences.
-   * 
+   *
    * @return
    * @since 6.0
    */
   public static String getAndroidSdkLocation() {
     @SuppressWarnings("deprecation")
-	ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
+    ScopedPreferenceStore preferenceStore = new ScopedPreferenceStore(new InstanceScope(),
         "com.android.ide.eclipse.adt");
     return preferenceStore.getString("com.android.ide.eclipse.adt.sdk");
   }
@@ -227,7 +223,7 @@ public class AndroidUtils {
   /**
    * Returns platforms for the specified android sdk location in ascending order
    * of versions.
-   * 
+   *
    * @param sdkLocation
    * @return array with platforms or empty array
    * @since 5.0
@@ -251,7 +247,7 @@ public class AndroidUtils {
 
   /**
    * Checks if file is in android dex format.
-   * 
+   *
    * @param file
    * @return
    */
@@ -270,19 +266,14 @@ public class AndroidUtils {
     } catch (IOException ex) {
       return false;
     } finally {
-      if (zipFile != null) {
-        try {
-          zipFile.close();
-        } catch (IOException e) {
-        }
-      }
+      FileUtils.close(zipFile);
     }
     return false;
   }
 
   /**
    * Checks if dp file is in android dex format.
-   * 
+   *
    * @param dpFile
    * @since 5.0
    */
@@ -323,26 +314,21 @@ public class AndroidUtils {
     } catch (IOException ioe) {
       return false;
     } finally {
-      if (jis != null) {
-        try {
-          jis.close();
-        } catch (IOException e) {
-        }
-      }
+      FileUtils.close(jis);
     }
     return true;
   }
 
   /**
    * Checks whether the file is compatible with Android's dex format.
-   * 
+   *
    * <p>
    * Android 'dx' tool has limitations on the output format of the files: only
    * <em>zip</em> and <em>jar</em> files are supported as output. This method
    * returns whether the file can be converted to dex format without special
    * handling or options.
    * </p>
-   * 
+   *
    * @param file
    *          the file to be checked for compatibility
    * @return whether the file can be converted to dex format without additional
@@ -350,15 +336,16 @@ public class AndroidUtils {
    */
   public static boolean isDexCompatible(File file) {
     for (int i = 0; i < DEX_COMPATIBLE_EXTENSIONS.length; i++) {
-      if (file.getName().endsWith(DEX_COMPATIBLE_EXTENSIONS[i]))
+      if (file.getName().endsWith(DEX_COMPATIBLE_EXTENSIONS[i])) {
         return true;
+      }
     }
     return false;
   }
 
   /**
    * Returns location of dx tool or null if this tool cannot be found.
-   * 
+   *
    * @return
    */
   private static File getDxToolLocation() {
@@ -366,7 +353,9 @@ public class AndroidUtils {
 
     File dxToolFile = null;
     String dxTool = null;
-    dxTool = MessageFormat.format("{0}/platform-tools/lib/dx.jar", new Object[] { androidSDK });
+    dxTool = MessageFormat.format("{0}/platform-tools/lib/dx.jar", new Object[] {
+      androidSDK
+    });
     dxToolFile = new File(dxTool);
     if (dxToolFile.exists()) {
       return dxToolFile;
@@ -374,7 +363,9 @@ public class AndroidUtils {
     String[] androidPlatforms = getAndroidPlatforms(androidSDK);
     for (int i = 0; i < androidPlatforms.length; i++) {
       String androidPlatform = androidPlatforms[i];
-      dxTool = MessageFormat.format("{0}/platforms/{1}/tools/lib/dx.jar", new Object[] { androidSDK, androidPlatform });
+      dxTool = MessageFormat.format("{0}/platforms/{1}/tools/lib/dx.jar", new Object[] {
+          androidSDK, androidPlatform
+      });
       dxToolFile = new File(dxTool);
       if (dxToolFile.exists()) {
         return dxToolFile;
