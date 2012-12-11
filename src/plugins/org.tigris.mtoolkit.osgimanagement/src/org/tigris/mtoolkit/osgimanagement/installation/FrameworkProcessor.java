@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.osgimanagement.installation;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -511,12 +510,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     } catch (Exception e) {
       throw new CoreException(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e));
     } finally {
-      if (input != null) {
-        try {
-          input.close();
-        } catch (IOException e) {
-        }
-      }
+      FileUtils.close(input);
       if (bundle != null) {
         bundle.delete();
       }
