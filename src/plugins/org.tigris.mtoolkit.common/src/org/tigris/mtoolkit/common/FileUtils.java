@@ -28,7 +28,7 @@ public final class FileUtils {
 
   /**
    * Extracts zip file.
-   * 
+   *
    * @param zipFile
    *          the zip file to extract
    * @param destinationDir
@@ -57,28 +57,20 @@ public final class FileUtils {
               outputStream.write(buf, 0, len);
             }
           } finally {
-            try {
-              outputStream.close();
-            } catch (IOException e) {
-              // nothing to do
-            }
+            close(outputStream);
           }
         }
         zis.closeEntry();
         zipEntry = zis.getNextEntry();
       }
     } finally {
-      try {
-        zis.close();
-      } catch (IOException e) {
-        // nothing to do
-      }
+      close(zis);
     }
   }
 
   /**
    * Makes zip file.
-   * 
+   *
    * @param src
    *          the source file or directory
    * @param zipFile
@@ -90,11 +82,7 @@ public final class FileUtils {
     try {
       addToZip(src, src.isDirectory() ? "" : src.getName(), zos);
     } finally {
-      try {
-        zos.close();
-      } catch (IOException e) {
-        // nothing to do
-      }
+      close(zos);
     }
   }
 
@@ -201,11 +189,7 @@ public final class FileUtils {
         }
         zos.closeEntry();
       } finally {
-        try {
-          in.close();
-        } catch (IOException e) {
-          // nothing to do
-        }
+        close(in);
       }
     }
   }
@@ -214,7 +198,7 @@ public final class FileUtils {
    * Deletes all files and subdirectories under dir. Returns true if all
    * deletions were successful. If a deletion fails, the method stops attempting
    * to delete and returns false.
-   * 
+   *
    * @param file
    * @return
    */
@@ -236,7 +220,7 @@ public final class FileUtils {
 
   /**
    * Returns file extension in lower case.
-   * 
+   *
    * @param file
    * @return
    */
