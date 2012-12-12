@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.lm.LM;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -51,7 +52,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 public final class ConnectFrameworkJob extends Job {
   private static final List connectingFrameworks = new ArrayList();
 
-  private Framework fw;
+  private Framework         fw;
 
   public ConnectFrameworkJob(Framework framework) {
     super(NLS.bind(Messages.connect_framework, framework.getName()));
@@ -144,7 +145,8 @@ public final class ConnectFrameworkJob extends Job {
               rStatus = Util.handleIAgentException(e);
             }
           } catch (IllegalStateException e) {
-            rStatus = Util.handleIAgentException(new IAgentException(e.getMessage(), IAgentErrors.ERROR_CANNOT_CONNECT, e));
+            rStatus = Util.handleIAgentException(new IAgentException(e.getMessage(), IAgentErrors.ERROR_CANNOT_CONNECT,
+                e));
           }
           if (rStatus != null) {
             monitor.done();
@@ -199,7 +201,9 @@ public final class ConnectFrameworkJob extends Job {
        * @see java.lang.Runnable#run()
        */
       public void run() {
-        String[] buttons = { Messages.close_button_label, Messages.get_iagent_button_label };
+        String[] buttons = {
+            Messages.close_button_label, Messages.get_iagent_button_label
+        };
         String message = Messages.connection_failed;
         if (e != null) {// add cause for connection failed
           message += "\nCause: " + e.getMessage();
@@ -210,8 +214,8 @@ public final class ConnectFrameworkJob extends Job {
           FrameworkPlugin.error(e);
         }
         message += "\n\n" + Messages.rcp_bundle_missing_message;
-        MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), Messages.rcp_bundle_missing_title, null, message,
-            MessageDialog.INFORMATION, buttons, 0);
+        MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), Messages.rcp_bundle_missing_title, null,
+            message, MessageDialog.INFORMATION, buttons, 0);
         dialog.setBlockOnOpen(true);
         dialog.open();
         if (dialog.getReturnCode() == 1) {
@@ -226,7 +230,8 @@ public final class ConnectFrameworkJob extends Job {
 
             FileDialog saveDialog = new FileDialog(display.getActiveShell(), SWT.SAVE);
             saveDialog.setText(Messages.save_as_dialog_title);
-            String[] filterExt = { "*.jar" }; //$NON-NLS-1$
+            String[] filterExt = {
+              "*.jar"}; //$NON-NLS-1$
             saveDialog.setFilterExtensions(filterExt);
             // TODO: initial filename setting doesn't work on Mac OS
             // X
@@ -245,20 +250,11 @@ public final class ConnectFrameworkJob extends Job {
             }
 
           } catch (IOException e1) {
-            StatusManager.getManager().handle(Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle", e1));
+            StatusManager.getManager().handle(
+                Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle", e1));
           } finally {
-            if (output != null) {
-              try {
-                output.close();
-              } catch (IOException e) {
-              }
-            }
-            if (iagentInput != null) {
-              try {
-                iagentInput.close();
-              } catch (IOException e) {
-              }
-            }
+            FileUtils.close(output);
+            FileUtils.close(iagentInput);
           }
         }
       }
