@@ -4,7 +4,7 @@
    <extension
          point="org.tigris.mtoolkit.common.installationItemProviders">
       <provider
-            class="org.tigris.mtoolkit.maven.internal.installation.InstallationProvider"
+            class="org.tigris.mtoolkit.maven.internal.installation.MavenInstallationItemProvider"
             id="org.tigris.mtoolkit.maven.core.installationProvider"
             name="Maven">
       </provider>

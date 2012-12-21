@@ -16,7 +16,7 @@ public class FileItem extends BaseItem {
 
   protected File pomFile;
 
-  protected FileItem(InstallationProvider provider, File pomFile) {
+  protected FileItem(MavenInstallationItemProvider provider, File pomFile) {
     super(provider);
     this.pomFile = pomFile;
   }

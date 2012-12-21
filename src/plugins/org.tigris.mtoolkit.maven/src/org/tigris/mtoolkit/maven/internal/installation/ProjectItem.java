@@ -18,7 +18,7 @@ public class ProjectItem extends BaseItem {
 
 	protected IMavenProjectFacade facade;
 
-	protected ProjectItem(InstallationProvider provider,
+	protected ProjectItem(MavenInstallationItemProvider provider,
 			IMavenProjectFacade facade) {
 		super(provider);
 		this.facade = facade;
