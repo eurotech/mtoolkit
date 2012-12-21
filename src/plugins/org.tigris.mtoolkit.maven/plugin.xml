@@ -6,8 +6,7 @@
       <provider
             class="org.tigris.mtoolkit.maven.internal.installation.MavenInstallationItemProvider"
             id="org.tigris.mtoolkit.maven.core.installationProvider"
-            name="Maven">
+            name="%MavenInstallationItemProvider.name">
       </provider>
    </extension>
-
 </plugin>
