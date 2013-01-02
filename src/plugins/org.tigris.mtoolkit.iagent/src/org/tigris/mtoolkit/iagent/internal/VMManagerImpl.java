@@ -31,10 +31,6 @@ import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
-/**
- * Implementation of VMManager
- *
- */
 public final class VMManagerImpl implements VMManager, ConnectionListener {
   private static final MethodSignature REGISTER_METHOD     = new MethodSignature("registerOutput", new String[] {
                                                              RemoteObject.class.getName()
@@ -47,11 +43,12 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
   private static final MethodSignature GET_SYSTEM_PROPERTY = new MethodSignature("getSystemProperty", new String[] {
                                                              MethodSignature.STRING_TYPE
                                                            }, true);
+  private static final MethodSignature SET_SYSTEM_PROPERTY = new MethodSignature("setSystemProperty", new String[] {
+      MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE
+                                                           }, true);
 
   private DeviceConnectorImpl          connector;
-
   private OutputStream                 lastRegisteredOutput;
-
   private LightServiceRegistry         extensionsRegistry;
 
   /**
@@ -59,7 +56,7 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
    *
    * @param aTransport
    */
-  public VMManagerImpl(DeviceConnectorImpl connector) {
+  VMManagerImpl(DeviceConnectorImpl connector) {
     if (connector == null) {
       throw new IllegalArgumentException();
     }
@@ -67,6 +64,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     connector.getConnectionManager().addConnectionListener(this);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.ConnectionListener#connectionChanged(org.tigris.mtoolkit.iagent.spi.ConnectionEvent)
+   */
   public void connectionChanged(ConnectionEvent event) {
     if (event.getType() == ConnectionEvent.CONNECTED
         && event.getConnection().getType() == ConnectionManager.PMP_CONNECTION) {
@@ -81,10 +81,16 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#isVMActive()
+   */
   public boolean isVMActive() throws IAgentException {
     return isVMConnectable();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#executeFrameworkCommand(java.lang.String)
+   */
   public void executeFrameworkCommand(String command) throws IAgentException {
     DebugUtils.debug(this, "[executeFrameworkCommand] >>> command: " + command);
     EXECUTE_METHOD.call(getPMPConnection().getRemoteParserService(), new Object[] {
@@ -92,6 +98,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     });
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#redirectFrameworkOutput(java.io.OutputStream)
+   */
   public void redirectFrameworkOutput(OutputStream os) throws IAgentException {
     DebugUtils.debug(this, "[redirectFrameworkOutput] >>> os: " + os);
     PMPConnection connection = getPMPConnection();
@@ -107,6 +116,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#isVMConnectable()
+   */
   public boolean isVMConnectable() throws IAgentException {
     if (!connector.isActive()) {
       DebugUtils.info(this, "[getPMPConnection] DeviceConnector is closed");
@@ -127,12 +139,18 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#getFrameworkStartLevel()
+   */
   public int getFrameworkStartLevel() throws IAgentException {
     DebugUtils.debug(this, "[getFrameworkStartLevel] >>> ");
     Integer fwStartLevel = (Integer) GET_FW_START_LEVEL.call(getPMPConnection().getRemoteBundleAdmin());
     return fwStartLevel.intValue();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#instrumentVM()
+   */
   public void instrumentVM() throws IAgentException {
     Object[] extensions = getExtensionsRegistry().getAll(Instrument.class.getName());
     for (int i = 0; i < extensions.length; i++) {
@@ -146,6 +164,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     throw new IAgentException("Failed to instrument remote framework", IAgentErrors.ERROR_INSTRUMENT_ERROR);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#isVMInstrumented(boolean)
+   */
   public boolean isVMInstrumented(boolean refresh) throws IAgentException {
     PMPConnection connection = null;
     try {
@@ -166,6 +187,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     return true;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#listRawArgs()
+   */
   public String[] listRawArgs() throws IAgentException {
     DebugUtils.debug(this, "[listRawArgs] >>>");
     MBSAConnection connection = getMBSAConnection();
@@ -200,6 +224,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#addRawArgument(java.lang.String)
+   */
   public void addRawArgument(String aRawArgument) throws IAgentException {
     DebugUtils.debug(this, "[addRawArgument] >>> aRawArgument: " + aRawArgument);
     MBSAConnection connection = getMBSAConnection();
@@ -229,6 +256,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#removeRawArgument(java.lang.String)
+   */
   public boolean removeRawArgument(String aRawArgument) throws IAgentException {
     DebugUtils.debug(this, "[removeRawArgument] >>> aRawArgument: " + aRawArgument);
     MBSAConnection connection = getMBSAConnection();
@@ -264,6 +294,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     return true;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#resetArgs()
+   */
   public void resetArgs() throws IAgentException {
     DebugUtils.debug(this, "[resetArgs] >>>");
     MBSAConnection connection = getMBSAConnection();
@@ -280,6 +313,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     DebugUtils.debug(this, "[resetArgs] Arguments successfully reset");
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#startVM()
+   */
   public void startVM() throws IAgentException {
     DebugUtils.debug(this, "[startVM] >>>");
     MBSAConnection connection = getMBSAConnection();
@@ -296,6 +332,9 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     DebugUtils.debug(this, "[startVM] VM successfully started");
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#stopVM()
+   */
   public void stopVM() throws IAgentException {
     DebugUtils.debug(this, "[stopVM] >>>");
     MBSAConnection connection = getMBSAConnection();
@@ -312,9 +351,21 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     DebugUtils.debug(this, "[stopVM] VM successfully stopped");
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#getSystemProperty(java.lang.String)
+   */
   public String getSystemProperty(String propertyName) throws IAgentException {
     return (String) GET_SYSTEM_PROPERTY.call(getPMPConnection().getRemoteBundleAdmin(), new Object[] {
       propertyName
+    });
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.VMManager#setSystemProperty(java.lang.String, java.lang.String)
+   */
+  public void setSystemProperty(String propertyName, String propertyValue) throws IAgentException {
+    SET_SYSTEM_PROPERTY.call(getPMPConnection().getRemoteBundleAdmin(), new Object[] {
+        propertyName, propertyValue
     });
   }
 

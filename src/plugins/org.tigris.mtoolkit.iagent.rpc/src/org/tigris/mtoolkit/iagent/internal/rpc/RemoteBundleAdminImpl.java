@@ -48,7 +48,7 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 
 public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements RemoteBundleAdmin,
-SynchronousBundleListener {
+    SynchronousBundleListener {
   public static final String    SYNCH_BUNDLE_EVENTS = "synch_bundle_event";
   public static final String    EVENT_TYPE_KEY      = "type";
   public static final String    EVENT_BUNDLE_ID_KEY = "bundle.id";
@@ -65,7 +65,7 @@ SynchronousBundleListener {
 
   public Class[] remoteInterfaces() {
     return new Class[] {
-        RemoteBundleAdmin.class
+      RemoteBundleAdmin.class
     };
   }
 
@@ -774,6 +774,11 @@ SynchronousBundleListener {
 
   public String getSystemProperty(String name) {
     return Activator.getBundleContext().getProperty(name);
+  }
+
+  public Object setSystemProperty(String name, String value) {
+    System.setProperty(name, value);
+    return null;
   }
 
   public Object getBundleResource(long id, String name, Dictionary properties) {
