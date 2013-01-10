@@ -23,6 +23,27 @@ public final class Utils {
   private Utils() {
   }
 
+  public static boolean isRemoteMethodDefined(RemoteObject remote, MethodSignature methodSignature)
+      throws IAgentException {
+    try {
+      return getRemoteMethod(remote, methodSignature) != null;
+    } catch (PMPException e) {
+      if (remote instanceof PMPRemoteObjectAdapter) {
+        int verificationResult = ((PMPRemoteObjectAdapter) remote).verifyRemoteReference();
+        if (verificationResult == PMPRemoteObjectAdapter.REPEAT) {
+          DebugUtils.debug(Utils.class, "[isRemoteMethodDefined] Remote reference verification says REPEAT");
+          try {
+            return getRemoteMethod(remote, methodSignature) != null;
+          } catch (PMPException e1) {
+            DebugUtils.info(Utils.class, "[isRemoteMethodDefined] Failed to get method again", e1);
+            return false;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   /**
    *
    * @param remote
@@ -30,11 +51,8 @@ public final class Utils {
    * @param parameters
    * @return
    * @throws IAgentException
-   * @deprecated Using this method result in too verbose code. Consider using
-   *             {@link MethodSignature#call(RemoteObject)} or one of its
-   *             siblings instead.
    */
-  public static Object callRemoteMethod(RemoteObject remote, MethodSignature methodSignature, Object[] parameters)
+  static Object callRemoteMethod(RemoteObject remote, MethodSignature methodSignature, Object[] parameters)
       throws IAgentException {
     try {
       return callRemoteMethod0(remote, parameters, methodSignature);
@@ -56,27 +74,6 @@ public final class Utils {
       DebugUtils.info(Utils.class, "[callRemoteMethod] Method invocation failed", e);
       throw new IAgentException("Unable to call method: " + methodSignature.name, IAgentErrors.ERROR_INTERNAL_ERROR, e);
     }
-  }
-
-  public static boolean isRemoteMethodDefined(RemoteObject remote, MethodSignature methodSignature)
-      throws IAgentException {
-    try {
-      return getRemoteMethod(remote, methodSignature) != null;
-    } catch (PMPException e) {
-      if (remote instanceof PMPRemoteObjectAdapter) {
-        int verificationResult = ((PMPRemoteObjectAdapter) remote).verifyRemoteReference();
-        if (verificationResult == PMPRemoteObjectAdapter.REPEAT) {
-          DebugUtils.debug(Utils.class, "[isRemoteMethodDefined] Remote reference verification says REPEAT");
-          try {
-            return getRemoteMethod(remote, methodSignature) != null;
-          } catch (PMPException e1) {
-            DebugUtils.info(Utils.class, "[isRemoteMethodDefined] Failed to get method again", e1);
-            return false;
-          }
-        }
-      }
-    }
-    return false;
   }
 
   private static Object callRemoteMethod0(RemoteObject remote, Object[] parameters, MethodSignature methodSignature)
