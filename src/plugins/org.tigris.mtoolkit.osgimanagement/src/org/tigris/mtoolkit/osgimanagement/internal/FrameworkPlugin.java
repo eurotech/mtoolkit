@@ -63,9 +63,10 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
 
   @Override
   public void stop(BundleContext context) throws Exception {
-    super.stop(context);
+    FrameWorkView.saveModel();
     FrameworkConnectorFactory.deinit();
     FrameworkPlugin.instance = null;
+    super.stop(context);
   }
 
   public String getId() {

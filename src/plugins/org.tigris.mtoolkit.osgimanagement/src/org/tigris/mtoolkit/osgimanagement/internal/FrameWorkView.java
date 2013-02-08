@@ -102,6 +102,7 @@ import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.ViewPart;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
@@ -789,32 +790,30 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
   }
 
   // Save Tree Model
-  private static void saveModel() {
+  public static void saveModel() {
+    if (FrameworkPlugin.getDefault() == null) {
+      return;
+    }
+    File configFile = new File(FrameworkPlugin.getDefault().getStateLocation().toFile(), STORAGE_FILE_NAME);
     XMLMemento rootConfig = XMLMemento.createWriteRoot(MEMENTO_ROOT_TYPE);
-
-    IMemento child;
     Model[] children = treeRoot.getChildren();
     for (int i = 0; i < treeRoot.getSize(); i++) {
       if (!((FrameworkImpl) children[i]).isAutoConnected()) {
         IMemento config = ((FrameworkImpl) children[i]).getConfig();
         if (config != null) {
-          child = rootConfig.createChild(MEMENTO_TYPE);
+          IMemento child = rootConfig.createChild(MEMENTO_TYPE);
           child.putMemento(config);
         }
       }
     }
+    OutputStreamWriter writer = null;
     try {
-      if (FrameworkPlugin.getDefault() == null) {
-        return;
-      }
-      File configFile = new File(FrameworkPlugin.getDefault().getStateLocation().toFile(), STORAGE_FILE_NAME);
-
-      FileOutputStream stream = new FileOutputStream(configFile);
-      OutputStreamWriter writer = new OutputStreamWriter(stream, "utf-8"); //$NON-NLS-1$
+      writer = new OutputStreamWriter(new FileOutputStream(configFile), "utf-8"); //$NON-NLS-1$
       rootConfig.save(writer);
-      writer.close();
     } catch (IOException e) {
       BrowserErrorHandler.processError(e, false);
+    } finally {
+      FileUtils.close(writer);
     }
   }
 
@@ -866,8 +865,6 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 
     // final dispose
     if (activeInstances.size() < 1) {
-      saveModel();
-      // clearAll();
       mgr.dispose();
       tree.getTree().dispose();
       activeInstances = null;
