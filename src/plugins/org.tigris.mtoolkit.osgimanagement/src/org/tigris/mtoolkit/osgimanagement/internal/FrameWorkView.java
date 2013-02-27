@@ -757,12 +757,14 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 
         if (element instanceof Category) {
           manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, installBundleAction);
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
         }
 
         if (element instanceof ObjectClass) {
           if (!(element.getParent() instanceof FrameworkImpl)) {
             manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, gotoServiceAction);
           }
+          manager.appendToGroup(ContentTypeActionsProvider.GROUP_ACTIONS, refreshAction);
         }
         if (element instanceof SimpleNode) {
           if (element.getName().equals(Messages.bundles_node_label)) {

@@ -45,13 +45,14 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	@Override
 	public void run() {
-		if (!isChecked())
-			return;
+		if (!isChecked()) {
+      return;
+    }
 		IStructuredSelection selection = getSelection();
 		if (selection.isEmpty()) {
 			return;
@@ -81,15 +82,17 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 
 	private IStructuredSelection getSelection() {
 		ISelection selection = provider.getSelection();
-		if (selection instanceof IStructuredSelection)
-			return (IStructuredSelection) selection;
-		else
-			return new StructuredSelection();
+		if (selection instanceof IStructuredSelection) {
+      return (IStructuredSelection) selection;
+    } else {
+      return new StructuredSelection();
+    }
 	}
 
 	private void setViewType(final FrameworkImpl fw, int newViewType) {
-		if (fw.getViewType() == newViewType)
-			return;
+		if (fw.getViewType() == newViewType) {
+      return;
+    }
 		try {
 			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
 			fw.setViewType(newViewType);
@@ -113,15 +116,16 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 			Object next = it.next();
 			if (next instanceof Model) {
 				FrameworkImpl fw = (FrameworkImpl) ((Model) next).findFramework();
-				if (fw != null && fw.isConnected())
-					frameworks.add(fw);
+				if (fw != null && fw.isConnected()) {
+          frameworks.add(fw);
+        }
 			}
 		}
-		if (frameworks.isEmpty()) {
-			setEnabled(false);
-			setChecked(false);
-			return;
-		}
+    if (frameworks.isEmpty()) {
+    	setEnabled(false);
+    	setChecked(false);
+    	return;
+    }
 
 		Iterator it = frameworks.iterator();
 		FrameworkImpl fw = (FrameworkImpl) it.next();
@@ -143,7 +147,7 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 		if (selection instanceof IStructuredSelection) {
 			updateState((IStructuredSelection) selection);
 		} else {
-			setEnabled(false);
+      setEnabled(false);
 			setChecked(false);
 		}
 	}

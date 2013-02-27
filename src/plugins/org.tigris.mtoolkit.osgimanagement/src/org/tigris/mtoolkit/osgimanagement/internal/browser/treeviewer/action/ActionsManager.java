@@ -51,7 +51,9 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UninstallBundle
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UpdateBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.UpdatePreverifyOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -255,6 +257,26 @@ public class ActionsManager {
 
     public boolean contains(ISchedulingRule rule) {
       return (rule instanceof FwMutexRule) && (((FwMutexRule) rule).fw == fw);
+    }
+  }
+
+  /**
+   * @param bundleCat
+   */
+  public static void refreshCategoryAction(Category category) {
+    FrameworkImpl fw = ((FrameworkImpl) category.findFramework());
+    if (fw != null) {
+      fw.refreshCategoryAction(category);
+    }
+  }
+
+  /**
+   * @param service
+   */
+  public static void refreshObjectClassAction(ObjectClass service) {
+    FrameworkImpl fw = ((FrameworkImpl) service.findFramework());
+    if (fw != null) {
+      fw.refreshObjectClassAction(service);
     }
   }
 

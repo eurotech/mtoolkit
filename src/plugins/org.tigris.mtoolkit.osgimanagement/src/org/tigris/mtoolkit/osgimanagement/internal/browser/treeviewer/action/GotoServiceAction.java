@@ -32,10 +32,11 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
-	public void run() {
+	@Override
+  public void run() {
 		try {
 			ObjectClass objectClass = (ObjectClass) getStructuredSelection().getFirstElement();
 			RemoteService service = objectClass.getService();
@@ -45,8 +46,9 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 				FrameworkImpl fw = ((FrameworkImpl) objectClass.findFramework());
 				if (fw.getViewType() == Framework.BUNDLES_VIEW) {
 					Bundle bundle = fw.findBundleForService(service.getServiceId());
-					if (bundle == null)
-						return;
+					if (bundle == null) {
+            return;
+          }
 					ServicesCategory category = (ServicesCategory) bundle.getChildren()[0];
 					services = category.getChildren();
 				} else {
@@ -78,23 +80,25 @@ public class GotoServiceAction extends SelectionProviderAction implements IState
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse
 	 * .jface.viewers.IStructuredSelection)
 	 */
-	public void selectionChanged(IStructuredSelection selection) {
+	@Override
+  public void selectionChanged(IStructuredSelection selection) {
 		updateState(selection);
 	}
 
 	public void updateState(IStructuredSelection selection) {
 		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof ObjectClass) {
 			ObjectClass oClass = (ObjectClass) getStructuredSelection().getFirstElement();
-			if ((oClass.getParent() instanceof FrameworkImpl))
-				return;
+			if ((oClass.getParent() instanceof FrameworkImpl)) {
+        return;
+      }
 			ServicesCategory category = (ServicesCategory) oClass.getParent();
 			if (category == null || category.getType() == ServicesCategory.REGISTERED_SERVICES) {
-				this.setEnabled(false);
+        this.setEnabled(false);
 			} else {
 				this.setEnabled(true);
 			}
