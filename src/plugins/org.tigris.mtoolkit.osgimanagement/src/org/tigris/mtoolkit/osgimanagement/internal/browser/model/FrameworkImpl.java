@@ -776,14 +776,15 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     return "Service " + type + " " + e; //$NON-NLS-1$ //$NON-NLS-2$
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.event.RemoteServiceListener#serviceChanged(org.tigris.mtoolkit.iagent.event.RemoteServiceEvent)
+   */
   public void serviceChanged(final RemoteServiceEvent e) {
     BrowserErrorHandler.debug(getDebugServiceChangedMsg(e));
     if (!isConnected()) {
       return;
     }
-
     synchronized (Framework.getLockObject(connector)) {
-
       try {
         RemoteService rService = e.getService();
         if (e.getType() == RemoteServiceEvent.UNREGISTERED) {
@@ -807,7 +808,11 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         }
         updateElement();
       } catch (IAgentException e1) {
-        BrowserErrorHandler.processError(e1, connector, userDisconnect);
+        if (e1.getErrorCode() != IAgentErrors.ERROR_SERVICE_UNREGISTERED) {
+          //Services might be unregistered at any time even before information
+          //for REGISTERED event has been dispatched to clients because PMP events are always asynchronous
+          BrowserErrorHandler.processError(e1, connector, userDisconnect);
+        }
       } catch (IllegalStateException ex) {
         // ignore illegal states, they are usually due to working with
         // stale
@@ -985,9 +990,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         regCategory.addElement(newBundle);
         servicesViewVector.addElement(oc);
         RemoteBundle rBundlesArray[] = regServ[i].getUsingBundles();
-        if (rBundlesArray.length > 0 && (oc.getChildren().length == 0
-            || (oc.getChildren().length == 1
-            && ((BundlesCategory) oc.getChildren()[0]).getKind() == BundlesCategory.REGISTERED))) {
+        if (rBundlesArray.length > 0
+            && (oc.getChildren().length == 0 || (oc.getChildren().length == 1 && ((BundlesCategory) oc.getChildren()[0])
+                .getKind() == BundlesCategory.REGISTERED))) {
           BundlesCategory usedCategory = new BundlesCategory(BundlesCategory.IN_USE);
           oc.addElement(usedCategory);
         }
@@ -1006,8 +1011,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         long id = usedServ[m].getServiceId();
         if (id == oc.getService().getServiceId()) {
           if (oc.getChildren().length == 0
-              || (oc.getChildren().length == 1
-              && ((BundlesCategory) oc.getChildren()[0]).getKind() == BundlesCategory.REGISTERED)) {
+              || (oc.getChildren().length == 1 && ((BundlesCategory) oc.getChildren()[0]).getKind() == BundlesCategory.REGISTERED)) {
             BundlesCategory usedCategory = new BundlesCategory(BundlesCategory.IN_USE);
             oc.addElement(usedCategory);
           }
