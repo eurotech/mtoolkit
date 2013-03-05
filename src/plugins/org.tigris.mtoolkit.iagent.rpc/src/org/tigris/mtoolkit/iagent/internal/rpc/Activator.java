@@ -86,7 +86,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
     pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
     pmpServer = PMPServerFactory.createServer(context, 1450, null);
-    pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, null);
+    pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, pmpServer.getProperties());
     synchronizer.setPMPServer(pmpServer);
     synchronizer.start();
 

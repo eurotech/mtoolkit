@@ -16,7 +16,6 @@ import java.net.Socket;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Vector;
 
 import org.osgi.framework.AllServiceListener;
@@ -30,7 +29,7 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 
 public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
-  /** constant used for the pmp configuration */
+  /** constant used for the PMP configuration */
   public static final String URI            = "uri";
 
   public static final String PORT           = "port";
@@ -282,8 +281,8 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     return "Server";
   }
 
-  public Map getProperties() {
-    Hashtable properties = new Hashtable();
+  public Dictionary getProperties() {
+    Hashtable properties = new Hashtable(1);
     properties.put(PORT, new Integer(port));
     return properties;
   }
