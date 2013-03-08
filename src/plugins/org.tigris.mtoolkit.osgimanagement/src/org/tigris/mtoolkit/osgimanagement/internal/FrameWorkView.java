@@ -1040,7 +1040,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
       try {
         tree.getTree().setRedraw(false);
         boolean refreshed = false;
-        if (treeRoot.getFilter() != "") {
+        if (treeRoot.getFilter().length() > 0) {
           tree.refresh();
           refreshed = true;
           if (lastRunRevealedElements == null || alreadyRevealedElementsCount == 0) {
@@ -1214,6 +1214,17 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
       return provider;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+      return super.hashCode();
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj) {
       if (this == obj) {
