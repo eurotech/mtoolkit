@@ -28,7 +28,7 @@ public final class ListItem {
    * @param value
    * @return the old value of the property
    */
-  public Object setProperty(String key, Object value) {
+  public Object setProperty(String key, Object value) { // NO_UCD
     return properties.put(key, value);
   }
 
@@ -38,7 +38,7 @@ public final class ListItem {
    * @param key
    * @return the value of the property
    */
-  public Object getProperty(String key) {
+  public Object getProperty(String key) { // NO_UCD
     return properties.get(key);
   }
 
