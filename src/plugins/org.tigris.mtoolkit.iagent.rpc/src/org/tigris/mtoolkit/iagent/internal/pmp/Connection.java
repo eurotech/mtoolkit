@@ -371,20 +371,6 @@ class Connection implements PMPConnection {
     return reader.addRemoteObject(obj, interfaces);
   }
 
-  protected void ping() {
-    boolean locked = false;
-    try {
-      os.begin(null);
-      locked = true;
-      os.write(PMPSessionThread.PING);
-      os.end(true);
-    } catch (Exception exc) {
-      if (locked) {
-        os.unlock();
-      }
-    }
-  }
-
   public void addEventListener(EventListener el, String[] eventTypes) throws IllegalArgumentException {
     if (el == null) {
       throw new IllegalArgumentException("Can't add null listener");
