@@ -21,10 +21,9 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 
-public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
-
-  private List                eventQueue = new LinkedList();
+public final class EventSynchronizerImpl implements Runnable, EventSynchronizer {
   private volatile boolean    running;
+  private List                eventQueue = new LinkedList();
   private PMPServer           server;
   private ServiceRegistration registration;
   private BundleContext       bc;
@@ -57,6 +56,9 @@ public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
     eventsThread.start();
   }
 
+  /* (non-Javadoc)
+   * @see java.lang.Runnable#run()
+   */
   public void run() {
     while (running) {
       EventData eventData = null;
@@ -64,7 +66,7 @@ public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
         try {
           while (eventQueue.isEmpty() && running) {
             if (DebugUtils.DEBUG_ENABLED) {
-              debug("[run] event queue is empty >> thread will wait");
+              DebugUtils.debug(this, "[run] event queue is empty >> thread will wait");
             }
             wait();
           }
@@ -80,19 +82,22 @@ public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
       Object convEvent = eventData.getConvertedEvent();
       String eventType = eventData.getEventType();
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("[run] sending event: " + eventData);
+        DebugUtils.debug(this, "[run] sending event: " + eventData);
       }
       server.event(convEvent, eventType);
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.event.EventSynchronizer#enqueue(org.tigris.mtoolkit.iagent.event.EventData)
+   */
   public void enqueue(EventData eventData) {
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("[enqueue] >>> eventData: " + eventData);
+      DebugUtils.debug(this, "[enqueue] >>> eventData: " + eventData);
     }
     if (!running) {
       if (DebugUtils.DEBUG_ENABLED) {
-        debug("[enqueue] Not running anymore. Skipping...");
+        DebugUtils.debug(this, "[enqueue] Not running anymore. Skipping...");
       }
       return;
     }
@@ -112,7 +117,7 @@ public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
 
   public void unregister(BundleContext bc) {
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("[unregister] Unregistering EventSynchronizer...");
+      DebugUtils.debug(this, "[unregister] Unregistering EventSynchronizer...");
     }
 
     if (registration != null) {
@@ -121,11 +126,7 @@ public class EventSynchronizerImpl implements Runnable, EventSynchronizer {
     }
     this.bc = null;
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("[unregister] EventSynchronizer unregistered.");
+      DebugUtils.debug(this, "[unregister] EventSynchronizer unregistered.");
     }
-  }
-
-  private final void debug(String message) {
-    DebugUtils.debug(this, message);
   }
 }
