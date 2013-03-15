@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -425,24 +424,6 @@ public class DPPUtilities {
       n1 -= 1;
     }
     return n1;
-  }
-
-  public static void main(String[] args) {
-    java.io.DataInputStream isr = new java.io.DataInputStream(System.in);
-    while (true) {
-      System.out.print("Enter password : ");
-      try {
-        String password = isr.readLine();
-        String encoded = encodePassword(password);
-        String decoded = decodePassword(encoded);
-        System.out.println("\noriginal: " + password);
-        System.out.println("encoded : " + encoded);
-        System.out.println("decoded : " + decoded);
-        System.out.println("correct : " + decoded.equals(password) + "\n");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
   }
 
   public static Vector convertToVector(String str) {
