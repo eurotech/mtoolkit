@@ -91,6 +91,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
               fw.setPMPConnectionListener(null);
               if (fw.isAutoConnected()) {
                 FrameWorkView.getTreeRoot().removeElement(fw);
+                fw.dispose();
               }
               break;
             }
@@ -124,7 +125,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
 
   /**
    * Creates PMP connection.
-   * 
+   *
    * @param connector
    * @param fw
    * @param frameworkName

@@ -140,6 +140,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     categoryHash = null;
     servicesVector = null;
     servicesViewVector = null;
+    connector = null;
   }
 
   public boolean isConnecting() {
