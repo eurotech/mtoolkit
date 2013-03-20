@@ -21,49 +21,60 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFramewor
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class ConnectAction extends SelectionProviderAction implements IStateAction {
+public final class ConnectAction extends SelectionProviderAction implements IStateAction {
 
-	public ConnectAction(ISelectionProvider provider, String label) {
-		super(provider, label);
-	}
+  public ConnectAction(ISelectionProvider provider, String label) {
+    super(provider, label);
+  }
 
-	public void run() {
-		setEnabled(false);
-		ISelection selection = getSelection();
-		Iterator iterator = getStructuredSelection().iterator();
-		while (iterator.hasNext()) {
-			FrameworkImpl framework = (FrameworkImpl) iterator.next();
-			ActionsManager.connectFrameworkAction(framework);
-			// needed to update workbench menu and toolbar status
-		}
-		getSelectionProvider().setSelection(selection);
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  @Override
+  public void run() {
+    setEnabled(false);
+    ISelection selection = getSelection();
+    Iterator iterator = getStructuredSelection().iterator();
+    while (iterator.hasNext()) {
+      FrameworkImpl framework = (FrameworkImpl) iterator.next();
+      ActionsManager.connectFrameworkAction(framework);
+      // needed to update workbench menu and toolbar status
+    }
+    getSelectionProvider().setSelection(selection);
+  }
 
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
+  // override to react properly to selection change
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   */
+  @Override
+  public void selectionChanged(IStructuredSelection selection) {
+    updateState(selection);
+  }
 
-	public void updateState(IStructuredSelection selection) {
-		if (selection.size() == 0) {
-			setEnabled(false);
-			return;
-		}
-		boolean enabled = true;
-
-		Iterator iterator = selection.iterator();
-		while (iterator.hasNext()) {
-			Model model = (Model) iterator.next();
-			if (!(model instanceof FrameworkImpl)) {
-				enabled = false;
-				break;
-			}
-			FrameworkImpl framework = (FrameworkImpl) model;
-			if (framework.isConnected() || framework.isConnecting() || ConnectFrameworkJob.isConnecting(framework)) {
-				enabled = false;
-				break;
-			}
-		}
-		this.setEnabled(enabled);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+   */
+  public void updateState(IStructuredSelection selection) {
+    if (selection.size() == 0) {
+      setEnabled(false);
+      return;
+    }
+    boolean enabled = true;
+    Iterator iterator = selection.iterator();
+    while (iterator.hasNext()) {
+      Model model = (Model) iterator.next();
+      if (!(model instanceof FrameworkImpl)) {
+        enabled = false;
+        break;
+      }
+      FrameworkImpl framework = (FrameworkImpl) model;
+      if (framework.isConnected() || framework.isAutoConnected() || framework.isConnecting()
+          || ConnectFrameworkJob.isConnecting(framework)) {
+        enabled = false;
+        break;
+      }
+    }
+    this.setEnabled(enabled);
+  }
 }
