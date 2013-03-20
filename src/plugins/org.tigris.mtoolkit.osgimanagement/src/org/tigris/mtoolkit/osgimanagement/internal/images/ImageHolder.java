@@ -15,32 +15,37 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
-public class ImageHolder {
+public final class ImageHolder {
 
-	private static final String IMAGES_PATH = "/images/";
+  private static final String IMAGES_PATH = "/images/";
 
-	public static Image getImage(String key) {
-		ImageRegistry imgRegistry = FrameworkPlugin.getDefault().getImageRegistry();
-		Image image = imgRegistry.get(key);
-		if (image == null)
-			createImage(key, imgRegistry);
-		return imgRegistry.get(key);
-	}
+  private ImageHolder() {
+  }
 
-	public static ImageDescriptor getImageDescriptor(String key) {
-		ImageRegistry imgRegistry = FrameworkPlugin.getDefault().getImageRegistry();
-		ImageDescriptor descriptor = imgRegistry.getDescriptor(key);
-		if (descriptor == null) {
-			descriptor = createImage(key, imgRegistry);
-		}
-		return descriptor;
-	}
+  public static Image getImage(String key) {
+    ImageRegistry imgRegistry = FrameworkPlugin.getDefault().getImageRegistry();
+    Image image = imgRegistry.get(key);
+    if (image == null) {
+      createImage(key, imgRegistry);
+    }
+    return imgRegistry.get(key);
+  }
 
-	private static ImageDescriptor createImage(String key, ImageRegistry imgRegistry) {
-		ImageDescriptor descriptor = FrameworkPlugin.imageDescriptorFromPlugin(FrameworkPlugin.PLUGIN_ID, key);
-		if (descriptor == null)
-			descriptor = FrameworkPlugin.imageDescriptorFromPlugin(FrameworkPlugin.PLUGIN_ID, IMAGES_PATH + key);
-		imgRegistry.put(key, descriptor);
-		return descriptor;
-	}
+  public static ImageDescriptor getImageDescriptor(String key) {
+    ImageRegistry imgRegistry = FrameworkPlugin.getDefault().getImageRegistry();
+    ImageDescriptor descriptor = imgRegistry.getDescriptor(key);
+    if (descriptor == null) {
+      descriptor = createImage(key, imgRegistry);
+    }
+    return descriptor;
+  }
+
+  private static ImageDescriptor createImage(String key, ImageRegistry imgRegistry) {
+    ImageDescriptor descriptor = FrameworkPlugin.imageDescriptorFromPlugin(FrameworkPlugin.PLUGIN_ID, key);
+    if (descriptor == null) {
+      descriptor = FrameworkPlugin.imageDescriptorFromPlugin(FrameworkPlugin.PLUGIN_ID, IMAGES_PATH + key);
+    }
+    imgRegistry.put(key, descriptor);
+    return descriptor;
+  }
 }
