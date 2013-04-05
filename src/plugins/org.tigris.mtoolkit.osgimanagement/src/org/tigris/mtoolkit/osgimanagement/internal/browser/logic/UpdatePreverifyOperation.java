@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.ManifestUtils;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -32,7 +33,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
-public class UpdatePreverifyOperation extends RemoteBundleOperation {
+public final class UpdatePreverifyOperation extends RemoteBundleOperation {
   private final File bundleFile;
 
   public UpdatePreverifyOperation(Bundle bundle, File bundleFile) {
@@ -40,14 +41,17 @@ public class UpdatePreverifyOperation extends RemoteBundleOperation {
     this.bundleFile = bundleFile;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation#doOperation(org.eclipse.core.runtime.IProgressMonitor)
+   */
   @Override
   protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
+    ZipFile zip = null;
     try {
       RemoteBundle rBundle = getBundle().getRemoteBundle();
-
       boolean nameDiff = true;
       boolean versionsDiff = true;
-      ZipFile zip = new ZipFile(bundleFile);
+      zip = new ZipFile(bundleFile);
       ZipEntry mf = zip.getEntry(JarFile.MANIFEST_NAME);
       final String symbNames[] = new String[] {
           "", rBundle.getSymbolicName()
@@ -82,6 +86,9 @@ public class UpdatePreverifyOperation extends RemoteBundleOperation {
       } else if (versionsDiff) {
         final int confirm[] = new int[SWT.CANCEL];
         PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+          /* (non-Javadoc)
+           * @see java.lang.Runnable#run()
+           */
           public void run() {
             String message = "The new and old bundles have different versions:\n" + "Existing: " + versions[1] + "\n"
                 + "New: " + versions[0] + "\n" + "Are you sure you want to do this?";
@@ -94,10 +101,15 @@ public class UpdatePreverifyOperation extends RemoteBundleOperation {
       }
     } catch (IOException ioe) {
       return Util.newStatus(IStatus.ERROR, "Failed to verify bundle", ioe);
+    } finally {
+      FileUtils.close(zip);
     }
     return Status.OK_STATUS;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation#getMessage(org.eclipse.core.runtime.IStatus)
+   */
   @Override
   protected String getMessage(IStatus operationStatus) {
     return NLS.bind(Messages.bundle_update_failure, operationStatus);
