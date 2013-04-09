@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.internal.browser;
+package org.tigris.mtoolkit.osgimanagement.internal;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;

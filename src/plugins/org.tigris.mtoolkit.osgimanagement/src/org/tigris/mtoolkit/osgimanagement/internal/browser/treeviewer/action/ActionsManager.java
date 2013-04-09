@@ -29,6 +29,7 @@ import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
+import org.eclipse.ui.progress.IProgressConstants;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -42,7 +43,7 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.UIHelper;
+import org.tigris.mtoolkit.osgimanagement.internal.UIHelper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StartBundleOperation;
@@ -58,7 +59,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public class ActionsManager {
+public final class ActionsManager {
   private static final String MIME_JAR   = "application/java-archive"; //$NON-NLS-1$
   private static final String JAR_FILTER = "*.jar";                   //$NON-NLS-1$
 
@@ -93,14 +94,15 @@ public class ActionsManager {
     if (files == null || files.length == 0) {
       return;
     }
-
+    final FrameworkProcessor processor = new FrameworkProcessor();
+    processor.setUseAdditionalProcessors(false);
     Job job = new Job("Installing to " + framework.getName()) {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       public IStatus run(IProgressMonitor monitor) {
-        FrameworkProcessor processor = new FrameworkProcessor();
-        processor.setUseAdditionalProcessors(false);
         InstallationTarget target = new FrameworkTarget(framework);
-
         IStatus status = Status.OK_STATUS;
         List items = new ArrayList();
         for (int i = 0; i < files.length; i++) {
@@ -120,6 +122,8 @@ public class ActionsManager {
         return status;
       }
     };
+    job.setUser(true);
+    job.setProperty(IProgressConstants.ICON_PROPERTY, processor.getGeneralTargetImageDescriptor());
     job.schedule();
   }
 

@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.SelectionProviderAction;
+import org.eclipse.ui.progress.IProgressConstants;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -36,11 +37,10 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class InstallDPAction extends SelectionProviderAction implements IStateAction {
-
+public final class InstallDPAction extends SelectionProviderAction implements IStateAction {
   private static final String DP_FILTER = "*.dp"; //$NON-NLS-1$
 
-  private TreeViewer parentView;
+  private TreeViewer          parentView;
 
   public InstallDPAction(ISelectionProvider provider, String label) {
     super(provider, label);
@@ -48,6 +48,7 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
   }
 
   // run method
+  @Override
   public void run() {
     Model node = (Model) getStructuredSelection().getFirstElement();
     Framework framework = node.findFramework();
@@ -61,13 +62,15 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
     if (files == null || files.length == 0) {
       return;
     }
-
+    final FrameworkProcessor processor = new FrameworkProcessor();
+    processor.setUseAdditionalProcessors(true);
     Job job = new Job("Installing to " + framework.getName()) {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
+      @Override
       public IStatus run(IProgressMonitor monitor) {
-        FrameworkProcessor processor = new FrameworkProcessor();
-        processor.setUseAdditionalProcessors(true);
         InstallationTarget target = new FrameworkTarget(framework);
-
         IStatus status = Status.OK_STATUS;
         List items = new ArrayList();
         for (int i = 0; i < files.length; i++) {
@@ -87,10 +90,13 @@ public class InstallDPAction extends SelectionProviderAction implements IStateAc
         return status;
       }
     };
+    job.setUser(true);
+    job.setProperty(IProgressConstants.ICON_PROPERTY, processor.getGeneralTargetImageDescriptor());
     job.schedule();
   }
 
   // override to react properly to selection change
+  @Override
   public void selectionChanged(IStructuredSelection selection) {
     updateState(selection);
   }
