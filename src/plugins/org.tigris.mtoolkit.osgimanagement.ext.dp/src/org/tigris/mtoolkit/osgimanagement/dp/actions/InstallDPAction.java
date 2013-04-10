@@ -38,16 +38,17 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class InstallDPAction extends SelectionProviderAction implements IStateAction {
-  private static final String DP_FILTER = "*.dp"; //$NON-NLS-1$
 
-  private TreeViewer          parentView;
+  private TreeViewer parentView;
 
   public InstallDPAction(ISelectionProvider provider, String label) {
     super(provider, label);
     this.parentView = (TreeViewer) provider;
   }
 
-  // run method
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
   @Override
   public void run() {
     Model node = (Model) getStructuredSelection().getFirstElement();
@@ -56,51 +57,17 @@ public final class InstallDPAction extends SelectionProviderAction implements IS
     getSelectionProvider().setSelection(getSelection());
   }
 
-  private void installDPAction(final Framework framework, TreeViewer parentView) {
-    final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
-        "Select Deployment Package To Install", DP_FILTER, "Deployment Package (*.dp)", true);
-    if (files == null || files.length == 0) {
-      return;
-    }
-    final FrameworkProcessor processor = new FrameworkProcessor();
-    processor.setUseAdditionalProcessors(true);
-    Job job = new Job("Installing to " + framework.getName()) {
-      /* (non-Javadoc)
-       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-       */
-      @Override
-      public IStatus run(IProgressMonitor monitor) {
-        InstallationTarget target = new FrameworkTarget(framework);
-        IStatus status = Status.OK_STATUS;
-        List items = new ArrayList();
-        for (int i = 0; i < files.length; i++) {
-          InstallationItem item = new BaseFileItem(files[i], DPProcessor.MIME_DP);
-          items.add(item);
-          if (monitor.isCanceled()) {
-            break;
-          }
-        }
-        status = processor.processInstallationItems(
-            (InstallationItem[]) items.toArray(new InstallationItem[items.size()]), null, target, monitor);
-
-        monitor.done();
-        if (monitor.isCanceled()) {
-          return Status.CANCEL_STATUS;
-        }
-        return status;
-      }
-    };
-    job.setUser(true);
-    job.setProperty(IProgressConstants.ICON_PROPERTY, processor.getGeneralTargetImageDescriptor());
-    job.schedule();
-  }
-
-  // override to react properly to selection change
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   */
   @Override
   public void selectionChanged(IStructuredSelection selection) {
     updateState(selection);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+   */
   public void updateState(IStructuredSelection selection) {
     if (selection.size() == 0) {
       setEnabled(false);
@@ -126,5 +93,43 @@ public final class InstallDPAction extends SelectionProviderAction implements IS
       }
     }
     setEnabled(enabled);
+  }
+
+  private void installDPAction(final Framework framework, TreeViewer parentView) {
+    final String DP_FILTER = "*.dp";
+    final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
+        "Select Deployment Package To Install", DP_FILTER, "Deployment Package (*.dp)", true);
+    if (files == null || files.length == 0) {
+      return;
+    }
+    final FrameworkProcessor processor = new FrameworkProcessor();
+    processor.setUseAdditionalProcessors(true);
+    Job job = new Job("Installing to " + framework.getName()) {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
+      @Override
+      public IStatus run(IProgressMonitor monitor) {
+        InstallationTarget target = new FrameworkTarget(framework);
+        List items = new ArrayList();
+        for (int i = 0; i < files.length; i++) {
+          items.add(new BaseFileItem(files[i], DPProcessor.MIME_DP));
+          if (monitor.isCanceled()) {
+            return Status.CANCEL_STATUS;
+          }
+        }
+        IStatus status = processor.processInstallationItems(
+            (InstallationItem[]) items.toArray(new InstallationItem[items.size()]), null, target, monitor);
+
+        monitor.done();
+        if (monitor.isCanceled()) {
+          return Status.CANCEL_STATUS;
+        }
+        return status;
+      }
+    };
+    job.setUser(true);
+    job.setProperty(IProgressConstants.ICON_PROPERTY, processor.getGeneralTargetImageDescriptor());
+    job.schedule();
   }
 }
