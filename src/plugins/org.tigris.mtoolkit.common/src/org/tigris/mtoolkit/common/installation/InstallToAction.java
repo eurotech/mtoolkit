@@ -46,6 +46,11 @@ public class InstallToAction extends Action {
    */
   @Override
   public void run() {
+    // Save dirty editors if possible but do not stop if not all are saved
+    boolean save = PlatformUI.getWorkbench().saveAllEditors(true);
+    if (!save) {
+      return;
+    }
     Job job = new Job(getActionText()) {
       /* (non-Javadoc)
        * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
