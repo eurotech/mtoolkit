@@ -26,10 +26,6 @@ public final class FilterJob extends Job {
   private final StructuredViewer viewer;
   private final Runnable         postRefreshAction;
 
-  public FilterJob(String name, StructuredViewer viewer) {
-    this(name, viewer, null);
-  }
-
   public FilterJob(String name, StructuredViewer aViewer, Runnable apostRefreshAction) {
     super(name);
     viewer = aViewer;
