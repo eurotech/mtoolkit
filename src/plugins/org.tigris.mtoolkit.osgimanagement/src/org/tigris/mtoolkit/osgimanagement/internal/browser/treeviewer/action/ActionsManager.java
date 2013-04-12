@@ -28,6 +28,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.progress.IProgressConstants;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
@@ -43,7 +45,6 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.UIHelper;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StartBundleOperation;
@@ -158,13 +159,22 @@ public final class ActionsManager {
   }
 
   public static void stopBundleAction(Bundle bundle) {
-    if (bundle.getID() == 0) {
-      MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), "Stop bundle", null, NLS.bind(
+    if (bundle.getID() == 23) {
+      final MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), "Stop bundle", null, NLS.bind(
           Messages.stop_system_bundle, bundle.getName()), MessageDialog.QUESTION, new String[] {
           "Continue", "Cancel"
       }, 0);
-      int statusCode = UIHelper.openWindow(dialog);
-      if (statusCode != Window.OK) {
+      Display display = PlatformUI.getWorkbench().getDisplay();
+      final int[] statusCode = new int[1];
+      display.syncExec(new Runnable() {
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
+          statusCode[0] = dialog.open();
+        }
+      });
+      if (statusCode[0] != Window.OK) {
         return;
       }
     }
@@ -226,7 +236,7 @@ public final class ActionsManager {
         // wait if connect operation is still active
         DeviceConnector connector = fw.getConnector();
         // if the connection fails, connector will be null, so we need
-        // to recheck the condition
+        // to re-check the condition
         if (connector != null) {
           connector.closeConnection();
         }

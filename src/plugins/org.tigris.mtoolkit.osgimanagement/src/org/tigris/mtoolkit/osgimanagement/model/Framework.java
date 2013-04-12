@@ -74,9 +74,6 @@ public abstract class Framework extends Model {
     return connectedFlag;
   }
 
-  /**
-   * @since 6.0
-   */
   public boolean isAutoConnected() {
     return autoConnected;
   }
@@ -86,7 +83,9 @@ public abstract class Framework extends Model {
   }
 
   public void addConnectionListener(FrameworkConnectionListener l) {
-    listeners.add(l);
+    if (!listeners.contains(l)) {
+      listeners.add(l);
+    }
   }
 
   public void removeConnectionListener(FrameworkConnectionListener l) {
@@ -97,14 +96,6 @@ public abstract class Framework extends Model {
     return connector.lockObj;
   }
 
-  public abstract Model createModel(String mimeType, String id, String version);
-
-  public abstract IMemento getConfig();
-
-  public abstract List getSignCertificateUids();
-
-  public abstract void setSignCertificateUids(List uids);
-
   /**
    * Returns map, containing information for certificates which shall be used
    * for signing the content, installed to this framework. If no signing is
@@ -113,4 +104,12 @@ public abstract class Framework extends Model {
    * @return the map with certificate properties
    */
   public abstract Map getSigningProperties();
+
+  public abstract Model createModel(String mimeType, String id, String version);
+
+  public abstract IMemento getConfig();
+
+  public abstract List getSignCertificateUids();
+
+  public abstract void setSignCertificateUids(List uids);
 }
