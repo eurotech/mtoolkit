@@ -57,7 +57,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.PropertySheet;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.AddFrameworkDialog;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public final class ActionsManager {
@@ -67,7 +67,7 @@ public final class ActionsManager {
   public static void addFrameworkAction(TreeRoot treeRoot) {
     String frameworkName = generateName(treeRoot);
     FrameworkImpl newFrameWork = new FrameworkImpl(frameworkName, false);
-    PropertySheet sheet = new PropertySheet(treeRoot, newFrameWork, true);
+    AddFrameworkDialog sheet = new AddFrameworkDialog(treeRoot, newFrameWork, true);
     sheet.open();
   }
 

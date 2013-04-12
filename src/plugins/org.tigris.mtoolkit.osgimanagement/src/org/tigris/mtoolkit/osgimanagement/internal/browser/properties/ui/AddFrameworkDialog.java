@@ -33,7 +33,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class PropertySheet extends TitleAreaDialog implements ConstantsDistributor, FrameworkPanel.ErrorMonitor {
+public class AddFrameworkDialog extends TitleAreaDialog implements ConstantsDistributor, FrameworkPanel.ErrorMonitor {
 
   public Button             connectButton;
 
@@ -48,7 +48,7 @@ public class PropertySheet extends TitleAreaDialog implements ConstantsDistribut
 
   private Model             parent;
 
-  public PropertySheet(Model parent, FrameworkImpl element, boolean newFramework) {
+  public AddFrameworkDialog(Model parent, FrameworkImpl element, boolean newFramework) {
     super(PluginUtilities.getActiveWorkbenchShell());
     this.addFramework = newFramework;
     this.parent = parent;
