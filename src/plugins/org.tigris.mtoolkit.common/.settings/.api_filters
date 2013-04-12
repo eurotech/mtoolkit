@@ -7,4 +7,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/tigris/mtoolkit/common/gui/FilteredCheckboxTree.java" type="org.tigris.mtoolkit.common.gui.FilteredCheckboxTree$FilterableCheckboxTreeViewer">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="CheckboxTreeViewer"/>
+                <message_argument value="FilterableCheckboxTreeViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
