@@ -74,9 +74,10 @@ public class Util {
   /**
    * @since 6.0
    */
-  public static Framework addFramework(DeviceConnector connector, IProgressMonitor monitor) throws CoreException {
+  public static Framework addFramework(DeviceConnector connector, String identifier, IProgressMonitor monitor)
+      throws CoreException {
     boolean autoConnectEnabled = FrameworkPreferencesPage.isAutoConnectEnabled();
-    String fwName = FrameworkConnectorFactory.generateFrameworkName(connector.getProperties());
+    String fwName = FrameworkConnectorFactory.generateFrameworkName(connector.getProperties(), identifier);
     FrameworkImpl fw = new FrameworkImpl(fwName, true);
     try {
       if (!connector.getVMManager().isVMActive()) {

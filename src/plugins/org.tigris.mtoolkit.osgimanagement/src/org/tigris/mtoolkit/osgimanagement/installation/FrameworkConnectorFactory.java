@@ -172,7 +172,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
     job.schedule();
   }
 
-  public static String generateFrameworkName(Dictionary connProps) {
+  public static String generateFrameworkName(Dictionary connProps, String identifier) {
     Hashtable frameWorkMap = new Hashtable();
     FrameworkImpl fws[] = FrameWorkView.getFrameworks();
     if (fws != null) {
@@ -184,6 +184,9 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
     Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
     String defaultFWName = Messages.new_framework_default_name + " (" + connProps.get(DeviceConnector.TRANSPORT_TYPE)
         + "=" + connProps.get(DeviceConnector.TRANSPORT_ID) + ")";
+    if (identifier != null) {
+      defaultFWName += " (" + identifier + ")";
+    }
     String frameWorkName = defaultFWName;
     String suffix = " ";
     if (ip != null) {
