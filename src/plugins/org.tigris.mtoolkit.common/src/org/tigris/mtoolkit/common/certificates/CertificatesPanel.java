@@ -59,13 +59,6 @@ public final class CertificatesPanel {
     this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
   }
 
-  /**
-   * @since 6.0
-   */
-  public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, boolean isComposite) {
-    this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH, isComposite);
-  }
-
   public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style, boolean isComposite) {
     if (isComposite) {
       signContentGroup = new Composite(parent, SWT.NONE);
