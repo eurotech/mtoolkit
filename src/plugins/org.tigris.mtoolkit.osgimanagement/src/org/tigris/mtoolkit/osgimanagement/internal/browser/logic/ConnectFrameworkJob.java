@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,8 +30,8 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
@@ -201,9 +203,17 @@ public final class ConnectFrameworkJob extends Job {
        * @see java.lang.Runnable#run()
        */
       public void run() {
-        String[] buttons = {
+        File[] iagentFile = FrameworkPlugin.getIAgentBundles();
+        String[] buttons = null;
+        if (iagentFile == null) {
+          buttons = new String[] {
+              Messages.close_button_label
+          };
+        } else {
+          buttons = new String[] {
             Messages.close_button_label, Messages.get_iagent_button_label
-        };
+          };
+        }
         String message = Messages.connection_failed;
         if (e != null) {// add cause for connection failed
           message += "\nCause: " + e.getMessage();
@@ -214,48 +224,60 @@ public final class ConnectFrameworkJob extends Job {
           FrameworkPlugin.error(e);
         }
         message += "\n\n" + Messages.rcp_bundle_missing_message;
+        if (iagentFile != null) {
+          message += Messages.get_missing_bundle_message;
+        }
         MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), Messages.rcp_bundle_missing_title, null,
             message, MessageDialog.INFORMATION, buttons, 0);
         dialog.setBlockOnOpen(true);
         dialog.open();
         if (dialog.getReturnCode() == 1) {
           // get IAgent button has been selected
-          InputStream iagentInput = FrameworkPlugin.getIAgentBundleAsStream();
-          OutputStream output = null;
+          FileInputStream rpcStream = null;
           try {
-            if (iagentInput == null) {
-              // TODO: Add dialog here
+            if (iagentFile == null) {
               return;
             }
 
-            FileDialog saveDialog = new FileDialog(display.getActiveShell(), SWT.SAVE);
-            saveDialog.setText(Messages.save_as_dialog_title);
-            String[] filterExt = {
-              "*.jar"}; //$NON-NLS-1$
-            saveDialog.setFilterExtensions(filterExt);
-            // TODO: initial filename setting doesn't work on Mac OS
-            // X
-            saveDialog.setFileName("iagent.rpc.jar");
-            String path = saveDialog.open();
+            DirectoryDialog dirDialog = new DirectoryDialog(display.getActiveShell(), SWT.SAVE);
+            dirDialog.setText(Messages.save_as_dialog_title);
+            String path = dirDialog.open();
             if (path == null) {
               return;
             }
-            output = new FileOutputStream(path);
-
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024];
-
-            while ((bytesRead = iagentInput.read(buffer)) != -1) {
-              output.write(buffer, 0, bytesRead);
-            }
-
-          } catch (IOException e1) {
+            path += File.separator;
+            rpcStream = new FileInputStream(iagentFile[0]);
+            saveFile(path + "iagent.rpc.jar", rpcStream);
+          } catch (IOException ex) {
             StatusManager.getManager().handle(
-                Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle", e1));
+                Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle(s)", ex));
           } finally {
-            FileUtils.close(output);
-            FileUtils.close(iagentInput);
+            FileUtils.close(rpcStream);
           }
+        }
+      }
+
+      private void saveFile(String filePath, InputStream input) {
+        OutputStream output = null;
+        try {
+          File file = new File(filePath);
+          if (file.exists()) {
+            boolean replaceFile = MessageDialog.openQuestion(null, Messages.confirm_replace_title,
+                NLS.bind(Messages.error_file_already_exist, file.toString()));
+            if (replaceFile) {
+              int bytesRead = 0;
+              byte[] buffer = new byte[1024];
+              output = new FileOutputStream(file);
+              while ((bytesRead = input.read(buffer)) != -1) {
+                output.write(buffer, 0, bytesRead);
+              }
+            }
+          }
+        } catch (IOException ex) {
+          StatusManager.getManager().handle(
+              Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle " + filePath, ex));
+        } finally {
+          FileUtils.close(output);
         }
       }
     });

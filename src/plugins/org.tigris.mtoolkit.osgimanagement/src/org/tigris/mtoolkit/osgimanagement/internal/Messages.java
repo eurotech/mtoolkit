@@ -50,6 +50,7 @@ public final class Messages extends NLS {
   public static String        bundle_properties_title;
   public static String        connecting_operation_title;
   public static String        preparing_operation_title;
+  public static String        confirm_replace_title;
 
   public static String        new_framework_default_name;
   public static String        root_element_name;
@@ -108,6 +109,7 @@ public final class Messages extends NLS {
 
   public static String        rcp_bundle_missing_title;
   public static String        rcp_bundle_missing_message;
+  public static String        get_missing_bundle_message;
   public static String        get_iagent_button_label;
   public static String        save_as_dialog_title;
 
@@ -129,6 +131,8 @@ public final class Messages extends NLS {
   public static String        use_activation_policy_tooltip;
 
   public static String        show_skipped_system_bundles_tooltip;
+
+  public static String        error_file_already_exist;
 
   /**
    * These are messages which fit to IAgentException error codes used though

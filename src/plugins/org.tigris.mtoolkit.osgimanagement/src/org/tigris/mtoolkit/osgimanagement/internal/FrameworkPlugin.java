@@ -11,9 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -27,7 +25,6 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
@@ -35,8 +32,9 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory
 public final class FrameworkPlugin extends AbstractUIPlugin {
   private static FrameworkPlugin instance      = null;
 
-  public static final String     PLUGIN_ID     = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
-  public static final String     IAGENT_RPC_ID = "org.tigris.mtoolkit.iagent.rpc";
+  public static final String     PLUGIN_ID         = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
+  public static final String     IAGENT_RPC_ID     = "org.tigris.mtoolkit.iagent.rpc";
+
 
   public static String           fileDialogLastSelection;
 
@@ -109,40 +107,25 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     return new File(statePath.toFile(), name);
   }
 
-  public static InputStream getIAgentBundleAsStream() {
+  public static File[] getIAgentBundles() {
     Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
-    Bundle selectedIAgent = null;
-    String selectedVersion = null;
+    Bundle selectedIAgentRpc = null;
     for (int i = 0; i < bundles.length; i++) {
       Bundle bundle = bundles[i];
       if (IAGENT_RPC_ID.equals(bundle.getSymbolicName())) {
-        @SuppressWarnings("cast")
-        String version = (String) bundle.getHeaders("").get(Constants.BUNDLE_VERSION);
-        if (version == null) {
-          if (selectedVersion == null) {
-            // if the iagent don't have a version
-            // use the bundle with highest ID
-            selectedIAgent = bundle;
-          }
-        } else {
-          if (selectedVersion == null || version.compareTo(selectedVersion) >= 0) {
-            // if we have a version
-            // we want the bundle with highest version and highest
-            // ID
-            selectedIAgent = bundle;
-            selectedVersion = version;
-          }
-        }
+        selectedIAgentRpc = bundle;
       }
     }
-    if (selectedIAgent != null) {
+    if (selectedIAgentRpc != null) {
       try {
-        File bundleFile = FileLocator.getBundleFile(selectedIAgent);
+        File bundleFile = FileLocator.getBundleFile(selectedIAgentRpc);
         if (bundleFile.isFile()) {
-          return new FileInputStream(bundleFile);
+          return new File[] {
+            bundleFile
+          };
         }
       } catch (IOException e) {
-        getDefault().getLog().log(Util.newStatus(IStatus.ERROR, "Failed to find IAgent RPC bundle", e));
+        getDefault().getLog().log(Util.newStatus(IStatus.ERROR, "Failed to find IAgent bundle(s)", e));
       }
     }
     return null;
