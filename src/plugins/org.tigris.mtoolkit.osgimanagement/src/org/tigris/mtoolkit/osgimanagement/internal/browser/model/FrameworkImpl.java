@@ -548,14 +548,13 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         Model bundles[] = children[j].getChildren();
         for (int k = 0; k < bundles.length; k++) {
           if (((Bundle) bundles[k]).getID() == id) {
+            children[j].removeElement(bundles[k]);
             if (j == 0) {
               servicesViewVector.removeElementAt(i);
               removeElement(objClass);
             } else {
               if (children[j].getChildren().length == 0) {
                 objClass.removeElement(children[j]);
-              } else {
-                children[j].removeElement(bundles[k]);
               }
             }
             break;
