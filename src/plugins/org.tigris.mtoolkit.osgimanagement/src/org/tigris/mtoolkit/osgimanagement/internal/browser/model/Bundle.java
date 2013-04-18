@@ -38,6 +38,7 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
   public static final String  OVR_ACTIVE_ICON       = "ovr_active.gif";                 //$NON-NLS-1$
   public static final String  OVR_RESOLVED_ICON     = "ovr_resolved.gif";               //$NON-NLS-1$
   public static final String  OVR_SIGNED_ICON       = "ovr_signed2.gif";                //$NON-NLS-1$
+  public static final int     ICON_WIDTH            = 16;
 
   // bundle types
   public static final int     BUNDLE_TYPE_FRAGMENT  = RemoteBundle.BUNDLE_TYPE_FRAGMENT;
@@ -57,6 +58,7 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
   private String              category;
   private ImageData           iconData;
   private Image               icon;
+  private Image               oldIcon;
 
   public Bundle(String name, RemoteBundle rBundle, int state, int type, String category, String version) throws IAgentException {
     super(name);
@@ -156,7 +158,7 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
       version = rBundle.getVersion();
       iconData = null;
       if (icon != null) {
-        icon.dispose();
+        oldIcon = icon;
         icon = null;
       }
       isSigned = rBundle.isBundleSigned();
@@ -286,6 +288,10 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     }
     Image baseIcon = new Image(PlatformUI.getWorkbench().getDisplay(), iconData);
     icon = new DecorationOverlayIcon(baseIcon, overlay, IDecoration.TOP_RIGHT).createImage();
+    if (oldIcon != null) {
+      oldIcon.dispose();
+      oldIcon = null;
+    }
     baseIcon.dispose();
     return icon;
   }
@@ -306,6 +312,9 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
       }
       is = new BufferedInputStream(is);
       iconData = new ImageData(is);
+      if (iconData.width != ICON_WIDTH) {
+        iconData = iconData.scaledTo(ICON_WIDTH, ICON_WIDTH);
+      }
       return iconData;
     } catch (IAgentException e) {
     } catch (BundleException e) {
@@ -321,7 +330,6 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
   }
 
   private String getIconPath() throws IAgentException, BundleException {
-    // TODO add support for big icons by scaling them
     String iconHeader = rBundle.getHeader(BUNDLE_ICON_HEADER, null);
     ManifestElement[] elements = null;
     if (iconHeader != null) {
@@ -330,9 +338,19 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     if (elements == null) {
       return null;
     }
+    String noSize = null;
+    String smallerSize = null;
+    int smaller = 0;
+    String biggerSize = null;
+    int bigger = Integer.MAX_VALUE;
     for (int i = 0; i < elements.length; i++) {
-      String sizeAttr = elements[i].getAttribute("size");
+      ManifestElement manifestEl = elements[i];
+      String value = manifestEl.getValue();
+      String sizeAttr = manifestEl.getAttribute("size");
       if (sizeAttr == null) {
+        if (noSize == null) {
+          noSize = value;
+        }
         continue;
       }
       int size;
@@ -341,11 +359,26 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
       } catch (NumberFormatException e) {
         continue;
       }
-      if (size == 16) {
-        return elements[i].getValue();
+      if (size == ICON_WIDTH) {
+        return value;
+      } else if (size < ICON_WIDTH) {
+        if (smaller < size) {
+          smaller = size;
+          smallerSize = value;
+        }
+      } else if (size > ICON_WIDTH) {
+        if (bigger > size) {
+          bigger = size;
+          biggerSize = value;
+        }
       }
     }
-    return null;
+    if (biggerSize != null) {
+      return biggerSize;
+    } else if (smallerSize != null) {
+      return smallerSize;
+    }
+    return noSize;
   }
 
   public boolean isSigned() {
@@ -357,6 +390,10 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     if (icon != null) {
       icon.dispose();
       icon = null;
+    }
+    if (oldIcon != null) {
+      oldIcon.dispose();
+      oldIcon = null;
     }
   }
 }
