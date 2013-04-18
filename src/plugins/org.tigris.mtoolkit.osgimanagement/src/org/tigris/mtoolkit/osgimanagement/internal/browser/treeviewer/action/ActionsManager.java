@@ -159,7 +159,7 @@ public final class ActionsManager {
   }
 
   public static void stopBundleAction(Bundle bundle) {
-    if (bundle.getID() == 23) {
+    if (bundle.getID() == 0) {
       final MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), "Stop bundle", null, NLS.bind(
           Messages.stop_system_bundle, bundle.getName()), MessageDialog.QUESTION, new String[] {
           "Continue", "Cancel"
