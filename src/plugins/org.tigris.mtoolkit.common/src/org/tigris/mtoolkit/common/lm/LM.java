@@ -36,7 +36,7 @@ public final class LM {
     verify(monitor, Collections.EMPTY_MAP);
   }
 
-  public static void verify(IProgressMonitor monitor, Map args) throws CoreException {
+  public static synchronized void verify(IProgressMonitor monitor, Map args) throws CoreException {
     if (lcl == null) {
       initialize();
     }
