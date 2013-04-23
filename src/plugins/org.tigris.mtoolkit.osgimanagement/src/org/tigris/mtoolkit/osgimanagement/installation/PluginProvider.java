@@ -182,7 +182,7 @@ public final class PluginProvider implements InstallationItemProvider {
      * This method checks for required bundles for specified plugin missing on
      * target framework. A dialog with missing bundles is shown to user to
      * select and install necessary bundles.
-     * 
+     *
      * @param framework
      *          - target framework
      * @param bundlesToInstall
@@ -195,7 +195,7 @@ public final class PluginProvider implements InstallationItemProvider {
       }
 
       if (!framework.isConnected()) {
-        return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Connection to framework was lost.");
+        return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Connection to framework was lost.");
       }
       // find missing bundle dependencies
       BundleDescription descr = pluginBase.getBundleDescription();
@@ -205,7 +205,7 @@ public final class PluginProvider implements InstallationItemProvider {
           path = " for: " + pluginBase.getUnderlyingResource().getProject().getName();
         } catch (Throwable t) {
         }
-        return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Missing bundle description" + path);
+        return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Missing bundle description" + path);
       }
       BundleDescription[] required = descr.getResolvedRequires();
       final Vector dependencies = new Vector();
@@ -445,7 +445,7 @@ public final class PluginProvider implements InstallationItemProvider {
         PluginItem item = items.get(i);
         String exportLocation = item.getLocation();
         if (exportLocation == null || !(file[i] = new File(exportLocation)).exists()) {
-          return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Plugin is not exported properly.");
+          return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Plugin is not exported properly.");
         }
         if (properties != null && "Dalvik".equalsIgnoreCase((String) properties.get("jvm.name"))
             && !AndroidUtils.isConvertedToDex(file[i])) {
@@ -465,7 +465,7 @@ public final class PluginProvider implements InstallationItemProvider {
       }
     } catch (IOException ioe) {
       monitor.done();
-      return new Status(IStatus.ERROR, FrameworkPlugin.getDefault().getId(), "Could not sign plugins", ioe);
+      return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Could not sign plugins", ioe);
     }
     return Status.OK_STATUS;
   }

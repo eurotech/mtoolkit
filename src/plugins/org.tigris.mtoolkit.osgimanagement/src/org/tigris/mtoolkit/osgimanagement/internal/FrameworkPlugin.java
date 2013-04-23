@@ -12,8 +12,6 @@ package org.tigris.mtoolkit.osgimanagement.internal;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
@@ -32,9 +30,9 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory
 public final class FrameworkPlugin extends AbstractUIPlugin {
   private static FrameworkPlugin instance      = null;
 
-  public static final String     PLUGIN_ID         = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
-  public static final String     IAGENT_RPC_ID     = "org.tigris.mtoolkit.iagent.rpc";
+  public static final String     PLUGIN_ID     = "org.tigris.mtoolkit.osgimanagement"; //$NON-NLS-1$
 
+  public static final String     IAGENT_RPC_ID = "org.tigris.mtoolkit.iagent.rpc";
 
   public static String           fileDialogLastSelection;
 
@@ -45,11 +43,9 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     }
   }
 
-  // Returns default instance
-  public static FrameworkPlugin getDefault() {
-    return instance;
-  }
-
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+   */
   @Override
   public void start(BundleContext context) throws Exception {
     super.start(context);
@@ -59,6 +55,9 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+   */
   @Override
   public void stop(BundleContext context) throws Exception {
     FrameWorkView.saveModel();
@@ -67,8 +66,9 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     super.stop(context);
   }
 
-  public String getId() {
-    return PLUGIN_ID;
+  // Returns default instance
+  public static FrameworkPlugin getDefault() {
+    return instance;
   }
 
   public static void error(IAgentException e) {
@@ -83,22 +83,12 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
   }
 
-  @Override
-  protected void initializeImageRegistry(ImageRegistry reg) {
-    super.initializeImageRegistry(reg);
-  }
-
   public static void log(IStatus status) {
     FrameworkPlugin fwPlugin = getDefault();
     if (fwPlugin == null) {
-      System.out.println(formatStatus(status));
       return;
     }
     ILog fwLog = fwPlugin.getLog();
-    if (fwLog == null) {
-      System.out.println(formatStatus(status));
-      return;
-    }
     fwLog.log(status);
   }
 
@@ -131,15 +121,11 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     return null;
   }
 
-  private static String formatStatus(IStatus status) {
-    String statusText = status.toString();
-    if (status.getException() == null) {
-      return statusText;
-    }
-    StringWriter swriter = new StringWriter();
-    PrintWriter pwriter = new PrintWriter(swriter);
-    status.getException().printStackTrace(pwriter);
-    pwriter.flush();
-    return statusText + System.getProperty("line.separator") + swriter.toString();
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeImageRegistry(org.eclipse.jface.resource.ImageRegistry)
+   */
+  @Override
+  protected void initializeImageRegistry(ImageRegistry reg) {
+    super.initializeImageRegistry(reg);
   }
 }

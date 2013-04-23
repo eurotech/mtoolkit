@@ -262,7 +262,7 @@ public final class BrowserErrorHandler {
     if (text == null) {
       text = ""; //$NON-NLS-1$
     }
-    final IStatus status = new Status(severity, plugin.getId(), 0, text, t);
+    final IStatus status = new Status(severity, FrameworkPlugin.PLUGIN_ID, 0, text, t);
     log.log(status);
   }
 }
