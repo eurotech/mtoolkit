@@ -54,7 +54,6 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemotePackage;
 import org.tigris.mtoolkit.osgimanagement.Util;
-import org.tigris.mtoolkit.osgimanagement.installation.PluginProvider.PluginItem;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -596,25 +595,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
      */
     public boolean processItems(List<InstallationItem> items, List<RemotePackage> installed, Map preparationProps,
         Framework framework, IProgressMonitor monitor) throws CoreException {
-      SubMonitor processMonitor = SubMonitor.convert(monitor, items.size() + 1);
+      SubMonitor processMonitor = SubMonitor.convert(monitor, 1);
       processMonitor.setTaskName("Installing bundles...");
-      processMonitor.worked(1);
-      Boolean checkDepends = (Boolean) preparationProps.get(InstallationConstants.CHECK_DEPENDENCIES);
-      if (checkDepends == null || checkDepends.booleanValue()) {
-        List<InstallationItem> dependencies = new ArrayList<InstallationItem>();
-        for (InstallationItem item : items) {
-          if (item instanceof PluginItem) {
-            IStatus status = ((PluginItem) item).checkAdditionalBundles((FrameworkImpl) framework,
-                processMonitor.newChild(1), dependencies, preparationProps);
-            if (status != null) {
-              if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
-                throw new CoreException(status);
-              }
-            }
-          }
-        }
-        items.addAll(dependencies);
-      }
       monitor.done();
       return true;
     }

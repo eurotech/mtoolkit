@@ -12,14 +12,13 @@ package org.tigris.mtoolkit.osgimanagement.internal;
 
 public interface IHelpContextIds {
 
-	public static final String PREFIX = "org.tigris.mtoolkit.";
+  public static final String PREFIX             = "org.tigris.mtoolkit.";
 
-	public static final String PROPERTY_FRAMEWORK = PREFIX + "property_framework_context"; //$NON-NLS-1$
-	public static final String FW_ADD_REMOVE = PREFIX + "fw_add_remove"; //$NON-NLS-1$
-	public static final String FRAMEWORKS_VIEW = PREFIX + "frameworks_view_context"; //$NON-NLS-1$
-	public static final String PROPERTY_BUNDLE = PREFIX + "property_bundle_context"; //$NON-NLS-1$
-	public static final String PROPERTY_SERVICE = PREFIX + "property_service_context"; //$NON-NLS-1$
+  public static final String PROPERTY_FRAMEWORK = PREFIX + "property_framework_context"; //$NON-NLS-1$
+  public static final String FW_ADD_REMOVE      = PREFIX + "fw_add_remove";             //$NON-NLS-1$
+  public static final String FRAMEWORKS_VIEW    = PREFIX + "frameworks_view_context";   //$NON-NLS-1$
+  public static final String PROPERTY_BUNDLE    = PREFIX + "property_bundle_context";   //$NON-NLS-1$
+  public static final String PROPERTY_SERVICE   = PREFIX + "property_service_context";  //$NON-NLS-1$
 
-	public static final String DEPEND_SELECT_DIALOG = PREFIX + "depend_select_dialog"; //$NON-NLS-1$
-	public static final String FW_SELECT_DIALOG = PREFIX + "fw_select_dialog"; //$NON-NLS-1$
+  public static final String FW_SELECT_DIALOG   = PREFIX + "fw_select_dialog";          //$NON-NLS-1$
 }

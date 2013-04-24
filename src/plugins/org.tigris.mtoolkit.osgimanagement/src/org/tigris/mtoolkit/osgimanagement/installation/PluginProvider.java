@@ -15,11 +15,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -30,15 +27,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.service.resolver.BundleDescription;
 import org.eclipse.pde.core.IBaseModel;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.core.plugin.PluginRegistry;
 import org.eclipse.pde.internal.core.natures.PDE;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.Version;
 import org.tigris.mtoolkit.common.PDEUtils;
 import org.tigris.mtoolkit.common.android.AndroidUtils;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
@@ -46,10 +39,7 @@ import org.tigris.mtoolkit.common.export.PluginExportManager;
 import org.tigris.mtoolkit.common.images.UIResources;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
-import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 /**
  * @since 5.0
@@ -176,99 +166,6 @@ public final class PluginProvider implements InstallationItemProvider {
      */
     public IPluginModelBase getPlugin() {
       return pluginBase;
-    }
-
-    /**
-     * This method checks for required bundles for specified plugin missing on
-     * target framework. A dialog with missing bundles is shown to user to
-     * select and install necessary bundles.
-     *
-     * @param framework
-     *          - target framework
-     * @param bundlesToInstall
-     * @return IStatus
-     */
-    IStatus checkAdditionalBundles(FrameworkImpl framework, IProgressMonitor monitor, List bundlesToInstall,
-        Map preparationProps) {
-      if (monitor.isCanceled()) {
-        return Status.CANCEL_STATUS;
-      }
-
-      if (!framework.isConnected()) {
-        return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Connection to framework was lost.");
-      }
-      // find missing bundle dependencies
-      BundleDescription descr = pluginBase.getBundleDescription();
-      if (descr == null) {
-        String path = "";
-        try {
-          path = " for: " + pluginBase.getUnderlyingResource().getProject().getName();
-        } catch (Throwable t) {
-        }
-        return new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, "Missing bundle description" + path);
-      }
-      BundleDescription[] required = descr.getResolvedRequires();
-      final Vector dependencies = new Vector();
-      for (int i = 0; i < required.length; i++) {
-        String symbName = required[i].getSymbolicName();
-        Version ver = required[i].getVersion();
-        Set ids = framework.getBundlesKeys();
-        Iterator iter = ids.iterator();
-        boolean found = false;
-        while (iter.hasNext()) {
-          Bundle bundle = framework.findBundle(iter.next());
-          try {
-            if (bundle.getName().equals(symbName) && bundle.getVersion().compareTo(ver.toString()) >= 0) {
-              found = true;
-              break;
-            }
-          } catch (IAgentException e) {
-            FrameworkPlugin.error(e);
-          }
-        }
-        if (!found) {
-          dependencies.addElement(required[i]);
-        }
-      }
-
-      // ask user which dependencies to install
-      if (dependencies.size() > 0) {
-        final boolean result[] = new boolean[1];
-        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-          public void run() {
-            DependenciesSelectionDialog dependenciesDialog = new DependenciesSelectionDialog(Display.getDefault()
-                .getActiveShell(), dependencies);
-            dependenciesDialog.open();
-            if (dependenciesDialog.getReturnCode() == Window.OK) {
-              Object[] selected = dependenciesDialog.getSelected();
-              dependencies.removeAllElements();
-              for (int i = 0; i < selected.length; i++) {
-                dependencies.addElement(selected[i]);
-              }
-            } else {
-              result[0] = true;
-            }
-          }
-        });
-        if (result[0]) {
-          return Status.CANCEL_STATUS;
-        }
-        // install dependencies
-        for (int i = 0; i < dependencies.size(); i++) {
-          descr = (BundleDescription) dependencies.elementAt(i);
-          final InstallationItem installationItem = getInstallationItem(descr);
-          if (installationItem != null) {
-            IStatus preparationStatus = installationItem.prepare(monitor, preparationProps);
-            if (preparationStatus != null) {
-              if (preparationStatus.matches(IStatus.ERROR) || preparationStatus.matches(IStatus.CANCEL)) {
-                return preparationStatus;
-              }
-            }
-            bundlesToInstall.add(installationItem);
-          }
-        }
-      }
-      return Status.OK_STATUS;
     }
   }
 

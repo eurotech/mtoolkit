@@ -12,17 +12,16 @@ package org.tigris.mtoolkit.common.installation;
 
 public final class InstallationConstants {
   //Installation item processor properties/arguments
-  public static final String TESTING_SUPPORTED = "testing_supported"; //$NON-NLS-1$
+  public static final String TESTING_SUPPORTED   = "testing_supported";         //$NON-NLS-1$
   public static final String AUTO_START_ITEMS    = "auto_start_items";          //$NON-NLS-1$
   public static final String AUTO_UPDATE_ITEMS   = "auto_update_items";         //$NON-NLS-1$
-  public static final String CHECK_DEPENDENCIES = "check_dependencies"; //$NON-NLS-1$
 
   // Signing contents
-  public static final String CERT_ALIAS = "certificate-alias"; //$NON-NLS-1$
+  public static final String CERT_ALIAS          = "certificate-alias";         //$NON-NLS-1$
   public static final String CERT_STORE_LOCATION = "certificate-store-location"; //$NON-NLS-1$
-  public static final String CERT_STORE_TYPE = "certificate-store-type"; //$NON-NLS-1$
-  public static final String CERT_STORE_PASS = "certificate-store-pass"; //$NON-NLS-1$
-  public static final String CERT_KEY_PASS = "certificate-key-pass"; //$NON-NLS-1$
+  public static final String CERT_STORE_TYPE     = "certificate-store-type";    //$NON-NLS-1$
+  public static final String CERT_STORE_PASS     = "certificate-store-pass";    //$NON-NLS-1$
+  public static final String CERT_KEY_PASS       = "certificate-key-pass";      //$NON-NLS-1$
 
   private InstallationConstants() {
   }
