@@ -20,11 +20,12 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.tigris.mtoolkit.common.PluginUtilities;
 
-public class DPPUtilities {
+public final class DPPUtilities {
   private static final String POINT_STRING = ".";                                 //$NON-NLS-1$
-  public static boolean       DEBUG        = Boolean.getBoolean("dpeditor.debug");
+  private static final boolean DEBUG        = "true".equals(Platform.getDebugOption("org.tigris.mtoolkit.dpeditor/debug")); //$NON-NLS-1$
 
   public static void debug(String s) {
     if (DEBUG) {

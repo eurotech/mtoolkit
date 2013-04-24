@@ -1,0 +1,4 @@
+# Debugging options for the org.tigris.mtoolkit.dpeditor plugin
+
+# Turns on/off debugging of DP Editor plugin
+org.tigris.mtoolkit.dpeditor/debug=false
