@@ -25,14 +25,8 @@ import org.tigris.mtoolkit.maven.internal.images.ImageHolder;
 /**
  * The activator class controls the plug-in life cycle
  */
-public class MavenCorePlugin extends AbstractUIPlugin {
-
-  // The plug-in ID
-  public static final String PLUGIN_ID = "org.tigris.mtoolkit.maven"; //$NON-NLS-1$
-
-  // TODO: Move to Equinox Debug infrastructure
-  public static final boolean DEBUG = Boolean.getBoolean("mtoolkit.maven.debug");
-  private static final String DEBUG_TAG = "[Maven Core] ";
+public final class MavenCorePlugin extends AbstractUIPlugin {
+  public static final String     PLUGIN_ID = "org.tigris.mtoolkit.maven"; //$NON-NLS-1$
 
   // The shared instance
   private static MavenCorePlugin plugin;
@@ -91,21 +85,6 @@ public class MavenCorePlugin extends AbstractUIPlugin {
     return new CoreException(status);
   }
 
-  public static void debug(String message) { // NO_UCD
-    debug(message, null);
-  }
-
-  public static void debug(String message, Throwable t) {
-    if (!DEBUG) {
-      return;
-    }
-    System.out.println(DEBUG_TAG.concat(message));
-    if (t != null) {
-      // TODO: Add line prefix while dumping the stack trace
-      t.printStackTrace(System.out);
-    }
-  }
-
   public static IStatus newStatus(int severity, String message, Throwable t) {
     return new Status(severity, PLUGIN_ID, message, t);
   }
@@ -122,5 +101,4 @@ public class MavenCorePlugin extends AbstractUIPlugin {
   public static CoreException newException(int severity, int code, String message, Throwable t) { // NO_UCD
     return newException(newStatus(severity, code, message, t));
   }
-
 }

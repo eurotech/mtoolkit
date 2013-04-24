@@ -21,11 +21,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.common.images.UIResources;
 
-public class UtilitiesPlugin extends AbstractUIPlugin {
-  public static final String     PLUGIN_ID = "org.tigris.mtoolkit.common";               //$NON-NLS-1$
-
-  private static final boolean   DEBUG     = Boolean.getBoolean("mtoolkit.common.debug");
-  private static final String    DEBUG_TAG = "[Common] ";
+public final class UtilitiesPlugin extends AbstractUIPlugin {
+  public static final String     PLUGIN_ID = "org.tigris.mtoolkit.common"; //$NON-NLS-1$
 
   private static UtilitiesPlugin inst;
 
@@ -33,7 +30,7 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 
   /**
    * Creates the Utilities plugin and caches its default instance
-   * 
+   *
    * @param descriptor
    *          the plugin descriptor which the receiver is made from
    */
@@ -65,7 +62,7 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
 
   /**
    * Gets the plugin singleton.
-   * 
+   *
    * @return the default UtilitiesPlugin instance
    */
   public static UtilitiesPlugin getDefault() {
@@ -83,7 +80,7 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
   /**
    * Returns an image descriptor for the image file at the given plug-in
    * relative path
-   * 
+   *
    * @param path
    *          the path
    * @return the image descriptor
@@ -129,27 +126,6 @@ public class UtilitiesPlugin extends AbstractUIPlugin {
    */
   public static CoreException newException(int severity, String message, Throwable t) {
     return new CoreException(newStatus(severity, message, t));
-  }
-
-  /**
-   * @since 5.0
-   */
-  public static void debug(String message) { // NO_UCD
-    debug(message, null);
-  }
-
-  /**
-   * @since 5.0
-   */
-  public static void debug(String message, Throwable t) { // NO_UCD
-    if (!DEBUG) {
-      return;
-    }
-    System.out.println(DEBUG_TAG.concat(message));
-    if (t != null) {
-      // TODO: Add line prefix while dumping the stack trace
-      t.printStackTrace(System.out);
-    }
   }
 
   /**
