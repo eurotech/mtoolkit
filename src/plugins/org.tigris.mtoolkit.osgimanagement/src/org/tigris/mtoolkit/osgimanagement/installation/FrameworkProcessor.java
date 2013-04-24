@@ -595,8 +595,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
      */
     public boolean processItems(List<InstallationItem> items, List<RemotePackage> installed, Map preparationProps,
         Framework framework, IProgressMonitor monitor) throws CoreException {
-      SubMonitor processMonitor = SubMonitor.convert(monitor, 1);
-      processMonitor.setTaskName("Installing bundles...");
       monitor.done();
       return true;
     }
