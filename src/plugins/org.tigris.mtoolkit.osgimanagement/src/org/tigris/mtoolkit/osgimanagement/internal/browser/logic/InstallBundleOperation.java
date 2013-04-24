@@ -59,6 +59,7 @@ public final class InstallBundleOperation {
     RemoteBundle rBundle[] = null;
     ZipFile zip = null;
     InputStream zis = null;
+    final boolean autoUpdateBundles = FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled();
     try {
       int work = (int) bundle.length();
       monitor.beginTask(Messages.install_bundle, work);
@@ -93,7 +94,11 @@ public final class InstallBundleOperation {
         } else {
           rBundle = connector.getDeploymentManager().getBundles(symbolicName, null);
           if (rBundle != null) {
-            install[0] = true;
+            if (rBundle.length == 1 && autoUpdateBundles) {
+              update[0] = true;
+            } else {
+              install[0] = true;
+            }
           }
         }
       }
@@ -120,7 +125,7 @@ public final class InstallBundleOperation {
         FileUtils.close(input);
         final Object rBundles[] = rBundle;
         int bundleIndex;
-        if (!install[0] && FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled()) {
+        if (!install[0] && autoUpdateBundles) {
           bundleIndex = 0;
         } else {
           bundleIndex = showUpdateBundleDialog(symbolicName, version, update, install, rBundles)[0];
