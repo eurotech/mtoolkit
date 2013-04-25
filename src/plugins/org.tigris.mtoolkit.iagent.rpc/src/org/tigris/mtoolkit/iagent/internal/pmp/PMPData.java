@@ -50,18 +50,27 @@ class PMPData extends ObjectInputStream {
 		super(is);
 	}
 
-	protected Class resolveClass(java.io.ObjectStreamClass osc) throws IOException, ClassNotFoundException {
-		return clazz.getName().equals(osc.getName()) ? clazz : loader.loadClass(osc.getName());
-	}
+  protected Class resolveClass(java.io.ObjectStreamClass osc) throws IOException, ClassNotFoundException {
+    if (clazz.getName().equals(osc.getName())) {
+      return clazz;
+    }
+    try {
+      return loader.loadClass(osc.getName());
+    } catch (ClassNotFoundException e) {
+      return super.resolveClass(osc);
+    }
+  }
 
 	/** writes a String in the OutputStream */
 	protected static void writeString(String s, OutputStream os) throws IOException {
-		if (s == null)
-			s = new String();
+		if (s == null) {
+      s = new String();
+    }
 		byte[] b = s.getBytes();
 		writeInt(b.length, os);
-		if (b.length > 0)
-			os.write(b);
+		if (b.length > 0) {
+      os.write(b);
+    }
 	}
 
 	/** writes an int in the OutputStream */
@@ -146,12 +155,13 @@ class PMPData extends ObjectInputStream {
 					writeInt(size, os);
 					for (int i = 0; i < size; i++) {
 						Object difObj = Array.get(obj, i);
-						if (difObj == null)
-							writeObject(difObj, os, false);
-						else if (difObj.getClass().getName().equals(className))
-							writeObject(difObj, os, false);
-						else
-							writeObject(difObj, os, true);
+						if (difObj == null) {
+              writeObject(difObj, os, false);
+            } else if (difObj.getClass().getName().equals(className)) {
+              writeObject(difObj, os, false);
+            } else {
+              writeObject(difObj, os, true);
+            }
 					}
 					return;
 				}
@@ -167,25 +177,25 @@ class PMPData extends ObjectInputStream {
 		} else if (obj instanceof Dictionary) {
 			writeDictionary((Dictionary) obj, os);
 		} else if (obj instanceof Serializable) {
-			if (clazz == String.class)
-				writeString((String) obj, os);
-			else if (clazz == Long.class)
-				writeLong(((Long) obj).longValue(), os);
-			else if (clazz == Short.class)
-				writeShort(((Short) obj).shortValue(), os);
-			else if (clazz == Character.class)
-				writeChar(((Character) obj).charValue(), os);
-			else if (clazz == Byte.class)
-				os.write(((Byte) obj).byteValue());
-			else if (clazz == Float.class)
-				writeInt(Float.floatToIntBits(((Float) obj).floatValue()), os);
-			else if (clazz == Double.class)
-				writeLong(Double.doubleToLongBits(((Double) obj).doubleValue()), os);
-			else if (clazz == Boolean.class)
-				os.write(((Boolean) obj).booleanValue() ? 1 : 0);
-			else if (clazz == Integer.class)
-				writeInt(((Integer) obj).intValue(), os);
-			else {
+			if (clazz == String.class) {
+        writeString((String) obj, os);
+      } else if (clazz == Long.class) {
+        writeLong(((Long) obj).longValue(), os);
+      } else if (clazz == Short.class) {
+        writeShort(((Short) obj).shortValue(), os);
+      } else if (clazz == Character.class) {
+        writeChar(((Character) obj).charValue(), os);
+      } else if (clazz == Byte.class) {
+        os.write(((Byte) obj).byteValue());
+      } else if (clazz == Float.class) {
+        writeInt(Float.floatToIntBits(((Float) obj).floatValue()), os);
+      } else if (clazz == Double.class) {
+        writeLong(Double.doubleToLongBits(((Double) obj).doubleValue()), os);
+      } else if (clazz == Boolean.class) {
+        os.write(((Boolean) obj).booleanValue() ? 1 : 0);
+      } else if (clazz == Integer.class) {
+        writeInt(((Integer) obj).intValue(), os);
+      } else {
 				ObjectOutputStream oos = new ObjectOutputStream(os);
 				oos.writeObject(obj);
 				oos.flush();
@@ -357,8 +367,9 @@ class PMPData extends ObjectInputStream {
 					os.write(zarr[i].booleanValue() ? 1 : 0);
 				}
 			}
-		} else
-			return false;
+		} else {
+      return false;
+    }
 		return true;
 	}
 
@@ -367,8 +378,9 @@ class PMPData extends ObjectInputStream {
 	/** reads a String from the InputStream */
 	protected static String readString(InputStream is, int maxLength) throws IOException {
 		int strlen = readInt(is);
-		if (strlen == 0)
-			return new String();
+		if (strlen == 0) {
+      return new String();
+    }
 		if (maxLength > 0 && strlen > maxLength) {
 			String errMsg = ERRMSG_LS + maxLength;
 			throw new IOException(errMsg);
@@ -404,15 +416,17 @@ class PMPData extends ObjectInputStream {
 
 	private static boolean checkFlag(InputStream is) throws IOException {
 		int nullflag = is.read();
-		if (nullflag == -1)
-			throw new IOException(ERRMSG1);
+		if (nullflag == -1) {
+      throw new IOException(ERRMSG1);
+    }
 		return (nullflag == 1);
 	}
 
 	protected static Object readObject(Class clazz, ClassLoader loader, PMPInputStream is, String newName, int maxSize,
 					int strLen, String prevName) throws IOException {
-		if (!checkFlag(is))
-			return null;
+		if (!checkFlag(is)) {
+      return null;
+    }
 		String className = new String();
 		try {
 			if (checkFlag(is)) {
@@ -420,10 +434,11 @@ class PMPData extends ObjectInputStream {
 			} else {
 				className = prevName;
 			}
-			if (newName != null)
-				if (newName.length() != 0) {
+			if (newName != null) {
+        if (newName.length() != 0) {
 					className = newName;
 				}
+      }
 		} catch (IOException ioExc) {
 			throw ioExc;
 		}
@@ -442,8 +457,9 @@ class PMPData extends ObjectInputStream {
 			className = className.substring(1, className.length() - 1);
 			if (className.startsWith(JAVA_LANG)) {
 				Object arr = readLangArray(className, size, is, strLen);
-				if (arr != null)
-					return arr;
+				if (arr != null) {
+          return arr;
+        }
 			}
 			if (clazz == null) {
 				if (loader != null) {
@@ -490,8 +506,9 @@ class PMPData extends ObjectInputStream {
 		}
 		if (className.equals(TYPES1[1]) || className.equals(TYPES2[1])) {
 			int b = is.read();
-			if (b == -1)
-				throw new IOException(ERRMSG1);
+			if (b == -1) {
+        throw new IOException(ERRMSG1);
+      }
 			return new Byte((byte) b);
 		}
 		if (className.equals(TYPES1[2]) || className.equals(TYPES2[2])) {
@@ -511,8 +528,9 @@ class PMPData extends ObjectInputStream {
 		}
 		if (className.equals(TYPES1[7]) || className.equals(TYPES2[7])) {
 			int b = is.read();
-			if (b == -1)
-				throw new IOException(ERRMSG1);
+			if (b == -1) {
+        throw new IOException(ERRMSG1);
+      }
 			return b == 1 ? Boolean.TRUE : Boolean.FALSE;
 		}
 
@@ -574,8 +592,9 @@ class PMPData extends ObjectInputStream {
 			int tmp = 0;
 			while (read < size) {
 				tmp = is.read(barr, read, size - read);
-				if (tmp == -1)
-					throw exc;
+				if (tmp == -1) {
+          throw exc;
+        }
 				read += tmp;
 			}
 			return barr;
@@ -613,8 +632,9 @@ class PMPData extends ObjectInputStream {
 			boolean[] zarr = new boolean[size];
 			for (int i = 0; i < size; i++) {
 				int b = is.read();
-				if (b == -1)
-					throw exc;
+				if (b == -1) {
+          throw exc;
+        }
 				zarr[i] = b == 1;
 			}
 			return zarr;
@@ -649,8 +669,9 @@ class PMPData extends ObjectInputStream {
 			for (int i = 0; i < size; i++) {
 				if (checkFlag(is)) {
 					int b = (byte) is.read();
-					if (b == -1)
-						throw new IOException(ERRMSG1);
+					if (b == -1) {
+            throw new IOException(ERRMSG1);
+          }
 					barr[i] = new Byte((byte) b);
 				}
 			}
@@ -700,22 +721,25 @@ class PMPData extends ObjectInputStream {
 			for (int i = 0; i < size; i++) {
 				if (checkFlag(is)) {
 					int b = is.read();
-					if (b == -1)
-						throw new IOException(ERRMSG1);
+					if (b == -1) {
+            throw new IOException(ERRMSG1);
+          }
 					zarr[i] = b == 1 ? Boolean.TRUE : Boolean.FALSE;
 				}
 			}
 			return zarr;
-		} else
-			return null;
+		} else {
+      return null;
+    }
 	}
 
 	/** reads a char from the InputStream */
 	protected static char readChar(InputStream is) throws IOException {
 		int ch1 = is.read();
 		int ch2 = is.read();
-		if ((ch1 | ch2) < 0)
-			throw new IOException(ERRMSG1);
+		if ((ch1 | ch2) < 0) {
+      throw new IOException(ERRMSG1);
+    }
 		return (char) ((ch1 << 8) + (ch2 << 0));
 	}
 
@@ -723,8 +747,9 @@ class PMPData extends ObjectInputStream {
 	protected static short readShort(InputStream is) throws IOException {
 		int ch1 = is.read();
 		int ch2 = is.read();
-		if ((ch1 | ch2) < 0)
-			throw new IOException(ERRMSG1);
+		if ((ch1 | ch2) < 0) {
+      throw new IOException(ERRMSG1);
+    }
 		return (short) ((ch1 << 8) + (ch2 << 0));
 	}
 
