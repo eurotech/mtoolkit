@@ -190,6 +190,10 @@
 				<exclude name="plugins/**/bin/**"/>
 				<exclude name="plugins/**/eclipse_compile/**"/>
 			</fileset>
+			<fileset dir="${testRepDirectory}">
+				<exclude name="plugins/**/bin/**"/>
+				<exclude name="plugins/**/eclipse_compile/**"/>
+			</fileset>
 		</copy>
 		<copy todir="${buildDirectory}/plugins">
 			<fileset dir="${docsDirectory}"/>
