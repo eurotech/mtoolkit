@@ -59,6 +59,10 @@ public final class CertificatesPanel {
     this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
   }
 
+  public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style) {
+    this(parent, horizontalSpan, verticalSpan, style, false);
+  }
+
   public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style, boolean isComposite) {
     if (isComposite) {
       signContentGroup = new Composite(parent, SWT.NONE);
@@ -66,12 +70,6 @@ public final class CertificatesPanel {
       signContentGroup = new Group(parent, SWT.NONE);
       ((Group) signContentGroup).setText(Messages.CertificatesPanel_signContentGroup);
     }
-    initContent(horizontalSpan, verticalSpan, style);
-  }
-
-  public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan, int style) {
-    signContentGroup = new Group(parent, SWT.NONE);
-    ((Group) signContentGroup).setText(Messages.CertificatesPanel_signContentGroup);
     initContent(horizontalSpan, verticalSpan, style);
   }
 
@@ -147,7 +145,7 @@ public final class CertificatesPanel {
   /**
    * Initializes the signing certificates with the given list of certificate ids
    * (of type String). This method could be called multiple times.
-   * 
+   *
    * @param signUids
    *          list with certificate ids or <code>null</code>
    */
