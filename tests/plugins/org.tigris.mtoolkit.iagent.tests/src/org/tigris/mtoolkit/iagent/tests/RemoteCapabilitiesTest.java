@@ -29,13 +29,13 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
   RemoteBundle                bundle;
   Map                         properties        = new Hashtable();
 
-  @Override
+
   protected void setUp() throws Exception {
     super.setUp();
     bundle = installBundle(TEST_CAP_BUNDLE);
   }
 
-  @Override
+
   protected void tearDown() throws Exception {
     try {
       if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {

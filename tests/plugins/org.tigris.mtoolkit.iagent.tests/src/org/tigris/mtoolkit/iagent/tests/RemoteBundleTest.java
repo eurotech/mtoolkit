@@ -23,13 +23,12 @@ public class RemoteBundleTest extends DeploymentTestCase {
 
   RemoteBundle bundle;
 
-  @Override
+
   protected void setUp() throws Exception {
     super.setUp();
     bundle = installBundle("test.bundle.b1_1.0.0.jar");
   }
 
-  @Override
   protected void tearDown() throws Exception {
     if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
       try {
@@ -203,7 +202,6 @@ public class RemoteBundleTest extends DeploymentTestCase {
 
     try {
       bundle.update(new InputStream() {
-        @Override
         public int read() throws IOException {
           return -1;
         }

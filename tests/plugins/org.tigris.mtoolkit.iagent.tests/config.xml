@@ -1,0 +1,84 @@
+<osgi-config xmlns:tree="http://www.prosyst.com/tee/tree"
+	tree:modelref="osgi-config">
+
+	<bundle tree:value="../bundles/fw.eventadmin.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+	<bundle tree:value="../bundles/osgimobile.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+	<bundle tree:value="../bundles/osgimobile.deploymentadmin.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+
+	<bundle tree:value="../bundles/osgimobile.autoconfig.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+	<bundle tree:value="../bundles/fw.swadmin.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+	
+    <bundle tree:value="../bundles/fw.swadmin.ext.bundle.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+	
+    <bundle tree:value="../bundles/osgimobile.swadmin.ext.deploymentpackage.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+
+	<bundle tree:value="../bundles/osgimobile.oatimpl.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+	<bundle tree:value="../bundles/iagent.rpc.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+	<bundle tree:value="../bundles/iagent.ext.rpc.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+
+	<bundle tree:value="../testcases/bundles/iagent.client.jar">
+		<action>install&amp;start</action>
+		<feature tree:value="loader.type">
+			<feature-value>jar</feature-value>
+		</feature>
+	</bundle>
+
+</osgi-config>

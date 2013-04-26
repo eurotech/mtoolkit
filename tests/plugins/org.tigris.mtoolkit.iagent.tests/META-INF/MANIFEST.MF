@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: IAgent tests
+Bundle-SymbolicName: org.tigris.mtoolkit.iagent.tests
+Bundle-Version: 1.0.0.qualifier
+Import-Package: junit.framework,
+ org.osgi.framework
+Require-Bundle: org.tigris.mtoolkit.iagent
+Export-Package: org.tigris.mtoolkit.iagent.tests
+Bundle-RequiredExecutionEnvironment: J2SE-1.4,
+ OSGi/Minimum-1.0
+TestCase-Data: /config.xml
+TestCase-Name: IAgent tests
+TestCase-Version: 1.0.0
+TFW-Name: JUnit
+TFW-Version: 3.8.1
+Target-Name: mBedded Server
+Target-Version: 7.0.0
+TestCase-Class:  org.tigris.mtoolkit.iagent.tests.AllTests
+
+
