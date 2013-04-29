@@ -12,12 +12,15 @@ package org.tigris.mtoolkit.osgimanagement.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -95,6 +98,19 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
   public static File getFile(String name) {
     IPath statePath = getDefault().getStateLocation();
     return new File(statePath.toFile(), name);
+  }
+
+  /** Returns an input stream to plug-in's embedded resource. */
+  public static InputStream getResourceStream(Path aPath) throws IOException {
+    if (instance == null) {
+      return FrameworkPlugin.class.getResourceAsStream(aPath.toPortableString());
+    } else {
+      URL resourceURL = FileLocator.find(instance.getBundle(), aPath, null);
+      if (resourceURL != null) {
+        return resourceURL.openStream();
+      }
+    }
+    return null;
   }
 
   public static File[] getIAgentBundles() {
