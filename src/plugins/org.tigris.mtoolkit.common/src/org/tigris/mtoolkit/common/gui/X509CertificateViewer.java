@@ -28,26 +28,23 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 /**
- * Certificate viewer, which mimics the way Firefox 3.5 shows the certificate information. Only part
- * of the properties of a given certificate is shown.
- * 
+ * Certificate viewer, which mimics the way Firefox 3.5 shows the certificate
+ * information. Only part of the properties of a given certificate is shown.
+ *
  */
-public class X509CertificateViewer {
-
-  private static final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
-
-  private Composite control;
-  private Label issuedToCNTxt;
-  private Label issuedToOTxt;
-  private Label issuedToOUTxt;
-  private Label issuedToSNTxt;
-  private Label issuedByCNTxt;
-  private Label issuedByOTxt;
-  private Label issuedByOUTxt;
-  private Label issuedOnTxt;
-  private Label expiresOnTxt;
-  private Label sha1FingerprintTxt;
-  private Label md5FingerprintTxt;
+public final class X509CertificateViewer {
+  private Composite       control;
+  private Label           issuedToCNTxt;
+  private Label           issuedToOTxt;
+  private Label           issuedToOUTxt;
+  private Label           issuedToSNTxt;
+  private Label           issuedByCNTxt;
+  private Label           issuedByOTxt;
+  private Label           issuedByOUTxt;
+  private Label           issuedOnTxt;
+  private Label           expiresOnTxt;
+  private Label           sha1FingerprintTxt;
+  private Label           md5FingerprintTxt;
 
   private X509Certificate certificate;
 
@@ -72,6 +69,15 @@ public class X509CertificateViewer {
     md5FingerprintTxt = createPanelEntry("MD5 Fingerprint");
   }
 
+  public Control getControl() {
+    return control;
+  }
+
+  public void setCertificate(X509Certificate certificate) {
+    this.certificate = certificate;
+    refresh();
+  }
+
   private Control createSectionLabel(String text) {
     Label sectionLabel = new Label(control, SWT.WRAP);
     sectionLabel.setText(text);
@@ -90,15 +96,6 @@ public class X509CertificateViewer {
     return panelEntryText;
   }
 
-  public Control getControl() {
-    return control;
-  }
-
-  public void setCertificate(X509Certificate certificate) {
-    this.certificate = certificate;
-    refresh();
-  }
-
   private void refresh() {
     List issuedToRDN = parseDN(certificate.getSubjectX500Principal().getName());
     issuedToCNTxt.setText(safeFindPart("CN", issuedToRDN));
@@ -111,6 +108,7 @@ public class X509CertificateViewer {
     issuedByOTxt.setText(safeFindPart("O", issuedByRDN));
     issuedByOUTxt.setText(safeFindPart("OU", issuedByRDN));
 
+    final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
     issuedOnTxt.setText(dateFormat.format(certificate.getNotBefore()));
     expiresOnTxt.setText(dateFormat.format(certificate.getNotAfter()));
 
@@ -136,14 +134,16 @@ public class X509CertificateViewer {
   }
 
   private static String formatByteArray(byte[] input) {
-    if (input == null || input.length == 0)
+    if (input == null || input.length == 0) {
       return "None";
+    }
     StringBuffer buf = new StringBuffer(input.length * 2 /* for each byte */
         + input.length /* for the separators */);
     for (int i = 0; i < input.length; i++) {
       String c = Integer.toHexString(input[i] & 0xFF).toUpperCase();
-      if (c.length() == 1)
+      if (c.length() == 1) {
         buf.append('0');
+      }
       buf.append(c).append(':');
     }
     buf.deleteCharAt(buf.length() - 1);
@@ -163,8 +163,9 @@ public class X509CertificateViewer {
     while (startIndex < dnLen) {
       for (endIndex = startIndex; endIndex < dnLen; endIndex++) {
         c = dn.charAt(endIndex);
-        if (c == ',' || c == '+')
+        if (c == ',' || c == '+') {
           break;
+        }
         if (c == '\\') {
           endIndex++; // skip the escaped char
         }
@@ -207,8 +208,9 @@ public class X509CertificateViewer {
 
   private static String safeFindPart(String partName, List rdnArray) {
     String part = findPart(partName, rdnArray);
-    if (part != null && part.length() > 0)
+    if (part != null && part.length() > 0) {
       return part;
+    }
     return "<Unknown>";
   }
 }

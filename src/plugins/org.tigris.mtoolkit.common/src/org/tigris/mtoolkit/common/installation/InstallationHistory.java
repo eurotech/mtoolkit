@@ -30,26 +30,27 @@ import org.eclipse.ui.XMLMemento;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 public final class InstallationHistory {
-  private static final int HISTORY_SIZE = 10;
-  private static final String STORAGE_FILE = "installation_history.xml";
-  private static final String ROOT_TYPE = "history";
-  private static final String PROCESSOR_TYPE = "processor";
-  private static final String PROCESSOR_NAME_ATTR = "name";
-  private static final String TARGET_TYPE = "target";
-  private static final String TARGET_UID_ATTR = "uid";
+  private static final int           HISTORY_SIZE        = 10;
+  private static final String        STORAGE_FILE        = "installation_history.xml";
+  private static final String        ROOT_TYPE           = "history";
+  private static final String        PROCESSOR_TYPE      = "processor";
+  private static final String        PROCESSOR_NAME_ATTR = "name";
+  private static final String        TARGET_TYPE         = "target";
+  private static final String        TARGET_UID_ATTR     = "uid";
 
-  private static Hashtable history = null;
-  private static InstallationHistory defaultInstance = null;
+  private static InstallationHistory defaultInstance     = null;
+
+  private Hashtable                  history             = null;
 
   private InstallationHistory() {
   }
 
   /**
    * Returns default instance.
-   * 
+   *
    * @return the default instance
    */
-  public static InstallationHistory getDefault() {
+  public static synchronized InstallationHistory getDefault() {
     if (defaultInstance == null) {
       defaultInstance = new InstallationHistory();
       defaultInstance.restoreHistory();
@@ -59,11 +60,11 @@ public final class InstallationHistory {
 
   /**
    * Promotes usage of specified target for passed processor.
-   * 
+   *
    * @param target
-   *            the target to promote
+   *          the target to promote
    * @param processor
-   *            the processor
+   *          the processor
    */
   public void promoteHistory(InstallationTarget target, InstallationItemProcessor processor) {
     if (history == null) {
@@ -95,11 +96,11 @@ public final class InstallationHistory {
   /**
    * Purges the passed list of target UIDs from targets, that are not valid
    * anymore for given processor.
-   * 
+   *
    * @param targets
-   *            the list of target UIDs to purge
+   *          the list of target UIDs to purge
    * @param processor
-   *            processor to obtain fresh list of available targets
+   *          processor to obtain fresh list of available targets
    */
   private void purgeTargets(List targetUIDs, InstallationItemProcessor processor) {
     InstallationTarget[] currentTargets = processor.getInstallationTargets();
@@ -122,9 +123,9 @@ public final class InstallationHistory {
   /**
    * Returns list with UIDs (String) that specify most recent targets used. If
    * there is no history for passed processor, empty list is returned.
-   * 
+   *
    * @param processor
-   *            processor for which to return history
+   *          processor for which to return history
    * @return list with recent UIDs
    */
   public List getHistoryUIDs(InstallationItemProcessor processor) {
@@ -139,14 +140,13 @@ public final class InstallationHistory {
   }
 
   /**
-   * Returns array with InstallationTarget elements that were most recently
-   * used for given processor. If there is no history for the passed
-   * processor, empty array is returned. This method intersects the current
-   * targets returned by the processor with the targets that were previously
-   * promoted.
-   * 
+   * Returns array with InstallationTarget elements that were most recently used
+   * for given processor. If there is no history for the passed processor, empty
+   * array is returned. This method intersects the current targets returned by
+   * the processor with the targets that were previously promoted.
+   *
    * @param processor
-   *            processor for which to return history
+   *          processor for which to return history
    * @return array with recent targets
    */
   public InstallationTarget[] getHistory(InstallationItemProcessor processor) {
