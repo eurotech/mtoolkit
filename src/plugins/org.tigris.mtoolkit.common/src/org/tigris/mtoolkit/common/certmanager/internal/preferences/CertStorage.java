@@ -50,7 +50,7 @@ public final class CertStorage implements ICertificateModifyListener {
     return defaultInstance;
   }
 
-  public void dispose() {
+  public static void release() {
     defaultInstance = null;
   }
 

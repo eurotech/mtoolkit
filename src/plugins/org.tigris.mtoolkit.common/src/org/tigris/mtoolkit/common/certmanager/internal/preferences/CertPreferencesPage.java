@@ -46,14 +46,14 @@ import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.certmanager.internal.dialogs.CertificateManagementDialog;
 import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
 
-public final class CertPreferencesPage extends PreferencePage implements
-IWorkbenchPreferencePage, IMToolkitPreferencePage {
-  private TableViewer certificatesViewer;
-  private Button btnAdd;
-  private Button btnEdit;
-  private Button btnRemove;
-  private Button btnBrowse;
-  private Text txtJarsignerLocation;
+public final class CertPreferencesPage extends PreferencePage implements IWorkbenchPreferencePage,
+    IMToolkitPreferencePage {
+  private TableViewer         certificatesViewer;
+  private Button              btnAdd;
+  private Button              btnEdit;
+  private Button              btnRemove;
+  private Button              btnBrowse;
+  private Text                txtJarsignerLocation;
 
   private static final String ATTR_JARSIGNER_LOCATION = "jarsigner.location"; //$NON-NLS-1$
 
@@ -189,7 +189,8 @@ IWorkbenchPreferencePage, IMToolkitPreferencePage {
 
   private void addCertificate() {
     Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleAdd, Messages.dlgCertMan_message_add);
+    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleAdd,
+        Messages.dlgCertMan_message_add);
     if (dialog.open() == Dialog.OK) {
       CertDescriptor cert = new CertDescriptor(CertStorage.getDefault().generateCertificateUid());
       cert.setAlias(dialog.alias);
@@ -209,7 +210,8 @@ IWorkbenchPreferencePage, IMToolkitPreferencePage {
     }
     CertDescriptor cert = (CertDescriptor) el;
     Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleEdit, cert, Messages.dlgCertMan_message_edit);
+    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleEdit, cert,
+        Messages.dlgCertMan_message_edit);
     if (dialog.open() == Dialog.OK) {
       cert.setAlias(dialog.alias);
       cert.setStoreLocation(dialog.storeLocation);
