@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -144,7 +144,7 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
 		store.setValue(MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL, autoUpdateBundlesOnInstallButton.getSelection());
 		// FIXME This is NOT proper way for tracking preferences change
 		if (showBundleCategories != enableBundleCategoriesButton.getSelection()) {
-			HashMap existingFrameworks = FrameWorkView.getTreeRoot().getFrameWorkMap();
+			HashMap existingFrameworks = FrameworksView.getTreeRoot().getFrameWorkMap();
 			Collection frameworks = existingFrameworks.values();
 			Iterator iterator = frameworks.iterator();
 

@@ -42,7 +42,7 @@ import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
@@ -160,7 +160,7 @@ public final class ActionsManager {
 
   public static void stopBundleAction(Bundle bundle) {
     if (bundle.getID() == 0) {
-      final MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), "Stop bundle", null, NLS.bind(
+      final MessageDialog dialog = new MessageDialog(FrameworksView.getShell(), "Stop bundle", null, NLS.bind(
           Messages.stop_system_bundle, bundle.getName()), MessageDialog.QUESTION, new String[] {
           "Continue", "Cancel"
       }, 0);

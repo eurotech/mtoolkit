@@ -17,7 +17,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
@@ -39,7 +39,7 @@ public final class RemoveAction extends SelectionProviderAction implements IStat
     } else {
       msg += count + " selected frameworks?";
     }
-    boolean confirm = MessageDialog.openQuestion(FrameWorkView.getShell(), "Remove Framework", msg);
+    boolean confirm = MessageDialog.openQuestion(FrameworksView.getShell(), "Remove Framework", msg);
     if (confirm) {
       Iterator iterator = getStructuredSelection().iterator();
       while (iterator.hasNext()) {

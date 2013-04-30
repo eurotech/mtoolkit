@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -84,12 +84,12 @@ public class Util {
         throw newException(IStatus.ERROR, Messages.connection_failed, null);
       }
       if (autoConnectEnabled) {
-        FrameWorkView.getTreeRoot().addElement(fw);
+        FrameworksView.getTreeRoot().addElement(fw);
       }
       fw.connect(connector, SubMonitor.convert(monitor));
     } catch (IAgentException e) {
       if (autoConnectEnabled) {
-        FrameWorkView.getTreeRoot().removeElement(fw);
+        FrameworksView.getTreeRoot().removeElement(fw);
       }
       throw newException(IStatus.ERROR, Messages.connection_failed, e);
     }
@@ -97,7 +97,7 @@ public class Util {
   }
 
   public static Set<String> getSystemBundles() {
-    return FrameWorkView.getSystemBundles();
+    return FrameworksView.getSystemBundles();
   }
 
   /**
@@ -134,7 +134,7 @@ public class Util {
   }
 
   public static Framework findFramework(DeviceConnector connector) {
-    FrameworkImpl[] fws = FrameWorkView.findFramework(connector);
+    FrameworkImpl[] fws = FrameworksView.findFramework(connector);
     if (fws != null && fws.length > 0) {
       return fws[0];
     }

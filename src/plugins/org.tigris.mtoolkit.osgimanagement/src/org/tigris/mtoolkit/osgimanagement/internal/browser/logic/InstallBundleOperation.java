@@ -42,7 +42,7 @@ import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
@@ -161,7 +161,7 @@ public final class InstallBundleOperation {
     };
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       public void run() {
-        TitleAreaDialog updateDialog = new TitleAreaDialog(FrameWorkView.getShell()) {
+        TitleAreaDialog updateDialog = new TitleAreaDialog(FrameworksView.getShell()) {
           private Button                       updateButton;
           private org.eclipse.swt.widgets.List list;
 

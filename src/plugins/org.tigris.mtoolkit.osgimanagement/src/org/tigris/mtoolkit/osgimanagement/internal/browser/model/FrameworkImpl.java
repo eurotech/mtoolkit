@@ -66,7 +66,7 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
@@ -134,7 +134,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     if (this.isConnected()) {
       this.disconnect();
     }
-    FrameWorkView.getTreeRoot().removeElement(this);
+    FrameworksView.getTreeRoot().removeElement(this);
     bundleHash = null;
     frameworkSystemBundles = null;
     categoryHash = null;
@@ -831,7 +831,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     }
     display.asyncExec(new Runnable() {
       public void run() {
-        FrameWorkView view = FrameWorkView.getActiveInstance();
+        FrameworksView view = FrameworksView.getActiveInstance();
         if (view != null) {
           view.updateContextMenuStates();
         }
@@ -1246,7 +1246,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   public boolean isSystemBundle(RemoteBundle bundle) {
     if (systemBundlesList == null) {
-      systemBundlesList = FrameWorkView.getSystemBundles();
+      systemBundlesList = FrameworksView.getSystemBundles();
     }
     try {
       return systemBundlesList.contains(bundle.getSymbolicName());

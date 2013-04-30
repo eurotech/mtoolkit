@@ -26,7 +26,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
@@ -73,7 +73,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
    * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
    */
   public void disconnected(DeviceConnector connector) {
-    FrameworkImpl fwArr[] = FrameWorkView.findFramework(connector);
+    FrameworkImpl fwArr[] = FrameworksView.findFramework(connector);
     if (fwArr == null) {
       return;
     }
@@ -82,7 +82,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
       BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
       synchronized (Framework.getLockObject(connector)) {
         ActionsManager.disconnectConsole(fw);
-        FrameworkImpl fws[] = FrameWorkView.getFrameworks();
+        FrameworkImpl fws[] = FrameworksView.getFrameworks();
         if (fws != null) {
           for (int i = 0; i < fws.length; i++) {
             fw = fws[i];
@@ -174,7 +174,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
 
   public static String generateFrameworkName(Dictionary connProps, String identifier) {
     Hashtable frameWorkMap = new Hashtable();
-    FrameworkImpl fws[] = FrameWorkView.getFrameworks();
+    FrameworkImpl fws[] = FrameworksView.getFrameworks();
     if (fws != null) {
       for (int i = 0; i < fws.length; i++) {
         frameWorkMap.put(fws[i].getName(), ""); //$NON-NLS-1$

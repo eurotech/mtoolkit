@@ -147,7 +147,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 // TODO:Remove static access to ui widgets and model entries
-public final class FrameWorkView extends ViewPart implements ConstantsDistributor {
+public final class FrameworksView extends ViewPart implements ConstantsDistributor {
   public static final String                        VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
                                                                                      + ".frameworkview";
   public static final String                        PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
@@ -218,8 +218,8 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
     return PluginUtilities.getActiveWorkbenchShell();
   }
 
-  // Get current active FrameWorkView
-  public static FrameWorkView getActiveInstance() {
+  // Get current active FrameworksView
+  public static FrameworksView getActiveInstance() {
     final IViewPart[] view = new IViewPart[1];
     IWorkbenchWindow[] workbenchWindows = PlatformUI.getWorkbench().getWorkbenchWindows();
     if (workbenchWindows != null && workbenchWindows.length > 0) {
@@ -241,12 +241,12 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
         }
       });
     }
-    return (FrameWorkView) view[0];
+    return (FrameworksView) view[0];
   }
 
   // Get the root containing all frameworks
   public static TreeRoot getTreeRoot() {
-    return FrameWorkView.treeRoot;
+    return FrameworksView.treeRoot;
   }
 
   // Gets current view tree
@@ -1109,7 +1109,7 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
 
     Model startNode = (Model) startSelection.getFirstElement();
     if (startNode == null) {
-      Model children[] = FrameWorkView.treeRoot.getChildren();
+      Model children[] = FrameworksView.treeRoot.getChildren();
       if (children == null || children.length == 0) {
         return;
       }
@@ -1141,8 +1141,8 @@ public final class FrameWorkView extends ViewPart implements ConstantsDistributo
         parent = parent.getParent();
       }
     }
-    if (foundNode == null && startNode != FrameWorkView.treeRoot.getChildren()[0]) {
-      node = FrameWorkView.treeRoot;
+    if (foundNode == null && startNode != FrameworksView.treeRoot.getChildren()[0]) {
+      node = FrameworksView.treeRoot;
       foundNode = findItem(node, text, startNode);
     }
 

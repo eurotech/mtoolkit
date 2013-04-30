@@ -14,7 +14,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 
 public final class AddAction extends SelectionProviderAction implements IStateAction {
 
@@ -26,7 +26,7 @@ public final class AddAction extends SelectionProviderAction implements IStateAc
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
-		ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot());
+		ActionsManager.addFrameworkAction(FrameworksView.getTreeRoot());
 		getSelectionProvider().setSelection(getSelection());
 	}
 	

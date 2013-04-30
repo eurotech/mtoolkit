@@ -15,7 +15,7 @@
          name="%OSGiSet.FrameworkView"
          icon="images/frameworks.gif"
          category="org.tigris.mtoolkit.osgi"
-         class="org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView"
+         class="org.tigris.mtoolkit.osgimanagement.internal.FrameworksView"
          id="org.tigris.mtoolkit.osgimanagement.frameworkview">
       </view>
    </extension>

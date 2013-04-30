@@ -54,7 +54,7 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     super.start(context);
     FrameworkPlugin.instance = this;
     FrameworkConnectorFactory.init();
-    FrameWorkView.restoreModel();
+    FrameworksView.restoreModel();
     fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
   }
 
@@ -63,7 +63,7 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
    */
   @Override
   public void stop(BundleContext context) throws Exception {
-    FrameWorkView.saveModel();
+    FrameworksView.saveModel();
     FrameworkConnectorFactory.deinit();
     FrameworkPlugin.instance = null;
     super.stop(context);

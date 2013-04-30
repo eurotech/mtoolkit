@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.installation.TargetSelectionDialog;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
@@ -157,7 +157,7 @@ public final class FrameworkSelector implements TargetSelectionDialog {
         }
       });
 
-      frameworkViewer.setInput(FrameWorkView.getTreeRoot());
+      frameworkViewer.setInput(FrameworksView.getTreeRoot());
 
       btnAdd = new Button(composite, SWT.PUSH);
       gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.HORIZONTAL_ALIGN_FILL);
@@ -221,7 +221,7 @@ public final class FrameworkSelector implements TargetSelectionDialog {
     }
 
     private void handleFrameworkAdd() {
-      ActionsManager.addFrameworkAction(FrameWorkView.getTreeRoot());
+      ActionsManager.addFrameworkAction(FrameworksView.getTreeRoot());
     }
 
     private void handleFrameworkRemove() {

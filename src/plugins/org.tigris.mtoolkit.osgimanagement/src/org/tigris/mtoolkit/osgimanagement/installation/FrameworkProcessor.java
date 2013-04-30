@@ -54,7 +54,7 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemotePackage;
 import org.tigris.mtoolkit.osgimanagement.Util;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
@@ -113,7 +113,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
    * getInstallationTargets()
    */
   public InstallationTarget[] getInstallationTargets() {
-    FrameworkImpl[] fws = FrameWorkView.getFrameworks();
+    FrameworkImpl[] fws = FrameworksView.getFrameworks();
     if (fws == null || fws.length == 0) {
       return new InstallationTarget[0];
     }
@@ -421,7 +421,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
          * @see java.lang.Runnable#run()
          */
         public void run() {
-          ListDialog dialog = new ListDialog(FrameWorkView.getShell());
+          ListDialog dialog = new ListDialog(FrameworksView.getShell());
           dialog.setTitle("Select processor");
           dialog.setLabelProvider(new LabelProvider() {
             /* (non-Javadoc)
@@ -564,7 +564,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
      * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#getImage()
      */
     public Image getImage() {
-      return ImageHolder.getImage(FrameWorkView.BUNDLES_GROUP_IMAGE_PATH);
+      return ImageHolder.getImage(FrameworksView.BUNDLES_GROUP_IMAGE_PATH);
     }
 
     /* (non-Javadoc)

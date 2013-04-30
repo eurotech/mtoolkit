@@ -43,7 +43,7 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -227,7 +227,7 @@ public final class ConnectFrameworkJob extends Job {
         if (iagentFile != null) {
           message += Messages.get_missing_bundle_message;
         }
-        MessageDialog dialog = new MessageDialog(FrameWorkView.getShell(), Messages.rcp_bundle_missing_title, null,
+        MessageDialog dialog = new MessageDialog(FrameworksView.getShell(), Messages.rcp_bundle_missing_title, null,
             message, MessageDialog.INFORMATION, buttons, 0);
         dialog.setBlockOnOpen(true);
         dialog.open();

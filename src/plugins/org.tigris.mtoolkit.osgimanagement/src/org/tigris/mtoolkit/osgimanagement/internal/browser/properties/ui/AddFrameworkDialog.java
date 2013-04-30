@@ -26,7 +26,7 @@ import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -147,7 +147,7 @@ public class AddFrameworkDialog extends TitleAreaDialog implements ConstantsDist
         }
       }
       fw.updateElement();
-      FrameWorkView fwView = FrameWorkView.getActiveInstance();
+      FrameworksView fwView = FrameworksView.getActiveInstance();
       if (fwView != null) {
         final TreeViewer tree = fwView.getTree();
         tree.setSelection(tree.getSelection());

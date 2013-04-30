@@ -20,7 +20,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
@@ -44,7 +44,7 @@ public class DeInstallBundleAction extends SelectionProviderAction implements IS
 				} else {
 					msg += count + " selected resources?";
 				}
-				result[0] = PluginUtilities.showConfirmationDialog(FrameWorkView.getShell(), "Confirm uninstall", msg);
+				result[0] = PluginUtilities.showConfirmationDialog(FrameworksView.getShell(), "Confirm uninstall", msg);
 			}
 		});
 		if (result[0] != SWT.OK) {

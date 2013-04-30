@@ -26,8 +26,8 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.IconFetcher;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameWorkView.ActionsProviderElement;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView.ActionsProviderElement;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
@@ -114,7 +114,7 @@ public final class ViewLabelProvider extends StyledCellLabelProvider {
     if (element instanceof Model) {
       FrameworkImpl fw = (FrameworkImpl) ((Model) element).findFramework();
       if (fw != null) {
-        List actionProviders = FrameWorkView.getActionsProviders();
+        List actionProviders = FrameworksView.getActionsProviders();
         for (int i = 0; i < actionProviders.size(); i++) {
           ContentTypeActionsProvider manager = ((ActionsProviderElement) actionProviders.get(i)).getProvider();
           Image image = manager.getImage((Model) element);
