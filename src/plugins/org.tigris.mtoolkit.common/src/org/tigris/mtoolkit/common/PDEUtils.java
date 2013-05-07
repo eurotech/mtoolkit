@@ -32,8 +32,9 @@ public final class PDEUtils {
    * Finds bundle with specified symbolic name and version. Workspace and target
    * platform bundles are searched, but bundles from workspace are preferably
    * returned over TP bundles.If version is present but exact match is not found
-   * bundle with the same symbolic name with the highest version is returned if any.
-   * Only active and valid plug-ins are returned.
+   * bundle with the same symbolic name with the highest version is returned if
+   * any. Only active and valid plug-ins are returned.
+   *
    * @param symbolicName
    * @param version
    * @return the bundle or null
@@ -43,19 +44,23 @@ public final class PDEUtils {
     if (entry == null) {
       return null;
     }
-    IPluginModelBase[] activeModels = entry.getActiveModels();
-    IPluginModelBase plugin = findBundle(activeModels, symbolicName, version, true, IMatchRules.PERFECT);
-    if (plugin == null) {
-      plugin = getMax(activeModels);
+    IPluginModelBase plugin = findBundle(entry.getWorkspaceModels(), symbolicName, version, true, IMatchRules.PERFECT);
+    if (plugin != null) {
+      return plugin;
     }
-    return plugin;
+    plugin = findBundle(entry.getExternalModels(), symbolicName, version, true, IMatchRules.PERFECT);
+    if (plugin != null) {
+      return plugin;
+    }
+    return getMax(entry.getActiveModels());
   }
 
   /**
    * Finds bundle with specified symbolic name and version from the target
-   * platform according to match rule.Workspace and target
-   * platform bundles are searched, but bundles from workspace are preferably
-   * returned over TP bundles.Only valid plug-ins are returned.
+   * platform according to match rule.Workspace and target platform bundles are
+   * searched, but bundles from workspace are preferably returned over TP
+   * bundles.Only valid plug-ins are returned.
+   *
    * @param symbolicName
    * @param version
    * @param enabledOnly
@@ -72,6 +77,7 @@ public final class PDEUtils {
 
   /**
    * Finds bundle by its description
+   *
    * @param desc
    * @return the bundle or null
    */
@@ -80,15 +86,17 @@ public final class PDEUtils {
   }
 
   /**
-   * Finds bundle with specified symbolic name and version from the target platform according to match rule.
-   * Only valid plug-ins are returned.
+   * Finds bundle with specified symbolic name and version from the target
+   * platform according to match rule. Only valid plug-ins are returned.
+   *
    * @param symbolicName
    * @param version
    * @param enabledOnly
    * @param match
    * @return the bundle or null
    */
-  public static IPluginModelBase findTargetPlatformBundle(String symbolicName, String version, boolean enabledOnly, int match) {
+  public static IPluginModelBase findTargetPlatformBundle(String symbolicName, String version, boolean enabledOnly,
+      int match) {
     ModelEntry entry = PluginRegistry.findEntry(symbolicName);
     if (entry == null) {
       return null;
@@ -98,9 +106,10 @@ public final class PDEUtils {
 
   /**
    * Finds bundle with specified symbolic name and version from the target
-   * platform.If version is present but exact match is not found
-   * bundle with the same symbolic name with the highest version is returned if any.
-   * Only active and valid plug-ins are returned.
+   * platform.If version is present but exact match is not found bundle with the
+   * same symbolic name with the highest version is returned if any. Only active
+   * and valid plug-ins are returned.
+   *
    * @param symbolicName
    * @param version
    * @return the bundle or null
@@ -119,7 +128,9 @@ public final class PDEUtils {
   }
 
   /**
-   * Finds bundle with specified symbolic name and version from the workspace according to match rule.
+   * Finds bundle with specified symbolic name and version from the workspace
+   * according to match rule.
+   *
    * @param symbolicName
    * @param version
    * @param enabledOnly
@@ -136,9 +147,10 @@ public final class PDEUtils {
 
   /**
    * Finds bundle with specified symbolic name and version from the workspace.
-   * If version is present but exact match is not found
-   * bundle with the same symbolic name with the highest version is returned if any.
-   * Only active and valid plug-ins are returned.
+   * If version is present but exact match is not found bundle with the same
+   * symbolic name with the highest version is returned if any. Only active and
+   * valid plug-ins are returned.
+   *
    * @param symbolicName
    * @param version
    * @return the bundle or null
@@ -215,11 +227,12 @@ public final class PDEUtils {
   }
 
   /**
-   * Returns true if the given version number is an empty version as
-   * defined by {@link Version}. Used in cases where it would be
-   * inappropriate to parse the actual version number.
+   * Returns true if the given version number is an empty version as defined by
+   * {@link Version}. Used in cases where it would be inappropriate to parse the
+   * actual version number.
    *
-   * @param version version string to check
+   * @param version
+   *          version string to check
    * @return true if empty version
    */
   public static boolean isEmptyVersion(String version) {
@@ -231,9 +244,11 @@ public final class PDEUtils {
   }
 
   /**
-   * Returns bundle version number defined by {@link Version} or empty version if none.
+   * Returns bundle version number defined by {@link Version} or empty version
+   * if none.
    *
-   * @param version version string to check
+   * @param version
+   *          version string to check
    * @return input version number or empty version, never null.
    */
   public static Version getBundleVersion(String version) {
@@ -243,9 +258,9 @@ public final class PDEUtils {
     return new Version(version);
   }
 
-  private static IPluginModelBase findBundle(IPluginModelBase[] models, String symbolicName, String version, boolean active,
-      int match) {
-    List results = new ArrayList();
+  private static IPluginModelBase findBundle(IPluginModelBase[] models, String symbolicName, String version,
+      boolean active, int match) {
+    List<IPluginModelBase> results = new ArrayList<IPluginModelBase>();
     for (int i = 0; i < models.length; i++) {
       if (selectBundle(models[i], active)) {
         if (isMatch(models[i].getPluginBase(), symbolicName, version, match)) {
@@ -253,7 +268,7 @@ public final class PDEUtils {
         }
       }
     }
-    return getMax((IPluginModelBase[]) results.toArray(new IPluginModelBase[results.size()]));
+    return getMax(results.toArray(new IPluginModelBase[results.size()]));
   }
 
   private static IPluginModelBase getMax(IPluginModelBase[] models) {
