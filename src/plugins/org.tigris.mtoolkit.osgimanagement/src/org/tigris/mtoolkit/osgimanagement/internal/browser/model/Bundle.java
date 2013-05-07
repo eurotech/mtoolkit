@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.core.runtime.Assert;
@@ -24,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleException;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -34,7 +34,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistri
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class Bundle extends Model implements IconProvider, ConstantsDistributor {
+public final class Bundle extends Model implements IconProvider, ConstantsDistributor {
   public static final String  OVR_ACTIVE_ICON       = "ovr_active.gif";                 //$NON-NLS-1$
   public static final String  OVR_RESOLVED_ICON     = "ovr_resolved.gif";               //$NON-NLS-1$
   public static final String  OVR_SIGNED_ICON       = "ovr_signed2.gif";                //$NON-NLS-1$
@@ -66,8 +66,7 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     this.rBundle = rBundle;
     this.id = rBundle.getBundleId();
     isSigned = rBundle.isBundleSigned();
-    // state is not get from rBundle to avoid unnecessary remote method
-    // calls
+    // state is not get from rBundle to avoid unnecessary remote method calls
     this.state = state;
     this.type = type;
     this.category = category;
@@ -101,6 +100,9 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
   }
 
   // Overrides method in Model class
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Model#testAttribute(java.lang.Object, java.lang.String, java.lang.String)
+   */
   @Override
   public boolean testAttribute(Object target, String name, String value) {
     if (!(target instanceof org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle)) {
@@ -231,12 +233,9 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     return category;
   }
 
-  public String getString() {
-    StringBuffer buff = new StringBuffer();
-    buff.append("ID: ").append(getID()).append(" Bundle name: ").append(getName()); //$NON-NLS-1$ //$NON-NLS-2$
-    return buff.toString();
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Model#toString()
+   */
   @Override
   public String toString() {
     try {
@@ -246,6 +245,9 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     return name;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Model#getLabel()
+   */
   @Override
   public String getLabel() {
     String label = getName();
@@ -262,6 +264,9 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     return label;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IconProvider#getIcon()
+   */
   public Image getIcon() {
     if (icon != null) {
       return icon;
@@ -269,7 +274,6 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     if (iconData == null) {
       return null;
     }
-
     ImageDescriptor overlay;
     switch (state) {
     case org.osgi.framework.Bundle.RESOLVED:
@@ -296,6 +300,9 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     return icon;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IconProvider#fetchIconData()
+   */
   public ImageData fetchIconData() {
     if (iconData != null) {
       return iconData;
@@ -319,14 +326,28 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
     } catch (IAgentException e) {
     } catch (BundleException e) {
     } finally {
-      if (is != null) {
-        try {
-          is.close();
-        } catch (IOException e) {
-        }
-      }
+      FileUtils.close(is);
     }
     return null;
+  }
+
+  public boolean isSigned() {
+    return isSigned;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#finalize()
+   */
+  @Override
+  protected void finalize() {
+    if (icon != null) {
+      icon.dispose();
+      icon = null;
+    }
+    if (oldIcon != null) {
+      oldIcon.dispose();
+      oldIcon = null;
+    }
   }
 
   private String getIconPath() throws IAgentException, BundleException {
@@ -379,21 +400,5 @@ public class Bundle extends Model implements IconProvider, ConstantsDistributor 
       return smallerSize;
     }
     return noSize;
-  }
-
-  public boolean isSigned() {
-    return isSigned;
-  }
-
-  @Override
-  public void finalize() {
-    if (icon != null) {
-      icon.dispose();
-      icon = null;
-    }
-    if (oldIcon != null) {
-      oldIcon.dispose();
-      oldIcon = null;
-    }
   }
 }
