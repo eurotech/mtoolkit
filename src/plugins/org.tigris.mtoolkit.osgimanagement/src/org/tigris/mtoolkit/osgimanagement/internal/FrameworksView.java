@@ -793,13 +793,18 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
 
   // Save Tree Model
   public static void saveModel() {
-    if (FrameworkPlugin.getDefault() == null) {
+    FrameworkPlugin plugin = FrameworkPlugin.getDefault();
+    if (plugin == null) {
       return;
     }
-    File configFile = new File(FrameworkPlugin.getDefault().getStateLocation().toFile(), STORAGE_FILE_NAME);
+    final TreeRoot root = treeRoot;
+    if (root == null) {
+      return;
+    }
+    File configFile = new File(plugin.getStateLocation().toFile(), STORAGE_FILE_NAME);
     XMLMemento rootConfig = XMLMemento.createWriteRoot(MEMENTO_ROOT_TYPE);
-    Model[] children = treeRoot.getChildren();
-    for (int i = 0; i < treeRoot.getSize(); i++) {
+    Model[] children = root.getChildren();
+    for (int i = 0; i < root.getSize(); i++) {
       if (!((FrameworkImpl) children[i]).isAutoConnected()) {
         IMemento config = ((FrameworkImpl) children[i]).getConfig();
         if (config != null) {
