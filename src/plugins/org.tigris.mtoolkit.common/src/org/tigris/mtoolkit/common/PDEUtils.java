@@ -258,6 +258,33 @@ public final class PDEUtils {
     return new Version(version);
   }
 
+  /**
+   * Tries to match a bundle against given constraints
+   *
+   * @param base
+   *          plug-in to match
+   * @param id
+   *          symbolic name to check
+   * @param version
+   *          version string to check
+   * @param match
+   *          match rule
+   * @return boolean value indicating if plug-in matches to constraints
+   */
+  public static boolean isMatch(IPluginBase base, String id, String version, int match) {
+    // if version is null, then match any version with same ID
+    if (base == null) {
+      return false; // guard against invalid plug-ins
+    }
+    if (base.getId() == null) {
+      return false; // guard against invalid plug-ins
+    }
+    if (version == null) {
+      return base.getId().equals(id);
+    }
+    return compare(base.getId(), base.getVersion(), id, version, match);
+  }
+
   private static IPluginModelBase findBundle(IPluginModelBase[] models, String symbolicName, String version,
       boolean active, int match) {
     List<IPluginModelBase> results = new ArrayList<IPluginModelBase>();
@@ -300,20 +327,6 @@ public final class PDEUtils {
       }
     }
     return max;
-  }
-
-  private static boolean isMatch(IPluginBase base, String id, String version, int match) {
-    // if version is null, then match any version with same ID
-    if (base == null) {
-      return false; // guard against invalid plug-ins
-    }
-    if (base.getId() == null) {
-      return false; // guard against invalid plug-ins
-    }
-    if (version == null) {
-      return base.getId().equals(id);
-    }
-    return compare(base.getId(), base.getVersion(), id, version, match);
   }
 
   private static IStatus validateVersion(String versionString) {
