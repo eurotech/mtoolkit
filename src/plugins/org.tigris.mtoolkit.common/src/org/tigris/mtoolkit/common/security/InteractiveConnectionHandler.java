@@ -29,7 +29,7 @@ import javax.net.ssl.TrustManager;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.gui.SWTUserInteraction;
 
-public class InteractiveConnectionHandler extends SSLSocketFactory implements HostnameVerifier {
+public final class InteractiveConnectionHandler extends SSLSocketFactory implements HostnameVerifier {
   private static final String                 MPRM_HTTP_TRANSPORT_THREAD_ELEMENT = "com.prosyst.mprm.net.impl.http.client.HttpClientTransportConnection";
 
   private static final UserInteractionWrapper interactionWrapper                 = new UserInteractionWrapper();
@@ -159,7 +159,6 @@ public class InteractiveConnectionHandler extends SSLSocketFactory implements Ho
         e.printStackTrace();
       }
     }
-    Thread.dumpStack();
     return defaultFactory;
   }
 
@@ -182,7 +181,6 @@ public class InteractiveConnectionHandler extends SSLSocketFactory implements Ho
         return privateVerifier;
       }
     }
-    Thread.dumpStack();
     return defaultVerifier;
   }
 
