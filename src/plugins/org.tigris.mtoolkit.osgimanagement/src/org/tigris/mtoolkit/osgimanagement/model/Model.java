@@ -25,15 +25,14 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeLi
 /**
  * @since 5.0
  */
-public abstract class Model implements Comparable, IActionFilter {
-
-  protected String name;
-  protected Model parent;
+public abstract class Model implements Comparable<Object>, IActionFilter {
+  protected String  name;
+  protected Model   parent;
   protected Set     elementList    = new TreeSet();
-  protected boolean selected = false;
-  protected int selectedChilds = 0;
-  private Vector slaves = new Vector();
-  private Model master;
+  protected boolean selected       = false;
+  protected int     selectedChilds = 0;
+  private Vector    slaves         = new Vector();
+  private Model     master;
 
   public Model(String name) {
     this.name = name;
@@ -60,7 +59,8 @@ public abstract class Model implements Comparable, IActionFilter {
 
   public void addElement(Model element) {
     if (element.getParent() != null) {
-      throw new IllegalArgumentException("Cannot change the parent of model object without removing it from the old one");
+      throw new IllegalArgumentException(
+          "Cannot change the parent of model object without removing it from the old one");
     }
 
     if (element.selectedChilds != 0) {
@@ -210,13 +210,35 @@ public abstract class Model implements Comparable, IActionFilter {
     return parent;
   }
 
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
   @Override
   public String toString() {
     return name;
   }
 
+  /* (non-Javadoc)
+   * @see java.lang.Comparable#compareTo(java.lang.Object)
+   */
   public int compareTo(Object obj) {
     return this.toString().compareTo(obj.toString());
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.IActionFilter#testAttribute(java.lang.Object, java.lang.String, java.lang.String)
+   */
+  public boolean testAttribute(Object target, String name, String value) {
+    if (!(target instanceof Model)) {
+      return false;
+    }
+
+    if (name.equalsIgnoreCase(ConstantsDistributor.NODE_NAME)) {
+      if (value.equalsIgnoreCase(this.name)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void removeChildren() {
@@ -231,19 +253,6 @@ public abstract class Model implements Comparable, IActionFilter {
     for (int i = 0; i < getSlaves().size(); i++) {
       ((Model) getSlaves().elementAt(i)).removeChildren();
     }
-  }
-
-  public boolean testAttribute(Object target, String name, String value) {
-    if (!(target instanceof Model)) {
-      return false;
-    }
-
-    if (name.equalsIgnoreCase(ConstantsDistributor.NODE_NAME)) {
-      if (value.equalsIgnoreCase(this.name)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public boolean isVisible() {
