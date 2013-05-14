@@ -31,50 +31,42 @@ import org.tigris.mtoolkit.iagent.transport.TransportsHub;
  * @version 1.0
  */
 public abstract class DeviceConnector {
-  public final static String PROPERTY_KEY_DP_ADMIN_AVAILABLE    = "mtoolkit.iagent.dpAdminAvailable";
-
-  public final static String PROPERTY_KEY_EVENT_ADMIN_AVAILABLE = "mtoolkit.iagent.eventAdminAvailable";
-
-  public final static String PROPERTY_KEY_APP_ADMIN_AVAILABLE   = "mtoolkit.iagent.appAdminAvailable";
-
-  public final static String PROPERTY_KEY_CONSOLE_SUPPORTED     = "mtoolkit.iagentt.consoleSupported";
-
   /**
    * Specifies TCP connection type to the target OSGi framework
    */
-  public static final int    TYPE_TCP                           = 0;
+  public static final int    TYPE_TCP       = 0;
 
   /**
    * Specifies the key for the host needed to establish client connection to
    * target OSGi framework. The value attached with this key in the connection
    * properties table must be a String object.
    */
-  public static final String KEY_DEVICE_IP                      = "framework-connection-ip";
+  public static final String KEY_DEVICE_IP  = "framework-connection-ip";
 
-  public static final String TRANSPORT_TYPE                     = "transport-type";
+  public static final String TRANSPORT_TYPE = "transport-type";
 
-  public static final String TRANSPORT_ID                       = "transport-id";
+  public static final String TRANSPORT_ID   = "transport-id";
 
   /**
    * @since 3.1
    */
-  public static final String PROP_PMP_PORT                      = ConnectionManager.PROP_PMP_PORT;
+  public static final String PROP_PMP_PORT  = ConnectionManager.PROP_PMP_PORT;
 
   /**
    * Internal constant indicating that a device connector was disconnected.
    */
-  protected static final int DISCONNECTED                       = 1 << 0;
+  protected static final int DISCONNECTED   = 1 << 0;
 
   /**
    * Internal constant indicating that a device connector was connected.
    */
-  protected static final int CONNECTED                          = 1 << 1;
+  protected static final int CONNECTED      = 1 << 1;
 
-  private static List        listeners                          = new ArrayList();
+  private static List        listeners      = new ArrayList();
 
   private static Map         factories;
 
-  public final Object        lockObj                            = new Object();
+  public final Object        lockObj        = new Object();
 
   static {
     factories = new HashMap();
@@ -131,36 +123,6 @@ public abstract class DeviceConnector {
     } catch (IOException e) {
       throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
     }
-  }
-
-  /**
-   * When called this method opens server connection with the specified type and
-   * properties and blocks until client connection from remote OSGi framework is
-   * accepted. After connection acceptance it returns DeviceConnector associated
-   * to the remote OSGi framework.
-   *
-   * @param transport
-   *          specifies the transport of this connection
-   * @param aConProps
-   *          connection properties containing the details of the connection
-   *          which should be established (port, connection acceptance timeout,
-   *          etc.). At least these properties must contain the port number. It
-   *          must be inserted with the specified key
-   *          {@link DeviceConnector#KEY_PORT} and the value must be an Integer
-   *          object. If passed the timeout property must be mapped to
-   *          {@link DeviceConnector#KEY_TIMEOUT} and the value also should be
-   *          an Integer object.
-   * @param monitor
-   *          progress monitor. Can be null.
-   * @return DeviceConnector associated with the accepted client connection
-   * @throws IAgentException
-   *           thrown when some general error occurs or if specified timeout is
-   *           reached before any client acceptance
-   */
-  public final static DeviceConnector openServerConnection(Transport transport, Dictionary aConProps,
-      IAProgressMonitor monitor) throws IAgentException {
-    DeviceConnectorFactory factory = getConnectorFactory(transport);
-    return factory.createServerConnection(transport, aConProps, monitor);
   }
 
   private static DeviceConnectorFactory getConnectorFactory(Transport transport) throws IAgentException {

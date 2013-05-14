@@ -19,47 +19,28 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
  * provides {@link DeviceConnector}s for specified connection type.
  */
 public interface DeviceConnectorFactory {
+  /**
+   * Returns the type of the connection over which {@link DeviceConnector}s
+   * provided from this factory are working ({@link DeviceConnector#TYPE_TCP})
+   *
+   * @return the type of the connection this factory is providing
+   */
+  public int getConnectionType();
 
-	/**
-	 * Returns the type of the connection over which {@link DeviceConnector}s
-	 * provided from this factory are working ({@link DeviceConnector#TYPE_TCP})
-	 * 
-	 * @return the type of the connection this factory is providing
-	 */
-	public int getConnectionType();
-
-	/**
-	 * Creates {@link DeviceConnector} working over specified client connection
-	 * to specified remote OSGi framework
-	 * 
-	 * @param transport
-	 * @param aConProps
-	 *            the connection properties (host, port, etc.)
-	 * @param monitor
-	 *            progress monitor. Can be null.
-	 * @return {@link DeviceConnector} connected to specified remote OSGi
-	 *         framework
-	 * @throws IAgentException
-	 *             thrown if connection could not be established
-	 */
-	public DeviceConnector createClientConnection(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
-			throws IAgentException;
-
-	/**
-	 * Opens specified server connection and blocks until connection from remote
-	 * OSGi framework is accepted or specified timeout is passed.
-	 * 
-	 * @param transport
-	 * @param aConProps
-	 *            the connection properties (port, connection timeout, etc.)
-	 * @param monitor
-	 *            progress monitor. Can be null.
-	 * @return {@link DeviceConnector} connected to specified remote OSGi
-	 *         framework
-	 * @throws IAgentException
-	 *             thrown if connection could not be established
-	 */
-	public DeviceConnector createServerConnection(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
-			throws IAgentException;
-
+  /**
+   * Creates {@link DeviceConnector} working over specified client connection to
+   * specified remote OSGi framework
+   *
+   * @param transport
+   * @param aConProps
+   *          the connection properties (host, port, etc.)
+   * @param monitor
+   *          progress monitor. Can be null.
+   * @return {@link DeviceConnector} connected to specified remote OSGi
+   *         framework
+   * @throws IAgentException
+   *           thrown if connection could not be established
+   */
+  public DeviceConnector createClientConnection(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
+      throws IAgentException;
 }

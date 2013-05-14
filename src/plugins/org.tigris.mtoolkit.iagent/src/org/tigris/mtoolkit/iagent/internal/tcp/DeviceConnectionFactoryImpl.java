@@ -22,21 +22,21 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 /**
  * Device connection factory providing DeviceConnectors working over TCP
  * transport
- * 
+ *
  */
-public class DeviceConnectionFactoryImpl implements DeviceConnectorFactory {
+public final class DeviceConnectionFactoryImpl implements DeviceConnectorFactory { // NO_UCD
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectorFactory#createClientConnection(org.tigris.mtoolkit.iagent.transport.Transport, java.util.Dictionary, org.tigris.mtoolkit.iagent.IAProgressMonitor)
+   */
+  public DeviceConnector createClientConnection(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
+      throws IAgentException {
+    return new DeviceConnectorImpl(transport, aConProps, monitor);
+  }
 
-	public DeviceConnector createClientConnection(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
-			throws IAgentException {
-		return new DeviceConnectorImpl(transport, aConProps, monitor);
-	}
-
-	public DeviceConnector createServerConnection(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
-			throws IAgentException {
-		throw new UnsupportedOperationException();
-	}
-
-	public int getConnectionType() {
-		return DeviceConnector.TYPE_TCP;
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectorFactory#getConnectionType()
+   */
+  public int getConnectionType() {
+    return DeviceConnector.TYPE_TCP;
+  }
 }
