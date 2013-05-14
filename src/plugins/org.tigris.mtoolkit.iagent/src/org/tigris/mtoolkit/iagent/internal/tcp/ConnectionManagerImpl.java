@@ -207,13 +207,6 @@ public final class ConnectionManagerImpl implements ConnectionManager {
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.spi.ConnectionManager#connectionClosed(org.tigris.mtoolkit.iagent.spi.AbstractConnection)
-   */
-  public void connectionClosed(AbstractConnection connection) {
-    connectionClosed(connection, true);
-  }
-
-  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.spi.ConnectionManager#queryProperty(java.lang.String)
    */
   public Object queryProperty(String propertyName) {
