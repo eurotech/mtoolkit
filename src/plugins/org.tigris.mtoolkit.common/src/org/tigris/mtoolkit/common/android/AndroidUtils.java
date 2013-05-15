@@ -252,6 +252,7 @@ public final class AndroidUtils {
    * @return
    */
   public static boolean isConvertedToDex(File file) {
+    boolean isConvertedToDex = false;
     ZipFile zipFile = null;
     try {
       zipFile = new ZipFile(file);
@@ -260,15 +261,15 @@ public final class AndroidUtils {
       Enumeration zipEntries = zipFile.entries();
       while (zipEntries.hasMoreElements()) {
         if ("classes.dex".equalsIgnoreCase(((ZipEntry) zipEntries.nextElement()).getName())) {
-          return true;
+          isConvertedToDex = true;
+          break;
         }
       }
     } catch (IOException ex) {
-      return false;
     } finally {
       FileUtils.close(zipFile);
     }
-    return false;
+    return isConvertedToDex;
   }
 
   /**
