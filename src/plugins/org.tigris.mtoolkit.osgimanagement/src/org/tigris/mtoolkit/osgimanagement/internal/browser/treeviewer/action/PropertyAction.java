@@ -17,33 +17,41 @@ import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
-public class PropertyAction extends SelectionProviderAction implements IStateAction {
+public final class PropertyAction extends SelectionProviderAction implements IStateAction {
+  private TreeViewer parentView;
 
-	private TreeViewer parentView;
+  public PropertyAction(ISelectionProvider provider, String label) {
+    super(provider, label);
+    this.parentView = (TreeViewer) provider;
+  }
 
-	public PropertyAction(ISelectionProvider provider, String label) {
-		super(provider, label);
-		this.parentView = (TreeViewer) provider;
-		this.setText(label + "@Alt+Enter");
-	}
+  // run method
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  @Override
+  public void run() {
+    FrameworkImpl framework = (FrameworkImpl) getStructuredSelection().getFirstElement();
+    ActionsManager.frameworkPropertiesAction(framework, parentView);
+    getSelectionProvider().setSelection(getSelection());
+  }
 
-	// run method
-	public void run() {
-		FrameworkImpl framework = (FrameworkImpl) getStructuredSelection().getFirstElement();
-		ActionsManager.frameworkPropertiesAction(framework, parentView);
-		getSelectionProvider().setSelection(getSelection());
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   */
+  @Override
+  public void selectionChanged(IStructuredSelection selection) {
+    updateState(selection);
+  }
 
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
-
-	public void updateState(IStructuredSelection selection) {
-		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof FrameworkImpl) {
-			this.setEnabled(true);
-		} else {
-			this.setEnabled(false);
-		}
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+   */
+  public void updateState(IStructuredSelection selection) {
+    if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof FrameworkImpl) {
+      this.setEnabled(true);
+    } else {
+      this.setEnabled(false);
+    }
+  }
 }

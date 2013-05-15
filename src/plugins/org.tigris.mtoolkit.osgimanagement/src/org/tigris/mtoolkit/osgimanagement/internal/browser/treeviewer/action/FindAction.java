@@ -13,25 +13,31 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.SelectionProviderAction;
 
-public class FindAction extends SelectionProviderAction {
+public final class FindAction extends SelectionProviderAction {
+  private Text filterText;
 
-	private Text filterText;
+  public FindAction(ISelectionProvider provider, Text filterText, String label) {
+    super(provider, label);
+    this.filterText = filterText;
+    setActionDefinitionId(ActionFactory.FIND.getCommandId());
+  }
 
-	public FindAction(ISelectionProvider provider, Text filterText, String label) {
-		super(provider, label);
-		this.filterText = filterText;
-		this.setText(label + "@Ctrl+F");
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  @Override
+  public void run() {
+    filterText.forceFocus();
+    filterText.selectAll();
+  }
 
-	// run method
-	public void run() {
-		filterText.forceFocus();
-		filterText.selectAll();
-	}
-
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   */
+  @Override
+  public void selectionChanged(IStructuredSelection selection) {
+  }
 }

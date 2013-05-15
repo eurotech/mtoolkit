@@ -34,15 +34,10 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 
-public class ServicePropertiesAction extends SelectionProviderAction implements IStateAction {
+public final class ServicePropertiesAction extends SelectionProviderAction implements IStateAction {
 
-  /**
-   * @param provider
-   * @param text
-   */
   public ServicePropertiesAction(ISelectionProvider provider, String text) {
     super(provider, text);
-    this.setText(text + "@Alt+Enter");
   }
 
   /*
@@ -59,6 +54,9 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
     }
     final Dictionary[] properties = new Dictionary[1];
     Job job = new Job("Retrieving service properties...") {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
@@ -70,6 +68,9 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
       }
     };
     job.addJobChangeListener(new JobChangeAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.JobChangeAdapter#done(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+       */
       @Override
       public void done(IJobChangeEvent event) {
         IStatus result = event.getResult();
@@ -88,6 +89,9 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
           return;
         }
         display.asyncExec(new Runnable() {
+          /* (non-Javadoc)
+           * @see java.lang.Runnable#run()
+           */
           public void run() {
             String tableHeader = null;
             try {
@@ -96,6 +100,9 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
             }
             PropertiesDialog dialog = new PropertiesDialog(display.getActiveShell(), Messages.service_properties_title,
                 tableHeader) {
+              /* (non-Javadoc)
+               * @see org.tigris.mtoolkit.common.gui.PropertiesDialog#attachHelp(org.eclipse.swt.widgets.Composite)
+               */
               @Override
               protected void attachHelp(Composite container) {
                 PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_SERVICE);
@@ -111,18 +118,17 @@ public class ServicePropertiesAction extends SelectionProviderAction implements 
     job.schedule();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse
-   * .jface.viewers.IStructuredSelection)
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
    */
   @Override
   public void selectionChanged(IStructuredSelection selection) {
     updateState(selection);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+   */
   public void updateState(IStructuredSelection selection) {
     if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof ObjectClass) {
       this.setEnabled(true);

@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
@@ -24,7 +25,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 public final class RemoveAction extends SelectionProviderAction implements IStateAction {
   public RemoveAction(ISelectionProvider provider, String label) {
     super(provider, label);
-    this.setText(label + "@Delete");
+    setActionDefinitionId(ActionFactory.DELETE.getCommandId());
   }
 
   /* (non-Javadoc)
@@ -78,7 +79,6 @@ public final class RemoveAction extends SelectionProviderAction implements IStat
     this.setEnabled(enabled);
   }
 
-  // override to react properly to selection change
   /* (non-Javadoc)
    * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
    */

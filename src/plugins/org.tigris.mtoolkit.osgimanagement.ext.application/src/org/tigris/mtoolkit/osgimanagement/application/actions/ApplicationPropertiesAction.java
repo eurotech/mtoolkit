@@ -15,62 +15,70 @@ import java.util.Map;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 
+public final class ApplicationPropertiesAction extends SelectionProviderAction implements IStateAction {
+  private TreeViewer parentView;
 
-public class ApplicationPropertiesAction extends SelectionProviderAction implements IStateAction {
+  public ApplicationPropertiesAction(ISelectionProvider provider, String label) {
+    super(provider, label);
+    this.parentView = (TreeViewer) provider;
+    setActionDefinitionId(ActionFactory.PROPERTIES.getCommandId());
+  }
 
-	private TreeViewer parentView;
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  @Override
+  public void run() {
+    Application application = (Application) getStructuredSelection().getFirstElement();
+    try {
+      Map headers = application.getRemoteApplication().getProperties();
+      Shell shell = parentView.getTree().getShell();
+      PropertiesDialog propertiesDialog = new PropertiesDialog(shell, "Application Properties") {
+        /* (non-Javadoc)
+         * @see org.tigris.mtoolkit.common.gui.PropertiesDialog#attachHelp(org.eclipse.swt.widgets.Composite)
+         */
+        @Override
+        protected void attachHelp(Composite container) {
+        }
+      };
 
-	public ApplicationPropertiesAction(ISelectionProvider provider, String label) {
-		super(provider, label);
-		this.parentView = (TreeViewer) provider;
-		this.setText(label + "@Alt+Enter");
-		this.setAccelerator(SWT.ALT | SWT.TRAVERSE_RETURN);
-	}
+      propertiesDialog.create();
+      propertiesDialog.getMainControl().setData(headers);
+      propertiesDialog.open();
 
-	// run method
-	public void run() {
-		Application application = (Application)getStructuredSelection().getFirstElement();
+      // needed to update workbench menu and toolbar status
+      getSelectionProvider().setSelection(getSelection());
+    } catch (IAgentException e) {
+      e.printStackTrace();
+    }
 
-		try {
-			Map headers = application.getRemoteApplication().getProperties();
-			Shell shell = parentView.getTree().getShell();
-			PropertiesDialog propertiesDialog = new PropertiesDialog(shell, "Application Properties") {
-				protected void attachHelp(Composite container) {
-				}
-			};
+  }
 
-			propertiesDialog.create();
-			propertiesDialog.getMainControl().setData(headers);
-			propertiesDialog.open();
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   */
+  @Override
+  public void selectionChanged(IStructuredSelection selection) {
+    updateState(selection);
+  }
 
-			// needed to update workbench menu and toolbar status
-			getSelectionProvider().setSelection(getSelection());
-		} catch (IAgentException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
-
-	public void updateState(IStructuredSelection selection) {
-		if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof Application) {
-			this.setEnabled(true);
-		} else {
-			this.setEnabled(false);
-		}
-	}
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+   */
+  public void updateState(IStructuredSelection selection) {
+    if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof Application) {
+      this.setEnabled(true);
+    } else {
+      this.setEnabled(false);
+    }
+  }
 }

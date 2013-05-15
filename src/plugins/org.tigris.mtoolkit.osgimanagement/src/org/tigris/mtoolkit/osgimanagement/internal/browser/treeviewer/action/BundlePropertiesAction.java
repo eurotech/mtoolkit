@@ -36,22 +36,25 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
-public class BundlePropertiesAction extends SelectionProviderAction implements IStateAction {
-
+public final class BundlePropertiesAction extends SelectionProviderAction implements IStateAction {
   private TreeViewer parentView;
 
   public BundlePropertiesAction(ISelectionProvider provider, String label) {
     super(provider, label);
     this.parentView = (TreeViewer) provider;
-    this.setText(label + "@Alt+Enter");
   }
 
-  // run method
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
   @Override
   public void run() {
     final Bundle bundle = (Bundle) getStructuredSelection().getFirstElement();
     final Dictionary[] headers = new Dictionary[1];
     Job job = new Job("Retrieving bundle properties...") {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
@@ -64,6 +67,9 @@ public class BundlePropertiesAction extends SelectionProviderAction implements I
       }
     };
     job.addJobChangeListener(new JobChangeAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.JobChangeAdapter#done(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+       */
       @Override
       public void done(IJobChangeEvent event) {
         IStatus result = event.getResult();
@@ -88,6 +94,9 @@ public class BundlePropertiesAction extends SelectionProviderAction implements I
             }
             Shell shell = parentView.getTree().getShell();
             PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
+              /* (non-Javadoc)
+               * @see org.tigris.mtoolkit.common.gui.PropertiesDialog#attachHelp(org.eclipse.swt.widgets.Composite)
+               */
               @Override
               protected void attachHelp(Composite container) {
                 PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_BUNDLE);
@@ -105,12 +114,17 @@ public class BundlePropertiesAction extends SelectionProviderAction implements I
     getSelectionProvider().setSelection(getSelection());
   }
 
-  // override to react properly to selection change
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   */
   @Override
   public void selectionChanged(IStructuredSelection selection) {
     updateState(selection);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+   */
   public void updateState(IStructuredSelection selection) {
     if (selection.size() == 1
         && getStructuredSelection().getFirstElement() instanceof Bundle

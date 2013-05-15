@@ -15,6 +15,7 @@ import java.util.Iterator;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
@@ -23,21 +24,18 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class RefreshAction extends SelectionProviderAction implements IStateAction {
-
-  private String     label1;
-  private String     label2;
+public final class RefreshAction extends SelectionProviderAction implements IStateAction {
   private TreeViewer tree;
 
-  public RefreshAction(ISelectionProvider provider, String label1, String label2, TreeViewer tree) {
-    super(provider, label1);
-    this.label1 = label1;
-    this.label2 = label2;
-    this.setText(getText() + "@F5");
+  public RefreshAction(ISelectionProvider provider, String label, TreeViewer tree) {
+    super(provider, label);
     this.tree = tree;
+    setActionDefinitionId(ActionFactory.REFRESH.getCommandId());
   }
 
-  // run method
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
   @Override
   public void run() {
     Iterator iterator = getStructuredSelection().iterator();
@@ -66,12 +64,17 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
     }
   }
 
-  // override to react properly to selection change
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   */
   @Override
   public void selectionChanged(IStructuredSelection selection) {
     updateState(selection);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
+   */
   public void updateState(IStructuredSelection selection) {
     if (selection.size() == 0) {
       setEnabled(false);
@@ -95,13 +98,6 @@ public class RefreshAction extends SelectionProviderAction implements IStateActi
         break;
       }
 
-    }
-    if (enabled) {
-      if (selection.getFirstElement() instanceof FrameworkImpl) {
-        setText(label1 + "@F5");
-      } else {
-        setText(label2 + "@F5");
-      }
     }
     this.setEnabled(enabled);
   }

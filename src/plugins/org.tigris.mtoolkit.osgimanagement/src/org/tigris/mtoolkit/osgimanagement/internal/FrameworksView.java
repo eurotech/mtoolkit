@@ -27,13 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.Command;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.core.commands.ParameterizedCommand;
-import org.eclipse.core.commands.contexts.Context;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -43,7 +36,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.action.GroupMarker;
@@ -53,11 +45,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.bindings.Binding;
-import org.eclipse.jface.bindings.Scheme;
-import org.eclipse.jface.bindings.keys.KeyBinding;
-import org.eclipse.jface.bindings.keys.KeySequence;
-import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -88,6 +75,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewReference;
@@ -97,10 +85,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
-import org.eclipse.ui.commands.ICommandService;
-import org.eclipse.ui.contexts.IContextService;
-import org.eclipse.ui.handlers.IHandlerService;
-import org.eclipse.ui.keys.IBindingService;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.ViewPart;
 import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.PluginUtilities;
@@ -166,12 +151,6 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
   public static final String                        CONSOLE_IMAGE_PATH           = "console.gif";
 
   private static final String                       SYSTEM_BUNDLES_EXT_POINT_ID  = "org.tigris.mtoolkit.osgimanagement.systemBundlesProvider";
-
-  private static final String                       FIND_COMMAND_ID              = FindAction.class.getName();
-  private static final String                       REFRESH_COMMAND_ID           = RefreshAction.class.getName();
-  private static final String                       REMOVE_COMMAND_ID            = RemoveAction.class.getName();
-  private static final String                       PROPERTIES_COMMAND_ID        = CommonPropertiesAction.class
-                                                                                     .getName();
 
   private static AddAction                          addFrameworkAction;
   private static RemoveAction                       removeFrameworkAction;
@@ -425,10 +404,10 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     addContributions();
     createToolbarAndMenu();
     PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FRAMEWORKS_VIEW);
-    createShortcut(FIND_COMMAND_ID, findAction, "Ctrl+F");
-    createShortcut(REFRESH_COMMAND_ID, refreshAction, "F5");
-    createShortcut(PROPERTIES_COMMAND_ID, commonPropertiesAction, "Alt+Enter");
-    createShortcut(REMOVE_COMMAND_ID, removeFrameworkAction, "DEL");
+    //createShortcut(FIND_COMMAND_ID, findAction, "Ctrl+F");
+    // createShortcut(REFRESH_COMMAND_ID, refreshAction, "F5");
+    //createShortcut(PROPERTIES_COMMAND_ID, commonPropertiesAction, "Alt+Enter");
+    //createShortcut(REMOVE_COMMAND_ID, removeFrameworkAction, "DEL");
   }
 
   private void createToolbarAndMenu() {
@@ -518,79 +497,16 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     }
   }
 
-  private void createShortcut(String commandName, final Action action, String shortcutCombination) {
-    try {
-      ICommandService commandService = (ICommandService) getSite().getService(ICommandService.class);
-      IHandlerService handlerService = (IHandlerService) getSite().getService(IHandlerService.class);
-      IBindingService bindingService = (IBindingService) getSite().getService(IBindingService.class);
-      IContextService contextService = (IContextService) getSite().getService(IContextService.class);
-
-      org.eclipse.core.commands.Category editCat = commandService.getCategory("org.eclipse.ui.category.edit"); //$NON-NLS-1$
-      Command scmd = commandService.getCommand(commandName);
-      if (!scmd.isDefined()) {
-        scmd.define(Messages.find_action_label, Messages.find_action_run_string, editCat);
-      }
-
-      IHandler handler = new AbstractHandler() {
-        public Object execute(ExecutionEvent event) throws ExecutionException {
-          if (action.isEnabled()) {
-            action.run();
-          }
-          return null;
-        }
-      };
-
-      handlerService.activateHandler(commandName, handler);
-
-      // now set up the keybindings
-      String sampleContextId = "sampleViewContext"; //$NON-NLS-1$
-      String parentContextId = "org.eclipse.ui.contexts.window"; //$NON-NLS-1$
-
-      Context sampleContext = contextService.getContext(sampleContextId);
-      if (!sampleContext.isDefined()) {
-        sampleContext.define(Messages.in_frameworks_view, Messages.find_in_frameworks_view, parentContextId);
-      }
-      contextService.activateContext(sampleContextId);
-
-      String defaultSchemeId = "org.eclipse.ui.defaultAcceleratorConfiguration"; //$NON-NLS-1$
-      Scheme defaultScheme = bindingService.getScheme(defaultSchemeId);
-
-      ParameterizedCommand pscmd = new ParameterizedCommand(scmd, null);
-
-      KeySequence keySequence = KeySequence.getInstance(shortcutCombination);
-      Binding newKey = new KeyBinding(keySequence, pscmd, defaultSchemeId, sampleContextId, null, null, null,
-          Binding.USER);
-
-      Binding[] bindings = bindingService.getBindings();
-      boolean found = false;
-      for (int i = 0; i < bindings.length; i++) {
-        if (bindings[i].getParameterizedCommand() != null
-            && bindings[i].getParameterizedCommand().getId().equals(commandName)) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        Binding[] newBindings = new Binding[bindings.length + 1];
-        newBindings[0] = newKey;
-        System.arraycopy(bindings, 0, newBindings, 1, bindings.length);
-        bindingService.savePreferences(defaultScheme, newBindings);
-      }
-    } catch (ParseException e) {
-      BrowserErrorHandler.processError(e, false);
-    } catch (IOException e) {
-      BrowserErrorHandler.processError(e, false);
-    }
-  }
-
   // Create custom contributions - tree popup menu
   private void addContributions() {
+    IActionBars actionBars = getViewSite().getActionBars();
+
     addFrameworkAction = new AddAction(tree, Messages.add_action_label);
     addFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(ADD_ACTION_IMAGE_PATH));
 
     removeFrameworkAction = new RemoveAction(tree, Messages.remove_action_label);
     removeFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(REMOVE_ACTION_ACTION_PATH));
-    removeFrameworkAction.setAccelerator(SWT.DEL);
+    actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), removeFrameworkAction);
 
     connectAction = new ConnectAction(tree, Messages.connect_action_label);
     connectAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONNECT_ACTION_IMAGE_PATH));
@@ -627,17 +543,18 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
 
     commonPropertiesAction = new CommonPropertiesAction(tree, Messages.property_action_label);
     commonPropertiesAction.setImageDescriptor(ImageHolder.getImageDescriptor(PROPERTIES_IMAGE_PATH));
-    commonPropertiesAction.setAccelerator(SWT.ALT | SWT.TRAVERSE_RETURN);
+    actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), commonPropertiesAction);
 
     findAction = new FindAction(tree, filterField, Messages.find_action_label);
     findAction.setImageDescriptor(ImageHolder.getImageDescriptor(SEARCH_IMAGE_PATH));
-    findAction.setAccelerator(SWT.CTRL | 'F');
+    actionBars.setGlobalActionHandler(ActionFactory.FIND.getId(), findAction);
+
     showConsoleAction = new ShowFrameworkConsole(tree, Messages.show_framework_console, tree);
     showConsoleAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONSOLE_IMAGE_PATH));
 
-    refreshAction = new RefreshAction(tree, Messages.refresh_action_label, Messages.refresh_action_label, tree);
-    refreshAction.setAccelerator(SWT.F5);
+    refreshAction = new RefreshAction(tree, Messages.refresh_action_label, tree);
     refreshAction.setImageDescriptor(ImageHolder.getImageDescriptor(REFRESH_IMAGE_PATH));
+    actionBars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), refreshAction);
 
     obtainActionProviders();
     for (int i = 0; i < actionProviders.size(); i++) {
@@ -657,6 +574,8 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     Menu menu = mgr.createContextMenu(tree.getControl());
     tree.getControl().setMenu(menu);
     getSite().registerContextMenu(mgr, tree);
+
+    actionBars.updateActionBars();
   }
 
   public void updateContextMenuStates() {
