@@ -26,7 +26,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
 public final class FrameworkSystemBundlesProvider implements ISystemBundlesProvider {
   private static final String SYSTEM_BUNDLES_FILE_NAME     = "system_bundles.txt";
-  private static final String SYSTEM_BUNDLES_RESOURCE_NAME = "/recources/" + SYSTEM_BUNDLES_FILE_NAME;
+  private static final String SYSTEM_BUNDLES_RESOURCE_NAME = "/resources/" + SYSTEM_BUNDLES_FILE_NAME;
 
   private Set                 loadedSymbolicNames;
 
