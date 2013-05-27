@@ -46,271 +46,306 @@ import org.eclipse.ui.dialogs.PropertyPage;
 /**
  * @since 5.0
  */
-public class PropertiesPage extends PropertyPage {
+public final class PropertiesPage extends PropertyPage {
+  /**
+   * @since 6.0
+   */
+  protected TreeViewer viewer;
+  protected Group      propertiesGroup;
+  private String       groupName = "Headers";
+  private Action       copyAction;
 
-	/**
-	 * @since 6.0
-	 */
-	protected TreeViewer viewer;
-	protected Group propertiesGroup;
-	private String groupName = "Headers";
-	private Action copyAction;
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+   */
+  @Override
+  public Control createContents(Composite parent) {
+    return createPage(parent);
+  }
 
-	public class TableContentProvider implements ITreeContentProvider {
-		public Object[] getElements(Object parent) {
-			if (parent instanceof Vector) {
-				return ((Vector) parent).toArray(new Object[((Vector) parent).size()]);
-			}
-			return new Object[0];
-		}
+  private Control createPage(Composite parent) {
+    Composite control = new Composite(parent, SWT.NONE);
+    control.setLayout(new GridLayout());
+    control.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		public void dispose() {
-		}
+    // Connect properties group
+    propertiesGroup = new Group(control, SWT.NONE);
+    propertiesGroup.setText(getGroupName());
+    GridData gd = new GridData(GridData.FILL_BOTH);
+    propertiesGroup.setLayoutData(gd);
+    propertiesGroup.setLayout(new GridLayout());
 
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
+    Tree tree = new Tree(propertiesGroup, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+    tree.setLayout(new GridLayout());
+    tree.setLayoutData(new GridData(GridData.FILL_BOTH));
+    tree.setHeaderVisible(true);
+    tree.setLinesVisible(true);
 
-		/**
-		 * @since 6.0
-		 */
-		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof PropertyObject) {
-				PropertyObject p = (PropertyObject) parentElement;
-				if (p.getData() instanceof Map) {
-					Vector children = getData((Map) p.getData());
-					return children.toArray(new Object[children.size()]);
-				} else if (p.getData() instanceof Dictionary) {
-					Vector children = getData((Dictionary) p.getData());
-					return children.toArray(new Object[children.size()]);
-				} else if (p.getData() instanceof Object[]) {
-					Vector children = getData(p.getName(), (Object[]) p.getData());
-					return children.toArray(new Object[children.size()]);
-				} else if (p.getData() instanceof Collection) {
-					Vector children = getData(p.getName(), (Collection) p.getData());
-					return children.toArray(new Object[children.size()]);
-				}
-			}
-			return new Object[0];
-		}
+    createActions(parent.getShell());
 
-		/**
-		 * @since 6.0
-		 */
-		public Object getParent(Object element) {
-			return null;
-		}
+    MenuManager menuManager = new MenuManager();
+    menuManager.setRemoveAllWhenShown(true);
+    menuManager.addMenuListener(new IMenuListener() {
+      public void menuAboutToShow(IMenuManager mgr) {
+        fillContextMenu(mgr);
+      }
+    });
+    Menu contextMenu = menuManager.createContextMenu(tree);
+    tree.setMenu(contextMenu);
 
-		/**
-		 * @since 6.0
-		 */
-		public boolean hasChildren(Object element) {
-			if (element instanceof PropertyObject) {
-				PropertyObject p = (PropertyObject) element;
-				Object d = p.getData();
-				return d instanceof Map || d instanceof Dictionary || d instanceof Object[] || d instanceof Collection;
-			}
-			return false;
-		}
-	}
+    String[] columnTitles = {
+        "Name", "Value"
+    };
+    TreeColumn treeColumn = new TreeColumn(tree, SWT.NULL);
+    treeColumn.setText(columnTitles[0]);
+    treeColumn.setWidth(130);
+    treeColumn = new TreeColumn(tree, SWT.NULL);
+    treeColumn.setText(columnTitles[1]);
+    treeColumn.setWidth(315);
+    viewer = new TreeViewer(tree);
+    viewer.setContentProvider(new TableContentProvider());
+    viewer.setLabelProvider(new TableLabelProvider());
 
-	public class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
-		public Image getColumnImage(Object element, int columnIndex) {
-			return null;
-		}
+    viewer.setColumnProperties(new String[2]);
 
-		public String getColumnText(Object element, int columnIndex) {
-			String columnText = null;
-			PropertyObject dataElement = (PropertyObject) element;
-			switch (columnIndex) {
-			case 0:
-				columnText = dataElement.getName();
-				break;
-			case 1:
-				columnText = dataElement.getValue();
-				break;
-			}
-			return columnText;
-		}
-	}
+    gd.widthHint = 460 + tree.getBorderWidth() * 2;
 
-	public Control createContents(Composite parent) {
-		return createPage(parent);
-	}
+    parent.getShell().setText(getTitle());
 
-	private Control createPage(Composite parent) {
-		Composite control = new Composite(parent, SWT.NONE);
-		control.setLayout(new GridLayout());
-		control.setLayoutData(new GridData(GridData.FILL_BOTH));
+    control.pack();
 
-		// Connect properties group
-		propertiesGroup = new Group(control, SWT.NONE);
-		propertiesGroup.setText(getGroupName());
-		GridData gd = new GridData(GridData.FILL_BOTH);
-		propertiesGroup.setLayoutData(gd);
-		propertiesGroup.setLayout(new GridLayout());
+    return control;
+  }
 
-		Tree tree = new Tree(propertiesGroup, SWT.BORDER
-						| SWT.MULTI
-						| SWT.H_SCROLL
-						| SWT.V_SCROLL
-						| SWT.FULL_SELECTION);
-		tree.setLayout(new GridLayout());
-		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
-		tree.setHeaderVisible(true);
-		tree.setLinesVisible(true);
+  public void setData(Dictionary data) {
+    viewer.setInput(getData(data));
+  }
 
-		createActions(parent.getShell());
+  public void setData(Map data) {
+    viewer.setInput(getData(data));
+  }
 
-		MenuManager menuManager = new MenuManager();
-		menuManager.setRemoveAllWhenShown(true);
-		menuManager.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager mgr) {
-				fillContextMenu(mgr);
-			}
-		});
-		Menu contextMenu = menuManager.createContextMenu(tree);
-		tree.setMenu(contextMenu);
+  private Vector getData(Dictionary data) {
+    Vector dataVector = new Vector();
+    Enumeration keys = data.keys();
+    while (keys.hasMoreElements()) {
+      String key = (String) keys.nextElement();
+      Object value = data.get(key);
+      dataVector.addAll(getElements(key, value));
+    }
+    return dataVector;
+  }
 
-		String[] columnTitles = { "Name", "Value" };
-		TreeColumn treeColumn = new TreeColumn(tree, SWT.NULL);
-		treeColumn.setText(columnTitles[0]);
-		treeColumn.setWidth(130);
-		treeColumn = new TreeColumn(tree, SWT.NULL);
-		treeColumn.setText(columnTitles[1]);
-		treeColumn.setWidth(315);
-		viewer = new TreeViewer(tree);
-		viewer.setContentProvider(new TableContentProvider());
-		viewer.setLabelProvider(new TableLabelProvider());
+  private Vector getData(Map data) {
+    Vector dataVector = new Vector();
+    Iterator keys = data.keySet().iterator();
+    while (keys.hasNext()) {
+      Object key = keys.next();
+      Object value = data.get(key);
+      dataVector.addAll(getElements(key, value));
+    }
+    return dataVector;
+  }
 
-		viewer.setColumnProperties(new String[2]);
+  private Vector getData(String key, Object[] data) {
+    Vector dataVector = new Vector();
+    for (int i = 0; i < data.length; i++) {
+      dataVector.addAll(getElements(key + "[" + i + "]", data[i]));
+    }
+    return dataVector;
+  }
 
-		gd.widthHint = 460 + tree.getBorderWidth() * 2;
+  private Vector getData(String key, Collection data) {
+    Vector dataVector = new Vector();
+    int i = 0;
+    for (Iterator it = data.iterator(); it.hasNext(); i++) {
+      dataVector.addAll(getElements(key + "[" + i + "]", it.next()));
+    }
+    return dataVector;
+  }
 
-		parent.getShell().setText(getTitle());
+  private Vector getElements(Object key, Object value) {
+    Vector elements = new Vector();
+    if (value instanceof Map || value instanceof Dictionary || value instanceof Object[] || value instanceof Collection) {
+      PropertyObject object = new PropertyObject(key.toString(), "");
+      object.setData(value);
+      elements.add(object);
+    } else {
+      PropertyObject object = new PropertyObject(key.toString(), value.toString());
+      elements.add(object);
+    }
 
-		control.pack();
+    return elements;
+  }
 
-		return control;
-	}
+  public void setGroupName(String tableTitle) {
+    groupName = tableTitle;
+  }
 
-	protected String getGroupName() {
-		return groupName;
-	}
+  private void createActions(Shell shell) {
+    copyAction = new CopyAction(shell);
+  }
 
-	public void setData(Dictionary data) {
-		viewer.setInput(getData(data));
-	}
+  /**
+   * @since 6.0
+   */
+  protected void fillContextMenu(IMenuManager manager) {
+    IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+    manager.add(copyAction);
+    copyAction.setEnabled(selection.size() > 0);
+    copyAction.setText(selection.size() > 1 ? CopyAction.COPY_ROWS : CopyAction.COPY_ROW);
+  }
 
-	public void setData(Map data) {
-		viewer.setInput(getData(data));
-	}
+  protected String getGroupName() {
+    return groupName;
+  }
 
-	private Vector getData(Dictionary data) {
-		Vector dataVector = new Vector();
-		Enumeration keys = data.keys();
-		while (keys.hasMoreElements()) {
-			String key = (String) keys.nextElement();
-			Object value = data.get(key);
-			dataVector.addAll(getElements(key, value));
-		}
-		return dataVector;
-	}
+  private class TableContentProvider implements ITreeContentProvider {
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
+     */
+    public Object[] getElements(Object parent) {
+      if (parent instanceof Vector) {
+        return ((Vector) parent).toArray(new Object[((Vector) parent).size()]);
+      }
+      return new Object[0];
+    }
 
-	private Vector getData(Map data) {
-		Vector dataVector = new Vector();
-		Iterator keys = data.keySet().iterator();
-		while (keys.hasNext()) {
-			Object key = keys.next();
-			Object value = data.get(key);
-			dataVector.addAll(getElements(key, value));
-		}
-		return dataVector;
-	}
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+     */
+    public void dispose() {
+    }
 
-	private Vector getData(String key, Object[] data) {
-		Vector dataVector = new Vector();
-		for (int i = 0; i < data.length; i++) {
-			dataVector.addAll(getElements(key + "[" + i + "]", data[i]));
-		}
-		return dataVector;
-	}
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+     */
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    }
 
-	private Vector getData(String key, Collection data) {
-		Vector dataVector = new Vector();
-		int i = 0;
-		for (Iterator it = data.iterator(); it.hasNext(); i++) {
-			dataVector.addAll(getElements(key + "[" + i + "]", it.next()));
-		}
-		return dataVector;
-	}
+    /**
+     * @since 6.0
+     */
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
+     */
+    public Object[] getChildren(Object parentElement) {
+      if (parentElement instanceof PropertyObject) {
+        PropertyObject p = (PropertyObject) parentElement;
+        if (p.getData() instanceof Map) {
+          Vector children = getData((Map) p.getData());
+          return children.toArray(new Object[children.size()]);
+        } else if (p.getData() instanceof Dictionary) {
+          Vector children = getData((Dictionary) p.getData());
+          return children.toArray(new Object[children.size()]);
+        } else if (p.getData() instanceof Object[]) {
+          Vector children = getData(p.getName(), (Object[]) p.getData());
+          return children.toArray(new Object[children.size()]);
+        } else if (p.getData() instanceof Collection) {
+          Vector children = getData(p.getName(), (Collection) p.getData());
+          return children.toArray(new Object[children.size()]);
+        }
+      }
+      return new Object[0];
+    }
 
-	private Vector getElements(Object key, Object value) {
-		Vector elements = new Vector();
-		if (value instanceof Map || value instanceof Dictionary || value instanceof Object[]
-				|| value instanceof Collection) {
-			PropertyObject object = new PropertyObject(key.toString(), "");
-			object.setData(value);
-			elements.add(object);
-		} else {
-			PropertyObject object = new PropertyObject(key.toString(), value.toString());
-			elements.add(object);
-		}
+    /**
+     * @since 6.0
+     */
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
+     */
+    public Object getParent(Object element) {
+      return null;
+    }
 
-		return elements;
-	}
+    /**
+     * @since 6.0
+     */
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
+     */
+    public boolean hasChildren(Object element) {
+      if (element instanceof PropertyObject) {
+        PropertyObject p = (PropertyObject) element;
+        Object d = p.getData();
+        return d instanceof Map || d instanceof Dictionary || d instanceof Object[] || d instanceof Collection;
+      }
+      return false;
+    }
+  }
 
-	public void setGroupName(String tableTitle) {
-		groupName = tableTitle;
-	}
+  private class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
+     */
+    public Image getColumnImage(Object element, int columnIndex) {
+      return null;
+    }
 
-	private void createActions(Shell shell) {
-		copyAction = new CopyAction(shell);
-	}
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
+     */
+    public String getColumnText(Object element, int columnIndex) {
+      String columnText = null;
+      PropertyObject dataElement = (PropertyObject) element;
+      switch (columnIndex) {
+      case 0:
+        columnText = dataElement.getName();
+        break;
+      case 1:
+        columnText = dataElement.getValue();
+        break;
+      }
+      return columnText;
+    }
+  }
 
-	/**
-	 * @since 6.0
-	 */
-	protected void fillContextMenu(IMenuManager manager) {
-		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+  private final class CopyAction extends Action {
+    private static final String COPY_ROW  = "Copy row";
+    private static final String COPY_ROWS = "Copy rows";
+    private final String        NL        = System.getProperty("line.separator");
 
-		manager.add(copyAction);
-		copyAction.setEnabled(selection.size() > 0);
-		copyAction.setText(selection.size() > 1 ? CopyAction.COPY_ROWS : CopyAction.COPY_ROW);
-	}
+    public CopyAction(Shell shell) {
+      super(COPY_ROW);
+    }
 
-	private class CopyAction extends Action {
-		private static final String COPY_ROW = "Copy row";
-		private static final String COPY_ROWS = "Copy rows";
-		private final String NL = System.getProperty("line.separator");
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.action.Action#run()
+     */
+    @Override
+    public void run() {
+      IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+      StringBuffer sb = new StringBuffer();
 
-		private Clipboard clipboard;
-
-		public CopyAction(Shell shell) {
-			super(COPY_ROW);
-			clipboard = new Clipboard(shell.getDisplay());
-		}
-
-		public void run() {
-			IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-			StringBuffer sb = new StringBuffer();
-
-			for (Iterator it = selection.iterator(); it.hasNext();) {
-				Object element = it.next();
-				if (element instanceof PropertyObject) {
-					PropertyObject property = (PropertyObject) element;
-					if (sb.length() > 0) {
-						sb.append(NL);
-					}
-					sb.append(property.name);
-					sb.append(": ");
-					sb.append(property.value);
-				}
-			}
-			if (sb.length() == 0) {
-				return;
-			}
-			TextTransfer textTransfer = TextTransfer.getInstance();
-			clipboard.setContents(new Object[] { sb.toString() }, new Transfer[] { textTransfer });
-		}
-	}
+      for (Iterator it = selection.iterator(); it.hasNext();) {
+        Object element = it.next();
+        if (element instanceof PropertyObject) {
+          PropertyObject property = (PropertyObject) element;
+          if (sb.length() > 0) {
+            sb.append(NL);
+          }
+          sb.append(property.name);
+          sb.append(": ");
+          sb.append(property.value);
+        }
+      }
+      if (sb.length() == 0) {
+        return;
+      }
+      Clipboard clipboard = null;
+      try {
+        clipboard = new Clipboard(viewer.getControl().getDisplay());
+        clipboard.setContents(new Object[] {
+          sb.toString()
+        }, new Transfer[] {
+          TextTransfer.getInstance()
+        });
+      } finally {
+        if (clipboard != null) {
+          clipboard.dispose();
+        }
+      }
+    }
+  }
 }
