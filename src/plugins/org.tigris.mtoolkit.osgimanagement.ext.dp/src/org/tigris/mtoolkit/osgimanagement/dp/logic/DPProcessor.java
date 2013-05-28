@@ -23,10 +23,10 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
-import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.DPActionsProvider;
-import org.tigris.mtoolkit.osgimanagement.dp.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public final class DPProcessor implements FrameworkProcessorExtension {
@@ -95,11 +95,12 @@ public final class DPProcessor implements FrameworkProcessorExtension {
     InputStream input = null;
     try {
       input = item.getInputStream();
-      packageFile = FileUtils.saveFile(Activator.getFile(item.getName()), input);
+      packageFile = FileUtils.saveFile(FrameworkPlugin.getFile(item.getName()), input);
       InstallDeploymentOperation operation = new InstallDeploymentOperation(framework);
       operation.install(packageFile, monitor);
     } catch (Exception e) {
-      throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to install deployment package", e));
+      throw new CoreException(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID,
+          "Unable to install deployment package", e));
     } finally {
       FileUtils.close(input);
       if (packageFile != null) {

@@ -31,11 +31,13 @@ import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
 public final class DPPropertiesAction extends SelectionProviderAction implements IStateAction {
-  private TreeViewer parentView;
+  private static final String PROPERTY_PACKAGE = "org.tigris.mtoolkit.osgimanagement.property_dp_context"; //$NON-NLS-1$
+
+  private TreeViewer          parentView;
 
   public DPPropertiesAction(ISelectionProvider provider, String label) {
     super(provider, label);
@@ -64,7 +66,7 @@ public final class DPPropertiesAction extends SelectionProviderAction implements
          */
         @Override
         protected void attachHelp(Composite container) {
-          PlatformUI.getWorkbench().getHelpSystem().setHelp(container, Activator.PROPERTY_PACKAGE);
+          PlatformUI.getWorkbench().getHelpSystem().setHelp(container, PROPERTY_PACKAGE);
         }
       };
       Dictionary headers = new Hashtable();
@@ -132,7 +134,7 @@ public final class DPPropertiesAction extends SelectionProviderAction implements
       propertiesDialog.open();
 
     } catch (IAgentException e) {
-      StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+      StatusManager.getManager().handle(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage(), e));
       return;
     }
   }

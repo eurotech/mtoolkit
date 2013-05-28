@@ -17,48 +17,50 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.dp.Activator;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
 public abstract class RemoteDeploymentOperation extends Job {
   private final DeploymentPackage pack;
-	protected Dialog dialog;
+  protected Dialog                dialog;
 
-	public RemoteDeploymentOperation(String name, DeploymentPackage pack) {
-		super(name);
-		this.pack = pack;
-		setRule(new DPOperationSchedulingRule(pack.findFramework()));
-	}
+  public RemoteDeploymentOperation(String name, DeploymentPackage pack) {
+    super(name);
+    this.pack = pack;
+    setRule(new DPOperationSchedulingRule(pack.findFramework()));
+  }
 
-	protected DeploymentPackage getDeploymentPackage() {
-		return pack;
-	}
-
-	@Override
+  /* (non-Javadoc)
+   * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+   */
+  @Override
   protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask(getName(), 1);
-		IStatus operationResult = Status.OK_STATUS;
-		try {
-			monitor.beginTask(getName(), 1);
-			operationResult = doOperation(monitor);
-		} catch (IAgentException e) {
-			operationResult = handleException(e);
-		} finally {
-			monitor.done();
-		}
-		if (!operationResult.isOK()) {
-      StatusManager.getManager().handle(operationResult,
-				StatusManager.SHOW | StatusManager.LOG);
+    monitor.beginTask(getName(), 1);
+    IStatus operationResult = Status.OK_STATUS;
+    try {
+      monitor.beginTask(getName(), 1);
+      operationResult = doOperation(monitor);
+    } catch (IAgentException e) {
+      operationResult = handleException(e);
+    } finally {
+      monitor.done();
     }
-		return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
-	}
+    if (!operationResult.isOK()) {
+      StatusManager.getManager().handle(operationResult, StatusManager.SHOW | StatusManager.LOG);
+    }
+    return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+  }
 
-	protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;
+  protected DeploymentPackage getDeploymentPackage() {
+    return pack;
+  }
 
-	protected IStatus handleException(IAgentException e) {
-		Status errStatus = new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e);
-		return errStatus;
-	}
+  protected IStatus handleException(IAgentException e) {
+    Status errStatus = new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage(), e);
+    return errStatus;
+  }
 
-	protected abstract String getMessage(IStatus operationStatus);
+  protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;
+
+  protected abstract String getMessage(IStatus operationStatus);
 }

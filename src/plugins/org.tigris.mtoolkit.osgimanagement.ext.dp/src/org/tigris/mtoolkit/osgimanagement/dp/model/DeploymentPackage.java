@@ -27,7 +27,7 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.IconProvider;
-import org.tigris.mtoolkit.osgimanagement.dp.Activator;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
@@ -77,7 +77,7 @@ public final class DeploymentPackage extends Model implements IconProvider {
     try {
       return dp.isStale();
     } catch (IAgentException e) {
-      StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage(), e));
+      StatusManager.getManager().handle(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage(), e));
     }
     return false;
   }

@@ -34,9 +34,9 @@ import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.application.actions.ApplicationPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.application.actions.StartApplicationAction;
 import org.tigris.mtoolkit.osgimanagement.application.actions.StopApplicationAction;
-import org.tigris.mtoolkit.osgimanagement.application.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 import org.tigris.mtoolkit.osgimanagement.application.model.ApplicationPackage;
+import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class ApplicationActionsProvider implements ContentTypeActionsProvider {
@@ -134,6 +134,7 @@ public final class ApplicationActionsProvider implements ContentTypeActionsProvi
 
   public void updateEnabledState(final DeviceConnector connector) {
     Job job = new Job("Update state") {
+      @Override
       protected IStatus run(IProgressMonitor monitor) {
         final boolean enabled = ApplicationModelProvider.isApplicationsSupported(connector);
         Display display = PlatformUI.getWorkbench().getDisplay();

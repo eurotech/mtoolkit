@@ -33,8 +33,8 @@ import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.DPPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.InstallDPAction;
 import org.tigris.mtoolkit.osgimanagement.dp.actions.UninstallDPAction;
-import org.tigris.mtoolkit.osgimanagement.dp.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
+import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
@@ -42,7 +42,7 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 public class DPActionsProvider implements ContentTypeActionsProvider {
 
   public static final String DP_GROUP_IMAGE_PATH = "dp_group.gif";
-  private static final String DP_PROPERTIES_IMAGE_PATH = "properties.gif";
+  private static final String DP_PROPERTIES_IMAGE_PATH = "dp_properties.gif";
   private static final String INSTALL_DP_IMAGE_PATH = "install_dp.gif";
   private static final String UNINSTALL_DP_IMAGE_PATH = "uninstall_dp.gif";
   private static final String DP_ICON_PATH = "dpackage.gif";
@@ -122,6 +122,7 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
 
   public void updateEnabledState(final DeviceConnector connector) {
     Job job = new Job("Update state") {
+      @Override
       protected IStatus run(IProgressMonitor monitor) {
         final boolean isSupported = DPModelProvider.isDpSupported(connector);
         Display display = PlatformUI.getWorkbench().getDisplay();

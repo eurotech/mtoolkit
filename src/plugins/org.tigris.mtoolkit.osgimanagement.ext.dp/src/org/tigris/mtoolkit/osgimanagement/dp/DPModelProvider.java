@@ -32,6 +32,7 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
@@ -159,7 +160,8 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
           } catch (IAgentException e1) {
             if (e1.getErrorCode() != IAgentErrors.ERROR_DEPLOYMENT_STALE
                 && e1.getErrorCode() != IAgentErrors.ERROR_REMOTE_ADMIN_NOT_AVAILABLE) {
-              StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, e1.getMessage(), e1));
+              StatusManager.getManager().handle(
+                  new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, e1.getMessage(), e1));
             }
           }
         } else if (e.getType() == RemoteDPEvent.UNINSTALLED) {
@@ -178,7 +180,7 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
         // ignore state exceptions, which usually indicates that something
         // is was fast enough to disappear
       } catch (Throwable t) {
-        StatusManager.getManager().handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID, t.getMessage(), t));
+        StatusManager.getManager().handle(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, t.getMessage(), t));
       }
     }
   }
