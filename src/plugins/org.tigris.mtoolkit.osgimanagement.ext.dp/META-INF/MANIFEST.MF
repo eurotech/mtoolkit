@@ -4,7 +4,6 @@ Bundle-Name: OSGi Management Deployment Package Support Extension
 Bundle-SymbolicName: org.tigris.mtoolkit.osgimanagement.ext.dp;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.tigris.mtoolkit.osgimanagement
-Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface,
  org.eclipse.ui.workbench,

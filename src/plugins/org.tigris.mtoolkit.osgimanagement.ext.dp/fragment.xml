@@ -15,7 +15,7 @@
             class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
             extension="dp"
             id="org.tigris.mtoolkit.osgimanagement.ext.dp.processor"
-            name="%DeploymentPackageProvider.name"
+            name="Deployment package provider"
             type="application/vnd.osgi.dp">
       </provider>
    </extension>
