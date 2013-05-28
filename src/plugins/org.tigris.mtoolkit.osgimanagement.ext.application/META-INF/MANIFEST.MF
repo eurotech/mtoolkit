@@ -1,11 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %bundleName
+Bundle-Name: OSGi Management Application Support Extension
 Bundle-SymbolicName: org.tigris.mtoolkit.osgimanagement.ext.application;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.tigris.mtoolkit.osgimanagement
-Bundle-Localization: plugin
-Bundle-Vendor: %providerName
+Bundle-Vendor: Tigris.org
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
