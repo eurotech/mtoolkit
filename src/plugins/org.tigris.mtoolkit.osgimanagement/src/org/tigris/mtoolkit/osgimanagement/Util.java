@@ -22,11 +22,12 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
@@ -69,6 +70,13 @@ public class Util {
    */
   public static CoreException newException(int severity, String message, Throwable t) {
     return new CoreException(newStatus(severity, message, t));
+  }
+
+  /**
+   * @since 6.0
+   */
+  public static void showMessageDialog(IStatus severity, String message) {
+    StatusManager.getManager().handle(newStatus(message, severity), StatusManager.SHOW | StatusManager.LOG);
   }
 
   /**
