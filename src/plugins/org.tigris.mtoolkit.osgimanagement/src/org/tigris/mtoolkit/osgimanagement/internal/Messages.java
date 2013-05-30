@@ -38,9 +38,6 @@ public final class Messages extends NLS {
   public static String        show_bundle_id_action_label;
   public static String        show_bundle_version_action_label;
   public static String        find_action_label;
-  public static String        find_action_run_string;
-  public static String        in_frameworks_view;
-  public static String        find_in_frameworks_view;
   public static String        refresh_action_label;
   public static String        show_framework_console;
 
