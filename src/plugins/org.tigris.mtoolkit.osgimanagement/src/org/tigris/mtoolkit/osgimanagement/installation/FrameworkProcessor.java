@@ -54,8 +54,8 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemotePackage;
 import org.tigris.mtoolkit.osgimanagement.Util;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -80,9 +80,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   private boolean                                        useAdditionalProcessors    = true;
 
   static {
-    Map props = new HashMap(1, 1);
-    props.put(InstallationConstants.TESTING_SUPPORTED, Boolean.TRUE);
-    properties = Collections.unmodifiableMap(props);
+    properties = Collections.unmodifiableMap(new HashMap(1, 1));
 
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint procExtPoint = registry.getExtensionPoint(EXTENSION_POINT_PROCESSORS);

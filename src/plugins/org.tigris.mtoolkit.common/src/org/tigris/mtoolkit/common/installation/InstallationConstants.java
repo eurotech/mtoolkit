@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.common.installation;
 
 public final class InstallationConstants {
   //Installation item processor properties/arguments
-  public static final String TESTING_SUPPORTED   = "testing_supported";         //$NON-NLS-1$
   public static final String AUTO_START_ITEMS    = "auto_start_items";          //$NON-NLS-1$
   public static final String AUTO_UPDATE_ITEMS   = "auto_update_items";         //$NON-NLS-1$
 
