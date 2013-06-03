@@ -13,38 +13,30 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class BundlesCategory extends Model {
+public final class BundlesCategory extends Model {
+  public static final int       REGISTERED = 0;
+  public static final int       IN_USE     = 1;
 
-	private int type;
-	private static String[] nodes;
-	public static int REGISTERED = 0;
-	public static int IN_USE = 1;
+  private final int             type;
+  private static final String[] nodes      = {
 
-	static {
-		nodes = new String[2];
-		nodes[0] = Messages.registered_in;
-		nodes[1] = Messages.used_by;
-	}
+      Messages.registered_in, Messages.used_by
+                                           };
 
-	/**
-	 * @param type
-	 */
-	private static String getTitle(int type) {
-		if ((type > 2) || (type < 0)) {
-			type = 0;
-		}
-		return nodes[type];
-	}
+  public BundlesCategory(int type) {
+    super(getTitle(type));
+    this.type = type;
+  }
 
-	public BundlesCategory(int type) {
-		super(getTitle(type));
-		this.type = type;
-	}
+  public int getKind() {
+    return type;
+  }
 
-	/**
-	 * @return
-	 */
-	public int getKind() {
-		return type;
-	}
+  private static String getTitle(int type) {
+    if ((type > 2) || (type < 0)) {
+      type = 0;
+    }
+    return nodes[type];
+  }
+
 }
