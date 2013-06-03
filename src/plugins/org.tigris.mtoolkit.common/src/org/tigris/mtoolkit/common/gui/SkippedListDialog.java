@@ -12,9 +12,8 @@ package org.tigris.mtoolkit.common.gui;
 
 import java.util.List;
 
-import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -30,20 +29,31 @@ import org.tigris.mtoolkit.common.images.UIResources;
 /**
  * @since 6.1
  */
-public class SkippedListDialog extends ListDialog {
-
-  private Button btnSkipDialog;
+public final class SkippedListDialog extends ListDialog {
+  private Button  btnSkipDialog;
   private boolean skipDialog;
 
   public SkippedListDialog(Shell parentShell, List items) {
     super(parentShell);
-
-    setContentProvider(new DefaultContentProvider());
+    setContentProvider(new ArrayContentProvider());
     setLabelProvider(new DefaultLabelProvider());
-    setInput(items.toArray());
+    setInput(items);
     setAddCancelButton(false);
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.dialogs.ListDialog#okPressed()
+   */
+  @Override
+  protected void okPressed() {
+    skipDialog = btnSkipDialog.getSelection();
+    super.okPressed();
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.dialogs.ListDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+   */
+  @Override
   protected Control createDialogArea(Composite container) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.SKIP_LIST_DIALOG);
     Composite dialogArea = (Composite) super.createDialogArea(container);
@@ -57,31 +67,17 @@ public class SkippedListDialog extends ListDialog {
     return dialogArea;
   }
 
-  protected void okPressed() {
-    skipDialog = btnSkipDialog.getSelection();
-    super.okPressed();
-  }
-
   public boolean isSkipInFuture() {
     return skipDialog;
   }
 
-  private class DefaultLabelProvider extends LabelProvider {
+  private static class DefaultLabelProvider extends LabelProvider {
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
+     */
+    @Override
     public Image getImage(Object element) {
       return UIResources.getImage(UIResources.PLUGIN_ICON);
     }
   }
-
-  private class DefaultContentProvider implements IStructuredContentProvider {
-    public void dispose() {
-    }
-
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    }
-
-    public Object[] getElements(Object inputElement) {
-      return (Object[]) inputElement;
-    }
-  }
-
 }
