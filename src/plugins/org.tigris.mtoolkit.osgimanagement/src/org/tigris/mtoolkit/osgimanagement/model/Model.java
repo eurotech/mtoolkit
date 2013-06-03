@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -28,11 +29,14 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeLi
 public abstract class Model implements Comparable<Object>, IActionFilter {
   protected String  name;
   protected Model   parent;
-  protected Set     elementList    = new TreeSet();
+
   protected boolean selected       = false;
   protected int     selectedChilds = 0;
-  private Vector    slaves         = new Vector();
+
+  private Set       elementList    = Collections.synchronizedSet(new TreeSet());
+
   private Model     master;
+  private Vector    slaves         = new Vector();
 
   public Model(String name) {
     this.name = name;
@@ -76,29 +80,6 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
   }
 
-  private void filterRecursively(Model element) {
-    element.filter();
-    Model[] children = element.getChildren();
-    if (children != null && children.length > 0) {
-      for (int i = 0; i < children.length; i++) {
-        filterRecursively(children[i]);
-      }
-    }
-  }
-
-  private void fireChildSelected(int delta) {
-    synchronized (this) {
-      selectedChilds += delta;
-    }
-    if (getParent() != null) {
-      getParent().fireChildSelected(delta);
-    }
-  }
-
-  private void setParent(Model parent) {
-    this.parent = parent;
-  }
-
   public void removeElement(Model element) {
     element.setParent(null);
     if (elementList.remove(element)) {
@@ -110,13 +91,15 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
   }
 
-  public synchronized Model[] getChildren() {
+  public Model[] getChildren() {
     return (Model[]) elementList.toArray(new Model[elementList.size()]);
   }
 
   public Model[] getSelectedChildrenRecursively() {
     List children = new ArrayList(selectedChilds);
-    internalGetSelectedChildrenRecursively(children);
+    synchronized (elementList) {
+      internalGetSelectedChildrenRecursively(children);
+    }
     return (Model[]) children.toArray(new Model[children.size()]);
   }
 
@@ -301,16 +284,41 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
   }
 
   public int indexOf(Model child) {
-    Iterator iterator = elementList.iterator();
     int index = 0;
-    while (iterator.hasNext()) {
-      Model node = (Model) iterator.next();
-      if (node == child) {
-        return index;
+    synchronized (elementList) {
+      Iterator iterator = elementList.iterator();
+      while (iterator.hasNext()) {
+        Model node = (Model) iterator.next();
+        if (node == child) {
+          return index;
+        }
+        index++;
       }
-      index++;
     }
     return -1;
+  }
+
+  private void filterRecursively(Model element) {
+    element.filter();
+    Model[] children = element.getChildren();
+    if (children != null && children.length > 0) {
+      for (int i = 0; i < children.length; i++) {
+        filterRecursively(children[i]);
+      }
+    }
+  }
+
+  private void fireChildSelected(int delta) {
+    synchronized (this) {
+      selectedChilds += delta;
+    }
+    if (getParent() != null) {
+      getParent().fireChildSelected(delta);
+    }
+  }
+
+  private void setParent(Model parent) {
+    this.parent = parent;
   }
 
 }
