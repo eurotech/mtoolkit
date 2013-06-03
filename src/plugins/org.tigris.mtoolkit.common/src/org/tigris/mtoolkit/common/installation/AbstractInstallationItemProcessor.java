@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 
@@ -24,28 +22,6 @@ import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 public abstract class AbstractInstallationItemProcessor implements InstallationItemProcessor {
-  private final List listenersList = new ArrayList();
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#addListener(org.tigris.mtoolkit.common.installation.InstallListener)
-   */
-  public synchronized void addListener(InstallListener listener) {
-    synchronized (listenersList) {
-      if (!listenersList.contains(listener)) {
-        listenersList.add(listener);
-      }
-    }
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#removeListener(int, java.util.EventListener)
-   */
-  public synchronized void removeListener(InstallListener listener) {
-    synchronized (listenersList) {
-      listenersList.remove(listener);
-    }
-  }
-
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#getProperties()
    */
@@ -94,26 +70,6 @@ public abstract class AbstractInstallationItemProcessor implements InstallationI
     sub.done();
     if (monitor.isCanceled()) {
       return Status.CANCEL_STATUS;
-    }
-    return Status.OK_STATUS;
-  }
-
-  protected IStatus fireInstallEvent(boolean before) {
-    EventListener[] listeners;
-    synchronized (listenersList) {
-      listeners = new EventListener[listenersList.size()];
-      listenersList.toArray(listeners);
-    }
-    for (int i = 0; i < listeners.length; i++) {
-      IStatus status = null;
-      if (before) {
-        status = ((InstallListener) listeners[i]).beforeInstall();
-      } else {
-        status = ((InstallListener) listeners[i]).afterInstall();
-      }
-      if (status != null && (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR))) {
-        return status;
-      }
     }
     return Status.OK_STATUS;
   }

@@ -271,12 +271,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       }
 
       if (!itemsToInstall.isEmpty()) {
-        IStatus fieStatus = fireInstallEvent(true);
-        if (fieStatus != null) {
-          if (fieStatus.matches(IStatus.CANCEL) || fieStatus.matches(IStatus.ERROR)) {
-            return fieStatus;
-          }
-        }
         List<RemoteBundle> bundlesToStart = new ArrayList<RemoteBundle>();
         for (InstallationItem item : itemsToInstall) {
           try {
@@ -291,12 +285,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
               return status;
             }
             FrameworkPlugin.log(status);
-          }
-        }
-        fieStatus = fireInstallEvent(false);
-        if (fieStatus != null) {
-          if (fieStatus.matches(IStatus.CANCEL) || fieStatus.matches(IStatus.ERROR)) {
-            return fieStatus;
           }
         }
         if (startBundles) {

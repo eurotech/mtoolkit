@@ -25,35 +25,35 @@ public interface InstallationItemProcessor {
 
   String MIME_ZIP = "application/zip";
   String MIME_JAR = "application/java-archive";
-  String MIME_DP = "application/vnd.osgi.dp";
+  String MIME_DP  = "application/vnd.osgi.dp";
 
   /**
-   * Returns human-readable name of the general target for which this
-   * processor installs items e.g. "OSGi Framework".
-   * 
+   * Returns human-readable name of the general target for which this processor
+   * installs items e.g. "OSGi Framework".
+   *
    * @return general target name
    */
   public String getGeneralTargetName();
 
   /**
-   * Returns image descriptor of the general target for which this
-   * processor installs items e.g. OSGi Framework connected image descriptor.
-   * 
+   * Returns image descriptor of the general target for which this processor
+   * installs items e.g. OSGi Framework connected image descriptor.
+   *
    * @return general target name
    */
   public ImageDescriptor getGeneralTargetImageDescriptor();
 
   /**
    * Returns array of supported MIME types which this processor can install.
-   * 
+   *
    * @return array of supported MIME types
    */
   public String[] getSupportedMimeTypes();
 
   /**
-   * Returns array of all targets to which this item processor can install
-   * items or empty array if there are no targets.
-   * 
+   * Returns array of all targets to which this item processor can install items
+   * or empty array if there are no targets.
+   *
    * @return the array of installation targets
    */
   public InstallationTarget[] getInstallationTargets();
@@ -65,7 +65,7 @@ public interface InstallationItemProcessor {
    * processor and make sure that it doesn't pass for processing an
    * {@link InstallationItem} with unsupported MIME type.
    * </p>
-   * 
+   *
    * @param items
    *          the items to install
    * @param args
@@ -74,7 +74,7 @@ public interface InstallationItemProcessor {
    *          the target where to install the passed items
    * @param monitor
    *          the progress monitor to display current progress
-   * 
+   *
    * @return the status of installation
    * @since 6.1
    */
@@ -83,21 +83,8 @@ public interface InstallationItemProcessor {
 
   /**
    * Returns processor properties
+   *
    * @return properties map
    */
   public Map/*<String,Object>*/getProperties();
-
-  /**
-   *  Adds the listener to the collection of listeners who will be notified for specified event 
-   *  during installation process.Moreover the listener may decide to stop installation.
-   *  This method has no effect if the listener is already added.This method is thread-safe.
-   *  @param listener to be added
-   */
-  void addListener(InstallListener listener);
-
-  /**
-   * Removes specific listener.If that listener doesn't exist this method does nothing.This method is thread-safe.
-    @param listener to be added
-   */
-  void removeListener(InstallListener listener);
 }

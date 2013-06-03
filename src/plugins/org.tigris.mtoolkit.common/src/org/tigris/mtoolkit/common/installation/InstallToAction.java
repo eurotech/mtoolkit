@@ -26,11 +26,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressConstants;
 
-public class InstallToAction extends Action {
-  protected final Map                       args;
-  protected final List                      items;
-  protected final InstallationTarget        target;
-  protected final InstallationItemProcessor processor;
+public final class InstallToAction extends Action {
+  private final Map                       args;
+  private final List                      items;
+  private final InstallationTarget        target;
+  private final InstallationItemProcessor processor;
 
   public InstallToAction(InstallationItemProcessor processor, Map/*<String,Object>*/args, InstallationTarget target,
       List/*<Mapping>*/items) {
@@ -51,7 +51,7 @@ public class InstallToAction extends Action {
     if (!save) {
       return;
     }
-    Job job = new Job(getActionText()) {
+    Job job = new Job("Installing to " + target.getName()) {
       /* (non-Javadoc)
        * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
        */
@@ -75,17 +75,7 @@ public class InstallToAction extends Action {
         }
         InstallationItem[] items = (InstallationItem[]) instItems.toArray(new InstallationItem[instItems.size()]);
 
-        IStatus status = preInstall(items);
-        if (status != null) {
-          if (status.matches(IStatus.ERROR) || status.matches(IStatus.CANCEL)) {
-            monitor.done();
-            return status;
-          }
-        }
-
-        status = processor.processInstallationItems(items, args, target, monitor);
-
-        postInstall();
+        IStatus status = processor.processInstallationItems(items, args, target, monitor);
 
         monitor.done();
         if (monitor.isCanceled()) {
@@ -97,17 +87,6 @@ public class InstallToAction extends Action {
     job.setUser(true);
     job.setProperty(IProgressConstants.ICON_PROPERTY, processor.getGeneralTargetImageDescriptor());
     job.schedule();
-  }
-
-  protected IStatus preInstall(InstallationItem[] items) {
-    return Status.OK_STATUS;
-  }
-
-  protected void postInstall() {
-  }
-
-  protected String getActionText() {
-    return "Installing to " + target.getName();
   }
 
   private InstallationItem selectInstallationItem(final Object resource, final Map items) {

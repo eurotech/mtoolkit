@@ -28,8 +28,8 @@ import org.eclipse.ui.menus.IWorkbenchContribution;
 import org.eclipse.ui.services.IServiceLocator;
 import org.tigris.mtoolkit.common.Messages;
 
-public class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
-  protected ISelectionService selectionService = null;
+public final class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
+  private ISelectionService selectionService = null;
 
   public InstallToMenu() {
     super();
@@ -59,7 +59,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
     if (capableProcessors == null || capableProcessors.size() == 0) {
       return new IContributionItem[0];
     }
-    MenuManager menuManager = new MenuManager(getMenuText());
+    MenuManager menuManager = new MenuManager(Messages.install_to_menu_label);
     Iterator iterator = capableProcessors.iterator();
     boolean first = true;
     while (iterator.hasNext()) {
@@ -70,22 +70,17 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
       first = false;
     }
     menuManager.setVisible(true);
-    return new IContributionItem[] { menuManager };
+    return new IContributionItem[] {
+      menuManager
+    };
   }
 
-  protected String getMenuText() {
-    return Messages.install_to_menu_label;
-  }
-
-  protected boolean isCapable(InstallationItemProcessor processor) {
-    return true;
-  }
-
-  protected Action createInstallationAction(InstallationItemProcessor processor, InstallationTarget target, List mappings) {
+  private Action createInstallationAction(InstallationItemProcessor processor, InstallationTarget target, List mappings) {
     return new InstallToAction(processor, null, target, mappings);
   }
 
-  private void createActions(final InstallationItemProcessor processor, final List mappings, final MenuManager menuManager) {
+  private void createActions(final InstallationItemProcessor processor, final List mappings,
+      final MenuManager menuManager) {
     InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
     for (int i = 0; i < targets.length; i++) {
       Action action = createInstallationAction(processor, targets[i], mappings);
@@ -159,7 +154,7 @@ public class InstallToMenu extends CompoundContributionItem implements IWorkbenc
           break;
         }
       }
-      if (isCapable && isCapable(processor)) {
+      if (isCapable) {
         capableProcessors.add(processor);
       }
     }
