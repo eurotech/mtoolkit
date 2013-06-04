@@ -22,75 +22,75 @@ import org.tigris.mtoolkit.iagent.event.RemoteDPEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDPListener;
 
 public class RemoteDPListenerTest extends DeploymentTestCase implements RemoteDPListener {
+  private List   events  = new ArrayList();
+  private Object sleeper = new Object();
 
-	private static final int SLEEP_INTERVAL = 2000;
+  protected void setUp() throws Exception {
+    super.setUp();
+    commands.addRemoteDPListener(this);
+  }
 
-	private List events = new ArrayList();
-	private Object sleeper = new Object();
+  protected void tearDown() throws Exception {
+    commands.removeRemoteDPListener(this);
+    super.tearDown();
+  }
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		commands.addRemoteDPListener(this);
-	}
+  public void testDPListener() throws IAgentException {
+    events.clear();
+    RemoteDP dp = installDeploymentPackage("test.depl.p1_1.0.0.dp");
+    sleep(SLEEP_INTERVAL);
+    RemoteDPEvent event = findEvent(RemoteDPEvent.INSTALLED);
+    assertNotNull(event);
+    assertEquals(dp, event.getDeploymentPackage());
 
-	protected void tearDown() throws Exception {
-		commands.removeRemoteDPListener(this);
-		super.tearDown();
-	}
+    dp.uninstall(false);
+    sleep(SLEEP_INTERVAL);
+    event = findEvent(RemoteDPEvent.UNINSTALLED);
+    assertNotNull(event);
+    assertEquals(dp, event.getDeploymentPackage());
+  }
 
-	public void testDPListener() throws IAgentException {
-		events.clear();
-		RemoteDP dp = installDeploymentPackage("test.depl.p1_1.0.0.dp");
-		sleep(SLEEP_INTERVAL);
-		RemoteDPEvent event = findEvent(RemoteDPEvent.INSTALLED);
-		assertNotNull(event);
-		assertEquals(dp, event.getDeploymentPackage());
+  private static void assertEquals(RemoteDP expected, RemoteDP actual) throws IAgentException {
+    if (expected == actual) {
+      return;
+    }
+    if (expected == null || actual == null) {
+      throw new AssertionFailedError("Expected: " + expected + " but was: " + actual);
+    }
+    assertEquals(expected.getName(), actual.getName());
+    assertEquals(expected.getVersion(), actual.getVersion());
+  }
 
-		dp.uninstall(false);
-		sleep(SLEEP_INTERVAL);
-		event = findEvent(RemoteDPEvent.UNINSTALLED);
-		assertNotNull(event);
-		assertEquals(dp, event.getDeploymentPackage());
-	}
+  private void sleep(long time) {
+    synchronized (sleeper) {
+      if (events.size() > 0) {
+        return;
+      }
+      try {
+        sleeper.wait(time);
+      } catch (InterruptedException e) {
+      }
+    }
+  }
 
-	private static void assertEquals(RemoteDP expected, RemoteDP actual) throws IAgentException {
-		if (expected == actual)
-			return;
-		if (expected == null || actual == null)
-			throw new AssertionFailedError("Expected: " + expected + " but was: " + actual);
-		assertEquals(expected.getName(), actual.getName());
-		assertEquals(expected.getVersion(), actual.getVersion());
-	}
+  private RemoteDPEvent findEvent(int type) throws IAgentException {
+    synchronized (sleeper) {
+      for (Iterator it = events.iterator(); it.hasNext();) {
+        RemoteDPEvent event = (RemoteDPEvent) it.next();
+        if (event.getType() == type) {
+          it.remove();
+          return event;
+        }
+      }
+    }
+    return null;
+  }
 
-	private void sleep(long time) {
-		synchronized (sleeper) {
-			if (events.size() > 0)
-				return;
-			try {
-				sleeper.wait(time);
-			} catch (InterruptedException e) {
-			}
-		}
-	}
-
-	private RemoteDPEvent findEvent(int type) throws IAgentException {
-		synchronized (sleeper) {
-			for (Iterator it = events.iterator(); it.hasNext();) {
-				RemoteDPEvent event = (RemoteDPEvent) it.next();
-				if (event.getType() == type) {
-					it.remove();
-					return event;
-				}
-			}
-		}
-		return null;
-	}
-
-	public void deploymentPackageChanged(RemoteDPEvent event) {
-		synchronized (sleeper) {
-			events.add(event);
-			sleeper.notifyAll();
-		}
-	}
+  public void deploymentPackageChanged(RemoteDPEvent event) {
+    synchronized (sleeper) {
+      events.add(event);
+      sleeper.notifyAll();
+    }
+  }
 
 }

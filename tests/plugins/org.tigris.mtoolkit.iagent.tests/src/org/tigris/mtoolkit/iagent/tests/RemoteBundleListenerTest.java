@@ -21,9 +21,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteBundleEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
 
 public class RemoteBundleListenerTest extends DeploymentTestCase implements RemoteBundleListener {
-
-  private static final int SLEEP_INTERVAL = 1000;
-  private List events = new ArrayList();
+  private List   events  = new ArrayList();
   private Object sleeper = new Object();
 
   public void testBundleListener() throws IAgentException {
@@ -97,7 +95,7 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
 
       assertEquals(Bundle.STARTING, bundle.getState());
       try {
-        Thread.sleep(3000);
+        Thread.sleep(SLEEP_INTERVAL);
       } catch (Exception e) {
         // TODO: handle exception
       }
@@ -127,25 +125,34 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
   }
 
   private RemoteBundleEvent findEvent(int type1) {
-    RemoteBundleEvent[] events = findEvents(new int[] { type1 });
+    RemoteBundleEvent[] events = findEvents(new int[] {
+      type1
+    });
     return events != null ? events[0] : null;
   }
 
   private RemoteBundleEvent[] findEvents(int type1, int type2) {
-    return findEvents(new int[] { type1, type2 });
+    return findEvents(new int[] {
+        type1, type2
+    });
   }
 
   private RemoteBundleEvent[] findEvents(int type1, int type2, int type3) {
-    return findEvents(new int[] { type1, type2, type3 });
+    return findEvents(new int[] {
+        type1, type2, type3
+    });
   }
 
   private RemoteBundleEvent[] findEvents(int type1, int type2, int type3, int type4) {
-    return findEvents(new int[] { type1, type2, type3, type4 });
+    return findEvents(new int[] {
+        type1, type2, type3, type4
+    });
   }
 
   private RemoteBundleEvent[] findEvents(int[] types) {
-    if (types == null)
+    if (types == null) {
       return null;
+    }
     synchronized (sleeper) {
       List foundEvents = new ArrayList();
       int count = 0;
@@ -167,8 +174,9 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
           }
         }
       }
-      if (foundEvents.size() == types.length)
+      if (foundEvents.size() == types.length) {
         return (RemoteBundleEvent[]) foundEvents.toArray(new RemoteBundleEvent[foundEvents.size()]);
+      }
     }
     return null;
   }
