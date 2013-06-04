@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.iagent.tests;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -26,15 +25,13 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
   private static final String CAPABILITY_2      = "test.bundle.capabilities.setter.cap2";
   private static final String CAPABILITY_REMAIN = "test.bundle.capabilities.setter.cap.remain";
 
-  RemoteBundle                bundle;
-  Map                         properties        = new Hashtable();
-
+  private RemoteBundle        bundle;
+  private final Hashtable     properties        = new Hashtable();
 
   protected void setUp() throws Exception {
     super.setUp();
     bundle = installBundle(TEST_CAP_BUNDLE);
   }
-
 
   protected void tearDown() throws Exception {
     try {
@@ -44,10 +41,6 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
     } catch (Exception e) {
     }
     super.tearDown();
-  }
-
-  public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
-    properties.put(e.getProperty(), e.getValue());
   }
 
   public void testGetCapabilities() throws IAgentException {
@@ -99,7 +92,12 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
       bundle.start(0);
 
       // Events are processed asynchronously, wait prop change events to be delivered
-      Thread.sleep(3000);
+      synchronized (properties) {
+        try {
+          properties.wait(SLEEP_INTERVAL);
+        } catch (InterruptedException e) {
+        }
+      }
 
       Object cap1Value = properties.get(CAPABILITY_1);
       assertEquals("Capability 1 should be set.", new Boolean(true), cap1Value);
@@ -139,6 +137,18 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
         }
         connector.removeRemoteDevicePropertyListener(this);
       } catch (Exception e) {
+      }
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener#devicePropertiesChanged(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent)
+   */
+  public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
+    synchronized (properties) {
+      properties.put(e.getProperty(), e.getValue());
+      if (properties.contains(CAPABILITY_1) && properties.contains(CAPABILITY_2)) {
+        properties.notifyAll();
       }
     }
   }
