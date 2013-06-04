@@ -66,8 +66,8 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
@@ -1395,8 +1395,17 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   protected void addServicePropertiesNodes(ObjectClass objClass) throws IAgentException {
+    Dictionary servProperties = null;
     RemoteService rService = objClass.getService();
-    Dictionary servProperties = rService.getProperties();
+    try {
+      servProperties = rService.getProperties();
+    } catch (IAgentException e) {
+      //Services can be unregistered at any time event before clients obtain any information for them
+      if (e.getErrorCode() == IAgentErrors.ERROR_SERVICE_UNREGISTERED) {
+        return;
+      }
+      throw e;
+    }
     Enumeration keys = servProperties.keys();
     while (keys.hasMoreElements()) {
       String key = (String) keys.nextElement();
