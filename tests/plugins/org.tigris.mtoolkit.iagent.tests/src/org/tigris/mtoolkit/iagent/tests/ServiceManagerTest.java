@@ -61,7 +61,7 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
     addRemoteServiceListener(this);
     RemoteBundle bundle1 = installBundle("test_register_service.jar");
     bundle1.start(0);
-    sleep(SLEEP_INTERVAL);
+    sleep(SLEEP_INTERVAL, TEST_SERVICE_CLASS, RemoteServiceEvent.REGISTERED);
     RemoteServiceEvent registeredEvent = findEvent(TEST_SERVICE_CLASS, RemoteServiceEvent.REGISTERED);
     assertNotNull("Service Registered event not appear!", registeredEvent);
     assertNotNull(registeredEvent.getService());
@@ -69,7 +69,7 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
     events.clear();
     RemoteBundle bundle2 = installBundle("test_listener_service.jar");
     bundle2.start(0);
-    sleep(SLEEP_INTERVAL);
+    sleep(SLEEP_INTERVAL, TEST_SERVICE_CLASS, RemoteServiceEvent.MODIFIED);
     RemoteServiceEvent modifiedEvent = findEvent(TEST_SERVICE_CLASS, RemoteServiceEvent.MODIFIED);
     assertNotNull("Service Modify event not appear!", modifiedEvent);
     assertEquals(registeredEvent.getService().getServiceId(), modifiedEvent.getService().getServiceId());
@@ -78,7 +78,7 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
 
     events.clear();
     bundle1.stop(0);
-    sleep(SLEEP_INTERVAL);
+    sleep(SLEEP_INTERVAL, TEST_SERVICE_CLASS, RemoteServiceEvent.UNREGISTERED);
     RemoteServiceEvent unregisteredEvent = findEvent(TEST_SERVICE_CLASS, RemoteServiceEvent.UNREGISTERED);
     assertNotNull("Service Unregistered event not appear!", unregisteredEvent);
     assertNotNull(unregisteredEvent.getService());
@@ -109,6 +109,16 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
 
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.event.RemoteServiceListener#serviceChanged(org.tigris.mtoolkit.iagent.event.RemoteServiceEvent)
+   */
+  public void serviceChanged(RemoteServiceEvent event) {
+    synchronized (sleeper) {
+      events.add(event);
+      sleeper.notifyAll();
+    }
+  }
+
   private void sleep(long time) {
     synchronized (sleeper) {
       if (events.size() > 0) {
@@ -121,10 +131,22 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
     }
   }
 
-  public void serviceChanged(RemoteServiceEvent event) {
-    synchronized (sleeper) {
-      events.add(event);
-      sleeper.notifyAll();
+  private void sleep(long time, String expectedClass, int expectedType) throws IAgentException {
+    final long now = System.currentTimeMillis();
+    while (true) {
+      synchronized (sleeper) {
+        if (findEvent(expectedClass, expectedType) != null) {
+          return;
+        }
+        long expiredTime = System.currentTimeMillis() - now;
+        if (expiredTime >= time) {
+          return;
+        }
+        try {
+          sleeper.wait(time - expiredTime);
+        } catch (InterruptedException e) {
+        }
+      }
     }
   }
 
