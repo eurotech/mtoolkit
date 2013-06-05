@@ -9,7 +9,6 @@ Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.tigris.mtoolkit.osgimanagement,
  org.tigris.mtoolkit.osgimanagement.installation,
- org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;x-internal:=true,
  org.tigris.mtoolkit.osgimanagement.model
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.ide,
@@ -32,8 +31,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.expressions,
  org.tigris.mtoolkit.console;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.jdt.internal.debug.ui.console,
- org.tigris.mtoolkit.common.installation,
+Import-Package: org.tigris.mtoolkit.common.installation,
  org.tigris.mtoolkit.iagent,
  org.tigris.mtoolkit.iagent.spi
 DynamicImport-Package: com.prosyst.tools.iagent.ext.config
