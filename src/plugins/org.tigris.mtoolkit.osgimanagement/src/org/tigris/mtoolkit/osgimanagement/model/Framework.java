@@ -29,6 +29,8 @@ public abstract class Framework extends Model {
   public final static int    BUNDLES_VIEW     = 0;
   public final static int    SERVICES_VIEW    = 1;
 
+  protected final Object     frameworkId      = new Object();
+
   protected DeviceConnector  connector;
   protected boolean          connectedFlag;
   protected int              viewType;
@@ -94,6 +96,10 @@ public abstract class Framework extends Model {
 
   public static Object getLockObject(DeviceConnector connector) {
     return connector.lockObj;
+  }
+
+  public Object getFrameworkID() {
+    return frameworkId;
   }
 
   /**

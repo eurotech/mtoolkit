@@ -15,7 +15,11 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IOConsole;
 import org.tigris.mtoolkit.console.ConsoleManager;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
@@ -23,6 +27,9 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class ViewContentProvider implements ITreeContentProvider, ContentChangeListener {
+
+  private static final String CONSOLE_TYPE = "osgiManagementConsole";
+
   private TreeViewer viewer;
 
   // Returns the child elements of the given parent element.
@@ -146,7 +153,29 @@ public final class ViewContentProvider implements ITreeContentProvider, ContentC
     display.asyncExec(new Runnable() {
       public void run() {
         if (canUpdate()) {
+          boolean changeName = false;
+          if (target instanceof Framework) {
+            Framework fw = (Framework) target;
+            changeName = ConsoleManager.equalConsoleName(fw.getConnector(), fw.getName());
+            removeConsolesFramework(fw);
+          }
           viewer.remove(target);
+          if (changeName) {
+            Model[] children = FrameworksView.getTreeRoot().getChildren();
+            if (children != null) {
+              for (int i = 0; i < children.length; i++) {
+                Model model = children[i];
+                if (model instanceof Framework) {
+                  Framework fw = (Framework) model;
+                  if (fw.getConnector() != null) {
+                    ConsoleManager.setName(fw.getConnector(), fw.getName());
+                    viewer.refresh();
+                    break;
+                  }
+                }
+              }
+            }
+          }
         }
       }
     });
@@ -155,5 +184,29 @@ public final class ViewContentProvider implements ITreeContentProvider, ContentC
 
   private boolean canUpdate() {
     return viewer != null && !viewer.getControl().isDisposed() && viewer.getInput() != null;
+  }
+
+  private void removeConsolesFramework(Framework framework) {
+    IConsole[] allConsoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+    Object frameworkID = framework.getFrameworkID();
+    for (IConsole iConsole : allConsoles) {
+      Object consoleFrameworkId = getFrameworkIdObject(iConsole);
+      if (consoleFrameworkId != null && consoleFrameworkId.equals(frameworkID)) {
+        ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] {
+          (IOConsole) iConsole
+        });
+      }
+    }
+  }
+
+  private static boolean isRemoteLauncherConsole(IConsole console) {
+    return CONSOLE_TYPE.equals(console.getType());
+  }
+
+  private static Object getFrameworkIdObject(IConsole console) {
+    if (!isRemoteLauncherConsole(console)) {
+      return null;
+    }
+    return ((IOConsole) console).getAttribute("mtoolkit.console.frameworkid");
   }
 }

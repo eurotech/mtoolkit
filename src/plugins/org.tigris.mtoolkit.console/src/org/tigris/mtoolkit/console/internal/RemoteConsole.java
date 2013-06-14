@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.console.internal;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -54,13 +55,16 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   private IOConsoleOutputStream output;
   private String                name;
 
-  public RemoteConsole(DeviceConnector dc, String name, IProcess iProcess) {
+  public RemoteConsole(DeviceConnector dc, String name, IProcess iProcess, Object fwId) {
     super("", "osgiManagementConsole", ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$ //$NON-NLS-2$
     this.name = name;
     this.connector = dc;
     this.process = iProcess;
     DeviceConnector.addDeviceConnectionListener(listener);
     setAttribute("mtoolkit.console.connector", connector); //$NON-NLS-1$
+    if (fwId != null) {
+      setAttribute("mtoolkit.console.frameworkid", fwId); //$NON-NLS-1$
+    }
   }
 
   /* (non-Javadoc)
@@ -223,11 +227,31 @@ public final class RemoteConsole extends IOConsole implements IConsole {
     // removed.
   }
 
+  public boolean equalsName(String name) {
+    String computeName = computeName(name);
+    String fwName = computeName();
+    return computeName.equals(fwName);
+  }
+
   private String computeName() {
-    String fwName = name;
+    return computeName(name);
+  }
+
+  private String computeName(String fwName) {
+    StringTokenizer tokenizer = new StringTokenizer(fwName, "()");
+    boolean hasDate = false;
+    while (tokenizer.hasMoreTokens()) {
+      String nextToken = tokenizer.nextToken();
+      try {
+        Date.parse(nextToken);
+        hasDate = true;
+      } catch (Exception e) {
+      }
+    }
     String timeStamp = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp);
     return (isDisconnected() ? Messages.RemoteConsole_Disconnected : "") + fwName //$NON-NLS-1$
-        + NLS.bind(Messages.RemoteConsole_Remote_Console_Name, timeStamp);
+        + (hasDate ? Messages.RemoteConsole_Remote_Framework_Name : NLS.bind(
+            Messages.RemoteConsole_Remote_Console_Name, timeStamp));
   }
 
   private static ConsoleReader redirectInput(RemoteConsole console, DeviceConnector connector) {

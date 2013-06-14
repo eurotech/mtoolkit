@@ -28,13 +28,17 @@ public final class ConsoleManager {
 
 	private static Map consoles = new HashMap();
 
-	public static IOConsole connectConsole(DeviceConnector dc, String consoleName) {
-		return connectConsole(dc, consoleName, null);
+  public static IOConsole connectConsole(DeviceConnector dc, String consoleName) {
+    return connectConsole(dc, consoleName, null);
+  }
+
+  public static IOConsole connectConsole(DeviceConnector dc, String consoleName, Object fwId) {
+    return connectConsole(dc, consoleName, null, fwId);
 	}
 
-	public static IOConsole connectConsole(DeviceConnector dc, String consoleName, IProcess iProcess) {
+  public static IOConsole connectConsole(DeviceConnector dc, String consoleName, IProcess iProcess, Object fwId) {
 		synchronized (consoles) {
-			Object console = consoles.get(dc);
+      Object console = consoles.get(dc);
 			if (consoles.get(dc) != null) {
 				if (console instanceof IOConsole) {
 					return (IOConsole) console;
@@ -49,7 +53,7 @@ public final class ConsoleManager {
 		RemoteConsole con = null;
 		boolean showConsole = false;
 		try {
-			con = createConsole(dc, consoleName, iProcess);
+      con = createConsole(dc, consoleName, iProcess, fwId);
 		} finally {
 			synchronized (consoles) {
 				if (con == null) {
@@ -70,8 +74,9 @@ public final class ConsoleManager {
 		}
 		IConsoleManager conMng = ConsolePlugin.getDefault().getConsoleManager();
 		conMng.addConsoles(new IConsole[] { con });
-		if (showConsole)
-			conMng.showConsoleView(con);
+		if (showConsole) {
+      conMng.showConsoleView(con);
+    }
 		return con;
 	}
 
@@ -86,8 +91,9 @@ public final class ConsoleManager {
 				return;
 			}
 		}
-		if (obj == null)
-			connectConsole(dc, consoleName);
+		if (obj == null) {
+      connectConsole(dc, consoleName);
+    }
 
 		showConsoleIfCreated(dc);
 	}
@@ -96,8 +102,9 @@ public final class ConsoleManager {
 		RemoteConsole con;
 		synchronized (consoles) {
 			Object obj = consoles.get(dc);
-			if (obj == null || obj == DISCONNECT_CONSOLE)
-				return null;
+			if (obj == null || obj == DISCONNECT_CONSOLE) {
+        return null;
+      }
 			if (obj == CREATING_CONSOLE) {
 				consoles.put(dc, SHOW_CONSOLE);
 				return null;
@@ -112,8 +119,9 @@ public final class ConsoleManager {
 		RemoteConsole console;
 		synchronized (consoles) {
 			Object obj = consoles.get(dc);
-			if (obj == null || obj == DISCONNECT_CONSOLE)
-				return;
+			if (obj == null || obj == DISCONNECT_CONSOLE) {
+        return;
+      }
 			if (obj == CREATING_CONSOLE || obj == SHOW_CONSOLE) {
 				consoles.put(dc, DISCONNECT_CONSOLE);
 				return;
@@ -127,8 +135,8 @@ public final class ConsoleManager {
 		con.disconnect();
 	}
 
-	private static RemoteConsole createConsole(DeviceConnector dc, String name, IProcess iProcess) {
-		RemoteConsole console = new RemoteConsole(dc, name, iProcess);
+  private static RemoteConsole createConsole(DeviceConnector dc, String name, IProcess iProcess, Object fwId) {
+    RemoteConsole console = new RemoteConsole(dc, name, iProcess, fwId);
 		return console;
 	}
 
@@ -141,4 +149,14 @@ public final class ConsoleManager {
 		}
 	}
 
+  public static boolean equalConsoleName(DeviceConnector connector, String name) {
+    synchronized (consoles) {
+      Object console = consoles.get(connector);
+      if (console instanceof RemoteConsole) {
+        RemoteConsole remCon = (RemoteConsole) console;
+        return remCon.equalsName(name);
+      }
+    }
+    return false;
+  }
 }

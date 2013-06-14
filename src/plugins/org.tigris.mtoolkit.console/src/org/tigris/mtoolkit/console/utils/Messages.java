@@ -38,6 +38,7 @@ public final class Messages extends NLS {
   public static String        RemoteConsole_FW_Out_Reset_Failed;
   public static String        RemoteConsole_Disconnected;
   public static String        RemoteConsole_Remote_Console_Name;
+  public static String        RemoteConsole_Remote_Framework_Name;
 
   private Messages() {
   }
