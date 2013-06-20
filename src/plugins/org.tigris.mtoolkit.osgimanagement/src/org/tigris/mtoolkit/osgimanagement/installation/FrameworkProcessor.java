@@ -185,14 +185,14 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   public IStatus processInstallationItems(final InstallationItem[] items, Map args, InstallationTarget target,
       final IProgressMonitor monitor) {
     // TODO use multi status to handle errors and warnings
-    SubMonitor subMonitor = SubMonitor.convert(monitor, items.length * 2 + 7);
+    SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
     try {
       Framework framework = ((FrameworkTarget) target).getFramework();
       if (!framework.isConnected()) {
-        subMonitor.beginTask(Messages.connecting_operation_title, 10);
+        subMonitor.setTaskName(Messages.connecting_operation_title);
         ConnectFrameworkJob connectJob = new ConnectFrameworkJob(framework);
-        IStatus status = connectJob.run(subMonitor.newChild(1));
+        IStatus status = connectJob.run(subMonitor.newChild(10));
         if (status != null) {
           if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
             return status;
@@ -213,7 +213,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       if (monitor.isCanceled()) {
         return Status.CANCEL_STATUS;
       }
-      subMonitor.worked(2);
 
       final DeviceConnector connector = framework.getConnector();
       if (connector == null) {
@@ -235,16 +234,14 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         return Status.CANCEL_STATUS;
       }
 
-      subMonitor.worked(1);
       subMonitor.setTaskName(Messages.preparing_operation_title);
-      IStatus prepareStatus = prepareItems(items, preparationProps, subMonitor.newChild(items.length), false);
+      IStatus prepareStatus = prepareItems(items, preparationProps, subMonitor.newChild(70), false);
       if (prepareStatus != null) {
         if (prepareStatus.matches(IStatus.CANCEL) || prepareStatus.matches(IStatus.ERROR)) {
           return prepareStatus;
         }
       }
 
-      subMonitor.worked(4);
       boolean startBundles;
       if (preparationProps.get(InstallationConstants.AUTO_START_ITEMS) != null) {
         startBundles = ((Boolean) preparationProps.get(InstallationConstants.AUTO_START_ITEMS)).booleanValue();
@@ -261,7 +258,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       List<RemotePackage> installedPackages = new ArrayList<RemotePackage>();
       itemsToInstall.addAll(Arrays.asList(items));
       IStatus processStatus = processItemsInternal(itemsToInstall, preparationProps, framework, installedPackages,
-          subMonitor.newChild(items.length));
+          subMonitor.newChild(10));
       if (processStatus.matches(IStatus.CANCEL)) {
         monitor.setCanceled(true);
         return processStatus;
@@ -272,9 +269,14 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
 
       if (!itemsToInstall.isEmpty()) {
         List<RemoteBundle> bundlesToStart = new ArrayList<RemoteBundle>();
+        subMonitor.setWorkRemaining(10);
+        int size = itemsToInstall.size();
+        SubMonitor installBundleProgress = SubMonitor.convert(subMonitor.newChild(5), 100);
+        int worked = 100 / size;
         for (InstallationItem item : itemsToInstall) {
           try {
-            RemoteBundle installedBundle = installBundle(item, framework, subMonitor);
+            installBundleProgress.setTaskName(NLS.bind(Messages.install_bundle_operation_title, item.getName()));
+            RemoteBundle installedBundle = installBundle(item, framework, installBundleProgress.newChild(worked));
             if (installedBundle != null) {
               bundlesToStart.add(installedBundle);
             }
@@ -288,10 +290,15 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           }
         }
         if (startBundles) {
+          subMonitor.setWorkRemaining(5);
+          size = bundlesToStart.size();
+          SubMonitor startBundleProgress = SubMonitor.convert(subMonitor.newChild(5), 100);
+          worked = 100 / size;
           for (RemoteBundle bundle : bundlesToStart) {
             if (bundle != null) {
               try {
-                startBundle(bundle, subMonitor);
+                subMonitor.setTaskName(NLS.bind(Messages.start_bundle_operation_title, bundle.getSymbolicName()));
+                startBundle(bundle, startBundleProgress.newChild(worked));
               } catch (Exception e) {
                 FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
               }

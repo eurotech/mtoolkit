@@ -48,6 +48,8 @@ public final class Messages extends NLS {
   public static String        connecting_operation_title;
   public static String        preparing_operation_title;
   public static String        confirm_replace_title;
+  public static String        install_bundle_operation_title;
+  public static String        start_bundle_operation_title;
 
   public static String        new_framework_default_name;
   public static String        root_element_name;
