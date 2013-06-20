@@ -29,7 +29,6 @@ public class AllTests {
     suite.addTestSuite(ServiceManagerTest.class);
     suite.addTestSuite(RemoteServiceTest.class);
     suite.addTestSuite(RemoteServiceListenerTest.class);
-    //suite.addTestSuite(MBSASessionTest.class);
     suite.addTestSuite(ThreadPoolTest.class);
     suite.addTestSuite(VMManagerTest.class);
     // $JUnit-END$
