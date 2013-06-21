@@ -48,12 +48,20 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 /**
- *
+ * 
  * DeviceConnector implementation
- *
+ * 
  */
 public class DeviceConnectorImpl extends DeviceConnector implements EventListener, ConnectionListener,
     DeviceConnectorSpi {
+  /**
+   * Enables backward compatibility with the old socket protocol
+   */
+  public static final boolean   ENABLE_COMPATIBILITY    = Boolean.getBoolean("iagent.compatibility.enable");
+
+  private static final String   EVENT_CAPABILITY_NAME   = "capability.name";
+  private static final String   EVENT_CAPABILITY_VALUE  = "capability.value";
+
   private LightServiceRegistry  serviceRegistry;
   private VMManagerImpl         runtimeCommands;
   private DeploymentManagerImpl deploymentCommands;
@@ -62,21 +70,18 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
   private Object                lock                    = new Object();
   private volatile boolean      isActive                = true;
   private Dictionary            connectionProperties;
-  private MethodSignature       methodGetCapabilities   = new MethodSignature("getCapabilities"); //$NON-NLS-1$
+  private MethodSignature       methodGetCapabilities   = new MethodSignature("getCapabilities");           //$NON-NLS-1$
 
   private List                  devicePropertyListeners = new LinkedList();
 
   private String                DEVICE_PROPERTY_EVENT   = "iagent_property_event";
-
-  private static final String   EVENT_CAPABILITY_NAME   = "capability.name";
-  private static final String   EVENT_CAPABILITY_VALUE  = "capability.value";
 
   private HashMap               managers;
   private HashSet               currentConnectionTypes  = new HashSet();
 
   /**
    * Creates new DeviceConnector with specified transport object
-   *
+   * 
    * @param transport
    * @param aConManager
    * @param monitor
@@ -138,14 +143,16 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 
       checkCancel(monitor);
 
-      // Trying compatible controller connection
-      try {
-        debug("[connect] Trying to connect to device which support MBSA");
-        connect0(ConnectionManager.MBSA_CONNECTION, monitor);
-        return;
-      } catch (IAgentException e) {
-        debug("[connect] Failed: " + e);
-        errCause.append("\n >>> Trying connection of type MBSA (compatible) ... failed: " + e);
+      if (ENABLE_COMPATIBILITY) {
+        // Trying compatible controller connection
+        try {
+          debug("[connect] Trying to connect to device which support MBSA");
+          connect0(ConnectionManager.MBSA_CONNECTION, monitor);
+          return;
+        } catch (IAgentException e) {
+          debug("[connect] Failed: " + e);
+          errCause.append("\n >>> Trying connection of type MBSA (compatible) ... failed: " + e);
+        }
       }
 
       checkCancel(monitor);
