@@ -20,19 +20,25 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 
 public class RemoteCapabilitiesTest extends DeploymentTestCase implements RemoteDevicePropertyListener {
-  private static final String TEST_CAP_BUNDLE   = "test.bundle.capabilities.setter_1.0.0.jar";
-  private static final String CAPABILITY_1      = "test.bundle.capabilities.setter.cap1";
-  private static final String CAPABILITY_2      = "test.bundle.capabilities.setter.cap2";
-  private static final String CAPABILITY_REMAIN = "test.bundle.capabilities.setter.cap.remain";
+  private static final String TEST_CAP_BUNDLE                      = "test.bundle.capabilities.setter_1.0.0.jar";
+  private static final String CAPABILITY_1                         = "test.bundle.capabilities.setter.cap1";
+  private static final String CAPABILITY_2                         = "test.bundle.capabilities.setter.cap2";
+  private static final String CAPABILITY_REMAIN                    = "test.bundle.capabilities.setter.cap.remain";
 
   private RemoteBundle        bundle;
-  private final Hashtable     properties        = new Hashtable();
+  private final Hashtable     properties                           = new Hashtable();
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.tests.DeploymentTestCase#setUp()
+   */
   protected void setUp() throws Exception {
     super.setUp();
     bundle = installBundle(TEST_CAP_BUNDLE);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.tests.DeploymentTestCase#tearDown()
+   */
   protected void tearDown() throws Exception {
     try {
       if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
@@ -89,6 +95,8 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
       properties.clear();
       connector.addRemoteDevicePropertyListener(this);
 
+      Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
+
       bundle.start(0);
 
       // Events are processed asynchronously, wait prop change events to be delivered
@@ -119,6 +127,9 @@ public class RemoteCapabilitiesTest extends DeploymentTestCase implements Remote
       // Testing properly removing of listeners
       connector.removeRemoteDevicePropertyListener(this);
 
+      Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
+
+      properties.clear();
       bundle.start(0);
       Thread.sleep(3000);
 

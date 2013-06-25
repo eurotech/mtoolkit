@@ -27,14 +27,18 @@ import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 
 public class DeploymentTestCase extends TestCase {
-  protected static final long   SLEEP_INTERVAL         = Long.getLong("iagent.tests.sleep.interval", 10000).longValue();
-  protected static final String BUNDLE_LOCATION_PREFIX = "dc-test:bundle:";
+  protected static final long   SLEEP_INTERVAL                 = Long.getLong("iagent.tests.sleep.interval", 10000)
+                                                                   .longValue();
+  protected static final long   REMOTE_LISTENER_CHANGE_TIMEOUT = Long.getLong("iagent.tests.remotelistener.timeout",
+                                                                   5000).longValue();
+
+  protected static final String BUNDLE_LOCATION_PREFIX         = "dc-test:bundle:";
 
   protected DeviceConnector     connector;
   protected DeviceConnectorSpi  connectorSpi;
   protected DeploymentManager   commands;
-  private Set                   deploymentPackages     = new HashSet();
-  private Set                   bundles                = new HashSet();
+  private Set                   deploymentPackages             = new HashSet();
+  private Set                   bundles                        = new HashSet();
 
   protected void setUp() throws Exception {
 

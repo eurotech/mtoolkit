@@ -66,30 +66,35 @@ public class ThreadPoolTest extends TestCase {
     Worker second = new Worker(1, 2500, reg);
     Worker third = new Worker(2, 500, reg);
     //total = 1000 + 2500 + 500;
+    ThreadPool pool = null;
+    try {
+      pool = new ThreadPool(1, ThreadPool.OPTION_NONE);
+      pool.enqueueWork(first);
+      pool.enqueueWork(second);
+      pool.enqueueWork(third);
 
-    ThreadPool pool = new ThreadPool(1, ThreadPool.OPTION_NONE);
-    pool.enqueueWork(first);
-    pool.enqueueWork(second);
-    pool.enqueueWork(third);
+      sleep(100);
 
-    sleep(100);
+      assertTrue("First thread must be running", isStarted(0, reg));
+      assertFalse("Second thread must not be running", isStarted(1, reg));
+      assertFalse("Third thread must not be running", isStarted(2, reg));
 
-    assertTrue("First thread must be running", isStarted(0, reg));
-    assertFalse("Second thread must not be running", isStarted(1, reg));
-    assertFalse("Third thread must not be running", isStarted(2, reg));
+      sleep(1500);
 
-    sleep(1500);
+      assertTrue("First thread must be done", isDone(0, reg));
+      assertTrue("Second thread must be running", isStarted(1, reg));
+      assertFalse("Third thread must not be running", isStarted(2, reg));
 
-    assertTrue("First thread must be done", isDone(0, reg));
-    assertTrue("Second thread must be running", isStarted(1, reg));
-    assertFalse("Third thread must not be running", isStarted(2, reg));
+      sleep(3000);
 
-    sleep(3000);
-
-    assertTrue("First thread must be done", isDone(0, reg));
-    assertTrue("Second thread must be done", isStarted(1, reg));
-    assertTrue("Third thread must be done", isStarted(2, reg));
-
+      assertTrue("First thread must be done", isDone(0, reg));
+      assertTrue("Second thread must be done", isStarted(1, reg));
+      assertTrue("Third thread must be done", isStarted(2, reg));
+    } finally {
+      if (pool != null) {
+        pool.stop();
+      }
+    }
   }
 
   public void testParallelWithLimit() {
@@ -100,34 +105,42 @@ public class ThreadPoolTest extends TestCase {
     Worker third = new Worker(2, 500, reg);
     Worker fourth = new Worker(3, 500, reg);
 
-    ThreadPool pool = new ThreadPool(3, ThreadPool.OPTION_AGGRESSIVE);
-    pool.enqueueWork(first);
-    pool.enqueueWork(second);
-    pool.enqueueWork(third);
-    pool.enqueueWork(fourth);
+    ThreadPool pool = null;
+    try {
 
-    sleep(100);
+      pool = new ThreadPool(3, ThreadPool.OPTION_AGGRESSIVE);
+      pool.enqueueWork(first);
+      pool.enqueueWork(second);
+      pool.enqueueWork(third);
+      pool.enqueueWork(fourth);
 
-    assertTrue("First thread must be running", isStarted(0, reg));
-    assertTrue("Second thread must be running", isStarted(1, reg));
-    assertTrue("Third thread must be running", isStarted(2, reg));
-    assertFalse("Fourth thread must not be running", isStarted(3, reg));
+      sleep(100);
 
-    sleep(600);
+      assertTrue("First thread must be running", isStarted(0, reg));
+      assertTrue("Second thread must be running", isStarted(1, reg));
+      assertTrue("Third thread must be running", isStarted(2, reg));
+      assertFalse("Fourth thread must not be running", isStarted(3, reg));
 
-    assertFalse("First thread must not be done", isDone(0, reg));
-    assertFalse("Second thread must not be done", isDone(1, reg));
-    assertTrue("Third thread must be done", isDone(2, reg));
-    assertTrue("Fourth thread must be running", isStarted(3, reg));
+      sleep(600);
 
-    sleep(1000);
+      assertFalse("First thread must not be done", isDone(0, reg));
+      assertFalse("Second thread must not be done", isDone(1, reg));
+      assertTrue("Third thread must be done", isDone(2, reg));
+      assertTrue("Fourth thread must be running", isStarted(3, reg));
 
-    assertTrue("First thread must be done", isDone(0, reg));
-    assertFalse("Second thread must not be done", isDone(1, reg));
-    assertTrue("Fourth thread must be done", isDone(3, reg));
+      sleep(1000);
 
-    sleep(1500);
-    assertTrue("Second thread must be done", isDone(1, reg));
+      assertTrue("First thread must be done", isDone(0, reg));
+      assertFalse("Second thread must not be done", isDone(1, reg));
+      assertTrue("Fourth thread must be done", isDone(3, reg));
+
+      sleep(1500);
+      assertTrue("Second thread must be done", isDone(1, reg));
+    } finally {
+      if (pool != null) {
+        pool.stop();
+      }
+    }
   }
 
   private static void sleep(int duration) {
@@ -180,7 +193,7 @@ public class ThreadPoolTest extends TestCase {
     } while (true);
   }
 
-  static class AtomicInteger {
+  private static class AtomicInteger {
     private int value;
 
     public synchronized int getValue() {
