@@ -1,6 +1,10 @@
 <osgi-config xmlns:tree="http://www.prosyst.com/tee/tree"
 	tree:modelref="osgi-config">
 
+	<property tree:value="iagent.debug">
+		<prop-value>true</prop-value>
+	</property>
+
 	<bundle tree:value="../bundles/fw.eventadmin.jar">
 		<action>install&amp;start</action>
 		<feature tree:value="loader.type">
@@ -36,15 +40,15 @@
 			<feature-value>jar</feature-value>
 		</feature>
 	</bundle>
-	
-    <bundle tree:value="../bundles/fw.swadmin.ext.bundle.jar">
+
+	<bundle tree:value="../bundles/fw.swadmin.ext.bundle.jar">
 		<action>install&amp;start</action>
 		<feature tree:value="loader.type">
 			<feature-value>jar</feature-value>
 		</feature>
 	</bundle>
-	
-    <bundle tree:value="../bundles/osgimobile.swadmin.ext.deploymentpackage.jar">
+
+	<bundle tree:value="../bundles/osgimobile.swadmin.ext.deploymentpackage.jar">
 		<action>install&amp;start</action>
 		<feature tree:value="loader.type">
 			<feature-value>jar</feature-value>
