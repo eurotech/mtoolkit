@@ -34,5 +34,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.tigris.mtoolkit.common.installation,
  org.tigris.mtoolkit.iagent,
  org.tigris.mtoolkit.iagent.spi
-DynamicImport-Package: com.prosyst.tools.iagent.ext.config
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
