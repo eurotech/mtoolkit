@@ -20,7 +20,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Path;
 import org.tigris.mtoolkit.common.FileUtils;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
@@ -28,13 +27,10 @@ public final class FrameworkSystemBundlesProvider implements ISystemBundlesProvi
   private static final String SYSTEM_BUNDLES_FILE_NAME     = "system_bundles.txt";
   private static final String SYSTEM_BUNDLES_RESOURCE_NAME = "/resources/" + SYSTEM_BUNDLES_FILE_NAME;
 
-  private Set                 loadedSymbolicNames;
+  private Set<String>         loadedSymbolicNames;
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider#getSystemBundlesIDs()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider#getSystemBundlesIDs()
    */
   public Set<String> getSystemBundlesIDs() {
     if (loadedSymbolicNames == null) {
@@ -52,7 +48,7 @@ public final class FrameworkSystemBundlesProvider implements ISystemBundlesProvi
         }
         this.loadedSymbolicNames = symbolicNames;
       } catch (IOException e) {
-        DebugUtils.error(this, "Failed to load system buindles list from the bundle resources", e);
+        FrameworkPlugin.warning("Failed to load system buindles list from the bundle resources", e);
         loadedSymbolicNames = Collections.EMPTY_SET;
       } finally {
         FileUtils.close(reader);
