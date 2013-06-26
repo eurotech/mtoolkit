@@ -10,23 +10,14 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.tests;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.AssertionFailedError;
-
 import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
 
-public class ServiceManagerTest extends ServiceManagerTestCase implements RemoteServiceListener {
-  protected static final String FILTER  = "(TEST_PROPERTY=Test)";
-
-  private List                  events  = new ArrayList();
-  private Object                sleeper = new Object();
+public final class ServiceManagerTest extends ServiceManagerTestCase implements RemoteServiceListener {
+  protected static final String FILTER = "(TEST_PROPERTY=Test)";
 
   public void testGetRemoteServices() throws IAgentException {
     RemoteBundle bundle = installBundle("test_register_service.jar");
@@ -56,7 +47,7 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
     bundle = null;
   }
 
-  public void testServiceListener() throws IAgentException {
+  public void testServiceListener() throws Exception {
     events.clear();
     addRemoteServiceListener(this);
     RemoteBundle bundle1 = installBundle("test_register_service.jar");
@@ -95,20 +86,6 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
     bundle2.uninstall(null);
   }
 
-  public static void assertEquals(Object[] expected, Object[] actual) {
-    if (expected == actual) {
-      return;
-    }
-    if (expected == null || actual == null) {
-      throw new AssertionFailedError("Expected " + expected + ", but was " + actual);
-    }
-    assertEquals(expected.length, actual.length);
-    for (int i = 0; i < actual.length; i++) {
-      assertEquals(expected[i], actual[i]);
-    }
-
-  }
-
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.event.RemoteServiceListener#serviceChanged(org.tigris.mtoolkit.iagent.event.RemoteServiceEvent)
    */
@@ -119,70 +96,7 @@ public class ServiceManagerTest extends ServiceManagerTestCase implements Remote
     }
   }
 
-  private void sleep(long time) {
-    synchronized (sleeper) {
-      if (events.size() > 0) {
-        return;
-      }
-      try {
-        sleeper.wait(time);
-      } catch (InterruptedException e) {
-      }
-    }
-  }
-
-  private void sleep(long time, String expectedClass, int expectedType) throws IAgentException {
-    final long now = System.currentTimeMillis();
-    while (true) {
-      synchronized (sleeper) {
-        if (findEvent(expectedClass, expectedType) != null) {
-          return;
-        }
-        long expiredTime = System.currentTimeMillis() - now;
-        if (expiredTime >= time) {
-          return;
-        }
-        try {
-          sleeper.wait(time - expiredTime);
-        } catch (InterruptedException e) {
-        }
-      }
-    }
-  }
-
   private boolean isServicePresent(String clazz, String filter) throws IAgentException {
     return findService(getAllRemoteServices(clazz, filter)) != null;
   }
-
-  private RemoteServiceEvent findEvent(String clazz, int type) throws IAgentException {
-    synchronized (sleeper) {
-      for (int j = 0; j < events.size(); j++) {
-        RemoteServiceEvent event = (RemoteServiceEvent) events.get(j);
-        if (event.getType() == type) {
-          String[] clazzs = event.getService().getObjectClass();
-          for (int i = 0; i < clazzs.length; i++) {
-            if (clazz.equals(clazzs[i])) {
-              return event;
-            }
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  private RemoteService findService(RemoteService[] services) throws IAgentException {
-    if (services != null) {
-      for (int j = 0; j < services.length; j++) {
-        String[] clazzs = services[j].getObjectClass();
-        for (int i = 0; i < clazzs.length; i++) {
-          if (TEST_SERVICE_CLASS.equals(clazzs[i])) {
-            return services[j];
-          }
-        }
-      }
-    }
-    return null;
-  }
-
 }

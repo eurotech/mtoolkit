@@ -13,53 +13,144 @@ package org.tigris.mtoolkit.iagent.tests;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.AssertionFailedError;
+
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.ServiceManager;
+import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
 
 public class ServiceManagerTestCase extends DeploymentTestCase {
+  public static final String TEST_SERVICE_CLASS = "com.prosyst.test.servicemanager.packages.register.TestService";
 
-	private ServiceManager serviceManager = null;
-	private List services = null;
+  private ServiceManager     serviceManager     = null;
+  private List               services           = null;
 
-	public static final String TEST_SERVICE_CLASS = "com.prosyst.test.servicemanager.packages.register.TestService";
+  protected List             events             = new ArrayList();
+  protected Object           sleeper            = new Object();
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		services = new ArrayList();
-		serviceManager = connector.getServiceManager();
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.tests.DeploymentTestCase#setUp()
+   */
+  protected void setUp() throws Exception {
+    super.setUp();
+    services = new ArrayList();
+    serviceManager = connector.getServiceManager();
+  }
 
-	protected void tearDown() throws Exception {
-		for (int j = 0; j < services.size(); j++) {
-			try {
-				serviceManager.removeRemoteServiceListener((RemoteServiceListener) services.get(j));
-			} catch (IAgentException e) {
-				e.printStackTrace();
-			}
-		}
-		services.clear();
-		services = null;
-		super.tearDown();
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.tests.DeploymentTestCase#tearDown()
+   */
+  protected void tearDown() throws Exception {
+    for (int j = 0; j < services.size(); j++) {
+      try {
+        serviceManager.removeRemoteServiceListener((RemoteServiceListener) services.get(j));
+      } catch (IAgentException e) {
+        e.printStackTrace();
+      }
+    }
+    if (!services.isEmpty()) {
+      Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
+    }
+    services.clear();
+    services = null;
+    super.tearDown();
+  }
 
-	public void addRemoteServiceListener(RemoteServiceListener listener) throws IAgentException {
-		if (listener != null) {
-			serviceManager.addRemoteServiceListener(listener);
-			services.add(listener);
-		}
-	}
+  protected void addRemoteServiceListener(RemoteServiceListener listener) throws IAgentException, InterruptedException {
+    if (listener != null) {
+      serviceManager.addRemoteServiceListener(listener);
+      services.add(listener);
+      Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
+    }
+  }
 
-	public void removeRemoteServiceListener(RemoteServiceListener listener) throws IAgentException {
-		if (listener != null) {
-			serviceManager.removeRemoteServiceListener(listener);
-			services.remove(listener);
-		}
-	}
+  protected void removeRemoteServiceListener(RemoteServiceListener listener) throws IAgentException,
+      InterruptedException {
+    if (listener != null) {
+      serviceManager.removeRemoteServiceListener(listener);
+      services.remove(listener);
+      Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
+    }
+  }
 
-	public RemoteService[] getAllRemoteServices(String clazz, String filter) throws IAgentException {
-		return serviceManager.getAllRemoteServices(clazz, filter);
-	}
+  protected RemoteService[] getAllRemoteServices(String clazz, String filter) throws IAgentException {
+    return serviceManager.getAllRemoteServices(clazz, filter);
+  }
 
+  protected RemoteServiceEvent findEvent(String clazz, int type) throws IAgentException {
+    synchronized (sleeper) {
+      for (int j = 0; j < events.size(); j++) {
+        RemoteServiceEvent event = (RemoteServiceEvent) events.get(j);
+        if (event.getType() == type) {
+          String[] clazzs = event.getService().getObjectClass();
+          for (int i = 0; i < clazzs.length; i++) {
+            if (clazz.equals(clazzs[i])) {
+              return event;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  protected RemoteService findService(RemoteService[] services) throws IAgentException {
+    if (services != null) {
+      for (int j = 0; j < services.length; j++) {
+        String[] clazzs = services[j].getObjectClass();
+        for (int i = 0; i < clazzs.length; i++) {
+          if (TEST_SERVICE_CLASS.equals(clazzs[i])) {
+            return services[j];
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  protected void sleep(long time) {
+    synchronized (sleeper) {
+      if (events.size() > 0) {
+        return;
+      }
+      try {
+        sleeper.wait(time);
+      } catch (InterruptedException e) {
+      }
+    }
+  }
+
+  protected void sleep(long time, String expectedClass, int expectedType) throws IAgentException {
+    final long now = System.currentTimeMillis();
+    while (true) {
+      synchronized (sleeper) {
+        if (findEvent(expectedClass, expectedType) != null) {
+          return;
+        }
+        long expiredTime = System.currentTimeMillis() - now;
+        if (expiredTime >= time) {
+          return;
+        }
+        try {
+          sleeper.wait(time - expiredTime);
+        } catch (InterruptedException e) {
+        }
+      }
+    }
+  }
+
+  protected static void assertEquals(Object[] expected, Object[] actual) {
+    if (expected == actual) {
+      return;
+    }
+    if (expected == null || actual == null) {
+      throw new AssertionFailedError("Expected " + expected + ", but was " + actual);
+    }
+    assertEquals(expected.length, actual.length);
+    for (int i = 0; i < actual.length; i++) {
+      assertEquals(expected[i], actual[i]);
+    }
+  }
 }
