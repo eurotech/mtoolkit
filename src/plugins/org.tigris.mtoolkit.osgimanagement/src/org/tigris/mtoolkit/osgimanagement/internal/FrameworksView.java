@@ -55,6 +55,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
@@ -98,7 +99,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHan
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ListUtil;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
@@ -355,7 +355,7 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     tree.setContentProvider(new ViewContentProvider());
     tree.setLabelProvider(new ViewLabelProvider());
     tree.addFilter(filter);
-    tree.setSorter(ListUtil.BUNDLE_SORTER);
+    tree.setSorter(new ViewerSorter());
     tree.setInput(treeRoot);
     getViewSite().setSelectionProvider(tree);
 
