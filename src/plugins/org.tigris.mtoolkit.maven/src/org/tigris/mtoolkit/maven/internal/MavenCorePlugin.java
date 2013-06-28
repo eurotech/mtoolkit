@@ -10,11 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.maven.internal;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
@@ -31,12 +28,18 @@ public final class MavenCorePlugin extends AbstractUIPlugin {
   // The shared instance
   private static MavenCorePlugin plugin;
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+   */
   @Override
   public void start(BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+   */
   @Override
   public void stop(BundleContext context) throws Exception {
     plugin = null;
@@ -59,12 +62,6 @@ public final class MavenCorePlugin extends AbstractUIPlugin {
     return imageDescriptorFromPlugin(PLUGIN_ID, path);
   }
 
-  @Override
-  protected void initializeImageRegistry(ImageRegistry reg) {
-    super.initializeImageRegistry(reg);
-    ImageHolder.initializeImageRegistry(reg);
-  }
-
   public static void error(String message, Throwable t) { // NO_UCD
     log(newStatus(IStatus.ERROR, message, t));
   }
@@ -81,24 +78,16 @@ public final class MavenCorePlugin extends AbstractUIPlugin {
     return new CoreException(newStatus(severity, message, t));
   }
 
-  public static CoreException newException(IStatus status) {
-    return new CoreException(status);
-  }
-
   public static IStatus newStatus(int severity, String message, Throwable t) {
     return new Status(severity, PLUGIN_ID, message, t);
   }
 
-  public static IStatus newStatus(int severity, int code, String message, Throwable t) {
-    return new Status(severity, PLUGIN_ID, code, message, t);
-  }
-
-  public static IStatus newStatus(String message, Throwable t, List<IStatus> children) { // NO_UCD
-    IStatus[] statuses = children.toArray(new IStatus[children.size()]);
-    return new MultiStatus(PLUGIN_ID, 0, statuses, message, t);
-  }
-
-  public static CoreException newException(int severity, int code, String message, Throwable t) { // NO_UCD
-    return newException(newStatus(severity, code, message, t));
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeImageRegistry(org.eclipse.jface.resource.ImageRegistry)
+   */
+  @Override
+  protected void initializeImageRegistry(ImageRegistry reg) {
+    super.initializeImageRegistry(reg);
+    ImageHolder.initializeImageRegistry(reg);
   }
 }
