@@ -24,8 +24,9 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
   private List   events  = new ArrayList();
   private Object sleeper = new Object();
 
-  public void testBundleListener() throws IAgentException {
+  public void testBundleListener() throws Exception {
     commands.addRemoteBundleListener(this);
+    Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
 
     try {
       RemoteBundle bundle = installBundle("test_register_service.jar");
@@ -82,6 +83,7 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
   public void testLazyStartedEvent() throws Exception {
     // Requires: R4.1 specification
     commands.addRemoteBundleListener(this);
+    Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
 
     try {
       events.clear();
