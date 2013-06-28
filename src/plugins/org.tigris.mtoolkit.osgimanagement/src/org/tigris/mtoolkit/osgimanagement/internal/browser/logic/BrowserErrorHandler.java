@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -28,7 +29,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class BrowserErrorHandler {
-  private static final boolean debug = Boolean.getBoolean("mtoolkit.osgimanagement.debug"); //$NON-NLS-1$
+  private static final boolean DEBUG = "true".equals(Platform.getDebugOption("org.tigris.mtoolkit.osgimanagement/debug")); //$NON-NLS-1$
 
   private BrowserErrorHandler() {
   }
@@ -89,7 +90,7 @@ public final class BrowserErrorHandler {
   }
 
   // Process given exception with no reason given
-  public static void processError(Throwable t, boolean showDialog) {// NO_UCD
+  public static void processError(Throwable t, boolean showDialog) {
     processError(t, Messages.no_reason_message, showDialog);
   }
 
@@ -98,7 +99,7 @@ public final class BrowserErrorHandler {
   }
 
   // Process given exception with reason
-  public static void processError(final Throwable t, String info, boolean display) {// NO_UCD
+  public static void processError(final Throwable t, String info, boolean display) {
 
     // Subsitute missing exception message
     final String reason[] = new String[1];
@@ -229,7 +230,7 @@ public final class BrowserErrorHandler {
     }
   }
 
-  public static void processInfo(final String text, boolean display) {// NO_UCD
+  public static void processInfo(final String text, boolean display) {
     if (display) {
       showInfoDialog(text);
     }
@@ -238,15 +239,14 @@ public final class BrowserErrorHandler {
     }
   }
 
-  public static void debug(String msg) {// NO_UCD
-    if (debug) {
+  public static void debug(String msg) {
+    if (DEBUG) {
       System.out.println("[OSGiManagement][debug] " + msg); //$NON-NLS-1$
     }
-
   }
 
-  public static void debug(Throwable t) {// NO_UCD
-    if (debug) {
+  public static void debug(Throwable t) {
+    if (DEBUG) {
       t.printStackTrace(System.out);
     }
   }
