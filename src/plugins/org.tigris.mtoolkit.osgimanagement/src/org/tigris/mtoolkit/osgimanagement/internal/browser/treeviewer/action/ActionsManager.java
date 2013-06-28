@@ -42,8 +42,8 @@ import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
@@ -64,10 +64,11 @@ public final class ActionsManager {
   private static final String MIME_JAR   = "application/java-archive"; //$NON-NLS-1$
   private static final String JAR_FILTER = "*.jar";                   //$NON-NLS-1$
 
+  private ActionsManager() {
+  }
+
   public static void addFrameworkAction(TreeRoot treeRoot) {
-    String frameworkName = generateName(treeRoot);
-    FrameworkImpl newFrameWork = new FrameworkImpl(frameworkName, false);
-    AddFrameworkDialog sheet = new AddFrameworkDialog(treeRoot, newFrameWork, true);
+    AddFrameworkDialog sheet = new AddFrameworkDialog(treeRoot, generateName(treeRoot));
     sheet.open();
   }
 

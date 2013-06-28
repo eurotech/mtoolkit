@@ -10,62 +10,64 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
-import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class AddFrameworkDialog extends TitleAreaDialog implements ConstantsDistributor, FrameworkPanel.ErrorMonitor {
+public final class AddFrameworkDialog extends TitleAreaDialog implements FrameworkPanel.ErrorMonitor {
+  private FrameworkPanel      fwPanel;
+  private CertificatesPanel   certificatesPanel;
+  private Button              connectButton;
 
-  public Button             connectButton;
+  private final FrameworkImpl fw;
+  private final Model         parent;
 
-  private FrameworkPanel    fwPanel;
-  private CertificatesPanel certificatesPanel;
-
-  private FrameworkImpl     fw;
-
-  private Composite         mainContent;
-
-  private boolean           addFramework;
-
-  private Model             parent;
-
-  public AddFrameworkDialog(Model parent, FrameworkImpl element, boolean newFramework) {
+  public AddFrameworkDialog(Model parent, String frameworkName) {
     super(PluginUtilities.getActiveWorkbenchShell());
-    this.addFramework = newFramework;
     this.parent = parent;
+    this.fw = new FrameworkImpl(frameworkName, false);
     this.setShellStyle(SWT.RESIZE | SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL);
-    fw = element;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.dialogs.TitleAreaDialog#setErrorMessage(java.lang.String)
+   */
+  @Override
+  public void setErrorMessage(String newErrorMessage) {
+    super.setErrorMessage(newErrorMessage);
+    Button ok = getButton(OK);
+    if (ok != null) {
+      ok.setEnabled(newErrorMessage == null);
+    }
   }
 
   // Create page contents
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+   */
   @Override
   protected Control createDialogArea(Composite parent) {
     Control main = super.createDialogArea(parent);
     setTitle("Framework details");
     setMessage("Edit framework details");
 
-    parent.getShell().setText(addFramework ? Messages.add_framework_title : Messages.framework_properties_title);
+    parent.getShell().setText(Messages.add_framework_title);
 
-    mainContent = new Composite((Composite) main, SWT.NONE);
+    Composite mainContent = new Composite((Composite) main, SWT.NONE);
     mainContent.setLayout(new GridLayout());
     GridData mainGD = new GridData(GridData.FILL_BOTH);
     mainGD.minimumWidth = 300;
@@ -79,16 +81,27 @@ public class AddFrameworkDialog extends TitleAreaDialog implements ConstantsDist
     certificatesPanel = new CertificatesPanel(mainContent, 1, 1);
 
     // Autoconnect checkbox
-    if (!fw.isAutoConnected() && fw.getParent() == null) {
-      connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
-      connectButton.setEnabled(!fw.isConnected());
-    }
+    connectButton = createCheckboxButton(Messages.connect_button_label, mainContent);
+    connectButton.setEnabled(!fw.isConnected());
 
     init();
 
     PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FW_ADD_REMOVE);
-
     return mainContent;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.dialogs.Dialog#okPressed()
+   */
+  @Override
+  protected void okPressed() {
+    if (fwPanel.validate()) {
+      setFWSettings();
+      if (!connectButton.isDisposed() && connectButton.getSelection()) {
+        FrameworkConnectorFactory.connectFrameWork(fw);
+      }
+      super.okPressed();
+    }
   }
 
   private Button createCheckboxButton(String label, Composite parent) {
@@ -100,26 +113,12 @@ public class AddFrameworkDialog extends TitleAreaDialog implements ConstantsDist
     return resultButton;
   }
 
-  @Override
-  protected void okPressed() {
-    boolean correct = fwPanel.validate();
-    if (correct) {
-      setFWSettings();
-      if (connectButton != null && !connectButton.isDisposed() && connectButton.getSelection()) {
-        FrameworkConnectorFactory.connectFrameWork(fw);
-      }
-      super.okPressed();
-    }
-  }
-
   private void init() {
-    IMemento config = fw.getConfig();
+    final IMemento config = fw.getConfig();
 
-    if (connectButton != null) {
-      Boolean connect = config.getBoolean(CONNECT_TO_FRAMEWORK);
-      if (connect != null) {
-        connectButton.setSelection(connect.booleanValue());
-      }
+    Boolean connect = config.getBoolean(ConstantsDistributor.CONNECT_TO_FRAMEWORK);
+    if (connect != null) {
+      connectButton.setSelection(connect.booleanValue());
     }
 
     // Framework Panel
@@ -131,28 +130,9 @@ public class AddFrameworkDialog extends TitleAreaDialog implements ConstantsDist
 
   // Called when target options are changed
   private void setFWSettings() {
-    boolean connChanged = saveConfig(fw.getConfig());
-    fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
-
-    if (addFramework) {
-      parent.addElement(fw);
-      addFramework = false;
-    } else {
-      DeviceConnector connector = fw.getConnector();
-      if (connector != null) {
-        if (fw.isConnected() && connChanged) {
-          Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-          MessageDialog.openInformation(shell, Messages.framework_ip_changed_title,
-              Messages.framework_ip_changed_message);
-        }
-      }
-      fw.updateElement();
-      FrameworksView fwView = FrameworksView.getActiveInstance();
-      if (fwView != null) {
-        final TreeViewer tree = fwView.getTree();
-        tree.setSelection(tree.getSelection());
-      }
-    }
+    saveConfig(fw.getConfig());
+    fw.setName(fw.getConfig().getString(ConstantsDistributor.FRAMEWORK_NAME));
+    parent.addElement(fw);
   }
 
   /**
@@ -161,26 +141,11 @@ public class AddFrameworkDialog extends TitleAreaDialog implements ConstantsDist
    * @param config
    * @return true if connection properties have changed
    */
-  protected boolean saveConfig(IMemento config) {
+  private void saveConfig(IMemento config) {
     // Framework panel
-    boolean connChanged = fwPanel.save(config);
-
+    fwPanel.save(config);
     // Signing Certificates
     fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
-
-    if (connectButton != null) {
-      config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
-    }
-    return connChanged;
+    config.putBoolean(ConstantsDistributor.CONNECT_TO_FRAMEWORK, connectButton.getSelection());
   }
-
-  @Override
-  public void setErrorMessage(String newErrorMessage) {
-    super.setErrorMessage(newErrorMessage);
-    Button ok = getButton(OK);
-    if (ok != null) {
-      ok.setEnabled(newErrorMessage == null);
-    }
-  }
-
 }
