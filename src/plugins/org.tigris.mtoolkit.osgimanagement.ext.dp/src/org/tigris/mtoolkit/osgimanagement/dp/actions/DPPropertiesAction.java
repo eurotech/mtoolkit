@@ -33,6 +33,7 @@ import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.dp.model.DeploymentPackage;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.util.DPPConstants;
 
 public final class DPPropertiesAction extends SelectionProviderAction implements IStateAction {
   private static final String PROPERTY_PACKAGE = "org.tigris.mtoolkit.osgimanagement.property_dp_context"; //$NON-NLS-1$
@@ -84,58 +85,62 @@ public final class DPPropertiesAction extends SelectionProviderAction implements
           e.printStackTrace();
         }
       } else {
-        headers.put("DeploymentPackage-SymbolicName", rdp.getHeader("DeploymentPackage-SymbolicName")); //$NON-NLS-1$ //$NON-NLS-2$
-        headers.put("DeploymentPackage-Version", rdp.getHeader("DeploymentPackage-Version")); //$NON-NLS-1$ //$NON-NLS-2$
+        headers.put(DPPConstants.dpSymbolicNameHeader, rdp.getHeader(DPPConstants.dpSymbolicNameHeader));
+        headers.put(DPPConstants.dpVersionHeader, rdp.getHeader(DPPConstants.dpVersionHeader));
 
-        header = "DeploymentPackage-FixPack"; //$NON-NLS-1$
+        header = DPPConstants.dpFixPackHeader;
         value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
 
-        header = "DeploymentPackage-Copyright";value = rdp.getHeader(header); //$NON-NLS-1$
+        header = DPPConstants.dpCopyrightHeader;
+        value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
 
-        header = "DeploymentPackage-ContactAddress";value = rdp.getHeader(header); //$NON-NLS-1$
+        header = DPPConstants.dpAddressHeader;
+        value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
 
-        header = "DeploymentPackage-Description";value = rdp.getHeader(header); //$NON-NLS-1$
+        header = DPPConstants.dpDescriptionHeader;
+        value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
 
-        header = "DeploymentPackage-DocURL";value = rdp.getHeader(header); //$NON-NLS-1$
+        header = DPPConstants.dpDocURLHeader;
+        value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
 
-        header = "DeploymentPackage-Vendor";value = rdp.getHeader(header); //$NON-NLS-1$
+        header = DPPConstants.dpVendorHeader;
+        value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
 
-        header = "DeploymentPackage-License";value = rdp.getHeader(header); //$NON-NLS-1$
+        header = DPPConstants.dpLicenseHeader;
+        value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
 
-        header = "DeploymentPackage-Icon";value = rdp.getHeader(header); //$NON-NLS-1$
+        header = DPPConstants.dpIcon;
+        value = rdp.getHeader(header);
         if (value != null) {
           headers.put(header, value);
         }
       }
-
       propertiesDialog.create();
       propertiesDialog.getMainControl().setData(headers);
       propertiesDialog.open();
-
     } catch (IAgentException e) {
       StatusManager.getManager().handle(new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage(), e));
-      return;
     }
   }
 

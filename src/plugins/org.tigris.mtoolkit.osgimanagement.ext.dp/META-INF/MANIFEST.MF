@@ -9,7 +9,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.workbench,
  org.eclipse.swt,
  org.tigris.mtoolkit.common,
- org.tigris.mtoolkit.iagent
+ org.tigris.mtoolkit.iagent,
+ org.tigris.mtoolkit.dpeditor
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Tigris.org
