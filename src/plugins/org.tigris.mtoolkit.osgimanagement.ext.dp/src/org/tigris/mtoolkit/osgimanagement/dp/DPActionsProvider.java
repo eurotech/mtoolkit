@@ -102,7 +102,9 @@ public class DPActionsProvider implements ContentTypeActionsProvider {
           manager.appendToGroup(ContentTypeActionsProvider.GROUP_PROPERTIES, dpPropertiesAction);
         } else if (element instanceof SimpleNode && "Deployment Packages".equals(element.getName()) ||
             element instanceof Framework) {
-          manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
+          if (installDPAction.canInstallAction(selection)) {
+            manager.appendToGroup(ContentTypeActionsProvider.GROUP_INSTALL, installDPAction);
+          }
         }
       }
     }

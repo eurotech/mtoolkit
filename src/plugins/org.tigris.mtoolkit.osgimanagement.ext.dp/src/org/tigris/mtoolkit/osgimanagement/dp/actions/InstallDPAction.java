@@ -69,30 +69,29 @@ public final class InstallDPAction extends SelectionProviderAction implements IS
    * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
    */
   public void updateState(IStructuredSelection selection) {
+    setEnabled(canInstallAction(selection));
+  }
+
+  public boolean canInstallAction(IStructuredSelection selection) {
     if (selection.size() == 0) {
-      setEnabled(false);
-      return;
+      return false;
     }
     Framework fw = ((Model) selection.getFirstElement()).findFramework();
-    boolean enabled = true;
     if (fw == null || !fw.isConnected()) {
-      enabled = false;
-    } else {
-      Iterator iterator = selection.iterator();
-      while (iterator.hasNext()) {
-        Model model = (Model) iterator.next();
-        if (model.findFramework() != fw) {
-          enabled = false;
-          break;
-        }
-        DeviceConnector connector = model.findFramework().getConnector();
-        if (connector == null || DPModelProvider.supportDPDictionary.get(connector) != Boolean.TRUE) {
-          enabled = false;
-          break;
-        }
+      return false;
+    }
+    Iterator iterator = selection.iterator();
+    while (iterator.hasNext()) {
+      Model model = (Model) iterator.next();
+      if (model.findFramework() != fw) {
+        return false;
+      }
+      DeviceConnector connector = model.findFramework().getConnector();
+      if (connector == null || DPModelProvider.supportDPDictionary.get(connector) != Boolean.TRUE) {
+        return false;
       }
     }
-    setEnabled(enabled);
+    return true;
   }
 
   private void installDPAction(final Framework framework, TreeViewer parentView) {
