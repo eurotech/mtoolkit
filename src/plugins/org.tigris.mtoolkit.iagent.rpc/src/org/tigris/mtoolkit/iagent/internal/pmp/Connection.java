@@ -52,7 +52,7 @@ class Connection implements PMPConnection {
       if (!answer.connected) {
         String errMsg = "Can't Connect To Server: " + answer.errMsg;
         disconnect(errMsg);
-        throw new PMPException(errMsg);
+        throw PMPAnswer.createException(errMsg, answer.errCause);
       } else {
         connected = true;
       }
@@ -63,7 +63,7 @@ class Connection implements PMPConnection {
 
   /**
    * Ends the session. Frees all allocated resources.
-   * 
+   *
    * @param errMsg
    *          the error message
    */
@@ -100,7 +100,7 @@ class Connection implements PMPConnection {
 
   /**
    * Gets reference to a service registered in the Framework.
-   * 
+   *
    * @param clazz
    *          Specifies the interface under which the service was regisered.
    * @param filter
@@ -129,8 +129,9 @@ class Connection implements PMPConnection {
     }
     if (answer.errMsg != null) {
       String errMsg = answer.errMsg;
+      Throwable cause = answer.errCause;
       answer.free();
-      throw new PMPException(errMsg);
+      throw PMPAnswer.createException(errMsg, cause);
     }
     RemoteObjectImpl toReturn = new RemoteObjectImpl(answer.objID, this);
     answer.free();
@@ -139,7 +140,7 @@ class Connection implements PMPConnection {
 
   /**
    * Gets reference to a service registered in the Framework.
-   * 
+   *
    * @param clazz
    *          Specifies the interface under which the service was registered.
    * @param filter
@@ -174,8 +175,9 @@ class Connection implements PMPConnection {
     }
     if (answer.errMsg != null) {
       String errMsg = answer.errMsg;
+      Throwable cause = answer.errCause;
       answer.free();
-      throw new PMPException(errMsg);
+      throw PMPAnswer.createException(errMsg, cause);
     }
     RemoteObjectImpl toReturn = new RemoteObjectImpl(answer.objID, this);
     answer.free();
@@ -196,7 +198,7 @@ class Connection implements PMPConnection {
       os.end(true);
       answer.get(is.timeout);
       if (answer.errMsg != null) {
-        throw new PMPException(answer.errMsg);
+        throw PMPAnswer.createException(answer.errMsg, answer.errCause);
       }
       return answer.methods;
     } catch (Exception exc) {
@@ -235,8 +237,9 @@ class Connection implements PMPConnection {
     }
     if (answer.errMsg != null) {
       String errMsg = answer.errMsg;
+      Throwable cause = answer.errCause;
       answer.free();
-      throw new PMPException(errMsg);
+      throw PMPAnswer.createException(errMsg, cause);
     }
     try {
       return new RemoteMethodImpl(name, answer.returnType, argTypes, ro.c, answer.methodID, ro);
@@ -334,7 +337,7 @@ class Connection implements PMPConnection {
       // if (answer.expectsReturn) {
       answer.get(is.timeout);
       if (answer.errMsg != null) {
-        throw new PMPException("Error Invoking Method: " + answer.errMsg);
+        throw PMPAnswer.createException("Error Invoking Method: " + answer.errMsg, answer.errCause);
       }
       if (!answer.expectsReturn) {
         return null;
@@ -394,7 +397,7 @@ class Connection implements PMPConnection {
 
   /**
    * Unregisters an EventListener
-   * 
+   *
    * @param el
    *          the EventListener
    */

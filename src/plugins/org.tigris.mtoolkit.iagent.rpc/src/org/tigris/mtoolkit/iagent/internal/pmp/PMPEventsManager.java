@@ -17,7 +17,6 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
-import org.tigris.mtoolkit.iagent.pmp.PMPException;
 
 /**
  * This implementation uses the PMP Service to receive remote events.
@@ -115,10 +114,11 @@ class PMPEventsManager implements Runnable {
       DebugUtils.debug(session, "Delivering event : " + event);
     }
     if (event instanceof ListenerEvent) {
-      if (!go)
-      // don't deliver listener events to the server, the connection
-      // has been closed
+      if (!go) {
+        // don't deliver listener events to the server, the connection
+        // has been closed
         return;
+      }
       ListenerEvent levent = (ListenerEvent) event;
       switch (levent.op) {
       case ListenerEvent.ADD_LISTENER_OP:
@@ -152,7 +152,7 @@ class PMPEventsManager implements Runnable {
   /**
    * Registers an {@link EventListener
    * org.tigris.mtoolkit.iagent.internal.event.EventListener}
-   * 
+   *
    * @param el
    *          the EventListener
    * @exception Exception
@@ -167,8 +167,9 @@ class PMPEventsManager implements Runnable {
         ls = new Vector();
         ls.addElement(el);
         listeners.put(type, ls);
-        if (!PMPConnection.FRAMEWORK_DISCONNECTED.equals(type))
+        if (!PMPConnection.FRAMEWORK_DISCONNECTED.equals(type)) {
           addEvent(new ListenerEvent(ListenerEvent.ADD_LISTENER_OP, type, el));
+        }
       } else if (!ls.contains(el)) {
         ls.addElement(el);
       }
@@ -194,7 +195,7 @@ class PMPEventsManager implements Runnable {
   /**
    * Unregisters a {@link EventListener
    * org.tigris.mtoolkit.iagent.internal.event.EventListener}
-   * 
+   *
    * @param el
    *          the EventListener
    */
@@ -221,16 +222,16 @@ class PMPEventsManager implements Runnable {
           }
         }
       }
-      // the code below is not in the synchronized block, because can 
+      // the code below is not in the synchronized block, because can
       // cause the following deadlock: PMPSessionThread.readEvent() calls
       // getClassLoader() and blocks if listeners is locked by this
-      // thread, thus the PMPAnswer cannot be read until listeners is 
+      // thread, thus the PMPAnswer cannot be read until listeners is
       // unlocked.
       // The add/remove listener operations are guaranteed to be executed
       // in the order they come in the events queue because:
       // 1. deliverEvent() calls this method sequentially and no other
       // operation can be executed until this method returns.
-      // 2. This method cannot finish until answer.get() returns - it 
+      // 2. This method cannot finish until answer.get() returns - it
       // blocks until the answer is received from the remote side.
       if (sendRemove) {
         if (PMPConnection.FRAMEWORK_DISCONNECTED.equals(evType)) {
@@ -243,7 +244,7 @@ class PMPEventsManager implements Runnable {
         os.end(true);
         answer.get(session.is.timeout);
         if (!answer.success) {
-          throw new PMPException(answer.errMsg);
+          throw PMPAnswer.createException(answer.errMsg, answer.errCause);
         }
       }
     } catch (Exception exc) { // PMPException, IOException
@@ -255,7 +256,7 @@ class PMPEventsManager implements Runnable {
 
   /**
    * Posts a custom event.
-   * 
+   *
    * @param evType
    *          the event's type
    * @param event

@@ -893,6 +893,7 @@ public class PMPSessionThread implements Runnable {
       }
     } catch (IOException ioExc) {
       answer.errMsg = ioExc.toString();
+      answer.errCause = ioExc;
     }
     synchronized (answer) {
       answer.received = true;
@@ -922,6 +923,7 @@ public class PMPSessionThread implements Runnable {
       }
     } catch (Exception exc) {
       answer.errMsg = exc.toString();
+      answer.errCause = exc;
     }
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "objID: " + answer.objID);
@@ -967,11 +969,13 @@ public class PMPSessionThread implements Runnable {
             answer.obj = PMPData.readObject(null, answer.loader, is, answer.returnType, maxA, -1, null);
           } catch (Exception exc) {
             answer.errMsg = exc.toString();
+            answer.errCause = exc;
           }
         }
       }
     } catch (Exception ioExc) {
       answer.errMsg = ioExc.toString();
+      answer.errCause = ioExc;
     }
     answer.finish();
   }
@@ -1021,6 +1025,7 @@ public class PMPSessionThread implements Runnable {
       }
     } catch (Exception ioExc) {
       answer.errMsg = ioExc.toString();
+      answer.errCause = ioExc;
     }
     answer.finish();
   }
@@ -1071,6 +1076,7 @@ public class PMPSessionThread implements Runnable {
       }
     } catch (IOException ioExc) {
       answer.errMsg = ioExc.toString();
+      answer.errCause = ioExc;
     }
     answer.finish();
 

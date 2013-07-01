@@ -12,6 +12,8 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 
 import java.io.IOException;
 
+import org.tigris.mtoolkit.iagent.pmp.PMPException;
+
 class PMPAnswer {
 
 	public boolean connected = false; // ok - connect
@@ -22,7 +24,8 @@ class PMPAnswer {
 	protected RemoteMethodImpl[] methods = null;
 	protected Object obj = null;
 	protected ClassLoader loader = null;
-	protected String errMsg = null;
+  protected String errMsg = null;
+  protected Throwable errCause = null;
 
 	public boolean success = false;
 	protected Connection connection;
@@ -47,6 +50,7 @@ class PMPAnswer {
 		methods = null;
 		obj = null;
 		errMsg = null;
+    errCause = null;
 
 		success = false;
 		expectsReturn = false;
@@ -68,16 +72,17 @@ class PMPAnswer {
 			while (!received) {
 				waiting = true;
 				try {
-					if (timeout > 0)
-						wait(timeout);
-					else {
+					if (timeout > 0) {
+            wait(timeout);
+          } else {
 						wait();
 						break;
 					}
 				} catch (Exception ignore) {
 				}
-				if (!received && (timeout > 0 && (System.currentTimeMillis() - time) > timeout))
-					break;
+				if (!received && (timeout > 0 && (System.currentTimeMillis() - time) > timeout)) {
+          break;
+        }
 			}
 		}
 		if (!received) {
@@ -89,4 +94,8 @@ class PMPAnswer {
 	public String toString() {
 		return "PMPAnswer --->>> " + c + " : " + c.hashCode(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
+
+  public static PMPException createException(String errMsg, Throwable cause) {
+    return (cause == null ? new PMPException(errMsg) : new PMPException(errMsg, cause));
+  }
 }
