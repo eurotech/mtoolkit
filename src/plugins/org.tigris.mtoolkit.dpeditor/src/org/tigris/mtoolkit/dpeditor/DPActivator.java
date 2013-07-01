@@ -27,10 +27,9 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.dpeditor.util.DPPUtil;
 
-public class DPActivator extends AbstractUIPlugin {
-
+public final class DPActivator extends AbstractUIPlugin {
   // The plug-in ID
-  public static final String PLUGIN_ID                  = "deploymenEditor";
+  public static final String PLUGIN_ID                  = "org.tigris.mtoolkit.dpeditor";
 
   // The shared instance
   private static DPActivator plugin;
@@ -204,5 +203,4 @@ public class DPActivator extends AbstractUIPlugin {
   public static void log(IStatus status) {
     getDefault().getLog().log(status);
   }
-
 }
