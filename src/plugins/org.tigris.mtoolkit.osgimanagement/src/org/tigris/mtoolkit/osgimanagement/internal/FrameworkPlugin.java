@@ -21,13 +21,13 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 
 public final class FrameworkPlugin extends AbstractUIPlugin {
@@ -114,25 +114,19 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
   }
 
   public static File[] getIAgentBundles() {
-    Bundle[] bundles = getDefault().getBundle().getBundleContext().getBundles();
-    Bundle selectedIAgentRpc = null;
-    for (int i = 0; i < bundles.length; i++) {
-      Bundle bundle = bundles[i];
-      if (IAGENT_RPC_ID.equals(bundle.getSymbolicName())) {
-        selectedIAgentRpc = bundle;
-      }
+    Bundle selectedIAgentRpc = Platform.getBundle(IAGENT_RPC_ID);
+    if (selectedIAgentRpc == null) {
+      return null;
     }
-    if (selectedIAgentRpc != null) {
-      try {
-        File bundleFile = FileLocator.getBundleFile(selectedIAgentRpc);
-        if (bundleFile.isFile()) {
-          return new File[] {
-            bundleFile
-          };
-        }
-      } catch (IOException e) {
-        getDefault().getLog().log(Util.newStatus(IStatus.ERROR, "Failed to find IAgent bundle(s)", e));
+    try {
+      File bundleFile = FileLocator.getBundleFile(selectedIAgentRpc);
+      if (bundleFile.isFile()) {
+        return new File[] {
+          bundleFile
+        };
       }
+    } catch (IOException e) {
+      error("Failed to find IAgent bundle(s)", e);
     }
     return null;
   }
