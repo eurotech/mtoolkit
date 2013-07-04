@@ -16,8 +16,10 @@ import org.eclipse.swt.graphics.Image;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
 public final class ImageHolder {
+  public static final String  SERVER_ICON_DISCONNECTED = "servernc.gif"; //$NON-NLS-1$
+  public static final String  SERVER_ICON_CONNECTED    = "server.gif";  //$NON-NLS-1$
 
-  private static final String IMAGES_PATH = "/images/";
+  private static final String IMAGES_PATH              = "/images/";
 
   private ImageHolder() {
   }

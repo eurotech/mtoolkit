@@ -7,7 +7,8 @@ Bundle-ClassPath: .
 Bundle-Activator: org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.tigris.mtoolkit.osgimanagement,
+Export-Package: org.tigris.mtoolkit.console,
+ org.tigris.mtoolkit.osgimanagement,
  org.tigris.mtoolkit.osgimanagement.installation,
  org.tigris.mtoolkit.osgimanagement.model
 Require-Bundle: org.eclipse.core.runtime,
@@ -21,6 +22,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.jdt.debug,
+ org.eclipse.jdt.debug.ui,
  org.eclipse.jdt.launching,
  org.eclipse.debug.core,
  org.eclipse.debug.ui,
@@ -28,10 +30,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.tigris.mtoolkit.iagent,
  org.eclipse.pde.core,
  org.eclipse.pde.ui,
- org.eclipse.core.expressions,
- org.tigris.mtoolkit.console;bundle-version="1.0.0"
+ org.eclipse.core.expressions
 Bundle-ActivationPolicy: lazy
-Import-Package: org.tigris.mtoolkit.common.installation,
- org.tigris.mtoolkit.iagent,
- org.tigris.mtoolkit.iagent.spi
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

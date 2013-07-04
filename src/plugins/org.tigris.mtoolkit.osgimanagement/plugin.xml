@@ -124,5 +124,51 @@
             id="Framework System Bundles Provider">
       </bundlesListProvider>
    </extension>
+   
+      <extension
+         point="org.eclipse.ui.console.consolePatternMatchListeners">
+      <consolePatternMatchListener
+            class="org.eclipse.jdt.internal.debug.ui.console.JavaConsoleTracker"
+            regex="\(\S*${java_extensions_regex}\S*\)"
+            qualifier="${java_extensions_regex}"
+            id="org.eclipse.jdt.debug.ui.JavaConsoleTracker">
+         <enablement>
+			  <test property="org.eclipse.ui.console.consoleTypeTest" value="osgiManagementConsole"/>
+         </enablement>
+      </consolePatternMatchListener>
+      <consolePatternMatchListener
+            class="org.eclipse.jdt.internal.debug.ui.console.JavaNativeConsoleTracker"
+            regex="\(Native Method\)"
+            qualifier="Native Method"
+            id="org.eclipse.jdt.debug.ui.JavaNativeConsoleTracker">
+         <enablement>
+			  <test property="org.eclipse.ui.console.consoleTypeTest" value="osgiManagementConsole"/>
+         </enablement>
+      </consolePatternMatchListener>
+            <consolePatternMatchListener
+            class="org.eclipse.jdt.internal.debug.ui.console.JavaExceptionConsoleTracker"
+            regex="\w[^\(\s]+Exception[\s|:]"
+            qualifier="Exception"
+            id="org.eclipse.jdt.debug.ui.JavaExceptionConsoleTracker">
+         <enablement>
+            <test
+                  property="org.eclipse.ui.console.consoleTypeTest"
+                  value="osgiManagementConsole">
+            </test>
+         </enablement>
+      </consolePatternMatchListener>
+   </extension>
+   <extension
+         point="org.eclipse.ui.console.consolePageParticipants">
+      <consolePageParticipant
+            class="org.tigris.mtoolkit.console.internal.ConsolePageParticipant"
+            id="org.tigris.mtoolkit.osgimanagement.consolePageParticipant">
+         <enablement>
+            <test
+                  property="org.eclipse.ui.console.consoleTypeTest"
+                  value="osgiManagementConsole">
+            </test></enablement>
+      </consolePageParticipant>
+   </extension>
 
 </plugin>
