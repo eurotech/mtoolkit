@@ -24,7 +24,9 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.ui.console,
  org.eclipse.core.filesystem,
  org.eclipse.core.runtime,
- org.tigris.mtoolkit.common
+ org.tigris.mtoolkit.common,
+ org.tigris.mtoolkit.osgimanagement,
+ org.tigris.mtoolkit.iagent
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: org.tigris.mtoolkit.dpeditor,

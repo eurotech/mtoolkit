@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.dpeditor;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -20,6 +21,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -202,5 +204,10 @@ public final class DPActivator extends AbstractUIPlugin {
 
   public static void log(IStatus status) {
     getDefault().getLog().log(status);
+  }
+
+  public static File getFile(String name) {
+    IPath statePath = getDefault().getStateLocation();
+    return new File(statePath.toFile(), name);
   }
 }
