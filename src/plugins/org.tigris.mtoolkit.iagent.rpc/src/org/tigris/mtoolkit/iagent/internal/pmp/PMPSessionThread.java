@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.iagent.internal.threadpool.ThreadPool;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
-import org.tigris.mtoolkit.iagent.internal.utils.ThreadPool;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 

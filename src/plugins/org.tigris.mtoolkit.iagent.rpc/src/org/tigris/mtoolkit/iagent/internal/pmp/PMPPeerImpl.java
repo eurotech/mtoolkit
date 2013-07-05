@@ -14,109 +14,112 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import org.tigris.mtoolkit.iagent.internal.utils.ThreadPool;
+import org.tigris.mtoolkit.iagent.internal.threadpool.ThreadPool;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPPeer;
 
 public class PMPPeerImpl implements PMPPeer {
+  protected List                    connections     = new ArrayList();
+  protected int                     numSessions;
 
-	protected List connections = new ArrayList();
-	protected int numSessions;
+  protected int                     maxStringLength = -1;
+  protected int                     maxArrayLength  = -1;
 
-	protected int maxStringLength = -1;
-	protected int maxArrayLength = -1;
+  protected ThreadPool              pool            = ThreadPool.newInstance();
+  protected Vector                  listeners       = new Vector(2, 5);
+  protected PMPConnectionDispatcher connDispatcher;
 
-	protected ThreadPool pool;
-	protected Vector listeners = new Vector(2, 5);
-	protected PMPConnectionDispatcher connDispatcher;
+  protected void addElement(PMPSessionThread ss) {
+    synchronized (connections) {
+      if (!connections.contains(ss)) {
+        connections.add(ss);
+      }
+    }
+  }
 
-	public PMPPeerImpl() {
-		pool = ThreadPool.getPool();
-	}
+  protected void removeElement(PMPSessionThread ss) {
+    synchronized (connections) {
+      connections.remove(ss);
+    }
+  }
 
-	protected void addElement(PMPSessionThread ss) {
-		synchronized (connections) {
-			if (!connections.contains(ss)) {
-				connections.add(ss);
-			}
-		}
-	}
+  protected synchronized String createSessionId() {
+    return String.valueOf(numSessions++);
+  }
 
-	protected void removeElement(PMPSessionThread ss) {
-		synchronized (connections) {
-			connections.remove(ss);
-		}
-	}
+  protected void closeConnections(String reason) {
+    synchronized (connections) {
+      PMPSessionThread[] copied = (PMPSessionThread[]) connections.toArray(new PMPSessionThread[connections.size()]);
+      for (int i = 0; i < copied.length; i++) {
+        PMPSessionThread session = copied[i];
+        session.disconnect(reason, true);
+      }
+    }
+  }
 
-	protected synchronized String createSessionId() {
-		return String.valueOf(numSessions++);
-	}
+  public void close() {
+    if (pool != null) {
+      pool.release();
+      pool = null;
+    }
+  }
 
-	protected void closeConnections(String reason) {
-		synchronized (connections) {
-			PMPSessionThread[] copied = (PMPSessionThread[]) connections.toArray(new PMPSessionThread[connections.size()]);
-			for (int i = 0; i < copied.length; i++) {
-				PMPSessionThread session = copied[i];
-				session.disconnect(reason, true);
-			}
-		}
-	}
+  protected ObjectInfo getService(String clazz, String filter) {
+    throw new UnsupportedOperationException();
+  }
 
-	public void close() {
-		if (pool != null) {
-			ThreadPool.releasePool(pool);
-			pool = null;
-		}
-	}
+  protected void ungetService(ObjectInfo info) {
+    throw new UnsupportedOperationException();
+  }
 
-	protected ObjectInfo getService(String clazz, String filter) {
-		throw new UnsupportedOperationException();
-	}
+  protected byte removeListener(String evType, PMPSessionThread listener) {
+    throw new UnsupportedOperationException();
+  }
 
-	protected void ungetService(ObjectInfo info) {
-		throw new UnsupportedOperationException();
-	}
+  protected void removeListeners(Vector evTypes, PMPSessionThread listener) {
+    throw new UnsupportedOperationException();
+  }
 
-	protected byte removeListener(String evType, PMPSessionThread listener) {
-		throw new UnsupportedOperationException();
-	}
+  protected byte addListener(String evType, PMPSessionThread listener) {
+    throw new UnsupportedOperationException();
+  }
 
-	protected void removeListeners(Vector evTypes, PMPSessionThread listener) {
-		throw new UnsupportedOperationException();
-	}
+  public String getRole() {
+    return "Peer";
+  }
 
-	protected byte addListener(String evType, PMPSessionThread listener) {
-		throw new UnsupportedOperationException();
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPPeer#addConnectionListener(org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener)
+   */
+  public void addConnectionListener(PMPConnectionListener listener) {
+    if (connDispatcher == null) {
+      connDispatcher = new PMPConnectionDispatcher(this);
+    }
+    synchronized (listeners) {
+      if (!listeners.contains(listener)) {
+        listeners.addElement(listener);
+      }
+    }
+  }
 
-	public String getRole() {
-		return "Peer";
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPPeer#removeConnectionListener(org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener)
+   */
+  public void removeConnectionListener(PMPConnectionListener listener) {
+    synchronized (listeners) {
+      listeners.removeElement(listener);
+    }
+  }
 
-	public void addConnectionListener(PMPConnectionListener listener) {
-		if (connDispatcher == null) {
-			connDispatcher = new PMPConnectionDispatcher(this);
-		}
-		synchronized (listeners) {
-			if (!listeners.contains(listener))
-				listeners.addElement(listener);
-		}
-	}
-
-	public void removeConnectionListener(PMPConnectionListener listener) {
-		synchronized (listeners) {
-			listeners.removeElement(listener);
-		}
-	}
-
-	/**
-	 * Fire Event When Client connected.
-	 * 
-	 * @param ss
-	 *            SessionThread for connection
-	 */
-	protected void fireConnectionEvent(boolean created, PMPSessionThread ss) {
-		if (connDispatcher != null)
-			connDispatcher.addEvent(created, ss);
-	}
+  /**
+   * Fire Event When Client connected.
+   *
+   * @param ss
+   *          SessionThread for connection
+   */
+  protected void fireConnectionEvent(boolean created, PMPSessionThread ss) {
+    if (connDispatcher != null) {
+      connDispatcher.addEvent(created, ss);
+    }
+  }
 }
