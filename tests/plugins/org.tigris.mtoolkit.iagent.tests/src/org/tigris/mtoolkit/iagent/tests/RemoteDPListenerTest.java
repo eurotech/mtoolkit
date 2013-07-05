@@ -28,10 +28,12 @@ public class RemoteDPListenerTest extends DeploymentTestCase implements RemoteDP
   protected void setUp() throws Exception {
     super.setUp();
     commands.addRemoteDPListener(this);
+    Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
   }
 
   protected void tearDown() throws Exception {
     commands.removeRemoteDPListener(this);
+    Thread.sleep(REMOTE_LISTENER_CHANGE_TIMEOUT);
     super.tearDown();
   }
 
