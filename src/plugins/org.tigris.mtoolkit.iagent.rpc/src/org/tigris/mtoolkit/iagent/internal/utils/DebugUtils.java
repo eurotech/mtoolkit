@@ -20,7 +20,6 @@ import java.util.Enumeration;
 
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.iagent.internal.utils.log.ConsoleLog;
-import org.tigris.mtoolkit.iagent.internal.utils.log.EclipseLog;
 import org.tigris.mtoolkit.iagent.internal.utils.log.FileLog;
 import org.tigris.mtoolkit.iagent.internal.utils.log.Log;
 import org.tigris.mtoolkit.iagent.internal.utils.log.OSGiLog;
@@ -77,13 +76,6 @@ public final class DebugUtils {
         log = new FileLog(new File(logFileName));
         return;
       }
-    } catch (Throwable t) { // Continue with other loggers
-    }
-
-    // Second - try org.eclipse.osgi.framework.log.FrameworkLog
-    try {
-      log = new EclipseLog(context);
-      return;
     } catch (Throwable t) { // Continue with other loggers
     }
 
