@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
-import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -21,6 +18,7 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -56,7 +54,9 @@ public final class BrowserErrorHandler {
         });
       }
     }
-    dumpToLog(IStatus.ERROR, message, null);
+    if (message != null) {
+      FrameworkPlugin.error(message, null);
+    }
   }
 
   public static void processError(Throwable t, Model unknown) {// NO_UCD
@@ -140,11 +140,10 @@ public final class BrowserErrorHandler {
         processError(info, display);
       }
     }
-
-    if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
-      dumpToLog(IStatus.ERROR, reason[0], ((IAgentException) t).getCauseException());
-    } else {
-      dumpToLog(IStatus.ERROR, reason[0], t);
+    if (t instanceof IAgentException) {
+      FrameworkPlugin.log(Util.handleIAgentException((IAgentException) t));
+    } else if (reason[0] != null) {
+      FrameworkPlugin.error(reason[0], t);
     }
   }
 
@@ -165,8 +164,9 @@ public final class BrowserErrorHandler {
         });
       }
     }
-
-    dumpToLog(IStatus.WARNING, info, null);
+    if (info != null) {
+      FrameworkPlugin.warning(info, null);
+    }
   }
 
   public static void processWarning(final Throwable t, String info, boolean display) {// NO_UCD
@@ -201,11 +201,10 @@ public final class BrowserErrorHandler {
         }
       }
     }
-
-    if (t instanceof IAgentException && ((IAgentException) t).getCauseException() != null) {
-      dumpToLog(IStatus.WARNING, reason, ((IAgentException) t).getCauseException());
-    } else {
-      dumpToLog(IStatus.WARNING, reason, t);
+    if (t instanceof IAgentException) {
+      FrameworkPlugin.log(Util.handleIAgentException((IAgentException) t));
+    } else if (reason != null) {
+      FrameworkPlugin.warning(reason, t);
     }
   }
 
@@ -234,8 +233,8 @@ public final class BrowserErrorHandler {
     if (display) {
       showInfoDialog(text);
     }
-    if (FrameworkPreferencesPage.isLogInfoEnabled()) {
-      dumpToLog(IStatus.INFO, text, null);
+    if (FrameworkPreferencesPage.isLogInfoEnabled() && text != null) {
+      FrameworkPlugin.info(text, null);
     }
   }
 
@@ -249,20 +248,5 @@ public final class BrowserErrorHandler {
     if (DEBUG) {
       t.printStackTrace(System.out);
     }
-  }
-
-  // Dump to eclipse system log
-  private static void dumpToLog(int severity, String text, Throwable t) {
-    final FrameworkPlugin plugin = FrameworkPlugin.getDefault();
-    if (plugin == null) {
-      return;
-    }
-    final ILog log = plugin.getLog();
-
-    if (text == null) {
-      text = ""; //$NON-NLS-1$
-    }
-    final IStatus status = new Status(severity, FrameworkPlugin.PLUGIN_ID, 0, text, t);
-    log.log(status);
   }
 }

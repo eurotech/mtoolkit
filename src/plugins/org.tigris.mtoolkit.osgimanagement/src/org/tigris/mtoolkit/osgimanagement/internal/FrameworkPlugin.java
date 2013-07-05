@@ -86,6 +86,10 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     log(new Status(IStatus.WARNING, PLUGIN_ID, message, t));
   }
 
+  public static void info(String message, Throwable t) {
+    log(new Status(IStatus.INFO, PLUGIN_ID, message, t));
+  }
+
   public static void log(IStatus status) {
     FrameworkPlugin fwPlugin = getDefault();
     if (fwPlugin == null) {
