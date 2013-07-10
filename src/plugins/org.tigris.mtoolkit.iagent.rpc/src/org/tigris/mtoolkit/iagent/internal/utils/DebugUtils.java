@@ -73,7 +73,7 @@ public final class DebugUtils {
     try {
       String logFileName = System.getProperty(PROP_LOG_FILE);
       if (logFileName != null) {
-        log = new FileLog(new File(logFileName));
+        log = new FileLog((context != null) ? context.getDataFile(logFileName) : new File(logFileName));
         return;
       }
     } catch (Throwable t) { // Continue with other loggers
