@@ -1,174 +1,185 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
-   <extension-point id="contentTypeExtensions" name="Content Type Extensions" schema="schema/contentTypeExtensions.exsd"/>
-   <extension-point id="osgiDeviceTypes" name="osgiDeviceTypes" schema="schema/osgiDeviceTypes.exsd"/>
-   <extension-point id="frameworkProcessorExtensions" name="Extensions for FrameworkProcessor" schema="schema/frameworkProcessorExtensions.exsd"/>
-   <extension-point id="systemBundlesProvider" name="OSGi System Bundles Provider" schema="schema/systemBundlesProvider.exsd"/>
+	<extension-point id="contentTypeExtensions" name="Content Type Extensions" schema="schema/contentTypeExtensions.exsd"/>
+	<extension-point id="osgiDeviceTypes" name="osgiDeviceTypes" schema="schema/osgiDeviceTypes.exsd"/>
+	<extension-point id="frameworkProcessorExtensions" name="Extensions for FrameworkProcessor" schema="schema/frameworkProcessorExtensions.exsd"/>
+	<extension-point id="systemBundlesProvider" name="OSGi System Bundles Provider" schema="schema/systemBundlesProvider.exsd"/>
 
-   <extension point="org.eclipse.ui.views">
-      <category
+	<extension point="org.eclipse.ui.views">
+		<category
          name="%OSGiSet.Category"
          id="org.tigris.mtoolkit.osgi">
-      </category>
-      <view
+		</category>
+		<view
          name="%OSGiSet.FrameworkView"
          icon="images/frameworks.gif"
          category="org.tigris.mtoolkit.osgi"
          class="org.tigris.mtoolkit.osgimanagement.internal.FrameworksView"
          id="org.tigris.mtoolkit.osgimanagement.frameworkview">
-      </view>
-   </extension>
+		</view>
+	</extension>
 
-   <extension
+	<extension
          point="org.eclipse.ui.preferencePages">
-      <page
+		<page
             category="org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"
 			class="org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage"
            id="org.tigris.mtoolkit.osgimanagement.preferences.FrameworkPreferencesPage"
            name="%FrameworkPreferencesPage.name">
-     </page>
-   </extension>
+		</page>
+	</extension>
 
 
-   <extension
+	<extension
          point="org.eclipse.core.runtime.preferences">
-      <initializer
+		<initializer
             class="org.tigris.mtoolkit.osgimanagement.internal.preferences.PreferenceInitializer">
-      </initializer>
-   </extension>
-   <extension
+		</initializer>
+	</extension>
+	<extension
          point="org.eclipse.core.contenttype.contentTypes">
-      <content-type
+		<content-type
             file-extensions="zip,jar"
             id="org.tigris.mtoolkit.osgimanagement.zip"
             name="Zip Archive"
             priority="normal">
-         <describer
+			<describer
                class="org.eclipse.core.runtime.content.BinarySignatureDescriber">
-            <parameter
+				<parameter
                   name="signature"
                   value="50 4B 03 04">
-            </parameter>
-         </describer>
-      </content-type>
-   </extension>
-   <extension
+				</parameter>
+			</describer>
+		</content-type>
+	</extension>
+	<extension
          point="org.tigris.mtoolkit.common.installationItemProviders">
-      <provider
+		<provider
             class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
             extension="jar"
             id="org.tigris.mtoolkit.osgimanagement.jarprovider"
             name="Bundle provider"
             type="application/java-archive">
-      </provider>
-      <provider
+		</provider>
+		<provider
             class="org.tigris.mtoolkit.common.installation.WorkspaceFileProvider"
             extension="zip"
             id="org.tigris.mtoolkit.osgimanagement.jarprovider"
             name="Bundle provider"
             type="application/zip">
-      </provider>
-      <provider
+		</provider>
+		<provider
             class="org.tigris.mtoolkit.osgimanagement.installation.PluginProvider"
             id="org.tigris.mtoolkit.osgimanagement.pluginprovider"
             name="Plugin project provider">
-      </provider>
-   </extension>
-   <extension
+		</provider>
+	</extension>
+	<extension
          point="org.tigris.mtoolkit.common.installationItemProcessors">
-      <processor
+		<processor
             class="org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessor"
             id="org.tigris.mtoolkit.osgimanagement.frameworkprocessor"
             selectionDialog="org.tigris.mtoolkit.osgimanagement.installation.FrameworkSelector">
-      </processor>
-   </extension>
-   <extension
+		</processor>
+	</extension>
+	<extension
          point="org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes">
-      <osgiDeviceTypeProvider
+		<osgiDeviceTypeProvider
             class="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SocketTypeProvider"
             id="plainSocket"
             name="Plain Socket">
-      </osgiDeviceTypeProvider>
-   </extension>
-   <extension
+		</osgiDeviceTypeProvider>
+	</extension>
+	<extension
          point="org.eclipse.ui.propertyPages">
-      <page
+		<page
             class="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPropertyPage"
             id="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPropertyPage"
             name="General">
-         <enabledWhen>
-            <instanceof
+			<enabledWhen>
+				<instanceof
                   value="org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl">
-            </instanceof>
-         </enabledWhen>
-      </page>
-   </extension>
-   <extension
+				</instanceof>
+			</enabledWhen>
+		</page>
+	</extension>
+	<extension
          point="org.eclipse.ui.propertyPages">
-      <page
+		<page
             class="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SigningPropertyPage"
             id="org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.SigningPropertyPage"
             name="Signing">
-         <enabledWhen>
-            <instanceof
+			<enabledWhen>
+				<instanceof
                   value="org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl">
-            </instanceof>
-         </enabledWhen>
-      </page>
-   </extension>
-   <extension
+				</instanceof>
+			</enabledWhen>
+		</page>
+	</extension>
+	<extension
          point="org.tigris.mtoolkit.osgimanagement.systemBundlesProvider">
-      <bundlesListProvider
+		<bundlesListProvider
             class="org.tigris.mtoolkit.osgimanagement.installation.FrameworkSystemBundlesProvider"
             id="Framework System Bundles Provider">
-      </bundlesListProvider>
-   </extension>
-   
-      <extension
+		</bundlesListProvider>
+	</extension>
+
+	<extension
          point="org.eclipse.ui.console.consolePatternMatchListeners">
-      <consolePatternMatchListener
+		<consolePatternMatchListener
             class="org.eclipse.jdt.internal.debug.ui.console.JavaConsoleTracker"
             regex="\(\S*${java_extensions_regex}\S*\)"
             qualifier="${java_extensions_regex}"
             id="org.eclipse.jdt.debug.ui.JavaConsoleTracker">
-         <enablement>
-			  <test property="org.eclipse.ui.console.consoleTypeTest" value="osgiManagementConsole"/>
-         </enablement>
-      </consolePatternMatchListener>
-      <consolePatternMatchListener
+			<enablement>
+				<test property="org.eclipse.ui.console.consoleTypeTest" value="osgiManagementConsole"/>
+			</enablement>
+		</consolePatternMatchListener>
+		<consolePatternMatchListener
             class="org.eclipse.jdt.internal.debug.ui.console.JavaNativeConsoleTracker"
             regex="\(Native Method\)"
             qualifier="Native Method"
             id="org.eclipse.jdt.debug.ui.JavaNativeConsoleTracker">
-         <enablement>
-			  <test property="org.eclipse.ui.console.consoleTypeTest" value="osgiManagementConsole"/>
-         </enablement>
-      </consolePatternMatchListener>
-            <consolePatternMatchListener
+			<enablement>
+				<test property="org.eclipse.ui.console.consoleTypeTest" value="osgiManagementConsole"/>
+			</enablement>
+		</consolePatternMatchListener>
+		<consolePatternMatchListener
             class="org.eclipse.jdt.internal.debug.ui.console.JavaExceptionConsoleTracker"
             regex="\w[^\(\s]+Exception[\s|:]"
             qualifier="Exception"
             id="org.eclipse.jdt.debug.ui.JavaExceptionConsoleTracker">
-         <enablement>
-            <test
+			<enablement>
+				<test
                   property="org.eclipse.ui.console.consoleTypeTest"
                   value="osgiManagementConsole">
-            </test>
-         </enablement>
-      </consolePatternMatchListener>
-   </extension>
-   <extension
+				</test>
+			</enablement>
+		</consolePatternMatchListener>
+	</extension>
+	<extension
          point="org.eclipse.ui.console.consolePageParticipants">
-      <consolePageParticipant
+		<consolePageParticipant
             class="org.tigris.mtoolkit.console.internal.ConsolePageParticipant"
             id="org.tigris.mtoolkit.osgimanagement.consolePageParticipant">
-         <enablement>
-            <test
+			<enablement>
+				<test
                   property="org.eclipse.ui.console.consoleTypeTest"
                   value="osgiManagementConsole">
-            </test></enablement>
-      </consolePageParticipant>
-   </extension>
+				</test>
+			</enablement>
+		</consolePageParticipant>
+	</extension>
+
+	<extension
+         point="org.tigris.mtoolkit.osgimanagement.contentTypeExtensions">
+		<actions
+            class="org.tigris.mtoolkit.osgimanagement.application.ApplicationActionsProvider">
+		</actions>
+		<model
+            class="org.tigris.mtoolkit.osgimanagement.application.ApplicationModelProvider">
+		</model>
+	</extension>
 
 </plugin>
