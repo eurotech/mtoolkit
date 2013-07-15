@@ -34,8 +34,6 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 
   public static final String PORT           = "port";
 
-  private static final int   DEFAULT_PORT   = 1450;
-
   private static final int   FAILURE_RANDOM = 0;
   private static final int   FAILURE_RETRY  = 1;
   private static final int   FAILURE_FAIL   = 2;
@@ -45,7 +43,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
 
   protected String           uri;
 
-  protected int              port           = DEFAULT_PORT;
+  protected int              port           = DEFAULT_PMP_PORT;
 
   private BundleContext      context;
 

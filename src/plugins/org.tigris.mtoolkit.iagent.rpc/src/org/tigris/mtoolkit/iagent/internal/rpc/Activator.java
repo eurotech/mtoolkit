@@ -25,6 +25,7 @@ import org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.ProSystRemoteConsole;
 import org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.pmp.PMPPeer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
@@ -37,6 +38,9 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
   private static final String           DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
 
   private static final String           IAGENT_CONTROLLER_PROP = "iagent.controller";
+
+  private static final int              IAGENT_PMP_PORT        = Integer.getInteger("iagent.pmp.port",
+                                                                   PMPPeer.DEFAULT_PMP_PORT).intValue();
 
   private static Activator              instance;
   private static BundleContext          context;
@@ -85,7 +89,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
     registerConsole(context);
 
     pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
-    pmpServer = PMPServerFactory.createServer(context, 1450, null);
+    pmpServer = PMPServerFactory.createServer(context, IAGENT_PMP_PORT, null);
     pmpServerReg = context.registerService(PMPServer.class.getName(), pmpServer, pmpServer.getProperties());
     synchronizer.setPMPServer(pmpServer);
     synchronizer.start();

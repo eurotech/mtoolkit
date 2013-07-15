@@ -11,26 +11,29 @@
 package org.tigris.mtoolkit.iagent.pmp;
 
 public interface PMPPeer {
+  /**
+   * @since 3.2
+   */
+  public static final int DEFAULT_PMP_PORT = 1450;
 
-	/**
-	 * Registers listener to receive events whenever one host is connected or
-	 * disconected to the pmp service
-	 * 
-	 * @param listener
-	 *            the PMPEventListener to register
-	 * @see PMPConnectionListener
-	 */
+  /**
+   * Registers listener to receive events whenever one host is connected or
+   * disconected to the pmp service
+   *
+   * @param listener
+   *          the PMPEventListener to register
+   * @see PMPConnectionListener
+   */
 
-	public void addConnectionListener(PMPConnectionListener listener);
+  public void addConnectionListener(PMPConnectionListener listener);
 
-	/**
-	 * Removes registred PMPEventlistener
-	 * 
-	 * @param listener
-	 *            the PMPEventListener to remove
-	 * @see PMPConnectionListener
-	 */
+  /**
+   * Removes registred PMPEventlistener
+   *
+   * @param listener
+   *          the PMPEventListener to remove
+   * @see PMPConnectionListener
+   */
 
-	public void removeConnectionListener(PMPConnectionListener listener);
-
+  public void removeConnectionListener(PMPConnectionListener listener);
 }

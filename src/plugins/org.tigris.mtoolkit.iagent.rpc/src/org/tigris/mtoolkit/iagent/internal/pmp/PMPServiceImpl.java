@@ -19,9 +19,7 @@ import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
-  private static final int     DEFAULT_PMP_PORT = 1450;
-
-  protected boolean            running          = false;
+  protected volatile boolean   running = false;
 
   protected static ClassLoader loader;
 
@@ -52,6 +50,16 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
     return "PMPService"; //$NON-NLS-1$
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#getRole()
+   */
+  public String getRole() {
+    return "Client";
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPService#connect(org.tigris.mtoolkit.iagent.transport.Transport, java.util.Dictionary)
+   */
   public PMPConnection connect(Transport transport, Dictionary properties) throws PMPException {
     if (!running) {
       throw new PMPException("Stopping pmpservice");
@@ -68,10 +76,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
       if (port < 0) {
         port = DEFAULT_PMP_PORT;
       }
-
-      PMPSessionThread st = null;
-      st = new PMPSessionThread(this, transport.createConnection(port), createSessionId());
-
+      PMPSessionThread st = new PMPSessionThread(this, transport.createConnection(port), createSessionId());
       Connection con = st.getConnection();
       con.connect();
       addElement(st);
@@ -87,6 +92,9 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#removeElement(org.tigris.mtoolkit.iagent.internal.pmp.PMPSessionThread)
+   */
   protected void removeElement(PMPSessionThread ss) {
     super.removeElement(ss);
     if ((connDispatcher != null) && ss.connected) {
@@ -110,9 +118,4 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
     }
     return toRet;
   }
-
-  public String getRole() {
-    return "Client";
-  }
-
 }
