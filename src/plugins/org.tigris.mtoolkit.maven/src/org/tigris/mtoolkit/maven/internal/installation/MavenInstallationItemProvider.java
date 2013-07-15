@@ -31,6 +31,7 @@ import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
+import org.tigris.mtoolkit.maven.MavenConstants;
 import org.tigris.mtoolkit.maven.MavenUtils;
 import org.tigris.mtoolkit.maven.internal.MavenCorePlugin;
 import org.tigris.mtoolkit.maven.internal.images.ImageHolder;
@@ -64,12 +65,12 @@ public final class MavenInstallationItemProvider implements InstallationItemProv
     resource = adaptItem(resource);
     if (resource instanceof File) {
       File file = (File) resource;
-      if (file.exists() && file.getName().equals("pom.xml")) {
+      if (file.exists() && file.getName().equals(MavenConstants.POM_FILE)) {
         return true;
       }
     }
     if (resource instanceof IMavenProjectFacade) {
-      if (!((IMavenProjectFacade) resource).getPackaging().equals("pom")) {
+      if (!((IMavenProjectFacade) resource).getPackaging().equals(MavenConstants.POM_PACKAGING)) {
         return true;
       }
     }
@@ -147,11 +148,11 @@ public final class MavenInstallationItemProvider implements InstallationItemProv
       if (facade != null) {
         return facade;
       }
-      IFile pomFile = project.getFile(new Path("pom.xml"));
+      IFile pomFile = project.getFile(new Path(MavenConstants.POM_FILE));
       resource = pomFile;
     }
     if (resource.getType() == IResource.FOLDER) {
-      IFile pomFile = ((IContainer) resource).getFile(new Path("pom.xml"));
+      IFile pomFile = ((IContainer) resource).getFile(new Path(MavenConstants.POM_FILE));
       resource = pomFile;
     }
     if (resource.getType() == IResource.FILE) {
@@ -163,7 +164,8 @@ public final class MavenInstallationItemProvider implements InstallationItemProv
   private IStatus prepareItem(BaseItem item, Map properties, IProgressMonitor monitor) {
     File pomFile = item.getPomLocationAtFilesystem();
     if (pomFile == null || !pomFile.exists()) {
-      return MavenCorePlugin.newStatus(IStatus.ERROR, "Cannot find pom.xml for " + item.getDisplayName(), null);
+      return MavenCorePlugin.newStatus(IStatus.ERROR,
+          "Cannot find " + MavenConstants.POM_FILE + " for " + item.getDisplayName(), null);
     }
     try {
       MavenProcess.launchDefaultBuild(pomFile.getParentFile(), monitor);
