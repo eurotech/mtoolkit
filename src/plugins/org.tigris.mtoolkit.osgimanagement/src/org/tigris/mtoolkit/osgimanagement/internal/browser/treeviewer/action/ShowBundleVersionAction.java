@@ -11,36 +11,28 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeAction;
 
-public class ShowBundleVersionAction extends SelectionProviderAction implements IStateAction {
+public final class ShowBundleVersionAction extends AbstractFrameworkTreeAction {
+  private TreeViewer tree;
+  private TreeRoot   root;
 
-	private TreeViewer tree;
-	private TreeRoot root;
+  public ShowBundleVersionAction(ISelectionProvider provider, String label, TreeViewer tree, TreeRoot root) {
+    super(provider, label);
+    this.tree = tree;
+    this.root = root;
+    setChecked(root.isShowBundlesVersion());
+  }
 
-	public ShowBundleVersionAction(ISelectionProvider provider, String label, TreeViewer tree, TreeRoot root) {
-		super(provider, label);
-		this.tree = tree;
-		this.root = root;
-		setChecked(root.isShowBundlesVersion());
-	}
-
-	public void run() {
-		root.setShowBundlesVersion(!root.isShowBundlesVersion());
-		setChecked(root.isShowBundlesVersion());
-		tree.refresh();
-	}
-
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
-
-	public void updateState(IStructuredSelection selection) {
-		// nothing
-	}
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  @Override
+  public void run() {
+    root.setShowBundlesVersion(!root.isShowBundlesVersion());
+    setChecked(root.isShowBundlesVersion());
+    tree.refresh();
+  }
 }

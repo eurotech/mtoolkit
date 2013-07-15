@@ -11,35 +11,30 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
-public final class UpdateBundleAction extends AbstractFrameworkTreeElementAction<Bundle> {
-  private static final int UPDATE_BUNDLE_STATE_MASK = org.osgi.framework.Bundle.INSTALLED
-                                                        | org.osgi.framework.Bundle.RESOLVED
-                                                        | org.osgi.framework.Bundle.STARTING
-                                                        | org.osgi.framework.Bundle.ACTIVE;
-
-  public UpdateBundleAction(ISelectionProvider provider, String label) {
-    super(false, Bundle.class, provider, label);
+public final class DisconnectFrameworkAction extends AbstractFrameworkTreeElementAction<FrameworkImpl> {
+  public DisconnectFrameworkAction(ISelectionProvider provider, String label) {
+    super(true, FrameworkImpl.class, provider, label);
   }
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  protected void execute(Bundle element) {
-    ActionsManager.updateBundleAction(element);
+  protected void execute(FrameworkImpl element) {
+    ActionsManager.disconnectFrameworkAction(element);
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeAction#isEnabled(org.tigris.mtoolkit.osgimanagement.model.Model)
+   * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeElementAction#isEnabled(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  protected boolean isEnabledFor(Bundle bundle) {
-    if (bundle.isSystemBundle()) {
+  protected boolean isEnabledFor(FrameworkImpl framework) {
+    if (!framework.isConnected() || framework.isAutoConnected()) {
       return false;
     }
-    return (bundle.getState() & UPDATE_BUNDLE_STATE_MASK) != 0;
+    return true;
   }
 }

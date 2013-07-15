@@ -15,13 +15,12 @@ import java.util.Iterator;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.console.ConsoleManager;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeAction;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public final class ShowFrameworkConsole extends SelectionProviderAction implements IStateAction {
+public final class ShowFrameworkConsole extends AbstractFrameworkTreeAction {
   private final TreeViewer tree;
 
   public ShowFrameworkConsole(ISelectionProvider provider, String label, TreeViewer tree) {
@@ -46,16 +45,9 @@ public final class ShowFrameworkConsole extends SelectionProviderAction implemen
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
    */
   @Override
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
-   */
   public void updateState(IStructuredSelection selection) {
     boolean enabled = false;
     Framework fw = null;

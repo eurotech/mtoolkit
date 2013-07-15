@@ -17,43 +17,63 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
+import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public final class CommonPropertiesAction extends SelectionProviderAction implements IStateAction {
-  private TreeViewer              parentView;
-  private SelectionProviderAction action;
-  private Vector                  actions;
+public final class CommonPropertiesAction extends AbstractFrameworkTreeElementAction<Model> {
+  private TreeViewer      parentView;
+  private Vector<IAction> actions;
 
   public CommonPropertiesAction(ISelectionProvider provider, String text) {
-    super(provider, text);
+    super(false, Model.class, provider, text);
     this.parentView = (TreeViewer) provider;
-    this.setEnabled(false);
-    actions = new Vector();
+    setEnabled(false);
+    actions = new Vector<IAction>();
     setActionDefinitionId(ActionFactory.PROPERTIES.getCommandId());
   }
 
+  public void registerAction(IAction action) {
+    actions.addElement(action);
+  }
+
   /* (non-Javadoc)
-   * @see org.eclipse.jface.action.Action#run()
+   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
    */
   @Override
-  public void run() {
-    IStructuredSelection selection = getStructuredSelection();
-    Object element = selection.getFirstElement();
-    action = null;
+  public void updateState(IStructuredSelection selection) {
+    if (selection.size() != 1) {
+      setEnabled(false);
+    } else {
+      for (int i = 0; i < actions.size(); i++) {
+        IAction action = actions.elementAt(i);
+        if (action instanceof IStateAction) {
+          ((IStateAction) action).updateState(selection);
+        }
+      }
+      super.updateState(selection);
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
+   */
+  @Override
+  protected void execute(Model element) {
+    IAction action = null;
     if (element instanceof ObjectClass) {
       action = new ServicePropertiesAction(parentView, Messages.property_action_label);
     } else if (element instanceof Bundle) {
       action = new BundlePropertiesAction(parentView, Messages.property_action_label);
     } else if (element instanceof FrameworkImpl) {
-      action = new PropertyAction(parentView, Messages.property_action_label);
+      action = new FrameworkPropertiesAction(parentView, Messages.property_action_label);
     } else {
       for (int i = 0; i < actions.size(); i++) {
-        SelectionProviderAction check = (SelectionProviderAction) actions.elementAt(i);
+        IAction check = actions.elementAt(i);
         if (check.isEnabled()) {
           action = check;
           break;
@@ -66,45 +86,27 @@ public final class CommonPropertiesAction extends SelectionProviderAction implem
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction#isEnabledFor(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() != 1) {
-      this.setEnabled(false);
+  protected boolean isEnabledFor(Model element) {
+    if ((element instanceof ObjectClass) || (element instanceof Bundle) || (element instanceof FrameworkImpl)
+        || checkActionsState(element)) {
+      return true;
     } else {
-      Object element = selection.getFirstElement();
-      if ((element instanceof ObjectClass) || (element instanceof Bundle) || (element instanceof FrameworkImpl)
-          || checkActionsState(selection)) {
-        this.setEnabled(true);
-      } else {
-        this.setEnabled(false);
-      }
+      return false;
     }
-
   }
 
-  private boolean checkActionsState(IStructuredSelection selection) {
+  private boolean checkActionsState(Model element) {
     boolean result = false;
     for (int i = 0; i < actions.size(); i++) {
-      IAction action = (IAction) actions.elementAt(i);
-      ((IStateAction) action).updateState(selection);
+      IAction action = actions.elementAt(i);
       if (action.isEnabled()) {
         result = true;
         break;
       }
     }
     return result;
-  }
-
-  public void registerAction(IAction action) {
-    actions.addElement(action);
   }
 }

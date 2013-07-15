@@ -19,37 +19,37 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
-public final class BundlePropertiesAction extends SelectionProviderAction implements IStateAction {
-  private TreeViewer parentView;
+public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAction<Bundle> {
+  private static final int BUNDLE_PROPERTIES_STATE_MASK = org.osgi.framework.Bundle.INSTALLED
+                                                            | org.osgi.framework.Bundle.RESOLVED
+                                                            | org.osgi.framework.Bundle.STARTING
+                                                            | org.osgi.framework.Bundle.ACTIVE
+                                                            | org.osgi.framework.Bundle.STOPPING;
 
   public BundlePropertiesAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-    this.parentView = (TreeViewer) provider;
+    super(false, Bundle.class, provider, label);
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.action.Action#run()
-   */
+  * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
+  */
   @Override
-  public void run() {
-    final Bundle bundle = (Bundle) getStructuredSelection().getFirstElement();
+  protected void execute(final Bundle bundle) {
     final Dictionary[] headers = new Dictionary[1];
     Job job = new Job("Retrieving bundle properties...") {
       /* (non-Javadoc)
@@ -88,11 +88,11 @@ public final class BundlePropertiesAction extends SelectionProviderAction implem
           return;
         }
         display.asyncExec(new Runnable() {
+          /* (non-Javadoc)
+           * @see java.lang.Runnable#run()
+           */
           public void run() {
-            if (parentView.getTree().isDisposed()) {
-              return;
-            }
-            Shell shell = parentView.getTree().getShell();
+            Shell shell = PluginUtilities.getActiveWorkbenchShell();
             PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
               /* (non-Javadoc)
                * @see org.tigris.mtoolkit.common.gui.PropertiesDialog#attachHelp(org.eclipse.swt.widgets.Composite)
@@ -110,30 +110,13 @@ public final class BundlePropertiesAction extends SelectionProviderAction implem
       }
     });
     job.schedule();
-    // needed to update workbench menu and toolbar status
-    getSelectionProvider().setSelection(getSelection());
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-   */
+  * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction#isEnabledFor(org.tigris.mtoolkit.osgimanagement.model.Model)
+  */
   @Override
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 1
-        && getStructuredSelection().getFirstElement() instanceof Bundle
-        && (((Bundle) getStructuredSelection().getFirstElement()).getState() & (org.osgi.framework.Bundle.INSTALLED
-            | org.osgi.framework.Bundle.RESOLVED | org.osgi.framework.Bundle.STARTING
-            | org.osgi.framework.Bundle.ACTIVE | org.osgi.framework.Bundle.STOPPING)) != 0) {
-      this.setEnabled(true);
-    } else {
-      this.setEnabled(false);
-    }
+  protected boolean isEnabledFor(Bundle bundle) {
+    return (bundle.getState() & BUNDLE_PROPERTIES_STATE_MASK) != 0;
   }
 }

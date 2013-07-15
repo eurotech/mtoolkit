@@ -19,35 +19,29 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.SelectionProviderAction;
 import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
-public final class ServicePropertiesAction extends SelectionProviderAction implements IStateAction {
-
+public final class ServicePropertiesAction extends AbstractFrameworkTreeElementAction<ObjectClass> {
   public ServicePropertiesAction(ISelectionProvider provider, String text) {
-    super(provider, text);
+    super(false, ObjectClass.class, provider, text);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.jface.action.IAction#run()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  public void run() {
-    ObjectClass object = (ObjectClass) getStructuredSelection().getFirstElement();
+  protected void execute(ObjectClass object) {
     final RemoteService service = object.getService();
     if (service == null) {
       return;
@@ -116,24 +110,5 @@ public final class ServicePropertiesAction extends SelectionProviderAction imple
       }
     });
     job.schedule();
-  }
-
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  @Override
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof ObjectClass) {
-      this.setEnabled(true);
-    } else {
-      this.setEnabled(false);
-    }
   }
 }

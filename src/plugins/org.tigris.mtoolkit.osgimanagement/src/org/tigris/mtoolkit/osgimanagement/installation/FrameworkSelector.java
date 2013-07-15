@@ -242,8 +242,7 @@ public final class FrameworkSelector implements TargetSelectionDialog {
       IStructuredSelection selection = (IStructuredSelection) frameworkViewer.getSelection();
       Object element = selection.getFirstElement();
       if (element instanceof FrameworkImpl) {
-        FrameworkImpl framework = (FrameworkImpl) element;
-        ActionsManager.frameworkPropertiesAction(framework, frameworkViewer);
+        ActionsManager.frameworkPropertiesAction(frameworkViewer);
       }
     }
 

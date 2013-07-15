@@ -10,57 +10,25 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.application.actions;
 
-import java.util.Iterator;
-
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.application.logic.RemoteApplicationOperation;
 import org.tigris.mtoolkit.osgimanagement.application.logic.StartApplicationOperation;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
-import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
-public class StartApplicationAction extends SelectionProviderAction implements IStateAction {
+public final class StartApplicationAction extends AbstractFrameworkTreeElementAction<Application> {
   public StartApplicationAction(ISelectionProvider provider, String label) {
-    super(provider, label);
+    super(true, Application.class, provider, label);
     updateState((IStructuredSelection) provider.getSelection());
   }
 
-  // run method
-  public void run() {
-    ISelection selection = getSelection();
-    Iterator iterator = getStructuredSelection().iterator();
-    while (iterator.hasNext()) {
-      Application application = (Application) iterator.next();
-      RemoteApplicationOperation job = new StartApplicationOperation(application);
-      job.schedule();
-    }
-    getSelectionProvider().setSelection(selection);
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
+   */
+  @Override
+  protected void execute(Application element) {
+    Job job = new StartApplicationOperation(element);
+    job.schedule();
   }
-
-  // override to react properly to selection change
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 0) {
-      setEnabled(false);
-      return;
-    }
-    boolean enabled = true;
-
-    Iterator iterator = selection.iterator();
-    while (iterator.hasNext()) {
-      Model model = (Model) iterator.next();
-      if (!(model instanceof Application)) {
-        enabled = false;
-        break;
-      }
-    }
-    this.setEnabled(enabled);
-  }
-
 }

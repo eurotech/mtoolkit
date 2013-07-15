@@ -12,27 +12,22 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
-import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
-public final class ShowBundleIDAction extends AbstractFrameworkTreeAction {
-  private final TreeViewer tree;
-  private final TreeRoot   root;
+public final class FrameworkPropertiesAction extends AbstractFrameworkTreeElementAction<FrameworkImpl> {
+  private TreeViewer parentView;
 
-  public ShowBundleIDAction(ISelectionProvider provider, String label, TreeViewer tree, TreeRoot root) {
-    super(provider, label);
-    this.tree = tree;
-    this.root = root;
-    setChecked(root.isShowBundlesID());
+  public FrameworkPropertiesAction(ISelectionProvider provider, String label) {
+    super(false, FrameworkImpl.class, provider, label);
+    this.parentView = (TreeViewer) provider;
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.action.Action#run()
+   * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  public void run() {
-    root.setShowBundlesID(!root.isShowBundlesID());
-    setChecked(root.isShowBundlesID());
-    tree.refresh();
+  protected void execute(FrameworkImpl element) {
+    ActionsManager.frameworkPropertiesAction(parentView);
   }
 }

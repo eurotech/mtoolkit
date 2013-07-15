@@ -19,48 +19,36 @@ import java.util.Hashtable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.actions.SelectionProviderAction;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.osgimanagement.dp.model.DeploymentPackage;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 import org.tigris.mtoolkit.util.DPPConstants;
 
-public final class DPPropertiesAction extends SelectionProviderAction implements IStateAction {
+public final class DPPropertiesAction extends AbstractFrameworkTreeElementAction<DeploymentPackage> {
   private static final String PROPERTY_PACKAGE = "org.tigris.mtoolkit.osgimanagement.property_dp_context"; //$NON-NLS-1$
 
-  private TreeViewer          parentView;
-
   public DPPropertiesAction(ISelectionProvider provider, String label) {
-    super(provider, label);
-    this.parentView = (TreeViewer) provider;
+    super(false, DeploymentPackage.class, provider, label);
     setActionDefinitionId(ActionFactory.PROPERTIES.getCommandId());
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.action.Action#run()
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  public void run() {
-    DeploymentPackage dp = (DeploymentPackage) getStructuredSelection().getFirstElement();
-    dpPropertiesAction(dp, parentView);
-    // needed to update workbench menu and toolbar status
-    getSelectionProvider().setSelection(getSelection());
-  }
-
-  private void dpPropertiesAction(DeploymentPackage dp, TreeViewer parentView) {
+  protected void execute(DeploymentPackage dp) {
     try {
       RemoteDP rdp = dp.getRemoteDP();
-      Shell shell = parentView.getTree().getShell();
+      Shell shell = PluginUtilities.getActiveWorkbenchShell();
       PropertiesDialog propertiesDialog = new PropertiesDialog(shell, "Deployment Package Headers") {
         /* (non-Javadoc)
          * @see org.tigris.mtoolkit.common.gui.PropertiesDialog#attachHelp(org.eclipse.swt.widgets.Composite)
@@ -141,25 +129,6 @@ public final class DPPropertiesAction extends SelectionProviderAction implements
       propertiesDialog.open();
     } catch (IAgentException e) {
       StatusManager.getManager().handle(new Status(IStatus.ERROR, DPActivator.PLUGIN_ID, e.getMessage(), e));
-    }
-  }
-
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  @Override
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  public void updateState(IStructuredSelection selection) {
-    if (selection.size() == 1 && getStructuredSelection().getFirstElement() instanceof DeploymentPackage) {
-      this.setEnabled(true);
-    } else {
-      this.setEnabled(false);
     }
   }
 }

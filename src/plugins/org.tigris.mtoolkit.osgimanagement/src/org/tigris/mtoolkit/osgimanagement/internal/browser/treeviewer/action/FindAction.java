@@ -11,13 +11,12 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.actions.SelectionProviderAction;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeAction;
 
-public final class FindAction extends SelectionProviderAction {
-  private Text filterText;
+public final class FindAction extends AbstractFrameworkTreeAction {
+  private final Text filterText;
 
   public FindAction(ISelectionProvider provider, Text filterText, String label) {
     super(provider, label);
@@ -32,12 +31,5 @@ public final class FindAction extends SelectionProviderAction {
   public void run() {
     filterText.forceFocus();
     filterText.selectAll();
-  }
-
-  /* (non-Javadoc)
-   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  @Override
-  public void selectionChanged(IStructuredSelection selection) {
   }
 }

@@ -10,72 +10,40 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.application.actions;
 
-import java.util.Iterator;
-
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
-import org.tigris.mtoolkit.osgimanagement.application.logic.RemoteApplicationOperation;
 import org.tigris.mtoolkit.osgimanagement.application.logic.StopApplicationOperation;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
-import org.tigris.mtoolkit.osgimanagement.model.Model;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
+public final class StopApplicationAction extends AbstractFrameworkTreeElementAction<Application> {
+  public StopApplicationAction(ISelectionProvider provider, String label) {
+    super(true, Application.class, provider, label);
+    updateState((IStructuredSelection) provider.getSelection());
+  }
 
-public class StopApplicationAction extends SelectionProviderAction implements IStateAction {
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
+   */
+  @Override
+  protected void execute(Application element) {
+    Job job = new StopApplicationOperation(element);
+    job.schedule();
+  }
 
-	public StopApplicationAction(ISelectionProvider provider, String label) {
-		super(provider, label);
-		updateState((IStructuredSelection) provider.getSelection());
-	}
-
-	// run method
-	public void run() {
-		ISelection selection = getSelection();
-		Iterator iterator = getStructuredSelection().iterator();
-		while (iterator.hasNext()) {
-			Application application = (Application) iterator.next();
-			RemoteApplicationOperation job = new StopApplicationOperation(application);
-			job.schedule();
-		}
-		getSelectionProvider().setSelection(selection);
-	}
-
-	// override to react properly to selection change
-	public void selectionChanged(IStructuredSelection selection) {
-		updateState(selection);
-	}
-
-	public void updateState(IStructuredSelection selection) {
-		if (selection.size() == 0) {
-			setEnabled(false);
-			return;
-		}
-		boolean enabled = true;
-
-		Iterator iterator = selection.iterator();
-		while (iterator.hasNext()) {
-			Model model = (Model) iterator.next();
-			if (!(model instanceof Application)) {
-				enabled = false;
-				break;
-			}
-			Application application = (Application) model;
-			try {
-				if (!(RemoteApplication.STATE_RUNNING.equals(application.getRemoteApplication().getState()) ||
-					  RemoteApplication.STATE_MIXED.equals(application.getRemoteApplication().getState()) ||
-					  RemoteApplication.STATE_STARTING.equals(application.getRemoteApplication().getState()))) {
-					enabled = false;
-					break;
-				}
-			} catch (IAgentException e) {
-				enabled = false;
-			}
-		}
-		this.setEnabled(enabled);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction#isEnabledFor(org.tigris.mtoolkit.osgimanagement.model.Model)
+   */
+  @Override
+  protected boolean isEnabledFor(Application application) {
+    final String state = application.getState();
+    if (!(RemoteApplication.STATE_RUNNING.equals(state) || RemoteApplication.STATE_MIXED.equals(state) || RemoteApplication.STATE_STARTING
+        .equals(state))) {
+      return false;
+    }
+    return true;
+  }
 
 }

@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnViewer;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.SameShellProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
@@ -32,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.progress.IProgressConstants;
+import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
@@ -61,8 +61,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.AddFram
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public final class ActionsManager {
-  private static final String MIME_JAR   = "application/java-archive"; //$NON-NLS-1$
   private static final String JAR_FILTER = "*.jar";                   //$NON-NLS-1$
+  private static final String MIME_JAR   = "application/java-archive"; //$NON-NLS-1$
 
   private ActionsManager() {
   }
@@ -90,8 +90,8 @@ public final class ActionsManager {
     job.schedule();
   }
 
-  public static void installBundleAction(final FrameworkImpl framework, TreeViewer parentView) {
-    final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(),
+  public static void installBundleAction(final FrameworkImpl framework) {
+    final File[] files = Util.openFileSelectionDialog(PluginUtilities.getActiveWorkbenchShell(),
         Messages.install_bundle_title, JAR_FILTER, Messages.bundle_filter_label, true);
     if (files == null || files.length == 0) {
       return;
@@ -129,13 +129,16 @@ public final class ActionsManager {
     job.schedule();
   }
 
-  public static void frameworkPropertiesAction(FrameworkImpl framework, ColumnViewer parentView) {
+  public static void frameworkPropertiesAction(ColumnViewer parentView) {
     PropertyDialogAction action = new PropertyDialogAction(new SameShellProvider(parentView.getControl()), parentView);
     action.run();
   }
 
   public static void removeFrameworkAction(final FrameworkImpl framework) {
     Job removeJob = new Job("Remove device") {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         framework.dispose();
@@ -179,14 +182,13 @@ public final class ActionsManager {
         return;
       }
     }
-
     RemoteBundleOperation job = new StopBundleOperation(bundle);
     job.schedule();
   }
 
-  public static void updateBundleAction(final Bundle bundle, TreeViewer parentView) {
-    final File[] files = Util.openFileSelectionDialog(parentView.getControl().getShell(), Messages.update_bundle_title,
-        JAR_FILTER, Messages.bundle_filter_label, false);
+  public static void updateBundleAction(final Bundle bundle) {
+    final File[] files = Util.openFileSelectionDialog(PluginUtilities.getActiveWorkbenchShell(),
+        Messages.update_bundle_title, JAR_FILTER, Messages.bundle_filter_label, false);
     if (files == null || files.length == 0) {
       return;
     }
@@ -195,6 +197,9 @@ public final class ActionsManager {
     preverifyJob.setUser(false);
     preverifyJob.setSystem(true);
     preverifyJob.addJobChangeListener(new JobChangeAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.JobChangeAdapter#done(org.eclipse.core.runtime.jobs.IJobChangeEvent)
+       */
       @Override
       public void done(IJobChangeEvent event) {
         if (event.getResult() != null && event.getResult().isOK()) {
@@ -210,6 +215,9 @@ public final class ActionsManager {
   public static void disconnectFrameworkAction(final FrameworkImpl fw) {
     disconnectConsole(fw);
     Job disconnectJob = new Job("Disconnect device") {
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
@@ -266,10 +274,16 @@ public final class ActionsManager {
       this.fw = fw;
     }
 
+    /* (non-Javadoc)
+     * @see org.eclipse.core.runtime.jobs.ISchedulingRule#isConflicting(org.eclipse.core.runtime.jobs.ISchedulingRule)
+     */
     public boolean isConflicting(ISchedulingRule rule) {
       return (rule instanceof FwMutexRule) && (((FwMutexRule) rule).fw == fw);
     }
 
+    /* (non-Javadoc)
+     * @see org.eclipse.core.runtime.jobs.ISchedulingRule#contains(org.eclipse.core.runtime.jobs.ISchedulingRule)
+     */
     public boolean contains(ISchedulingRule rule) {
       return (rule instanceof FwMutexRule) && (((FwMutexRule) rule).fw == fw);
     }
@@ -294,5 +308,4 @@ public final class ActionsManager {
       fw.refreshObjectClassAction(service);
     }
   }
-
 }

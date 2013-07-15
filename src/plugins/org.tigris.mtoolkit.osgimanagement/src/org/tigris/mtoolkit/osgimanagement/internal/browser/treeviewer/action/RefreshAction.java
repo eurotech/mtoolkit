@@ -16,16 +16,15 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.actions.ActionFactory;
-import org.eclipse.ui.actions.SelectionProviderAction;
-import org.tigris.mtoolkit.osgimanagement.IStateAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeAction;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public final class RefreshAction extends SelectionProviderAction implements IStateAction {
-  private TreeViewer tree;
+public final class RefreshAction extends AbstractFrameworkTreeAction {
+  private final TreeViewer tree;
 
   public RefreshAction(ISelectionProvider provider, String label, TreeViewer tree) {
     super(provider, label);
@@ -65,16 +64,9 @@ public final class RefreshAction extends SelectionProviderAction implements ISta
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.ui.actions.SelectionProviderAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-   */
-  @Override
-  public void selectionChanged(IStructuredSelection selection) {
-    updateState(selection);
-  }
-
-  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.osgimanagement.IStateAction#updateState(org.eclipse.jface.viewers.IStructuredSelection)
    */
+  @Override
   public void updateState(IStructuredSelection selection) {
     if (selection.size() == 0) {
       setEnabled(false);

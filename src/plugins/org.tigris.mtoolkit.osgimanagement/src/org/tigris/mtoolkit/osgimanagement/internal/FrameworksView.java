@@ -107,20 +107,20 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategor
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AddAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.CommonPropertiesAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ConnectAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DeInstallBundleAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DisconnectAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ConnectFrameworkAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.UninstallBundleAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DisconnectFrameworkAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.FindAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.GotoServiceAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.InstallBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RefreshAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RemoveAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.RemoveFrameworkAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowBundleIDAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowBundleVersionAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowFrameworkConsole;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowServicePropertiesInTree;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StartAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StopAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StartBundleAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StopBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.UpdateBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ViewAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewContentProvider;
@@ -153,13 +153,13 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
   private static final String                       SYSTEM_BUNDLES_EXT_POINT_ID  = "org.tigris.mtoolkit.osgimanagement.systemBundlesProvider";
 
   private static AddAction                          addFrameworkAction;
-  private static RemoveAction                       removeFrameworkAction;
-  private static ConnectAction                      connectAction;
-  private static DisconnectAction                   disconnectAction;
+  private static RemoveFrameworkAction                       removeFrameworkAction;
+  private static ConnectFrameworkAction                      connectAction;
+  private static DisconnectFrameworkAction                   disconnectAction;
   private static InstallBundleAction                installBundleAction;
-  private static DeInstallBundleAction              deinstallBundleAction;
-  private static StartAction                        startAction;
-  private static StopAction                         stopAction;
+  private static UninstallBundleAction              deinstallBundleAction;
+  private static StartBundleAction                        startAction;
+  private static StopBundleAction                         stopAction;
   private static UpdateBundleAction                 updateBundleAction;
   private static CommonPropertiesAction             commonPropertiesAction;
   private static ShowServicePropertiesInTree        showServPropsInTreeAction;
@@ -504,26 +504,26 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     addFrameworkAction = new AddAction(tree, Messages.add_action_label);
     addFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(ADD_ACTION_IMAGE_PATH));
 
-    removeFrameworkAction = new RemoveAction(tree, Messages.remove_action_label);
+    removeFrameworkAction = new RemoveFrameworkAction(tree, Messages.remove_action_label);
     removeFrameworkAction.setImageDescriptor(ImageHolder.getImageDescriptor(REMOVE_ACTION_ACTION_PATH));
     actionBars.setGlobalActionHandler(ActionFactory.DELETE.getId(), removeFrameworkAction);
 
-    connectAction = new ConnectAction(tree, Messages.connect_action_label);
+    connectAction = new ConnectFrameworkAction(tree, Messages.connect_action_label);
     connectAction.setImageDescriptor(ImageHolder.getImageDescriptor(CONNECT_ACTION_IMAGE_PATH));
 
-    disconnectAction = new DisconnectAction(tree, Messages.disconnect_action_label);
+    disconnectAction = new DisconnectFrameworkAction(tree, Messages.disconnect_action_label);
     disconnectAction.setImageDescriptor(ImageHolder.getImageDescriptor(DISCONNECT_ACTION_IMAGE_PATH));
 
     installBundleAction = new InstallBundleAction(tree, Messages.install_action_label);
     installBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(INSTALL_BUNDLE_IMAGE_PATH));
 
-    deinstallBundleAction = new DeInstallBundleAction(tree, Messages.deinstall_action_label);
+    deinstallBundleAction = new UninstallBundleAction(tree, Messages.deinstall_action_label);
     deinstallBundleAction.setImageDescriptor(ImageHolder.getImageDescriptor(UNINSTALL_BUNDLE_IMAGE_PATH));
 
-    startAction = new StartAction(tree, Messages.start_action_label);
+    startAction = new StartBundleAction(tree, Messages.start_action_label);
     startAction.setImageDescriptor(ImageHolder.getImageDescriptor(START_BUNDLE_IMAGE_PATH));
 
-    stopAction = new StopAction(tree, Messages.stop_action_label);
+    stopAction = new StopBundleAction(tree, Messages.stop_action_label);
     stopAction.setImageDescriptor(ImageHolder.getImageDescriptor(STOP_BUNDLE_IMAGE_PATH));
 
     updateBundleAction = new UpdateBundleAction(tree, Messages.update_action_label);

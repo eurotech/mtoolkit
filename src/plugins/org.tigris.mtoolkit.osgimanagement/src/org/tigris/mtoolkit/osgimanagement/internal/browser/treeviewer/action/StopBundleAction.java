@@ -14,32 +14,31 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
-public final class UpdateBundleAction extends AbstractFrameworkTreeElementAction<Bundle> {
-  private static final int UPDATE_BUNDLE_STATE_MASK = org.osgi.framework.Bundle.INSTALLED
-                                                        | org.osgi.framework.Bundle.RESOLVED
-                                                        | org.osgi.framework.Bundle.STARTING
-                                                        | org.osgi.framework.Bundle.ACTIVE;
+public final class StopBundleAction extends AbstractFrameworkTreeElementAction<Bundle> {
+  private static final int STOP_BUNDLE_STATE_MASK = org.osgi.framework.Bundle.ACTIVE
+                                                      | org.osgi.framework.Bundle.STARTING;
 
-  public UpdateBundleAction(ISelectionProvider provider, String label) {
-    super(false, Bundle.class, provider, label);
+  public StopBundleAction(ISelectionProvider provider, String label) {
+    super(true, Bundle.class, provider, label);
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
-   */
+  * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeElementAction#execute(org.tigris.mtoolkit.osgimanagement.model.Model)
+  */
   @Override
   protected void execute(Bundle element) {
-    ActionsManager.updateBundleAction(element);
+    ActionsManager.stopBundleAction(element);
   }
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AbstractFrameworkTreeAction#isEnabled(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  protected boolean isEnabledFor(Bundle bundle) {
-    if (bundle.isSystemBundle()) {
+  protected boolean isEnabledFor(Bundle element) {
+    Bundle bundle = element;
+    if (bundle.getType() != 0 || bundle.isSystemBundle()) {
       return false;
     }
-    return (bundle.getState() & UPDATE_BUNDLE_STATE_MASK) != 0;
+    return (bundle.getState() & STOP_BUNDLE_STATE_MASK) != 0;
   }
 }
