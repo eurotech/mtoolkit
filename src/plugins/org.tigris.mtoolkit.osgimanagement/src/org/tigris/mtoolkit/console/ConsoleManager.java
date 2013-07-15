@@ -22,12 +22,14 @@ import org.tigris.mtoolkit.console.internal.RemoteConsole;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 
 public final class ConsoleManager {
-  public static final String CONSOLE_TYPE       = "osgiManagementConsole";
+  private static final String CONSOLE_TYPE       = "osgiManagementConsole";
+  private static final Object CREATING_CONSOLE   = new Object();
+  private static final Object SHOW_CONSOLE       = new Object();
+  private static final Object DISCONNECT_CONSOLE = new Object();
+  private static final Map    consoles           = new HashMap();
 
-  private static Object      CREATING_CONSOLE   = new Object();
-  private static Object      SHOW_CONSOLE       = new Object();
-  private static Object      DISCONNECT_CONSOLE = new Object();
-  private static Map         consoles           = new HashMap();
+  private ConsoleManager() {
+  }
 
   public static boolean isOSGiManagementConsole(IConsole console) {
     return CONSOLE_TYPE.equals(console.getType());
@@ -143,7 +145,7 @@ public final class ConsoleManager {
   }
 
   private static RemoteConsole createConsole(DeviceConnector dc, String name, IProcess iProcess, Object fwId) {
-    RemoteConsole console = new RemoteConsole(dc, name, iProcess, fwId);
+    RemoteConsole console = new RemoteConsole(dc, name, CONSOLE_TYPE, iProcess, fwId);
     return console;
   }
 

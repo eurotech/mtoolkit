@@ -34,7 +34,6 @@ import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.part.IPageBookViewPage;
-import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -57,8 +56,8 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   private IOConsoleOutputStream output;
   private String                name;
 
-  public RemoteConsole(DeviceConnector dc, String name, IProcess iProcess, Object fwId) {
-    super("", ConsoleManager.CONSOLE_TYPE, ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$
+  public RemoteConsole(DeviceConnector dc, String name, String consoleType, IProcess iProcess, Object fwId) {
+    super("", consoleType, ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$
     this.name = name;
     this.connector = dc;
     this.process = iProcess;
