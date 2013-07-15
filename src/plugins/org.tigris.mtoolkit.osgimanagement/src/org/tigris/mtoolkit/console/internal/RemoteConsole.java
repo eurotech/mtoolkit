@@ -34,6 +34,7 @@ import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.part.IPageBookViewPage;
+import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -57,7 +58,7 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   private String                name;
 
   public RemoteConsole(DeviceConnector dc, String name, IProcess iProcess, Object fwId) {
-    super("", "osgiManagementConsole", ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$ //$NON-NLS-2$
+    super("", ConsoleManager.CONSOLE_TYPE, ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$
     this.name = name;
     this.connector = dc;
     this.process = iProcess;

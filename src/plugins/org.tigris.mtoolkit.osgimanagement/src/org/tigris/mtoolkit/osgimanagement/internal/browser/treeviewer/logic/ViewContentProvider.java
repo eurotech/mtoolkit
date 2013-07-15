@@ -27,9 +27,6 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class ViewContentProvider implements ITreeContentProvider, ContentChangeListener {
-
-  private static final String CONSOLE_TYPE = "osgiManagementConsole";
-
   private TreeViewer viewer;
 
   // Returns the child elements of the given parent element.
@@ -199,12 +196,8 @@ public final class ViewContentProvider implements ITreeContentProvider, ContentC
     }
   }
 
-  private static boolean isRemoteLauncherConsole(IConsole console) {
-    return CONSOLE_TYPE.equals(console.getType());
-  }
-
   private static Object getFrameworkIdObject(IConsole console) {
-    if (!isRemoteLauncherConsole(console)) {
+    if (!ConsoleManager.isOSGiManagementConsole(console)) {
       return null;
     }
     return ((IOConsole) console).getAttribute("mtoolkit.console.frameworkid");
