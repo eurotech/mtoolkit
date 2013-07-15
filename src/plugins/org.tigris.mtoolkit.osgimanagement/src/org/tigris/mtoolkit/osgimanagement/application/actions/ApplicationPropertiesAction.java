@@ -53,7 +53,7 @@ public final class ApplicationPropertiesAction extends AbstractFrameworkTreeElem
         try {
           properties[0] = application.getRemoteApplication().getProperties();
         } catch (IAgentException e) {
-          return Util.newStatus(IStatus.ERROR, "Failed to get bundle headers", e);
+          return Util.newStatus(IStatus.ERROR, "Failed to get application properties", e);
         }
         return Status.OK_STATUS;
       }
