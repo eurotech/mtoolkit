@@ -79,7 +79,13 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
       }
       parent = null;
     }
-    connector = null;
+    if (connector != null) {
+      try {
+        connector.removeRemoteDevicePropertyListener(this);
+      } catch (IAgentException e) {
+      }
+      connector = null;
+    }
     applicationsNode = null;
     supportApplications = false;
   }

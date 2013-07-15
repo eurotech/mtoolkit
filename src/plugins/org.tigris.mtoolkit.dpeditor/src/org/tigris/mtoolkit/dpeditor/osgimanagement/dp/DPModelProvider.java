@@ -100,6 +100,11 @@ public class DPModelProvider implements ContentTypeModelProvider, RemoteDPListen
     }
     if (connector != null) {
       supportDPDictionary.remove(connector);
+      try {
+        connector.removeRemoteDevicePropertyListener(this);
+      } catch (IAgentException e1) {
+        e1.printStackTrace();
+      }
       connector = null;
     }
     dpNode = null;

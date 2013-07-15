@@ -29,6 +29,7 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
@@ -93,6 +94,11 @@ public class Util {
       }
       if (autoConnectEnabled) {
         FrameworksView.getTreeRoot().addElement(fw);
+      }
+      PMPConnectionListener pmpListener = fw.getPMPConnectionListener();
+      if (pmpListener == null || !connector.equals(pmpListener.getConnector())) {
+        pmpListener = new PMPConnectionListener(fw, fwName, connector, autoConnectEnabled);
+        fw.setPMPConnectionListener(pmpListener);
       }
       fw.connect(connector, SubMonitor.convert(monitor));
     } catch (IAgentException e) {

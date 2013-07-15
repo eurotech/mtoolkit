@@ -210,6 +210,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   private void removeRemoteListeners() {
     try {
+      connector.removeRemoteDevicePropertyListener(this);
       DeploymentManager deploymentManager = connector.getDeploymentManager();
       if (deploymentManager != null) {
         deploymentManager.removeRemoteBundleListener(this);
@@ -306,10 +307,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         removeRemoteListeners();
       }
 
-      for (int i = 0; i < modelProviders.size(); i++) {
-        ((ModelProviderElement) modelProviders.get(i)).getProvider().disconnect();
-      }
-
       clearModel();
       if (!isAutoConnected()) {
         connector = null;
@@ -324,6 +321,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   private void clearModel() {
+    for (int i = 0; i < modelProviders.size(); i++) {
+      ((ModelProviderElement) modelProviders.get(i)).getProvider().disconnect();
+    }
     modelProviders.clear();
     removeChildren();
     bundles = null;

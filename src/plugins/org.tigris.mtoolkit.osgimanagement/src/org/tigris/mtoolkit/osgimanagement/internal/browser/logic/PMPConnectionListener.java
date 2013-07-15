@@ -68,6 +68,7 @@ public final class PMPConnectionListener implements ConnectionListener {
     if (!autoConnected) {
       ActionsManager.disconnectConsole(fw);
     }
+    ((DeviceConnectorSpi) connector).getConnectionManager().removeConnectionListener(this);
     fw.disconnect();
   }
 
