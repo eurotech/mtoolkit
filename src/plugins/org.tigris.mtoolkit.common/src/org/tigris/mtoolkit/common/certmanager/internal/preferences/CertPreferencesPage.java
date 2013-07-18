@@ -44,10 +44,10 @@ import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.certmanager.internal.dialogs.CertificateManagementDialog;
-import org.tigris.mtoolkit.common.preferences.IMToolkitPreferencePage;
 
-public final class CertPreferencesPage extends PreferencePage implements IWorkbenchPreferencePage,
-    IMToolkitPreferencePage {
+public final class CertPreferencesPage extends PreferencePage implements IWorkbenchPreferencePage {
+  private static final String ATTR_JARSIGNER_LOCATION = "jarsigner.location"; //$NON-NLS-1$
+
   private TableViewer         certificatesViewer;
   private Button              btnAdd;
   private Button              btnEdit;
@@ -55,8 +55,9 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
   private Button              btnBrowse;
   private Text                txtJarsignerLocation;
 
-  private static final String ATTR_JARSIGNER_LOCATION = "jarsigner.location"; //$NON-NLS-1$
-
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+   */
   @Override
   public Control createContents(Composite parent) {
     Composite composite = new Composite(parent, SWT.NONE);
@@ -87,12 +88,18 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
     certificatesViewer.setLabelProvider(new CertLabelProvider());
     certificatesViewer.setInput(CertStorage.getDefault());
     certificatesViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+       */
       public void selectionChanged(SelectionChangedEvent event) {
         updateButtonsState();
       }
     });
 
     certificatesViewer.getControl().addKeyListener(new KeyAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.KeyAdapter#keyPressed(org.eclipse.swt.events.KeyEvent)
+       */
       @Override
       public void keyPressed(KeyEvent e) {
         if (e.keyCode == SWT.DEL) {
@@ -103,6 +110,9 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
 
     btnAdd = createButton(composite, Messages.certs_btnAdd);
     btnAdd.addSelectionListener(new SelectionAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+       */
       @Override
       public void widgetSelected(SelectionEvent e) {
         addCertificate();
@@ -111,6 +121,9 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
 
     btnEdit = createButton(composite, Messages.certs_btnEdit);
     btnEdit.addSelectionListener(new SelectionAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+       */
       @Override
       public void widgetSelected(SelectionEvent e) {
         editCertificate();
@@ -119,6 +132,9 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
 
     btnRemove = createButton(composite, Messages.certs_btnRemove);
     btnRemove.addSelectionListener(new SelectionAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+       */
       @Override
       public void widgetSelected(SelectionEvent e) {
         removeCertificate();
@@ -141,6 +157,9 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
     btnBrowse = new Button(composite, SWT.PUSH);
     btnBrowse.setText(Messages.browseLabel);
     btnBrowse.addSelectionListener(new SelectionAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+       */
       @Override
       public void widgetSelected(SelectionEvent e) {
         browseLocation();
@@ -161,20 +180,27 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
     return button;
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
+   */
   public void init(IWorkbench workbench) {
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
+   */
   @Override
   public void performDefaults() {
     super.performDefaults();
-
     CertStorage.getDefault().performDefaults();
-
     String defLocation = CertUtils.getDefaultJarsignerLocation();
     txtJarsignerLocation.setText(defLocation);
     saveJarsignerLocation(defLocation);
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#performOk()
+   */
   @Override
   public boolean performOk() {
     CertStorage.getDefault().save();
@@ -182,6 +208,9 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
     return true;
   }
 
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.preference.PreferencePage#performCancel()
+   */
   @Override
   public boolean performCancel() {
     return true;
@@ -283,7 +312,6 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
       return;
     }
     IPreferenceStore store = plugin.getPreferenceStore();
-
     store.setValue(ATTR_JARSIGNER_LOCATION, location);
   }
 }
