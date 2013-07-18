@@ -17,37 +17,36 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
 /**
- * Extenders which provide additional connections shall implement this interface
+ * Extender which provide additional connections shall implement this interface
+ *
  * @since 3.0
  */
 public interface ExtConnectionFactory {
+  /**
+   * Returns true if connections, created by this factory can be used to connect
+   * to controller.
+   *
+   * @return
+   */
+  public boolean isControllerType();
 
-	/**
-	 * Returns true if connections, created by this factory can be used to
-	 * connect to controller.
-	 * 
-	 * @return
-	 */
-	public boolean isControllerType();
+  /**
+   * Returns the type of connections this factory creates.
+   *
+   * @return
+   */
+  public int getConnectionType();
 
-	/**
-	 * Returns the type of connections this factory creates.
-	 * 
-	 * @return
-	 */
-	public int getConnectionType();
-
-	/**
-	 * Creates connection using the passed transport.
-	 * 
-	 * @param transport
-	 * @param connProperties
-	 * @param connManager
-	 * @param monitor
-	 * @throws IAgentException
-	 *             if connection cannot be established
-	 */
-	public AbstractConnection createConnection(Transport transport, Dictionary connProperties,
-			ConnectionManager connManager, IAProgressMonitor monitor) throws IAgentException;
-
+  /**
+   * Creates connection using the passed transport.
+   *
+   * @param transport
+   * @param connProperties
+   * @param connManager
+   * @param monitor
+   * @throws IAgentException
+   *           if connection cannot be established
+   */
+  public AbstractConnection createConnection(Transport transport, Dictionary connProperties,
+      ConnectionManager connManager, IAProgressMonitor monitor) throws IAgentException;
 }
