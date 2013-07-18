@@ -33,6 +33,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.tcp.ConnectionManagerImpl;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
+import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
@@ -48,9 +49,9 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 /**
- * 
+ *
  * DeviceConnector implementation
- * 
+ *
  */
 public class DeviceConnectorImpl extends DeviceConnector implements EventListener, ConnectionListener,
     DeviceConnectorSpi {
@@ -58,6 +59,9 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
    * Enables backward compatibility with the old socket protocol
    */
   public static final boolean   ENABLE_COMPATIBILITY    = Boolean.getBoolean("iagent.compatibility.enable");
+
+  private static final String   MBS_COMMS_PROP          = "mbs.comms";
+  private static final String   MBS_COMMS_V3            = "comms3";
 
   private static final String   EVENT_CAPABILITY_NAME   = "capability.name";
   private static final String   EVENT_CAPABILITY_VALUE  = "capability.value";
@@ -81,7 +85,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
 
   /**
    * Creates new DeviceConnector with specified transport object
-   * 
+   *
    * @param transport
    * @param aConManager
    * @param monitor
@@ -124,27 +128,38 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
   }
 
   private void connect(Dictionary props, IAProgressMonitor monitor) throws IAgentException {
-    Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate");
+    final Integer pmpPort = (Integer) props.get(PMPService.PROP_PMP_PORT);
+    //In case we already have PMP port connect to PMP directly
+    if (pmpPort != null) {
+      debug("[connect] Connect directly to PMP");
+      connect0(ConnectionManager.PMP_CONNECTION, monitor);
+    }
+    final Boolean connectImmeadiate = (Boolean) props.get("framework-connection-immediate");
     if (connectImmeadiate == null || connectImmeadiate.booleanValue()) {
       StringBuffer errCause = new StringBuffer();
       // Trying controller connections
       int[] extControllerTypes = connectionManager.getExtControllerConnectionTypes();
-      for (int i = 0; i < extControllerTypes.length; i++) {
-        checkCancel(monitor);
-        try {
-          debug("[connect] Trying to connect to controller of type: " + extControllerTypes[i]);
-          connect0(extControllerTypes[i], monitor);
-          return;
-        } catch (IAgentException e) {
-          debug("[connect] Failed: " + e);
-          errCause.append("\n >>> Trying connection of type " + extControllerTypes[i] + " ... failed: " + e);
+      if (extControllerTypes.length > 0) {
+        final VMManager manager = getVMManager();
+        if (pmpPort == null || MBS_COMMS_V3.equals(manager.getSystemProperty(MBS_COMMS_PROP))) {
+          for (int i = 0; i < extControllerTypes.length; i++) {
+            checkCancel(monitor);
+            try {
+              debug("[connect] Trying to connect to controller of type: " + extControllerTypes[i]);
+              connect0(extControllerTypes[i], monitor);
+              return;
+            } catch (IAgentException e) {
+              debug("[connect] Failed: " + e);
+              errCause.append("\n >>> Trying connection of type " + extControllerTypes[i] + " ... failed: " + e);
+            }
+          }
         }
       }
 
       checkCancel(monitor);
 
+      // Trying compatible controller connection
       if (ENABLE_COMPATIBILITY) {
-        // Trying compatible controller connection
         try {
           debug("[connect] Trying to connect to device which support MBSA");
           connect0(ConnectionManager.MBSA_CONNECTION, monitor);
@@ -156,6 +171,10 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
       }
 
       checkCancel(monitor);
+
+      if (errCause.length() == 0) {
+        return;
+      }
       IAgentException e = new IAgentException(errCause.toString(), IAgentErrors.ERROR_CANNOT_CONNECT);
       debug("[connect] Unable to create controller connection");
       throw new IAgentException("Unable to create controller connection", IAgentErrors.ERROR_CANNOT_CONNECT, e);
