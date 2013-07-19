@@ -10,56 +10,15 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.application.logic;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractRemoteModelOperation;
 
-public abstract class RemoteApplicationOperation extends Job {
-  private final Application application;
-
+public abstract class RemoteApplicationOperation extends AbstractRemoteModelOperation<Application> {
   public RemoteApplicationOperation(String taskName, Application application) {
-    super(taskName);
-    setUser(true);
-    this.application = application;
-  }
-
-  /* (non-Javadoc)
-   * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-   */
-  @Override
-  protected IStatus run(IProgressMonitor monitor) {
-    monitor.beginTask(getName(), 1);
-    IStatus operationResult = Status.OK_STATUS;
-    try {
-      monitor.beginTask(getName(), 1);
-      operationResult = doOperation(monitor);
-    } catch (IAgentException e) {
-      operationResult = handleException(e);
-    } finally {
-      if (application != null) {
-        application.updateElement();
-      }
-      monitor.done();
-    }
-    if (monitor.isCanceled()) {
-      return Status.CANCEL_STATUS;
-    }
-    return Util.newStatus(getMessage(operationResult), operationResult);
+    super(taskName, application);
   }
 
   protected Application getApplication() {
-    return application;
+    return getModel();
   }
-
-  protected IStatus handleException(Exception e) {
-    return Util.newStatus(IStatus.ERROR, e.getMessage(), e);
-  }
-
-  protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;
-
-  protected abstract String getMessage(IStatus operationStatus);
 }

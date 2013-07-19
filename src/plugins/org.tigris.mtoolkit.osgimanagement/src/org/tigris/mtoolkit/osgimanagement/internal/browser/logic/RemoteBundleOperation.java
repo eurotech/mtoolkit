@@ -10,60 +10,23 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
+import org.tigris.mtoolkit.osgimanagement.model.AbstractRemoteModelOperation;
 
-public abstract class RemoteBundleOperation extends Job {
-  private final Bundle bundle;
-
+public abstract class RemoteBundleOperation extends AbstractRemoteModelOperation<Bundle> {
   public RemoteBundleOperation(String taskName, Bundle bundle) {
-    super(taskName);
-    this.bundle = bundle;
-    setUser(true);
+    super(taskName, bundle);
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractRemoteModelOperation#refreshState(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  protected IStatus run(IProgressMonitor monitor) {
-    monitor.beginTask(getName(), 1);
-    IStatus operationResult = Status.OK_STATUS;
-    try {
-      monitor.beginTask(getName(), 1);
-      operationResult = doOperation(monitor);
-    } catch (IAgentException e) {
-      // refresh the bundle state
-      if (getBundle() != null) {
-        getBundle().refreshStateFromRemote();
-      }
-      operationResult = handleException(e);
-    } finally {
-      if (bundle != null) {
-        bundle.updateElement();
-      }
-      monitor.done();
-    }
-    if (monitor.isCanceled()) {
-      return Status.CANCEL_STATUS;
-    }
-    return Util.newStatus(getMessage(operationResult), operationResult);
+  protected void refreshState(Bundle model) {
+    model.refreshStateFromRemote();
   }
 
   protected Bundle getBundle() {
-    return bundle;
+    return getModel();
   }
-
-  protected IStatus handleException(IAgentException e) {
-    return Util.handleIAgentException(e);
-  }
-
-  protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;
-
-  protected abstract String getMessage(IStatus operationStatus);
 }
