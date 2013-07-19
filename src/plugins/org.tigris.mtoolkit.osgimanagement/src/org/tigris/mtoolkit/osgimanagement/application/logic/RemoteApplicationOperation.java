@@ -14,13 +14,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
 public abstract class RemoteApplicationOperation extends Job {
-  private Application application;
+  private final Application application;
 
   public RemoteApplicationOperation(String taskName, Application application) {
     super(taskName);
@@ -46,12 +45,10 @@ public abstract class RemoteApplicationOperation extends Job {
       }
       monitor.done();
     }
-    if (!operationResult.isOK()) {
-      StatusManager.getManager().handle(
-          new Status(operationResult.getSeverity(), FrameworkPlugin.PLUGIN_ID, operationResult.getMessage(),
-              operationResult.getException()), StatusManager.SHOW | StatusManager.LOG);
+    if (monitor.isCanceled()) {
+      return Status.CANCEL_STATUS;
     }
-    return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+    return Util.newStatus(getMessage(operationResult), operationResult);
   }
 
   protected Application getApplication() {
@@ -59,8 +56,7 @@ public abstract class RemoteApplicationOperation extends Job {
   }
 
   protected IStatus handleException(Exception e) {
-    Status errStatus = new Status(IStatus.ERROR, FrameworkPlugin.PLUGIN_ID, e.getMessage(), e);
-    return errStatus;
+    return Util.newStatus(IStatus.ERROR, e.getMessage(), e);
   }
 
   protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;

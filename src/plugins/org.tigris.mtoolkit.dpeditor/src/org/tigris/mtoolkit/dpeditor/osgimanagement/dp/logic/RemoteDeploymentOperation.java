@@ -14,15 +14,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.tigris.mtoolkit.dpeditor.DPActivator;
 import org.tigris.mtoolkit.dpeditor.osgimanagement.dp.model.DeploymentPackage;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.osgimanagement.Util;
 
 public abstract class RemoteDeploymentOperation extends Job {
   private final DeploymentPackage pack;
-  protected Dialog                dialog;
 
   public RemoteDeploymentOperation(String name, DeploymentPackage pack) {
     super(name);
@@ -45,10 +43,10 @@ public abstract class RemoteDeploymentOperation extends Job {
     } finally {
       monitor.done();
     }
-    if (!operationResult.isOK()) {
-      StatusManager.getManager().handle(operationResult, StatusManager.SHOW | StatusManager.LOG);
+    if (monitor.isCanceled()) {
+      return Status.CANCEL_STATUS;
     }
-    return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+    return Util.newStatus(getMessage(operationResult), operationResult);
   }
 
   protected DeploymentPackage getDeploymentPackage() {
@@ -56,8 +54,7 @@ public abstract class RemoteDeploymentOperation extends Job {
   }
 
   protected IStatus handleException(IAgentException e) {
-    Status errStatus = new Status(IStatus.ERROR, DPActivator.PLUGIN_ID, e.getMessage(), e);
-    return errStatus;
+    return DPActivator.newStatus(IStatus.ERROR, e.getMessage(), e);
   }
 
   protected abstract IStatus doOperation(IProgressMonitor monitor) throws IAgentException;

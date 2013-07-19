@@ -23,12 +23,14 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteDP;
 
-public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
-
+public final class UninstallDeploymentOperation extends RemoteDeploymentOperation {
   public UninstallDeploymentOperation(DeploymentPackage pack) {
     super("Uninstalling deployment package...", pack);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.dpeditor.osgimanagement.dp.logic.RemoteDeploymentOperation#doOperation(org.eclipse.core.runtime.IProgressMonitor)
+   */
   @Override
   protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
     try {
@@ -52,7 +54,15 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
     return Status.OK_STATUS;
   }
 
-  protected IStatus uninstallDeploymentPackage(boolean forced) throws IAgentException {
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.dpeditor.osgimanagement.dp.logic.RemoteDeploymentOperation#getMessage(org.eclipse.core.runtime.IStatus)
+   */
+  @Override
+  protected String getMessage(IStatus operationStatus) {
+    return NLS.bind("Deployment package {0} uninstallation failed", getDeploymentPackage().toString());
+  }
+
+  IStatus uninstallDeploymentPackage(boolean forced) throws IAgentException {
     RemoteDP rPackage = getDeploymentPackage().getRemoteDP();
     rPackage.uninstall(forced);
     return Status.OK_STATUS;
@@ -62,8 +72,11 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
     Display display = PlatformUI.getWorkbench().getDisplay();
     final int[] result = new int[1];
     display.syncExec(new Runnable() {
+      /* (non-Javadoc)
+       * @see java.lang.Runnable#run()
+       */
       public void run() {
-        dialog = new MessageDialog(PluginUtilities.getActiveWorkbenchShell(),
+        MessageDialog dialog = new MessageDialog(PluginUtilities.getActiveWorkbenchShell(),
             "Force Deployment Package Uninstallation", null, NLS.bind(
                 "Deployment package {0} uninstallation failed: {1}", getDeploymentPackage().toString(),
                 status.getMessage()), MessageDialog.QUESTION, new String[] {
@@ -74,10 +87,4 @@ public class UninstallDeploymentOperation extends RemoteDeploymentOperation {
     });
     return result[0] == 0;
   }
-
-  @Override
-  protected String getMessage(IStatus operationStatus) {
-    return NLS.bind("Deployment package {0} uninstallation failed", getDeploymentPackage().toString());
-  }
-
 }
