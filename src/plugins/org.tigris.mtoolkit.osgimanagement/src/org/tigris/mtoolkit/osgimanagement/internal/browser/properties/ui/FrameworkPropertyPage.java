@@ -26,7 +26,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel.ErrorMonitor;
 
 public final class FrameworkPropertyPage extends PropertyPage implements ConstantsDistributor, ErrorMonitor {
-  private FrameworkImpl  fw;
   private FrameworkPanel fwPanel;
 
   /* (non-Javadoc)
@@ -36,6 +35,7 @@ public final class FrameworkPropertyPage extends PropertyPage implements Constan
   public boolean performOk() {
     boolean correct = fwPanel.validate();
     if (correct) {
+      final FrameworkImpl fw = (FrameworkImpl) getElement();
       String oldLabel = fw.getLabel();
 
       boolean connChanged = fwPanel.save(fw.getConfig());
@@ -62,6 +62,7 @@ public final class FrameworkPropertyPage extends PropertyPage implements Constan
   @Override
   protected Control createContents(Composite parent) {
     PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.PROPERTY_FRAMEWORK);
+
     Composite composite = new Composite(parent, SWT.NONE);
     GridLayout layout = new GridLayout();
     layout.marginHeight = 0;
@@ -69,8 +70,7 @@ public final class FrameworkPropertyPage extends PropertyPage implements Constan
     composite.setLayout(layout);
     composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-    fw = (FrameworkImpl) getElement();
-
+    final FrameworkImpl fw = (FrameworkImpl) getElement();
     fwPanel = new FrameworkPanel(composite, fw, fw.getParent(), GridData.FILL_HORIZONTAL);
     fwPanel.setErrorMonitor(this);
     fwPanel.initialize(fw.getConfig());
@@ -83,6 +83,7 @@ public final class FrameworkPropertyPage extends PropertyPage implements Constan
    */
   @Override
   protected void performDefaults() {
+    final FrameworkImpl fw = (FrameworkImpl) getElement();
     fwPanel.initialize(fw.getConfig());
   }
 
@@ -93,15 +94,6 @@ public final class FrameworkPropertyPage extends PropertyPage implements Constan
   public void setErrorMessage(String error) {
     super.setErrorMessage(error);
     setValid(error == null);
-  }
-
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-   */
-  @Override
-  public void dispose() {
-    fw = null;
-    super.dispose();
   }
 
   private void updateTitle(String oldName, String newName) {

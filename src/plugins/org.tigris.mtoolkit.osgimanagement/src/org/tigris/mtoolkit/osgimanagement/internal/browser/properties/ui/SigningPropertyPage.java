@@ -22,7 +22,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public final class SigningPropertyPage extends PropertyPage {
-  private FrameworkImpl     fw;
   private CertificatesPanel certificatesPanel;
 
   /* (non-Javadoc)
@@ -38,7 +37,7 @@ public final class SigningPropertyPage extends PropertyPage {
     composite.setLayout(layout);
     composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-    fw = (FrameworkImpl) getElement();
+    final FrameworkImpl fw = (FrameworkImpl) getElement();
 
     certificatesPanel = new CertificatesPanel(composite, 1, 1, GridData.FILL_BOTH);
     certificatesPanel.initialize(fw.getSignCertificateUids());
@@ -61,16 +60,8 @@ public final class SigningPropertyPage extends PropertyPage {
    */
   @Override
   public boolean performOk() {
+    final FrameworkImpl fw = (FrameworkImpl) getElement();
     fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
     return true;
-  }
-
-  /* (non-Javadoc)
-   * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-   */
-  @Override
-  public void dispose() {
-    fw = null;
-    super.dispose();
   }
 }
