@@ -185,10 +185,9 @@ public final class ViewContentProvider implements ITreeContentProvider, ContentC
 
   private void removeConsolesFramework(Framework framework) {
     IConsole[] allConsoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
-    Object frameworkID = framework.getFrameworkID();
     for (IConsole iConsole : allConsoles) {
       Object consoleFrameworkId = getFrameworkIdObject(iConsole);
-      if (consoleFrameworkId != null && consoleFrameworkId.equals(frameworkID)) {
+      if (consoleFrameworkId != null && consoleFrameworkId.equals(framework)) {
         ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] {
           (IOConsole) iConsole
         });

@@ -119,7 +119,7 @@ public final class PMPConnectionListener implements ConnectionListener {
           connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
           fw.connect(connector, sMonitor);
           if (!autoConnected && fw.isConnected()) {
-            ConsoleManager.connectConsole(connector, fw.getName(), fw.getFrameworkID());
+            ConsoleManager.connectConsole(connector, fw.getName(), fw);
           }
           return Status.OK_STATUS;
         } finally {
