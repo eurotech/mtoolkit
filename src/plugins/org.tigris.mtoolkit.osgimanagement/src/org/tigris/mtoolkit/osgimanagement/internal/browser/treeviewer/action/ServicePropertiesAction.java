@@ -26,9 +26,9 @@ import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.osgimanagement.Util;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
 import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
@@ -70,12 +70,12 @@ public final class ServicePropertiesAction extends AbstractFrameworkTreeElementA
         IStatus result = event.getResult();
         if (!result.isOK()) {
           if (result.getException() != null) {
-            BrowserErrorHandler.processError(result.getException(), "Failed to get service properties", true);
+            FrameworkPlugin.processError(result.getException(), "Failed to get service properties", true);
           }
           return;
         }
         if (properties[0] == null) {
-          BrowserErrorHandler.processError("Empty service properties returned.", true);
+          FrameworkPlugin.processError("Empty service properties returned.", true);
           return;
         }
         final Display display = PlatformUI.getWorkbench().getDisplay();

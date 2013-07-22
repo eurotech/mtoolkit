@@ -26,9 +26,9 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -79,7 +79,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
     }
     for (int j = 0; j < fwArr.length; j++) {
       FrameworkImpl fw = fwArr[j];
-      BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
+      FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
       synchronized (Framework.getLockObject(connector)) {
         ActionsManager.disconnectConsole(fw);
         FrameworkImpl fws[] = FrameworksView.getFrameworks();
@@ -118,7 +118,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
       fw.setConnector(fConnector);
     }
 
-    BrowserErrorHandler.debug("FrameworkPlugin: " + fw.getName() + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$
+    FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$
     createPMPConnection(fConnector, fw, fw.getName(), fw.isAutoConnected());
   }
 
@@ -161,7 +161,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
           try {
             connector.getVMManager().isVMActive();
           } catch (IAgentException e) {
-            BrowserErrorHandler.processError(e, NLS.bind(Messages.pmp_connect_error_message, fw.getName()), true);
+            FrameworkPlugin.processError(e, NLS.bind(Messages.pmp_connect_error_message, fw.getName()), true);
             e.printStackTrace();
           }
         }

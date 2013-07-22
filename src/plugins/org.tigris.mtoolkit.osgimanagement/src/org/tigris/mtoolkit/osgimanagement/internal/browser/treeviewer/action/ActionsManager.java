@@ -45,7 +45,6 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.RemoteBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StartBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.StopBundleOperation;
@@ -251,7 +250,7 @@ public final class ActionsManager {
         }
       }
     } catch (IAgentException e) {
-      BrowserErrorHandler.processError(e, true);
+      FrameworkPlugin.processError(e, true);
       e.printStackTrace();
     }
   }

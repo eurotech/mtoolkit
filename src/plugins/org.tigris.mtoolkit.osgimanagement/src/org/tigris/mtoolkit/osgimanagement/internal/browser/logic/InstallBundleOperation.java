@@ -42,6 +42,7 @@ import org.tigris.mtoolkit.common.installation.ProgressInputStream;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -66,7 +67,7 @@ public final class InstallBundleOperation {
       input = new ProgressInputStream(new FileInputStream(bundle), monitor);
       DeviceConnector connector = framework.getConnector();
       if (connector == null) {
-        BrowserErrorHandler.processError("Connection lost", true);
+        FrameworkPlugin.processError("Connection lost", true);
         return null;
       }
 

@@ -52,7 +52,7 @@ public final class PMPConnectionListener implements ConnectionListener {
     if (e.getConnection().getType() != ConnectionManager.PMP_CONNECTION) {
       return;
     }
-    BrowserErrorHandler
+    FrameworkPlugin
         .debug("PMP Connection Changed " + (e.getType() == ConnectionEvent.CONNECTED ? "CONNECTED" : "DISCONNECTED") + " " + connector); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     if (e.getType() == ConnectionEvent.DISCONNECTED) {
       disconnected();

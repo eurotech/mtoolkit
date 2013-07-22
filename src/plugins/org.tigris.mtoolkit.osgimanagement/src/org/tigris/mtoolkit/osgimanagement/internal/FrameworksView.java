@@ -94,7 +94,6 @@ import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
@@ -733,7 +732,7 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
       writer = new OutputStreamWriter(new FileOutputStream(configFile), "utf-8"); //$NON-NLS-1$
       rootConfig.save(writer);
     } catch (IOException e) {
-      BrowserErrorHandler.processError(e, false);
+      FrameworkPlugin.processError(e, false);
     } finally {
       FileUtils.close(writer);
     }
@@ -750,9 +749,9 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     } catch (FileNotFoundException e) {
       // do nothing
     } catch (IOException e) {
-      BrowserErrorHandler.processError(e, false);
+      FrameworkPlugin.processError(e, false);
     } catch (WorkbenchException e) {
-      BrowserErrorHandler.processError(e, false);
+      FrameworkPlugin.processError(e, false);
     }
 
     if (memento == null) {

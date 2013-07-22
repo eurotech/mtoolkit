@@ -69,7 +69,6 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
@@ -176,7 +175,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         connector.getServiceManager().addRemoteServiceListener(this);
       }
     } catch (IAgentException e) {
-      BrowserErrorHandler.processError(e, connector, userDisconnect);
+      FrameworkPlugin.processError(e, connector, userDisconnect);
     }
   }
 
@@ -218,7 +217,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       connector.getServiceManager().removeRemoteServiceListener(this);
     } catch (final IAgentException e) {
       if (e.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED) {
-        BrowserErrorHandler.processError(e, connector, userDisconnect);
+        FrameworkPlugin.processError(e, connector, userDisconnect);
       }
     }
   }
@@ -253,7 +252,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       }
 
     } catch (IAgentException e) {
-      BrowserErrorHandler.processError(e, connector, userDisconnect);
+      FrameworkPlugin.processError(e, connector, userDisconnect);
       return false;
     } catch (IllegalStateException ise) {
       // connection was closed
@@ -291,7 +290,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         connecting = false;
       }
       if (!refreshing) {
-        BrowserErrorHandler.processInfo(name + " successfully " + "connected", false); //$NON-NLS-1$
+        FrameworkPlugin.processInfo(name + " successfully " + "connected", false); //$NON-NLS-1$
       }
     }
     return true;
@@ -313,7 +312,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       }
       updateElement();
       updateContextMenuStates();
-      BrowserErrorHandler.processInfo(name + " successfully " + "disconnected", false); //$NON-NLS-1$
+      FrameworkPlugin.processInfo(name + " successfully " + "disconnected", false); //$NON-NLS-1$
     }
     for (int i = 0; i < listeners.size(); i++) {
       ((FrameworkConnectionListener) listeners.get(i)).disconnected();
@@ -618,7 +617,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   public void bundleChanged(RemoteBundleEvent e) {
-    BrowserErrorHandler.debug(getDebugBundleChangedMsg(e));
+    FrameworkPlugin.debug(getDebugBundleChangedMsg(e));
     synchronized ((Framework.getLockObject(connector))) {
       if (!isConnected()) {
         return;
@@ -704,7 +703,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED
             && ex.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED
             && ex.getErrorCode() != IAgentErrors.ERROR_CANNOT_CONNECT) {
-          BrowserErrorHandler.processError(ex, connector, userDisconnect);
+          FrameworkPlugin.processError(ex, connector, userDisconnect);
         }
       }
     }
@@ -748,7 +747,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         }
       }
     } catch (Throwable t) {
-      BrowserErrorHandler.processError(t, true);
+      FrameworkPlugin.processError(t, true);
     }
   }
 
@@ -780,7 +779,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
    * @see org.tigris.mtoolkit.iagent.event.RemoteServiceListener#serviceChanged(org.tigris.mtoolkit.iagent.event.RemoteServiceEvent)
    */
   public void serviceChanged(final RemoteServiceEvent e) {
-    BrowserErrorHandler.debug(getDebugServiceChangedMsg(e));
+    FrameworkPlugin.debug(getDebugServiceChangedMsg(e));
     if (!isConnected()) {
       return;
     }
@@ -811,15 +810,15 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         if (e1.getErrorCode() != IAgentErrors.ERROR_SERVICE_UNREGISTERED) {
           //Services might be unregistered at any time even before information
           //for REGISTERED event has been dispatched to clients because PMP events are always asynchronous
-          BrowserErrorHandler.processError(e1, connector, userDisconnect);
+          FrameworkPlugin.processError(e1, connector, userDisconnect);
         }
       } catch (IllegalStateException ex) {
         // ignore illegal states, they are usually due to working with
         // stale
         // data
-        BrowserErrorHandler.debug(ex);
+        FrameworkPlugin.debug(ex);
       } catch (Throwable t) {
-        BrowserErrorHandler.processError(t, connector, userDisconnect);
+        FrameworkPlugin.processError(t, connector, userDisconnect);
       }
     }
   }
@@ -923,9 +922,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
             addServicesInServicesView(findBundle(bid.longValue()), regServ, usedServ);
           }
         } catch (IAgentException e) {
-          BrowserErrorHandler.processError(e, false);
+          FrameworkPlugin.processError(e, false);
         } catch (IllegalStateException e) {
-          BrowserErrorHandler.processError(e, false);
+          FrameworkPlugin.processError(e, false);
         }
         return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
       }
@@ -1064,7 +1063,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         addBundle(rBundlesArray[i]);
       } catch (IAgentException e) {
         if (!userDisconnect && e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
-          BrowserErrorHandler.processError(e, getConnector(), userDisconnect);
+          FrameworkPlugin.processError(e, getConnector(), userDisconnect);
         }
       }
       if (monitor.isCanceled()) {
@@ -1098,7 +1097,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         retrieveServicesInfo(rBundle, snapshots[i].getRegisteredServices(), snapshots[i].getUsedServices());
       } catch (IAgentException e) {
         if (!userDisconnect && e.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED) {
-          BrowserErrorHandler.processError(e, getConnector(), userDisconnect);
+          FrameworkPlugin.processError(e, getConnector(), userDisconnect);
         }
       }
       if (monitor.isCanceled()) {
@@ -1762,9 +1761,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
             addServicesInServicesView(findBundle(rBundle.getBundleId()), regServ, usedServ);
           }
         } catch (IAgentException e) {
-          BrowserErrorHandler.processError(e, false);
+          FrameworkPlugin.processError(e, false);
         } catch (IllegalStateException e) {
-          BrowserErrorHandler.processError(e, false);
+          FrameworkPlugin.processError(e, false);
         }
         return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
       }
@@ -1787,7 +1786,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
           }
         } catch (Exception e) {
           // exception in isStale
-          BrowserErrorHandler.processError(e, false);
+          FrameworkPlugin.processError(e, false);
         }
         return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
       }

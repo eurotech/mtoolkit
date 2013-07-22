@@ -29,7 +29,7 @@ import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
 public final class ApplicationPropertiesAction extends AbstractFrameworkTreeElementAction<Application> {
@@ -67,7 +67,7 @@ public final class ApplicationPropertiesAction extends AbstractFrameworkTreeElem
         IStatus result = event.getResult();
         if (!result.isOK() || (properties[0] == null)) {
           if (result.getException() != null) {
-            BrowserErrorHandler.processError(result.getException(), "Failed to get application properties", true);
+            FrameworkPlugin.processError(result.getException(), "Failed to get application properties", true);
           }
           return;
         }

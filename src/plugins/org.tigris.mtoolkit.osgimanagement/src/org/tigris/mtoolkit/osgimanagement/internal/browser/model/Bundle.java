@@ -28,8 +28,8 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.IconProvider;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.BrowserErrorHandler;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
@@ -258,7 +258,7 @@ public final class Bundle extends Model implements IconProvider, ConstantsDistri
       try {
         label += " [" + String.valueOf(getVersion()) + "]";
       } catch (IAgentException e) {
-        BrowserErrorHandler.processError(e, NLS.bind(Messages.cant_get_bundle_version, String.valueOf(getID())), false);
+        FrameworkPlugin.processError(e, NLS.bind(Messages.cant_get_bundle_version, String.valueOf(getID())), false);
       }
     }
     return label;
