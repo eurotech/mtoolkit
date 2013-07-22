@@ -108,7 +108,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AddAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.CommonPropertiesAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ConnectFrameworkAction;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.UninstallBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.DisconnectFrameworkAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.FindAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.GotoServiceAction;
@@ -121,6 +120,7 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.Sho
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ShowServicePropertiesInTree;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StartBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.StopBundleAction;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.UninstallBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.UpdateBundleAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ViewAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.logic.ViewContentProvider;
@@ -134,7 +134,7 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 // TODO:Remove static access to ui widgets and model entries
 public final class FrameworksView extends ViewPart implements ConstantsDistributor {
   public static final String                        VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
-                                                                                     + ".frameworkview";
+                                                                                     + ".frameworkview";                                      //$NON-NLS-1$
   public static final String                        PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
   public static final String                        UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                                       //$NON-NLS-1$
   public static final String                        STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                                         //$NON-NLS-1$
@@ -153,13 +153,13 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
   private static final String                       SYSTEM_BUNDLES_EXT_POINT_ID  = "org.tigris.mtoolkit.osgimanagement.systemBundlesProvider";
 
   private static AddAction                          addFrameworkAction;
-  private static RemoveFrameworkAction                       removeFrameworkAction;
-  private static ConnectFrameworkAction                      connectAction;
-  private static DisconnectFrameworkAction                   disconnectAction;
+  private static RemoveFrameworkAction              removeFrameworkAction;
+  private static ConnectFrameworkAction             connectAction;
+  private static DisconnectFrameworkAction          disconnectAction;
   private static InstallBundleAction                installBundleAction;
   private static UninstallBundleAction              deinstallBundleAction;
-  private static StartBundleAction                        startAction;
-  private static StopBundleAction                         stopAction;
+  private static StartBundleAction                  startAction;
+  private static StopBundleAction                   stopAction;
   private static UpdateBundleAction                 updateBundleAction;
   private static CommonPropertiesAction             commonPropertiesAction;
   private static ShowServicePropertiesInTree        showServPropsInTreeAction;
@@ -404,10 +404,6 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     addContributions();
     createToolbarAndMenu();
     PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IHelpContextIds.FRAMEWORKS_VIEW);
-    //createShortcut(FIND_COMMAND_ID, findAction, "Ctrl+F");
-    // createShortcut(REFRESH_COMMAND_ID, refreshAction, "F5");
-    //createShortcut(PROPERTIES_COMMAND_ID, commonPropertiesAction, "Alt+Enter");
-    //createShortcut(REMOVE_COMMAND_ID, removeFrameworkAction, "DEL");
   }
 
   private void createToolbarAndMenu() {
@@ -794,7 +790,6 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
       mgr.dispose();
       tree.getTree().dispose();
       activeInstances = null;
-      // treeRoot = null;
     }
   }
 
@@ -1072,15 +1067,9 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
 
     boolean itemFound = false;
     if (foundNode == startNode) {
-      // if (foundNode.getName().indexOf(text) == -1) {
-      // findText.setForeground(red);
-      // }
     } else if (foundNode != null) {
       parentView.setSelection(new StructuredSelection(foundNode));
-      // findText.setForeground(black);
       itemFound = true;
-    } else {
-      // findText.setForeground(red);
     }
 
     if (!itemFound) {
