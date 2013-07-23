@@ -142,7 +142,7 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
     store.setValue(MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL, autoUpdateBundlesOnInstallButton.getSelection());
     // FIXME This is NOT proper way for tracking preferences change
     if (showBundleCategories != enableBundleCategoriesButton.getSelection()) {
-      HashMap existingFrameworks = FrameworksView.getTreeRoot().getFrameWorkMap();
+      HashMap existingFrameworks = FrameworksView.getTreeRoot().getFrameworkMap();
       Collection frameworks = existingFrameworks.values();
       Iterator iterator = frameworks.iterator();
 

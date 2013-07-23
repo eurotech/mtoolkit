@@ -1020,7 +1020,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     }
   }
 
-  public int getFrameWorkStartLevel() throws IAgentException {
+  public int getFrameworkStartLevel() throws IAgentException {
     return connector.getVMManager().getFrameworkStartLevel();
   }
 

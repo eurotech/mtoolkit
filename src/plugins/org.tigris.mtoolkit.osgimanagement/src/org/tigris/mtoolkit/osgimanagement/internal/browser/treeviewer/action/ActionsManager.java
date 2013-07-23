@@ -71,9 +71,9 @@ public final class ActionsManager {
     sheet.open();
   }
 
-  // generates unique name for the new FrameWork
+  // generates unique name for the new Framework
   public static String generateName(TreeRoot treeRoot) {
-    HashMap frameWorkMap = treeRoot.getFrameWorkMap();
+    HashMap frameWorkMap = treeRoot.getFrameworkMap();
     int index = 1;
     String frameWorkName;
     do {
@@ -256,7 +256,7 @@ public final class ActionsManager {
   }
 
   public static void connectFrameworkAction(FrameworkImpl framework) {
-    FrameworkConnectorFactory.connectFrameWork(framework);
+    FrameworkConnectorFactory.connectFramework(framework);
   }
 
   public static void refreshBundleAction(Bundle bundle) {

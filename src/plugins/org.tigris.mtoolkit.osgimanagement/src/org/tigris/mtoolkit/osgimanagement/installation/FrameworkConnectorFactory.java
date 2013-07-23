@@ -58,7 +58,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
     DeviceConnector.removeDeviceConnectionListener(factory);
   }
 
-  public static void connectFrameWork(final Framework fw) {
+  public static void connectFramework(final Framework fw) {
     ConnectFrameworkJob job = new ConnectFrameworkJob(fw);
     job.schedule();
   }

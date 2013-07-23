@@ -51,7 +51,7 @@ public final class StartBundleOperation extends RemoteBundleOperation {
       // the bundle failed to start, most probably because its
       // start level is too high
       int bundleStartLevel = rBundle.getBundleStartLevel();
-      int fwStartLevel = ((FrameworkImpl) getBundle().findFramework()).getFrameWorkStartLevel();
+      int fwStartLevel = ((FrameworkImpl) getBundle().findFramework()).getFrameworkStartLevel();
       if (fwStartLevel < bundleStartLevel) {
         return Util.newStatus(IStatus.WARNING, Messages.bundle_start_failure, null);
       }

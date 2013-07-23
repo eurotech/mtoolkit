@@ -322,7 +322,7 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
         if (node != null) {
           if (node instanceof FrameworkImpl) {
             if (!((FrameworkImpl) node).isConnected()) {
-              FrameworkConnectorFactory.connectFrameWork((FrameworkImpl) node);
+              FrameworkConnectorFactory.connectFramework((FrameworkImpl) node);
             }
           }
           boolean expand = !tree.getExpandedState(node);

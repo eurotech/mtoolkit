@@ -26,7 +26,7 @@ public final class TreeRoot extends Model {
     super(name);
   }
 
-  public HashMap getFrameWorkMap() {
+  public HashMap getFrameworkMap() {
     Model[] children = getChildren();
     HashMap result = new HashMap(children.length);
     for (int i = 0; i < children.length; i++) {

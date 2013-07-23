@@ -98,7 +98,7 @@ public final class AddFrameworkDialog extends TitleAreaDialog implements Framewo
     if (fwPanel.validate()) {
       setFWSettings();
       if (!connectButton.isDisposed() && connectButton.getSelection()) {
-        FrameworkConnectorFactory.connectFrameWork(fw);
+        FrameworkConnectorFactory.connectFramework(fw);
       }
       super.okPressed();
     }
