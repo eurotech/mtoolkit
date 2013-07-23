@@ -39,6 +39,9 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
  */
 public class Util {
 
+  private Util() {
+  }
+
   public static IStatus handleIAgentException(IAgentException e) {
     Throwable cause = e.getCauseException() != null ? e.getCauseException() : e;
     return Util.newStatus(IStatus.ERROR, getErrorMessage(e), cause);
@@ -52,18 +55,6 @@ public class Util {
 
   public static IStatus newStatus(int severity, String message, Throwable t) {
     return new Status(severity, FrameworkPlugin.PLUGIN_ID, message, t);
-  }
-
-  private static String getErrorMessage(IAgentException e) {
-    String msg = e.getMessage();
-    if (msg == null) {
-      msg = Messages.operation_failed;
-      Throwable cause = e.getCauseException();
-      if (cause != null && cause.getMessage() != null) {
-        msg += " " + cause.getMessage(); //$NON-NLS-1$
-      }
-    }
-    return msg;
   }
 
   /**
@@ -127,14 +118,12 @@ public class Util {
     };
     dialog.setFilterExtensions(filterArr);
     dialog.setFilterNames(namesArr);
-    if (FrameworkPlugin.fileDialogLastSelection != null) {
-      dialog.setFileName(null);
-      dialog.setFilterPath(FrameworkPlugin.fileDialogLastSelection);
-    }
+    dialog.setFileName(null);
+    dialog.setFilterPath(FrameworkPlugin.getLastFileSelection());
     dialog.setText(title);
     String res = dialog.open();
     if (res != null) {
-      FrameworkPlugin.fileDialogLastSelection = res;
+      FrameworkPlugin.setLastFileSelection(res);
       // getFileNames returns relative names!
       String[] names = dialog.getFileNames();
       String path = dialog.getFilterPath();
@@ -153,5 +142,17 @@ public class Util {
       return fws[0];
     }
     return null;
+  }
+
+  private static String getErrorMessage(IAgentException e) {
+    String msg = e.getMessage();
+    if (msg == null) {
+      msg = Messages.operation_failed;
+      Throwable cause = e.getCauseException();
+      if (cause != null && cause.getMessage() != null) {
+        msg += " " + cause.getMessage(); //$NON-NLS-1$
+      }
+    }
+    return msg;
   }
 }

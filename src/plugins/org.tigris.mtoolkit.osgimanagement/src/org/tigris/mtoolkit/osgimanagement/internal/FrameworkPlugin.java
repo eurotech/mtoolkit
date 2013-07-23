@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
@@ -38,20 +37,17 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
 public final class FrameworkPlugin extends AbstractUIPlugin {
-  private static final boolean   DEBUG         = "true".equals(Platform.getDebugOption("org.tigris.mtoolkit.osgimanagement/debug")); //$NON-NLS-1$
+  private static final String    LAST_FILE_SELECTION = "LAST_FILE_SELECTION";
+  private static final boolean   DEBUG               = "true".equals(Platform.getDebugOption("org.tigris.mtoolkit.osgimanagement/debug")); //$NON-NLS-1$
 
-  public static final String     PLUGIN_ID     = "org.tigris.mtoolkit.osgimanagement";                                              //$NON-NLS-1$
+  public static final String     PLUGIN_ID           = "org.tigris.mtoolkit.osgimanagement";                                              //$NON-NLS-1$
 
-  public static final String     IAGENT_RPC_ID = "org.tigris.mtoolkit.iagent.rpc";
+  public static final String     IAGENT_RPC_ID       = "org.tigris.mtoolkit.iagent.rpc";
 
-  private static FrameworkPlugin instance      = null;
-  public static String           fileDialogLastSelection;
+  private static FrameworkPlugin instance            = null;
 
   public FrameworkPlugin() {
-    super();
-    if (instance == null) {
-      instance = this;
-    }
+    FrameworkPlugin.instance = this;
   }
 
   /* (non-Javadoc)
@@ -63,7 +59,6 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
     FrameworkPlugin.instance = this;
     FrameworkConnectorFactory.init();
     FrameworksView.restoreModel();
-    fileDialogLastSelection = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
   }
 
   /* (non-Javadoc)
@@ -123,6 +118,19 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
       }
     }
     return null;
+  }
+
+  public static String getLastFileSelection() {
+    if (instance != null) {
+      return instance.getPreferenceStore().getString(LAST_FILE_SELECTION);
+    }
+    return null;
+  }
+
+  public static void setLastFileSelection(String lastFileSelection) {
+    if (instance != null) {
+      instance.getPreferenceStore().putValue(LAST_FILE_SELECTION, lastFileSelection);
+    }
   }
 
   public static File[] getIAgentBundles() {
