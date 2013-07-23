@@ -83,31 +83,31 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   private boolean               showServicePropertiesInTree = false;
 
-  public Hashtable              bundleHash;
-  public Hashtable              categoryHash;
+  private Hashtable             bundleHash;
+  private Hashtable             categoryHash;
 
   // stores services info during connect action
-  public Vector                 servicesVector;
+  private Vector                servicesVector;
 
   // stores services view nodes
-  public Vector                 servicesViewVector;
+  private Vector                servicesViewVector;
 
   private Model                 bundles;
 
   private volatile boolean      refreshing                  = false;
-  private boolean               connecting                  = false;
+  private volatile boolean      connecting                  = false;
 
   private PMPConnectionListener connectionListener;
 
   // flag indicates user has forced disconnect action
-  public boolean                userDisconnect              = false;
+  private boolean               userDisconnect              = false;
 
   private boolean               supportBundles              = false;
   private boolean               supportServices             = false;
   private IMemento              configs;
 
   private Set<String>           systemBundlesList;
-  public Map<Long, String>      frameworkSystemBundles;
+  private Map<Long, String>     frameworkSystemBundles;
 
   public FrameworkImpl(String name, boolean autoConnected) {
     super(name, autoConnected);
@@ -148,6 +148,14 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   public void setConnector(DeviceConnector connector) {
     this.connector = connector;
+  }
+
+  public boolean isUserDisconnect() {
+    return userDisconnect;
+  }
+
+  public void setUserDisconnect(boolean userDisconnect) {
+    this.userDisconnect = userDisconnect;
   }
 
   public void connect(final DeviceConnector connector, SubMonitor monitor) {
