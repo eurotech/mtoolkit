@@ -19,7 +19,6 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.eclipse.ui.IActionFilter;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 
@@ -27,16 +26,18 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeLi
  * @since 5.0
  */
 public abstract class Model implements Comparable<Object>, IActionFilter {
-  protected String  name;
-  protected Model   parent;
+  private static final String NODE_NAME      = "node_name";                               //$NON-NLS-1$
 
-  protected boolean selected       = false;
-  protected int     selectedChilds = 0;
+  protected String            name;
+  protected Model             parent;
 
-  private Set       elementList    = Collections.synchronizedSet(new TreeSet());
+  protected boolean           selected       = false;
+  protected int               selectedChilds = 0;
 
-  private Model     master;
-  private Vector    slaves         = new Vector();
+  private Set                 elementList    = Collections.synchronizedSet(new TreeSet());
+
+  private Model               master;
+  private Vector              slaves         = new Vector();
 
   public Model(String name) {
     this.name = name;
@@ -216,7 +217,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
       return false;
     }
 
-    if (name.equalsIgnoreCase(ConstantsDistributor.NODE_NAME)) {
+    if (name.equalsIgnoreCase(NODE_NAME)) {
       if (value.equalsIgnoreCase(this.name)) {
         return true;
       }

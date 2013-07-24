@@ -33,11 +33,11 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public final class SocketTypeProvider implements DeviceTypeProvider, ConstantsDistributor {
+public final class SocketTypeProvider implements DeviceTypeProvider {
   private final String                TRANSPORT_TYPE = "socket";
+  private static final String         DEFAULT_IP     = "localhost"; //$NON-NLS-1$
 
   private Text                        idText;
   private Text                        portText;

@@ -80,7 +80,12 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 public final class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener,
     RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
 
-  private boolean               showServicePropertiesInTree = false;
+  private static final String   FRAMEWORK_STATUS_NAME         = "status";                        //$NON-NLS-1$
+  private static final String   FRAMEWORK_CONNECT_VALUE       = "connected";                     //$NON-NLS-1$
+
+  private static final String   FRAMEWORK_SIGN_CERTIFICATE_ID = "framework_sign_certificate_uid"; //$NON-NLS-1$
+
+  private boolean               showServicePropertiesInTree   = false;
 
   private Hashtable             bundleHash;
   private Hashtable             categoryHash;
@@ -93,16 +98,16 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   private Model                 bundles;
 
-  private volatile boolean      refreshing                  = false;
-  private volatile boolean      connecting                  = false;
+  private volatile boolean      refreshing                    = false;
+  private volatile boolean      connecting                    = false;
 
   private PMPConnectionListener connectionListener;
 
   // flag indicates user has forced disconnect action
-  private boolean               userDisconnect              = false;
+  private boolean               userDisconnect                = false;
 
-  private boolean               supportBundles              = false;
-  private boolean               supportServices             = false;
+  private boolean               supportBundles                = false;
+  private boolean               supportServices               = false;
   private IMemento              configs;
 
   private Set<String>           systemBundlesList;

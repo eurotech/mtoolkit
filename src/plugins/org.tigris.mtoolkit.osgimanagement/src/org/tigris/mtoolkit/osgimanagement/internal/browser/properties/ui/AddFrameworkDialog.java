@@ -29,6 +29,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class AddFrameworkDialog extends TitleAreaDialog implements FrameworkPanel.ErrorMonitor {
+  private static final String CONNECT_TO_FRAMEWORK = "framework_connect_key";
+
   private FrameworkPanel      fwPanel;
   private CertificatesPanel   certificatesPanel;
   private Button              connectButton;
@@ -116,7 +118,7 @@ public final class AddFrameworkDialog extends TitleAreaDialog implements Framewo
   private void init() {
     final IMemento config = fw.getConfig();
 
-    Boolean connect = config.getBoolean(ConstantsDistributor.CONNECT_TO_FRAMEWORK);
+    Boolean connect = config.getBoolean(CONNECT_TO_FRAMEWORK);
     if (connect != null) {
       connectButton.setSelection(connect.booleanValue());
     }
@@ -146,6 +148,6 @@ public final class AddFrameworkDialog extends TitleAreaDialog implements Framewo
     fwPanel.save(config);
     // Signing Certificates
     fw.setSignCertificateUids(certificatesPanel.getSignCertificateUids());
-    config.putBoolean(ConstantsDistributor.CONNECT_TO_FRAMEWORK, connectButton.getSelection());
+    config.putBoolean(CONNECT_TO_FRAMEWORK, connectButton.getSelection());
   }
 }

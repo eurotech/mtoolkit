@@ -30,21 +30,30 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.IconProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public final class Bundle extends Model implements IconProvider, ConstantsDistributor {
-  public static final String  OVR_ACTIVE_ICON       = "ovr_active.gif";                 //$NON-NLS-1$
-  public static final String  OVR_RESOLVED_ICON     = "ovr_resolved.gif";               //$NON-NLS-1$
-  public static final String  OVR_SIGNED_ICON       = "ovr_signed2.gif";                //$NON-NLS-1$
-  public static final int     ICON_WIDTH            = 16;
+public final class Bundle extends Model implements IconProvider {
+  public static final String  OVR_SIGNED_ICON          = "ovr_signed2.gif";                //$NON-NLS-1$
+
+  private static final int    ICON_WIDTH               = 16;
+
+  private static final String OVR_ACTIVE_ICON          = "ovr_active.gif";                 //$NON-NLS-1$
+  private static final String OVR_RESOLVED_ICON        = "ovr_resolved.gif";               //$NON-NLS-1$
+
+  private static final String BUNDLE_ICON_HEADER       = "Bundle-Icon";
+
+  private static final String BUNDLE_STATE_NAME        = "state";                          //$NON-NLS-1$
+  private static final String BUNDLE_UNINSTALLED_VALUE = "uninstalled";                    //$NON-NLS-1$
+  private static final String BUNDLE_INSTALLED_VALUE   = "installed";                      //$NON-NLS-1$
+  private static final String BUNDLE_RESOLVED_VALUE    = "resolved";                       //$NON-NLS-1$
+  private static final String BUNDLE_STARTING_VALUE    = "starting";                       //$NON-NLS-1$
+  private static final String BUNDLE_STOPPING_VALUE    = "stopping";                       //$NON-NLS-1$
+  private static final String BUNDLE_ACTIVE_VALUE      = "active";                         //$NON-NLS-1$
 
   // bundle types
-  public static final int     BUNDLE_TYPE_FRAGMENT  = RemoteBundle.BUNDLE_TYPE_FRAGMENT;
-  public static final int     BUNDLE_TYPE_EXTENSION = BUNDLE_TYPE_FRAGMENT + 1;
-
-  private static final String BUNDLE_ICON_HEADER    = "Bundle-Icon";
+  public static final int     BUNDLE_TYPE_FRAGMENT     = RemoteBundle.BUNDLE_TYPE_FRAGMENT;
+  public static final int     BUNDLE_TYPE_EXTENSION    = BUNDLE_TYPE_FRAGMENT + 1;
 
   private final RemoteBundle  rBundle;
 
@@ -54,7 +63,7 @@ public final class Bundle extends Model implements IconProvider, ConstantsDistri
   private String              version;
   private boolean             isSigned;
   // 0 for regular bundles
-  private int                 type                  = -1;
+  private int                 type                     = -1;
   private String              category;
   private ImageData           iconData;
   private Image               icon;
