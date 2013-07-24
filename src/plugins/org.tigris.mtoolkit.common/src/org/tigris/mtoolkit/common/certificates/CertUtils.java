@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -135,6 +136,32 @@ public final class CertUtils {
       }
     }
     return count;
+  }
+
+  public static Map getPreparationProperties(List signCertificateUids) {
+    Map preparationProps = new Hashtable();
+    if (signCertificateUids != null) {
+      int certId = 0;
+      for (Iterator it = signCertificateUids.iterator(); it.hasNext();) {
+        ICertificateDescriptor cert = getCertificate((String) it.next());
+        if (cert != null) {
+          pushCertificate(preparationProps, cert, certId++);
+        }
+      }
+    }
+    return preparationProps;
+  }
+
+  public static boolean validateCertificateUids(List signCertificateUids) {
+    if (signCertificateUids != null) {
+      for (Iterator it = signCertificateUids.iterator(); it.hasNext();) {
+        ICertificateDescriptor cert = getCertificate((String) it.next());
+        if (cert == null) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   public static String getCertificateAlias(Map properties, int id) {

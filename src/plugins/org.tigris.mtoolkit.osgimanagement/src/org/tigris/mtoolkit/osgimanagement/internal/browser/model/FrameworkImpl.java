@@ -48,7 +48,6 @@ import org.eclipse.ui.model.WorkbenchAdapter;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
-import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.iagent.BundleSnapshot;
 import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -1530,17 +1529,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
    */
   @Override
   public Map getSigningProperties() {
-    Map properties = new Hashtable();
-    List certUids = getSignCertificateUids();
-    Iterator signIterator = certUids.iterator();
-    int certId = 0;
-    while (signIterator.hasNext()) {
-      ICertificateDescriptor cert = CertUtils.getCertificate((String) signIterator.next());
-      if (cert != null) {
-        CertUtils.pushCertificate(properties, cert, certId++);
-      }
-    }
-    return properties;
+    return CertUtils.getPreparationProperties(getSignCertificateUids());
   }
 
   public List getModelProviders() {
