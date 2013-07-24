@@ -149,6 +149,8 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
   public static final String                        REFRESH_IMAGE_PATH           = "refresh_action.gif";
   public static final String                        CONSOLE_IMAGE_PATH           = "console.gif";
 
+  private static final String                       STORAGE_FILE_NAME            = "ModelStorage.xml";                                        //$NON-NLS-1$
+
   private static final String                       SYSTEM_BUNDLES_EXT_POINT_ID  = "org.tigris.mtoolkit.osgimanagement.systemBundlesProvider";
 
   private static AddAction                          addFrameworkAction;

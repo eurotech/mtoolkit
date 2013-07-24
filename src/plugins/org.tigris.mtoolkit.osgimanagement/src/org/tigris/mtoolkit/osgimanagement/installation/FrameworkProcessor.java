@@ -58,7 +58,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
@@ -139,7 +138,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
    * getGeneralTargetImageDescriptor()
    */
   public ImageDescriptor getGeneralTargetImageDescriptor() {
-    return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
+    return ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED);
   }
 
   /*

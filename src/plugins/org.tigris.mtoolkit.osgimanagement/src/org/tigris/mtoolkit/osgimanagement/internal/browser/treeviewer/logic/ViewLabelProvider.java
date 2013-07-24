@@ -29,7 +29,6 @@ import org.tigris.mtoolkit.osgimanagement.IconFetcher;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView.ActionsProviderElement;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
@@ -68,9 +67,9 @@ public final class ViewLabelProvider extends StyledCellLabelProvider {
     if (element instanceof FrameworkImpl) {
       FrameworkImpl framework = (FrameworkImpl) element;
       if (framework.isConnected()) {
-        return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_CONNECTED);
+        return ImageHolder.getImage(ImageHolder.SERVER_ICON_CONNECTED);
       } else {
-        return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
+        return ImageHolder.getImage(ImageHolder.SERVER_ICON_DISCONNECTED);
       }
     }
     if (element instanceof Category) {

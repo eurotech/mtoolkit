@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.osgimanagement.installation;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
@@ -31,9 +30,9 @@ public final class FrameworkTarget implements InstallationTarget {
    */
   public ImageDescriptor getIcon() {
     if (fw.isConnected()) {
-      return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_CONNECTED);
+      return ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED);
     }
-    return ImageHolder.getImageDescriptor(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
+    return ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_DISCONNECTED);
   }
 
   /* (non-Javadoc)

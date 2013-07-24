@@ -47,7 +47,6 @@ import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.installation.TargetSelectionDialog;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
@@ -323,9 +322,9 @@ public final class FrameworkSelector implements TargetSelectionDialog {
         if (element instanceof FrameworkImpl) {
           FrameworkImpl framework = (FrameworkImpl) element;
           if (framework.isConnected()) {
-            return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_CONNECTED);
+            return ImageHolder.getImage(ImageHolder.SERVER_ICON_CONNECTED);
           } else {
-            return ImageHolder.getImage(ConstantsDistributor.SERVER_ICON_DISCONNECTED);
+            return ImageHolder.getImage(ImageHolder.SERVER_ICON_DISCONNECTED);
           }
         }
         return null;

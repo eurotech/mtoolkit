@@ -11,32 +11,27 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
 
 public interface ConstantsDistributor {
-  static final String DEFAULT_IP = "localhost"; //$NON-NLS-1$
+  static final String DEFAULT_IP                    = "localhost";                     //$NON-NLS-1$
 
-  static final String FRAMEWORK_NAME = "framework_name_key"; //$NON-NLS-1$
-  static final String TRANSPORT_PROVIDER_ID = "transport_type_key"; //$NON-NLS-1$
+  static final String FRAMEWORK_NAME                = "framework_name_key";            //$NON-NLS-1$
+  static final String TRANSPORT_PROVIDER_ID         = "transport_type_key";            //$NON-NLS-1$
 
   static final String FRAMEWORK_SIGN_CERTIFICATE_ID = "framework_sign_certificate_uid"; //$NON-NLS-1$
-  static final String CONNECT_TO_FRAMEWORK = "framework_connect_key";
+  static final String CONNECT_TO_FRAMEWORK          = "framework_connect_key";
 
-  static final String MEMENTO_TYPE = "browser_model"; //$NON-NLS-1$
-  static final String MEMENTO_ROOT_TYPE = "browser_root_model"; //$NON-NLS-1$
+  static final String MEMENTO_TYPE                  = "browser_model";                 //$NON-NLS-1$
+  static final String MEMENTO_ROOT_TYPE             = "browser_root_model";            //$NON-NLS-1$
 
-  static final String STORAGE_FILE_NAME = "ModelStorage.xml"; //$NON-NLS-1$
+  static final String FRAMEWORK_STATUS_NAME         = "status";                        //$NON-NLS-1$
+  static final String FRAMEWORK_CONNECT_VALUE       = "connected";                     //$NON-NLS-1$
 
-  static final String SERVER_ICON_DISCONNECTED = "servernc.gif"; //$NON-NLS-1$
-  static final String SERVER_ICON_CONNECTED = "server.gif"; //$NON-NLS-1$
+  static final String BUNDLE_STATE_NAME             = "state";                         //$NON-NLS-1$
+  static final String BUNDLE_UNINSTALLED_VALUE      = "uninstalled";                   //$NON-NLS-1$
+  static final String BUNDLE_INSTALLED_VALUE        = "installed";                     //$NON-NLS-1$
+  static final String BUNDLE_RESOLVED_VALUE         = "resolved";                      //$NON-NLS-1$
+  static final String BUNDLE_STARTING_VALUE         = "starting";                      //$NON-NLS-1$
+  static final String BUNDLE_STOPPING_VALUE         = "stopping";                      //$NON-NLS-1$
+  static final String BUNDLE_ACTIVE_VALUE           = "active";                        //$NON-NLS-1$
 
-  static final String FRAMEWORK_STATUS_NAME = "status"; //$NON-NLS-1$
-  static final String FRAMEWORK_CONNECT_VALUE = "connected"; //$NON-NLS-1$
-
-  static final String BUNDLE_STATE_NAME = "state"; //$NON-NLS-1$
-  static final String BUNDLE_UNINSTALLED_VALUE = "uninstalled"; //$NON-NLS-1$
-  static final String BUNDLE_INSTALLED_VALUE = "installed"; //$NON-NLS-1$
-  static final String BUNDLE_RESOLVED_VALUE = "resolved"; //$NON-NLS-1$
-  static final String BUNDLE_STARTING_VALUE = "starting"; //$NON-NLS-1$
-  static final String BUNDLE_STOPPING_VALUE = "stopping"; //$NON-NLS-1$
-  static final String BUNDLE_ACTIVE_VALUE = "active"; //$NON-NLS-1$
-
-  static final String NODE_NAME = "node_name"; //$NON-NLS-1$
+  static final String NODE_NAME                     = "node_name";                     //$NON-NLS-1$
 }
