@@ -556,7 +556,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
      * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#getImage()
      */
     public Image getImage() {
-      return ImageHolder.getImage(FrameworksView.BUNDLES_GROUP_IMAGE_PATH);
+      return ImageHolder.getImage(ImageHolder.BUNDLES_GROUP_IMAGE_PATH);
     }
 
     /* (non-Javadoc)

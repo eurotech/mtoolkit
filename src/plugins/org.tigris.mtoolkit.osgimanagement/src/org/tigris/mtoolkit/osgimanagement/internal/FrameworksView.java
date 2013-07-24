@@ -133,20 +133,20 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 public final class FrameworksView extends ViewPart {
   public static final String                        VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
                                                                                      + ".frameworkview";                                      //$NON-NLS-1$
-  public static final String                        PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
-  public static final String                        UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                                       //$NON-NLS-1$
-  public static final String                        STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                                         //$NON-NLS-1$
-  public static final String                        START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";                                        //$NON-NLS-1$
-  public static final String                        UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";                                    //$NON-NLS-1$
-  public static final String                        INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";                                      //$NON-NLS-1$
-  public static final String                        DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";                                   //$NON-NLS-1$
-  public static final String                        CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";                                      //$NON-NLS-1$
-  public static final String                        REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";                                       //$NON-NLS-1$
-  public static final String                        ADD_ACTION_IMAGE_PATH        = "add_action.gif";                                          //$NON-NLS-1$
-  public static final String                        BUNDLES_GROUP_IMAGE_PATH     = "bundles_group.gif";                                       //$NON-NLS-1$
-  public static final String                        SEARCH_IMAGE_PATH            = "search_action.gif";
-  public static final String                        REFRESH_IMAGE_PATH           = "refresh_action.gif";
-  public static final String                        CONSOLE_IMAGE_PATH           = "console.gif";
+
+  private static final String                       PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
+  private static final String                       UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                                       //$NON-NLS-1$
+  private static final String                       STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                                         //$NON-NLS-1$
+  private static final String                       START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";                                        //$NON-NLS-1$
+  private static final String                       UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";                                    //$NON-NLS-1$
+  private static final String                       INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";                                      //$NON-NLS-1$
+  private static final String                       DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";                                   //$NON-NLS-1$
+  private static final String                       CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";                                      //$NON-NLS-1$
+  private static final String                       REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";                                       //$NON-NLS-1$
+  private static final String                       ADD_ACTION_IMAGE_PATH        = "add_action.gif";                                          //$NON-NLS-1$
+  private static final String                       SEARCH_IMAGE_PATH            = "search_action.gif";                                       //$NON-NLS-1$
+  private static final String                       REFRESH_IMAGE_PATH           = "refresh_action.gif";                                      //$NON-NLS-1$
+  private static final String                       CONSOLE_IMAGE_PATH           = "console.gif";                                             //$NON-NLS-1$
 
   private static final String                       STORAGE_FILE_NAME            = "ModelStorage.xml";                                        //$NON-NLS-1$
 
@@ -189,7 +189,18 @@ public final class FrameworksView extends ViewPart {
   private static final List<ISystemBundlesProvider> systemBundlesProviders       = new ArrayList<ISystemBundlesProvider>();
 
   static {
-    obtainSystemBundlesProviders();
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint extensionPoint = registry.getExtensionPoint(SYSTEM_BUNDLES_EXT_POINT_ID);
+    IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
+    if (elements != null) {
+      for (int i = 0; i < elements.length; i++) {
+        try {
+          systemBundlesProviders.add((ISystemBundlesProvider) elements[i].createExecutableExtension("class"));
+        } catch (CoreException e) {
+          FrameworkPlugin.error("Exception while intializing system bundles provider elements", e);
+        }
+      }
+    }
   }
 
   // Get current shell
@@ -435,7 +446,7 @@ public final class FrameworksView extends ViewPart {
         new Separator(), new ActionContributionItem(installBundleAction)
     };
     bundlesTB = new ToolbarIMenuCreator(items, tree);
-    bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
+    bundlesTB.setImageDescriptor(ImageHolder.getImageDescriptor(ImageHolder.BUNDLES_GROUP_IMAGE_PATH));
     bundlesTB.setToolTipText(Messages.BundlesAction_ToolTip);
     toolBar.appendToGroup(ContentTypeActionsProvider.GROUP_DEPLOYMENT, bundlesTB);
 
@@ -477,22 +488,6 @@ public final class FrameworksView extends ViewPart {
     return systemBundles;
   }
 
-  private static void obtainSystemBundlesProviders() {
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint extensionPoint = registry.getExtensionPoint(SYSTEM_BUNDLES_EXT_POINT_ID);
-    IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
-    if (elements == null) {
-      return;
-    }
-    for (int i = 0; i < elements.length; i++) {
-      try {
-        systemBundlesProviders.add((ISystemBundlesProvider) elements[i].createExecutableExtension("class"));
-      } catch (CoreException e) {
-        FrameworkPlugin.error("Exception while intializing system bundles provider elements", e);
-      }
-    }
-  }
-
   // Create custom contributions - tree popup menu
   private void addContributions() {
     IActionBars actionBars = getViewSite().getActionBars();
@@ -529,7 +524,7 @@ public final class FrameworksView extends ViewPart {
     viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameworkImpl.SERVICES_VIEW);
     viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ViewLabelProvider.SERVICES_CATEGORY_ICON));
     viewBundlesAction = new ViewAction(tree, Messages.bundles_view_action_label, tree, FrameworkImpl.BUNDLES_VIEW);
-    viewBundlesAction.setImageDescriptor(ImageHolder.getImageDescriptor(BUNDLES_GROUP_IMAGE_PATH));
+    viewBundlesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ImageHolder.BUNDLES_GROUP_IMAGE_PATH));
 
     showBundleIDAction = new ShowBundleIDAction(tree, Messages.show_bundle_id_action_label, tree, getTreeRoot());
     showBundleVersionAction = new ShowBundleVersionAction(tree, Messages.show_bundle_version_action_label, tree,
@@ -1103,24 +1098,18 @@ public final class FrameworksView extends ViewPart {
         .equals(ServicesCategory.nodes[1]));
   }
 
-  public class ActionsProviderElement {
+  public final class ActionsProviderElement {
     private String                     extension;
     private String                     clazz;
     private ContentTypeActionsProvider provider;
-    private IConfigurationElement      confElement;
 
     public ActionsProviderElement(IConfigurationElement configurationElement) {
-      confElement = configurationElement;
       extension = configurationElement.getAttribute("extension");
       clazz = configurationElement.getAttribute("class");
     }
 
     public void setProvider(ContentTypeActionsProvider provider) {
       this.provider = provider;
-    }
-
-    public IConfigurationElement getConfigurationElement() {
-      return confElement;
     }
 
     public ContentTypeActionsProvider getProvider() {
@@ -1164,7 +1153,6 @@ public final class FrameworksView extends ViewPart {
       } else if (!extension.equals(otherElement.extension)) {
         return false;
       }
-
       return true;
     }
   }
