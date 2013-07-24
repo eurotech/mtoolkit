@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui;
 
-import java.net.InetAddress;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -216,16 +215,12 @@ public final class SocketTypeProvider implements DeviceTypeProvider, ConstantsDi
   }
 
   private String validate(String ip) {
-    if (ip.trim().equals("")) {
+    ip = ip.trim();
+    if (ip.length() == 0) {
       return "Type framework address";
+    } else {
+      return null;
     }
-    try {
-      // just check if address is correct
-      InetAddress.getByName(ip);
-    } catch (Exception e) {
-      return "Invalid address: " + e.getMessage();
-    }
-    return null;
   }
 
   private String validatePort(String port) {
