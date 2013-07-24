@@ -43,8 +43,8 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel;
@@ -112,7 +112,7 @@ public final class ConnectFrameworkJob extends Job {
         String transportType = null;
         Dictionary aConnProps = null;
 
-        String providerID = config.getString(ConstantsDistributor.TRANSPORT_PROVIDER_ID);
+        String providerID = config.getString(FrameworkImpl.TRANSPORT_PROVIDER_ID);
         List providers = FrameworkPanel.obtainDeviceTypeProviders(null);
         for (int i = 0; i < providers.size(); i++) {
           DeviceTypeProviderElement provider = (DeviceTypeProviderElement) providers.get(i);

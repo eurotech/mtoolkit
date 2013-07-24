@@ -21,11 +21,10 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel.ErrorMonitor;
 
-public final class FrameworkPropertyPage extends PropertyPage implements ConstantsDistributor, ErrorMonitor {
+public final class FrameworkPropertyPage extends PropertyPage implements ErrorMonitor {
   private FrameworkPanel fwPanel;
 
   /* (non-Javadoc)
@@ -39,7 +38,7 @@ public final class FrameworkPropertyPage extends PropertyPage implements Constan
       String oldLabel = fw.getLabel();
 
       boolean connChanged = fwPanel.save(fw.getConfig());
-      fw.setName(fw.getConfig().getString(FRAMEWORK_NAME));
+      fw.setName(fw.getConfig().getString(FrameworkImpl.FRAMEWORK_NAME));
 
       updateTitle(oldLabel, fw.getLabel());
 

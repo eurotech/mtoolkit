@@ -68,7 +68,6 @@ import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
 import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
@@ -78,7 +77,13 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public final class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener,
-    RemoteDevicePropertyListener, IAdaptable, ConstantsDistributor {
+    RemoteDevicePropertyListener, IAdaptable {
+
+  public static final String    FRAMEWORK_NAME                = "framework_name_key";            //$NON-NLS-1$
+  public static final String    TRANSPORT_PROVIDER_ID         = "transport_type_key";            //$NON-NLS-1$
+
+  public static final String    MEMENTO_TYPE                  = "browser_model";                 //$NON-NLS-1$
+  public static final String    MEMENTO_ROOT_TYPE             = "browser_root_model";            //$NON-NLS-1$
 
   private static final String   FRAMEWORK_STATUS_NAME         = "status";                        //$NON-NLS-1$
   private static final String   FRAMEWORK_CONNECT_VALUE       = "connected";                     //$NON-NLS-1$

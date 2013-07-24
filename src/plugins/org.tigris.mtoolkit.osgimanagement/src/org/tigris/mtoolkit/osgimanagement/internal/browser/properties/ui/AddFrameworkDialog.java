@@ -24,7 +24,6 @@ import org.tigris.mtoolkit.common.certificates.CertificatesPanel;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.IHelpContextIds;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
@@ -133,7 +132,7 @@ public final class AddFrameworkDialog extends TitleAreaDialog implements Framewo
   // Called when target options are changed
   private void setFWSettings() {
     saveConfig(fw.getConfig());
-    fw.setName(fw.getConfig().getString(ConstantsDistributor.FRAMEWORK_NAME));
+    fw.setName(fw.getConfig().getString(FrameworkImpl.FRAMEWORK_NAME));
     parent.addElement(fw);
   }
 

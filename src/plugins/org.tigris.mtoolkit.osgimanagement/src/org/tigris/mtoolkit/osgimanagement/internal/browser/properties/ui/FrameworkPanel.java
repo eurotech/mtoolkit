@@ -46,11 +46,10 @@ import org.tigris.mtoolkit.osgimanagement.DeviceTypeProvider;
 import org.tigris.mtoolkit.osgimanagement.DeviceTypeProviderValidator;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class FrameworkPanel implements ConstantsDistributor, SelectionListener, DeviceTypeProviderValidator {
+public class FrameworkPanel implements SelectionListener, DeviceTypeProviderValidator {
 
   private static final String       DEFAULT_DEVICE_TYPE = "DEFAULT_DEVICE_TYPE";
 
@@ -131,7 +130,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
             String pTransportType = provider.getProvider().getTransportType();
             if (transportType.equals(pTransportType)) {
               String id = provider.getTypeId();
-              fw.getConfig().putString(TRANSPORT_PROVIDER_ID, id);
+              fw.getConfig().putString(FrameworkImpl.TRANSPORT_PROVIDER_ID, id);
               break;
             }
           } catch (CoreException e) {
@@ -341,7 +340,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
 
   public void initialize(IMemento config) {
     defaultConfig = cloneMemento(config);
-    String providerId = config.getString(TRANSPORT_PROVIDER_ID);
+    String providerId = config.getString(FrameworkImpl.TRANSPORT_PROVIDER_ID);
     boolean providerFound = false;
     if (providerId != null) {
       for (Iterator it = deviceTypesProviders.iterator(); it.hasNext();) {
@@ -353,7 +352,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
         }
       }
     }
-    String name = config.getString(FRAMEWORK_NAME);
+    String name = config.getString(FrameworkImpl.FRAMEWORK_NAME);
     if (name != null) {
       textServer.setText(name);
     }
@@ -431,7 +430,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
    * @return true if connection properties have changed
    */
   public boolean save(IMemento config) {
-    config.putString(FRAMEWORK_NAME, textServer.getText());
+    config.putString(FrameworkImpl.FRAMEWORK_NAME, textServer.getText());
     boolean connChanged = false;
     try {
       IMemento initialConfig = cloneMemento(config);
@@ -439,7 +438,7 @@ public class FrameworkPanel implements ConstantsDistributor, SelectionListener, 
         config = cloneMemento(defaultConfig);
       }
       selectedProvider.getProvider().save(config);
-      config.putString(TRANSPORT_PROVIDER_ID, selectedProvider.getTypeId());
+      config.putString(FrameworkImpl.TRANSPORT_PROVIDER_ID, selectedProvider.getTypeId());
       connChanged = !mementoEquals(initialConfig, config);
     } catch (CoreException e) {
       e.printStackTrace();

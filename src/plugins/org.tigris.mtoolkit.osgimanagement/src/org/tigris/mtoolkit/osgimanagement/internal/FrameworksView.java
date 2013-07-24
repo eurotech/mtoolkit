@@ -94,7 +94,6 @@ import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
 import org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConstantsDistributor;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
@@ -131,7 +130,7 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 // TODO:Remove static access to ui widgets and model entries
-public final class FrameworksView extends ViewPart implements ConstantsDistributor {
+public final class FrameworksView extends ViewPart {
   public static final String                        VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
                                                                                      + ".frameworkview";                                      //$NON-NLS-1$
   public static final String                        PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
@@ -718,13 +717,13 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
       return;
     }
     File configFile = new File(plugin.getStateLocation().toFile(), STORAGE_FILE_NAME);
-    XMLMemento rootConfig = XMLMemento.createWriteRoot(MEMENTO_ROOT_TYPE);
+    XMLMemento rootConfig = XMLMemento.createWriteRoot(FrameworkImpl.MEMENTO_ROOT_TYPE);
     Model[] children = root.getChildren();
     for (int i = 0; i < root.getSize(); i++) {
       if (!((FrameworkImpl) children[i]).isAutoConnected()) {
         IMemento config = ((FrameworkImpl) children[i]).getConfig();
         if (config != null) {
-          IMemento child = rootConfig.createChild(MEMENTO_TYPE);
+          IMemento child = rootConfig.createChild(FrameworkImpl.MEMENTO_TYPE);
           child.putMemento(config);
         }
       }
@@ -757,16 +756,16 @@ public final class FrameworksView extends ViewPart implements ConstantsDistribut
     }
 
     if (memento == null) {
-      memento = XMLMemento.createWriteRoot(MEMENTO_ROOT_TYPE);
+      memento = XMLMemento.createWriteRoot(FrameworkImpl.MEMENTO_ROOT_TYPE);
     }
 
     treeRoot = new TreeRoot(Messages.root_element_name);
 
     String elementName;
     FrameworkImpl element;
-    IMemento[] all = memento.getChildren(MEMENTO_TYPE);
+    IMemento[] all = memento.getChildren(FrameworkImpl.MEMENTO_TYPE);
     for (int i = 0; i < all.length; i++) {
-      elementName = all[i].getString(FRAMEWORK_NAME);
+      elementName = all[i].getString(FrameworkImpl.FRAMEWORK_NAME);
       if (elementName == null) {
         continue;
       }
