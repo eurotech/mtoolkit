@@ -10,6 +10,7 @@ Bundle-Localization: plugin
 Export-Package: org.tigris.mtoolkit.console,
  org.tigris.mtoolkit.osgimanagement,
  org.tigris.mtoolkit.osgimanagement.installation,
+ org.tigris.mtoolkit.osgimanagement.internal.images,
  org.tigris.mtoolkit.osgimanagement.model
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui.ide,

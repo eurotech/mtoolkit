@@ -40,26 +40,25 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class ApplicationActionsProvider implements ContentTypeActionsProvider {
-  private static final String START_APPLICATION_IMAGE_PATH = "start_application_action.gif";
-  private static final String STOP_APPLICATION_IMAGE_PATH = "stop_application_action.gif";
-  private static final String APPLICATION_GROUP_IMAGE_PATH = "application_group.gif";
-  private static final String APPLICATION_PROPERTIES_IMAGE_PATH = "application_properties.gif";
+  private static final String         START_APPLICATION_IMAGE_PATH      = "start_application_action.gif";
+  private static final String         STOP_APPLICATION_IMAGE_PATH       = "stop_application_action.gif";
+  private static final String         APPLICATION_GROUP_IMAGE_PATH      = "application_group.gif";
+  private static final String         APPLICATION_PROPERTIES_IMAGE_PATH = "application_properties.gif";
 
-  public static final String APPLICATION_STARTED_ICON_PATH = "started_application_state.gif";
-  public static final String APPLICATION_STOPPING_ICON_PATH = "stopping_application_state.gif";
-  public static final String APPLICATION_INSTALLED_ICON_PATH = "installed_application_state.gif";
-  public static final String APPLICATION_MIXED_ICON_PATH = "mixed_application_state.gif";
+  private static final String         APPLICATION_STARTED_ICON_PATH     = "started_application_state.gif";
+  private static final String         APPLICATION_STOPPING_ICON_PATH    = "stopping_application_state.gif";
+  private static final String         APPLICATION_INSTALLED_ICON_PATH   = "installed_application_state.gif";
+  private static final String         APPLICATION_MIXED_ICON_PATH       = "mixed_application_state.gif";
 
-  public static final String APPLICATION_ICON_PATH = "application.gif";
-  public static final String APPLICATION_PACKAGE_ICON_PATH = "application_package.gif";
+  private static final String         APPLICATION_PACKAGE_ICON_PATH     = "application_package.gif";
 
-  private StartApplicationAction startApplicationAction;
-  private StopApplicationAction stopApplicationAction;
+  private StartApplicationAction      startApplicationAction;
+  private StopApplicationAction       stopApplicationAction;
   private ApplicationPropertiesAction applicationPropertiesAction;
 
-  private TreeViewer tree;
-  private ToolbarIMenuCreator applicationTB;
-  private Hashtable commonActions;
+  private TreeViewer                  tree;
+  private ToolbarIMenuCreator         applicationTB;
+  private Hashtable                   commonActions;
 
   public void init(TreeViewer tree) {
     this.tree = tree;
@@ -78,7 +77,9 @@ public final class ApplicationActionsProvider implements ContentTypeActionsProvi
   }
 
   public void fillToolBar(ToolBarManager tbm) {
-    Action[] actions = new Action[] { startApplicationAction, stopApplicationAction, applicationPropertiesAction };
+    Action[] actions = new Action[] {
+        startApplicationAction, stopApplicationAction, applicationPropertiesAction
+    };
     applicationTB = new ToolbarIMenuCreator(actions, tree);
     applicationTB.setImageDescriptor(ImageHolder.getImageDescriptor(APPLICATION_GROUP_IMAGE_PATH));
     applicationTB.setToolTipText("Various application actions");

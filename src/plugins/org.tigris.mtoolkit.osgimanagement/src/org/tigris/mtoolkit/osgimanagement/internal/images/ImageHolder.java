@@ -18,8 +18,8 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 public final class ImageHolder {
   public static final String  SERVER_ICON_DISCONNECTED = "servernc.gif";     //$NON-NLS-1$
   public static final String  SERVER_ICON_CONNECTED    = "server.gif";       //$NON-NLS-1$
-
   public static final String  BUNDLES_GROUP_IMAGE_PATH = "bundles_group.gif";
+  public static final String  APPLICATION_ICON_PATH    = "application.gif";
 
   private static final String IMAGES_PATH              = "/images/";
 
