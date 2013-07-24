@@ -352,8 +352,7 @@ public final class RemoteBundleImpl implements RemoteBundle {
       id
     });
     if (servicesProps == null) {
-      DebugUtils.debug(this, "[getRegisteredServices] remote call result is: " + servicesProps
-          + " -> bundle is uninstalled");
+      DebugUtils.debug(this, "[getRegisteredServices] remote call result is null -> bundle is uninstalled");
       uninstalled = true;
       checkBundleState();
       return new RemoteService[0];
@@ -379,8 +378,7 @@ public final class RemoteBundleImpl implements RemoteBundle {
       id
     });
     if (servicesProps == null) {
-      DebugUtils
-          .debug(this, "[getServicesInUse] remote call result is: " + servicesProps + " -> bundle is uninstalled");
+      DebugUtils.debug(this, "[getServicesInUse] remote call result is null -> bundle is uninstalled");
       uninstalled = true;
       checkBundleState();
       return new RemoteService[0];
@@ -406,8 +404,7 @@ public final class RemoteBundleImpl implements RemoteBundle {
       id
     });
     if (fragmentBundleIDs == null) {
-      DebugUtils
-          .debug(this, "[getFragments] remote call result is: " + fragmentBundleIDs + " -> bundle is uninstalled");
+      DebugUtils.debug(this, "[getFragments] remote call result is null -> bundle is uninstalled");
       uninstalled = true;
       checkBundleState();
       return null;
@@ -436,7 +433,7 @@ public final class RemoteBundleImpl implements RemoteBundle {
       id
     });
     if (hostBundleIDs == null) {
-      DebugUtils.debug(this, "[getHosts] remote call result is: " + hostBundleIDs + " -> bundle is uninstalled");
+      DebugUtils.debug(this, "[getHosts] remote call result is null -> bundle is uninstalled");
       uninstalled = true;
       checkBundleState();
       return null;
