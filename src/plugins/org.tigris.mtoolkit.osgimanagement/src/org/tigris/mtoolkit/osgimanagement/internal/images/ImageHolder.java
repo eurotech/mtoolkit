@@ -20,6 +20,7 @@ public final class ImageHolder {
   public static final String  SERVER_ICON_CONNECTED    = "server.gif";       //$NON-NLS-1$
   public static final String  BUNDLES_GROUP_IMAGE_PATH = "bundles_group.gif";
   public static final String  APPLICATION_ICON_PATH    = "application.gif";
+  public static final String  SERVICES_CATEGORY_ICON   = "services.gif";     //$NON-NLS-1$
 
   private static final String IMAGES_PATH              = "/images/";
 

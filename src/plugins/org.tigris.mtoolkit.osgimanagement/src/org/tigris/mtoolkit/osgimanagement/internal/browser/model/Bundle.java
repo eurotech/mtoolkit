@@ -34,8 +34,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class Bundle extends Model implements IconProvider {
-  public static final String  OVR_SIGNED_ICON          = "ovr_signed2.gif";                //$NON-NLS-1$
-
   private static final int    ICON_WIDTH               = 16;
 
   private static final String OVR_ACTIVE_ICON          = "ovr_active.gif";                 //$NON-NLS-1$

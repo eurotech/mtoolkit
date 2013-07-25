@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.osgimanagement.application.model;
 import org.osgi.service.application.ApplicationDescriptor;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
+import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class Application extends Model {
@@ -31,8 +32,7 @@ public final class Application extends Model {
       }
       state = remoteApplication.getState();
     } catch (IAgentException e) {
-      //TODO handle this exception
-      e.printStackTrace();
+      FrameworkPlugin.error(e);
     }
   }
 

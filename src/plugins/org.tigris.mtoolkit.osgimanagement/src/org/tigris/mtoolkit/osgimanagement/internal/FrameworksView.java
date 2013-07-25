@@ -133,7 +133,6 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 public final class FrameworksView extends ViewPart {
   public static final String                        VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
                                                                                      + ".frameworkview";                                      //$NON-NLS-1$
-
   private static final String                       PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
   private static final String                       UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                                       //$NON-NLS-1$
   private static final String                       STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                                         //$NON-NLS-1$
@@ -522,7 +521,7 @@ public final class FrameworksView extends ViewPart {
 
     gotoServiceAction = new GotoServiceAction(tree, Messages.goto_service_action_label);
     viewServicesAction = new ViewAction(tree, Messages.services_view_action_label, tree, FrameworkImpl.SERVICES_VIEW);
-    viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ViewLabelProvider.SERVICES_CATEGORY_ICON));
+    viewServicesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ImageHolder.SERVICES_CATEGORY_ICON));
     viewBundlesAction = new ViewAction(tree, Messages.bundles_view_action_label, tree, FrameworkImpl.BUNDLES_VIEW);
     viewBundlesAction.setImageDescriptor(ImageHolder.getImageDescriptor(ImageHolder.BUNDLES_GROUP_IMAGE_PATH));
 

@@ -134,8 +134,7 @@ public class FrameworkPanel implements SelectionListener, DeviceTypeProviderVali
               break;
             }
           } catch (CoreException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            FrameworkPlugin.log(e.getStatus());
           }
         }
       }

@@ -43,22 +43,22 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 public final class ViewLabelProvider extends StyledCellLabelProvider {
-  public static final String     ROOT_ICON                       = "homefolder.gif";                //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_EXTENSION_INSTALLED = "bundle_extension_installed.gif"; //$NON-NLS-1$
-  public static final String     OBJECT_CLASS_ICON               = "objectClass.gif";               //$NON-NLS-1$
-  public static final String     SERVICES_CATEGORY_ICON          = "services.gif";                  //$NON-NLS-1$
-  public static final String     CATEGORY_ICON                   = "category.gif";                  //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_FRAGMENT_INSTALLED  = "bundle_fragment_installed.gif"; //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_EXTENSION           = "bundle_extension.gif";          //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_FRAGMENT            = "bundle_fragment.gif";           //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_STOPPING            = "bundle_stopping.gif";           //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_STARTING            = "bundle_starting.gif";           //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_INSTALLED           = "bundle_installed.gif";          //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_UNINSTALLED         = "bundle_uninstalled.gif";        //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_UNKNOWN             = "bundle_unk.gif";                //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_RESOLVED            = "bundle_resolved.gif";           //$NON-NLS-1$
-  public static final String     BUNDLE_ICON_ACTIVE              = "bundle_active.gif";             //$NON-NLS-1$
-  public static final String     BUNDLE_NODE_ICON                = "bundles_package.gif";           //$NON-NLS-1$
+  private static final String    ROOT_ICON                       = "homefolder.gif";                //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_EXTENSION_INSTALLED = "bundle_extension_installed.gif"; //$NON-NLS-1$
+  private static final String    OBJECT_CLASS_ICON               = "objectClass.gif";               //$NON-NLS-1$
+  private static final String    CATEGORY_ICON                   = "category.gif";                  //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_FRAGMENT_INSTALLED  = "bundle_fragment_installed.gif"; //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_EXTENSION           = "bundle_extension.gif";          //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_FRAGMENT            = "bundle_fragment.gif";           //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_STOPPING            = "bundle_stopping.gif";           //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_STARTING            = "bundle_starting.gif";           //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_INSTALLED           = "bundle_installed.gif";          //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_UNINSTALLED         = "bundle_uninstalled.gif";        //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_UNKNOWN             = "bundle_unk.gif";                //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_RESOLVED            = "bundle_resolved.gif";           //$NON-NLS-1$
+  private static final String    BUNDLE_ICON_ACTIVE              = "bundle_active.gif";             //$NON-NLS-1$
+  private static final String    BUNDLE_NODE_ICON                = "bundles_package.gif";           //$NON-NLS-1$
+  private static final String    OVR_SIGNED_ICON                 = "ovr_signed2.gif";               //$NON-NLS-1$
 
   private HashMap<Object, Image> customImages                    = new HashMap<Object, Image>();
 
@@ -73,7 +73,7 @@ public final class ViewLabelProvider extends StyledCellLabelProvider {
       }
     }
     if (element instanceof Category) {
-      return ImageHolder.getImage(ViewLabelProvider.CATEGORY_ICON);
+      return ImageHolder.getImage(CATEGORY_ICON);
     }
     if (element instanceof Bundle) {
       Bundle bundle = (Bundle) element;
@@ -85,7 +85,7 @@ public final class ViewLabelProvider extends StyledCellLabelProvider {
             image.dispose();
           }
         }
-        icon = new DecorationOverlayIcon(icon, ImageHolder.getImageDescriptor(Bundle.OVR_SIGNED_ICON),
+        icon = new DecorationOverlayIcon(icon, ImageHolder.getImageDescriptor(OVR_SIGNED_ICON),
             IDecoration.BOTTOM_LEFT).createImage();
         if (icon != null) {
           customImages.put(bundle, icon);
@@ -94,17 +94,17 @@ public final class ViewLabelProvider extends StyledCellLabelProvider {
       return icon;
     }
     if ((element instanceof ServicesCategory) || (element instanceof BundlesCategory)) {
-      return ImageHolder.getImage(ViewLabelProvider.SERVICES_CATEGORY_ICON);
+      return ImageHolder.getImage(ImageHolder.SERVICES_CATEGORY_ICON);
     }
     if (element instanceof ObjectClass) {
-      return ImageHolder.getImage(ViewLabelProvider.OBJECT_CLASS_ICON);
+      return ImageHolder.getImage(OBJECT_CLASS_ICON);
     }
     if (element instanceof TreeRoot) {
-      return ImageHolder.getImage(ViewLabelProvider.ROOT_ICON);
+      return ImageHolder.getImage(ROOT_ICON);
     }
     if (element instanceof SimpleNode) {
       if (((SimpleNode) element).getName().equals(Messages.bundles_node_label)) {
-        return ImageHolder.getImage(ViewLabelProvider.BUNDLE_NODE_ICON);
+        return ImageHolder.getImage(BUNDLE_NODE_ICON);
       }
     }
     if (element instanceof ServiceProperty) {
