@@ -29,7 +29,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.ActionsManager;
@@ -63,41 +62,13 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
     job.schedule();
   }
 
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
-   */
-  public void connected(final DeviceConnector connector) {
+  public static IStatus connectFrameworkSync(final Framework fw, IProgressMonitor monitor) {
+    ConnectFrameworkJob job = new ConnectFrameworkJob(fw);
+    return job.run(monitor);
   }
 
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
-   */
-  public void disconnected(DeviceConnector connector) {
-    FrameworkImpl fwArr[] = FrameworksView.findFramework(connector);
-    if (fwArr == null) {
-      return;
-    }
-    for (int j = 0; j < fwArr.length; j++) {
-      FrameworkImpl fw = fwArr[j];
-      FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
-      synchronized (Framework.getLockObject(connector)) {
-        ActionsManager.disconnectConsole(fw);
-        FrameworkImpl fws[] = FrameworksView.getFrameworks();
-        if (fws != null) {
-          for (int i = 0; i < fws.length; i++) {
-            fw = fws[i];
-            if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
-              fw.disconnect();
-              fw.setPMPConnectionListener(null);
-              if (fw.isAutoConnected()) {
-                fw.dispose();
-              }
-              break;
-            }
-          }
-        }
-      }
-    }
+  public static boolean isConnecting(Framework fw) {
+    return ConnectFrameworkJob.isConnecting(fw);
   }
 
   public static void connectFramework(final DeviceConnector connector, FrameworkImpl fw) {
@@ -198,5 +169,42 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
       index++;
     }
     return frameWorkName;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   */
+  public void connected(final DeviceConnector connector) {
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   */
+  public void disconnected(DeviceConnector connector) {
+    FrameworkImpl fwArr[] = FrameworksView.findFramework(connector);
+    if (fwArr == null) {
+      return;
+    }
+    for (int j = 0; j < fwArr.length; j++) {
+      FrameworkImpl fw = fwArr[j];
+      FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
+      synchronized (Framework.getLockObject(connector)) {
+        ActionsManager.disconnectConsole(fw);
+        FrameworkImpl fws[] = FrameworksView.getFrameworks();
+        if (fws != null) {
+          for (int i = 0; i < fws.length; i++) {
+            fw = fws[i];
+            if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
+              fw.disconnect();
+              fw.setPMPConnectionListener(null);
+              if (fw.isAutoConnected()) {
+                fw.dispose();
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
   }
 }

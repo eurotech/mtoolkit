@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.osgimanagement.internal.browser.logic;
+package org.tigris.mtoolkit.osgimanagement.installation;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,7 +42,6 @@ import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.Util;
-import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -51,12 +50,12 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Framewo
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel.DeviceTypeProviderElement;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
-public final class ConnectFrameworkJob extends Job {
+final class ConnectFrameworkJob extends Job {
   private static final List connectingFrameworks = new ArrayList();
 
   private Framework         fw;
 
-  public ConnectFrameworkJob(Framework framework) {
+  ConnectFrameworkJob(Framework framework) {
     super(NLS.bind(Messages.connect_framework, framework.getName()));
     this.fw = framework;
   }
@@ -172,7 +171,7 @@ public final class ConnectFrameworkJob extends Job {
     return Status.OK_STATUS;
   }
 
-  public static boolean isConnecting(FrameworkImpl fw) {
+  static boolean isConnecting(Framework fw) {
     synchronized (connectingFrameworks) {
       return connectingFrameworks.contains(fw);
     }

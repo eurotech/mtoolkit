@@ -56,7 +56,6 @@ import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.InstallBundleOperation;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
@@ -189,8 +188,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       Framework framework = ((FrameworkTarget) target).getFramework();
       if (!framework.isConnected()) {
         subMonitor.setTaskName(Messages.connecting_operation_title);
-        ConnectFrameworkJob connectJob = new ConnectFrameworkJob(framework);
-        IStatus status = connectJob.run(subMonitor.newChild(10));
+        IStatus status=FrameworkConnectorFactory.connectFrameworkSync(framework,subMonitor.newChild(10));
         if (status != null) {
           if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
             return status;

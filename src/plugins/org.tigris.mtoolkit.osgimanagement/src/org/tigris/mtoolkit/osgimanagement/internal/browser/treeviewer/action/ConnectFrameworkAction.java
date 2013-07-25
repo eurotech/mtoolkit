@@ -11,7 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ConnectFrameworkJob;
+import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.model.AbstractFrameworkTreeElementAction;
 
@@ -34,7 +34,7 @@ public final class ConnectFrameworkAction extends AbstractFrameworkTreeElementAc
   @Override
   protected boolean isEnabledFor(FrameworkImpl framework) {
     if (framework.isConnected() || framework.isAutoConnected() || framework.isConnecting()
-        || ConnectFrameworkJob.isConnecting(framework)) {
+        || FrameworkConnectorFactory.isConnecting(framework)) {
       return false;
     }
     return true;
