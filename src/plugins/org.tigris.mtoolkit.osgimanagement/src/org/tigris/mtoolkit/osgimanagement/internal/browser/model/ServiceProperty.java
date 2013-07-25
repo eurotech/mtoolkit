@@ -12,16 +12,19 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class ServiceProperty extends Model {
-
+public final class ServiceProperty extends Model {
 	private String label;
 
 	public ServiceProperty(String name) {
 		super(name);
-		label = name;
+    this.label = name;
 	}
 
-	public String getLabel() {
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Model#getLabel()
+   */
+	@Override
+  public String getLabel() {
 		return label;
 	}
 }

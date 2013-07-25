@@ -12,8 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.application.model;
 
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
-public class ApplicationPackage extends SimpleNode {
-	
+public final class ApplicationPackage extends SimpleNode {
 	public ApplicationPackage(String name) {
 		super(name);
 	}

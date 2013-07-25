@@ -12,10 +12,8 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.model;
 
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
-public class Category extends Model {
-
+public final class Category extends Model {
 	public Category(String name) {
 		super(name);
 	}
-
 }
