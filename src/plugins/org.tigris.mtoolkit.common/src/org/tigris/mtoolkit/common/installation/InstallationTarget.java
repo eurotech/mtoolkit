@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.installation;
 
+import java.util.Map;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 
 /**
@@ -20,36 +22,43 @@ public interface InstallationTarget {
   /**
    * Returns unique id of the installation target. This uid can be used as a
    * persistent identifier.
-   * 
+   *
    * @return the unique id that represents the target
    */
   public String getUID();
 
   /**
    * Returns human-readable name for this target.
-   * 
+   *
    * @return the name
    */
   public String getName();
 
   /**
    * Returns the icon for this target.
-   * 
+   *
    * @return the icon
    */
   public ImageDescriptor getIcon();
 
   /**
    * Returns if the target is connected
-   * 
+   *
    * @return connected or not
    */
   public boolean isConnected();
 
   /**
    * Returns if the target can be stored persistently
-   * 
+   *
    * @return the target can be stored persistently
    */
   public boolean isTransient();
+
+  /**
+   * Signing certificates which will be used by installation item processor
+   * 
+   * @return signing certificates or empty map if none
+   */
+  public Map getSigningProperties();
 }

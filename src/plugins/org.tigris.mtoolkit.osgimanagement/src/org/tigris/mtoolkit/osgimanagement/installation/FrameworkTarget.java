@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.installation;
 
+import java.util.Map;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
@@ -56,12 +58,18 @@ public final class FrameworkTarget implements InstallationTarget {
     return fw.isConnected();
   }
 
-
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.common.installation.InstallationTarget#isTransient()
    */
   public boolean isTransient() {
     return fw.isAutoConnected();
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationTarget#getSigningProperties()
+   */
+  public Map getSigningProperties() {
+    return fw.getSigningProperties();
   }
 
   public Framework getFramework() {

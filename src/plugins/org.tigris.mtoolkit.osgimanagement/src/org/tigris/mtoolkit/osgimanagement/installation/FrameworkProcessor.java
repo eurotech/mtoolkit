@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -218,11 +217,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         return Util.newStatus(IStatus.ERROR, NLS.bind("Could not establish connection to {0}", framework), null);
       }
 
-      Map preparationProps = new Hashtable();
-      preparationProps.putAll(framework.getSigningProperties());
-      if (args != null) {
-        preparationProps.putAll(args);
-      }
+      final Map preparationProps = getPreparationProperties(target, args);
+
       if (!preparationProps.containsKey(PROP_JVM_NAME)) {
         String transportType = (String) connector.getProperties().get(DeviceConnector.TRANSPORT_TYPE);
         if (ANDROID_TRANSPORT_TYPE.equals(transportType)) {

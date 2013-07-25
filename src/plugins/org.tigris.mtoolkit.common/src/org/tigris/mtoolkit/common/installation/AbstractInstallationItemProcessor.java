@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.common.installation;
 
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -72,5 +73,14 @@ public abstract class AbstractInstallationItemProcessor implements InstallationI
       return Status.CANCEL_STATUS;
     }
     return Status.OK_STATUS;
+  }
+
+  protected final Map getPreparationProperties(InstallationTarget target, Map args) {
+    Map preparationProps = new Hashtable();
+    if (args != null) {
+      preparationProps.putAll(args);
+    }
+    preparationProps.putAll(target.getSigningProperties());
+    return preparationProps;
   }
 }
