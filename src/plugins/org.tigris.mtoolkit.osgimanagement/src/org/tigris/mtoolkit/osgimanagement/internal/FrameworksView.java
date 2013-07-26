@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -176,12 +175,10 @@ public final class FrameworksView extends ViewPart {
 
   private Text                                      filterField;
   private TreeViewer                                tree;
-  private IWorkbenchPage                            activePage;
   private MenuManager                               mgr;
   private ToolbarIMenuCreator                       bundlesTB;
   private static TreeRoot                           treeRoot;
 
-  private static HashMap                            activeInstances;
   private String                                    notFoundText                 = null;
 
   // System bundles providers
@@ -353,14 +350,6 @@ public final class FrameworksView extends ViewPart {
         super.keyPressed(e);
       }
     });
-
-    activePage = getSite().getPage();
-
-    if (activeInstances == null) {
-      activeInstances = new HashMap();
-    }
-
-    activeInstances.put(new Integer(activePage.hashCode()), this);
 
     tree.setContentProvider(new ViewContentProvider());
     tree.setLabelProvider(new ViewLabelProvider());
@@ -776,14 +765,11 @@ public final class FrameworksView extends ViewPart {
    */
   @Override
   public void dispose() {
-    super.dispose();
-    activeInstances.remove(new Integer(activePage.hashCode()));
-
-    // final dispose
-    if (activeInstances.size() < 1) {
+    try {
       mgr.dispose();
       tree.getTree().dispose();
-      activeInstances = null;
+    } finally {
+      super.dispose();
     }
   }
 

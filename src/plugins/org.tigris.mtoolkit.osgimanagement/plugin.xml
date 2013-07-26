@@ -12,11 +12,12 @@
          id="org.tigris.mtoolkit.osgi">
 		</category>
 		<view
-         name="%OSGiSet.FrameworkView"
-         icon="images/frameworks.gif"
-         category="org.tigris.mtoolkit.osgi"
-         class="org.tigris.mtoolkit.osgimanagement.internal.FrameworksView"
-         id="org.tigris.mtoolkit.osgimanagement.frameworkview">
+        allowMultiple="false"
+        category="org.tigris.mtoolkit.osgi"
+        class="org.tigris.mtoolkit.osgimanagement.internal.FrameworksView"
+        icon="images/frameworks.gif"
+        id="org.tigris.mtoolkit.osgimanagement.frameworkview"
+        name="%OSGiSet.FrameworkView">
 		</view>
 	</extension>
 
