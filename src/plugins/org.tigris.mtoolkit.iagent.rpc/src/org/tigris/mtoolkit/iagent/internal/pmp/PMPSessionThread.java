@@ -27,6 +27,8 @@ import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 
 public class PMPSessionThread implements Runnable {
+  private static final String   EMPTY_STRING                   = new String();
+
   protected PMPOutputStream     os;
   protected PMPInputStream      is;
   protected String              url;
@@ -580,7 +582,7 @@ public class PMPSessionThread implements Runnable {
           readReal = (is.read() == 1);
         }
         if (readReal) {
-          args[i] = PMPData.readObject(null, info.obj.getClass().getClassLoader(), is, new String(), maxA, -1, null);
+          args[i] = PMPData.readObject(null, info.obj.getClass().getClassLoader(), is, EMPTY_STRING, maxA, -1, null);
           // check that if the arguments is InputStream and it is not
           // the last argument we need to load it entirely in the memory
           if ((i != (args.length - 1)) && (args[i] instanceof InputStream)) {
@@ -1094,7 +1096,7 @@ public class PMPSessionThread implements Runnable {
           DebugUtils.debug(this, sEvType);
         }
         ClassLoader loader = connection.evMngr.getClassLoader(sEvType);
-        Object event = PMPData.readObject(null, loader, is, new String(), maxA, -1, null);
+        Object event = PMPData.readObject(null, loader, is, EMPTY_STRING, maxA, -1, null);
         connection.evMngr.postEvent(sEvType, event);
       }
     } catch (IOException ioExc) {

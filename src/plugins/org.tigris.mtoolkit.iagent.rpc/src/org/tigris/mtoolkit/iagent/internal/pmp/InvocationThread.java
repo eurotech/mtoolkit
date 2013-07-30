@@ -20,16 +20,17 @@ import org.tigris.mtoolkit.iagent.pmp.PMPContext;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 
 public class InvocationThread implements Runnable, PMPContext {
+  private static final String EPMTY_STRING      = new String();
 
-  private static ThreadLocal invocationContext = new ThreadLocal();
+  private static ThreadLocal  invocationContext = new ThreadLocal();
 
-  private PMPSessionThread   session;
-  private Method             m;
-  private boolean            serflag;
-  private Object             objContext;
-  private Object[]           args;
-  private short              msgID;
-  private Object             obj;
+  private PMPSessionThread    session;
+  private Method              m;
+  private boolean             serflag;
+  private Object              objContext;
+  private Object[]            args;
+  private short               msgID;
+  private Object              obj;
 
   public InvocationThread(PMPSessionThread session, Method m, Object obj, boolean serflag, Object context,
       Object[] args, short msgID) {
@@ -49,7 +50,7 @@ public class InvocationThread implements Runnable, PMPContext {
     try {
       result = m.invoke(obj, args);
     } catch (Exception exc) {
-      String errMsg = new String();
+      String errMsg = EPMTY_STRING;
       if (exc instanceof InvocationTargetException) {
         errMsg = ((InvocationTargetException) exc).getTargetException().toString();
         DebugUtils.error(session, "Target Exception: ", ((InvocationTargetException) exc).getTargetException());

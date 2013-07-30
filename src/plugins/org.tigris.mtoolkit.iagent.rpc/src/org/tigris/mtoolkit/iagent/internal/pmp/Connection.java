@@ -20,15 +20,16 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
  * Contains the methods necessary for connecting to the PMP Service and for
  * getting references to the services registered in the Framework.
  */
-
 class Connection implements PMPConnection {
-  protected PMPInputStream   is;
-  protected PMPOutputStream  os;
-  protected PMPSessionThread reader;
+  private static final String EMPTY_STRING = new String();
 
-  protected boolean          connected = false;
+  protected volatile boolean  connected    = false;
 
-  protected PMPEventsManager evMngr;
+  protected PMPInputStream    is;
+  protected PMPOutputStream   os;
+  protected PMPSessionThread  reader;
+
+  protected PMPEventsManager  evMngr;
 
   public Connection(PMPInputStream is, PMPOutputStream os, PMPSessionThread reader) {
     this.is = is;
@@ -67,7 +68,9 @@ class Connection implements PMPConnection {
    * @param errMsg
    *          the error message
    */
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPConnection#disconnect(java.lang.String)
+   */
   public void disconnect(String errMsg) {
     if (!connected) {
       if (DebugUtils.DEBUG_ENABLED) {
@@ -79,7 +82,7 @@ class Connection implements PMPConnection {
   }
 
   protected void disconnected(String errMsg) {
-    errMsg = errMsg == null ? new String() : errMsg;
+    errMsg = errMsg == null ? EMPTY_STRING : errMsg;
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "Connection: disconnecting " + errMsg);
     }
@@ -113,7 +116,9 @@ class Connection implements PMPConnection {
    *              such service registered in the Framework.
    * @see RemoteObject
    */
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPConnection#getReference(java.lang.String, java.lang.String)
+   */
   public RemoteObject getReference(String clazz, String filter) throws PMPException {
     PMPAnswer answer = new PMPAnswer(reader);
     try {
@@ -155,7 +160,9 @@ class Connection implements PMPConnection {
    *              such service registered in the Framework.
    * @see RemoteObject
    */
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPConnection#getReference(java.lang.String, java.lang.String, long)
+   */
   public RemoteObject getReference(String clazz, String filter, long bid) throws PMPException {
     PMPAnswer answer = new PMPAnswer(reader);
     short msgID = 0;
@@ -194,7 +201,7 @@ class Connection implements PMPConnection {
       msgID = os.begin(answer);
       os.write(PMPSessionThread.GET_METHOD);
       PMPData.writeInt(ro.IOR, os);
-      PMPData.writeString(new String(), os);
+      PMPData.writeString(EMPTY_STRING, os);
       os.end(true);
       answer.get(is.timeout);
       if (answer.errMsg != null) {
@@ -272,7 +279,7 @@ class Connection implements PMPConnection {
     if (changed) {
       answer.returnType = expReturnType;
     } else {
-      answer.returnType = new String();
+      answer.returnType = EMPTY_STRING;
     }
     short msgID = 0;
     try {
@@ -374,6 +381,9 @@ class Connection implements PMPConnection {
     return reader.addRemoteObject(obj, interfaces);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPConnection#addEventListener(org.tigris.mtoolkit.iagent.pmp.EventListener, java.lang.String[])
+   */
   public void addEventListener(EventListener el, String[] eventTypes) throws IllegalArgumentException {
     if (el == null) {
       throw new IllegalArgumentException("Can't add null listener");
@@ -402,6 +412,9 @@ class Connection implements PMPConnection {
    *          the EventListener
    */
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPConnection#removeEventListener(org.tigris.mtoolkit.iagent.pmp.EventListener, java.lang.String[])
+   */
   public void removeEventListener(EventListener el, String[] eventTypes) throws IllegalArgumentException {
     if (el == null) {
       throw new IllegalArgumentException("Can't remove null listener");
@@ -419,12 +432,17 @@ class Connection implements PMPConnection {
 
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPConnection#getSessionID()
+   */
   public String getSessionID() {
     return reader.sessionID;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPConnection#isConnected()
+   */
   public boolean isConnected() {
     return connected;
   }
-
 }
