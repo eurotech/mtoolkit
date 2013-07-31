@@ -24,6 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.internal.pmp.InvocationThread;
 import org.tigris.mtoolkit.iagent.internal.rpc.Activator;
 import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
+import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
@@ -36,15 +37,17 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 
 public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole, EventListener {
-  private ServiceRegistration registration;
+  private static final Integer OFFSET                = new Integer(0);
 
-  private final Map           dispatchers           = new HashMap();
+  private ServiceRegistration  registration;
 
-  private PrintStream         oldSystemOut;
-  private PrintStream         newSystemOut;
-  private PrintStream         oldSystemErr;
-  private PrintStream         newSystemErr;
-  private boolean             replacedSystemOutputs = false;
+  private final Map            dispatchers           = new HashMap();
+
+  private PrintStream          oldSystemOut;
+  private PrintStream          newSystemOut;
+  private PrintStream          oldSystemErr;
+  private PrintStream          newSystemErr;
+  private boolean              replacedSystemOutputs = false;
 
   public void register(BundleContext context) {
     registration = context.registerService(RemoteConsole.class.getName(), this, null);
@@ -231,7 +234,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
           try {
             object.dispose();
           } catch (PMPException e) {
-            // TODO: Log exception
+            DebugUtils.error(this, e.getMessage(), e);
           }
           return;
         }
@@ -240,10 +243,10 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
           int read = buffer.read(buf);
           try {
             method.invoke(new Object[] {
-                buf, new Integer(0), new Integer(read)
+                buf, OFFSET, new Integer(read)
             }, true);
           } catch (PMPException e) {
-            // TODO: Log exception
+            DebugUtils.error(this, e.getMessage(), e);
           }
         }
       }

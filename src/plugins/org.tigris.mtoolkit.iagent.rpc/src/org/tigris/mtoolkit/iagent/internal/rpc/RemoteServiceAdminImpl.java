@@ -32,11 +32,11 @@ import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 
-public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements RemoteServiceAdmin, AllServiceListener {
+public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements RemoteServiceAdmin, AllServiceListener {
   private static final String  EVENT_TYPE_KEY         = "type";
-  private static final int     SERVICE_REGISTERED     = 1 << 0;
-  private static final int     SERVICE_MODIFIED       = 1 << 1;
-  private static final int     SERVICE_UNREGISTERED   = 1 << 2;
+  private static final Integer SERVICE_REGISTERED     = new Integer(1 << 0);
+  private static final Integer SERVICE_MODIFIED       = new Integer(1 << 1);
+  private static final Integer SERVICE_UNREGISTERED   = new Integer(1 << 2);
 
   private static final boolean TRACK_SERVICES_DEBUG   = Boolean.getBoolean("iagent.debug.services");
 
@@ -46,11 +46,20 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
       int.class, long.class, float.class, double.class, byte.class, short.class, char.class, boolean.class,
       Integer.class, Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class,
       String.class
-  };
+                                                      };
   private BundleContext        bc;
   private ServiceRegistration  registration;
 
   private Map                  services               = new Hashtable();
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
+   */
+  public Class[] remoteInterfaces() {
+    return new Class[] {
+      RemoteServiceAdmin.class
+    };
+  }
 
   public void register(BundleContext context) {
     if (DebugUtils.DEBUG_ENABLED) {
@@ -80,17 +89,6 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     }
   }
 
-  private void fillServicesMap(ServiceReference[] references) {
-    if (references == null || references.length == 0) {
-      return;
-    }
-    for (int i = 0; i < references.length; i++) {
-      ServiceReference ref = references[i];
-      Long sid = (Long) ref.getProperty(Constants.SERVICE_ID);
-      services.put(sid, ref);
-    }
-  }
-
   public void unregister(BundleContext context) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[unregister] Unregistering...");
@@ -114,6 +112,9 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#checkFilter(java.lang.String)
+   */
   public String checkFilter(String filter) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[checkFilter] >>> filter: " + filter);
@@ -132,6 +133,9 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#getAllRemoteServices(java.lang.String, java.lang.String)
+   */
   public Dictionary[] getAllRemoteServices(String clazz, String filter) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
@@ -148,40 +152,42 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     return convertReferences(refs);
   }
 
-  private ServiceReference getServiceReference(long id) {
-    ServiceReference ref = (ServiceReference) services.get(new Long(id));
-    return ref;
-  }
-
-  public Class[] remoteInterfaces() {
-    return new Class[] {
-        RemoteServiceAdmin.class
-    };
-  }
-
-  public void addService(ServiceReference ref) {
-    Long serviceId = (Long) ref.getProperty(Constants.SERVICE_ID);
-    if (TRACK_SERVICES_DEBUG) {
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#getUsingBundles(long)
+   */
+  public long[] getUsingBundles(long id) {
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[getUsingBundles] >>> id: " + id);
+    }
+    ServiceReference ref = getServiceReference(id);
+    if (ref == null) {
       if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "[addService] Track service: " + ref + "; id: " + serviceId);
+        DebugUtils.debug(this, "[getUsingBundles] No such service");
       }
+      return null;
     }
-    services.put(serviceId, ref);
+    Bundle[] bundles = ref.getUsingBundles();
+    long[] bids = RemoteBundleAdminImpl.convertBundlesToIds(bundles);
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[getUsingBundles] bundles: " + DebugUtils.convertForDebug(bids));
+    }
+    return bids;
   }
 
-  public void removeService(ServiceReference ref) {
-    Long serviceId = (Long) ref.getProperty(Constants.SERVICE_ID);
-    if (TRACK_SERVICES_DEBUG) {
-      if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "[addService] Stop tracking service: " + ref + "; id: " + serviceId);
-      }
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#isServiceStale(long)
+   */
+  public boolean isServiceStale(long id) {
+    boolean stale = services.get(new Long(id)) == null;
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[isServiceStale] id: " + id + "; stale: " + stale);
     }
-    // XXX: Unnecessary synchronization?
-    synchronized (services) {
-      services.remove(serviceId);
-    }
+    return stale;
   }
 
+  /* (non-Javadoc)
+   * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
+   */
   public void serviceChanged(ServiceEvent event) {
     switch (event.getType()) {
     case ServiceEvent.REGISTERED: {
@@ -196,51 +202,9 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     postRemoteEvent(event);
   }
 
-  private void postRemoteEvent(ServiceEvent event) {
-    if (systemBundle == null) {
-      systemBundle = bc.getBundle(0);
-    }
-    if (systemBundle.getState() == Bundle.STOPPING) {
-      return;
-    }
-    if (bc.getBundle().getState() == Bundle.STOPPING) {
-      return;
-    }
-    EventSynchronizer synchronizer = Activator.getSynchronizer();
-    if (synchronizer != null) {
-      Dictionary convertedServiceEvent = convertServiceEvent(event);
-      if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this,
-            "[postRemoteEvent] Posting remote event: " + DebugUtils.convertForDebug(convertedServiceEvent) + "; type: "
-                + RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
-      }
-      synchronizer.enqueue(new EventData(convertedServiceEvent, RemoteServiceAdmin.CUSTOM_SERVICE_EVENT));
-    } else {
-      if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "[postRemoteEvent] Event synchronizer was disabled");
-      }
-    }
-  }
-
-  private Dictionary convertServiceEvent(ServiceEvent event) {
-    Dictionary props = new Hashtable();
-    switch (event.getType()) {
-    case ServiceEvent.REGISTERED:
-      props.put(EVENT_TYPE_KEY, new Integer(SERVICE_REGISTERED));
-      break;
-    case ServiceEvent.MODIFIED:
-      props.put(EVENT_TYPE_KEY, new Integer(SERVICE_MODIFIED));
-      break;
-    case ServiceEvent.UNREGISTERING:
-      props.put(EVENT_TYPE_KEY, new Integer(SERVICE_UNREGISTERED));
-      break;
-    }
-
-    props.put(Constants.SERVICE_ID, event.getServiceReference().getProperty(Constants.SERVICE_ID));
-    props.put(Constants.OBJECTCLASS, event.getServiceReference().getProperty(Constants.OBJECTCLASS));
-    return props;
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#getBundle(long)
+   */
   public long getBundle(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundle] >>> id: " + id);
@@ -259,6 +223,9 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     return bundleID;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#getProperties(long)
+   */
   public Dictionary getProperties(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getProperties] >>> id: " + id);
@@ -284,6 +251,13 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     }
 
     return props;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin#getServiceRegistration()
+   */
+  protected ServiceRegistration getServiceRegistration() {
+    return registration;
   }
 
   private Object convertProperty(Object value) {
@@ -339,40 +313,68 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     return result;
   }
 
-  private boolean isFilterSupportedClass(Class clazz) {
-    for (int i = 0; i < filterSupportedClasses.length; i++) {
-      if (filterSupportedClasses[i].equals(clazz)) {
-        return true;
-      }
+  private void postRemoteEvent(ServiceEvent event) {
+    if (systemBundle == null) {
+      systemBundle = bc.getBundle(0);
     }
-    return false;
-  }
-
-  public long[] getUsingBundles(long id) {
-    if (DebugUtils.DEBUG_ENABLED) {
-      DebugUtils.debug(this, "[getUsingBundles] >>> id: " + id);
+    if (systemBundle.getState() == Bundle.STOPPING) {
+      return;
     }
-    ServiceReference ref = getServiceReference(id);
-    if (ref == null) {
+    if (bc.getBundle().getState() == Bundle.STOPPING) {
+      return;
+    }
+    EventSynchronizer synchronizer = Activator.getSynchronizer();
+    if (synchronizer != null) {
+      Dictionary convertedServiceEvent = convertServiceEvent(event);
       if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "[getUsingBundles] No such service");
+        DebugUtils.debug(this,
+            "[postRemoteEvent] Posting remote event: " + DebugUtils.convertForDebug(convertedServiceEvent) + "; type: "
+                + RemoteServiceAdmin.CUSTOM_SERVICE_EVENT);
       }
-      return null;
+      synchronizer.enqueue(new EventData(convertedServiceEvent, RemoteServiceAdmin.CUSTOM_SERVICE_EVENT));
+    } else {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[postRemoteEvent] Event synchronizer was disabled");
+      }
     }
-    Bundle[] bundles = ref.getUsingBundles();
-    long[] bids = RemoteBundleAdminImpl.convertBundlesToIds(bundles);
-    if (DebugUtils.DEBUG_ENABLED) {
-      DebugUtils.debug(this, "[getUsingBundles] bundles: " + DebugUtils.convertForDebug(bids));
-    }
-    return bids;
   }
 
-  public boolean isServiceStale(long id) {
-    boolean stale = services.get(new Long(id)) == null;
-    if (DebugUtils.DEBUG_ENABLED) {
-      DebugUtils.debug(this, "[isServiceStale] id: " + id + "; stale: " + stale);
+  private void addService(ServiceReference ref) {
+    Long serviceId = (Long) ref.getProperty(Constants.SERVICE_ID);
+    if (TRACK_SERVICES_DEBUG) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[addService] Track service: " + ref + "; id: " + serviceId);
+      }
     }
-    return stale;
+    services.put(serviceId, ref);
+  }
+
+  private void removeService(ServiceReference ref) {
+    Long serviceId = (Long) ref.getProperty(Constants.SERVICE_ID);
+    if (TRACK_SERVICES_DEBUG) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[addService] Stop tracking service: " + ref + "; id: " + serviceId);
+      }
+    }
+    services.remove(serviceId);
+  }
+
+  private Dictionary convertServiceEvent(ServiceEvent event) {
+    Dictionary props = new Hashtable();
+    switch (event.getType()) {
+    case ServiceEvent.REGISTERED:
+      props.put(EVENT_TYPE_KEY, SERVICE_REGISTERED);
+      break;
+    case ServiceEvent.MODIFIED:
+      props.put(EVENT_TYPE_KEY, (SERVICE_MODIFIED));
+      break;
+    case ServiceEvent.UNREGISTERING:
+      props.put(EVENT_TYPE_KEY, SERVICE_UNREGISTERED);
+      break;
+    }
+    props.put(Constants.SERVICE_ID, event.getServiceReference().getProperty(Constants.SERVICE_ID));
+    props.put(Constants.OBJECTCLASS, event.getServiceReference().getProperty(Constants.OBJECTCLASS));
+    return props;
   }
 
   static Dictionary[] convertReferences(ServiceReference[] refs) {
@@ -388,7 +390,28 @@ public class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements Remot
     return refsProps;
   }
 
-  protected ServiceRegistration getServiceRegistration() {
-    return registration;
+  private boolean isFilterSupportedClass(Class clazz) {
+    for (int i = 0; i < filterSupportedClasses.length; i++) {
+      if (filterSupportedClasses[i].equals(clazz)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void fillServicesMap(ServiceReference[] references) {
+    if (references == null || references.length == 0) {
+      return;
+    }
+    for (int i = 0; i < references.length; i++) {
+      ServiceReference ref = references[i];
+      Long sid = (Long) ref.getProperty(Constants.SERVICE_ID);
+      services.put(sid, ref);
+    }
+  }
+
+  private ServiceReference getServiceReference(long id) {
+    ServiceReference ref = (ServiceReference) services.get(new Long(id));
+    return ref;
   }
 }
