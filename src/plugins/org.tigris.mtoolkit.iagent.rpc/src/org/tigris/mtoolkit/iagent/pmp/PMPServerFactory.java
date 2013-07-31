@@ -19,14 +19,17 @@ import org.tigris.mtoolkit.iagent.internal.pmp.Server;
 
 public final class PMPServerFactory {
   /** constant used for the pmp configuration */
+  public static final String   MAX_STRING_PROP = "iagent.pmp.server.maxstringlength";
 
-  public static final String MAX_STRING = "maxstringlength";
   /** constant used for the pmp configuration */
+  public static final String   MAX_ARRAY_PROP  = "iagent.pmp.server.maxarraylength";
 
-  public static final String MAX_ARRAY  = "maxarraylength";
   /** constant used for the pmp configuration */
+  public static final String   TIMEOUT_PROP    = "iagent.pmp.server.timeout";
 
-  public static final String TIMEOUT    = "timeout";
+  private static final Integer MAX_STRING      = Integer.getInteger(MAX_STRING_PROP, 255);
+  private static final Integer MAX_ARRAY       = Integer.getInteger(MAX_ARRAY_PROP, 300000);
+  private static final Integer TIMEOUT         = Integer.getInteger(MAX_ARRAY_PROP, 10000);
 
   private PMPServerFactory() {
   }
@@ -38,14 +41,14 @@ public final class PMPServerFactory {
     final String uri = "tcp://:" + String.valueOf(port);
     props.put(Server.URI, uri);
     props.put(Server.PORT, new Integer(port));
-    if (props.get(PMPServerFactory.TIMEOUT) == null) {
-      props.put(PMPServerFactory.TIMEOUT, new Integer(10000));
+    if (props.get(PMPServerFactory.TIMEOUT_PROP) == null) {
+      props.put(PMPServerFactory.TIMEOUT_PROP, TIMEOUT);
     }
-    if (props.get(PMPServerFactory.MAX_STRING) == null) {
-      props.put(PMPServerFactory.MAX_STRING, new Integer(255));
+    if (props.get(PMPServerFactory.MAX_STRING_PROP) == null) {
+      props.put(PMPServerFactory.MAX_STRING_PROP, MAX_STRING);
     }
-    if (props.get(PMPServerFactory.MAX_ARRAY) == null) {
-      props.put(PMPServerFactory.MAX_ARRAY, new Integer(300000));
+    if (props.get(PMPServerFactory.MAX_ARRAY_PROP) == null) {
+      props.put(PMPServerFactory.MAX_ARRAY_PROP, MAX_ARRAY);
     }
     try {
       return new Server(context, props);

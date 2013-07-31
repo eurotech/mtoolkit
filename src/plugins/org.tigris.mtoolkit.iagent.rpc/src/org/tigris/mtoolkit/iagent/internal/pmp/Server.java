@@ -52,8 +52,8 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
   public Server(BundleContext context, Dictionary config) throws IOException {
     this.context = context;
     this.uri = ((String) config.get(URI));
-    this.maxArrayLength = ((Integer) config.get(PMPServerFactory.MAX_ARRAY)).intValue();
-    this.maxStringLength = ((Integer) config.get(PMPServerFactory.MAX_STRING)).intValue();
+    this.maxArrayLength = ((Integer) config.get(PMPServerFactory.MAX_ARRAY_PROP)).intValue();
+    this.maxStringLength = ((Integer) config.get(PMPServerFactory.MAX_STRING_PROP)).intValue();
     Integer port = (Integer) config.get(PORT);
     if (port != null) {
       this.port = port.intValue();
@@ -63,8 +63,8 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
   }
 
   protected void updateProps(Dictionary config) {
-    int tempMaxA = ((Integer) config.get(PMPServerFactory.MAX_ARRAY)).intValue();
-    int tempMaxS = ((Integer) config.get(PMPServerFactory.MAX_STRING)).intValue();
+    int tempMaxA = ((Integer) config.get(PMPServerFactory.MAX_ARRAY_PROP)).intValue();
+    int tempMaxS = ((Integer) config.get(PMPServerFactory.MAX_STRING_PROP)).intValue();
     if (maxArrayLength == tempMaxA && maxStringLength == tempMaxS) {
       return;
     }
