@@ -45,16 +45,16 @@ import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 @SuppressWarnings("deprecation")
 public final class RemoteConsole extends IOConsole implements IConsole {
-  public static final String    P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected"; //$NON-NLS-1$
+  public static final String       P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected"; //$NON-NLS-1$
 
-  private final Date            timestamp      = new Date();
-  private final Listener        listener       = new Listener();
-  private final IProcess        process;
+  private final Date               timestamp      = new Date();
+  private final Listener           listener       = new Listener();
+  private final IProcess           process;
 
-  private DeviceConnector       connector;
-  private ConsoleReader         reader;
-  private IOConsoleOutputStream output;
-  private String                name;
+  private volatile DeviceConnector connector;
+  private volatile ConsoleReader   reader;
+  private volatile IOConsoleOutputStream output;
+  private String                   name;
 
   public RemoteConsole(DeviceConnector dc, String name, String consoleType, IProcess iProcess, Object fwId) {
     super("", consoleType, ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$
@@ -85,10 +85,8 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   @Override
   public IPageBookViewPage createPage(IConsoleView view) {
     IPageBookViewPage createPage = super.createPage(view);
-    synchronized (RemoteConsole.this) {
-      if (reader != null) {
-        return createPage;
-      }
+    if (reader != null) {
+      return createPage;
     }
     Job job = new Job(Messages.redirect_console_output) {
       @Override
@@ -168,9 +166,8 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   }
 
   public boolean isDisconnected() {
-    synchronized (RemoteConsole.this) {
-      return connector == null || !connector.isActive();
-    }
+    final DeviceConnector connector = this.connector;
+    return connector == null || !connector.isActive();
   }
 
   public void setConsoleName(String name) {
@@ -289,10 +286,7 @@ public final class RemoteConsole extends IOConsole implements IConsole {
      * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
      */
     public void disconnected(DeviceConnector connector) {
-      DeviceConnector connector1 = null;
-      synchronized (RemoteConsole.this) {
-        connector1 = RemoteConsole.this.connector;
-      }
+      final DeviceConnector connector1 = connector;
       if (connector != null && connector.equals(connector1)) {
         disconnect();
       }
