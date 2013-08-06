@@ -10,23 +10,17 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.VMManager;
 import org.tigris.mtoolkit.iagent.instrumentation.Instrument;
-import org.tigris.mtoolkit.iagent.internal.tcp.DataFormater;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
-import org.tigris.mtoolkit.iagent.spi.MBSAConnection;
-import org.tigris.mtoolkit.iagent.spi.MBSAConnectionCallBack;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
@@ -188,170 +182,6 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#listRawArgs()
-   */
-  public String[] listRawArgs() throws IAgentException {
-    DebugUtils.debug(this, "[listRawArgs] >>>");
-    MBSAConnection connection = getMBSAConnection();
-    if (!connection.isConnected()) {
-      DebugUtils.info(this, "[listRawArgs] Device is disconnected!");
-      throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-    }
-    MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_LISTRAWARGS, null);
-    int rspStatus = tCallBack.getRspStatus();
-    if (rspStatus >= 0) {
-      byte rspData[] = tCallBack.getRspData();
-      if (rspData != null) {
-        ByteArrayInputStream bis = null;
-        try {
-          bis = new ByteArrayInputStream(rspData);
-          String[] args = DataFormater.readStringArray(bis);
-          DebugUtils.debug(this, "[listRawArgs] Raw arguments list: " + DebugUtils.convertForDebug(args));
-          return args;
-        } catch (IOException e) {
-          DebugUtils.info(this, "[listRawArgs] Error formatting response data!", e);
-          throw new IAgentException("Error formatting response data!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
-        } finally {
-          DataFormater.closeInputStream(bis);
-        }
-      } else {
-        DebugUtils.debug(this, "[listRawArgs] no arguments available");
-        return new String[0];
-      }
-    } else {
-      DebugUtils.info(this, "[listRawArgs] Command failure: " + rspStatus);
-      throw new IAgentException("Command failure: " + rspStatus, rspStatus);
-    }
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#addRawArgument(java.lang.String)
-   */
-  public void addRawArgument(String aRawArgument) throws IAgentException {
-    DebugUtils.debug(this, "[addRawArgument] >>> aRawArgument: " + aRawArgument);
-    MBSAConnection connection = getMBSAConnection();
-    if (!connection.isConnected()) {
-      DebugUtils.info(this, "[addRawArgument] Device is disconnected!");
-      throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-    }
-    if (aRawArgument == null) {
-      throw new IllegalArgumentException("Argument could not be null!");
-    }
-    ByteArrayOutputStream bos = null;
-    try {
-      bos = new ByteArrayOutputStream(256);
-      DataFormater.writeString(bos, aRawArgument);
-    } catch (IOException e) {
-      DebugUtils.info(this, "[addRawArgument] Error processing arguments!", e);
-      throw new IAgentException("Error processing arguments!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
-    }
-    MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_ADDRAWARGUMENT, bos.toByteArray());
-    DataFormater.closeOutputStream(bos);
-    int rspStatus = tCallBack.getRspStatus();
-    if (rspStatus < 0) {
-      DebugUtils.info(this, "[addRawArgument] Command failure: " + rspStatus);
-      throw new IAgentException("Command failure: " + rspStatus, rspStatus);
-    } else {
-      DebugUtils.debug(this, "[addRawArgument] argument addition successful");
-    }
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#removeRawArgument(java.lang.String)
-   */
-  public boolean removeRawArgument(String aRawArgument) throws IAgentException {
-    DebugUtils.debug(this, "[removeRawArgument] >>> aRawArgument: " + aRawArgument);
-    MBSAConnection connection = getMBSAConnection();
-    if (!connection.isConnected()) {
-      DebugUtils.info(this, "[removeRawArgument] Device is disconnected!");
-      throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-    }
-    if (aRawArgument == null) {
-      throw new IllegalArgumentException("Argument could not be null!");
-    }
-    ByteArrayOutputStream bos = null;
-    try {
-      bos = new ByteArrayOutputStream(256);
-      DataFormater.writeString(bos, aRawArgument);
-    } catch (IOException e) {
-      DebugUtils.info(this, "[removeRawArgument] Error processing arguments!", e);
-      throw new IAgentException("Error processing arguments!", IAgentErrors.ERROR_INTERNAL_ERROR, e);
-    }
-    MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_REMOVERAWARGUMENT,
-        bos.toByteArray());
-    DataFormater.closeOutputStream(bos);
-    int rspStatus = tCallBack.getRspStatus();
-    if (rspStatus < 0) {
-      if (rspStatus == IAgentErrors.ERR_RUNTIME_ARG_NOT_FOUND) {
-        DebugUtils.debug(this, "[removeRawArgument] Runtime argument cannot be found");
-        return false;
-      }
-      DebugUtils.info(this, "[removeRawArgument] Command failure: " + rspStatus);
-      throw new IAgentException("Failed to remove VM argument: " + rspStatus, rspStatus);
-    } else {
-      DebugUtils.debug(this, "[removeRawArgument] argument removal successful");
-    }
-    return true;
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#resetArgs()
-   */
-  public void resetArgs() throws IAgentException {
-    DebugUtils.debug(this, "[resetArgs] >>>");
-    MBSAConnection connection = getMBSAConnection();
-    if (!connection.isConnected()) {
-      DebugUtils.info(this, "[resetArgs] Device is disconnected!");
-      throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-    }
-    MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_RESETARGS, null);
-    int rspStatus = tCallBack.getRspStatus();
-    if (rspStatus < 0) {
-      DebugUtils.info(this, "[resetArgs] Command failure: " + rspStatus);
-      throw new IAgentException("Failed to reset VM arguments: " + rspStatus, rspStatus);
-    }
-    DebugUtils.debug(this, "[resetArgs] Arguments successfully reset");
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#startVM()
-   */
-  public void startVM() throws IAgentException {
-    DebugUtils.debug(this, "[startVM] >>>");
-    MBSAConnection connection = getMBSAConnection();
-    if (!connection.isConnected()) {
-      DebugUtils.info(this, "[startVM] Device is disconnected!");
-      throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-    }
-    MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_STARTVM, null);
-    int rspStatus = tCallBack.getRspStatus();
-    if (rspStatus < 0) {
-      DebugUtils.info(this, "[startVM] Command failure: " + rspStatus);
-      throw new IAgentException("Failed to start VM: " + rspStatus, rspStatus);
-    }
-    DebugUtils.debug(this, "[startVM] VM successfully started");
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#stopVM()
-   */
-  public void stopVM() throws IAgentException {
-    DebugUtils.debug(this, "[stopVM] >>>");
-    MBSAConnection connection = getMBSAConnection();
-    if (!connection.isConnected()) {
-      DebugUtils.info(this, "[stopVM] Device is disconnected!");
-      throw new IAgentException("Device is disconnected!", IAgentErrors.ERROR_DISCONNECTED);
-    }
-    MBSAConnectionCallBack tCallBack = connection.sendData(IAgentCommands.IAGENT_CMD_STOPVM, null);
-    int rspStatus = tCallBack.getRspStatus();
-    if (rspStatus < 0) {
-      DebugUtils.info(this, "[stopVM] Command failure: " + rspStatus);
-      throw new IAgentException("Failed to stop VM: " + rspStatus, rspStatus);
-    }
-    DebugUtils.debug(this, "[stopVM] VM successfully stopped");
-  }
-
-  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.VMManager#getSystemProperty(java.lang.String)
    */
   public String getSystemProperty(String propertyName) throws IAgentException {
@@ -374,10 +204,6 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
       extensionsRegistry = new LightServiceRegistry(VMManagerImpl.class.getClassLoader());
     }
     return extensionsRegistry;
-  }
-
-  private MBSAConnection getMBSAConnection() throws IAgentException {
-    return (MBSAConnection) connector.getConnection(ConnectionManager.MBSA_CONNECTION);
   }
 
   private PMPConnection getPMPConnection() throws IAgentException {

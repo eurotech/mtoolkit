@@ -20,8 +20,6 @@ import java.io.OutputStream;
  *
  */
 public interface VMManager {
-  public boolean isVMActive() throws IAgentException;
-
   /**
    * Redirects the framework output (stdout and stderr) to the passed
    * OutputStream. The method shouldn't be called more than 1 time, without
@@ -61,75 +59,6 @@ public interface VMManager {
   public int getFrameworkStartLevel() throws IAgentException;
 
   /**
-   * Returns rows of the startup VM script created by the instrumentation agent.
-   *
-   * @return array of raws to the startup VM script created by the
-   *         instrumentation agent
-   * @throws IAgentException
-   *           thrown if some error occurs during transport of the command to
-   *           the device, or during its execution
-   */
-  public String[] listRawArgs() throws IAgentException;
-
-  /**
-   * Add raw argument in the VM startup script created by the instrumentation
-   * agent. Through this method can be added only set of allowed arguments.
-   *
-   * This method generally could be used instead of all other customized
-   * arguments set-up methods this class provides. You should be cautious using
-   * this method and other methods for argument set-up in the same time.
-   *
-   * @throws IAgentException
-   *           thrown if some error occurs during transport of the command to
-   *           the device, or during its execution
-   */
-  public void addRawArgument(String aRawArgument) throws IAgentException;
-
-  /**
-   * Remove raw argument from the VM startup script created by the
-   * instrumentation agent.
-   *
-   * You should be cautious using this method, because you could remove
-   * arguments which are added not only from
-   * {@link VMManager#addRawArgument(String)} but also from other customized
-   * arguments set-up methods.
-   *
-   * @returns true in case the argument existed and was removed, false if the
-   *          argument wasn't found in the current arguments list
-   * @throws IAgentException
-   *           thrown if some error occurs during transport of the command to
-   *           the device, or during its execution
-   */
-  public boolean removeRawArgument(String aRawArgument) throws IAgentException;
-
-  /**
-   * Removes all settings done trough this class
-   *
-   * @throws IAgentException
-   *           thrown if some error occurs during transport of the command to
-   *           the device, or during its execution
-   */
-  public void resetArgs() throws IAgentException;
-
-  /**
-   * Starts the VM on the connected target device
-   *
-   * @throws IAgentException
-   *           thrown if some error occurs during transport of the command to
-   *           the device, or during its execution
-   */
-  public void startVM() throws IAgentException;
-
-  /**
-   * Stops the VM on the connected target device
-   *
-   * @throws IAgentException
-   *           thrown if some error occurs during transport of the command to
-   *           the device, or during its execution
-   */
-  public void stopVM() throws IAgentException;
-
-  /**
    * Returns whether the Instrumentation Agent device part is available on the
    * connected device.<br>
    * If this method returns false, the clients of the API can decice to call
@@ -154,6 +83,14 @@ public interface VMManager {
    * @throws IAgentException
    */
   public boolean isVMConnectable() throws IAgentException;
+
+  /**
+   * Returns whether the framework can be connected via PMP connection.
+   *
+   * @return true if pmp connection is available, false otherwise
+   * @throws IAgentException
+   */
+  public boolean isVMActive() throws IAgentException;
 
   /**
    * Instruments the remote device (installs/updates/activates the
@@ -185,5 +122,4 @@ public interface VMManager {
    * @throws IAgentException
    */
   public void setSystemProperty(String propertyName, String propertyValue) throws IAgentException;
-
 }

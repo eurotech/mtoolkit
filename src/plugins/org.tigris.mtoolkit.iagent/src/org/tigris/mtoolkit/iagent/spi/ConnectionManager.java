@@ -25,7 +25,6 @@ import org.tigris.mtoolkit.iagent.IAgentException;
  *
  */
 public interface ConnectionManager {
-  public static final int    MBSA_CONNECTION = 0x0;
   public static final int    PMP_CONNECTION  = 0x1;
 
   /**

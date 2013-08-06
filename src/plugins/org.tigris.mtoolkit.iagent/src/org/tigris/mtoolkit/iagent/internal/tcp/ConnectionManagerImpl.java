@@ -97,14 +97,9 @@ public final class ConnectionManagerImpl implements ConnectionManager {
       connection = (AbstractConnection) connections.get(key);
       if (connection == null) {
         fireEvent = true;
-        switch (type) {
-        case MBSA_CONNECTION:
-          connection = createMBSAConnection(transport);
-          break;
-        case PMP_CONNECTION:
+        if (type == PMP_CONNECTION) {
           connection = createPMPConnection(transport);
-          break;
-        default:
+        } else {
           ExtConnectionFactory factory = findFactoryForType(type);
           if (factory == null) {
             DebugUtils.info(this, "[createConnection] Unknown connection type passed: " + type);
@@ -250,12 +245,6 @@ public final class ConnectionManagerImpl implements ConnectionManager {
     synchronized (listeners) {
       listeners.clear();
     }
-  }
-
-  private MBSAConnectionImpl createMBSAConnection(Transport transport) throws IAgentException {
-    MBSAConnectionImpl connection = new MBSAConnectionImpl(transport, conProperties, this);
-    DebugUtils.debug(this, "[createMBSAConnection] Created connection: " + connection);
-    return connection;
   }
 
   private PMPConnectionImpl createPMPConnection(Transport transport) throws IAgentException {

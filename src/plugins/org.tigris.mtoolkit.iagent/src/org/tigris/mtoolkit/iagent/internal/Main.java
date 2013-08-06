@@ -40,16 +40,6 @@ public class Main {
 		String command = args[0];
 		String ip = args[1];
 		try {
-			if ("start".equals(command)) {
-				String[] vmArgs = new String[args.length - 2];
-				System.arraycopy(args, 2, vmArgs, 0, vmArgs.length);
-				startVM(ip, vmArgs);
-				return;
-			}
-			if ("stop".equals(command)) {
-				stopVM(ip);
-				return;
-			}
 			if ("status".equals(command)) {
 				statusVM(ip);
 				return;
@@ -78,16 +68,6 @@ public class Main {
 			} else {
 				System.out.println("Remote OSGi framework is not active.");
 			}
-		} finally {
-			connector.closeConnection();
-		}
-	}
-
-	private static void stopVM(String ip) throws IAgentException {
-		DeviceConnector connector = connectVM(ip);
-		try {
-			connector.getVMManager().stopVM();
-			System.out.println("Remote virtual machine successfully stopped.");
 		} finally {
 			connector.closeConnection();
 		}
@@ -127,25 +107,6 @@ public class Main {
 			return "UNINSTALLED";
 		}
 		return "UNKNOWN(" + state + ")";
-	}
-
-	private static void startVM(String ip, String[] vmArgs) throws IAgentException {
-		DeviceConnector connector = connectVM(ip);
-		try {
-			System.out.println("Warning: If the remote VM is already active, starting it again will not result in any additional action.");
-			connector.getVMManager().resetArgs();
-			System.out.print("Command line: ");
-			for (int i = 0; i < vmArgs.length; ++i) {
-				System.out.print(vmArgs[i]);
-				System.out.print(' ');
-				connector.getVMManager().addRawArgument(vmArgs[i]);
-			}
-			System.out.println();
-			connector.getVMManager().startVM();
-			System.out.print("Remote virtual machine successfully started.");
-		} finally {
-			connector.closeConnection();
-		}
 	}
 
 	private static DeviceConnector connectVM(String ip) throws IAgentException {

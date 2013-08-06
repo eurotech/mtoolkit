@@ -42,8 +42,6 @@ class PMPOutputStream extends OutputStream {
 
 	protected boolean ping = false;
 
-	protected long time = System.currentTimeMillis();
-
 	public PMPOutputStream(OutputStream os, PMPSessionThread c) {
 		this.os = os;
 		this.c = c;
@@ -91,8 +89,9 @@ class PMPOutputStream extends OutputStream {
 			} else {
 				writeShort((short) toWrite, buffer, position);
 				position += (toWrite + 2);
-				if (position == buffer.length)
-					flush(false);
+				if (position == buffer.length) {
+          flush(false);
+        }
 			}
 		}
 	}
@@ -110,8 +109,9 @@ class PMPOutputStream extends OutputStream {
 
 	/** writes a message in the underlying OutputStream */
 	private void flush(boolean last) throws IOException {
-		if (closed)
-			throw new IOException("Disconnected");
+		if (closed) {
+      throw new IOException("Disconnected");
+    }
 		if (last) {
 			buffer[dataOffset - 1] = (byte) 1;
 			writeBuffer();
@@ -140,8 +140,9 @@ class PMPOutputStream extends OutputStream {
 			// InterruptedException
 			waiting--;
 		}
-		if (closed)
-			return;
+		if (closed) {
+      return;
+    }
 		this.msgID = msgID;
 		locked = true;
 		position = dataOffset;
@@ -149,8 +150,9 @@ class PMPOutputStream extends OutputStream {
 	}
 
 	protected synchronized short begin(PMPAnswer answer) {
-		if (closed)
-			return -1;
+		if (closed) {
+      return -1;
+    }
 		while (locked) {
 			waiting++;
 			try {
@@ -159,12 +161,14 @@ class PMPOutputStream extends OutputStream {
 			}
 			waiting--;
 		}
-		if (closed)
-			return -1;
+		if (closed) {
+      return -1;
+    }
 		locked = true;
 
-		if (++clientMsgID <= 0)
-			clientMsgID = 1;
+		if (++clientMsgID <= 0) {
+      clientMsgID = 1;
+    }
 		msgID = clientMsgID;
 		try {
 			writeShort(msgID, buffer, 0);
@@ -187,8 +191,9 @@ class PMPOutputStream extends OutputStream {
 			unlock();
 		}
 		if (checkClosed && closed) {
-			if (ioExc == null)
-				ioExc = new IOException("Disconnected");
+			if (ioExc == null) {
+        ioExc = new IOException("Disconnected");
+      }
 			throw ioExc;
 		}
 	}
@@ -224,8 +229,9 @@ class PMPOutputStream extends OutputStream {
 	}
 
 	protected void checkWaitStatus(String msg) {
-		if (ping)
-			c.disconnect(msg, false);
+		if (ping) {
+      c.disconnect(msg, false);
+    }
 		synchronized (answers) {
 			for (Iterator it = answers.values().iterator(); it.hasNext();) {
 				PMPAnswer answer = (PMPAnswer) it.next();

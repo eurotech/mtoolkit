@@ -35,10 +35,6 @@ public class ThreadUtils {
   private ThreadUtils() {
   }
 
-  public static Thread createThread(Runnable runnable) {
-    return createThread(runnable, getThreadsStackSize());
-  }
-
   public static Thread createThread(Runnable runnable, String name) {
     Thread thread = createThread(runnable, getThreadsStackSize());
     thread.setName(name);

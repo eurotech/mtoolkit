@@ -155,23 +155,7 @@ public class DeviceConnectorImpl extends DeviceConnector implements EventListene
           }
         }
       }
-
       checkCancel(monitor);
-
-      // Trying compatible controller connection
-      if (ENABLE_COMPATIBILITY) {
-        try {
-          debug("[connect] Trying to connect to device which support MBSA");
-          connect0(ConnectionManager.MBSA_CONNECTION, monitor);
-          return;
-        } catch (IAgentException e) {
-          debug("[connect] Failed: " + e);
-          errCause.append("\n >>> Trying connection of type MBSA (compatible) ... failed: " + e);
-        }
-      }
-
-      checkCancel(monitor);
-
       if (errCause.length() == 0) {
         return;
       }
