@@ -31,11 +31,6 @@ import org.tigris.mtoolkit.iagent.transport.TransportsHub;
  */
 public abstract class DeviceConnector {
   /**
-   * Specifies TCP connection type to the target OSGi framework
-   */
-  public static final int    TYPE_TCP       = 0;
-
-  /**
    * Specifies the key for the host needed to establish client connection to
    * target OSGi framework. The value attached with this key in the connection
    * properties table must be a String object.

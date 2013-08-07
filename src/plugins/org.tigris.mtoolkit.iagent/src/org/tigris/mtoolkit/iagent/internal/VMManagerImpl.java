@@ -15,7 +15,6 @@ import java.io.OutputStream;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.VMManager;
-import org.tigris.mtoolkit.iagent.instrumentation.Instrument;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
@@ -23,7 +22,6 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
-import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public final class VMManagerImpl implements VMManager, ConnectionListener {
   private static final MethodSignature REGISTER_METHOD     = new MethodSignature("registerOutput", new String[] {
@@ -43,7 +41,6 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
 
   private DeviceConnectorImpl          connector;
   private OutputStream                 lastRegisteredOutput;
-  private LightServiceRegistry         extensionsRegistry;
 
   /**
    * Creates new runtime commands with specified transport
@@ -143,45 +140,6 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#instrumentVM()
-   */
-  public void instrumentVM() throws IAgentException {
-    Object[] extensions = getExtensionsRegistry().getAll(Instrument.class.getName());
-    for (int i = 0; i < extensions.length; i++) {
-      if (extensions[i] instanceof Instrument) {
-        if (((Instrument) extensions[i]).instrumentVM(connector)) {
-          // properly instrumented, stop now
-          return;
-        }
-      }
-    }
-    throw new IAgentException("Failed to instrument remote framework", IAgentErrors.ERROR_INSTRUMENT_ERROR);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#isVMInstrumented(boolean)
-   */
-  public boolean isVMInstrumented(boolean refresh) throws IAgentException {
-    PMPConnection connection = null;
-    try {
-      connection = getPMPConnection();
-      connection.getRemoteBundleAdmin();
-      connection.getRemoteServiceAdmin();
-    } catch (Exception e) {
-      return false;
-    }
-    Object[] extensions = getExtensionsRegistry().getAll(Instrument.class.getName());
-    for (int i = 0; i < extensions.length; i++) {
-      if (extensions[i] instanceof Instrument) {
-        if (!((Instrument) extensions[i]).isVMInstrumented(connector)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.VMManager#getSystemProperty(java.lang.String)
    */
   public String getSystemProperty(String propertyName) throws IAgentException {
@@ -197,13 +155,6 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     SET_SYSTEM_PROPERTY.call(getPMPConnection().getRemoteBundleAdmin(), new Object[] {
         propertyName, propertyValue
     });
-  }
-
-  private LightServiceRegistry getExtensionsRegistry() {
-    if (extensionsRegistry == null) {
-      extensionsRegistry = new LightServiceRegistry(VMManagerImpl.class.getClassLoader());
-    }
-    return extensionsRegistry;
   }
 
   private PMPConnection getPMPConnection() throws IAgentException {

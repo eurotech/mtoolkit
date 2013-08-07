@@ -57,25 +57,6 @@ public interface VMManager {
    * @throws IAgentException
    */
   public int getFrameworkStartLevel() throws IAgentException;
-
-  /**
-   * Returns whether the Instrumentation Agent device part is available on the
-   * connected device.<br>
-   * If this method returns false, the clients of the API can decice to call
-   * {@link #instrumentVM()} in order to prepare the connected device for
-   * further operations.
-   *
-   * @param refresh
-   *          True indicates that the method should not rely on the cached state
-   *          and inquery the device directly. False indicates that the method
-   *          can return the cached state.
-   * @return whether the remote device is properly instrumented (Instrumentation
-   *         Agent device part is correctly installed and running)
-   * @throws IAgentException
-   * @see {@link #instrumentVM()}
-   */
-  public boolean isVMInstrumented(boolean refresh) throws IAgentException;
-
   /**
    * Returns whether the framework can be connected via PMP connection.
    *
@@ -91,14 +72,6 @@ public interface VMManager {
    * @throws IAgentException
    */
   public boolean isVMActive() throws IAgentException;
-
-  /**
-   * Instruments the remote device (installs/updates/activates the
-   * Instrumentation Agent device part)
-   *
-   * @throws IAgentException
-   */
-  public void instrumentVM() throws IAgentException;
 
   /**
    * Returns value of system property argument on remote device VM specified by

@@ -5,10 +5,8 @@ Bundle-Name: mToolkit Instrumentation Agent Bundle
 Bundle-Version: 4.1.1.qualifier
 Bundle-Vendor: Tigris.org
 Bundle-Description: Provides Instrumentation Agent API and implementation
-Bundle-Activator: org.tigris.mtoolkit.iagent.Activator
 Export-Package: org.tigris.mtoolkit.iagent;version="2.0.0",
  org.tigris.mtoolkit.iagent.event;version="2.0.0",
- org.tigris.mtoolkit.iagent.instrumentation;version="1.0.0",
  org.tigris.mtoolkit.iagent.internal;version="2.0.0";x-internal:=true,
  org.tigris.mtoolkit.iagent.internal.tcp;version="2.0.0";x-internal:=true,
  org.tigris.mtoolkit.iagent.spi;version="1.0.0"

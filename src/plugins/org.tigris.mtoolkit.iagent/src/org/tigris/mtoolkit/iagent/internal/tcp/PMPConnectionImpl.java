@@ -27,17 +27,9 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
-import org.tigris.mtoolkit.iagent.spi.PMPConnector;
 import org.tigris.mtoolkit.iagent.transport.Transport;
-import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public final class PMPConnectionImpl implements PMPConnection, EventListener {
-  /**
-   * Enables backward compatibility with the old socket protocol
-   */
-  private static final boolean                         ENABLE_COMPATIBILITY         = Boolean
-                                                                                        .getBoolean("iagent.compatibility.enable");
-
   private static MethodSignature                       RELEASE_METHOD               = new MethodSignature(
                                                                                         "releaseConsole",
                                                                                         MethodSignature.NO_ARGS, true);
@@ -51,8 +43,6 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
   private HashMap                                      remoteObjects                = new HashMap(5);
   private RemoteObject                                 administration;
   private RemoteObject                                 remoteParserService;
-
-  private LightServiceRegistry                         pmpRegistry;
   private volatile boolean                             closed                       = false;
 
   public PMPConnectionImpl(Transport transport, Dictionary conProperties, ConnectionManagerImpl connManager) throws IAgentException {
@@ -75,20 +65,8 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
       DebugUtils.debug(this, "[Constructor] Transport: " + transport);
       pmpConnection = pmpService.connect(transport, conProperties);
     } catch (PMPException e) {
-      DebugUtils.info(this, "[Constructor] Failed to create PMP connection 1", e);
-      if (ENABLE_COMPATIBILITY && "socket".equals(transport.getType().getTypeId())) {
-        // if we are using old socket protocol, try to create
-        // backward compatible connection
-        try {
-          pmpConnection = createClosedConnection(transport.getId());
-        } catch (PMPException e2) {
-          DebugUtils.info(this, "[Constructor] Failed to create PMP connection 2", e2);
-          throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e2);
-        }
-      }
-      if (pmpConnection == null) {
-        throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e);
-      }
+      DebugUtils.error(this, "[Constructor] Failed to create PMP connection 1", e);
+      throw new IAgentException("Unable to connect to the framework", IAgentErrors.ERROR_CANNOT_CONNECT, e);
     }
     this.connManager = connManager;
     pmpConnection.addEventListener(this, new String[] {
@@ -320,11 +298,6 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
     }
   }
 
-  public Object getManager(String className) {
-    LightServiceRegistry registry = getServiceRegistry();
-    return registry.get(className);
-  }
-
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.spi.AbstractConnection#getProperty(java.lang.String)
    */
@@ -334,26 +307,6 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
 
   private Integer getPmpPort(ConnectionManager manager) throws IAgentException {
     return (Integer) manager.queryProperty(ConnectionManager.PROP_PMP_PORT);
-  }
-
-  private LightServiceRegistry getServiceRegistry() {
-    if (pmpRegistry == null) {
-      pmpRegistry = new LightServiceRegistry(PMPConnectionImpl.class.getClassLoader());
-    }
-    return pmpRegistry;
-  }
-
-  private org.tigris.mtoolkit.iagent.pmp.PMPConnection createClosedConnection(String targetIP) throws PMPException {
-    org.tigris.mtoolkit.iagent.pmp.PMPConnection connection = null;
-    if (targetIP == null) {
-      throw new IllegalArgumentException(
-          "Connection properties hashtable does not contain device IP value with key DeviceConnector.KEY_DEVICE_IP!");
-    }
-    PMPConnector connectionMngr = (PMPConnector) getManager("org.tigris.mtoolkit.iagent.spi.PMPConnector");
-    if (connectionMngr != null) {
-      connection = connectionMngr.createPMPConnection(targetIP);
-    }
-    return connection;
   }
 
   private void resetRemoteReferences() {
