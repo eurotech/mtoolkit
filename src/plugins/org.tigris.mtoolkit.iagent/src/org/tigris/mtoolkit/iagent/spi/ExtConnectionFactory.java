@@ -23,12 +23,19 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
  */
 public interface ExtConnectionFactory {
   /**
+   * Returns true if connection factory is supported for your platform
+   *
+   * @return
+   */
+  public boolean isSupported();
+
+  /**
    * Returns true if connections, created by this factory can be used to connect
    * to controller.
    *
    * @return
    */
-  public boolean isControllerType();
+  public boolean isControllerType(DeviceConnectorSpi connector) throws IAgentException;
 
   /**
    * Returns the type of connections this factory creates.

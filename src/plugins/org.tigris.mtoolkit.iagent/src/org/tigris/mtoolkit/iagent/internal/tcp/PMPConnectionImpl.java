@@ -18,7 +18,6 @@ import java.util.Iterator;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
@@ -33,6 +32,12 @@ import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public final class PMPConnectionImpl implements PMPConnection, EventListener {
+  /**
+   * Enables backward compatibility with the old socket protocol
+   */
+  private static final boolean                         ENABLE_COMPATIBILITY         = Boolean
+                                                                                        .getBoolean("iagent.compatibility.enable");
+
   private static MethodSignature                       RELEASE_METHOD               = new MethodSignature(
                                                                                         "releaseConsole",
                                                                                         MethodSignature.NO_ARGS, true);
@@ -71,7 +76,7 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
       pmpConnection = pmpService.connect(transport, conProperties);
     } catch (PMPException e) {
       DebugUtils.info(this, "[Constructor] Failed to create PMP connection 1", e);
-      if (DeviceConnectorImpl.ENABLE_COMPATIBILITY && "socket".equals(transport.getType().getTypeId())) {
+      if (ENABLE_COMPATIBILITY && "socket".equals(transport.getType().getTypeId())) {
         // if we are using old socket protocol, try to create
         // backward compatible connection
         try {

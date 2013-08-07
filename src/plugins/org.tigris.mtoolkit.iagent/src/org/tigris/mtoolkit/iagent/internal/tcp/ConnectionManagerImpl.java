@@ -33,9 +33,9 @@ import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 public final class ConnectionManagerImpl implements ConnectionManager {
   protected Dictionary conProperties;
   protected Transport  transport;
-  private List         listeners    = new LinkedList();
-  private List         extFactories = new LinkedList();
-  private Map          connections  = new Hashtable();
+  private final List   listeners    = new LinkedList();
+  private final List   extFactories = new LinkedList();
+  private final Map    connections  = new Hashtable();
 
   public ConnectionManagerImpl(Transport transport, Dictionary aConProperties) {
     this.transport = transport;
@@ -181,6 +181,9 @@ public final class ConnectionManagerImpl implements ConnectionManager {
    *
    * @param connection
    */
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.ConnectionManager#connectionClosed(org.tigris.mtoolkit.iagent.spi.AbstractConnection, boolean)
+   */
   public void connectionClosed(AbstractConnection connection, boolean notify) {
     DebugUtils.debug(this, "[connectionClosed] >>> connection: " + connection);
     boolean sendEvent = false;
@@ -224,20 +227,10 @@ public final class ConnectionManagerImpl implements ConnectionManager {
    *
    * @return array of types or empty array
    */
-  public int[] getExtControllerConnectionTypes() {
-    List types = new ArrayList();
-    for (Iterator it = extFactories.iterator(); it.hasNext();) {
-      ExtConnectionFactory factory = (ExtConnectionFactory) it.next();
-      if (factory.isControllerType()) {
-        types.add(new Integer(factory.getConnectionType()));
-      }
+  public ExtConnectionFactory[] getExtConnectionFactories() {
+    synchronized (extFactories) {
+      return (ExtConnectionFactory[]) extFactories.toArray(new ExtConnectionFactory[extFactories.size()]);
     }
-    int[] result = new int[types.size()];
-    int i = 0;
-    for (Iterator it = types.iterator(); it.hasNext();) {
-      result[i++] = ((Integer) it.next()).intValue();
-    }
-    return result;
   }
 
   public void removeListeners() {
