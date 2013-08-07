@@ -14,8 +14,8 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteService;
-import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 
 public final class RemoteServiceTest extends ServiceManagerTestCase {
@@ -94,7 +94,7 @@ public final class RemoteServiceTest extends ServiceManagerTestCase {
     PMPConnection pmpConnection = (PMPConnection) connectorSpi.getConnectionManager().createConnection(
         ConnectionManager.PMP_CONNECTION);
     pmpConnection.closeConnection();
-    DeviceConnectorImpl connectorImpl = (DeviceConnectorImpl) connector;
+    DeviceConnectorSpi connectorImpl = (DeviceConnectorSpi) connector;
     ConnectionManager connectionManager = connectorImpl.getConnectionManager();
     connectionManager.createConnection(ConnectionManager.PMP_CONNECTION);
 

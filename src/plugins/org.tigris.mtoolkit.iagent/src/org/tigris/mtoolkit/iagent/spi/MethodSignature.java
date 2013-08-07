@@ -87,10 +87,6 @@ public final class MethodSignature {
     this.shouldSerialize = shouldSerialize;
   }
 
-  public MethodSignature(RemoteMethod rMethod) {
-    this(rMethod.getName(), rMethod.getArgTypes());
-  }
-
   /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */
