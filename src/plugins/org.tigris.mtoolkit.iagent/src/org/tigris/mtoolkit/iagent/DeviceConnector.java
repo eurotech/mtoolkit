@@ -13,11 +13,10 @@ package org.tigris.mtoolkit.iagent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
+import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.transport.Transport;
@@ -62,24 +61,9 @@ public abstract class DeviceConnector {
    */
   protected static final int CONNECTED      = 1 << 1;
 
-  private static List        listeners      = new ArrayList();
-
-  private static Map         factories;
+  private static final List  listeners      = new ArrayList();
 
   public final Object        lockObj        = new Object();
-
-  static {
-    factories = new HashMap();
-    try {
-      Class factoryClass = Class.forName("org.tigris.mtoolkit.iagent.internal.tcp.DeviceConnectionFactoryImpl");
-      DeviceConnectorFactory factory = (DeviceConnectorFactory) factoryClass.newInstance();
-      if (factory != null) {
-        factories.put(new Integer(factory.getConnectionType()), factory);
-      }
-    } catch (Throwable t) {
-      DebugUtils.error("DeviceConnector", "Failed to initialize device connector factories", t);
-    }
-  }
 
   /**
    * Provides DeviceConnector connected to specified remote OSGi framework over
@@ -101,8 +85,7 @@ public abstract class DeviceConnector {
    */
   public final static DeviceConnector openClientConnection(Transport transport, Dictionary aConProps,
       IAProgressMonitor monitor) throws IAgentException {
-    DeviceConnectorFactory factory = getConnectorFactory(transport);
-    DeviceConnector connector = factory.createClientConnection(transport, aConProps, monitor);
+    DeviceConnector connector = new DeviceConnectorImpl(transport, aConProps, monitor);
     fireConnectionEvent(CONNECTED, connector);
     return connector;
   }
@@ -123,18 +106,6 @@ public abstract class DeviceConnector {
     } catch (IOException e) {
       throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
     }
-  }
-
-  private static DeviceConnectorFactory getConnectorFactory(Transport transport) throws IAgentException {
-    int conType = DeviceConnector.TYPE_TCP;
-    // TODO: get proper connectionType for this transport
-    if (factories != null) {
-      DeviceConnectorFactory factory = (DeviceConnectorFactory) factories.get(new Integer(conType));
-      if (factory != null) {
-        return factory;
-      }
-    }
-    throw new IAgentException("No available factory for transport type: " + conType, IAgentErrors.ERROR_INTERNAL_ERROR);
   }
 
   /**
