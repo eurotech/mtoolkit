@@ -95,11 +95,6 @@ public class IAgentErrors {
   public static final int ERROR_INTERNAL_ERROR                   = -5008;
 
   /**
-   * Instrumentation of the remote OSGi framework failed.
-   */
-  public static final int ERROR_INSTRUMENT_ERROR                 = -5009;
-
-  /**
    * Code indicating that a required remote service is not available.
    */
   public static final int ERROR_REMOTE_ADMIN_NOT_AVAILABLE       = -5010;
