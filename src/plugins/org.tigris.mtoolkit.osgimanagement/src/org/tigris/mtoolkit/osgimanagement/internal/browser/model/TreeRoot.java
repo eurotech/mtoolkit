@@ -82,7 +82,7 @@ public final class TreeRoot extends Model {
    * @see org.tigris.mtoolkit.osgimanagement.model.Model#getListeners()
    */
   @Override
-  protected ArrayList getListeners() {
+  protected synchronized ArrayList getListeners() {
     synchronized (listeners) {
       ArrayList result = new ArrayList(listeners);
       return result;
@@ -93,7 +93,7 @@ public final class TreeRoot extends Model {
    * @see org.tigris.mtoolkit.osgimanagement.model.Model#select(org.tigris.mtoolkit.osgimanagement.model.Model)
    */
   @Override
-  protected boolean select(Model model) {
+  protected synchronized boolean select(Model model) {
     if (filter.length() == 0) {
       return true;
     }

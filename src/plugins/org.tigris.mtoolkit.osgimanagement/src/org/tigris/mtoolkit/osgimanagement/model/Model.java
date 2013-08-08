@@ -34,22 +34,20 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
   protected boolean           selected       = false;
   protected int               selectedChilds = 0;
 
-  private Set                 elementList    = Collections.synchronizedSet(new TreeSet());
+  private final Set           elementList    = Collections.synchronizedSet(new TreeSet());
 
-  private Model               master;
-  private Vector              slaves         = new Vector();
+  private final Model         master;
+  private final Vector        slaves         = new Vector();
 
   public Model(String name) {
     this.name = name;
+    this.master = null;
   }
 
   public Model(String name, Model master) {
-    this(name);
+    this.name = name;
+    this.master = master;
     if (master != null) {
-      this.master = master;
-      if (master.slaves == null) {
-        master.slaves = new Vector();
-      }
       master.slaves.addElement(this);
     }
   }
@@ -62,7 +60,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     return master;
   }
 
-  public void addElement(Model element) {
+  public synchronized void addElement(Model element) {
     if (element.getParent() != null) {
       throw new IllegalArgumentException(
           "Cannot change the parent of model object without removing it from the old one");
@@ -74,14 +72,13 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
 
     element.setParent(this);
 
-    filterRecursively(element);
-
     if (elementList.add(element)) {
+      filterRecursively(element);
       fireElementAdded(element);
     }
   }
 
-  public void removeElement(Model element) {
+  public synchronized void removeElement(Model element) {
     element.setParent(null);
     if (elementList.remove(element)) {
       fireChildSelected(-element.selectedChilds);
@@ -92,15 +89,14 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
   }
 
-  public Model[] getChildren() {
+  public synchronized Model[] getChildren() {
     return (Model[]) elementList.toArray(new Model[elementList.size()]);
   }
 
-  public Model[] getSelectedChildrenRecursively() {
+  public synchronized Model[] getSelectedChildrenRecursively() {
     List children = new ArrayList(selectedChilds);
-    synchronized (elementList) {
-      internalGetSelectedChildrenRecursively(children);
-    }
+    internalGetSelectedChildrenRecursively(children);
+
     return (Model[]) children.toArray(new Model[children.size()]);
   }
 
@@ -118,14 +114,14 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     return elementList.size();
   }
 
-  protected ArrayList getListeners() {
+  protected synchronized ArrayList getListeners() {
     if (parent == null) {
       return null;
     }
     return parent.getListeners();
   }
 
-  protected void fireElementAdded(Model target) {
+  protected synchronized void fireElementAdded(Model target) {
     ArrayList listeners = this.getListeners();
     if (listeners == null) {
       return;
@@ -139,7 +135,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
   }
 
-  protected void fireElementChanged(Model target) {
+  protected synchronized void fireElementChanged(Model target) {
     ArrayList listeners = this.getListeners();
     if (listeners == null) {
       return;
@@ -153,7 +149,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
   }
 
-  protected void fireElementRemoved(Model target) {
+  protected synchronized void fireElementRemoved(Model target) {
     ArrayList listeners = this.getListeners();
     if (listeners == null) {
       return;
@@ -168,7 +164,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
   }
 
   // When name of a element is changed at elementList node is removed and added with its new name.
-  public void setName(String name) {
+  public synchronized void setName(String name) {
     Model parent = this.getParent();
     if (parent != null && parent.elementList.remove(this)) {
       this.name = name;
@@ -177,7 +173,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     this.name = name;
   }
 
-  public String getName() {
+  public synchronized String getName() {
     return name;
   }
 
@@ -190,7 +186,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     return getName();
   }
 
-  public Model getParent() {
+  public synchronized Model getParent() {
     return parent;
   }
 
@@ -199,7 +195,7 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
    */
   @Override
   public String toString() {
-    return name;
+    return getName();
   }
 
   /* (non-Javadoc)
@@ -218,14 +214,14 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
 
     if (name.equalsIgnoreCase(NODE_NAME)) {
-      if (value.equalsIgnoreCase(this.name)) {
+      if (value.equalsIgnoreCase(getName())) {
         return true;
       }
     }
     return false;
   }
 
-  public void removeChildren() {
+  public synchronized void removeChildren() {
     if (getSize() < 1) {
       return;
     }
@@ -239,31 +235,31 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
   }
 
-  public boolean isVisible() {
+  public synchronized boolean isVisible() {
     return selected || (selectedChilds > 0);
   }
 
-  public boolean containSelectedChilds() {
+  public synchronized boolean containSelectedChilds() {
     return selectedChilds - (selected ? 1 : 0) > 0;
   }
 
-  protected boolean select(Model model) {
+  protected synchronized boolean select(Model model) {
     if (getParent() != null) {
       return getParent().select(model);
     }
     return false;
   }
 
-  public void filter() {
+  public synchronized void filter() {
     boolean selected = select(this);
     int selectedDelta;
-    synchronized (this) {
-      if (selected == this.selected) {
-        return;
-      }
-      this.selected = selected;
-      selectedDelta = selected ? 1 : -1;
+
+    if (selected == this.selected) {
+      return;
     }
+    this.selected = selected;
+    selectedDelta = selected ? 1 : -1;
+
     fireChildSelected(selectedDelta);
   }
 
@@ -284,17 +280,15 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     fireElementChanged(this);
   }
 
-  public int indexOf(Model child) {
+  public synchronized int indexOf(Model child) {
     int index = 0;
-    synchronized (elementList) {
-      Iterator iterator = elementList.iterator();
-      while (iterator.hasNext()) {
-        Model node = (Model) iterator.next();
-        if (node == child) {
-          return index;
-        }
-        index++;
+    Iterator iterator = elementList.iterator();
+    while (iterator.hasNext()) {
+      Model node = (Model) iterator.next();
+      if (node == child) {
+        return index;
       }
+      index++;
     }
     return -1;
   }
@@ -309,16 +303,14 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
     }
   }
 
-  private void fireChildSelected(int delta) {
-    synchronized (this) {
-      selectedChilds += delta;
-    }
-    if (getParent() != null) {
-      getParent().fireChildSelected(delta);
+  private synchronized void fireChildSelected(int delta) {
+    selectedChilds += delta;
+    if (parent != null) {
+      parent.fireChildSelected(delta);
     }
   }
 
-  private void setParent(Model parent) {
+  private synchronized void setParent(Model parent) {
     this.parent = parent;
   }
 
