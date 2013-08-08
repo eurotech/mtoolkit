@@ -97,6 +97,7 @@ public final class DebugUtils {
     initialized = false;
     if (log != null) {
       log.close();
+      log = null;
     }
   }
 
