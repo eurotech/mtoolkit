@@ -19,6 +19,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportsHub;
 
@@ -78,18 +79,33 @@ public abstract class DeviceConnector {
    * @throws IAgentException
    *           thrown if connection could not be established
    */
-  public final static DeviceConnector openClientConnection(Transport transport, Dictionary aConProps,
-      IAProgressMonitor monitor) throws IAgentException {
+  public final static DeviceConnector connect(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
+      throws IAgentException {
     DeviceConnector connector = new DeviceConnectorImpl(transport, aConProps, monitor);
     fireConnectionEvent(CONNECTED, connector);
     return connector;
   }
 
-  public final static DeviceConnector connect(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
-      throws IAgentException {
-    return openClientConnection(transport, aConProps, monitor);
-  }
-
+  /**
+   * Provides DeviceConnector connected to specified remote OSGi framework over
+   * client connection.
+   *
+   * @param transportType
+   *          specifies the transport type of this connection
+   * @param id
+   *          specifies the transport id of this connection
+   * @param aConProps
+   *          the properties needed to establish connection. At least it must
+   *          contain the host property. They must be mapped with specified keys
+   *          - {@link DeviceConnector#KEY_DEVICE_IP}. The value for the host
+   *          must be String.
+   * @param monitor
+   *          progress monitor. Can be null.
+   * @return DeviceConnector object which is connected to the specified remote
+   *         OSGi framework
+   * @throws IAgentException
+   *           thrown if connection could not be established
+   */
   public final static DeviceConnector connect(String transportType, String id, Dictionary aConProps,
       IAProgressMonitor monitor) throws IAgentException {
     try {
@@ -163,6 +179,60 @@ public abstract class DeviceConnector {
   public abstract boolean isActive();
 
   /**
+   * Returns the connection properties of the DeviceConnector. Result is
+   * returned immediately without blocking.
+   *
+   * @return properties, never null
+   */
+  public abstract Dictionary getProperties();
+
+  /**
+   * Returns the properties of the remote side of the DeviceConnector. This
+   * method could perform communication with the remote side and could block.
+   *
+   * @return remote properties, never null
+   * @throws IAgentException
+   *           in case of error
+   * @since 4.1
+   */
+  public abstract Dictionary getRemoteProperties() throws IAgentException;
+
+  /**
+   * Removes a listener from the listener list. This means that the listener
+   * won't be notified for remote device properties change events.
+   *
+   * @param listener
+   *          the listener to be removed
+   * @throws IAgentException
+   *           if the remote OSGi framework is already disconnected
+   */
+  public abstract void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException;
+
+  /**
+   * Add a listener which will be notified whenever a device property change
+   * event is generated on the remote site. Adding the same listener twice
+   * doesn't have any effect
+   *
+   * @param listener
+   *          the listener which will be notified for remote device properties
+   *          change events
+   * @throws IAgentException
+   */
+  public abstract void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException;
+
+  /**
+   * Provides {@link IAgentManager} associated with this device connector.
+   * {@link IAgentManager} object is created only one time (the first time this
+   * method is called). The returned object by this method will be one and the
+   * same during the whole life of this device connector.
+   *
+   * @return {@link IAgentManager} through which OSGi service registry can be
+   *         inspected
+   * @throws IAgentException
+   */
+  public abstract Object getManager(String className) throws IAgentException;
+
+  /**
    * Adds {@link DeviceConnectionListener}. The listener's
    * {@link DeviceConnectionListener#disconnected(DeviceConnector)} method will
    * be called when the connection this {@link DeviceConnector} is working over
@@ -219,49 +289,4 @@ public abstract class DeviceConnector {
       }
     }
   }
-
-  /**
-   * Returns the connection properties of the DeviceConnector. Result is
-   * returned immediately without blocking.
-   *
-   * @return properties, never null
-   */
-  public abstract Dictionary getProperties();
-
-  /**
-   * Returns the properties of the remote side of the DeviceConnector. This
-   * method could perform communication with the remote side and could block.
-   *
-   * @return remote properties, never null
-   * @throws IAgentException
-   *           in case of error
-   * @since 4.1
-   */
-  public abstract Dictionary getRemoteProperties() throws IAgentException;
-
-  /**
-   * Removes a listener from the listener list. This means that the listener
-   * won't be notified for remote device properties change events.
-   *
-   * @param listener
-   *          the listener to be removed
-   * @throws IAgentException
-   *           if the remote OSGi framework is already disconnected
-   */
-  public abstract void removeRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException;
-
-  /**
-   * Add a listener which will be notified whenever a device property change
-   * event is generated on the remote site. Adding the same listener twice
-   * doesn't have any effect
-   *
-   * @param listener
-   *          the listener which will be notified for remote device properties
-   *          change events
-   * @throws IAgentException
-   */
-  public abstract void addRemoteDevicePropertyListener(RemoteDevicePropertyListener listener) throws IAgentException;
-
-  public abstract Object getManager(String className) throws IAgentException;
-
 }
