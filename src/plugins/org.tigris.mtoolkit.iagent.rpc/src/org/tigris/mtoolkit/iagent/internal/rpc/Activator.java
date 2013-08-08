@@ -100,6 +100,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
     pmpServerReg.unregister();
     pmpServer.close();
     pmpServiceReg.unregister();
+    PMPServiceFactory.dispose();
 
     if (synchronizer != null) {
       synchronizer.stopDispatching();

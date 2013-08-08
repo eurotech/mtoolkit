@@ -12,11 +12,23 @@ package org.tigris.mtoolkit.iagent.pmp;
 
 import org.tigris.mtoolkit.iagent.internal.pmp.PMPServiceImpl;
 
-public class PMPServiceFactory {
+public final class PMPServiceFactory {
+  private static PMPService defaultInstance;
 
-	private static PMPService defaultInstance = new PMPServiceImpl();
+  private PMPServiceFactory() {
+  }
 
-	public static PMPService getDefault() {
-		return defaultInstance;
-	}
+  public static synchronized PMPService getDefault() {
+    if (defaultInstance == null) {
+      defaultInstance = new PMPServiceImpl();
+    }
+    return defaultInstance;
+  }
+
+  public static synchronized void dispose() {
+    if (defaultInstance != null) {
+      ((PMPServiceImpl) defaultInstance).destroy();
+    }
+    defaultInstance = null;
+  }
 }
