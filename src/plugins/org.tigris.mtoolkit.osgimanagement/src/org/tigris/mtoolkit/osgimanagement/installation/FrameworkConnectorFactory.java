@@ -152,7 +152,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
       }
     }
 
-    Object ip = connProps.get(DeviceConnector.KEY_DEVICE_IP);
+    Object ip = connProps.get(DeviceConnector.TRANSPORT_ID);
     String defaultFWName = Messages.new_framework_default_name + " (" + connProps.get(DeviceConnector.TRANSPORT_TYPE)
         + "=" + connProps.get(DeviceConnector.TRANSPORT_ID) + ")";
     if (identifier != null) {

@@ -32,18 +32,23 @@ import org.tigris.mtoolkit.iagent.transport.TransportsHub;
  */
 public abstract class DeviceConnector {
   /**
-   * Specifies the key for the host needed to establish client connection to
-   * target OSGi framework. The value attached with this key in the connection
-   * properties table must be a String object.
+   * Specifies the key for transport type used by
+   * {@link DeviceConnector#getProperties} method. The value attached with this
+   * key in the connection properties table must be a String object
    */
-  public static final String KEY_DEVICE_IP  = "framework-connection-ip";
-
   public static final String TRANSPORT_TYPE = "transport-type";
 
+  /**
+   * Specifies the key for transport id(such as IP address or host name) used by
+   * {@link DeviceConnector#getProperties} method. The value attached with this
+   * key in the connection properties table must be a String object
+   */
   public static final String TRANSPORT_ID   = "transport-id";
 
   /**
-   * @since 3.1
+   * Specifies the key for PMP port used by
+   * {@link DeviceConnector#getProperties} method. The value attached with this
+   * key in the connection properties table must be a Integer object
    */
   public static final String PROP_PMP_PORT  = ConnectionManager.PROP_PMP_PORT;
 
@@ -59,32 +64,11 @@ public abstract class DeviceConnector {
 
   private static final List  listeners      = new ArrayList();
 
-  public final Object        lockObj        = new Object();
-
   /**
-   * Provides DeviceConnector connected to specified remote OSGi framework over
-   * client connection.
-   *
-   * @param transport
-   *          specifies the transport of this connection
-   * @param aConProps
-   *          the properties needed to establish connection. At least it must
-   *          contain the host property. They must be mapped with specified keys
-   *          - {@link DeviceConnector#KEY_DEVICE_IP}. The value for the host
-   *          must be String.
-   * @param monitor
-   *          progress monitor. Can be null.
-   * @return DeviceConnector object which is connected to the specified remote
-   *         OSGi framework
-   * @throws IAgentException
-   *           thrown if connection could not be established
+   * Internal object used as synchronization root of the DeviceConnector. This
+   * object is not intended to be used by clients.
    */
-  public final static DeviceConnector connect(Transport transport, Dictionary aConProps, IAProgressMonitor monitor)
-      throws IAgentException {
-    DeviceConnector connector = new DeviceConnectorImpl(transport, aConProps, monitor);
-    fireConnectionEvent(CONNECTED, connector);
-    return connector;
-  }
+  public final Object        lockObj        = new Object();
 
   /**
    * Provides DeviceConnector connected to specified remote OSGi framework over
@@ -113,7 +97,9 @@ public abstract class DeviceConnector {
       if (transport == null) {
         throw new IAgentException("Unable to find compatible transport provider.", IAgentErrors.ERROR_CANNOT_CONNECT);
       }
-      return connect(transport, aConProps, monitor);
+      DeviceConnector connector = new DeviceConnectorImpl(transport, aConProps, monitor);
+      fireConnectionEvent(CONNECTED, connector);
+      return connector;
     } catch (IOException e) {
       throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
     }
