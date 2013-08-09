@@ -46,10 +46,6 @@ public final class FrameworkPlugin extends AbstractUIPlugin {
 
   private static FrameworkPlugin instance            = null;
 
-  public FrameworkPlugin() {
-    FrameworkPlugin.instance = this;
-  }
-
   /* (non-Javadoc)
    * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
    */

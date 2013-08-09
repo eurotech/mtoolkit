@@ -44,24 +44,23 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.images.ImageHolder;
 
 @SuppressWarnings("deprecation")
-public final class RemoteConsole extends IOConsole implements IConsole {
-  public static final String       P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected"; //$NON-NLS-1$
+public final class RemoteConsole extends IOConsole implements IConsole, DeviceConnectionListener {
+  public static final String             P_DISCONNECTED = "org.tigris.mtoolkit.console.internal.console.disconnected"; //$NON-NLS-1$
 
-  private final Date               timestamp      = new Date();
-  private final Listener           listener       = new Listener();
-  private final IProcess           process;
+  private final Date                     timestamp      = new Date();
+  private final IProcess                 process;
 
-  private volatile DeviceConnector connector;
-  private volatile ConsoleReader   reader;
+  private volatile DeviceConnector       connector;
+  private volatile ConsoleReader         reader;
   private volatile IOConsoleOutputStream output;
-  private String                   name;
+  private String                         name;
 
   public RemoteConsole(DeviceConnector dc, String name, String consoleType, IProcess iProcess, Object fwId) {
     super("", consoleType, ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED), true); //$NON-NLS-1$
     this.name = name;
     this.connector = dc;
     this.process = iProcess;
-    DeviceConnector.addDeviceConnectionListener(listener);
+    DeviceConnector.addDeviceConnectionListener(this);
     setAttribute("mtoolkit.console.connector", connector); //$NON-NLS-1$
     if (fwId != null) {
       setAttribute("mtoolkit.console.frameworkid", fwId); //$NON-NLS-1$
@@ -176,7 +175,7 @@ public final class RemoteConsole extends IOConsole implements IConsole {
   }
 
   public void disconnect() {
-    DeviceConnector.removeDeviceConnectionListener(listener);
+    DeviceConnector.removeDeviceConnectionListener(this);
 
     Display display = PlatformUI.getWorkbench().getDisplay();
     if (!display.isDisposed()) {
@@ -223,6 +222,21 @@ public final class RemoteConsole extends IOConsole implements IConsole {
     // executed
     // when the console is disposed. The console will be disposed when it is
     // removed.
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   */
+  public void connected(DeviceConnector connector) {
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   */
+  public void disconnected(DeviceConnector connector) {
+    if (connector != null && connector.equals(this.connector)) {
+      disconnect();
+    }
   }
 
   public boolean equalsName(String name) {
@@ -272,24 +286,6 @@ public final class RemoteConsole extends IOConsole implements IConsole {
         FrameworkPlugin.error(Messages.RemoteConsole_Console_Write_Failed, e1);
       }
       FrameworkPlugin.log(Util.handleIAgentException(e));
-    }
-  }
-
-  private class Listener implements DeviceConnectionListener {
-    /* (non-Javadoc)
-     * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
-     */
-    public void connected(DeviceConnector connector) {
-    }
-
-    /* (non-Javadoc)
-     * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
-     */
-    public void disconnected(DeviceConnector connector) {
-      final DeviceConnector connector1 = connector;
-      if (connector != null && connector.equals(connector1)) {
-        disconnect();
-      }
     }
   }
 }
