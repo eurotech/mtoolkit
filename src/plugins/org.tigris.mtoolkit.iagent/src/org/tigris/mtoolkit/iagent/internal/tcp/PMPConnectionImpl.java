@@ -41,7 +41,6 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
   private ConnectionManagerImpl                        connManager;
 
   private HashMap                                      remoteObjects                = new HashMap(5);
-  private RemoteObject                                 administration;
   private RemoteObject                                 remoteParserService;
   private volatile boolean                             closed                       = false;
 
@@ -331,15 +330,6 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
         DebugUtils.error(this, "[resetRemoteReferences] Failure during PMP connection cleanup", e);
       }
       remoteParserService = null;
-    }
-
-    if (administration != null) {
-      try {
-        administration.dispose();
-      } catch (PMPException e) {
-        DebugUtils.error(this, "[resetRemoteReferences] Failure during PMP connection cleanup", e);
-      }
-      administration = null;
     }
   }
 }
