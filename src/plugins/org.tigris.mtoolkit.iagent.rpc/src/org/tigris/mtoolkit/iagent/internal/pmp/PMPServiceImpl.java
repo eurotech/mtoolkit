@@ -19,13 +19,10 @@ import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
-  protected volatile boolean   running = false;
-
-  protected static ClassLoader loader;
+  protected volatile boolean running = false;
 
   public PMPServiceImpl() {
     numSessions = 0;
-    loader = getClass().getClassLoader();
     running = true;
   }
 

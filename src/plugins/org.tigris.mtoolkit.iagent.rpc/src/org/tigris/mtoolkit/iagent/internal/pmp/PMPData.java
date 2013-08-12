@@ -475,7 +475,7 @@ class PMPData extends ObjectInputStream {
         }
       }
       if (clazz == null) {
-        loader = PMPServiceImpl.loader;
+        loader = PMPData.class.getClassLoader();
         try {
           clazz = loader.loadClass(className);
         } catch (Throwable exc) {
@@ -548,7 +548,7 @@ class PMPData extends ObjectInputStream {
       }
     }
     if (clazz == null) {
-      loader = PMPServiceImpl.loader;
+      loader = PMPData.class.getClassLoader();
       try {
         clazz = loader.loadClass(className);
       } catch (Exception exc) {
