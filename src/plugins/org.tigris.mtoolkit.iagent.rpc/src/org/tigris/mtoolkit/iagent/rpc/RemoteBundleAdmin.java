@@ -48,6 +48,10 @@ public interface RemoteBundleAdmin extends RemoteServiceIDProvider {
 
   int getBundleState(long id);
 
+  Dictionary getSignerCertificates(long id);
+
+  boolean isSignerTrusted(long id);
+
   /**
    * Checks if the bundle is signed.
    *

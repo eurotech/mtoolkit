@@ -18,9 +18,9 @@ import java.util.Dictionary;
  * client to query some of the metadata associated with the bundle, check it
  * state and perform the standard operations - install, uninstall, start, stop
  * and resolve.
- * 
+ *
  * @author Danail Nachev
- * 
+ *
  */
 public interface RemoteBundle extends RemotePackage {
 	/**
@@ -59,7 +59,7 @@ public interface RemoteBundle extends RemotePackage {
 
 	/**
 	 * Returns the id of the underlying bundle
-	 * 
+	 *
 	 * @return the id of the bundle
 	 */
 	public long getBundleId();
@@ -67,7 +67,7 @@ public interface RemoteBundle extends RemotePackage {
 	/**
 	 * Returns the symbolic name of the underlying bundle or null if the bundle
 	 * doesn't follow R4 specification
-	 * 
+	 *
 	 * @return the symbolic name of the bundle
 	 * @throws IAgentException
 	 */
@@ -76,7 +76,7 @@ public interface RemoteBundle extends RemotePackage {
 	/**
 	 * Returns the version of the bundle found in the Bundle-Version header or
 	 * null if the header is missing.
-	 * 
+	 *
 	 * @return the Bundle-Version header value
 	 * @throws IAgentException
 	 */
@@ -86,12 +86,12 @@ public interface RemoteBundle extends RemotePackage {
 	 * Returns Manifest headers and corresponding values. If the underlying
 	 * bundle has been uninstalled its manifest may not be available. In this
 	 * case, the method will return null.<br>
-	 * 
+	 *
 	 * The header values will be localized according to the passed locale code.
 	 * If it is null, then the manifest will be returned localized to the
 	 * current remote locale. If the passed String is empty, then no
 	 * localization will be performed and the raw values will be returned.
-	 * 
+	 *
 	 * @param locale
 	 *            the locale code into which the values will be localized
 	 * @return Dictionary object containing the manifest headers and values of
@@ -107,7 +107,7 @@ public interface RemoteBundle extends RemotePackage {
 	 * <code>
 	 *    getHeaders(locale).get(headerName);
 	 * </code>
-	 * 
+	 *
 	 * @param headerName
 	 *            the name of the header to return
 	 * @param locale
@@ -117,9 +117,25 @@ public interface RemoteBundle extends RemotePackage {
 	 */
 	public String getHeader(String headerName, String locale) throws IAgentException;
 
+  /**
+   * Returns if the underlying bundle is signed the signer's certificates. If
+   * the underlying bundle is not signed the map will be empty.
+   *
+   * @return a map with signer's certificates of the remote bundle
+   * @throws IAgentException
+   */
+  public Dictionary getSignerCertificates() throws IAgentException;
+
+  /**
+   * Returns if the underlying bundle's signer is trusted.
+   *
+   * @return the signed trusted state of the remote bundle
+   * @throws IAgentException
+   */
+  public boolean isSignerTrusted() throws IAgentException;
 	/**
 	 * Returns if the underlying bundle is signed.
-	 * 
+	 *
 	 * @return the signed state of the remote bundle
 	 * @throws IAgentException
 	 */
@@ -127,7 +143,7 @@ public interface RemoteBundle extends RemotePackage {
 
 	/**
 	 * Returns the location of the bundle
-	 * 
+	 *
 	 * @return the location of the remote bundle
 	 * @throws IAgentException
 	 */
@@ -135,7 +151,7 @@ public interface RemoteBundle extends RemotePackage {
 
 	/**
 	 * Returns the state of the underlying bundle.
-	 * 
+	 *
 	 * @return the state of the remote bundle
 	 * @throws IAgentException
 	 */
@@ -145,7 +161,7 @@ public interface RemoteBundle extends RemotePackage {
 	 * Starts the bundle. The method will block until the bundle is in ACTIVE
 	 * state or an exception is thrown indicating that the bundle cannot be
 	 * started.
-	 * 
+	 *
 	 * @param flags
 	 *            options passed to the underlying framework. The supported
 	 *            options are framework implementation specific. Value "0" means
@@ -156,7 +172,7 @@ public interface RemoteBundle extends RemotePackage {
 
 	/**
 	 * Stops the bundle
-	 * 
+	 *
 	 * @param flags
 	 *            options passed to the underlying framework. The supported
 	 *            options are framework implementation specific. Value "0" means
@@ -168,7 +184,7 @@ public interface RemoteBundle extends RemotePackage {
 	/**
 	 * Update the bundle from the passed InputStream object. The method will
 	 * always close the stream even in case of failure.
-	 * 
+	 *
 	 * @param in
 	 * @throws IAgentException
 	 */
@@ -177,7 +193,7 @@ public interface RemoteBundle extends RemotePackage {
 	/**
 	 * Try to resolve the bundle. The method returns true if the bundle is in
 	 * resolved state. Returns false if the bundle cannot be resolved.
-	 * 
+	 *
 	 * @return true in case of successful resolving, false when the bundle
 	 *         cannot be resolved
 	 * @throws IAgentException
@@ -187,7 +203,7 @@ public interface RemoteBundle extends RemotePackage {
 	/**
 	 * Returns information for all services registered by this bundle. Returns
 	 * empty array if no services are registered.
-	 * 
+	 *
 	 * @return
 	 * @throws IAgentException
 	 */
@@ -197,7 +213,7 @@ public interface RemoteBundle extends RemotePackage {
 	 * Returns information for all services, which are used by this bundle.
 	 * Returns empty array if no services are known to be used. A service is
 	 * considered to be used, if its usage count is greater than zero.
-	 * 
+	 *
 	 * @return
 	 * @throws IAgentException
 	 */
@@ -209,10 +225,10 @@ public interface RemoteBundle extends RemotePackage {
 	 * <ul>
 	 * <li>{@link #BUNDLE_TYPE_FRAGMENT}</li>
 	 * </ul>
-	 * 
+	 *
 	 * If none of the above values is valid for this bundle, then result 0
 	 * (zero) will be returned
-	 * 
+	 *
 	 * @return
 	 * @throws IAgentException
 	 */
@@ -222,7 +238,7 @@ public interface RemoteBundle extends RemotePackage {
 	 * Returns RemoteBundle objects representing the fragments attached to this
 	 * bundle or null if the bundle has no attached fragments or it isn't
 	 * fragment
-	 * 
+	 *
 	 * @return
 	 * @throws IAgentException
 	 */
@@ -232,7 +248,7 @@ public interface RemoteBundle extends RemotePackage {
 	 * Returns RemoteBundle object in array, representing the host to which the
 	 * fragment is attached or null if the bundle is not a fragment. Currently,
 	 * a fragment can be attached to only one host.
-	 * 
+	 *
 	 * @return
 	 * @throws IAgentException
 	 */
@@ -244,7 +260,7 @@ public interface RemoteBundle extends RemotePackage {
 	 * The timestamp is a number, which can be used to track any changes to the
 	 * bundle. This number is changed, whenever the bundle is updated.
 	 * </p>
-	 * 
+	 *
 	 * @return the last modified timestamp of the bundle
 	 * @throws IAgentException
 	 */
@@ -252,7 +268,7 @@ public interface RemoteBundle extends RemotePackage {
 
 	/**
 	 * Returns the start level of the remote bundle.
-	 * 
+	 *
 	 * @return start level of the bundle
 	 * @throws IAgentException
 	 */
@@ -260,10 +276,10 @@ public interface RemoteBundle extends RemotePackage {
 
 	/**
 	 * Returns resource from the remote bundle.
-	 * 
+	 *
 	 * @param name
 	 *            the name of the resource
-	 * 
+	 *
 	 * @return InputStream for reading the resource or null if there is no such
 	 *         resource
 	 * @throws IAgentException

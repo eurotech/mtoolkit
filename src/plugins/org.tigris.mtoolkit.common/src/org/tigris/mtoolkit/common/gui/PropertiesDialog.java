@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.gui;
 
+import java.util.Dictionary;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TrayDialog;
 import org.eclipse.swt.SWT;
@@ -23,14 +25,14 @@ import org.eclipse.swt.widgets.Shell;
  * @since 5.0
  */
 public abstract class PropertiesDialog extends TrayDialog {
-	private PropertiesPage mainControl;
+  protected PropertiesPage mainControl;
 	private String title;
 	private String tableTitle;
-	
+
 	public PropertiesDialog(Shell shell, String title) {
 		this(shell, title, null);
 	}
-	
+
 	public PropertiesDialog(Shell shell, String title, String tableTitle) {
 		super(shell);
 		this.setShellStyle(SWT.CLOSE | SWT.TITLE | SWT.APPLICATION_MODAL | SWT.RESIZE);
@@ -53,6 +55,16 @@ public abstract class PropertiesDialog extends TrayDialog {
 	public PropertiesPage getMainControl() {
 		return mainControl;
 	}
+
+  protected void setMainControl(Composite container, PropertiesPage page, Dictionary data) {
+    page.setTitle(title);
+    if (tableTitle != null) {
+      page.setGroupName(tableTitle);
+    }
+    page.createContents(container);
+    page.setData(data);
+    mainControl = page;
+  }
 
 	protected PropertiesPage createMainControl(Composite container) {
 		PropertiesPage page = new PropertiesPage();

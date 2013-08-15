@@ -16,10 +16,12 @@ import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -841,5 +843,60 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 
   protected ServiceRegistration getServiceRegistration() {
     return registration;
+  }
+
+  /* (non-Javadoc)
+  * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getSignerCertificates(long)
+  */
+  public Dictionary getSignerCertificates(long id) {
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[getSignerCertificates] >>> id: " + id);
+    }
+    Bundle bundle = bc.getBundle(id);
+    if (bundle == null) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[getSignerCertificates] No such bundle");
+      }
+      return null;
+    }
+    Map signers = bundle.getSignerCertificates(Bundle.SIGNERS_ALL);
+    Dictionary extMap = new Hashtable();
+    Iterator keys = signers.keySet().iterator();
+    while (keys.hasNext()) {
+      X509Certificate cert = (X509Certificate) keys.next();
+      List chain = (List) signers.get(cert);
+      List chain_mod = new ArrayList(chain.size());
+      Iterator chainIterator = chain.iterator();
+      while (chainIterator.hasNext()) {
+        chain_mod.add(chainIterator.next());
+      }
+      extMap.put(cert, chain_mod);
+    }
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[getSignerCertificates] result: " + extMap.toString());
+    }
+    return extMap;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#isSignerTrusted(long)
+   */
+  public boolean isSignerTrusted(long id) {
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[isSignerTrusted] >>> id: " + id);
+    }
+    Bundle bundle = bc.getBundle(id);
+    if (bundle == null) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[isSignerTrusted] No such bundle");
+      }
+      return false;
+    }
+    Map ss = bundle.getSignerCertificates(Bundle.SIGNERS_TRUSTED);
+    boolean signed = !ss.isEmpty();
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[isSignerTrusted] result: " + signed);
+    }
+    return signed;
   }
 }

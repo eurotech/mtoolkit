@@ -46,7 +46,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 /**
  * @since 5.0
  */
-public final class PropertiesPage extends PropertyPage {
+public class PropertiesPage extends PropertyPage {
   /**
    * @since 6.0
    */
@@ -63,7 +63,7 @@ public final class PropertiesPage extends PropertyPage {
     return createPage(parent);
   }
 
-  private Control createPage(Composite parent) {
+  protected Control createPage(Composite parent) {
     Composite control = new Composite(parent, SWT.NONE);
     control.setLayout(new GridLayout());
     control.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -109,6 +109,8 @@ public final class PropertiesPage extends PropertyPage {
     viewer.setColumnProperties(new String[2]);
 
     gd.widthHint = 460 + tree.getBorderWidth() * 2;
+
+    gd.heightHint = 100;
 
     parent.getShell().setText(getTitle());
 

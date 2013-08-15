@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -19,7 +20,10 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -50,7 +54,7 @@ public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAc
   */
   @Override
   protected void execute(final Bundle bundle) {
-    final Dictionary[] headers = new Dictionary[1];
+    final Dictionary[] headers = new Dictionary[2];
     Job job = new Job("Retrieving bundle properties...") {
       /* (non-Javadoc)
        * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
@@ -60,6 +64,9 @@ public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAc
         try {
           RemoteBundle rBundle = bundle.getRemoteBundle();
           headers[0] = rBundle.getHeaders(null);
+          if (bundle.isSigned()) {
+            headers[1] = rBundle.getSignerCertificates();
+          }
         } catch (IAgentException e) {
           return Util.newStatus(IStatus.ERROR, "Failed to get bundle headers", e);
         }
@@ -93,17 +100,44 @@ public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAc
            */
           public void run() {
             Shell shell = PluginUtilities.getActiveWorkbenchShell();
-            PropertiesDialog propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
-              /* (non-Javadoc)
-               * @see org.tigris.mtoolkit.common.gui.PropertiesDialog#attachHelp(org.eclipse.swt.widgets.Composite)
-               */
-              @Override
-              protected void attachHelp(Composite container) {
-                PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_BUNDLE);
-              }
-            };
-            propertiesDialog.create();
-            propertiesDialog.getMainControl().setData(headers[0]);
+            PropertiesDialog propertiesDialog;
+            if (headers[1] == null) {
+              propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
+                /* (non-Javadoc)
+                 * @see org.tigris.mtoolkit.common.gui.PropertiesDialog#attachHelp(org.eclipse.swt.widgets.Composite)
+                 */
+                @Override
+                protected void attachHelp(Composite container) {
+                  PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_BUNDLE);
+                }
+              };
+              propertiesDialog.create();
+              propertiesDialog.getMainControl().setData(headers[0]);
+            } else {
+              propertiesDialog = new PropertiesDialog(shell, Messages.bundle_properties_title) {
+                @Override
+                protected void attachHelp(Composite container) {
+                  PlatformUI.getWorkbench().getHelpSystem().setHelp(container, IHelpContextIds.PROPERTY_BUNDLE);
+                }
+
+                @Override
+                public Control createDialogArea(Composite parent) {
+                  parent.setLayout(new GridLayout());
+                  GridData mGD = new GridData(GridData.FILL_BOTH);
+                  mGD.heightHint = 500;
+                  mGD.widthHint = 800;
+                  parent.setLayoutData(mGD);
+                  BundlePropertiesPage page = new BundlePropertiesPage();
+                  Dictionary props = new Hashtable(2);
+                  props.put(BundlePropertiesPage.HEADERS_KEY, headers[0]);
+                  props.put(BundlePropertiesPage.CERTIFICATES_KEY, headers[1]);
+                  setMainControl(parent, page, props);
+                  attachHelp(parent);
+                  return parent;
+                }
+              };
+              propertiesDialog.create();
+            }
             propertiesDialog.open();
           }
         });

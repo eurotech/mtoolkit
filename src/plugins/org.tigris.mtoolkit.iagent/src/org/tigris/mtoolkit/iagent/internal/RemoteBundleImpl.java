@@ -24,6 +24,10 @@ import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.Utils;
 
 public final class RemoteBundleImpl implements RemoteBundle {
+  private static MethodSignature GET_SIGNER_CERTIFICATES_METHOD  = new MethodSignature("getSignerCertificates",
+                                                                     MethodSignature.BID_ARGS, true);
+  private static MethodSignature IS_SIGNER_TRUSTED_METHOD        = new MethodSignature("isSignerTrusted",
+                                                                     MethodSignature.BID_ARGS, true);
   private static MethodSignature GET_BUNDLE_STATE_METHOD         = new MethodSignature("getBundleState",
                                                                      MethodSignature.BID_ARGS, true);
   private static MethodSignature GET_BUNDLE_LAST_MODIFIED_METHOD = new MethodSignature("getBundleLastModified",
@@ -560,5 +564,50 @@ public final class RemoteBundleImpl implements RemoteBundle {
 
   private RemoteObject getBundleAdmin() throws IAgentException {
     return commands.getBundleAdmin();
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.RemoteBundle#getSignerCertificates()
+   */
+  //public Dictionary getSignerCertificates() throws IAgentException {
+  public Dictionary getSignerCertificates() throws IAgentException {
+    DebugUtils.debug(this, "[getSignerCertificates] >>>");
+    checkBundleState();
+    RemoteObject admin = getBundleAdmin();
+    Dictionary signerCertificates = null;
+    if (Utils.isRemoteMethodDefined(admin, GET_SIGNER_CERTIFICATES_METHOD)) {
+      Object tmp = GET_SIGNER_CERTIFICATES_METHOD.call(admin, new Object[] {
+        id
+      });
+
+      System.out.println(tmp);
+      signerCertificates = (Dictionary) GET_SIGNER_CERTIFICATES_METHOD.call(admin, new Object[] {
+        id
+      });
+      DebugUtils.debug(this, "[getSignerCertificates] Bundle sertificates: " + signerCertificates);
+    } else {
+      DebugUtils.debug(this, "[method not found on iagent] >>>");
+    }
+    return signerCertificates;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.RemoteBundle#isSignerTrusted()
+   */
+  public boolean isSignerTrusted() throws IAgentException {
+    DebugUtils.debug(this, "[isSignerTrusted] >>>");
+    boolean isSignerTrusted = false;
+    checkBundleState();
+    RemoteObject admin = getBundleAdmin();
+    if (Utils.isRemoteMethodDefined(admin, IS_SIGNER_TRUSTED_METHOD)) {
+      Boolean isSignerTrustedResult = (Boolean) IS_SIGNER_TRUSTED_METHOD.call(admin, new Object[] {
+        id
+      });
+      isSignerTrusted = isSignerTrustedResult.booleanValue();
+      DebugUtils.debug(this, "[isSignerTrusted] Bundle signer trusted: " + isSignerTrusted);
+    } else {
+      DebugUtils.debug(this, "[method not found on iagent] >>>");
+    }
+    return isSignerTrusted;
   }
 }

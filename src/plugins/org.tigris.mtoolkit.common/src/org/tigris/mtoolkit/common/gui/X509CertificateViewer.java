@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -47,10 +48,22 @@ public final class X509CertificateViewer {
   private Label           md5FingerprintTxt;
 
   private X509Certificate certificate;
+  ScrolledComposite       scrolled;
 
   public X509CertificateViewer(Composite parent, int style) {
-    control = new Composite(parent, SWT.NONE);
+    scrolled = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
+
+    // always show the focus control
+    scrolled.setShowFocusedControl(true);
+    scrolled.setExpandHorizontal(true);
+    scrolled.setExpandVertical(true);
+
+    GridData scrolledData = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
+    scrolled.setLayoutData(scrolledData);
+
+    control = new Composite(scrolled, SWT.NONE);
     control.setLayout(new GridLayout(2, false));
+    control.setLayoutData(scrolledData);
 
     createSectionLabel("Issued To");
     issuedToCNTxt = createPanelEntry("Common Name (CN)");
@@ -67,10 +80,11 @@ public final class X509CertificateViewer {
     createSectionLabel("Fingerprints");
     sha1FingerprintTxt = createPanelEntry("SHA1 Fingerprint");
     md5FingerprintTxt = createPanelEntry("MD5 Fingerprint");
+    scrolled.setContent(control);
   }
 
   public Control getControl() {
-    return control;
+    return scrolled;
   }
 
   public void setCertificate(X509Certificate certificate) {
@@ -122,6 +136,8 @@ public final class X509CertificateViewer {
     } catch (CertificateEncodingException e) {
       sha1FingerprintTxt.setText(e.toString());
     }
+    control.pack();
+    scrolled.setMinSize(control.getSize());
   }
 
   private static byte[] digest(byte[] stream, String alg) {

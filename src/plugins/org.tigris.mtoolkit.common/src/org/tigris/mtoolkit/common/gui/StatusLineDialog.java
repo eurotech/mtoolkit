@@ -97,7 +97,7 @@ public class StatusLineDialog extends TrayDialog {
     layout.marginLeft = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
     layout.marginWidth = 0;
     composite.setLayout(layout);
-    composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
     statusLine = new StatusLine(composite, SWT.NONE);
     GridData statusData = new GridData(SWT.FILL, SWT.CENTER, true, false);
