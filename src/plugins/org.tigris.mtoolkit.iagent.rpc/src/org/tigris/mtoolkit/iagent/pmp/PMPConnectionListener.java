@@ -12,7 +12,7 @@
 package org.tigris.mtoolkit.iagent.pmp;
 
 /**
- * Listener used to receicve events whenever a remote Framework is connected or
+ * Listener used to receive events whenever a remote Framework is connected or
  * disconnected to this PMPService. Implementations of this class must be
  * registered {@link PMPService#addPMPConnListener
  * PMPService.addPMPConnListener} and unregistered
@@ -24,7 +24,7 @@ public interface PMPConnectionListener {
 	/**
 	 * Method fired from PMPService when a remote client is connected to the
 	 * PMPService.
-	 * 
+	 *
 	 * @param connection
 	 *            Connection to the remote Framework
 	 */
@@ -34,7 +34,7 @@ public interface PMPConnectionListener {
 	/**
 	 * Method fired from PMPService when a remote clientis disconnected from the
 	 * PMPService.
-	 * 
+	 *
 	 * @param connection
 	 *            the clients connection
 	 */
