@@ -21,19 +21,17 @@ import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 
-public final class EventSynchronizerImpl implements Runnable, EventSynchronizer {
+final class EventSynchronizerImpl implements Runnable, EventSynchronizer {
   private volatile boolean    running;
+
   private List                eventQueue = new LinkedList();
   private PMPServer           server;
   private ServiceRegistration registration;
-  private BundleContext       bc;
   private Thread              eventsThread;
 
   EventSynchronizerImpl(BundleContext bc) {
     eventsThread = ThreadUtils.createThread(this, "IAgent RPC Event Thread");
-    this.bc = bc;
     eventsThread.setDaemon(true);
-
     registration = bc.registerService(EventSynchronizer.class.getName(), this, null);
   }
 
@@ -107,26 +105,25 @@ public final class EventSynchronizerImpl implements Runnable, EventSynchronizer 
     }
   }
 
-  public void stopDispatching() {
-    synchronized (this) {
-      running = false;
-      notifyAll();
-    }
-    unregister(bc);
-  }
-
-  public void unregister(BundleContext bc) {
+  public void unregister() {
+    stopDispatching();
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[unregister] Unregistering EventSynchronizer...");
     }
-
     if (registration != null) {
       registration.unregister();
       registration = null;
     }
-    this.bc = null;
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[unregister] EventSynchronizer unregistered.");
     }
+  }
+
+  private void stopDispatching() {
+    synchronized (this) {
+      running = false;
+      notifyAll();
+    }
+    unregister();
   }
 }
