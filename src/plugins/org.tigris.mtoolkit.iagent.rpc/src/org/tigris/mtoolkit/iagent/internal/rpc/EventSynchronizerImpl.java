@@ -106,7 +106,10 @@ final class EventSynchronizerImpl implements Runnable, EventSynchronizer {
   }
 
   public void unregister() {
-    stopDispatching();
+    synchronized (this) {
+      running = false;
+      notifyAll();
+    }
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[unregister] Unregistering EventSynchronizer...");
     }
@@ -117,13 +120,5 @@ final class EventSynchronizerImpl implements Runnable, EventSynchronizer {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[unregister] EventSynchronizer unregistered.");
     }
-  }
-
-  private void stopDispatching() {
-    synchronized (this) {
-      running = false;
-      notifyAll();
-    }
-    unregister();
   }
 }
