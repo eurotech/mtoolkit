@@ -263,9 +263,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       if (!itemsToInstall.isEmpty()) {
         List<RemoteBundle> bundlesToStart = new ArrayList<RemoteBundle>();
         subMonitor.setWorkRemaining(10);
-        int size = itemsToInstall.size();
         SubMonitor installBundleProgress = SubMonitor.convert(subMonitor.newChild(5), 100);
-        int worked = 100 / size;
+        int worked = 100 / itemsToInstall.size();
         for (InstallationItem item : itemsToInstall) {
           try {
             installBundleProgress.setTaskName(NLS.bind(Messages.install_bundle_operation_title, item.getName()));
@@ -284,16 +283,17 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         }
         if (startBundles) {
           subMonitor.setWorkRemaining(5);
-          size = bundlesToStart.size();
           SubMonitor startBundleProgress = SubMonitor.convert(subMonitor.newChild(5), 100);
-          worked = 100 / size;
-          for (RemoteBundle bundle : bundlesToStart) {
-            if (bundle != null) {
-              try {
-                subMonitor.setTaskName(NLS.bind(Messages.start_bundle_operation_title, bundle.getSymbolicName()));
-                startBundle(bundle, startBundleProgress.newChild(worked));
-              } catch (Exception e) {
-                FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
+          if (!bundlesToStart.isEmpty()) {
+            worked = 100 / bundlesToStart.size();
+            for (RemoteBundle bundle : bundlesToStart) {
+              if (bundle != null) {
+                try {
+                  subMonitor.setTaskName(NLS.bind(Messages.start_bundle_operation_title, bundle.getSymbolicName()));
+                  startBundle(bundle, startBundleProgress.newChild(worked));
+                } catch (Exception e) {
+                  FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
+                }
               }
             }
           }
