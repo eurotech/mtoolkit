@@ -28,7 +28,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -40,7 +39,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.gui.X509CertificateViewer;
 
-public class CertificatesGroup {
+public final class CertificatesGroup {
   private static int style = SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL | SWT.H_SCROLL | SWT.V_SCROLL | SWT.Expand;
 
   public class CertificateChainElement {
@@ -68,10 +67,9 @@ public class CertificatesGroup {
   }
 
   public class CertLabelProvider extends LabelProvider {
-    public Image getColumnImage(Object element) {
-      return null;
-    }
-
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
+     */
     @Override
     public String getText(Object element) {
       X509Certificate dataElement;
@@ -111,86 +109,104 @@ public class CertificatesGroup {
     }
   }
 
-  public ITreeContentProvider cpCertificatesGroup = new ITreeContentProvider() {
-                                                    public Object[] getElements(Object inputElement) {
-                                                      if (inputElement instanceof Dictionary) {
-                                                        Object[] children = getData((Dictionary) inputElement);
-                                                        return children;
+  public ITreeContentProvider   cpCertificatesGroup = new ITreeContentProvider() {
+                                                      /* (non-Javadoc)
+                                                       * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
+                                                       */
+                                                      public Object[] getElements(Object inputElement) {
+                                                        if (inputElement instanceof Dictionary) {
+                                                          Object[] children = getData((Dictionary) inputElement);
+                                                          return children;
+                                                        }
+                                                        if (inputElement instanceof CertificateChainElement) {
+                                                          return ((CertificateChainElement) inputElement).getChildren();
+                                                        }
+                                                        return new Object[0];
                                                       }
-                                                      if (inputElement instanceof CertificateChainElement) {
-                                                        return ((CertificateChainElement) inputElement).getChildren();
-                                                      }
-                                                      return new Object[0];
-                                                    }
 
-                                                    public void dispose() {
-                                                    }
-
-                                                    public void inputChanged(Viewer viewer, Object oldInput,
-                                                        Object newInput) {
-                                                    }
-
-                                                    public Object[] getChildren(Object parentElement) {
-                                                      if (parentElement instanceof Dictionary) {
-                                                        Object[] children = getData((Dictionary) parentElement);
-                                                        return children;
+                                                      /* (non-Javadoc)
+                                                       * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+                                                       */
+                                                      public void dispose() {
                                                       }
-                                                      if (parentElement instanceof CertificateChainElement) {
-                                                        Object[] children = ((CertificateChainElement) parentElement)
-                                                            .getChildren();
-                                                        return children;
-                                                      }
-                                                      return new Object[0];
-                                                    }
 
-                                                    public Object getParent(Object element) {
-                                                      if (element instanceof CertificateChainElement) {
-                                                        return ((CertificateChainElement) element).getParent();
+                                                      /* (non-Javadoc)
+                                                       * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+                                                       */
+                                                      public void inputChanged(Viewer viewer, Object oldInput,
+                                                          Object newInput) {
                                                       }
-                                                      return null;
-                                                    }
 
-                                                    public boolean hasChildren(Object element) {
-                                                      if (element instanceof Dictionary) {
-                                                        return true;
+                                                      /* (non-Javadoc)
+                                                       * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
+                                                       */
+                                                      public Object[] getChildren(Object parentElement) {
+                                                        if (parentElement instanceof Dictionary) {
+                                                          Object[] children = getData((Dictionary) parentElement);
+                                                          return children;
+                                                        }
+                                                        if (parentElement instanceof CertificateChainElement) {
+                                                          Object[] children = ((CertificateChainElement) parentElement)
+                                                              .getChildren();
+                                                          return children;
+                                                        }
+                                                        return new Object[0];
                                                       }
-                                                      if (element instanceof CertificateChainElement
-                                                          && ((CertificateChainElement) element).getChildren().length > 1) {
-                                                        return true;
-                                                      }
-                                                      return false;
-                                                    }
 
-                                                    private Object[] getData(Dictionary data) {
-                                                      Vector dataVector = new Vector();
-                                                      Enumeration keys = data.keys();
-                                                      while (keys.hasMoreElements()) {
-                                                        X509Certificate parent = (X509Certificate) keys.nextElement();
-                                                        List children = (List) data.get(parent);
-                                                        dataVector.addAll(getElements(parent, children));
+                                                      /* (non-Javadoc)
+                                                       * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
+                                                       */
+                                                      public Object getParent(Object element) {
+                                                        if (element instanceof CertificateChainElement) {
+                                                          return ((CertificateChainElement) element).getParent();
+                                                        }
+                                                        return null;
                                                       }
-                                                      return dataVector.toArray();
-                                                    }
 
-                                                    private Vector getElements(X509Certificate parent, List children) {
-                                                      Vector elements = new Vector<CertificateChainElement>();
-                                                      Iterator i = children.iterator();
-                                                      while (i.hasNext()) {
-                                                        X509Certificate element = (X509Certificate) i.next();
-                                                        X509Certificate[] elementChildren = new X509Certificate[1];
-                                                        elementChildren[0] = element;
-                                                        CertificateChainElement chainElement = new CertificateChainElement(
-                                                            parent, elementChildren);
-                                                        elements.add(chainElement);
+                                                      /* (non-Javadoc)
+                                                       * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
+                                                       */
+                                                      public boolean hasChildren(Object element) {
+                                                        if (element instanceof Dictionary) {
+                                                          return true;
+                                                        }
+                                                        if (element instanceof CertificateChainElement
+                                                            && ((CertificateChainElement) element).getChildren().length > 1) {
+                                                          return true;
+                                                        }
+                                                        return false;
                                                       }
-                                                      return elements;
-                                                    }
-                                                  };
 
-  private Group               signContentGroup;
-  private Tree                treeCertificates;
-  private TreeViewer          certificatesViewer;
-  private Composite           certificateDetails;
+                                                      private Object[] getData(Dictionary data) {
+                                                        Vector dataVector = new Vector();
+                                                        Enumeration keys = data.keys();
+                                                        while (keys.hasMoreElements()) {
+                                                          X509Certificate parent = (X509Certificate) keys.nextElement();
+                                                          List children = (List) data.get(parent);
+                                                          dataVector.addAll(getElements(parent, children));
+                                                        }
+                                                        return dataVector.toArray();
+                                                      }
+
+                                                      private Vector getElements(X509Certificate parent, List children) {
+                                                        Vector elements = new Vector<CertificateChainElement>();
+                                                        Iterator i = children.iterator();
+                                                        while (i.hasNext()) {
+                                                          X509Certificate element = (X509Certificate) i.next();
+                                                          X509Certificate[] elementChildren = new X509Certificate[1];
+                                                          elementChildren[0] = element;
+                                                          CertificateChainElement chainElement = new CertificateChainElement(
+                                                              parent, elementChildren);
+                                                          elements.add(chainElement);
+                                                        }
+                                                        return elements;
+                                                      }
+                                                    };
+
+  private Group                 signContentGroup;
+  private Tree                  treeCertificates;
+  private TreeViewer            certificatesViewer;
+  private Composite             certificateDetails;
   private X509CertificateViewer xcv;
 
   public CertificatesGroup(Composite parent) {
@@ -245,6 +261,9 @@ public class CertificatesGroup {
     certificatesViewer.setContentProvider(cpCertificatesGroup);
     certificatesViewer.setLabelProvider(new CertLabelProvider());
     treeCertificates.addSelectionListener(new SelectionAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+       */
       @Override
       public void widgetSelected(SelectionEvent e) {
         refreshViewer(e.item.getData());
@@ -258,7 +277,7 @@ public class CertificatesGroup {
     signContentGroup.pack();
   }
 
-  protected void refreshViewer(Object data) {
+  private void refreshViewer(Object data) {
     if (data instanceof CertificateChainElement) {
       CertificateChainElement element = (CertificateChainElement) data;
       if (xcv == null) {
