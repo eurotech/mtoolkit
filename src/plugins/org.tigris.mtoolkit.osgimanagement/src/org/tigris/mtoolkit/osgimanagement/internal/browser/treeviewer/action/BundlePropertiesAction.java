@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -63,7 +66,7 @@ public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAc
       protected IStatus run(IProgressMonitor monitor) {
         try {
           RemoteBundle rBundle = bundle.getRemoteBundle();
-          headers[0] = rBundle.getHeaders(null);
+          headers[0] = parseHeaders(rBundle.getHeaders(null));
           if (bundle.isSigned()) {
             headers[1] = rBundle.getSignerCertificates();
           }
@@ -152,5 +155,51 @@ public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAc
   @Override
   protected boolean isEnabledFor(Bundle bundle) {
     return (bundle.getState() & BUNDLE_PROPERTIES_STATE_MASK) != 0;
+  }
+
+  protected static Dictionary parseHeaders(Dictionary headers) {
+    ArrayList<String> parsedHeaders = new ArrayList<String>();
+    parsedHeaders.add("Export-Package");
+    parsedHeaders.add("Import-Package");
+    parsedHeaders.add("Require-Bundle");
+    Enumeration keys = headers.keys();
+    while (keys.hasMoreElements()) {
+      Object key = keys.nextElement();
+      if (parsedHeaders.contains(key.toString())) {
+        String value = headers.get(key).toString();
+        headers.put(key, parseText(value));
+      }
+    }
+    return headers;
+  }
+
+  protected static ArrayList<String> parseText(String text) {
+    ArrayList<String> parseValue = new ArrayList<String>();
+    String comma = ",";
+    if (text.indexOf(comma) != -1) {
+      StringTokenizer tokenizer = new StringTokenizer(text, comma);
+      StringBuffer buf = new StringBuffer();
+      boolean addToBuffer = false;
+      while (tokenizer.hasMoreTokens()) {
+        String token = tokenizer.nextToken();
+        if (!addToBuffer && (token.indexOf("version=\"(") != -1 || token.indexOf("version=\"[") != -1)) {
+          addToBuffer = true;
+          buf = new StringBuffer();
+          buf.append(token);
+          continue;
+        }
+        if (addToBuffer) {
+          buf.append(comma);
+          buf.append(token);
+          token = buf.toString();
+          addToBuffer = false;
+        }
+        parseValue.add(token);
+      }
+      text = buf.toString();
+    } else {
+      parseValue.add(text);
+    }
+    return parseValue;
   }
 }
