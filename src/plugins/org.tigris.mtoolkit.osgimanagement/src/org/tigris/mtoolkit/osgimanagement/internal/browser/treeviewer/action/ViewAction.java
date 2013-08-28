@@ -70,10 +70,6 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 				FrameworkImpl fw = (FrameworkImpl) it.next();
 				setViewType(fw, viewType);
 			}
-			for (Iterator it = frameworks.iterator(); it.hasNext();) {
-				FrameworkImpl fw = (FrameworkImpl) it.next();
-				tree.expandToLevel(fw, 1);
-			}
 		} finally {
 			tree.getTree().setRedraw(true);
 		}
@@ -90,15 +86,16 @@ public class ViewAction extends Action implements IStateAction, ISelectionChange
 	}
 
 	private void setViewType(final FrameworkImpl fw, int newViewType) {
-		if (fw.getViewType() == newViewType) {
-      return;
-    }
-		try {
+    try {
+      if (fw.getViewType() == newViewType) {
+        return;
+      }
 			tree.collapseToLevel(fw, TreeViewer.ALL_LEVELS);
 			fw.setViewType(newViewType);
-			tree.expandToLevel(fw, 1);
 		} catch (Throwable t) {
 			FrameworkPlugin.error("Exception while switching framework view type", t);
+    } finally {
+      tree.expandToLevel(fw, 1);
 		}
 
 
