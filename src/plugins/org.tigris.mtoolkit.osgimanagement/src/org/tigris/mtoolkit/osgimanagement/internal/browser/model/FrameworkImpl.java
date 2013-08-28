@@ -1401,12 +1401,20 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   private void addObjectClassNodes(Model parent, String objClasses[], Long nameID, RemoteService service)
       throws IAgentException {
+    StringBuffer buf = new StringBuffer();
     for (int i = 0; i < objClasses.length; i++) {
-      ObjectClass objClass = new ObjectClass(objClasses[i] + " [" + service.getServiceId() + "]", nameID, service);
-      parent.addElement(objClass);
-      if (isShownServicePropertiss()) {
-        addServicePropertiesNodes(objClass);
+      String name = objClasses[i].toString();
+      if (buf.indexOf(name) == -1) {
+        if (buf.length() != 0) {
+          buf.append(", ");
+        }
+        buf.append(name);
       }
+    }
+    ObjectClass objClass = new ObjectClass(buf.toString() + " [" + service.getServiceId() + "]", nameID, service);
+    parent.addElement(objClass);
+    if (isShownServicePropertiss()) {
+      addServicePropertiesNodes(objClass);
     }
   }
 
