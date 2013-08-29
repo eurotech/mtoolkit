@@ -79,10 +79,16 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
   }
 
   public synchronized void removeElement(Model element) {
+    removeElement(element, true);
+  }
+
+  public synchronized void removeElement(Model element, boolean fireElementRemoved) {
     element.setParent(null);
     if (elementList.remove(element)) {
       fireChildSelected(-element.selectedChilds);
-      fireElementRemoved(element);
+      if (fireElementRemoved) {
+        fireElementRemoved(element);
+      }
       if (element instanceof Framework) {
         ((Framework) element).listeners.clear();
       }
@@ -222,13 +228,17 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
   }
 
   public synchronized void removeChildren() {
+    removeChildren(true);
+  }
+
+  public synchronized void removeChildren(boolean fireElementRemoved) {
     if (getSize() < 1) {
       return;
     }
     Model[] elements = getChildren();
     for (int i = 0; i < elements.length; i++) {
-      removeElement(elements[i]);
-      elements[i].removeChildren();
+      removeElement(elements[i], fireElementRemoved);
+      elements[i].removeChildren(false);
     }
     for (int i = 0; i < getSlaves().size(); i++) {
       ((Model) getSlaves().elementAt(i)).removeChildren();

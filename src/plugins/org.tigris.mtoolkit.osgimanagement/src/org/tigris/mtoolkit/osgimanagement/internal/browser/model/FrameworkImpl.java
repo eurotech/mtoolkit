@@ -323,7 +323,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         removeRemoteListeners();
       }
 
-      clearModel();
+      clearModel(false);
       if (!isAutoConnected()) {
         connector = null;
       }
@@ -337,11 +337,15 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   private void clearModel() {
+    clearModel(true);
+  }
+
+  private void clearModel(boolean fireElementRemoved) {
     for (int i = 0; i < modelProviders.size(); i++) {
       ((ModelProviderElement) modelProviders.get(i)).getProvider().disconnect();
     }
     modelProviders.clear();
-    removeChildren();
+    removeChildren(fireElementRemoved);
     bundles = null;
     if (bundleHash != null) {
       bundleHash.clear();
