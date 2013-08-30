@@ -18,10 +18,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 
-public abstract class BaseItem extends BaseFileItem {
+public abstract class AbstractMavenItem extends BaseFileItem {
   protected MavenInstallationItemProvider mavenProvider;
 
-  protected BaseItem(MavenInstallationItemProvider provider) {
+  protected AbstractMavenItem(MavenInstallationItemProvider provider) {
     super(null, "application/java-archive");
     this.mavenProvider = provider;
   }

@@ -83,9 +83,9 @@ public final class MavenInstallationItemProvider implements InstallationItemProv
   public InstallationItem getInstallationItem(Object resource) {
     resource = adaptItem(resource);
     if (resource instanceof File) {
-      return new FileItem(this, (File) resource);
+      return new MavenFileItem(this, (File) resource);
     } else if (resource instanceof IMavenProjectFacade) {
-      return new ProjectItem(this, (IMavenProjectFacade) resource);
+      return new MavenProjectItem(this, (IMavenProjectFacade) resource);
     } else {
       return null;
     }
@@ -104,9 +104,9 @@ public final class MavenInstallationItemProvider implements InstallationItemProv
     monitor.beginTask("Preparing installation items...", items.size());
     try {
       for (InstallationItem item : castedItems) {
-        if (item instanceof BaseItem) {
-          monitor.subTask(((BaseItem) item).getDisplayName());
-          IStatus status = prepareItem((BaseItem) item, properties, monitor);
+        if (item instanceof AbstractMavenItem) {
+          monitor.subTask(((AbstractMavenItem) item).getDisplayName());
+          IStatus status = prepareItem((AbstractMavenItem) item, properties, monitor);
           if (status.matches(IStatus.ERROR | IStatus.CANCEL)) {
             return status;
           }
@@ -161,7 +161,7 @@ public final class MavenInstallationItemProvider implements InstallationItemProv
     return null;
   }
 
-  private IStatus prepareItem(BaseItem item, Map properties, IProgressMonitor monitor) {
+  private IStatus prepareItem(AbstractMavenItem item, Map properties, IProgressMonitor monitor) {
     File pomFile = item.getPomLocationAtFilesystem();
     if (pomFile == null || !pomFile.exists()) {
       return MavenCorePlugin.newStatus(IStatus.ERROR,

@@ -12,23 +12,25 @@ package org.tigris.mtoolkit.maven.internal.installation;
 
 import java.io.File;
 
-public class FileItem extends BaseItem {
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
 
-  protected File pomFile;
+public class MavenProjectItem extends AbstractMavenItem {
 
-  protected FileItem(MavenInstallationItemProvider provider, File pomFile) {
-    super(provider);
-    this.pomFile = pomFile;
-  }
+	protected IMavenProjectFacade facade;
 
-  @Override
-  public File getPomLocationAtFilesystem() {
-    return pomFile;
-  }
+	protected MavenProjectItem(MavenInstallationItemProvider provider,
+			IMavenProjectFacade facade) {
+		super(provider);
+		this.facade = facade;
+	}
 
-  @Override
-  public String getDisplayName() {
-    return "workspace file " + pomFile.getAbsolutePath();
-  }
+	@Override
+	public File getPomLocationAtFilesystem() {
+		return facade.getPomFile();
+	}
 
+	@Override
+	public String getDisplayName() {
+		return "workspace project " + facade.getProject().getName();
+	}
 }
