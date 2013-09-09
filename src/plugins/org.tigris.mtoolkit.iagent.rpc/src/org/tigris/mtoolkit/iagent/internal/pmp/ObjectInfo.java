@@ -76,11 +76,13 @@ public final class ObjectInfo {
 			throw new NoSuchMethodException(name);
 		}
 		mArr[0] = m;
-		if (methods == null)
-			methods = new Vector(2, 5);
+		if (methods == null) {
+      methods = new Vector(2, 5);
+    }
 		for (int i = 0; i < methods.size(); i++) {
-			if (m.equals(methods.elementAt(i)))
-				return i + 1;
+			if (m.equals(methods.elementAt(i))) {
+        return i + 1;
+      }
 		}
 		methods.addElement(m);
 		return methods.size();
@@ -88,8 +90,9 @@ public final class ObjectInfo {
 
 	/** returns all the Method-s of the remote object */
 	public Vector getMethods() {
-		if (methods == null)
-			methods = new Vector();
+		if (methods == null) {
+      methods = new Vector();
+    }
 		if (interfaces != null) {
 			for (int i = 0; i < interfaces.length; i++) {
 				Method[] allMethods = interfaces[i].getMethods();
@@ -107,28 +110,50 @@ public final class ObjectInfo {
 	// XXX: Doesn't support multidimensional arrays
 	private Class getClass(String name) throws ClassNotFoundException {
 		if (name.charAt(0) == '[') {
-			if (name.length() == 2) // primitive array -> can be loaded from
-				// anywhere
+			if (name.length() == 2) {
+        // primitive array -> can be loaded from anywhere
 				return Class.forName(name);
-			// array of reference -> load the array component type, create array
-			// and get the class
-			String componentType = name.substring(2);
-			Class componentClass = getClass(componentType);
-			return Array.newInstance(componentClass, 0).getClass();
+      }
+			try {
+        // array of reference -> load the array component type, create array
+        // and get the class
+        String componentType = name.substring(2);
+        Class componentClass = getClass(componentType);
+        return Array.newInstance(componentClass, 0).getClass();
+      } catch (ClassNotFoundException e) {
+        if (obj.getClass().getClassLoader() == null) {
+          return Class.forName(name);
+        } else {
+          return Class.forName(name, false, obj.getClass().getClassLoader());
+        }
+      }
 		}
 		// not an array
-		return name.equals(PMPData.TYPES1[0])	? int.class
-												: name.equals(PMPData.TYPES1[4]) ? long.class
-																				: name.equals(PMPData.TYPES1[3]) ? short.class
-																												: name.equals(PMPData.TYPES1[1]) ? byte.class
-																																				: name.equals(PMPData.TYPES1[2]) ? char.class
-																																												: name.equals(PMPData.TYPES1[5]) ? float.class
-																																																				: name.equals(PMPData.TYPES1[6]) ? double.class
-																																																												: name.equals(PMPData.TYPES1[8]) ? void.class
-																																																																				: name.equals(PMPData.TYPES1[7]) ? boolean.class
-																																																																												: obj.getClass().getClassLoader() == null	? Class.forName(name)
-																																																																																							: obj.getClass().getClassLoader().loadClass(name);
+    if (name.equals(PMPData.TYPES1[0])) {
+      return int.class;
+    } else if (name.equals(PMPData.TYPES1[4])) {
+      return long.class;
+    } else if (name.equals(PMPData.TYPES1[3])) {
+      return short.class;
+    } else if (name.equals(PMPData.TYPES1[1])) {
+      return byte.class;
+    } else if (name.equals(PMPData.TYPES1[2])) {
+      return char.class;
+    } else if (name.equals(PMPData.TYPES1[5])) {
+      return float.class;
+    } else if (name.equals(PMPData.TYPES1[6])) {
+      return double.class;
+    } else if (name.equals(PMPData.TYPES1[8])) {
+      return void.class;
+    } else if (name.equals(PMPData.TYPES1[7])) {
+      return boolean.class;
+    } else if (obj.getClass().getClassLoader() == null) {
+      return Class.forName(name);
+    } else {
+      return Class.forName(name, false, obj.getClass().getClassLoader());
+    }
 	}
+
 	/** puts an ObjectInfo instance in the free objects' queue */
 	public void freeInfo() {
 		methods = null;
