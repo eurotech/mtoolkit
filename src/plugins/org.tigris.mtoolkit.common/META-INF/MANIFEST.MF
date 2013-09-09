@@ -28,6 +28,7 @@ Export-Package: org.tigris.mtoolkit.common;version="1.0.0",
  org.tigris.mtoolkit.common.images;version="1.0.0",
  org.tigris.mtoolkit.common.installation;version="1.0.0",
  org.tigris.mtoolkit.common.lm;version="1.0.0",
+ org.tigris.mtoolkit.common.model;version="1.0.0",
  org.tigris.mtoolkit.common.preferences;version="1.0.0",
  org.tigris.mtoolkit.common.security;version="1.0.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
