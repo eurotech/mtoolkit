@@ -11,10 +11,7 @@
 package org.tigris.mtoolkit.iagent.transport.socket;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
 import org.tigris.mtoolkit.iagent.transport.TransportType;
@@ -22,56 +19,41 @@ import org.tigris.mtoolkit.iagent.transport.TransportType;
 /**
  * @since 3.0
  */
-public class SocketTransport implements Transport {
+public final class SocketTransport implements Transport {
+  private final SocketTransportType type;
+  private final String              host;
 
-	private String host;
-	private SocketTransportType type;
-	private List connections = new ArrayList();
-	private volatile boolean closed;
+  public SocketTransport(SocketTransportType type, String host) {
+    this.host = host;
+    this.type = type;
+  }
 
-	public SocketTransport(SocketTransportType type, String host) {
-		this.host = host;
-		this.type = type;
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.Transport#createConnection(int)
+   */
+  public TransportConnection createConnection(int port) throws IOException {
+    return new SocketTransportConnection(host, port, 0);
+  }
 
-	public TransportConnection createConnection(int port) throws IOException {
-		if (closed)
-			throw new IOException("Transport is closed");
-		SocketTransportConnection connection = new SocketTransportConnection(host, port, 0);
-			synchronized (connections) {
-				connections.add(connection);
-			}
-		return connection;
-	}
-	
-	public String toString() {
-		return "Socket Transport: " + host;
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.Transport#getId()
+   */
+  public String getId() {
+    return host;
+  }
 
-	public void dispose() {
-		closed = true;
-		SocketTransportConnection[] establishedConnections;
-		synchronized (connections) {
-			establishedConnections = (SocketTransportConnection[]) connections.toArray(new SocketTransportConnection[connections.size()]);
-		}
-		for (int i = 0; i < establishedConnections.length; i++) {
-			try {
-				establishedConnections[i].close();
-			} catch (Throwable e) {
-				DebugUtils.error(SocketTransport.class, "Failed to correctly close an connection: " + establishedConnections[i], e);
-			}
-		}
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.Transport#getType()
+   */
+  public TransportType getType() {
+    return type;
+  }
 
-	public String getId() {
-		return host;
-	}
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  public String toString() {
+    return "Socket Transport: " + host;
+  }
 
-	public TransportType getType() {
-		return type;
-	}
-
-	public boolean isDisposed() {
-		return closed;
-	}
 }
