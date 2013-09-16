@@ -196,7 +196,6 @@ public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAc
         }
         parseValue.add(token);
       }
-      text = buf.toString();
     } else {
       parseValue.add(text);
     }

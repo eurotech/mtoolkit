@@ -79,7 +79,6 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
  * @since 5.0
  */
 public final class FrameworkProcessor extends AbstractInstallationItemProcessor {
-  private static final Map                               properties;
   private static final String                            PROP_JVM_NAME              = "jvm.name";
   private static final String                            ANDROID_TRANSPORT_TYPE     = "android";
 
@@ -90,8 +89,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   private boolean                                        useAdditionalProcessors    = true;
 
   static {
-    properties = Collections.unmodifiableMap(new HashMap(1, 1));
-
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint procExtPoint = registry.getExtensionPoint(EXTENSION_POINT_PROCESSORS);
     IConfigurationElement[] elements = procExtPoint.getConfigurationElements();
@@ -114,11 +111,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     this.useAdditionalProcessors = enable;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
-   * getInstallationTargets()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#getInstallationTargets()
    */
   public InstallationTarget[] getInstallationTargets() {
     FrameworkImpl[] fws = FrameworksView.getFrameworks();
@@ -132,42 +126,22 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return (InstallationTarget[]) targets.toArray(new InstallationTarget[targets.size()]);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
-   * getGeneralTargetName()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#getGeneralTargetName()
    */
   public String getGeneralTargetName() {
     return "OSGi Framework";
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
-   * getGeneralTargetImageDescriptor()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#getGeneralTargetImageDescriptor()
    */
   public ImageDescriptor getGeneralTargetImageDescriptor() {
     return ImageHolder.getImageDescriptor(ImageHolder.SERVER_ICON_CONNECTED);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
-   * getProperties()
-   */
-  @Override
-  public Map getProperties() {
-    return properties;
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#
-   * getSupportedMimeTypes()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#getSupportedMimeTypes()
    */
   public String[] getSupportedMimeTypes() {
     List<String> mimeTypes = new ArrayList<String>();
@@ -198,7 +172,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       List<RemotePackage> installedPackages, final IProgressMonitor monitor) {
     // TODO use multi status to handle errors and warnings
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
-
     try {
       Framework framework = ((FrameworkTarget) target).getFramework();
       if (!framework.isConnected()) {
@@ -211,14 +184,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           if (status.matches(IStatus.WARNING) && status.getCode() == ILC.E) {
             return status;
           }
-        }
-        try {
-          int counter = 0;
-          while (!framework.isConnected() && counter++ < 100) {
-            Thread.sleep(50);
-          }
-        } catch (InterruptedException ex) {
-          return Util.newStatus(IStatus.ERROR, ex.getMessage(), ex);
         }
       }
       if (monitor.isCanceled()) {
@@ -249,8 +214,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           return prepareStatus;
         }
       }
-
-      boolean startBundles;
+      final boolean startBundles;
       if (preparationProps.get(InstallationConstants.AUTO_START_ITEMS) != null) {
         startBundles = ((Boolean) preparationProps.get(InstallationConstants.AUTO_START_ITEMS)).booleanValue();
       } else {
@@ -273,7 +237,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       if (processStatus.matches(IStatus.ERROR)) {
         return processStatus;
       }
-
       if (!itemsToInstall.isEmpty()) {
         List<RemoteBundle> bundlesToStart = new ArrayList<RemoteBundle>();
         subMonitor.setWorkRemaining(10);
@@ -287,13 +250,19 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
           showSkippedSystemBundles(skippedSystemBundles);
         }
         final Map<String, Throwable> installProblems = new HashMap<String, Throwable>();
+        Set<InstallationItem> dontStart = (Set<InstallationItem>) args.get(InstallationConstants.DONT_START);
+        if (dontStart == null) {
+          dontStart = Collections.EMPTY_SET;
+        }
         for (InstallationItem item : itemsToInstallMap.values()) {
           installBundleProgress.setTaskName(NLS.bind(Messages.install_bundle_operation_title, item.getName()));
           final SubMonitor mon = installBundleProgress.newChild(worked);
           RemoteBundle installedBundle = installBundle(item, framework, installProblems, mon);
           if (installedBundle != null) {
             installedPackages.add(installedBundle);
-            bundlesToStart.add(installedBundle);
+            if (!dontStart.contains(item)) {
+              bundlesToStart.add(installedBundle);
+            }
           }
         }
         if (!installProblems.isEmpty()) {
@@ -308,7 +277,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
               if (bundle != null) {
                 try {
                   subMonitor.setTaskName(NLS.bind(Messages.start_bundle_operation_title, bundle.getSymbolicName()));
-                  startBundle(bundle, startBundleProgress.newChild(worked));
+                  startBundle(bundle, args, startBundleProgress.newChild(worked));
                 } catch (Exception e) {
                   FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
                 }
@@ -659,36 +628,55 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return null;
   }
 
-  private static void startBundle(final RemoteBundle remoteBundle, final IProgressMonitor monitor) throws Exception {
+  private static void startBundle(final RemoteBundle remoteBundle, Map args, IProgressMonitor monitor)
+      throws IAgentException {
+    // Fragment bundles cannot be started
     if (remoteBundle.getType() == RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
-      // Fragment bundles cannot be started
       return;
     }
     final String symbolicName = remoteBundle.getSymbolicName();
     final String version = remoteBundle.getVersion();
-    Job job = new Job(NLS.bind("Starting bundle {0}({1})", symbolicName, version)) {
+    final String taskName = NLS.bind("Starting bundle {0}({1})", symbolicName, version);
+    final Runnable startBundle = new Runnable() {
       /* (non-Javadoc)
-       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       * @see java.lang.Runnable#run()
        */
-      @Override
-      public IStatus run(IProgressMonitor monitor) {
+      public void run() {
         int flags = FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY : 0;
         try {
           remoteBundle.start(flags);
         } catch (IAgentException e) {
           // only log this exception, because the user requested install bundle
           StatusManager.getManager().handle(Util.handleIAgentException(e), StatusManager.LOG);
-          return Status.CANCEL_STATUS;
-        } finally {
-          monitor.done();
         }
-        if (monitor.isCanceled()) {
-          return Status.CANCEL_STATUS;
-        }
-        return Status.OK_STATUS;
       }
     };
-    job.schedule();
+    try {
+      if (Boolean.TRUE.equals(args.get(InstallationConstants.START_BUNDLES_SEQ))) {
+        monitor.setTaskName(taskName);
+        if (monitor.isCanceled()) {
+          return;
+        }
+        startBundle.run();
+      } else {
+        Job job = new Job(taskName) {
+          /* (non-Javadoc)
+           * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+           */
+          @Override
+          public IStatus run(IProgressMonitor monitor) {
+            startBundle.run();
+            if (monitor.isCanceled()) {
+              return Status.CANCEL_STATUS;
+            }
+            return Status.OK_STATUS;
+          }
+        };
+        job.schedule();
+      }
+    } finally {
+      monitor.done();
+    }
   }
 
   private static final class BundlesProcessor implements FrameworkProcessorExtension {
@@ -729,13 +717,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     }
 
     /* (non-Javadoc)
-     * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItem(org.tigris.mtoolkit.common.installation.InstallationItem,
-     *                                                                                              java.util.List,
-     *                                                                                              java.util.List,
-     *                                                                                              java.util.Map,
-     *                                                                                              org.tigris.mtoolkit.osgimanagement.model.Framework,
-     *                                                                                              org.eclipse.core.runtime.IProgressMonitor)
-     */
+    * @see org.tigris.mtoolkit.osgimanagement.installation.FrameworkProcessorExtension#processItems(java.util.List, java.util.List, java.util.Map, org.tigris.mtoolkit.osgimanagement.model.Framework, org.eclipse.core.runtime.IProgressMonitor)
+    */
     public boolean processItems(List<InstallationItem> items, List<RemotePackage> installed, Map preparationProps,
         Framework framework, IProgressMonitor monitor) throws CoreException {
       monitor.done();
