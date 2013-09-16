@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.2"?>
 <plugin>
 	<extension-point id="contentTypeExtensions" name="Content Type Extensions" schema="schema/contentTypeExtensions.exsd"/>
 	<extension-point id="osgiDeviceTypes" name="osgiDeviceTypes" schema="schema/osgiDeviceTypes.exsd"/>
@@ -31,13 +30,6 @@
 		</page>
 	</extension>
 
-
-	<extension
-         point="org.eclipse.core.runtime.preferences">
-		<initializer
-            class="org.tigris.mtoolkit.osgimanagement.internal.preferences.PreferenceInitializer">
-		</initializer>
-	</extension>
 	<extension
          point="org.eclipse.core.contenttype.contentTypes">
 		<content-type
@@ -54,6 +46,7 @@
 			</describer>
 		</content-type>
 	</extension>
+
 	<extension
          point="org.tigris.mtoolkit.common.installationItemProviders">
 		<provider
@@ -76,6 +69,7 @@
             name="Plugin project provider">
 		</provider>
 	</extension>
+
 	<extension
          point="org.tigris.mtoolkit.common.installationItemProcessors">
 		<processor
@@ -84,6 +78,7 @@
             selectionDialog="org.tigris.mtoolkit.osgimanagement.installation.FrameworkSelector">
 		</processor>
 	</extension>
+
 	<extension
          point="org.tigris.mtoolkit.osgimanagement.osgiDeviceTypes">
 		<osgiDeviceTypeProvider
@@ -92,6 +87,7 @@
             name="Plain Socket">
 		</osgiDeviceTypeProvider>
 	</extension>
+
 	<extension
          point="org.eclipse.ui.propertyPages">
 		<page
@@ -105,6 +101,7 @@
 			</enabledWhen>
 		</page>
 	</extension>
+
 	<extension
          point="org.eclipse.ui.propertyPages">
 		<page
@@ -118,6 +115,7 @@
 			</enabledWhen>
 		</page>
 	</extension>
+
 	<extension
          point="org.tigris.mtoolkit.osgimanagement.systemBundlesProvider">
 		<bundlesListProvider
@@ -125,7 +123,6 @@
             id="Framework System Bundles Provider">
 		</bundlesListProvider>
 	</extension>
-
 	<extension
          point="org.eclipse.ui.console.consolePatternMatchListeners">
 		<consolePatternMatchListener
@@ -159,6 +156,7 @@
 			</enablement>
 		</consolePatternMatchListener>
 	</extension>
+
 	<extension
          point="org.eclipse.ui.console.consolePageParticipants">
 		<consolePageParticipant
@@ -182,5 +180,4 @@
             class="org.tigris.mtoolkit.osgimanagement.application.ApplicationModelProvider">
 		</model>
 	</extension>
-
 </plugin>

@@ -11,7 +11,6 @@
 package org.tigris.mtoolkit.osgimanagement;
 
 import java.io.File;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -99,10 +98,6 @@ public class Util {
       throw newException(IStatus.ERROR, Messages.connection_failed, e);
     }
     return fw;
-  }
-
-  public static Set<String> getSystemBundles() {
-    return FrameworksView.getSystemBundles();
   }
 
   /**

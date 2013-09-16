@@ -40,7 +40,7 @@ public final class InstallationRegistry {
   /**
    * Returns map containing capable providers (as keys) and installation items
    * (as values) for the given source element.
-   * 
+   *
    * @param source
    * @return map with provider-item pairs or empty map
    */
@@ -61,7 +61,7 @@ public final class InstallationRegistry {
   /**
    * Returns the first found installation item for given source with specified
    * mimeType.
-   * 
+   *
    * @param source
    * @param mimeType
    * @return installation item or null if no item is found
@@ -95,7 +95,7 @@ public final class InstallationRegistry {
     return (TargetSelectionDialog) selectionDialogs.get(itemProcessor);
   }
 
-  public static InstallationRegistry getInstance() {
+  public synchronized static InstallationRegistry getInstance() {
     if (registry == null) {
       registry = new InstallationRegistry();
     }
@@ -120,7 +120,7 @@ public final class InstallationRegistry {
    * adds them to a passed hash table with existing item providers (if a
    * provider already exists in the table, it is not re-created). For keys are
    * used the class names of item providers as String objects.
-   * 
+   *
    * @param elements
    *            array of configuration elements
    * @param providers
@@ -132,8 +132,9 @@ public final class InstallationRegistry {
         continue;
       }
       String clazz = elements[i].getAttribute("class");
-      if (clazz == null)
+      if (clazz == null) {
         continue;
+      }
 
       try {
         Object provider = elements[i].createExecutableExtension("class");
@@ -156,7 +157,7 @@ public final class InstallationRegistry {
    * objects of selection dialogs for each processor are also obtained. Keys
    * for processors table are class names of item processors as String
    * objects. Keys for dialogs table are the instances of item processors.
-   * 
+   *
    * @param elements
    *            array of configuration elements
    * @param processors

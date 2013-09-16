@@ -11,13 +11,20 @@
 package org.tigris.mtoolkit.osgimanagement.installation;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -30,6 +37,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -37,17 +45,22 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.common.FileUtils;
+import org.tigris.mtoolkit.common.ManifestUtils;
+import org.tigris.mtoolkit.common.PluginUtilities;
+import org.tigris.mtoolkit.common.gui.SkippedListDialog;
 import org.tigris.mtoolkit.common.installation.AbstractInstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationConstants;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.lm.ILC;
+import org.tigris.mtoolkit.common.model.BundleInfo;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -174,13 +187,15 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#processInstallationItems(org.tigris.mtoolkit.common.installation.InstallationItem[],
-   *                                                                                                 java.util.Map,
-   *                                                                                                 org.tigris.mtoolkit.common.installation.InstallationTarget,
-   *                                                                                                 org.eclipse.core.runtime.IProgressMonitor)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#processInstallationItems(org.tigris.mtoolkit.common.installation.InstallationItem[], java.util.Map, org.tigris.mtoolkit.common.installation.InstallationTarget, org.eclipse.core.runtime.IProgressMonitor)
    */
   public IStatus processInstallationItems(final InstallationItem[] items, Map args, InstallationTarget target,
       final IProgressMonitor monitor) {
+    return processInstallationItems(items, args, target, new ArrayList<RemotePackage>(items.length), monitor);
+  }
+
+  public IStatus processInstallationItems(final InstallationItem[] items, Map args, InstallationTarget target,
+      List<RemotePackage> installedPackages, final IProgressMonitor monitor) {
     // TODO use multi status to handle errors and warnings
     SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
@@ -188,7 +203,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       Framework framework = ((FrameworkTarget) target).getFramework();
       if (!framework.isConnected()) {
         subMonitor.setTaskName(Messages.connecting_operation_title);
-        IStatus status=FrameworkConnectorFactory.connectFrameworkSync(framework,subMonitor.newChild(10));
+        IStatus status = FrameworkConnectorFactory.connectFrameworkSync(framework, subMonitor.newChild(10));
         if (status != null) {
           if (status.matches(IStatus.CANCEL) || status.matches(IStatus.ERROR)) {
             return status;
@@ -248,7 +263,6 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       }
 
       List<InstallationItem> itemsToInstall = new ArrayList<InstallationItem>();
-      List<RemotePackage> installedPackages = new ArrayList<RemotePackage>();
       itemsToInstall.addAll(Arrays.asList(items));
       IStatus processStatus = processItemsInternal(itemsToInstall, preparationProps, framework, installedPackages,
           subMonitor.newChild(10));
@@ -265,21 +279,25 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         subMonitor.setWorkRemaining(10);
         SubMonitor installBundleProgress = SubMonitor.convert(subMonitor.newChild(5), 100);
         int worked = 100 / itemsToInstall.size();
-        for (InstallationItem item : itemsToInstall) {
-          try {
-            installBundleProgress.setTaskName(NLS.bind(Messages.install_bundle_operation_title, item.getName()));
-            RemoteBundle installedBundle = installBundle(item, framework, installBundleProgress.newChild(worked));
-            if (installedBundle != null) {
-              bundlesToStart.add(installedBundle);
-            }
-          } catch (CoreException e) {
-            final IStatus status = e.getStatus();
-            if (status.matches(IStatus.CANCEL)) {
-              monitor.setCanceled(true);
-              return status;
-            }
-            FrameworkPlugin.log(status);
+
+        final Map<BundleInfo, InstallationItem> itemsToInstallMap = parsePreparedBundles(itemsToInstall);
+        //remove system bundles
+        final List<String> skippedSystemBundles = filterSystemBundles(itemsToInstallMap);
+        if (skippedSystemBundles.size() > 0) {
+          showSkippedSystemBundles(skippedSystemBundles);
+        }
+        final Map<String, Throwable> installProblems = new HashMap<String, Throwable>();
+        for (InstallationItem item : itemsToInstallMap.values()) {
+          installBundleProgress.setTaskName(NLS.bind(Messages.install_bundle_operation_title, item.getName()));
+          final SubMonitor mon = installBundleProgress.newChild(worked);
+          RemoteBundle installedBundle = installBundle(item, framework, installProblems, mon);
+          if (installedBundle != null) {
+            installedPackages.add(installedBundle);
+            bundlesToStart.add(installedBundle);
           }
+        }
+        if (!installProblems.isEmpty()) {
+          showNoAllBundlesInstalledDialog(installProblems);
         }
         if (startBundles) {
           subMonitor.setWorkRemaining(5);
@@ -311,9 +329,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return Status.OK_STATUS;
   }
 
-  // TODO This method should not be revealed.
-  public IStatus processItemsInternal(List<InstallationItem> itemsToInstall, Map preparationProps, Framework framework,
-      List<RemotePackage> installed, IProgressMonitor monitor) {
+  private IStatus processItemsInternal(List<InstallationItem> itemsToInstall, Map preparationProps,
+      Framework framework, List<RemotePackage> installed, IProgressMonitor monitor) {
     Map<FrameworkProcessorExtension, List<InstallationItem>> installationMap = new HashMap<FrameworkProcessorExtension, List<InstallationItem>>();
     for (InstallationItem item : itemsToInstall) {
       FrameworkProcessorExtension processor;
@@ -378,6 +395,145 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       return Status.CANCEL_STATUS;
     }
     return Status.OK_STATUS;
+  }
+
+  private void showSkippedSystemBundles(final List<String> skippedSystemBundles) {
+    if (!FrameworkPreferencesPage.isShowSkippedSystemBundles()) {
+      return;
+    }
+    final boolean skipInFuture[] = new boolean[] {
+      false
+    };
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      /* (non-Javadoc)
+       * @see java.lang.Runnable#run()
+       */
+      public void run() {
+        final Shell shell = PluginUtilities.getActiveWorkbenchShell();
+        SkippedListDialog dialog = new SkippedListDialog(shell, skippedSystemBundles);
+        dialog.setTitle("Skipped System Bundles");
+        dialog.setMessage("The following bundles are determined to be system and will not be updated: ");
+        if (dialog.open() == Window.OK) {
+          skipInFuture[0] = dialog.isSkipInFuture();
+        }
+      }
+    });
+    if (skipInFuture[0]) {
+      FrameworkPreferencesPage.setShowSkippedSystemBundles(false);
+    }
+  }
+
+  /**
+   * When there is some problem with the installation of some bundles, we should
+   * inform the user for this at least. So we make a list of all files that were
+   * not installed by some reason and show them to the user.
+   *
+   * @param notInstalledBundles
+   */
+  private static void showNoAllBundlesInstalledDialog(Map<String, Throwable> installProblems) {
+    if (installProblems == null || installProblems.isEmpty()) {
+      return;
+    }
+    final Map notInstalledBundles = installProblems;
+    final Display display = PlatformUI.getWorkbench().getDisplay();
+    if (display != null && !display.isDisposed()) {
+      display.asyncExec(new Runnable() {
+        /* (non-Javadoc)
+         * @see java.lang.Runnable#run()
+         */
+        public void run() {
+          StringBuffer message = new StringBuffer();
+          message.append("The following bundles were not installed: ");
+          message.append("\n");
+          Set bundles = notInstalledBundles.keySet();
+          int i = 0;
+          for (Iterator iterator = bundles.iterator(); iterator.hasNext();) {
+            String bundle = (String) iterator.next();
+            if (i != 0) {
+              message.append(",\n");
+            }
+            message.append(bundle);
+            String cause = ((Throwable) notInstalledBundles.get(bundle)).getMessage();
+            if (!"".equals(cause)) {
+              message.append(" (");
+              message.append(cause);
+              message.append(") ");
+            }
+            if (i > 5) {
+              message.append("\n");
+              message.append("...");
+              break;
+            }
+            i++;
+          }
+          notInstalledBundles.clear();
+          MessageDialog dialog = new MessageDialog(display.getActiveShell(), "Warning", null, message.toString(),
+              MessageDialog.INFORMATION, new String[] {
+                "OK"
+              }, 0);
+          dialog.setBlockOnOpen(true);
+          dialog.open();
+        }
+      });
+    }
+  }
+
+  private Map<BundleInfo, InstallationItem> parsePreparedBundles(List<InstallationItem> items) {
+    Map<BundleInfo, InstallationItem> result = new LinkedHashMap<BundleInfo, InstallationItem>();
+    for (InstallationItem item : items) {
+      InstallationItem[] children = item.getChildren();
+      List infos = new ArrayList();
+      if (children == null) {
+        BundleInfo bundleInfo = getBundleInfo(item);
+        result.put(bundleInfo, item);
+        infos.add(bundleInfo);
+      } else {
+        for (InstallationItem childItem : children) {
+          BundleInfo bundleInfo = getBundleInfo(childItem);
+          result.put(bundleInfo, childItem);
+          infos.add(bundleInfo);
+        }
+      }
+    }
+    return result;
+  }
+
+  private BundleInfo getBundleInfo(InstallationItem item) {
+    File file = new File(item.getLocation());
+    if (file.exists()) {
+      JarFile f = null;
+      try {
+        f = new JarFile(file);
+        JarEntry manifestEntry = f.getJarEntry(JarFile.MANIFEST_NAME);
+        Map<String, String> headers = ManifestUtils.getManifestHeaders(f.getInputStream(manifestEntry));
+        String bundleName = ManifestUtils.getBundleSymbolicName(headers);
+        String version = ManifestUtils.getBundleVersion(headers);
+        if (bundleName != null) {
+          return new BundleKey(bundleName, version);
+        }
+      } catch (IOException e) {
+        FrameworkPlugin.error("Failed to parse bundle's manifest: " + file.getAbsolutePath(), e);
+      } finally {
+        FileUtils.close(f);
+      }
+    }
+    String fName = file.getName();
+    int extIndex = fName.lastIndexOf('.');
+    String bName = fName.substring(0, extIndex >= 0 ? extIndex : fName.length());
+    return new BundleKey(bName, null);
+  }
+
+  private List<String> filterSystemBundles(Map<BundleInfo, InstallationItem> bundlesMap) {
+    final Set<String> installedSystemBundles = FrameworksView.getSystemBundles();
+    Set<String> skippedBundles = new HashSet<String>();
+    for (Iterator<BundleInfo> it = bundlesMap.keySet().iterator(); it.hasNext();) {
+      BundleInfo bundle = it.next();
+      if (installedSystemBundles.contains(bundle.getSymbolicName())) {
+        it.remove();
+        skippedBundles.add(bundle.getSymbolicName());
+      }
+    }
+    return new ArrayList<String>(skippedBundles);
   }
 
   private FrameworkProcessorExtension findProcessor(final InstallationItem item, final IProgressMonitor monitor)
@@ -483,8 +639,8 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return results;
   }
 
-  private static RemoteBundle installBundle(InstallationItem item, Framework framework, IProgressMonitor monitor)
-      throws CoreException {
+  private static RemoteBundle installBundle(InstallationItem item, Framework framework,
+      Map<String, Throwable> installProblems, IProgressMonitor monitor) {
     File bundle = null;
     InputStream input = null;
     try {
@@ -493,13 +649,14 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
       InstallBundleOperation operation = new InstallBundleOperation((FrameworkImpl) framework);
       return operation.installBundle(bundle, monitor);
     } catch (Exception e) {
-      throw new CoreException(Util.newStatus(IStatus.ERROR, "Unable to install bundle", e));
+      installProblems.put(item.getName(), e);
     } finally {
       FileUtils.close(input);
       if (bundle != null) {
         bundle.delete();
       }
     }
+    return null;
   }
 
   private static void startBundle(final RemoteBundle remoteBundle, final IProgressMonitor monitor) throws Exception {
@@ -602,6 +759,48 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
      */
     public int compareTo(ExtensionWrapper o) {
       return priority - o.priority;
+    }
+  }
+
+  private static final class BundleKey implements BundleInfo {
+    private String symbolicName;
+    private String version;
+
+    private BundleKey(String symbolicName, String version) {
+      this.symbolicName = symbolicName;
+      this.version = version;
+    }
+
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.model.BundleInfo#getSymbolicName()
+     */
+    public String getSymbolicName() {
+      return symbolicName;
+    }
+
+    /* (non-Javadoc)
+     * @see org.tigris.mtoolkit.common.model.BundleInfo#getVersion()
+     */
+    public String getVersion() {
+      return version;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+      if (!(obj instanceof BundleKey)) {
+        return false;
+      }
+      BundleKey other = (BundleKey) obj;
+      if (symbolicName == null ? (other.getSymbolicName() != null) : !symbolicName.equals(other.getSymbolicName())) {
+        return false;
+      }
+      if (version == null ? (other.getVersion() != null) : !version.equals(other.getVersion())) {
+        return false;
+      }
+      return true;
     }
   }
 }
