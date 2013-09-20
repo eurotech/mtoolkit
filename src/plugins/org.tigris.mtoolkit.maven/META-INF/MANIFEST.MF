@@ -21,5 +21,4 @@ Import-Package: org.eclipse.debug.core,
  org.eclipse.m2e.core.embedder,
  org.eclipse.m2e.core.project
 Export-Package: org.tigris.mtoolkit.maven,
- org.tigris.mtoolkit.maven.internal.images,
- org.tigris.mtoolkit.maven.launching
+ org.tigris.mtoolkit.maven.internal.images

@@ -35,7 +35,6 @@ import org.tigris.mtoolkit.maven.MavenConstants;
 import org.tigris.mtoolkit.maven.MavenUtils;
 import org.tigris.mtoolkit.maven.internal.MavenCorePlugin;
 import org.tigris.mtoolkit.maven.internal.images.ImageHolder;
-import org.tigris.mtoolkit.maven.launching.MavenProcess;
 
 public final class MavenInstallationItemProvider implements InstallationItemProvider {
   /* (non-Javadoc)
@@ -168,7 +167,7 @@ public final class MavenInstallationItemProvider implements InstallationItemProv
           "Cannot find " + MavenConstants.POM_FILE + " for " + item.getDisplayName(), null);
     }
     try {
-      MavenProcess.launchDefaultBuild(pomFile.getParentFile(), monitor);
+      MavenUtils.launchDefaultBuild(pomFile.getParentFile(), monitor);
       File artifact = MavenUtils.locateMavenArtifact(pomFile);
       if (!artifact.exists()) {
         return MavenCorePlugin.newStatus(IStatus.ERROR, "Unable to find Maven artifact at expected location: "
