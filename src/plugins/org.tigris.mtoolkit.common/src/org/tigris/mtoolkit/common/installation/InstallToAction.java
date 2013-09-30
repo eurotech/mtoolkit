@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.common.installation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public final class InstallToAction extends Action {
       List/*<Mapping>*/items) {
     super(target.getName());
     this.processor = processor;
-    this.args = args;
+    this.args = args == null ? Collections.EMPTY_MAP : args;
     this.target = target;
     this.items = items;
   }

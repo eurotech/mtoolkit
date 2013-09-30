@@ -69,7 +69,7 @@ public interface InstallationItemProcessor {
    * @param items
    *          the items to install
    * @param args
-   *          Additional arguments
+   *          Additional arguments. Should not be null
    * @param target
    *          the target where to install the passed items
    * @param monitor

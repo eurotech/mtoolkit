@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.dpeditor.osgimanagement.dp.actions;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -118,7 +119,8 @@ public final class InstallDPAction extends SelectionProviderAction implements IS
           }
         }
         IStatus status = processor.processInstallationItems(
-            (InstallationItem[]) items.toArray(new InstallationItem[items.size()]), null, target, monitor);
+            (InstallationItem[]) items.toArray(new InstallationItem[items.size()]), Collections.EMPTY_MAP, target,
+            monitor);
 
         monitor.done();
         if (monitor.isCanceled()) {

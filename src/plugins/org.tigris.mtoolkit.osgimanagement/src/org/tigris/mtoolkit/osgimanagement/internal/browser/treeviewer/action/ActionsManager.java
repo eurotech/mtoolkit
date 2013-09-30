@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -114,7 +115,8 @@ public final class ActionsManager {
           }
         }
         status = processor.processInstallationItems(
-            (InstallationItem[]) items.toArray(new InstallationItem[items.size()]), null, target, monitor);
+            (InstallationItem[]) items.toArray(new InstallationItem[items.size()]), Collections.EMPTY_MAP, target,
+            monitor);
 
         monitor.done();
         if (monitor.isCanceled()) {
