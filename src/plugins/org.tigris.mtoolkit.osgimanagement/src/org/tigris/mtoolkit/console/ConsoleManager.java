@@ -43,6 +43,13 @@ public final class ConsoleManager {
     return connectConsole(dc, consoleName, null, fwId);
   }
 
+  public static DeviceConnector getConnectorObject(IConsole console) {
+    if (!ConsoleManager.isOSGiManagementConsole(console)) {
+      return null;
+    }
+    return (DeviceConnector) ((IOConsole) console).getAttribute("mtoolkit.console.connector");
+  }
+
   public static IOConsole connectConsole(DeviceConnector dc, String consoleName, IProcess iProcess, Object fwId) {
     synchronized (consoles) {
       Object console = consoles.get(dc);
