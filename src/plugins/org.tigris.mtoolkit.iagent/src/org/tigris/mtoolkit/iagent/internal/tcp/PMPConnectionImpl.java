@@ -84,13 +84,6 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
    * @see org.tigris.mtoolkit.iagent.spi.AbstractConnection#closeConnection()
    */
   public void closeConnection() throws IAgentException {
-    closeConnection(true);
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.spi.AbstractConnection#closeConnection(boolean)
-   */
-  public void closeConnection(boolean aSendEvent) throws IAgentException {
     DebugUtils.debug(this, "[closeConnection] >>>");
     synchronized (this) {
       if (closed) {
@@ -111,7 +104,7 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
     } finally {
       if (connManager != null) {
         try {
-          connManager.connectionClosed(this, aSendEvent);
+          connManager.connectionClosed(this, true);
         } catch (Throwable e) {
           DebugUtils.error(this, "[closeConnection] Internal error in connection manager", e);
         }
