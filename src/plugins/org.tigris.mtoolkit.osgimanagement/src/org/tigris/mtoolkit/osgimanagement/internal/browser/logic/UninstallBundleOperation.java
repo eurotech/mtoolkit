@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Bundle;
 
@@ -29,7 +30,9 @@ public final class UninstallBundleOperation extends RemoteBundleOperation {
    */
   @Override
   protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
-    getBundle().getRemoteBundle().uninstall(null);
+    final RemoteBundle remoteBundle = getBundle().getRemoteBundle();
+    remoteBundle.uninstall(null);
+    remoteBundle.refreshPackages();
     return Status.OK_STATUS;
   }
 

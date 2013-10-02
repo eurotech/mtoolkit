@@ -14,7 +14,6 @@ public final class InstallationConstants {
   //Installation item processor properties/arguments
   public static final String AUTO_START_ITEMS    = "auto_start_items";          //$NON-NLS-1$
   public static final String AUTO_UPDATE_ITEMS   = "auto_update_items";         //$NON-NLS-1$
-  public static final String START_BUNDLES_SEQ   = "start_bundles_seq";         //$NON-NLS-1$
   public static final String DONT_START          = "dont_start";                //$NON-NLS-1$
 
   // Signing contents

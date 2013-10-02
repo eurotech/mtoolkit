@@ -538,33 +538,12 @@ public final class RemoteBundleImpl implements RemoteBundle {
   }
 
   /* (non-Javadoc)
-   * @see java.lang.Object#toString()
+   * @see org.tigris.mtoolkit.iagent.RemoteBundle#refreshPackages()
    */
-  public String toString() {
-    return "RemoteBundle@" + Integer.toHexString(System.identityHashCode(this)) + "[" + id + "][" + location + "]";
+  public void refreshPackages() throws IAgentException {
+    commands.refreshPackages();
   }
 
-  private void checkBundleErrorResult(Error err) throws IAgentException {
-    if (err == null) {
-      return;
-    } else if (err.getCode() == Error.BUNDLE_UNINSTALLED_CODE) {
-      uninstalled = true;
-      checkBundleState();
-    } else {
-      throw new IAgentException(err);
-    }
-  }
-
-  private void checkBundleState() throws IAgentException {
-    if (uninstalled) {
-      DebugUtils.debug(this, "[checkBundleState] Remote bundle has been uninstalled");
-      throw new IAgentException("Remote bundle has been uninstalled", IAgentErrors.ERROR_BUNDLE_UNINSTALLED);
-    }
-  }
-
-  private RemoteObject getBundleAdmin() throws IAgentException {
-    return commands.getBundleAdmin();
-  }
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.RemoteBundle#getSignerCertificates()
@@ -609,5 +588,34 @@ public final class RemoteBundleImpl implements RemoteBundle {
       DebugUtils.debug(this, "[method not found on iagent] >>>");
     }
     return isSignerTrusted;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  public String toString() {
+    return "RemoteBundle@" + Integer.toHexString(System.identityHashCode(this)) + "[" + id + "][" + location + "]";
+  }
+
+  private void checkBundleErrorResult(Error err) throws IAgentException {
+    if (err == null) {
+      return;
+    } else if (err.getCode() == Error.BUNDLE_UNINSTALLED_CODE) {
+      uninstalled = true;
+      checkBundleState();
+    } else {
+      throw new IAgentException(err);
+    }
+  }
+
+  private void checkBundleState() throws IAgentException {
+    if (uninstalled) {
+      DebugUtils.debug(this, "[checkBundleState] Remote bundle has been uninstalled");
+      throw new IAgentException("Remote bundle has been uninstalled", IAgentErrors.ERROR_BUNDLE_UNINSTALLED);
+    }
+  }
+
+  private RemoteObject getBundleAdmin() throws IAgentException {
+    return commands.getBundleAdmin();
   }
 }

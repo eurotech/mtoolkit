@@ -13,6 +13,8 @@ package org.tigris.mtoolkit.iagent.rpc;
 import java.io.InputStream;
 import java.util.Dictionary;
 
+import org.osgi.service.packageadmin.PackageAdmin;
+
 public interface RemoteBundleAdmin extends RemoteServiceIDProvider {
   public static final int    INCLUDE_BUNDLE_HEADERS      = 0x01;
   public static final int    INCLUDE_BUNDLE_STATES       = 0x02;
@@ -220,6 +222,13 @@ public interface RemoteBundleAdmin extends RemoteServiceIDProvider {
   public String getSystemProperty(String property);
 
   public Object setSystemProperty(String name, String value);
+
+  /**
+   * Invokes {@link PackageAdmin#refreshPackages(org.osgi.framework.Bundle[])}
+   * with argument null}
+   * 
+   */
+  public Object refreshPackages();
 
   /**
    * Returns resource with given name.

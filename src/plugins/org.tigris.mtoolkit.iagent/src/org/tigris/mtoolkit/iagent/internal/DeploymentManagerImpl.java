@@ -75,6 +75,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
       "int", Dictionary.class.getName()
                                                                    }, true);
 
+  private static MethodSignature REFRESH_PACKAGES              = new MethodSignature("refreshPackages",
+                                                                   MethodSignature.NO_ARGS, true);
+
   private DeviceConnectorImpl    connector;
 
   private List                   bundleListeners               = new LinkedList();
@@ -89,6 +92,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     this.connector = connector;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#getBundles(java.lang.String, java.lang.String)
+   */
   public RemoteBundle[] getBundles(String symbolicName, String version) throws IAgentException {
     DebugUtils.debug(this, "[getBundles] >>> symbolicName: " + symbolicName + "; version: " + version);
     if (symbolicName == null) {
@@ -117,6 +123,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#getDeploymentPackage(java.lang.String)
+   */
   public RemoteDP getDeploymentPackage(String name) throws IAgentException {
     DebugUtils.debug(this, "[getDeploymentPackage] >>> name: " + name);
     if (name == null) {
@@ -135,6 +144,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#installBundle(java.lang.String, java.io.InputStream)
+   */
   public RemoteBundle installBundle(String location, InputStream is) throws IAgentException {
     DebugUtils.debug(this, "[installBundle] >>> location: " + location + "; inputStream: " + is);
     if (location == null || is == null) {
@@ -145,20 +157,7 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     });
     if (bundleId != null) {
       if (bundleId.longValue() != -1) {
-        return new RemoteBundleImpl(this, bundleId, location); // directly
-        // return
-        // reference
-        // to
-        // the
-        // bundle,
-        // instead
-        // of
-        // walking
-        // to
-        // the
-        // device
-        // for
-        // this
+        return new RemoteBundleImpl(this, bundleId, location);
       }
     }
     Object result = INSTALL_BUNDLE_METHOD.call(getBundleAdmin(), new Object[] {
@@ -179,18 +178,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
-  public RemoteObject getBundleAdmin() throws IAgentException {
-    PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
-    RemoteObject bundleAdmin = connection.getRemoteBundleAdmin();
-    return bundleAdmin;
-  }
-
-  public RemoteObject getDeploymentAdmin() throws IAgentException {
-    PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
-    RemoteObject bundleAdmin = connection.getRemoteDeploymentAdmin();
-    return bundleAdmin;
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#installDeploymentPackage(java.io.InputStream)
+   */
   public RemoteDP installDeploymentPackage(InputStream is) throws IAgentException {
     DebugUtils.debug(this, "[installDeploymentPackage] >>> is: " + is);
     if (is == null) {
@@ -209,6 +199,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#listBundles()
+   */
   public RemoteBundle[] listBundles() throws IAgentException {
     DebugUtils.debug(this, "[listBundles] >>>");
     long[] bids = (long[]) LIST_BUNDLES_METHOD.call(getBundleAdmin());
@@ -226,6 +219,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     return bundles;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#listDeploymentPackages()
+   */
   public RemoteDP[] listDeploymentPackages() throws IAgentException {
     DebugUtils.debug(this, "[listDeploymentPackages] >>>");
     Dictionary dps = (Dictionary) LIST_DPS_METHOD.call(getDeploymentAdmin());
@@ -254,6 +250,21 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  public RemoteObject getBundleAdmin() throws IAgentException {
+    PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
+    RemoteObject bundleAdmin = connection.getRemoteBundleAdmin();
+    return bundleAdmin;
+  }
+
+  public RemoteObject getDeploymentAdmin() throws IAgentException {
+    PMPConnection connection = (PMPConnection) connector.getConnection(ConnectionManager.PMP_CONNECTION);
+    RemoteObject bundleAdmin = connection.getRemoteDeploymentAdmin();
+    return bundleAdmin;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#addRemoteBundleListener(org.tigris.mtoolkit.iagent.event.RemoteBundleListener)
+   */
   public void addRemoteBundleListener(RemoteBundleListener listener) throws IAgentException {
     DebugUtils.debug(this, "[addRemoteBundleListener] >>> listener: " + listener);
     synchronized (this) {
@@ -277,6 +288,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#addRemoteDPListener(org.tigris.mtoolkit.iagent.event.RemoteDPListener)
+   */
   public void addRemoteDPListener(RemoteDPListener listener) throws IAgentException {
     DebugUtils.debug(this, "[addRemoteDPListener] >>> listener: " + listener);
     synchronized (this) {
@@ -302,6 +316,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#removeRemoteBundleListener(org.tigris.mtoolkit.iagent.event.RemoteBundleListener)
+   */
   public void removeRemoteBundleListener(RemoteBundleListener listener) throws IAgentException {
     DebugUtils.debug(this, "[removeRemoteBundleListener] >>> listener: " + listener);
     synchronized (bundleListeners) {
@@ -324,6 +341,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#removeRemoteDPListener(org.tigris.mtoolkit.iagent.event.RemoteDPListener)
+   */
   public void removeRemoteDPListener(RemoteDPListener listener) throws IAgentException {
     DebugUtils.debug(this, "[removeRemoteDPListener] >>> listener: " + listener);
     synchronized (dpListeners) {
@@ -346,6 +366,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.EventListener#event(java.lang.Object, java.lang.String)
+   */
   public void event(Object event, String eventType) {
     try {
       DebugUtils.debug(this, "[event] >>> event: " + event + "; type: " + eventType);
@@ -369,6 +392,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     return connector;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.ConnectionListener#connectionChanged(org.tigris.mtoolkit.iagent.spi.ConnectionEvent)
+   */
   public void connectionChanged(ConnectionEvent event) {
     DebugUtils.debug(this, "[connectionChanged] >>> event: " + event);
     if (event.getType() == ConnectionEvent.CONNECTED
@@ -429,6 +455,9 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#getBundlesSnapshot(java.util.Dictionary)
+   */
   public BundleSnapshot[] getBundlesSnapshot(Dictionary properties) throws IAgentException {
     DebugUtils.debug(this, "[getBundlesSnapshot] >>>");
     int options = RemoteBundleAdmin.INCLUDE_BUNDLE_HEADERS | RemoteBundleAdmin.INCLUDE_BUNDLE_STATES
@@ -464,6 +493,19 @@ public final class DeploymentManagerImpl implements DeploymentManager, EventList
       result[i] = new BundleSnapshotImpl(this, snapshots[i]);
     }
     return result;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.DeploymentManager#refreshPackages()
+   */
+  public void refreshPackages() throws IAgentException {
+    final RemoteObject bAdmin = getBundleAdmin();
+    if (REFRESH_PACKAGES.isDefined(bAdmin)) {
+      Object error = REFRESH_PACKAGES.call(bAdmin);
+      if (error instanceof Error) {
+        throw new IAgentException((Error) error);
+      }
+    }
   }
 
   private void fireBundleEvent(long bundleId, int type) {

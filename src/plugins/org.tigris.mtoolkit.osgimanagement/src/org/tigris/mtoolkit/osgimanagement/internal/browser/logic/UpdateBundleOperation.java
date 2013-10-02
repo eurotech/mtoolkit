@@ -94,6 +94,7 @@ public class UpdateBundleOperation extends RemoteBundleOperation {
 
       pis = new ProgressInputStream(new FileInputStream(updateFile), mon);
       rBundle.update(pis);
+      rBundle.refreshPackages();
 
       getBundle().refreshTypeFromRemote();
 

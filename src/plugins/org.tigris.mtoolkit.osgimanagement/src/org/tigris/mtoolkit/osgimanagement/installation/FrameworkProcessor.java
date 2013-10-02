@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -49,7 +48,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
-import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
 import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.ManifestUtils;
@@ -61,6 +59,7 @@ import org.tigris.mtoolkit.common.installation.InstallationItem;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.common.lm.ILC;
 import org.tigris.mtoolkit.common.model.BundleInfo;
+import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
@@ -277,7 +276,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
               if (bundle != null) {
                 try {
                   subMonitor.setTaskName(NLS.bind(Messages.start_bundle_operation_title, bundle.getSymbolicName()));
-                  startBundle(bundle, args, startBundleProgress.newChild(worked));
+                  startBundle(bundle, startBundleProgress.newChild(worked));
                 } catch (Exception e) {
                   FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
                 }
@@ -285,6 +284,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
             }
           }
         }
+        refreshPackages(connector);
       }
     } finally {
       for (int i = 0; i < items.length; i++) {
@@ -628,54 +628,32 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return null;
   }
 
-  private static void startBundle(final RemoteBundle remoteBundle, Map args, IProgressMonitor monitor)
+  private static void startBundle(final RemoteBundle remoteBundle, IProgressMonitor monitor)
       throws IAgentException {
     // Fragment bundles cannot be started
     if (remoteBundle.getType() == RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
       return;
     }
-    final String symbolicName = remoteBundle.getSymbolicName();
-    final String version = remoteBundle.getVersion();
-    final String taskName = NLS.bind("Starting bundle {0}({1})", symbolicName, version);
-    final Runnable startBundle = new Runnable() {
-      /* (non-Javadoc)
-       * @see java.lang.Runnable#run()
-       */
-      public void run() {
-        int flags = FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY : 0;
-        try {
-          remoteBundle.start(flags);
-        } catch (IAgentException e) {
-          // only log this exception, because the user requested install bundle
-          StatusManager.getManager().handle(Util.handleIAgentException(e), StatusManager.LOG);
-        }
-      }
-    };
+    if (monitor.isCanceled()) {
+      return;
+    }
     try {
-      if (Boolean.TRUE.equals(args.get(InstallationConstants.START_BUNDLES_SEQ))) {
-        monitor.setTaskName(taskName);
-        if (monitor.isCanceled()) {
-          return;
-        }
-        startBundle.run();
-      } else {
-        Job job = new Job(taskName) {
-          /* (non-Javadoc)
-           * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-           */
-          @Override
-          public IStatus run(IProgressMonitor monitor) {
-            startBundle.run();
-            if (monitor.isCanceled()) {
-              return Status.CANCEL_STATUS;
-            }
-            return Status.OK_STATUS;
-          }
-        };
-        job.schedule();
-      }
+      final String symbolicName = remoteBundle.getSymbolicName();
+      final String version = remoteBundle.getVersion();
+      monitor.setTaskName(NLS.bind("Starting bundle {0}({1})", symbolicName, version));
+      final int flags = FrameworkPreferencesPage.isActivationPolicyEnabled() ? Bundle.START_ACTIVATION_POLICY : 0;
+      remoteBundle.start(flags);
     } finally {
       monitor.done();
+    }
+  }
+
+  private void refreshPackages(DeviceConnector connector) {
+    try {
+      final DeploymentManager manager = connector.getDeploymentManager();
+      manager.refreshPackages();
+    } catch (IAgentException e) {
+      FrameworkPlugin.log(Util.newStatus(IStatus.ERROR, e.getMessage(), e));
     }
   }
 

@@ -806,6 +806,24 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#refreshPackages()
+   */
+  public Object refreshPackages() {
+    if (DebugUtils.DEBUG_ENABLED) {
+      DebugUtils.debug(this, "[refreshPackages]");
+    }
+    PackageAdmin admin = (PackageAdmin) packageAdminTrack.getService();
+    if (admin == null) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[refreshPackages] No packageAdmin");
+      }
+    } else {
+      admin.refreshPackages(null);
+    }
+    return null;
+  }
+
   public static int getBundleErrorCode(BundleException e) {
     int code;
     try {
