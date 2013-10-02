@@ -26,7 +26,7 @@ public final class RemoteServiceListenerTest extends ServiceManagerTestCase impl
     RemoteServiceEvent registeredEvent = findEvent(TEST_SERVICE_CLASS, RemoteServiceEvent.REGISTERED);
     sleep(SLEEP_INTERVAL);
     assertNotNull("Service Registered event not appear!", registeredEvent);
-    assertNotNull(registeredEvent.getService());
+    assertNotNull("Service object associated with the event should be non-null", registeredEvent.getService());
 
     events.clear();
     RemoteBundle bundle2 = installBundle("test_listener_service.jar");
@@ -34,18 +34,24 @@ public final class RemoteServiceListenerTest extends ServiceManagerTestCase impl
     sleep(SLEEP_INTERVAL);
     RemoteServiceEvent modifiedEvent = findEvent(TEST_SERVICE_CLASS, RemoteServiceEvent.MODIFIED);
     assertNotNull("Service Modify event not appear!", modifiedEvent);
-    assertEquals(registeredEvent.getService().getServiceId(), modifiedEvent.getService().getServiceId());
-    assertEquals(registeredEvent.getService().getObjectClass(), modifiedEvent.getService().getObjectClass());
-    assertNotNull(modifiedEvent.getService());
+    assertNotNull("Service object associated with the Service Modify event should be non-null",
+        modifiedEvent.getService());
+    assertEquals("The result from calling getServiceId() from Registered and Modified event should be the same",
+        registeredEvent.getService().getServiceId(), modifiedEvent.getService().getServiceId());
+    assertEquals("The result from calling getObjectClass() from Registered and Modified event should be the same",
+        registeredEvent.getService().getObjectClass(), modifiedEvent.getService().getObjectClass());
 
     events.clear();
     bundle1.stop(0);
     sleep(SLEEP_INTERVAL);
     RemoteServiceEvent unregisteredEvent = findEvent(TEST_SERVICE_CLASS, RemoteServiceEvent.UNREGISTERED);
     assertNotNull("Service Unregistered event not appear!", unregisteredEvent);
-    assertNotNull(unregisteredEvent.getService());
-    assertEquals(registeredEvent.getService().getServiceId(), unregisteredEvent.getService().getServiceId());
-    assertEquals(registeredEvent.getService().getObjectClass(), unregisteredEvent.getService().getObjectClass());
+    assertNotNull("RemoteService object associated with Service Unregistered event should be non-null",
+        unregisteredEvent.getService());
+    assertEquals("The result from calling getServiceId() from Registered and Unregistered event should be the same",
+        registeredEvent.getService().getServiceId(), unregisteredEvent.getService().getServiceId());
+    assertEquals("The result from calling getObjectClass() from Registered and Unregistered event should be the same",
+        registeredEvent.getService().getObjectClass(), unregisteredEvent.getService().getObjectClass());
 
     removeRemoteServiceListener(this);
     events.clear();

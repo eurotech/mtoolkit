@@ -29,7 +29,7 @@ public class ApplicationTestCase extends DeploymentTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		appManager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());
-		assertNotNull(appManager);
+    assertNotNull("The result from calling getManager() should be non-null", appManager);
 		bundleAppsListener = installBundle(BUNDLE_APPS_LISTENER_NAME);
 		bundleAppsListener.start(0);
 	}

@@ -42,13 +42,13 @@ public class RemoteDPListenerTest extends DeploymentTestCase implements RemoteDP
     RemoteDP dp = installDeploymentPackage("test.depl.p1_1.0.0.dp");
     sleep(SLEEP_INTERVAL);
     RemoteDPEvent event = findEvent(RemoteDPEvent.INSTALLED);
-    assertNotNull(event);
+    assertNotNull("The result calling find installed event should be non-null", event);
     assertEquals(dp, event.getDeploymentPackage());
 
     dp.uninstall(false);
     sleep(SLEEP_INTERVAL);
     event = findEvent(RemoteDPEvent.UNINSTALLED);
-    assertNotNull(event);
+    assertNotNull("The result calling find uninstalled event should be non-null", event);
     assertEquals(dp, event.getDeploymentPackage());
   }
 
@@ -59,8 +59,10 @@ public class RemoteDPListenerTest extends DeploymentTestCase implements RemoteDP
     if (expected == null || actual == null) {
       throw new AssertionFailedError("Expected: " + expected + " but was: " + actual);
     }
-    assertEquals(expected.getName(), actual.getName());
-    assertEquals(expected.getVersion(), actual.getVersion());
+    assertEquals("The name of the expected and actual deployment packages should be the same",
+        expected.getName(), actual.getName());
+    assertEquals("The version of the expected and actual deployment packages should be the same",
+        expected.getVersion(), actual.getVersion());
   }
 
   private void sleep(long time) {

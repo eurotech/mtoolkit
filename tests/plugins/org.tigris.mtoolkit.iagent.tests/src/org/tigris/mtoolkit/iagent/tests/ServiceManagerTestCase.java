@@ -141,16 +141,16 @@ public class ServiceManagerTestCase extends DeploymentTestCase {
     }
   }
 
-  protected static void assertEquals(Object[] expected, Object[] actual) {
+  protected static void assertEquals(String message, Object[] expected, Object[] actual) {
     if (expected == actual) {
       return;
     }
     if (expected == null || actual == null) {
       throw new AssertionFailedError("Expected " + expected + ", but was " + actual);
     }
-    assertEquals(expected.length, actual.length);
+    assertEquals(message, expected.length, actual.length);
     for (int i = 0; i < actual.length; i++) {
-      assertEquals(expected[i], actual[i]);
+      assertEquals(message, expected[i], actual[i]);
     }
   }
 }

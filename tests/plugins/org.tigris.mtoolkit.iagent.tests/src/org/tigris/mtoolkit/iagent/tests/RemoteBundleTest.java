@@ -40,57 +40,59 @@ public class RemoteBundleTest extends DeploymentTestCase {
   }
 
   public void testGetSymbolicName() throws IAgentException {
-    assertNotNull(bundle);
-    assertEquals("test.bundle.b1", bundle.getSymbolicName());
+    assertNotNull("The bundle should be non-null", bundle);
+    assertEquals("Installed bundle must be with the given name", "test.bundle.b1", bundle.getSymbolicName());
   }
 
   public void testGetVersion() throws IAgentException {
-    assertNotNull(bundle);
-    assertEquals("1.0.0", bundle.getVersion());
+    assertNotNull("The bundle should be non-null", bundle);
+    assertEquals("Installed bundle must be with the given version", "1.0.0", bundle.getVersion());
   }
 
   public void testGetHeaders() throws IAgentException {
     Dictionary dict = bundle.getHeaders(null);
     String value = (String) dict.get("Localized-Header");
-    assertEquals("Default localization", value);
+    assertEquals("Installed bundle must be with default localization", "Default localization", value);
 
     dict = bundle.getHeaders("");
     value = (String) dict.get("Localized-Header");
-    assertEquals("%localized", value);
+    assertEquals("The value of the header 'Localized-Header' should be '%localized'", "%localized", value);
 
     dict = bundle.getHeaders("de");
     value = (String) dict.get("Localized-Header");
-    assertEquals("German localization", value);
+    assertEquals("The value of the header 'Localized-Header' should be 'German localization'", "German localization",
+        value);
   }
 
   public void testGetHeader() throws IAgentException {
     String value = bundle.getHeader("Localized-Header", null);
-    assertEquals("Default localization", value);
+    assertEquals("Installed bundle must be with default localization", "Default localization", value);
 
     value = bundle.getHeader("Localized-Header", "");
-    assertEquals("%localized", value);
+    assertEquals("The value of the header 'Localized-Header' should be '%localized'", "%localized", value);
 
     value = bundle.getHeader("Localized-Header", "de");
-    assertEquals("German localization", value);
+    assertEquals("The value of the header 'Localized-Header' should be 'German localization'", "German localization",
+        value);
   }
 
   public void testGetLocation() throws IAgentException {
     RemoteBundle[] bundles = commands.getBundles(bundle.getSymbolicName(), bundle.getVersion());
-    assertNotNull(bundles);
-    assertEquals(1, bundles.length);
-    assertEquals(bundle.getLocation(), bundles[0].getLocation());
+    assertNotNull("The result from calling getBundles() should be non-null", bundles);
+    assertEquals("Get bundles length must be 1", 1, bundles.length);
+    assertEquals("The bundle location should be the same", bundle.getLocation(), bundles[0].getLocation());
   }
 
   public void testStartStop() throws IAgentException {
-    assertTrue(bundle.getState() != Bundle.ACTIVE);
+    assertTrue("Bundle state should not be active", bundle.getState() != Bundle.ACTIVE);
 
     bundle.start(0);
 
-    assertEquals(Bundle.ACTIVE, bundle.getState());
+    assertEquals("Bundle state must be active", Bundle.ACTIVE, bundle.getState());
 
     bundle.stop(0);
 
-    assertEquals(Bundle.RESOLVED, bundle.getState());
+    assertEquals("Bundle state must be resolved", Bundle.RESOLVED, bundle.getState());
   }
 
   public void testUpdate() throws IAgentException {
@@ -98,7 +100,7 @@ public class RemoteBundleTest extends DeploymentTestCase {
 
     bundle.update(input);
 
-    assertEquals("1.0.1", bundle.getVersion());
+    assertEquals("Bundle version must be 1.0.1", "1.0.1", bundle.getVersion());
 
     try {
       bundle.update(null);
@@ -109,31 +111,31 @@ public class RemoteBundleTest extends DeploymentTestCase {
   }
 
   public void testUninstall() throws IAgentException {
-    assertTrue(bundle.getState() != Bundle.UNINSTALLED);
+    assertTrue("Bundle state should not be uninstalled", bundle.getState() != Bundle.UNINSTALLED);
 
     bundle.uninstall(null);
 
-    assertEquals(Bundle.UNINSTALLED, bundle.getState());
+    assertEquals("Bundle state should be uninstalled", Bundle.UNINSTALLED, bundle.getState());
   }
 
   public void testResolve() throws IAgentException {
-    assertTrue(bundle.resolve());
-    assertEquals(Bundle.RESOLVED, bundle.getState());
+    assertTrue("The bundle mast be in resolved state", bundle.resolve());
+    assertEquals("Bundle state shoulc be resolved", Bundle.RESOLVED, bundle.getState());
 
     RemoteBundle unresolvedBundle = installBundle("test.bundle.b2_1.0.0.jar");
 
-    assertFalse(unresolvedBundle.resolve());
-    assertEquals(Bundle.INSTALLED, unresolvedBundle.getState());
+    assertFalse("The bundle cannot be resolved", unresolvedBundle.resolve());
+    assertEquals("The bundle state should be installed", Bundle.INSTALLED, unresolvedBundle.getState());
   }
 
   public void testGetRegisteredService() throws IAgentException {
-    assertNotNull(bundle.getRegisteredServices());
-    assertEquals(0, bundle.getRegisteredServices().length);
+    assertNotNull("The result from calling getRegisteredServices() should be non-null", bundle.getRegisteredServices());
+    assertEquals("The registered services length should be 0", 0, bundle.getRegisteredServices().length);
 
     RemoteBundle serviceBundle = installBundle("test_register_service.jar");
-    assertNotNull(serviceBundle);
+    assertNotNull("The result from calling installBundle() should be non-null", serviceBundle);
     serviceBundle.start(0);
-    assertEquals(Bundle.ACTIVE, serviceBundle.getState());
+    assertEquals("The state of the bundle should be ACTIVE", Bundle.ACTIVE, serviceBundle.getState());
     RemoteService[] services = serviceBundle.getRegisteredServices();
 
     assertRemoteService(services, serviceBundle.getBundleId());
@@ -148,42 +150,45 @@ public class RemoteBundleTest extends DeploymentTestCase {
   }
 
   private void assertRemoteService(RemoteService[] services, long bundleId) throws IAgentException {
-    assertNotNull(services);
-    assertEquals(1, services.length);
-    assertNotNull(services[0]);
+    assertNotNull("The remote services should not be null", services);
+    assertEquals("The remote services lenght should be 1", 1, services.length);
+    assertNotNull("The first remote service from the array should not be null", services[0]);
 
     assertRemoteService(services[0], bundleId);
   }
 
   private void assertRemoteService(RemoteService service, long bundleId) throws IAgentException {
-    assertNotNull(service);
+    assertNotNull("The remote service should not be null", service);
 
     RemoteBundle registeringBundle = service.getBundle();
-    assertNotNull(registeringBundle);
-    assertEquals(bundleId, registeringBundle.getBundleId());
+    assertNotNull("The remote bundle should not be null", registeringBundle);
+    assertEquals("The result from calling getBundleId() should be ", bundleId, registeringBundle.getBundleId());
 
     String[] objectClass = service.getObjectClass();
-    assertNotNull(objectClass);
-    assertEquals(1, objectClass.length);
-    assertNotNull(objectClass[0]);
-    assertEquals(ServiceManagerTestCase.TEST_SERVICE_CLASS, objectClass[0]);
+    assertNotNull("The array containing the interfaces under which the service is registered should not be null",
+        objectClass);
+    assertEquals("The length of the array should be 1", 1, objectClass.length);
+    assertNotNull("The first interfece which the service is registered should not be null", objectClass[0]);
+    assertEquals("The interface which the service is registered should be ", ServiceManagerTestCase.TEST_SERVICE_CLASS,
+        objectClass[0]);
   }
 
   public void testGetServicesInUse() throws IAgentException {
-    assertNotNull(bundle.getServicesInUse());
-    assertEquals(0, bundle.getServicesInUse().length);
+    assertNotNull("The services, which are used by this bundle should not be null", bundle.getServicesInUse());
+    assertEquals("The result calling getServicesInUse() should be 0", 0, bundle.getServicesInUse().length);
 
     RemoteBundle serviceBundle = installBundle("test_register_service.jar");
-    assertNotNull(serviceBundle);
+    assertNotNull("The install bundle should not be null", serviceBundle);
 
     RemoteBundle listenerBundle = installBundle("test_listener_service.jar");
-    assertNotNull(listenerBundle);
+    assertNotNull("The install listener bundle should not be null", listenerBundle);
 
     serviceBundle.start(0);
     listenerBundle.start(0);
 
-    assertEquals(Bundle.ACTIVE, serviceBundle.getState());
-    assertEquals(Bundle.ACTIVE, listenerBundle.getState());
+    assertEquals("The result from calling getState() should be ACTIVE state", Bundle.ACTIVE, serviceBundle.getState());
+    assertEquals("The result from calling getState() of listener bundle should be ACTIVE state", Bundle.ACTIVE,
+        listenerBundle.getState());
 
     RemoteService[] services = listenerBundle.getServicesInUse();
     assertRemoteService(services, serviceBundle.getBundleId());
@@ -213,7 +218,7 @@ public class RemoteBundleTest extends DeploymentTestCase {
 
   private void uninstallBundleSilently(RemoteBundle bundle) throws IAgentException {
     bundle.uninstall(null);
-    assertTrue(bundle.getState() == RemoteBundle.UNINSTALLED);
+    assertTrue("The bundle state should be uninstalled", bundle.getState() == RemoteBundle.UNINSTALLED);
   }
 
   public void testIllegalStateUninstall() throws IAgentException {

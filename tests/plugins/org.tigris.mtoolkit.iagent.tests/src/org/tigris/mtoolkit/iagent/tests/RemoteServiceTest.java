@@ -102,7 +102,8 @@ public final class RemoteServiceTest extends ServiceManagerTestCase {
       serviceOld.getBundle();
       fail("An IllegalStateException should be thrown for not synchronized service");
     } catch (IAgentException e) {
-      assertEquals(IAgentErrors.ERROR_SERVICE_UNREGISTERED, e.getErrorCode());
+      assertEquals("The code error of exception should be " + IAgentErrors.ERROR_SERVICE_UNREGISTERED,
+          IAgentErrors.ERROR_SERVICE_UNREGISTERED, e.getErrorCode());
     }
     try {
       serviceOld.getObjectClass();
@@ -114,7 +115,8 @@ public final class RemoteServiceTest extends ServiceManagerTestCase {
       serviceOld.getProperties();
       fail("An IAgentException should be thrown for not synchronized service");
     } catch (IAgentException e) {
-      assertEquals(IAgentErrors.ERROR_SERVICE_UNREGISTERED, e.getErrorCode());
+      assertEquals("The code error of exception should be " + IAgentErrors.ERROR_SERVICE_UNREGISTERED,
+          IAgentErrors.ERROR_SERVICE_UNREGISTERED, e.getErrorCode());
     }
     try {
       serviceOld.getServiceId();
@@ -125,10 +127,12 @@ public final class RemoteServiceTest extends ServiceManagerTestCase {
       serviceOld.getUsingBundles();
       fail("An IAgentException should be thrown for not synchronized service");
     } catch (IAgentException e) {
-      assertEquals(IAgentErrors.ERROR_SERVICE_UNREGISTERED, e.getErrorCode());
+      assertEquals("The code error of exception should be " + IAgentErrors.ERROR_SERVICE_UNREGISTERED,
+          IAgentErrors.ERROR_SERVICE_UNREGISTERED, e.getErrorCode());
     }
     try {
-      assertFalse(serviceOld.isStale());
+      assertFalse("The result from calling isStale() should be wether the service has been unregistered",
+          serviceOld.isStale());
     } catch (IAgentException e) {
       fail("An IAgentException should be thrown for not synchronized service");
     }

@@ -19,6 +19,6 @@ public class VMManagerTest extends DeploymentTestCase {
 
 	public void testGetSystemProperty() throws Exception {
 		String javaVersion = connector.getVMManager().getSystemProperty("java.version");
-		assertNotNull(javaVersion);
+    assertNotNull("The value of system property 'java.version' should be non-null", javaVersion);
 	}
 }

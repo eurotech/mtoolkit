@@ -22,7 +22,7 @@ public class DeploymentManagerTest extends DeploymentTestCase {
 	public void testListDeploymentPackages() throws IAgentException {
 		// assume that there are no deployment packages installed
 		RemoteDP[] initialDPs = commands.listDeploymentPackages();
-		assertNotNull(initialDPs);
+    assertNotNull("The result from calling listDeploymentPackages() should be non-null", initialDPs);
 		int initialDPCount = initialDPs.length;
 
 		installDeploymentPackage("test.depl.p1_1.0.0.dp", "test.depl.p1");
@@ -48,13 +48,13 @@ public class DeploymentManagerTest extends DeploymentTestCase {
 		installDeploymentPackage("test.depl.p1_1.0.0.dp", "test.depl.p1");
 
 		RemoteDP dp = commands.getDeploymentPackage("test.depl.p1");
-		assertNotNull(dp);
-		assertEquals("test.depl.p1", dp.getName());
-		assertEquals("1.0.0", dp.getVersion());
+    assertNotNull("The result of getDeploymentPackage with given symbolic name should be non-null", dp);
+    assertEquals("Installed deployment package must be with the given name", "test.depl.p1", dp.getName());
+    assertEquals("Installed deployment package version should be 1.0.0", "1.0.0", dp.getVersion());
 
 		// invalid parameters
 		RemoteDP nonExistentDP = commands.getDeploymentPackage("non.existent.package");
-		assertNull(nonExistentDP);
+    assertNull("The result calling getDeploymentPackage() with invalid parameter should be null", nonExistentDP);
 
 		try {
 			commands.getDeploymentPackage(null);
@@ -67,8 +67,8 @@ public class DeploymentManagerTest extends DeploymentTestCase {
 	public void testInstallDeploymentPackage() throws Exception {
 		RemoteDP dp = installDeploymentPackage("test.depl.p1_1.0.0.dp", "test.depl.p1");
 		assertNotNull("The result from calling installDeploymentPackage() should be non-null", dp);
-		assertEquals("test.depl.p1", dp.getName());
-		assertEquals("1.0.0", dp.getVersion());
+    assertEquals("Installed deployment package must be with the given name", "test.depl.p1", dp.getName());
+    assertEquals("Installed deployment package version should be 1.0.0", "1.0.0", dp.getVersion());
 		assertFalse("The installed package must not be stale", dp.isStale());
 
 		try {
@@ -107,21 +107,22 @@ public class DeploymentManagerTest extends DeploymentTestCase {
 		assertEquals("The returned array must contain only one element because we have specified version",
 			1,
 			bundle.length);
-		assertEquals(bundle[0].getBundleId(), installedBundle.getBundleId());
+    assertEquals("Installed bundle and getBundles() with given name must be with equals id", bundle[0].getBundleId(),
+        installedBundle.getBundleId());
 
 		installBundle("test.bundle.b1_1.0.1.jar");
 
 		bundle = commands.getBundles("test.bundle.b1", null);
-		assertNotNull(bundle);
+    assertNotNull("The result from calling getBundles() with given symbolic name should be non-null", bundle);
 		String dpSwAdminEnable = connector.getVMManager().getSystemProperty("iagent.swadmin.deployment.support");
 		dpSwAdminEnable = dpSwAdminEnable == null ? null : dpSwAdminEnable.trim();
 		if (dpSwAdminEnable != null && dpSwAdminEnable.length() != 0 && dpSwAdminEnable.equals("true")) {
-			assertEquals(1, bundle.length);
+      assertEquals("The length of getBundles() should be 1", 1, bundle.length);
 		} else {
-			assertEquals(2, bundle.length);
+      assertEquals("The length of getBundles() should be 2", 2, bundle.length);
 		}
 		bundle = commands.getBundles("unknown.bundle.b1", null);
-		assertNull(bundle);
+    assertNull("The result from calling getBundles() with 'unknown.bundle.b1' symbolic name should be null", bundle);
 
 		try {
 			commands.getBundles(null, null);
@@ -138,32 +139,40 @@ public class DeploymentManagerTest extends DeploymentTestCase {
 		InputStream is = getClass().getClassLoader().getResourceAsStream("test.bundle.b1_1.0.0.jar");
 		RemoteBundle bundle = commands.installBundle(location, is);
 
-		assertNotNull(bundle);
-		assertTrue(bundle.getBundleId() != -1);
-		assertTrue(bundle.getState() != Bundle.UNINSTALLED);
+    assertNotNull("The result from calling installBundle() should be non-null", bundle);
+    assertTrue("The result from calling getBundleId() should not be -1", bundle.getBundleId() != -1);
+    assertTrue("The result from calling getState() should be different from UNINSTALLED",
+        bundle.getState() != Bundle.UNINSTALLED);
 
-		assertEquals("test.bundle.b1", bundle.getSymbolicName());
-		assertEquals("1.0.0", bundle.getVersion());
+    assertEquals("The result from calling getSymbolicName() should be 'test.bundle.b1'", "test.bundle.b1",
+        bundle.getSymbolicName());
+    assertEquals("The result from calling getVersionO() should be 1.0.0", "1.0.0", bundle.getVersion());
 
 		// get the bundle via list, to check the location
 		RemoteBundle[] rBundles = commands.listBundles();
 		boolean found = false;
 		for (int i = rBundles.length - 1; i >= 0; i--) {
 			if (rBundles[i].getBundleId() == bundle.getBundleId()) {
-				assertEquals(rBundles[i].getLocation(), bundle.getLocation());
+        assertEquals(
+            "The result from calling getLocation() from installed bundle and every bundle from list should be the same",
+            rBundles[i].getLocation(), bundle.getLocation());
 				found = true;
 				break;
 			}
 		}
-		assertTrue(found); // assert that the bundle is found
+    assertTrue("The result from finding bunsle with the given location should be true", found); // assert that the bundle is found
 
 		is = getClass().getClassLoader().getResourceAsStream("test.bundle.b1_1.0.1.jar");
 		RemoteBundle bundle101 = commands.installBundle(location, is); // try to
 		// update
-		assertNotNull(bundle101);
-		assertEquals(bundle.getBundleId(), bundle101.getBundleId());
-		assertEquals(bundle.getSymbolicName(), bundle101.getSymbolicName());
-		assertEquals(bundle.getVersion(), bundle101.getVersion()); // they
+    assertNotNull("The result of trying of update bundle with location '" + location + "' should be not null",
+        bundle101);
+    assertEquals("The result from calling getBundleId() for bundle and updated bundle should be the same",
+        bundle.getBundleId(), bundle101.getBundleId());
+    assertEquals("The result from calling getSymbolicName() for bundle and updated bundle should be the same",
+        bundle.getSymbolicName(), bundle101.getSymbolicName());
+    assertEquals("The result from calling getVersion() for bundle and updated bundle should be the same",
+        bundle.getVersion(), bundle101.getVersion()); // they
 		// should
 		// have the
 		// same

@@ -20,26 +20,28 @@ public class RemoteApplicationTest extends ApplicationTestCase {
 
 	public void testProperties() throws Exception {
 		RemoteBundle oneAppBundle = installBundle(ApplicationTestCase.BUNDLE_ONE_APP_NAME);
-		
+
 		RemoteApplication app = getRemoteApplication("FirstApplication");
-		
+
 		Map props = app.getProperties();
-		assertNotNull(props);
-		assertEquals("FirstApplication", props.get(Constants.SERVICE_PID));
-		assertEquals(new Long(oneAppBundle.getBundleId()), props.get("bundle.id"));
+    assertNotNull("The result from calling properties of the ApplicationDescriptor should be non-null", props);
+    assertEquals("Service's persistent identifier should be 'FirstApplication'", "FirstApplication",
+        props.get(Constants.SERVICE_PID));
+    assertEquals("The bundle.id property should be equals of the bundle id of installed bundle",
+        new Long(oneAppBundle.getBundleId()), props.get("bundle.id"));
 	}
-	
+
 	public void testState() throws Exception {
 		RemoteBundle oneAppBundle = installBundle(ApplicationTestCase.BUNDLE_ONE_APP_NAME);
-		
+
 		RemoteApplication app = getRemoteApplication("FirstApplication");
-		
-		assertEquals("INSTALLED", app.getState());
+
+    assertEquals("The result of calling getState() should be INSTALLED", "INSTALLED", app.getState());
 		app.start(null);
-		assertEquals("RUNNING", app.getState());
+    assertEquals("The result of calling getState() should be RUNNING", "RUNNING", app.getState());
 		app.stop();
-		assertEquals("INSTALLED", app.getState());
+    assertEquals("The result of calling getState() should be INSTALLED", "INSTALLED", app.getState());
 		oneAppBundle.uninstall(null);
-		assertEquals("UNINSTALLED", app.getState());
+    assertEquals("The result of calling getState() should be UNINSTALLED", "UNINSTALLED", app.getState());
 	}
 }

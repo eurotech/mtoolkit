@@ -33,46 +33,55 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
       bundle.resolve();
 
       RemoteBundleEvent[] foundEvents = findEvents(RemoteBundleEvent.INSTALLED, RemoteBundleEvent.RESOLVED);
-      assertNotNull(foundEvents);
+      assertNotNull("The result calling findEvents() for all INSTALLED and RESOLVED events should be non-null",
+          foundEvents);
       assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
       events.clear();
       bundle.start(0);
       foundEvents = findEvents(RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
-      assertNotNull(foundEvents);
+      assertNotNull("The result calling findEvents() for all STARTING and STARTED events should be non-null",
+          foundEvents);
       assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
       events.clear();
       bundle.stop(0);
       foundEvents = findEvents(RemoteBundleEvent.STOPPING, RemoteBundleEvent.STOPPED);
-      assertNotNull(foundEvents);
+      assertNotNull("The result calling findEvents() for all STOPPING and STOPPED events should be non-null",
+          foundEvents);
       assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
       events.clear();
       bundle.start(0);
       foundEvents = findEvents(RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
-      assertNotNull(foundEvents);
+      assertNotNull("The result calling findEvents() for all STARTING and STARTED events should be non-null",
+          foundEvents);
       assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
       events.clear();
       bundle.update(getClass().getClassLoader().getResourceAsStream("test_register_service.jar"));
       foundEvents = findEvents(RemoteBundleEvent.STOPPING, RemoteBundleEvent.STOPPED, RemoteBundleEvent.UNRESOLVED,
           RemoteBundleEvent.UPDATED);
-      assertNotNull(foundEvents);
+      assertNotNull(
+          "The result calling findEvents() for all STOPPING, STOPPED, UNRESOLVED and UPDATED events should be non-null",
+          foundEvents);
       assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
       foundEvents = findEvents(RemoteBundleEvent.RESOLVED, RemoteBundleEvent.STARTING, RemoteBundleEvent.STARTED);
-      assertNotNull(foundEvents);
+      assertNotNull("The result calling findEvents() for all STARTING and STARTED events should be non-null",
+          foundEvents);
       assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
       events.clear();
       bundle.uninstall(null);
       foundEvents = findEvents(RemoteBundleEvent.STOPPING, RemoteBundleEvent.STOPPED, RemoteBundleEvent.UNRESOLVED,
           RemoteBundleEvent.UNINSTALLED);
-      assertNotNull(foundEvents);
+      assertNotNull(
+          "The result calling findEvents() for all STOPPING, STOPPED, UNRESOLVED and UNINSTALLED events should be non-null",
+          foundEvents);
       assertRemoteBundle(foundEvents[0].getBundle(), bundle.getBundleId());
 
-      assertEquals(0, events.size());
+      assertEquals("The events size should be 0", 0, events.size());
 
       bundle = null;
     } finally {
@@ -88,14 +97,14 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
     try {
       events.clear();
       RemoteBundle bundle = installBundle("test.bundle.b3_1.0.0.jar");
-      assertNotNull(bundle);
+      assertNotNull("The result calling installBundle() should be non-null", bundle);
       bundle.resolve();
 
-      assertEquals(Bundle.RESOLVED, bundle.getState());
+      assertEquals("Bundle state should be RESOLVED", Bundle.RESOLVED, bundle.getState());
 
       bundle.start(Bundle.START_ACTIVATION_POLICY | Bundle.START_TRANSIENT);
 
-      assertEquals(Bundle.STARTING, bundle.getState());
+      assertEquals("The result from calling getState() should be STARTING", Bundle.STARTING, bundle.getState());
       try {
         Thread.sleep(SLEEP_INTERVAL);
       } catch (Exception e) {
@@ -104,7 +113,7 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
 
       RemoteBundleEvent foundEvent = findEvent(RemoteBundleEvent.LAZY_STARTED);
 
-      assertNotNull(foundEvent);
+      assertNotNull("The result calling findEvents() for all LAZY_STARTED events should be non-null", foundEvent);
       assertRemoteBundle(foundEvent.getBundle(), bundle.getBundleId());
       bundle.uninstall(null);
       bundle = null;
@@ -114,13 +123,12 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
   }
 
   private void assertRemoteBundle(RemoteBundle bundle, long bundleId) throws IAgentException {
-    assertNotNull(bundle);
-    assertEquals(bundleId, bundle.getBundleId());
+    assertNotNull("The bundle should be not-null", bundle);
+    assertEquals("The result from calling getBundleId() should be " + bundleId, bundleId, bundle.getBundleId());
   }
 
   public void bundleChanged(RemoteBundleEvent event) {
     synchronized (sleeper) {
-      System.out.println("============ Adding event: " + event);
       events.add(event);
       sleeper.notifyAll();
     }
@@ -165,7 +173,6 @@ public class RemoteBundleListenerTest extends DeploymentTestCase implements Remo
           // ignore
         }
       }
-      System.out.println("============== events.size() = " + events.size());
       for (Iterator it = events.iterator(); it.hasNext();) {
         RemoteBundleEvent event = (RemoteBundleEvent) it.next();
         for (int i = 0; i < types.length; i++) {
