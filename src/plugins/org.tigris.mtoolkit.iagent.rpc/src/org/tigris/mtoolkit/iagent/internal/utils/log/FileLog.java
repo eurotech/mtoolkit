@@ -12,59 +12,62 @@ package org.tigris.mtoolkit.iagent.internal.utils.log;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
 import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 
 public class FileLog implements Log {
-	private File logFile;
-	Object lock = new Object();
+  private PrintWriter out;
+  private final Object lock = new Object();
 
-	public FileLog(File logFile) {
-		if (logFile == null) {
-			throw new IllegalArgumentException("logFile is null");
-		}
-		this.logFile = logFile;
-	}
+  public FileLog(File logFile) throws IOException {
+    if (logFile == null) {
+      throw new IllegalArgumentException("logFile is null");
+    }
+    out = new PrintWriter(new FileWriter(logFile.getAbsolutePath(), true));
+  }
 
-	public void log(int severity, String msg, Throwable t) {
-		synchronized (lock) {
-			PrintWriter out = null;
-			try {
-				out = new PrintWriter(new FileWriter(logFile.getAbsolutePath(), true));
-				out.println(getDateTime() + " " + getSeverityString(severity) + msg);
-				if (t != null) {
-					out.println(DebugUtils.getStackTrace(t));
-				}
-				out.flush();
-			} catch (Exception ex) {
-				// logging failed
-			} finally {
-				if (out != null) {
-					out.close();
-				}
-			}
-		}
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.utils.log.Log#log(int, java.lang.String, java.lang.Throwable)
+   */
+  public void log(int severity, String msg, Throwable t) {
+    synchronized (lock) {
+      try {
+        out.println(getDateTime() + " " + getSeverityString(severity) + msg);
+        if (t != null) {
+          out.println(DebugUtils.getStackTrace(t));
+        }
+      } catch (Exception ex) {
+        // logging failed
+      } finally {
+        out.flush();
+      }
+    }
+  }
 
-	public void close() {
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.utils.log.Log#close()
+   */
+  public void close() {
+    out.close();
+  }
 
-	private static String getDateTime() {
-		return new Date().toString();
-	}
+  private static String getDateTime() {
+    return new Date().toString();
+  }
 
-	private static String getSeverityString(int severity) {
-		switch (severity) {
-		case INFO:
-			return "[I]";
-		case ERROR:
-			return "[E]";
-		case DEBUG:
-			return "[D]";
-		default:
-			return "[E]";
-		}
-	}
+  private static String getSeverityString(int severity) {
+    switch (severity) {
+    case INFO:
+      return "[I]";
+    case ERROR:
+      return "[E]";
+    case DEBUG:
+      return "[D]";
+    default:
+      return "[E]";
+    }
+  }
 }
