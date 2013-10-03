@@ -17,11 +17,11 @@ import java.util.List;
 
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportsHub;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 /**
  * This class represents connection to a remote OSGi framework. It is associated

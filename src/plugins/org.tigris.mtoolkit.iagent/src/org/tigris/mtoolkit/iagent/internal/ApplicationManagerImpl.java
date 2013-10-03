@@ -22,7 +22,6 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.iagent.event.RemoteApplicationEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteApplicationListener;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
@@ -32,6 +31,7 @@ import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class ApplicationManagerImpl implements ApplicationManager, IAgentManager, EventListener,
     ConnectionListener {

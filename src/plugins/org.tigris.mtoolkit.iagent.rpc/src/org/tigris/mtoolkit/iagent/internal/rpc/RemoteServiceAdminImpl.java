@@ -26,11 +26,11 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements RemoteServiceAdmin, AllServiceListener {
   private static final String  EVENT_TYPE_KEY         = "type";

@@ -15,9 +15,9 @@ import java.io.InputStream;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
-import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
+import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 import org.tigris.mtoolkit.iagent.Error;
 
 public final class DefaultDeploymentManagerDelegate implements DeploymentManagerDelegate {

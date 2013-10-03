@@ -18,10 +18,10 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteService;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.Utils;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class RemoteBundleImpl implements RemoteBundle {
   private static MethodSignature GET_SIGNER_CERTIFICATES_METHOD  = new MethodSignature("getSignerCertificates",

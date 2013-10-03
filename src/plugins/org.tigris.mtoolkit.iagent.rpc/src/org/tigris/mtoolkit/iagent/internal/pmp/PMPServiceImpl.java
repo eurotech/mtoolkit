@@ -12,11 +12,11 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 
 import java.util.Dictionary;
 
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
   protected volatile boolean running = false;

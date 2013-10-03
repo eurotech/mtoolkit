@@ -13,7 +13,7 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 class PMPInputStream extends InputStream {
 

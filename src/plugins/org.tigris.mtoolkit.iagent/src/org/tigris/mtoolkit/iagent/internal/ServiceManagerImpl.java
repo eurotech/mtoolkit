@@ -20,7 +20,6 @@ import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.ServiceManager;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
@@ -28,6 +27,7 @@ import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class ServiceManagerImpl implements ServiceManager, EventListener, ConnectionListener {
   private static MethodSignature GET_ALL_REMOTE_SERVICES_METHOD = new MethodSignature("getAllRemoteServices",

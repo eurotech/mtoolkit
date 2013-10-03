@@ -14,10 +14,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 /**
  * Helper class for reading big data (files for example) from the client

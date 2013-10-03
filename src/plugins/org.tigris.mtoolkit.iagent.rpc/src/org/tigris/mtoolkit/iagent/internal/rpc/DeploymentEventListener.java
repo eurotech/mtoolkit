@@ -22,7 +22,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public class DeploymentEventListener implements EventHandler {
   public static final String  DEPLOYMENT_EVENT             = "d_event";

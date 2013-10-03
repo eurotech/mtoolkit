@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 /**
  * The client side representation of an object located on the Framework.

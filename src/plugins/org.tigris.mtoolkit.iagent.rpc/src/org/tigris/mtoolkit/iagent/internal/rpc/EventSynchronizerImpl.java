@@ -17,9 +17,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 final class EventSynchronizerImpl implements Runnable, EventSynchronizer {
   private volatile boolean    running;

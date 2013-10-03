@@ -21,13 +21,13 @@ import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.IAProgressMonitor;
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
 import org.tigris.mtoolkit.iagent.spi.ConnectionListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.ExtConnectionFactory;
 import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public final class ConnectionManagerImpl implements ConnectionManager {

@@ -8,7 +8,7 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.internal.utils;
+package org.tigris.mtoolkit.iagent.util;
 
 import java.io.File;
 import java.io.PrintWriter;

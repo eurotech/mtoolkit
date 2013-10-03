@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.tigris.mtoolkit.iagent.internal.threadpool.ThreadPool;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.transport.TransportConnection;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public class PMPSessionThread implements Runnable {
   private static final String   EMPTY_STRING                   = new String();

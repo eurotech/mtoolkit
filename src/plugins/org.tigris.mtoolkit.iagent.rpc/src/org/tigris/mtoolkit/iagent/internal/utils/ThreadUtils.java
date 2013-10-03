@@ -12,6 +12,8 @@ package org.tigris.mtoolkit.iagent.internal.utils;
 
 import java.lang.reflect.Constructor;
 
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
+
 /**
  * @since 3.1
  */

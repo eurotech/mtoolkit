@@ -31,7 +31,6 @@ import org.tigris.mtoolkit.iagent.VMManager;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.tcp.ConnectionManagerImpl;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
@@ -47,6 +46,7 @@ import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.transport.Transport;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 /**

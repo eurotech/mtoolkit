@@ -18,8 +18,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.tigris.mtoolkit.iagent.Error;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class DefaultBundleManagerDelegate implements BundleManagerDelegate {
 	private final BundleContext bc;

@@ -14,10 +14,10 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPContext;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public class InvocationThread implements Runnable, PMPContext {
   private static final String EPMTY_STRING      = new String();

@@ -13,9 +13,9 @@ package org.tigris.mtoolkit.iagent.spi;
 import java.util.Arrays;
 
 import org.tigris.mtoolkit.iagent.IAgentException;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class MethodSignature {
   /**

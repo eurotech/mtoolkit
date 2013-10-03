@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 /**
  * Contains the methods necessary for connecting to the PMP Service and for

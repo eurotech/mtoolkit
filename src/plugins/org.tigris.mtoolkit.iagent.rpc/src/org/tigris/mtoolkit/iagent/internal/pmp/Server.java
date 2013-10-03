@@ -22,11 +22,11 @@ import org.osgi.framework.AllServiceListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
   /** constant used for the PMP configuration */

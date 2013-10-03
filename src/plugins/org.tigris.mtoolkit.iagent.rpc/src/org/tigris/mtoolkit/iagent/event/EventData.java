@@ -12,7 +12,7 @@ package org.tigris.mtoolkit.iagent.event;
 
 import java.util.Dictionary;
 
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public class EventData {
 	private Object conEvent = null;

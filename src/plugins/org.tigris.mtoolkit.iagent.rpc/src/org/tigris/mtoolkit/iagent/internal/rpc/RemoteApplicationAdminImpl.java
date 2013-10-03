@@ -32,12 +32,12 @@ import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
-import org.tigris.mtoolkit.iagent.internal.utils.DebugUtils;
 import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
+import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implements RemoteApplicationAdmin,
 ServiceTrackerCustomizer {
