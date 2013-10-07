@@ -67,12 +67,13 @@ public final class Bundle extends Model implements IconProvider {
   private Image               icon;
   private Image               oldIcon;
 
-  public Bundle(String name, RemoteBundle rBundle, int state, int type, String category, String version) throws IAgentException {
+  public Bundle(String name, RemoteBundle rBundle, int state, int type, String category, String version,
+      boolean isSigned) {
     super(name);
     Assert.isNotNull(rBundle);
     this.rBundle = rBundle;
     this.id = rBundle.getBundleId();
-    isSigned = rBundle.isBundleSigned();
+    this.isSigned = isSigned;
     // state is not get from rBundle to avoid unnecessary remote method calls
     this.state = state;
     this.type = type;

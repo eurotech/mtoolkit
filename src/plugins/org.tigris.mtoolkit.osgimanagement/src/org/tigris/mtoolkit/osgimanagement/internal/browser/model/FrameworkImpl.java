@@ -417,6 +417,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   // Overrides method in Model class
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Model#testAttribute(java.lang.Object, java.lang.String, java.lang.String)
+   */
   @Override
   public boolean testAttribute(Object target, String name, String value) {
     if (!(target instanceof org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl)) {
@@ -1198,7 +1201,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       if (bundleHash.containsKey(new Long(rBundle.getBundleId()))) {
         return;
       }
-
       if (headers == null) {
         headers = rBundle.getHeaders(null);
       }
@@ -1209,7 +1211,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       Vector categoriesNames = new Vector();
       String bundleName = getBundleName(rBundle, headers);
       String bundleVersion = (String) headers.get(Constants.BUNDLE_VERSION);
-
       if (categoryName == null) {
         categoriesNames.addElement(Messages.unknown_category_label);
       } else {
@@ -1230,8 +1231,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
             categoryHash.put(categoriesNames.elementAt(i), category);
           }
         }
+        boolean isSigned = rBundle.isBundleSigned();
         Bundle bundleMaster = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers),
-            (String) categoriesNames.elementAt(0), bundleVersion);
+            (String) categoriesNames.elementAt(0), bundleVersion, isSigned);
         Model category = (Model) categoryHash.get(categoriesNames.elementAt(0));
         category.addElement(bundleMaster);
         bundleHash.put(new Long(bundleMaster.getID()), bundleMaster);
@@ -1245,9 +1247,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         }
       } else {
         Model bundleParentModel = getBundlesNode();
-
+        boolean isSigned = rBundle.isBundleSigned();
         Bundle bundle = new Bundle(bundleName, rBundle, state, getRemoteBundleType(rBundle, headers),
-            (String) categoriesNames.elementAt(0), bundleVersion);
+            (String) categoriesNames.elementAt(0), bundleVersion, isSigned);
         bundleParentModel.addElement(bundle);
         bundleHash.put(new Long(bundle.getID()), bundle);
         if (isSystemBundle(rBundle)) {
@@ -1475,6 +1477,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener#devicePropertiesChanged(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent)
+   */
   public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
     if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
       boolean enabled = ((Boolean) e.getValue()).booleanValue();
@@ -1482,6 +1487,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
       if (Capabilities.BUNDLE_SUPPORT.equals(property)) {
         if (enabled) {
           Job addJob = new Job(Messages.retrieve_bundles_info) {
+            /* (non-Javadoc)
+             * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+             */
             @Override
             protected IStatus run(IProgressMonitor monitor) {
               int total = FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES;
@@ -1510,6 +1518,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         if (enabled) {
           supportServices = true;
           Job addJob = new Job(Messages.retrieve_services_info) {
+            /* (non-Javadoc)
+             * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+             */
             @Override
             protected IStatus run(IProgressMonitor monitor) {
               int total = FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES;
@@ -1537,6 +1548,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Framework#getConfig()
+   */
   @Override
   public IMemento getConfig() {
     return configs;
@@ -1548,6 +1562,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
    * required, then empty Map is returned.
    *
    * @return the map with certificate properties
+   */
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Framework#getSigningProperties()
    */
   @Override
   public Map getSigningProperties() {
@@ -1595,10 +1612,13 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Framework#getSignCertificateUids()
+   */
   @Override
   public List getSignCertificateUids() {
     String keys[] = configs.getAttributeKeys();
-    List result = new ArrayList();
+    List result = new ArrayList(keys.length);
     for (int i = 0; i < keys.length; i++) {
       if (keys[i].startsWith(FRAMEWORK_SIGN_CERTIFICATE_ID)) {
         String uid = configs.getString(keys[i]);
@@ -1610,6 +1630,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     return result;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Framework#setSignCertificateUids(java.util.List)
+   */
   @Override
   public void setSignCertificateUids(List uids) {
     String keys[] = configs.getAttributeKeys();
@@ -1626,6 +1649,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.Framework#createModel(java.lang.String, java.lang.String, java.lang.String)
+   */
   @Override
   public Model createModel(String mimeType, String id, String version) {
     Model model = null;
@@ -1734,7 +1760,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
    */
   public void refreshCategoryAction(final Category category) {
     Job job = new Job(Messages.refresh_bundles_info) {
-
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
@@ -1795,7 +1823,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
    */
   public void refreshObjectClassAction(final ObjectClass service) {
     Job job = new Job(Messages.refresh_bundles_info) {
-
+      /* (non-Javadoc)
+       * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
+       */
       @Override
       protected IStatus run(IProgressMonitor monitor) {
         try {
