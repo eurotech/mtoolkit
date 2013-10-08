@@ -53,7 +53,7 @@ public class DeploymentEventListener implements EventHandler {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[register] Registering Event handler for deployment package events...");
     }
-    Dictionary eventProps = new Hashtable();
+    Dictionary eventProps = new Hashtable(1, 1f);
     eventProps.put(EventConstants.EVENT_TOPIC, new String[] {
         INSTALL_EVENT_TOPIC, UNINSTALL_EVENT_TOPIC, COMPLETE_EVENT_TOPIC,
     });
@@ -182,7 +182,7 @@ public class DeploymentEventListener implements EventHandler {
   }
 
   private Dictionary convertDeploymentEvent(String symbolicName, String version, int type) {
-    Dictionary event = new Hashtable();
+    Dictionary event = new Hashtable(2, 1f);
     event.put(EVENT_TYPE_KEY, new Integer(type));
     event.put(EVENT_DEPLOYMENT_PACKAGE_KEY, new String[] {
         symbolicName, version

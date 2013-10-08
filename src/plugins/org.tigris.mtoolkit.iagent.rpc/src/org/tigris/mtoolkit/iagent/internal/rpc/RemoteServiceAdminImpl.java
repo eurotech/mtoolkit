@@ -239,8 +239,8 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
       return null;
     }
 
-    Dictionary props = new Hashtable();
     String[] keys = ref.getPropertyKeys();
+    Dictionary props = new Hashtable(keys.length, 1f);
     for (int i = 0; i < keys.length; i++) {
       Object prop = ref.getProperty(keys[i]);
       props.put(keys[i], convertProperty(prop));
@@ -360,7 +360,7 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
   }
 
   private Dictionary convertServiceEvent(ServiceEvent event) {
-    Dictionary props = new Hashtable();
+    Dictionary props = new Hashtable(3, 1f);
     switch (event.getType()) {
     case ServiceEvent.REGISTERED:
       props.put(EVENT_TYPE_KEY, SERVICE_REGISTERED);
@@ -383,7 +383,7 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
     }
     Dictionary[] refsProps = new Dictionary[refs.length];
     for (int i = 0; i < refs.length; i++) {
-      refsProps[i] = new Hashtable();
+      refsProps[i] = new Hashtable(2, 1f);
       refsProps[i].put(Constants.SERVICE_ID, refs[i].getProperty(Constants.SERVICE_ID));
       refsProps[i].put(Constants.OBJECTCLASS, refs[i].getProperty(Constants.OBJECTCLASS));
     }

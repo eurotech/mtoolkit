@@ -142,11 +142,8 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
       DebugUtils.debug(this, "[listDeploymentPackages] >>>");
     }
     DeploymentAdmin admin = internalGetDeploymentAdmin();
-
     DeploymentPackage[] packages = admin.listDeploymentPackages();
-
-    Dictionary result = new Hashtable();
-
+    Dictionary result = new Hashtable(packages.length, 1f);
     for (int i = 0; i < packages.length; i++) {
       DeploymentPackage dp = packages[i];
       result.put(dp.getName(), dp.getVersion().toString());
@@ -190,8 +187,7 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
       return null;
     }
     BundleInfo[] bundleInfos = dp.getBundleInfos();
-
-    Dictionary result = new Hashtable();
+    Dictionary result = new Hashtable(bundleInfos.length, 1f);
     for (int i = 0; i < bundleInfos.length; i++) {
       BundleInfo bundleInfo = bundleInfos[i];
       result.put(bundleInfo.getSymbolicName(), bundleInfo.getVersion().toString());
@@ -380,7 +376,7 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
 
   public Class[] remoteInterfaces() {
     return new Class[] {
-        RemoteDeploymentAdmin.class
+      RemoteDeploymentAdmin.class
     };
   }
 

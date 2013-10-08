@@ -171,7 +171,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       return null;
     }
     Dictionary headers = bundle.getHeaders(locale);
-    Dictionary converted = new Hashtable();
+    Dictionary converted = new Hashtable(headers.size(), 1f);
     for (Enumeration e = headers.keys(); e.hasMoreElements();) {
       Object key = e.nextElement();
       converted.put(key.toString(), headers.get(key).toString());
@@ -410,7 +410,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     long[] ids = listBundles();
     List snapshots = new ArrayList();
     for (int i = 0; i < ids.length; i++) {
-      Dictionary bundleInfo = new Hashtable();
+      Dictionary bundleInfo = new Hashtable(5, 1f);
       bundleInfo.put(KEY_BUNDLE_ID, new Long(ids[i]));
       if ((includeOptions & INCLUDE_BUNDLE_HEADERS) != 0) {
         Dictionary headers = getBundleHeaders(ids[i], null);
@@ -724,7 +724,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
   }
 
   private Dictionary convertBundleEvent(BundleEvent bEvent) {
-    Dictionary event = new Hashtable();
+    Dictionary event = new Hashtable(2, 1f);
     event.put(EVENT_TYPE_KEY, new Integer(bEvent.getType()));
     event.put(EVENT_BUNDLE_ID_KEY, new Long(bEvent.getBundle().getBundleId()));
     return event;
@@ -878,8 +878,8 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       return null;
     }
     Map signers = bundle.getSignerCertificates(Bundle.SIGNERS_ALL);
-    Dictionary extMap = new Hashtable();
     Iterator keys = signers.keySet().iterator();
+    Dictionary extMap = new Hashtable(signers.size(), 1f);
     while (keys.hasNext()) {
       X509Certificate cert = (X509Certificate) keys.next();
       List chain = (List) signers.get(cert);

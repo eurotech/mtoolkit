@@ -24,56 +24,59 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 
 public class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implements RemoteCapabilitiesManager {
 
-	private static final String PROPERTY_EVENT = "iagent_property_event";
-	private static final String EVENT_CAPABILITY_NAME = "capability.name";
-	private static final String EVENT_CAPABILITY_VALUE = "capability.value";
+  private static final String PROPERTY_EVENT         = "iagent_property_event";
+  private static final String EVENT_CAPABILITY_NAME  = "capability.name";
+  private static final String EVENT_CAPABILITY_VALUE = "capability.value";
 
-	BundleContext bc;
-	private ServiceRegistration registration;
-	private Hashtable capabilities = new Hashtable();
+  BundleContext               bc;
+  private ServiceRegistration registration;
+  private Hashtable           capabilities           = new Hashtable(10, 1f);
 
-	public Class[] remoteInterfaces() {
-		return new Class[] { RemoteCapabilitiesProvider.class, RemoteCapabilitiesManager.class };
-	}
+  public Class[] remoteInterfaces() {
+    return new Class[] {
+        RemoteCapabilitiesProvider.class, RemoteCapabilitiesManager.class
+    };
+  }
 
-	public void register(BundleContext bundleContext) {
-		this.bc = bundleContext;
-		initCapabilities();
+  public void register(BundleContext bundleContext) {
+    this.bc = bundleContext;
+    initCapabilities();
 
-		registration = bc.registerService(new String[] { RemoteCapabilitiesProvider.class.getName(),
-				RemoteCapabilitiesManager.class.getName() }, this, null);
-	}
+    registration = bc.registerService(new String[] {
+        RemoteCapabilitiesProvider.class.getName(), RemoteCapabilitiesManager.class.getName()
+    }, this, null);
+  }
 
-	public void unregister(BundleContext bundleContext) {
-		if (registration != null) {
-			registration.unregister();
-			registration = null;
-		}
+  public void unregister(BundleContext bundleContext) {
+    if (registration != null) {
+      registration.unregister();
+      registration = null;
+    }
 
-		this.bc = null;
-	}
+    this.bc = null;
+  }
 
-	private void initCapabilities() {
-		capabilities.clear();
-	}
+  private void initCapabilities() {
+    capabilities.clear();
+  }
 
-	public Map getCapabilities() {
-		return (Map) capabilities.clone();
-	}
+  public Map getCapabilities() {
+    return (Map) capabilities.clone();
+  }
 
-	public void setCapability(String capability, Object value) {
-		capabilities.put(capability, value);
+  public void setCapability(String capability, Object value) {
+    capabilities.put(capability, value);
 
-		EventSynchronizer synchronizer = Activator.getSynchronizer();
-		if (synchronizer != null) {
-			Dictionary pmpEventData = new Hashtable();
-			pmpEventData.put(EVENT_CAPABILITY_NAME, capability);
-			pmpEventData.put(EVENT_CAPABILITY_VALUE, value);
-			synchronizer.enqueue(new EventData(pmpEventData, PROPERTY_EVENT));
-		}
-	}
+    EventSynchronizer synchronizer = Activator.getSynchronizer();
+    if (synchronizer != null) {
+      Dictionary pmpEventData = new Hashtable(2, 1f);
+      pmpEventData.put(EVENT_CAPABILITY_NAME, capability);
+      pmpEventData.put(EVENT_CAPABILITY_VALUE, value);
+      synchronizer.enqueue(new EventData(pmpEventData, PROPERTY_EVENT));
+    }
+  }
 
-	protected ServiceRegistration getServiceRegistration() {
-		return registration;
-	}
+  protected ServiceRegistration getServiceRegistration() {
+    return registration;
+  }
 }

@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -40,7 +41,7 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implements RemoteApplicationAdmin,
-ServiceTrackerCustomizer {
+    ServiceTrackerCustomizer {
 
   private static final String OSGI_APPLICATION_PACKAGE = "org.osgi.service.application.";
   private static final String APPLICATION_DESCRIPTOR   = OSGI_APPLICATION_PACKAGE + "ApplicationDescriptor";
@@ -70,7 +71,7 @@ ServiceTrackerCustomizer {
 
   public Class[] remoteInterfaces() {
     return new Class[] {
-        RemoteApplicationAdmin.class
+      RemoteApplicationAdmin.class
     };
   }
 
@@ -270,7 +271,7 @@ ServiceTrackerCustomizer {
   }
 
   private Dictionary convertApplicationEvent(String applicationId, int type) {
-    Dictionary event = new Hashtable();
+    Dictionary event = new Hashtable(2, 1f);
     event.put(EVENT_TYPE_KEY, new Integer(type));
     event.put(EVENT_APPLICATION_ID_KEY, applicationId);
     return event;
@@ -305,9 +306,9 @@ ServiceTrackerCustomizer {
 
   private Object invokeMethod1(Object obj, String method, Class paramType, Object param) throws Exception {
     return invokeMethodn(obj, method, new Class[] {
-        paramType
+      paramType
     }, new Object[] {
-        param
+      param
     });
   }
 
@@ -399,7 +400,7 @@ ServiceTrackerCustomizer {
       return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Cannot get properties: " + DebugUtils.toString(e),
           DebugUtils.getStackTrace(e));
     }
-    return new Hashtable();
+    return Collections.EMPTY_MAP;
   }
 
   protected ServiceRegistration getServiceRegistration() {
@@ -407,8 +408,8 @@ ServiceTrackerCustomizer {
   }
 
   private Map getReferenceProperties(ServiceReference ref) {
-    Map props = new Hashtable();
     String[] keys = ref.getPropertyKeys();
+    Map props = new Hashtable(keys.length, 1f);
     for (int i = 0; i < keys.length; i++) {
       Object value = ref.getProperty(keys[i]);
       if (value != null) {
@@ -419,8 +420,8 @@ ServiceTrackerCustomizer {
   }
 
   private Map convertProperties(Map props) {
-    Map result = new Hashtable();
     Set keys = props.keySet();
+    Map result = new Hashtable(keys.size(), 1f);
     Iterator iterator = keys.iterator();
     while (iterator.hasNext()) {
       Object key = iterator.next();
