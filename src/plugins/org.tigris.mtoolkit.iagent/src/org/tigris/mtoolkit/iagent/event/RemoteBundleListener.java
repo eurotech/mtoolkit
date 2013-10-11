@@ -10,21 +10,25 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
+import java.util.EventListener;
+
+import org.tigris.mtoolkit.iagent.DeploymentManager;
+
 /**
  * Clients interested in remote bundle events must implement this interface. The
  * listeners must be added to the listeners list via
  * {@link DeploymentManager#addRemoteBundleListener(RemoteBundleListener)}
  * method.
- * 
+ *
  * @author Danail Nachev
- * 
+ *
  */
-public interface RemoteBundleListener {
+public interface RemoteBundleListener extends EventListener {
 
 	/**
 	 * Sent when remote bundle is changed in some way (installed, updated,
 	 * uninstalled, etc.).
-	 * 
+	 *
 	 * @param event
 	 *            an event object containing details
 	 */

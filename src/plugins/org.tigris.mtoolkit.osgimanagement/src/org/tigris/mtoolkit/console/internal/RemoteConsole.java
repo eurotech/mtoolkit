@@ -34,6 +34,7 @@ import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.console.IOConsole;
 import org.eclipse.ui.console.IOConsoleOutputStream;
 import org.eclipse.ui.part.IPageBookViewPage;
+import org.tigris.mtoolkit.iagent.DeviceConnectionEvent;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -225,17 +226,13 @@ public final class RemoteConsole extends IOConsole implements IConsole, DeviceCo
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#deviceConnectionEvent(org.tigris.mtoolkit.iagent.DeviceConnectionEvent)
    */
-  public void connected(DeviceConnector connector) {
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
-   */
-  public void disconnected(DeviceConnector connector) {
-    if (connector != null && connector.equals(this.connector)) {
-      disconnect();
+  public void deviceConnectionEvent(DeviceConnectionEvent event) {
+    if (event.getType() == DeviceConnectionEvent.DISCONNECTED) {
+      if (event.getConnector().equals(this.connector)) {
+        disconnect();
+      }
     }
   }
 

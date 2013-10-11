@@ -10,6 +10,9 @@
  ****************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
+import java.util.EventListener;
+
+import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 
 /**
@@ -18,16 +21,16 @@ import org.tigris.mtoolkit.iagent.IAgentException;
  * {@link DeviceConnector#addRemoteDevicePropertyListener(RemoteDevicePropertyListener)
  * method.
  */
-public interface RemoteDevicePropertyListener {
+public interface RemoteDevicePropertyListener extends EventListener {
 
 	/**
 	 * Sent when remote device properties are changed in some way (no more
 	 * console is available, or eventAdmin service is registered/unregistered,
 	 * etc.).
-	 * 
+	 *
 	 * @param event
 	 *            an event object containing details
-	 * @throws IAgentException 
+	 * @throws IAgentException
 	 */
 	public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException;
 }

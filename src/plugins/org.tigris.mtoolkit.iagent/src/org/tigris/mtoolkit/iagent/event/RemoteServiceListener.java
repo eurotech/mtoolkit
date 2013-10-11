@@ -10,22 +10,24 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
+import java.util.EventListener;
+
+import org.tigris.mtoolkit.iagent.ServiceManager;
+
 /**
  * Clients which are interested in remote service events must implement this
  * interface and add itself as interested parties in listeners list via
  * {@link ServiceManager#addRemoteServiceListener(RemoteServiceListener)}
- * 
+ *
  * @author Danail Nachev
- * 
+ *
  */
-public interface RemoteServiceListener {
-
+public interface RemoteServiceListener extends EventListener {
 	/**
 	 * Sent when a remote service is changed.
-	 * 
+	 *
 	 * @param event
 	 *            an object describing details about the event
 	 */
 	void serviceChanged(RemoteServiceEvent event);
-
 }

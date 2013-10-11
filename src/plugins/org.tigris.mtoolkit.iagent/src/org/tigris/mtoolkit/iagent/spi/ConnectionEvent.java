@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
+import java.util.EventObject;
 
 /**
  * Event, fired when change in the state of internal connection occur
- * 
+ *
  */
-public class ConnectionEvent {
-
+public final class ConnectionEvent extends EventObject {
 	/**
 	 * Event type, indicating a connection was established.
 	 */
@@ -28,18 +28,19 @@ public class ConnectionEvent {
 	 */
 	public final static int DISCONNECTED = 2;
 
-	private int type;
+  private final int                type;
 
-	private AbstractConnection connection;
+  private final AbstractConnection connection;
 
 	public ConnectionEvent(int type, AbstractConnection connection) {
+    super(connection);
 		this.type = type;
 		this.connection = connection;
 	}
 
 	/**
 	 * Returns the type of the event
-	 * 
+	 *
 	 * @return
 	 */
 	public int getType() {
@@ -48,13 +49,16 @@ public class ConnectionEvent {
 
 	/**
 	 * Returns the associated connection
-	 * 
+	 *
 	 * @return
 	 */
 	public AbstractConnection getConnection() {
 		return connection;
 	}
 
+  /* (non-Javadoc)
+   * @see java.util.EventObject#toString()
+   */
 	public String toString() {
 		return "ConnectionEvent[type=" + convertType(type) + "; connection=" + connection + "]";
 	}
@@ -69,5 +73,4 @@ public class ConnectionEvent {
 			return "UNKNOWN(" + type + ")";
 		}
 	}
-
 }

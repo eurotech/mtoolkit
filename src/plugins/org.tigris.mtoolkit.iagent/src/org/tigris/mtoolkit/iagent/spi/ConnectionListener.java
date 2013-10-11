@@ -10,21 +10,21 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.spi;
 
+import java.util.EventListener;
+
 
 /**
  * Listeners implementing this interface will be notified for changes in the
  * state of the underlying connections.
- * 
+ *
  * @author Danail Nachev
- * 
+ *
  */
-public interface ConnectionListener {
-
+public interface ConnectionListener extends EventListener {
 	/**
 	 * Called when a change in the state of a connection occur
-	 * 
+	 *
 	 * @param event
 	 */
 	public void connectionChanged(ConnectionEvent event);
-
 }

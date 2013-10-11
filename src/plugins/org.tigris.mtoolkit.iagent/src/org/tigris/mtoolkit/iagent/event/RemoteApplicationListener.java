@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
-public interface RemoteApplicationListener {
+import java.util.EventListener;
+
+public interface RemoteApplicationListener extends EventListener {
 	/**
 	 * Sent when remote application is changed in some way (installed, started,
 	 * stopped or uninstalled).
-	 * 
+	 *
 	 * @param event
 	 *            an event object containing details
 	 */

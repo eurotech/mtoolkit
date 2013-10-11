@@ -47,7 +47,7 @@ public final class RemoteApplicationEvent extends RemoteEvent {
    *          {@link RemoteApplicationEvent#STOPPED}
    */
   public RemoteApplicationEvent(RemoteApplication application, int type) {
-    super(type);
+    super(type, application);
     this.remoteApplication = application;
   }
 
@@ -65,13 +65,6 @@ public final class RemoteApplicationEvent extends RemoteEvent {
    */
   public String toString() {
     return "RemoteBundleEvent[bundle=" + remoteApplication + ";type=" + convertType(getType()) + "]";
-  }
-
-  /* (non-Javadoc)
-   * @see java.lang.Object#hashCode()
-   */
-  public int hashCode() {
-    return super.hashCode();
   }
 
   private String convertType(int type) {

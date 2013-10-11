@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.tigris.mtoolkit.iagent.DeviceConnectionEvent;
 import org.tigris.mtoolkit.iagent.DeviceConnectionListener;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -172,35 +173,32 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#connected(org.tigris.mtoolkit.iagent.DeviceConnector)
+   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#deviceConnectionEvent(org.tigris.mtoolkit.iagent.DeviceConnectionEvent)
    */
-  public void connected(final DeviceConnector connector) {
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.DeviceConnectionListener#disconnected(org.tigris.mtoolkit.iagent.DeviceConnector)
-   */
-  public void disconnected(DeviceConnector connector) {
-    FrameworkImpl fwArr[] = FrameworksView.findFramework(connector);
-    if (fwArr == null) {
-      return;
-    }
-    for (int j = 0; j < fwArr.length; j++) {
-      FrameworkImpl fw = fwArr[j];
-      FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
-      synchronized (Framework.getLockObject(connector)) {
-        ActionsManager.disconnectConsole(fw);
-        FrameworkImpl fws[] = FrameworksView.getFrameworks();
-        if (fws != null) {
-          for (int i = 0; i < fws.length; i++) {
-            fw = fws[i];
-            if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
-              fw.disconnect();
-              fw.setPMPConnectionListener(null);
-              if (fw.isAutoConnected()) {
-                fw.dispose();
+  public void deviceConnectionEvent(DeviceConnectionEvent event) {
+    if (event.getType() == DeviceConnectionEvent.DISCONNECTED) {
+      final DeviceConnector connector = event.getConnector();
+      FrameworkImpl fwArr[] = FrameworksView.findFramework(connector);
+      if (fwArr == null) {
+        return;
+      }
+      for (int j = 0; j < fwArr.length; j++) {
+        FrameworkImpl fw = fwArr[j];
+        FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
+        synchronized (Framework.getLockObject(connector)) {
+          ActionsManager.disconnectConsole(fw);
+          FrameworkImpl fws[] = FrameworksView.getFrameworks();
+          if (fws != null) {
+            for (int i = 0; i < fws.length; i++) {
+              fw = fws[i];
+              if (fw.getConnector() != null && fw.getConnector().equals(connector)) {
+                fw.disconnect();
+                fw.setPMPConnectionListener(null);
+                if (fw.isAutoConnected()) {
+                  fw.dispose();
+                }
+                break;
               }
-              break;
             }
           }
         }

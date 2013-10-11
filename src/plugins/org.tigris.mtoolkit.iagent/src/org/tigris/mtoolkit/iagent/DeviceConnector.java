@@ -264,10 +264,10 @@ public abstract class DeviceConnector {
       try {
         switch (type) {
         case DISCONNECTED:
-          listener.disconnected(connector);
+          listener.deviceConnectionEvent(new DeviceConnectionEvent(DeviceConnectionEvent.DISCONNECTED, connector));
           break;
         case CONNECTED:
-          listener.connected(connector);
+          listener.deviceConnectionEvent(new DeviceConnectionEvent(DeviceConnectionEvent.CONNECTED, connector));
           break;
         }
       } catch (Throwable e) {

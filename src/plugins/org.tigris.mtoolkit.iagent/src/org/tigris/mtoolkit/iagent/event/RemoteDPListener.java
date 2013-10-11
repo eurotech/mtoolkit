@@ -10,20 +10,24 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.event;
 
+import java.util.EventListener;
+
+import org.tigris.mtoolkit.iagent.DeploymentManager;
+
 /**
  * Clients interested in remote deployment package events must implement this
  * interface. The listeners must be added to the listeners list via
  * {@link DeploymentManager#addRemoteDPListener(RemoteDPListener)} method.
- * 
+ *
  * @author Danail Nachev
- * 
+ *
  */
-public interface RemoteDPListener {
+public interface RemoteDPListener extends EventListener {
 
 	/**
 	 * Sent when remote deployment package has been installed/uninstalled or
 	 * changed in some other way.
-	 * 
+	 *
 	 * @param event
 	 *            an object containing details about the event
 	 */

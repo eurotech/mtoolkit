@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 ProSyst Software GmbH and others.
+ * Copyright (c) 2005, 2013 ProSyst Software GmbH and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,33 +8,31 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.event;
+package org.tigris.mtoolkit.iagent;
 
 import java.util.EventObject;
 
-/**
- * Common class for remote events.
- *
- * @author Danail Nachev
- *
- */
-public abstract class RemoteEvent extends EventObject {
-  public static final Object NO_SOURCE = new Object();
+public final class DeviceConnectionEvent extends EventObject {
+  public static final int       CONNECTED    = 1 << 0;
+  public static final int       DISCONNECTED = 1 << 1;
 
-  private final int           type;
+  private final int             type;
+  private final DeviceConnector connector;
 
-  public RemoteEvent(int type, Object source) {
-    super((source != null) ? source : NO_SOURCE);
+  /**
+   * @param source
+   */
+  public DeviceConnectionEvent(int type, DeviceConnector connector) {
+    super(connector);
+    this.connector = connector;
     this.type = type;
   }
 
-  /**
-   * Returns the type of the event. Specific type constants are defined in the
-   * successors of this class.
-   *
-   * @return the type of the event
-   */
   public int getType() {
     return type;
+  }
+
+  public DeviceConnector getConnector() {
+    return connector;
   }
 }
