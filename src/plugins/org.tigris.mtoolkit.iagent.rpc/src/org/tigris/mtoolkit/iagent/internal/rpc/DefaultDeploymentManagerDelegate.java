@@ -15,28 +15,22 @@ import java.io.InputStream;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
+import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
 import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
-import org.tigris.mtoolkit.iagent.Error;
 
 public final class DefaultDeploymentManagerDelegate implements DeploymentManagerDelegate {
-
 	private DeploymentAdmin dpAdmin;
 
 	public DefaultDeploymentManagerDelegate(DeploymentAdmin dpAdmin) {
 		this.dpAdmin = dpAdmin;
 	}
 
-	public boolean isSupported() {
-		return true;
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate#installDeploymentPackage(java.io.InputStream)
-	 */
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate#installDeploymentPackage(java.io.InputStream)
+   */
 	public Object installDeploymentPackage(InputStream in) {
 		try {
 			DeploymentPackage dp = dpAdmin.installDeploymentPackage(in);
@@ -47,11 +41,9 @@ public final class DefaultDeploymentManagerDelegate implements DeploymentManager
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate#uninstallDeploymentPackage(org.osgi.service.deploymentadmin.DeploymentPackage, boolean)
-	 */
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate#uninstallDeploymentPackage(org.osgi.service.deploymentadmin.DeploymentPackage, boolean)
+   */
 	public Object uninstallDeploymentPackage(DeploymentPackage dp, boolean force) {
 		if (!force) {
 			// normal
