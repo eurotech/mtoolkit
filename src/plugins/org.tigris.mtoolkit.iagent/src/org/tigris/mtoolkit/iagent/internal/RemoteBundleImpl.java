@@ -555,11 +555,6 @@ public final class RemoteBundleImpl implements RemoteBundle {
     RemoteObject admin = getBundleAdmin();
     Dictionary signerCertificates = null;
     if (Utils.isRemoteMethodDefined(admin, GET_SIGNER_CERTIFICATES_METHOD)) {
-      Object tmp = GET_SIGNER_CERTIFICATES_METHOD.call(admin, new Object[] {
-        id
-      });
-
-      System.out.println(tmp);
       signerCertificates = (Dictionary) GET_SIGNER_CERTIFICATES_METHOD.call(admin, new Object[] {
         id
       });
