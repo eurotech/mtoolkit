@@ -560,7 +560,7 @@ public final class RemoteBundleImpl implements RemoteBundle {
       });
       DebugUtils.debug(this, "[getSignerCertificates] Bundle sertificates: " + signerCertificates);
     } else {
-      DebugUtils.debug(this, "[method not found on iagent] >>>");
+      DebugUtils.debug(this, "[getSignerCertificates] method not found on iagent>>>");
     }
     return signerCertificates;
   }
@@ -580,7 +580,7 @@ public final class RemoteBundleImpl implements RemoteBundle {
       isSignerTrusted = isSignerTrustedResult.booleanValue();
       DebugUtils.debug(this, "[isSignerTrusted] Bundle signer trusted: " + isSignerTrusted);
     } else {
-      DebugUtils.debug(this, "[method not found on iagent] >>>");
+      DebugUtils.debug(this, "[isSignerTrusted] Method not found on iagent >>>");
     }
     return isSignerTrusted;
   }
