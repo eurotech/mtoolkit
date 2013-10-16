@@ -544,11 +544,9 @@ public final class RemoteBundleImpl implements RemoteBundle {
     commands.refreshPackages();
   }
 
-
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.RemoteBundle#getSignerCertificates()
    */
-  //public Dictionary getSignerCertificates() throws IAgentException {
   public Dictionary getSignerCertificates() throws IAgentException {
     DebugUtils.debug(this, "[getSignerCertificates] >>>");
     checkBundleState();
