@@ -41,9 +41,7 @@ public class DeploymentTestCase extends TestCase {
   private Set                   bundles                        = new HashSet();
 
   protected void setUp() throws Exception {
-
-    Hashtable props = new Hashtable();
-    props.put(DeviceConnector.TRANSPORT_ID, "127.0.0.1");
+    Hashtable props = new Hashtable(1, 1f);
     props.put("framework-connection-immediate", Boolean.FALSE);
     connector = DeviceConnector.connect("socket", "127.0.0.1", props, null);
     // use the fact that the same class implements both the connector and
