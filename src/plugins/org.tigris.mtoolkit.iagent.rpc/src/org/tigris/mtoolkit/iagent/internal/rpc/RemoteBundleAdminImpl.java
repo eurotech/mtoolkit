@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.zip.DeflaterOutputStream;
 
@@ -877,17 +878,15 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       }
       return null;
     }
-    Map signers = bundle.getSignerCertificates(Bundle.SIGNERS_ALL);
-    Iterator keys = signers.keySet().iterator();
-    Dictionary extMap = new Hashtable(signers.size(), 1f);
-    while (keys.hasNext()) {
-      X509Certificate cert = (X509Certificate) keys.next();
-      List chain = (List) signers.get(cert);
+    final Map signers = bundle.getSignerCertificates(Bundle.SIGNERS_ALL);
+    final Dictionary extMap = new Hashtable(signers.size(), 1f);
+    final Iterator entries = signers.entrySet().iterator();
+    while (entries.hasNext()) {
+      final Entry entry = (Entry) entries.next();
+      final X509Certificate cert = (X509Certificate) entry.getKey();
+      final List chain = (List) entry.getValue();
       List chain_mod = new ArrayList(chain.size());
-      Iterator chainIterator = chain.iterator();
-      while (chainIterator.hasNext()) {
-        chain_mod.add(chainIterator.next());
-      }
+      chain_mod.addAll(chain);
       extMap.put(cert, chain_mod);
     }
     if (DebugUtils.DEBUG_ENABLED) {
