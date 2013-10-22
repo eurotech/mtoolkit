@@ -51,7 +51,7 @@ public final class MethodSignature {
   RemoteObject                 cachedObject;
 
   public MethodSignature(String name) {
-    this(name, new String[0], true);
+    this(name, NO_ARGS, true);
   }
 
   public MethodSignature(String name, String[] parameterNames) {
@@ -82,7 +82,7 @@ public final class MethodSignature {
     this.name = name;
     this.parameterTypes = parameterNames;
     if (this.parameterTypes == null) {
-      this.parameterTypes = new String[0];
+      this.parameterTypes = NO_ARGS;
     }
     this.shouldSerialize = shouldSerialize;
   }
@@ -185,7 +185,7 @@ public final class MethodSignature {
       return null;
     }
     if (classes.length == 0) {
-      return new String[0];
+      return NO_ARGS;
     }
     String[] classNames = new String[classes.length];
     for (int i = 0; i < classes.length; i++) {
