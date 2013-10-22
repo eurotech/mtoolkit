@@ -83,21 +83,42 @@
    </extension>
    
   <extension point="org.eclipse.ui.newWizards">
-		<category
-            id="org.tigris.mtoolkit.osgi.category"
+		<category id="org.tigris.mtoolkit.osgi.category"
             name="%NewDPPWizard.category">
 		</category>
-		<wizard
-            category="org.tigris.mtoolkit.osgi.category"
+		<wizard category="org.tigris.mtoolkit.osgi.category"
             class="org.tigris.mtoolkit.common.gui.OSGiBundleWizard"
             icon="icons/obj16/newosgiprj_wiz.gif"
             id="com.prosyst.tools.builder.new.wizard"
             finalPerspective="org.eclipse.pde.ui.PDEPerspective"
+            project="true"
             name="%OSGiBundle.name">
 			<description>
             	%OSGiBundle.description
 			</description>
 		</wizard>
+	</extension>
+	
+	<extension point="org.eclipse.ui.exportWizards">
+    <wizard category="org.tigris.mtoolkit.osgi.category"
+            class="org.eclipse.pde.internal.ui.wizards.exports.PluginExportWizard"
+            icon="icons/obj16/exp_osgibundle.gif"
+            id="org.eclipse.pde.ui.pluginExportWizard"
+            name="%OSGiBundleExportWizard.label">
+      <description>
+            %OSGiBundleExportWizard.description
+      </description>
+      <selection name="plugin.xml"
+               class="org.eclipse.core.resources.IFile">
+      </selection>
+      <selection name="fragment.xml"
+               class="org.eclipse.core.resources.IFile">
+      </selection>
+      <selection class="org.eclipse.core.resources.IProject">
+      </selection>
+      <keywordReference id="org.eclipse.pde.ui.pde">
+      </keywordReference>
+    </wizard>
 	</extension>
    
 </plugin>
