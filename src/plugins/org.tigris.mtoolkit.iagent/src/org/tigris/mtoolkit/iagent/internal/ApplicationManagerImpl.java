@@ -17,7 +17,6 @@ import java.util.Map;
 
 import org.tigris.mtoolkit.iagent.ApplicationManager;
 import org.tigris.mtoolkit.iagent.Error;
-import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
 import org.tigris.mtoolkit.iagent.event.RemoteApplicationEvent;
@@ -44,23 +43,51 @@ public final class ApplicationManagerImpl implements ApplicationManager, IAgentM
   private final MethodSignature START                    = new MethodSignature("start", new Class[] {
       String.class, Map.class
                                                          });
+
   private final MethodSignature STOP                     = new MethodSignature("stop", String.class);
   private final MethodSignature GET_STATE                = new MethodSignature("getState", String.class);
   private final MethodSignature GET_PROPERTIES           = new MethodSignature("getProperties", String.class);
 
   private DeviceConnectorSpi    connectorSpi;
-  private List                  applicationListeners     = new LinkedList();
-  private boolean               addedConnectionListener;
+  private final List            applicationListeners     = new LinkedList();
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.IAgentManager#dispose()
+   */
+  public void dispose() {
+    try {
+      synchronized (applicationListeners) {
+        applicationListeners.clear();
+        PMPConnection connection = (PMPConnection) connectorSpi.getConnectionManager().getActiveConnection(
+            ConnectionManager.PMP_CONNECTION);
+        if (connection != null) {
+          DebugUtils
+              .debug(this,
+                  "[removeListeners] PMP connection is available, remove event listener for synchronous application events...");
+          connection.removeEventListener(this, new String[] {
+            SYNCH_APPLICATION_EVENT
+          });
+        }
+        DebugUtils.debug(this, "[removeListeners] application listeners removed");
+      }
+    } catch (IAgentException e) {
+      DebugUtils.error(this, "[dispose] Exception while disposing application manager", e);
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.IAgentManager#init(org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi)
+   */
+  public void init(DeviceConnectorSpi connector) {
+    this.connectorSpi = connector;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.ApplicationManager#addRemoteApplicationListener(org.tigris.mtoolkit.iagent.event.RemoteApplicationListener)
+   */
   public void addRemoteApplicationListener(RemoteApplicationListener listener) throws IAgentException {
     DebugUtils.debug(this, "[addRemoteApplicaionListener] >>> listener: " + listener);
-    synchronized (this) {
-      if (!addedConnectionListener) {
-        connectorSpi.getConnectionManager().addConnectionListener(this);
-        addedConnectionListener = true;
-        DebugUtils.debug(this, "[addRemoteBundleListener] Connection listener added");
-      }
-    }
+    connectorSpi.getConnectionManager().addConnectionListener(this);
     synchronized (applicationListeners) {
       if (!applicationListeners.contains(listener)) {
         PMPConnection connection = (PMPConnection) connectorSpi.getConnectionManager().getActiveConnection(
@@ -78,19 +105,20 @@ public final class ApplicationManagerImpl implements ApplicationManager, IAgentM
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.ApplicationManager#listApplications()
+   */
   public RemoteApplication[] listApplications() throws IAgentException {
     DebugUtils.debug(this, "[listApplications] >>>");
     String[] applicationIDs = (String[]) GET_APPLICATIONS.call(getApplicationAdmin());
-    if (applicationIDs == null) {
-      String msg = "listApplications() must not return null array. There is a problem with the transport.";
-      DebugUtils.error(this, "[listApplications] " + msg);
-      throw new IAgentException(msg, IAgentErrors.GENERAL_ERROR);
-    }
-    RemoteApplication[] applications = new RemoteApplication[applicationIDs.length];
     DebugUtils.debug(this,
         "[listApplications] Returned applications list: " + DebugUtils.convertForDebug(applicationIDs));
-    for (int i = 0; i < applicationIDs.length; i++) {
-      applications[i] = new RemoteApplicationImpl(this, applicationIDs[i]);
+    int appsLength = (applicationIDs != null) ? applicationIDs.length : 0;
+    RemoteApplication[] applications = new RemoteApplication[appsLength];
+    if (applicationIDs != null) {
+      for (int i = 0; i < applicationIDs.length; i++) {
+        applications[i] = new RemoteApplicationImpl(this, applicationIDs[i]);
+      }
     }
     return applications;
   }
@@ -119,6 +147,9 @@ public final class ApplicationManagerImpl implements ApplicationManager, IAgentM
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.EventListener#event(java.lang.Object, java.lang.String)
+   */
   public void event(Object event, String eventType) {
     try {
       DebugUtils.debug(this, "[event] >>> event: " + event + "; type: " + eventType);
@@ -136,6 +167,9 @@ public final class ApplicationManagerImpl implements ApplicationManager, IAgentM
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.ConnectionListener#connectionChanged(org.tigris.mtoolkit.iagent.spi.ConnectionEvent)
+   */
   public void connectionChanged(ConnectionEvent event) {
     DebugUtils.debug(this, "[connectionChanged] >>> event: " + event);
     if (event.getType() == ConnectionEvent.CONNECTED
@@ -155,31 +189,6 @@ public final class ApplicationManagerImpl implements ApplicationManager, IAgentM
         }
       }
     }
-  }
-
-  public void dispose() {
-    try {
-      synchronized (applicationListeners) {
-        applicationListeners.clear();
-        PMPConnection connection = (PMPConnection) connectorSpi.getConnectionManager().getActiveConnection(
-            ConnectionManager.PMP_CONNECTION);
-        if (connection != null) {
-          DebugUtils
-              .debug(this,
-                  "[removeListeners] PMP connection is available, remove event listener for synchronous application events...");
-          connection.removeEventListener(this, new String[] {
-            SYNCH_APPLICATION_EVENT
-          });
-        }
-        DebugUtils.debug(this, "[removeListeners] application listeners removed");
-      }
-    } catch (IAgentException e) {
-      DebugUtils.error(this, "[dispose] Exception while disposing application manager", e);
-    }
-  }
-
-  public void init(DeviceConnectorSpi connector) {
-    this.connectorSpi = connector;
   }
 
   public void startApplication(String applicationID, Map properties) throws IAgentException {

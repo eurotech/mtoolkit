@@ -62,22 +62,26 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
   private static final String ERROR_STATE              = "ERROR";
   private static final String UNKNOWN_STATE            = "UNKNOWN";
 
-  private ServiceRegistration registration;
+  private static final Class[] CLASSES                  = new Class[] {
+                                                         RemoteApplicationAdmin.class
+                                                       };
+
   private BundleContext       bc;
+  private ServiceRegistration registration;
   private ServiceTracker      applicationTracker;
   private ServiceTracker      handlesTracker;
-  private boolean             suppressEventFiring      = false;
-  private boolean             applicationSupport       = false;
+  private volatile boolean    suppressEventFiring      = false;
+  private volatile boolean    applicationSupport       = false;
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
+   */
   public Class[] remoteInterfaces() {
-    return new Class[] {
-      RemoteApplicationAdmin.class
-    };
+    return CLASSES;
   }
 
   public void register(BundleContext bundleContext) {
     this.bc = bundleContext;
-
     suppressEventFiring = true;
     try {
       applicationTracker = new ServiceTracker(bc, APPLICATION_DESCRIPTOR, this);
@@ -92,12 +96,14 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
     registration = bc.registerService(RemoteApplicationAdmin.class.getName(), this, null);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin#unregister(org.osgi.framework.BundleContext)
+   */
   public void unregister(BundleContext bc) {
     if (registration != null) {
       registration.unregister();
       registration = null;
     }
-
     if (applicationTracker != null) {
       applicationTracker.close();
       applicationTracker = null;
@@ -106,54 +112,34 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
       handlesTracker.close();
       handlesTracker = null;
     }
-
     setApplicationSupport(false);
-
     this.bc = null;
   }
 
-  private void setApplicationSupport(boolean enabled) {
-    applicationSupport = enabled;
-    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-    if (capMan != null) {
-      capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(enabled));
-    }
-  }
-
-  private void fireApplicationEvent(String id, int type) {
-    Dictionary event = convertApplicationEvent(id, type);
-    EventSynchronizer synchronizer = Activator.getSynchronizer();
-    if (synchronizer != null) {
-      synchronizer.enqueue(new EventData(event, SYNCH_APPLICATION_EVENT));
-    }
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin#getApplications()
+   */
   public String[] getApplications() {
     ServiceReference[] refs = applicationTracker.getServiceReferences();
     if (refs == null) {
-      return new String[0];
+      return null;
     }
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("[getApplications] " + refs.length + " applications available.");
+      DebugUtils.debug(this, "[getApplications] " + refs.length + " applications available.");
     }
     String[] ids = new String[refs.length];
     for (int i = 0; i < refs.length; i++) {
       ids[i] = (String) refs[i].getProperty(Constants.SERVICE_PID);
     }
     if (DebugUtils.DEBUG_ENABLED) {
-      debug("[getApplications] Application ids: " + DebugUtils.convertForDebug(ids));
+      DebugUtils.debug(this, "[getApplications] Application ids: " + DebugUtils.convertForDebug(ids));
     }
     return ids;
   }
 
-  private final void debug(String message) {
-    DebugUtils.debug(this, message);
-  }
-
-  private final void error(String message, Throwable e) {
-    DebugUtils.error(this, message, e);
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin#start(java.lang.String, java.util.Map)
+   */
   public Object start(String applicationID, Map properties) {
     Object descriptor = findApplicationDescriptor(applicationID);
     if (descriptor == null) {
@@ -164,6 +150,9 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
     return result;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin#stop(java.lang.String)
+   */
   public Object stop(String applicationID) {
     Object[] handles = handlesTracker.getServices();
     if (handles == null) {
@@ -179,6 +168,110 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
       }
     }
     return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin#getState(java.lang.String)
+   */
+  public String getState(String applicationId) {
+    Object descriptor = findApplicationDescriptor(applicationId);
+    if (descriptor == null) {
+      return UNINSTALLED_STATE;
+    }
+    Object[] handles = findHandles(applicationId);
+    if (handles.length == 0) {
+      return INSTALLED_STATE;
+    }
+    if (handles.length == 1) {
+      return getHandleState(handles[0]);
+    }
+    if (handles.length > 1) {
+      return MIXED_STATE;
+    }
+    return UNKNOWN_STATE;
+  }
+
+  /* (non-Javadoc)
+   * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+   */
+  public Object addingService(ServiceReference reference) {
+    if (!applicationSupport) {
+      setApplicationSupport(true);
+    }
+    Object service = bc.getService(reference);
+    if (!suppressEventFiring) {
+      if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
+        String id = getApplicationIdFromDescriptor(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_INSTALLED);
+        }
+      } else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
+        String id = getApplicationIdFromHandle(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_STARTED);
+        }
+      }
+    }
+    return service;
+  }
+
+  /* (non-Javadoc)
+   * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, T)
+   */
+  public void modifiedService(ServiceReference reference, Object service) {
+    // do nothing
+  }
+
+  /* (non-Javadoc)
+   * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, T)
+   */
+  public void removedService(ServiceReference reference, Object service) {
+    bc.ungetService(reference);
+    if (!suppressEventFiring) {
+      if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
+        String id = getApplicationIdFromDescriptor(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_UNINSTALLED);
+        }
+      } else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
+        String id = getApplicationIdFromHandle(service);
+        if (id != null) {
+          fireApplicationEvent(id, APP_STOPPED);
+        }
+      }
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin#getProperties(java.lang.String)
+   */
+  public Object getProperties(String applicationId) {
+    Object descriptor = findApplicationDescriptor(applicationId);
+    if (descriptor == null) {
+      return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application has been uninstalled");
+    }
+    try {
+      Object result = invokeMethod1(descriptor, "getProperties", String.class, null);
+      if (result instanceof Map) {
+        Map map = convertProperties((Map) result);
+        ServiceReference sr = findDescriptorReference(applicationId);
+        if (sr != null) {
+          map.putAll(getReferenceProperties(sr));
+        }
+        return map;
+      }
+    } catch (Exception e) {
+      return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Cannot get properties: " + DebugUtils.toString(e),
+          DebugUtils.getStackTrace(e));
+    }
+    return Collections.EMPTY_MAP;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin#getServiceRegistration()
+   */
+  protected ServiceRegistration getServiceRegistration() {
+    return registration;
   }
 
   private Object launchFromDescriptor(Object descriptor, Map properties) {
@@ -228,29 +321,11 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
     return null;
   }
 
-  public String getState(String applicationId) {
-    Object descriptor = findApplicationDescriptor(applicationId);
-    if (descriptor == null) {
-      return UNINSTALLED_STATE;
-    }
-    Object[] handles = findHandles(applicationId);
-    if (handles.length == 0) {
-      return INSTALLED_STATE;
-    }
-    if (handles.length == 1) {
-      return getHandleState(handles[0]);
-    }
-    if (handles.length > 1) {
-      return MIXED_STATE;
-    }
-    return UNKNOWN_STATE;
-  }
-
   private String getHandleState(Object handle) {
     try {
       return (String) invokeMethod0(handle, "getState");
     } catch (Exception e) {
-      error("Failed to get application state", e);
+      DebugUtils.error(this, "Failed to get application state", e);
       return ERROR_STATE;
     }
   }
@@ -270,11 +345,22 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
     return filtered.toArray();
   }
 
-  private Dictionary convertApplicationEvent(String applicationId, int type) {
+  private void fireApplicationEvent(String id, int type) {
     Dictionary event = new Hashtable(2, 1f);
     event.put(EVENT_TYPE_KEY, new Integer(type));
-    event.put(EVENT_APPLICATION_ID_KEY, applicationId);
-    return event;
+    event.put(EVENT_APPLICATION_ID_KEY, id);
+    EventSynchronizer synchronizer = Activator.getSynchronizer();
+    if (synchronizer != null) {
+      synchronizer.enqueue(new EventData(event, SYNCH_APPLICATION_EVENT));
+    }
+  }
+
+  private void setApplicationSupport(boolean enabled) {
+    applicationSupport = enabled;
+    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
+    if (capMan != null) {
+      capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(enabled));
+    }
   }
 
   private String getApplicationIdFromReference(ServiceReference ref) {
@@ -286,7 +372,7 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
       Object descriptor = invokeMethod0(obj, "getApplicationDescriptor");
       return getApplicationIdFromDescriptor(descriptor);
     } catch (Exception e) {
-      error("Failed to get application descriptor from " + obj, e);
+      DebugUtils.error(this, "Failed to get application descriptor from " + obj, e);
       return null;
     }
   }
@@ -295,7 +381,7 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
     try {
       return (String) invokeMethod0(obj, "getApplicationId");
     } catch (Exception e) {
-      error("Failed to get application id from " + obj, e);
+      DebugUtils.error(this, "Failed to get application id from " + obj, e);
       return null;
     }
   }
@@ -337,74 +423,6 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
     } else {
       return className.equals(value);
     }
-  }
-
-  public Object addingService(ServiceReference reference) {
-    if (!applicationSupport) {
-      setApplicationSupport(true);
-    }
-    Object service = bc.getService(reference);
-    if (!suppressEventFiring) {
-      if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
-        String id = getApplicationIdFromDescriptor(service);
-        if (id != null) {
-          fireApplicationEvent(id, APP_INSTALLED);
-        }
-      } else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
-        String id = getApplicationIdFromHandle(service);
-        if (id != null) {
-          fireApplicationEvent(id, APP_STARTED);
-        }
-      }
-    }
-    return service;
-  }
-
-  public void modifiedService(ServiceReference reference, Object service) {
-    // do nothing
-  }
-
-  public void removedService(ServiceReference reference, Object service) {
-    bc.ungetService(reference);
-    if (!suppressEventFiring) {
-      if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_DESCRIPTOR)) {
-        String id = getApplicationIdFromDescriptor(service);
-        if (id != null) {
-          fireApplicationEvent(id, APP_UNINSTALLED);
-        }
-      } else if (testObjectClass(reference.getProperty(Constants.OBJECTCLASS), APPLICATION_HANDLE)) {
-        String id = getApplicationIdFromHandle(service);
-        if (id != null) {
-          fireApplicationEvent(id, APP_STOPPED);
-        }
-      }
-    }
-  }
-
-  public Object getProperties(String applicationId) {
-    Object descriptor = findApplicationDescriptor(applicationId);
-    if (descriptor == null) {
-      return new Error(IAgentErrors.ERROR_APPLICATION_UNINSTALLED, "Application has been uninstalled");
-    }
-    try {
-      Object result = invokeMethod1(descriptor, "getProperties", String.class, null);
-      if (result instanceof Map) {
-        Map map = convertProperties((Map) result);
-        ServiceReference sr = findDescriptorReference(applicationId);
-        if (sr != null) {
-          map.putAll(getReferenceProperties(sr));
-        }
-        return map;
-      }
-    } catch (Exception e) {
-      return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Cannot get properties: " + DebugUtils.toString(e),
-          DebugUtils.getStackTrace(e));
-    }
-    return Collections.EMPTY_MAP;
-  }
-
-  protected ServiceRegistration getServiceRegistration() {
-    return registration;
   }
 
   private Map getReferenceProperties(ServiceReference ref) {

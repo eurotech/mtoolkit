@@ -21,15 +21,16 @@ import org.tigris.mtoolkit.iagent.util.DebugUtils;
  * getting references to the services registered in the Framework.
  */
 class Connection implements PMPConnection {
-  private static final String EMPTY_STRING = new String();
+  private static final String   EMPTY_STRING         = new String();
+  private static final String[] EMPTY_ARGUMENT_TYPES = new String[0];
 
-  protected volatile boolean  connected    = false;
+  protected volatile boolean    connected            = false;
 
-  protected PMPInputStream    is;
-  protected PMPOutputStream   os;
-  protected PMPSessionThread  reader;
+  protected PMPInputStream      is;
+  protected PMPOutputStream     os;
+  protected PMPSessionThread    reader;
 
-  protected PMPEventsManager  evMngr;
+  protected PMPEventsManager    evMngr;
 
   public Connection(PMPInputStream is, PMPOutputStream os, PMPSessionThread reader) {
     this.is = is;
@@ -221,9 +222,7 @@ class Connection implements PMPConnection {
   protected RemoteMethodImpl getMethod(RemoteObjectImpl ro, String name, String[] argTypes) throws PMPException {
     PMPAnswer answer = new PMPAnswer(reader);
     short msgID = 0;
-    if (argTypes == null) {
-      argTypes = new String[0];
-    }
+    argTypes = (argTypes == null) ? EMPTY_ARGUMENT_TYPES : argTypes;
     try {
       msgID = os.begin(answer);
       os.write(PMPSessionThread.GET_METHOD);
