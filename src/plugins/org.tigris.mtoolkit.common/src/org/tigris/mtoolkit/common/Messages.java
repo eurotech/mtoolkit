@@ -54,6 +54,10 @@ public class Messages {
 
   public static String        browseLabel;
 
+  public static String        OSGiBundleWizard_title;
+  public static String        OSGiBundleWizard_MainPage_title;
+  public static String        OSGiBundleWizard_MainPage_desc;
+
   static {
     NLS.initializeMessages(BUNDLE_NAME, Messages.class);
   }
