@@ -15,4 +15,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/tigris/mtoolkit/common/gui/OSGiBundleWizard.java" type="org.tigris.mtoolkit.common.gui.OSGiBundleWizard">
+        <filter id="576720909">
+            <message_arguments>
+                <message_argument value="NewPluginProjectWizard"/>
+                <message_argument value="OSGiBundleWizard"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
