@@ -56,20 +56,25 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
   public static final String    EVENT_TYPE_KEY      = "type";
   public static final String    EVENT_BUNDLE_ID_KEY = "bundle.id";
 
+  private static final Class[]  CLASSES             = new Class[] {
+                                                      RemoteBundleAdmin.class
+                                                    };
+
+  private BundleContext         bc;
+  private ServiceRegistration   registration;
   private ServiceTracker        packageAdminTrack;
   private ServiceTracker        startLevelTrack;
   private ServiceTracker        delegatesTrack;
-  private ServiceRegistration   registration;
-  private BundleContext         bc;
 
   private Bundle                systemBundle;
 
   private BundleManagerDelegate defaultDelegate;
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
+   */
   public Class[] remoteInterfaces() {
-    return new Class[] {
-      RemoteBundleAdmin.class
-    };
+    return CLASSES;
   }
 
   public void register(BundleContext bc) {
@@ -135,6 +140,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleState(long)
+   */
   public int getBundleState(long id) {
     Bundle bundle = bc.getBundle(id);
     int bundleState = bundle != null ? bundle.getState() : Bundle.UNINSTALLED;
@@ -144,6 +152,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bundleState;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleLocation(long)
+   */
   public String getBundleLocation(long id) {
     Bundle bundle = bc.getBundle(id);
     if (bundle != null) {
@@ -160,6 +171,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleHeaders(long, java.lang.String)
+   */
   public Dictionary getBundleHeaders(long id, String locale) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundleHeaders] >>> id: " + id + "; locale: " + locale);
@@ -177,13 +191,15 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       Object key = e.nextElement();
       converted.put(key.toString(), headers.get(key).toString());
     }
-
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundleHeaders] headers: " + DebugUtils.convertForDebug(converted));
     }
     return converted;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleHeader(long, java.lang.String, java.lang.String)
+   */
   public Object getBundleHeader(long id, String headerName, String locale) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundleHeader] >>> id: " + id + "; headerName" + headerName + "; locale" + locale);
@@ -205,6 +221,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bundleHeader;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#isBundleSigned(long)
+   */
   public boolean isBundleSigned(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[isBundleSigned] >>> id: " + id);
@@ -216,7 +235,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       }
       return false;
     }
-
     Map ss = bundle.getSignerCertificates(Bundle.SIGNERS_ALL);
     boolean signed = !ss.isEmpty();
     if (DebugUtils.DEBUG_ENABLED) {
@@ -225,6 +243,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return signed;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleLastModified(long)
+   */
   public long getBundleLastModified(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundleLastModified] >>> id: " + id);
@@ -246,6 +267,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bundleLastModified;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleSymbolicName(long)
+   */
   public String getBundleSymbolicName(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundleSymbolicName] >>> id: " + id);
@@ -265,6 +289,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return symbolicName;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#startBundle(long, int)
+   */
   public Object startBundle(long id, int flags) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[startBundle] >>> id: " + id + "; flags" + flags);
@@ -310,6 +337,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#stopBundle(long, int)
+   */
   public Object stopBundle(long id, int flags) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[stopBundle] id: " + id + "; flags" + flags);
@@ -355,6 +385,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#resolveBundles(long[])
+   */
   public boolean resolveBundles(long[] ids) {
     if (ids == null) {
       if (DebugUtils.DEBUG_ENABLED) {
@@ -377,7 +410,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       bs = new Bundle[v.size()];
       v.copyInto(bs);
     }
-
     PackageAdmin packageAdmin = (PackageAdmin) packageAdminTrack.getService();
     if (packageAdmin == null) {
       if (DebugUtils.DEBUG_ENABLED) {
@@ -392,6 +424,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return areBundlesResolved;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#listBundles()
+   */
   public long[] listBundles() {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[listBundles] >>>");
@@ -404,6 +439,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bids;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundlesSnapshot(int, java.util.Dictionary)
+   */
   public Object getBundlesSnapshot(int includeOptions, Dictionary properties) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundlesSnapshot] >>>");
@@ -460,6 +498,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return result;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#installBundle(java.lang.String, java.io.InputStream)
+   */
   public Object installBundle(String location, InputStream is) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[installBundle] location: " + location + "; inputStream: " + is);
@@ -480,14 +521,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bundleId;
   }
 
-  private BundleManagerDelegate getDelegate() {
-    BundleManagerDelegate delegate = (BundleManagerDelegate) delegatesTrack.getService();
-    if (delegate != null) {
-      return delegate;
-    }
-    return defaultDelegate;
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#uninstallBundle(long)
+   */
   public Object uninstallBundle(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[uninstallBundle] id: " + id);
@@ -514,6 +550,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundles(java.lang.String, java.lang.String)
+   */
   public long[] getBundles(String symbolicName, String version) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundles] symbolicName: " + symbolicName + "; version: " + version);
@@ -530,6 +569,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bids;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#updateBundle(long, java.io.InputStream)
+   */
   public Object updateBundle(long id, InputStream is) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[updateBundle] installBundle; id: " + id + "; inputStream: " + is);
@@ -554,6 +596,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getRegisteredServices(long)
+   */
   public Dictionary[] getRegisteredServices(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getRegisteredServices] id: " + id);
@@ -576,6 +621,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getUsingServices(long)
+   */
   public Dictionary[] getUsingServices(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getUsingServices] id: " + id);
@@ -602,6 +650,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getFragmentBundles(long)
+   */
   public long[] getFragmentBundles(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getFragmentBundles] id: " + id);
@@ -629,6 +680,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bids;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getHostBundles(long)
+   */
   public long[] getHostBundles(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getHostBundles] id: " + id);
@@ -655,6 +709,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bids;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleType(long)
+   */
   public int getBundleType(long id) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundleType] id: " + id);
@@ -680,17 +737,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return bundleType;
   }
 
-  static long[] convertBundlesToIds(Bundle[] bundles) {
-    if (bundles == null) {
-      return new long[0];
-    }
-    long[] bids = new long[bundles.length];
-    for (int i = 0; i < bundles.length; i++) {
-      bids[i] = bundles[i].getBundleId();
-    }
-    return bids;
-  }
-
+  /* (non-Javadoc)
+   * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
+   */
   public void bundleChanged(BundleEvent event) {
     if (systemBundle == null) {
       systemBundle = bc.getBundle(0);
@@ -724,13 +773,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
-  private Dictionary convertBundleEvent(BundleEvent bEvent) {
-    Dictionary event = new Hashtable(2, 1f);
-    event.put(EVENT_TYPE_KEY, new Integer(bEvent.getType()));
-    event.put(EVENT_BUNDLE_ID_KEY, new Long(bEvent.getBundle().getBundleId()));
-    return event;
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleByLocation(java.lang.String)
+   */
   public long getBundleByLocation(String location) {
     if (location == null) {
       throw new IllegalArgumentException("getBundleByLocation requires non-null string passed as arg");
@@ -746,6 +791,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     return -1;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getAgentData()
+   */
   public String[] getAgentData() {
     Bundle agentBundle = bc.getBundle();
     String agentVersion = (String) agentBundle.getHeaders().get(Constants.BUNDLE_VERSION);
@@ -753,7 +801,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
         Long.toString(agentBundle.getBundleId()), agentVersion
     };
     return agentData;
-
   }
 
   public int getBundleStartLevel(long id) {
@@ -766,6 +813,9 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getFrameworkStartLevel()
+   */
   public int getFrameworkStartLevel() {
     StartLevel slService = (StartLevel) startLevelTrack.getService();
     if (slService != null) {
@@ -775,15 +825,24 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getSystemProperty(java.lang.String)
+   */
   public String getSystemProperty(String name) {
-    return Activator.getBundleContext().getProperty(name);
+    return bc.getProperty(name);
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#setSystemProperty(java.lang.String, java.lang.String)
+   */
   public Object setSystemProperty(String name, String value) {
     System.setProperty(name, value);
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getBundleResource(long, java.lang.String, java.util.Dictionary)
+   */
   public Object getBundleResource(long id, String name, Dictionary properties) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getBundleResource] id: " + id);
@@ -799,7 +858,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     if (resource == null) {
       return null;
     }
-
     try {
       return resource.openStream();
     } catch (IOException e) {
@@ -823,45 +881,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       admin.refreshPackages(null);
     }
     return null;
-  }
-
-  public static int getBundleErrorCode(BundleException e) {
-    int code;
-    try {
-      Method getType = BundleException.class.getMethod("getType", null);
-      code = ((Integer) getType.invoke(e, null)).intValue();
-    } catch (Exception e1) {
-      return IAgentErrors.ERROR_BUNDLE_UNKNOWN;
-    }
-
-    switch (code) {
-    case BundleException.ACTIVATOR_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_ACTIVATOR;
-    case BundleException.DUPLICATE_BUNDLE_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_DUPLICATE;
-    case BundleException.INVALID_OPERATION:
-      return IAgentErrors.ERROR_BUNDLE_INVALID_OPERATION;
-    case BundleException.MANIFEST_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_MANIFEST;
-    case BundleException.NATIVECODE_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_NATIVECODE;
-    case BundleException.RESOLVE_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_RESOLVE;
-    case BundleException.SECURITY_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_SECURITY;
-    case BundleException.START_TRANSIENT_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_START_TRANSIENT;
-    case BundleException.STATECHANGE_ERROR:
-      return IAgentErrors.ERROR_BUNDLE_STATECHANGE;
-    case BundleException.UNSUPPORTED_OPERATION:
-      return IAgentErrors.ERROR_BUNDLE_UNSUPPORTED_OPERATION;
-    default:
-      return IAgentErrors.ERROR_BUNDLE_UNKNOWN;
-    }
-  }
-
-  protected ServiceRegistration getServiceRegistration() {
-    return registration;
   }
 
   /* (non-Javadoc)
@@ -916,4 +935,73 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
     return signed;
   }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin#getServiceRegistration()
+   */
+  protected ServiceRegistration getServiceRegistration() {
+    return registration;
+  }
+
+  static long[] convertBundlesToIds(Bundle[] bundles) {
+    if (bundles == null) {
+      return new long[0];
+    }
+    long[] bids = new long[bundles.length];
+    for (int i = 0; i < bundles.length; i++) {
+      bids[i] = bundles[i].getBundleId();
+    }
+    return bids;
+  }
+
+  public static int getBundleErrorCode(BundleException e) {
+    int code;
+    try {
+      Method getType = BundleException.class.getMethod("getType", null);
+      code = ((Integer) getType.invoke(e, null)).intValue();
+    } catch (Exception e1) {
+      return IAgentErrors.ERROR_BUNDLE_UNKNOWN;
+    }
+
+    switch (code) {
+    case BundleException.ACTIVATOR_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_ACTIVATOR;
+    case BundleException.DUPLICATE_BUNDLE_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_DUPLICATE;
+    case BundleException.INVALID_OPERATION:
+      return IAgentErrors.ERROR_BUNDLE_INVALID_OPERATION;
+    case BundleException.MANIFEST_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_MANIFEST;
+    case BundleException.NATIVECODE_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_NATIVECODE;
+    case BundleException.RESOLVE_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_RESOLVE;
+    case BundleException.SECURITY_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_SECURITY;
+    case BundleException.START_TRANSIENT_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_START_TRANSIENT;
+    case BundleException.STATECHANGE_ERROR:
+      return IAgentErrors.ERROR_BUNDLE_STATECHANGE;
+    case BundleException.UNSUPPORTED_OPERATION:
+      return IAgentErrors.ERROR_BUNDLE_UNSUPPORTED_OPERATION;
+    default:
+      return IAgentErrors.ERROR_BUNDLE_UNKNOWN;
+    }
+  }
+
+  private Dictionary convertBundleEvent(BundleEvent bEvent) {
+    Dictionary event = new Hashtable(2, 1f);
+    event.put(EVENT_TYPE_KEY, new Integer(bEvent.getType()));
+    event.put(EVENT_BUNDLE_ID_KEY, new Long(bEvent.getBundle().getBundleId()));
+    return event;
+  }
+
+  private BundleManagerDelegate getDelegate() {
+    BundleManagerDelegate delegate = (BundleManagerDelegate) delegatesTrack.getService();
+    if (delegate != null) {
+      return delegate;
+    }
+    return defaultDelegate;
+  }
+
 }

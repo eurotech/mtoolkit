@@ -22,20 +22,24 @@ import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 
-public class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implements RemoteCapabilitiesManager {
+public final class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implements RemoteCapabilitiesManager {
+  private static final String  PROPERTY_EVENT         = "iagent_property_event";
+  private static final String  EVENT_CAPABILITY_NAME  = "capability.name";
+  private static final String  EVENT_CAPABILITY_VALUE = "capability.value";
 
-  private static final String PROPERTY_EVENT         = "iagent_property_event";
-  private static final String EVENT_CAPABILITY_NAME  = "capability.name";
-  private static final String EVENT_CAPABILITY_VALUE = "capability.value";
+  private static final Class[] CLASSES                = new Class[] {
+      RemoteCapabilitiesProvider.class, RemoteCapabilitiesManager.class
+                                                      };
 
-  BundleContext               bc;
-  private ServiceRegistration registration;
-  private Hashtable           capabilities           = new Hashtable(10, 1f);
+  private BundleContext        bc;
+  private ServiceRegistration  registration;
+  private final Hashtable      capabilities           = new Hashtable(10, 1f);
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
+   */
   public Class[] remoteInterfaces() {
-    return new Class[] {
-        RemoteCapabilitiesProvider.class, RemoteCapabilitiesManager.class
-    };
+    return CLASSES;
   }
 
   public void register(BundleContext bundleContext) {
@@ -52,21 +56,21 @@ public class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implement
       registration.unregister();
       registration = null;
     }
-
     this.bc = null;
   }
 
-  private void initCapabilities() {
-    capabilities.clear();
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider#getCapabilities()
+   */
   public Map getCapabilities() {
     return (Map) capabilities.clone();
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager#setCapability(java.lang.String, java.lang.Object)
+   */
   public void setCapability(String capability, Object value) {
     capabilities.put(capability, value);
-
     EventSynchronizer synchronizer = Activator.getSynchronizer();
     if (synchronizer != null) {
       Dictionary pmpEventData = new Hashtable(2, 1f);
@@ -76,7 +80,14 @@ public class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implement
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin#getServiceRegistration()
+   */
   protected ServiceRegistration getServiceRegistration() {
     return registration;
+  }
+
+  private void initCapabilities() {
+    capabilities.clear();
   }
 }

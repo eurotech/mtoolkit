@@ -35,8 +35,12 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin;
 import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
-public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements RemoteDeploymentAdmin {
+public final class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements RemoteDeploymentAdmin {
   private static final String       EVENT_ADMIN_CLASS = "org.osgi.service.event.EventAdmin";
+
+  private static final Class[]      CLASSES           = new Class[] {
+                                                        RemoteDeploymentAdmin.class
+                                                      };
 
   private ServiceRegistration       registration;
   private EventAdminTracker         eventAdminTrack;
@@ -46,22 +50,35 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
   private DeploymentManagerDelegate defaultDelegate;
   private DeploymentEventListener   listener;
 
-  private class EventAdminTracker extends ServiceTracker {
+  private final class EventAdminTracker extends ServiceTracker {
     private EventAdminTracker(BundleContext context, String clazz, ServiceTrackerCustomizer customizer) {
       super(context, clazz, customizer);
     }
 
+    /* (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTracker#addingService(org.osgi.framework.ServiceReference)
+     */
     public Object addingService(ServiceReference reference) {
       registerListener();
       return super.addingService(reference);
     }
 
+    /* (non-Javadoc)
+     * @see org.osgi.util.tracker.ServiceTracker#removedService(org.osgi.framework.ServiceReference, T)
+     */
     public void removedService(ServiceReference reference, Object service) {
       super.removedService(reference, service);
       if (getService() == null) {
         unregisterListener();
       }
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
+   */
+  public Class[] remoteInterfaces() {
+    return CLASSES;
   }
 
   public void register(BundleContext bc, Object admin) {
@@ -92,6 +109,9 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteDeploymentAdmin#unregister(org.osgi.framework.BundleContext)
+   */
   public void unregister(BundleContext bc) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[unregister] Unregistering...");
@@ -120,21 +140,6 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
 
   public DeploymentAdmin getDeploymentAdmin() {
     return deploymentAdmin;
-  }
-
-  private void registerListener() {
-    if (listener != null) {
-      return;
-    }
-    listener = new DeploymentEventListener();
-    listener.register(context, deploymentAdmin);
-  }
-
-  private void unregisterListener() {
-    if (listener != null) {
-      listener.unregister();
-      listener = null;
-    }
   }
 
   public Dictionary listDeploymentPackages() {
@@ -279,16 +284,6 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
     }
   }
 
-  private DeploymentPackage internalGetDeploymentPackage(String name, String version) {
-    DeploymentAdmin admin = internalGetDeploymentAdmin();
-    DeploymentPackage dp = admin.getDeploymentPackage(name);
-    if (dp != null && dp.getVersion().toString().equals(version)) {
-      return dp;
-    } else {
-      return null;
-    }
-  }
-
   public String getDeploymentPackageVersion(String dpName) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getDeploymentPackageVersion] >>> dpName: " + dpName);
@@ -307,17 +302,6 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
       }
       return null;
     }
-  }
-
-  private DeploymentAdmin internalGetDeploymentAdmin() {
-    DeploymentAdmin admin = deploymentAdmin;
-    if (admin == null) {
-      if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "[internalGetDeploymentAdmin] DeploymentAdmin has been unregistered.");
-      }
-      throw new IllegalStateException("DeploymentAdmin is not available");
-    }
-    return admin;
   }
 
   public Object installDeploymentPackage(InputStream in) {
@@ -366,21 +350,51 @@ public class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin implements Re
     }
   }
 
+  protected ServiceRegistration getServiceRegistration() {
+    return registration;
+  }
+
+  private DeploymentAdmin internalGetDeploymentAdmin() {
+    DeploymentAdmin admin = deploymentAdmin;
+    if (admin == null) {
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[internalGetDeploymentAdmin] DeploymentAdmin has been unregistered.");
+      }
+      throw new IllegalStateException("DeploymentAdmin is not available");
+    }
+    return admin;
+  }
+
+  private void registerListener() {
+    if (listener != null) {
+      return;
+    }
+    listener = new DeploymentEventListener();
+    listener.register(context, deploymentAdmin);
+  }
+
+  private void unregisterListener() {
+    if (listener != null) {
+      listener.unregister();
+      listener = null;
+    }
+  }
+
+  private DeploymentPackage internalGetDeploymentPackage(String name, String version) {
+    DeploymentAdmin admin = internalGetDeploymentAdmin();
+    DeploymentPackage dp = admin.getDeploymentPackage(name);
+    if (dp != null && dp.getVersion().toString().equals(version)) {
+      return dp;
+    } else {
+      return null;
+    }
+  }
+
   private DeploymentManagerDelegate getDelegate() {
     DeploymentManagerDelegate delegate = (DeploymentManagerDelegate) delegatesTrack.getService();
     if (delegate != null) {
       return delegate;
     }
     return defaultDelegate;
-  }
-
-  public Class[] remoteInterfaces() {
-    return new Class[] {
-      RemoteDeploymentAdmin.class
-    };
-  }
-
-  protected ServiceRegistration getServiceRegistration() {
-    return registration;
   }
 }

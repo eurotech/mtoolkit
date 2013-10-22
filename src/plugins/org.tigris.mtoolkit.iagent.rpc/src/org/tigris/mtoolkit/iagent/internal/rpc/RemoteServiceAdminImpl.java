@@ -40,9 +40,13 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
 
   private static final boolean TRACK_SERVICES_DEBUG   = Boolean.getBoolean("iagent.debug.services");
 
+  private static final Class[] CLASSES                = new Class[] {
+                                                        RemoteServiceAdmin.class
+                                                      };
+
   private Bundle               systemBundle;
 
-  private Class[]              filterSupportedClasses = new Class[] {
+  private final Class[]        filterSupportedClasses = new Class[] {
       int.class, long.class, float.class, double.class, byte.class, short.class, char.class, boolean.class,
       Integer.class, Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class,
       String.class
@@ -50,15 +54,13 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
   private BundleContext        bc;
   private ServiceRegistration  registration;
 
-  private Map                  services               = new Hashtable();
+  private final Map            services               = new Hashtable();
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
    */
   public Class[] remoteInterfaces() {
-    return new Class[] {
-      RemoteServiceAdmin.class
-    };
+    return CLASSES;
   }
 
   public void register(BundleContext context) {
@@ -66,7 +68,6 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
       DebugUtils.debug(this, "[register] Registering remote service admin...");
     }
     this.bc = context;
-
     registration = context.registerService(RemoteServiceAdmin.class.getName(), this, null);
 
     synchronized (services) {
@@ -94,7 +95,7 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
       DebugUtils.debug(this, "[unregister] Unregistering...");
     }
     context.removeServiceListener(this);
-    services = null;
+    services.clear();
     if (registration != null) {
       registration.unregister();
       registration = null;
@@ -230,7 +231,6 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getProperties] >>> id: " + id);
     }
-
     ServiceReference ref = getServiceReference(id);
     if (ref == null) {
       if (DebugUtils.DEBUG_ENABLED) {
@@ -238,18 +238,15 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
       }
       return null;
     }
-
     String[] keys = ref.getPropertyKeys();
     Dictionary props = new Hashtable(keys.length, 1f);
     for (int i = 0; i < keys.length; i++) {
       Object prop = ref.getProperty(keys[i]);
       props.put(keys[i], convertProperty(prop));
     }
-
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getProperties] service properties: " + DebugUtils.convertForDebug(props));
     }
-
     return props;
   }
 
