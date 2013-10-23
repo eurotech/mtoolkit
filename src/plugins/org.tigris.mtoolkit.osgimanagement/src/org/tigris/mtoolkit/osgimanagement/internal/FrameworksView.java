@@ -768,6 +768,7 @@ public final class FrameworksView extends ViewPart {
     try {
       mgr.dispose();
       tree.getTree().dispose();
+      FrameworkPlugin.getDefault().getImageRegistry().dispose();
     } finally {
       super.dispose();
     }
