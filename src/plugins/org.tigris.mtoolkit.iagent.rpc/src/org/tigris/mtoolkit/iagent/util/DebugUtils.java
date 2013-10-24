@@ -25,13 +25,13 @@ import org.tigris.mtoolkit.iagent.internal.utils.log.Log;
 import org.tigris.mtoolkit.iagent.internal.utils.log.OSGiLog;
 
 public final class DebugUtils {
-  private static final String PROP_DEBUG_ENABLED = "iagent.debug";                        //$NON-NLS-1$
-  private static final String PROP_LOG_FILE      = "iagent.log.file";                     //$NON-NLS-1$
-  private static final String NL                 = System.getProperty("line.separator");  //$NON-NLS-1$
-  public static final boolean DEBUG_ENABLED      = Boolean.getBoolean(PROP_DEBUG_ENABLED);
+  private static final String     PROP_DEBUG_ENABLED = "iagent.debug";                        //$NON-NLS-1$
+  private static final String     PROP_LOG_FILE      = "iagent.log.file";                     //$NON-NLS-1$
+  private static final String     NL                 = System.getProperty("line.separator");  //$NON-NLS-1$
+  public static final boolean     DEBUG_ENABLED      = Boolean.getBoolean(PROP_DEBUG_ENABLED);
 
-  private static Log          log;
-  private static boolean      initialized        = false;
+  private static volatile Log     log;
+  private static volatile boolean initialized        = false;
 
   public static final void info(Object module, String message) {
     log(module, Log.INFO, message);
