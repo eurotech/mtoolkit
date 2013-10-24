@@ -1,88 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.3"?>
 <plugin>
-   <extension-point id="preferencesPages" name="mToolkit Preferences Pages" schema="schema/preferencesPages.exsd"/>
-   <extension-point id="installationItemProcessors" name="Inastallation Item Processors" schema="schema/installationItemProcessors.exsd"/>
-   <extension-point id="installationItemProviders" name="Installation Item Providers" schema="schema/installationItemProviders.exsd"/>
-   <extension-point id="lm" name="" schema="schema/lm.exsd"/>
+	<extension-point id="preferencesPages" name="mToolkit Preferences Pages" schema="schema/preferencesPages.exsd"/>
+	<extension-point id="installationItemProcessors" name="Inastallation Item Processors" schema="schema/installationItemProcessors.exsd"/>
+	<extension-point id="installationItemProviders" name="Installation Item Providers" schema="schema/installationItemProviders.exsd"/>
+	<extension-point id="lm" name="" schema="schema/lm.exsd"/>
 
-   <extension point="org.eclipse.ui.preferencePages">
-      <page class="org.tigris.mtoolkit.common.preferences.CommonPreferencePage"
+	<extension point="org.eclipse.ui.preferencePages">
+		<page class="org.tigris.mtoolkit.common.preferences.CommonPreferencePage"
             id="org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"
             name="mToolkit">
-      </page>
-   </extension>
-   
-   <extension point="org.eclipse.ui.preferencePages">
-      <page category="org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"
+		</page>
+	</extension>
+
+	<extension point="org.eclipse.ui.preferencePages">
+		<page category="org.tigris.mtoolkit.common.preferences.MToolkitPreferencePage"
 			class="org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"
             id="org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"
             name="%CertPreferencesPage.name">
-      </page>
-   </extension>
-   
-    <extension point="org.eclipse.ui.menus">
-      <menuContribution
+		</page>
+	</extension>
+
+	<extension point="org.eclipse.ui.menus">
+		<menuContribution
             locationURI="popup:org.eclipse.ui.popup.any?after=additions">
-         <dynamic class="org.tigris.mtoolkit.common.installation.InstallToMenu"
+			<dynamic class="org.tigris.mtoolkit.common.installation.InstallToMenu"
                   id="org.tigris.mtoolkit.osgimanagement.installto">
-            <visibleWhen>
-               <reference
+				<visibleWhen>
+					<reference
                      definitionId="org.tigris.mtoolkit.osgimanagement.installto.selection">
-               </reference>
-            </visibleWhen>
-         </dynamic>
-      </menuContribution>
-   </extension>
-   
-  <extension point="org.eclipse.core.expressions.propertyTesters">
-    <propertyTester id="org.tigris.mtoolkit.osgimanagement.IResource.PropertyTester"
+					</reference>
+				</visibleWhen>
+			</dynamic>
+		</menuContribution>
+	</extension>
+
+	<extension point="org.eclipse.core.expressions.propertyTesters">
+		<propertyTester id="org.tigris.mtoolkit.osgimanagement.IResource.PropertyTester"
         type="org.eclipse.core.resources.IResource"
         namespace="org.tigris.mtoolkit.osgimanagement"
         properties="matchesPattern"
         class="org.tigris.mtoolkit.common.ResourcePropertyTester">
-     </propertyTester>
-  </extension>
-  
-  <extension point="org.eclipse.core.expressions.propertyTesters">
-    <propertyTester id="org.tigris.mtoolkit.osgimanagement.IPluginModelBase.PropertyTester"
+		</propertyTester>
+	</extension>
+
+	<extension point="org.eclipse.core.expressions.propertyTesters">
+		<propertyTester id="org.tigris.mtoolkit.osgimanagement.IPluginModelBase.PropertyTester"
         type="org.eclipse.pde.core.plugin.IPluginModelBase"
         namespace="org.tigris.mtoolkit.osgimanagement"
         properties="matchesPattern"
         class="org.tigris.mtoolkit.common.ResourcePropertyTester">
-     </propertyTester>
-  </extension>
-  
-  <extension point="org.eclipse.core.expressions.propertyTesters">
-    <propertyTester id="org.tigris.mtoolkit.osgimanagement.BundleDescription.PropertyTester"
+		</propertyTester>
+	</extension>
+
+	<extension point="org.eclipse.core.expressions.propertyTesters">
+		<propertyTester id="org.tigris.mtoolkit.osgimanagement.BundleDescription.PropertyTester"
         type="org.eclipse.osgi.service.resolver.BundleDescription"
         namespace="org.tigris.mtoolkit.osgimanagement"
         properties="matchesPattern"
         class="org.tigris.mtoolkit.common.ResourcePropertyTester">
-     </propertyTester>
-  </extension>
-   
-  <extension point="org.eclipse.core.expressions.definitions">
-      <definition id="org.tigris.mtoolkit.osgimanagement.installto.selection">
-         <with variable="selection">
-            <iterate>
-            	<or>
-		            <adapt type="org.eclipse.pde.core.plugin.IPluginModelBase">
-		               	<test property="org.tigris.mtoolkit.osgimanagement.matchesPattern"/>
-		            </adapt>
-		            <adapt type="org.eclipse.osgi.service.resolver.BundleDescription">
-		               	<test property="org.tigris.mtoolkit.osgimanagement.matchesPattern"/>
-		            </adapt>
-		            <adapt type="org.eclipse.core.resources.IResource">
-		               	<test property="org.tigris.mtoolkit.osgimanagement.matchesPattern"/>
-		            </adapt>
-	            </or>              
-            </iterate>
-         </with>
-      </definition>
-   </extension>
-   
-  <extension point="org.eclipse.ui.newWizards">
+		</propertyTester>
+	</extension>
+
+	<extension point="org.eclipse.core.expressions.definitions">
+		<definition id="org.tigris.mtoolkit.osgimanagement.installto.selection">
+			<with variable="selection">
+				<iterate>
+					<or>
+						<adapt type="org.eclipse.pde.core.plugin.IPluginModelBase">
+							<test property="org.tigris.mtoolkit.osgimanagement.matchesPattern"/>
+						</adapt>
+						<adapt type="org.eclipse.osgi.service.resolver.BundleDescription">
+							<test property="org.tigris.mtoolkit.osgimanagement.matchesPattern"/>
+						</adapt>
+						<adapt type="org.eclipse.core.resources.IResource">
+							<test property="org.tigris.mtoolkit.osgimanagement.matchesPattern"/>
+						</adapt>
+					</or>              
+				</iterate>
+			</with>
+		</definition>
+	</extension>
+
+	<extension point="org.eclipse.ui.newWizards">
 		<category id="org.tigris.mtoolkit.osgi.category"
             name="%NewDPPWizard.category">
 		</category>
@@ -94,31 +94,25 @@
             project="true"
             name="%OSGiBundle.name">
 			<description>
-            	%OSGiBundle.description
+				%OSGiBundle.description
 			</description>
 		</wizard>
 	</extension>
-	
+
 	<extension point="org.eclipse.ui.exportWizards">
-    <wizard category="org.tigris.mtoolkit.osgi.category"
+		<wizard category="org.tigris.mtoolkit.osgi.category"
             class="org.eclipse.pde.internal.ui.wizards.exports.PluginExportWizard"
             icon="icons/obj16/exp_osgibundle.gif"
             id="org.eclipse.pde.ui.pluginExportWizard"
             name="%OSGiBundleExportWizard.label">
-      <description>
-            %OSGiBundleExportWizard.description
-      </description>
-      <selection name="plugin.xml"
-               class="org.eclipse.core.resources.IFile">
-      </selection>
-      <selection name="fragment.xml"
-               class="org.eclipse.core.resources.IFile">
-      </selection>
-      <selection class="org.eclipse.core.resources.IProject">
-      </selection>
-      <keywordReference id="org.eclipse.pde.ui.pde">
-      </keywordReference>
-    </wizard>
+			<description>
+				%OSGiBundleExportWizard.description
+			</description>
+			<selection class="org.eclipse.core.resources.IProject">
+			</selection>
+			<keywordReference id="org.eclipse.pde.ui.pde">
+			</keywordReference>
+		</wizard>
 	</extension>
-   
+
 </plugin>
