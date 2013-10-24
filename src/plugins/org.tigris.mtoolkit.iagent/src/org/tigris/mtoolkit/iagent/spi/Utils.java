@@ -18,12 +18,12 @@ import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
-public final class Utils {
+final class Utils {
 
   private Utils() {
   }
 
-  public static boolean isRemoteMethodDefined(RemoteObject remote, MethodSignature methodSignature)
+  static boolean isRemoteMethodDefined(RemoteObject remote, MethodSignature methodSignature)
       throws IAgentException {
     try {
       return getRemoteMethod(remote, methodSignature) != null;

@@ -20,7 +20,6 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 import org.tigris.mtoolkit.iagent.spi.MethodSignature;
-import org.tigris.mtoolkit.iagent.spi.Utils;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class RemoteBundleImpl implements RemoteBundle {
@@ -160,8 +159,8 @@ public final class RemoteBundleImpl implements RemoteBundle {
     DebugUtils.debug(this, "[isSigned] >>>");
     boolean isSigned = false;
     checkBundleState();
-    RemoteObject admin = getBundleAdmin();
-    if (Utils.isRemoteMethodDefined(admin, IS_BUNDLE_SIGNED_METHOD)) {
+    final RemoteObject admin = getBundleAdmin();
+    if (IS_BUNDLE_SIGNED_METHOD.isDefined(admin)) {
       Boolean isSignedResult = (Boolean) IS_BUNDLE_SIGNED_METHOD.call(admin, new Object[] {
         id
       });
@@ -550,9 +549,9 @@ public final class RemoteBundleImpl implements RemoteBundle {
   public Dictionary getSignerCertificates() throws IAgentException {
     DebugUtils.debug(this, "[getSignerCertificates] >>>");
     checkBundleState();
-    RemoteObject admin = getBundleAdmin();
+    final RemoteObject admin = getBundleAdmin();
     Dictionary signerCertificates = null;
-    if (Utils.isRemoteMethodDefined(admin, GET_SIGNER_CERTIFICATES_METHOD)) {
+    if (GET_SIGNER_CERTIFICATES_METHOD.isDefined(admin)) {
       signerCertificates = (Dictionary) GET_SIGNER_CERTIFICATES_METHOD.call(admin, new Object[] {
         id
       });
@@ -570,8 +569,8 @@ public final class RemoteBundleImpl implements RemoteBundle {
     DebugUtils.debug(this, "[isSignerTrusted] >>>");
     boolean isSignerTrusted = false;
     checkBundleState();
-    RemoteObject admin = getBundleAdmin();
-    if (Utils.isRemoteMethodDefined(admin, IS_SIGNER_TRUSTED_METHOD)) {
+    final RemoteObject admin = getBundleAdmin();
+    if (IS_SIGNER_TRUSTED_METHOD.isDefined(admin)) {
       Boolean isSignerTrustedResult = (Boolean) IS_SIGNER_TRUSTED_METHOD.call(admin, new Object[] {
         id
       });
