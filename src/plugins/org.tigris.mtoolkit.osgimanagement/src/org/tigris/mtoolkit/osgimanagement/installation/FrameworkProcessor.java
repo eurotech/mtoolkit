@@ -220,8 +220,11 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         startBundles = FrameworkPreferencesPage.isAutoStartBundlesEnabled();
         preparationProps.put(InstallationConstants.AUTO_START_ITEMS, new Boolean(startBundles));
       }
-      if (preparationProps.get(InstallationConstants.AUTO_UPDATE_ITEMS) == null) {
-        boolean autoUpdate = FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled();
+      final boolean autoUpdate;
+      if (preparationProps.get(InstallationConstants.AUTO_UPDATE_ITEMS) != null) {
+        autoUpdate = ((Boolean) preparationProps.get(InstallationConstants.AUTO_UPDATE_ITEMS)).booleanValue();
+      } else {
+        autoUpdate = FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled();
         preparationProps.put(InstallationConstants.AUTO_UPDATE_ITEMS, new Boolean(autoUpdate));
       }
 
@@ -256,7 +259,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         for (InstallationItem item : itemsToInstallMap.values()) {
           installBundleProgress.setTaskName(NLS.bind(Messages.install_bundle_operation_title, item.getName()));
           final SubMonitor mon = installBundleProgress.newChild(worked);
-          RemoteBundle installedBundle = installBundle(item, framework, installProblems, mon);
+          RemoteBundle installedBundle = installBundle(item, framework, installProblems, autoUpdate, mon);
           if (installedBundle != null) {
             installedPackages.add(installedBundle);
             if (!dontStart.contains(item)) {
@@ -609,14 +612,14 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   }
 
   private static RemoteBundle installBundle(InstallationItem item, Framework framework,
-      Map<String, Throwable> installProblems, IProgressMonitor monitor) {
+      Map<String, Throwable> installProblems, boolean autoUpdate, IProgressMonitor monitor) {
     File bundle = null;
     InputStream input = null;
     try {
       input = item.getInputStream();
       bundle = FileUtils.saveFile(FrameworkPlugin.getFile(item.getName()), input);
       InstallBundleOperation operation = new InstallBundleOperation((FrameworkImpl) framework);
-      return operation.installBundle(bundle, monitor);
+      return operation.installBundle(bundle, autoUpdate, monitor);
     } catch (Exception e) {
       installProblems.put(item.getName(), e);
     } finally {

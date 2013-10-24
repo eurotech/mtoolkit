@@ -46,7 +46,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
-import org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesPage;
 
 public final class InstallBundleOperation {
   private final FrameworkImpl framework;
@@ -55,12 +54,12 @@ public final class InstallBundleOperation {
     this.framework = framework;
   }
 
-  public RemoteBundle installBundle(File bundle, IProgressMonitor monitor) throws IAgentException {
+  public RemoteBundle installBundle(File bundle, boolean autoUpdate, IProgressMonitor monitor) throws IAgentException {
     InputStream input = null;
     RemoteBundle rBundle[] = null;
     ZipFile zip = null;
     InputStream zis = null;
-    final boolean autoUpdateBundles = FrameworkPreferencesPage.isAutoUpdateBundlesOnInstallEnabled();
+    final boolean autoUpdateBundles = autoUpdate;
     try {
       int work = (int) bundle.length();
       monitor.beginTask(Messages.install_bundle, work);
