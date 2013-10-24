@@ -45,6 +45,8 @@ public abstract class Framework extends Model {
   private long               timeStamp;
   private Dictionary         remoteProperties = null;
 
+  private final Object       lockObj          = new Object();
+
   /**
    * @since 6.0
    */
@@ -94,8 +96,8 @@ public abstract class Framework extends Model {
     listeners.remove(l);
   }
 
-  public static Object getLockObject(DeviceConnector connector) {
-    return connector.lockObj;
+  public Object getLockObject() {
+    return lockObj;
   }
 
   /**

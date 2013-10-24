@@ -262,7 +262,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         SubMonitor monitor = sMonitor.newChild(modelTotal);
         monitor.setTaskName("Retrieve additional providers data");
         ContentTypeModelProvider manager = ((ModelProviderElement) modelProviders.get(i)).getProvider();
-        /* Model node = */manager.connect(this, connector, monitor);
+        manager.connect(this, monitor);
         if (monitor.isCanceled()) {
           return false;
         }
@@ -280,7 +280,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   private boolean initModel(SubMonitor sMonitor) {
-    synchronized (Framework.getLockObject(connector)) {
+    synchronized (getLockObject()) {
       try {
         connecting = true;
         userDisconnect = false;
@@ -314,7 +314,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   public void disconnect() {
-    synchronized (Framework.getLockObject(connector)) {
+    synchronized (getLockObject()) {
       if (!isConnected()) {
         return;
       }
@@ -438,7 +438,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     if (this.viewType == viewType) {
       return;
     }
-    synchronized (Framework.getLockObject(connector)) {
+    synchronized (getLockObject()) {
       this.viewType = viewType;
     }
     Model[] children = getChildren();
@@ -642,7 +642,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   public void bundleChanged(RemoteBundleEvent e) {
     FrameworkPlugin.debug(getDebugBundleChangedMsg(e));
-    synchronized ((Framework.getLockObject(connector))) {
+    synchronized ((getLockObject())) {
       if (!isConnected()) {
         return;
       }
@@ -807,7 +807,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     if (!isConnected()) {
       return;
     }
-    synchronized (Framework.getLockObject(connector)) {
+    synchronized (getLockObject()) {
       try {
         RemoteService rService = e.getService();
         if (e.getType() == RemoteServiceEvent.UNREGISTERED) {
@@ -873,7 +873,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     Job job = new Job(Messages.refresh_framework_info) {
       @Override
       protected IStatus run(IProgressMonitor monitor) {
-        synchronized (Framework.getLockObject(connector)) {
+        synchronized (getLockObject()) {
           SubMonitor sMonitor = SubMonitor.convert(monitor, FrameworkConnectorFactory.CONNECT_PROGRESS);
           sMonitor.setTaskName("Refreshing " + FrameworkImpl.this.getName());
           try {

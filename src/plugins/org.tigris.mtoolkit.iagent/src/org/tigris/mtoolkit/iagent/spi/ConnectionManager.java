@@ -25,13 +25,24 @@ import org.tigris.mtoolkit.iagent.IAgentException;
  *
  */
 public interface ConnectionManager {
-  public static final int    PMP_CONNECTION  = 0x1;
+  /**
+   * {@link PMPConnection} connection type identifier
+   */
+  public static final int PMP_CONNECTION = 0x1;
 
   /**
-   * @since 3.0
+   * Gets active connection of given type. In case there's no active connection
+   * from that type null will be returned.In case of unknown type,
+   * {@link IllegalArgumentException} will be thrown.
+   * 
+   * @param type
+   *          the type of the connection.
+   * @return AbstractConnection object or null. The client should upcast it to
+   *         the proper type
+   * @throws IAgentException
+   * @throws IllegalArgumentException
+   *           if the type passed in is unknown
    */
-  public static final String PROP_PMP_PORT   = "pmp-port";
-
   public AbstractConnection getActiveConnection(int type) throws IAgentException;
 
   /**
@@ -45,7 +56,8 @@ public interface ConnectionManager {
    * @return AbstractConnection object. The client should upcast it to the
    *         proper type
    * @throws IAgentException
-   * @throws {@link IllegalArgumentException} if the type passed in is unknown
+   * @throws IllegalArgumentException
+   *           if the type passed in is unknown
    */
   public AbstractConnection createConnection(int type) throws IAgentException;
 

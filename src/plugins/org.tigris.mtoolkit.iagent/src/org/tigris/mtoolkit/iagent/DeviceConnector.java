@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.internal.DeviceConnectorImpl;
-import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.transport.TransportsHub;
@@ -50,25 +49,9 @@ public abstract class DeviceConnector {
    * {@link DeviceConnector#getProperties} method. The value attached with this
    * key in the connection properties table must be a Integer object
    */
-  public static final String PROP_PMP_PORT  = ConnectionManager.PROP_PMP_PORT;
-
-  /**
-   * Internal constant indicating that a device connector was disconnected.
-   */
-  protected static final int DISCONNECTED   = 1 << 0;
-
-  /**
-   * Internal constant indicating that a device connector was connected.
-   */
-  protected static final int CONNECTED      = 1 << 1;
+  public static final String PROP_PMP_PORT  = "pmp-port";
 
   private static final List  listeners      = new ArrayList();
-
-  /**
-   * Internal object used as synchronization root of the DeviceConnector. This
-   * object is not intended to be used by clients.
-   */
-  public final Object        lockObj        = new Object();
 
   /**
    * Provides DeviceConnector connected to specified remote OSGi framework over
@@ -98,7 +81,7 @@ public abstract class DeviceConnector {
         throw new IAgentException("Unable to find compatible transport provider.", IAgentErrors.ERROR_CANNOT_CONNECT);
       }
       DeviceConnector connector = new DeviceConnectorImpl(transport, aConProps, monitor);
-      fireConnectionEvent(CONNECTED, connector);
+      fireConnectionEvent(DeviceConnectionEvent.CONNECTED, connector);
       return connector;
     } catch (IOException e) {
       throw new IAgentException("Unable to establish connection", IAgentErrors.ERROR_CANNOT_CONNECT);
@@ -258,15 +241,14 @@ public abstract class DeviceConnector {
       }
       clonedListeners = (DeviceConnectionListener[]) listeners.toArray(new DeviceConnectionListener[listeners.size()]);
     }
-
     for (int i = 0; i < clonedListeners.length; i++) {
       DeviceConnectionListener listener = clonedListeners[i];
       try {
         switch (type) {
-        case DISCONNECTED:
+        case DeviceConnectionEvent.DISCONNECTED:
           listener.deviceConnectionEvent(new DeviceConnectionEvent(DeviceConnectionEvent.DISCONNECTED, connector));
           break;
-        case CONNECTED:
+        case DeviceConnectionEvent.CONNECTED:
           listener.deviceConnectionEvent(new DeviceConnectionEvent(DeviceConnectionEvent.CONNECTED, connector));
           break;
         }

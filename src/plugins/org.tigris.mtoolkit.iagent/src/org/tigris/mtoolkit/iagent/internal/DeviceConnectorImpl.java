@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.tigris.mtoolkit.iagent.DeploymentManager;
+import org.tigris.mtoolkit.iagent.DeviceConnectionEvent;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAProgressMonitor;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
@@ -214,7 +215,7 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
     } catch (Throwable t) {
       DebugUtils.error(this, "Failed to close underlying connections", t);
     }
-    fireConnectionEvent(DISCONNECTED, this);
+    fireConnectionEvent(DeviceConnectionEvent.DISCONNECTED, this);
   }
 
   /* (non-Javadoc)

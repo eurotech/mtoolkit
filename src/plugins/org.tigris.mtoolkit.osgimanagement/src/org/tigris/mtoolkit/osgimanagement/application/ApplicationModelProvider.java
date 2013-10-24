@@ -35,17 +35,17 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 public final class ApplicationModelProvider implements ContentTypeModelProvider, RemoteApplicationListener,
     RemoteDevicePropertyListener {
   private ApplicationPackage applicationsNode;
-  private DeviceConnector connector;
-  private Model parent;
+  private DeviceConnector    connector;
+  private Framework          fw;
   private ApplicationManager manager;
-  private boolean supportApplications;
+  private boolean            supportApplications;
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider#connect(org.tigris.mtoolkit.osgimanagement.model.Model, org.tigris.mtoolkit.iagent.DeviceConnector, org.eclipse.core.runtime.IProgressMonitor)
    */
-  public Model connect(Model parent, DeviceConnector connector, IProgressMonitor monitor) {
-    this.connector = connector;
-    this.parent = parent;
+  public void connect(Framework fw, IProgressMonitor monitor) {
+    this.fw = fw;
+    this.connector = fw.getConnector();
     if (connector != null && connector.isActive()) {
       supportApplications = isApplicationsSupported(connector);
       try {
@@ -59,7 +59,6 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
       }
     }
     monitor.done();
-    return applicationsNode;
   }
 
   /* (non-Javadoc)
@@ -73,11 +72,11 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
         e.printStackTrace();
       }
     }
-    if (parent != null) {
+    if (fw != null) {
       if (applicationsNode != null) {
-        parent.removeElement(applicationsNode);
+        fw.removeElement(applicationsNode);
       }
-      parent = null;
+      fw = null;
     }
     if (connector != null) {
       try {
@@ -97,10 +96,10 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
     Model node = null;
     if (supportApplications && applicationsNode != null) {
       if (viewType == Framework.BUNDLES_VIEW) {
-        parent.addElement(applicationsNode);
+        fw.addElement(applicationsNode);
         node = applicationsNode;
       } else if (viewType == Framework.SERVICES_VIEW) {
-        parent.removeElement(applicationsNode);
+        fw.removeElement(applicationsNode);
       }
     }
     return node;
@@ -113,7 +112,7 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
     if (applicationsNode == null) {
       return;
     }
-    synchronized (Framework.getLockObject(connector)) {
+    synchronized (fw.getLockObject()) {
       String remoteAppID = null;
       RemoteApplication remoteApp = event.getApplication();
       try {
@@ -165,7 +164,7 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
           }
           if (applicationsNode != null) {
             applicationsNode.removeChildren();
-            parent.removeElement(applicationsNode);
+            fw.removeElement(applicationsNode);
             applicationsNode = null;
           }
 
@@ -214,8 +213,8 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
 
   private void initModel(IProgressMonitor monitor) {
     applicationsNode = new ApplicationPackage("Applications");
-    if (parent.findFramework().getViewType() == Framework.BUNDLES_VIEW) {
-      parent.addElement(applicationsNode);
+    if (fw.getViewType() == Framework.BUNDLES_VIEW) {
+      fw.addElement(applicationsNode);
     }
     try {
       manager = (ApplicationManager) connector.getManager(ApplicationManager.class.getName());

@@ -102,7 +102,7 @@ public final class ConnectionManagerImpl implements ConnectionManager {
         } else {
           ExtConnectionFactory factory = findFactoryForType(type);
           if (factory == null) {
-            DebugUtils.info(this, "[createConnection] Unknown connection type passed: " + type);
+            DebugUtils.error(this, "[createConnection] Unknown connection type passed: " + type);
             throw new IllegalArgumentException("Unknown connection type passed: " + type);
           }
           connection = factory.createConnection(transport, conProperties, this, monitor);
@@ -124,6 +124,13 @@ public final class ConnectionManagerImpl implements ConnectionManager {
    */
   public synchronized AbstractConnection getActiveConnection(int type) {
     DebugUtils.debug(this, "[getActiveConnection] >>> type: " + type);
+    if (type != PMP_CONNECTION) {
+      ExtConnectionFactory factory = findFactoryForType(type);
+      if (factory == null) {
+        DebugUtils.error(this, "[getActiveConnection] Unknown connection type passed: " + type);
+        throw new IllegalArgumentException("Unknown connection type passed: " + type);
+      }
+    }
     AbstractConnection connection = (AbstractConnection) connections.get(new Integer(type));
     if (connection != null && !connection.isConnected()) {
       connection = null;

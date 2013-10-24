@@ -185,7 +185,7 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
       for (int j = 0; j < fwArr.length; j++) {
         FrameworkImpl fw = fwArr[j];
         FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was disconnected with connector: " + connector); //$NON-NLS-1$ //$NON-NLS-2$
-        synchronized (Framework.getLockObject(connector)) {
+        synchronized (fw.getLockObject()) {
           ActionsManager.disconnectConsole(fw);
           FrameworkImpl fws[] = FrameworksView.getFrameworks();
           if (fws != null) {

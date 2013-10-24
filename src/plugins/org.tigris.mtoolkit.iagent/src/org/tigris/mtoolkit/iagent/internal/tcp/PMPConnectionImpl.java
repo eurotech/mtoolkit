@@ -298,7 +298,7 @@ public final class PMPConnectionImpl implements PMPConnection, EventListener {
   }
 
   private Integer getPmpPort(ConnectionManager manager) throws IAgentException {
-    return (Integer) manager.queryProperty(ConnectionManager.PROP_PMP_PORT);
+    return (Integer) manager.queryProperty(DeviceConnector.PROP_PMP_PORT);
   }
 
   private void resetRemoteReferences() {
