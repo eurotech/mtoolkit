@@ -15,6 +15,7 @@ import java.util.Hashtable;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.osgi.util.NLS;
@@ -42,10 +43,9 @@ public final class FrameworkConnectorFactory implements DeviceConnectionListener
   public static final int                  CONNECT_PROGRESS_SERVICES   = (int) (CONNECT_PROGRESS * 0.2);
   public static final int                  CONNECT_PROGRESS_ADDITIONAL = (int) (CONNECT_PROGRESS * 0.4);
 
-  private static final boolean             IAGENT_UI_ACCESS            = Boolean
-                                                                           .getBoolean("osgimanagement.iagent.access.warn");
+  private static final boolean             IAGENT_UI_ACCESS            = "true".equals(Platform.getDebugOption("org.tigris.mtoolkit.osgimanagement/iagent.ui.warn")); //$NON-NLS-1$
 
-  private static FrameworkConnectorFactory factory                     = new FrameworkConnectorFactory();
+  private static final FrameworkConnectorFactory factory                     = new FrameworkConnectorFactory();
 
   private FrameworkConnectorFactory() {
   }
