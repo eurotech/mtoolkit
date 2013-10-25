@@ -29,6 +29,7 @@ import org.tigris.mtoolkit.iagent.VMManager;
 import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
+import org.tigris.mtoolkit.iagent.spi.IAgentManager;
 
 public final class DeviceConnectorSWTWrapper extends DeviceConnector implements DeviceConnectorSpi {
   private DeviceConnector delegate;
@@ -77,9 +78,9 @@ public final class DeviceConnectorSWTWrapper extends DeviceConnector implements 
    * @see org.tigris.mtoolkit.iagent.DeviceConnector#getManager(java.lang.String)
    */
   @Override
-  public Object getManager(String className) throws IAgentException {
+  public IAgentManager getManager(String className) throws IAgentException {
     checkThread();
-    return wrapObject(delegate.getManager(className));
+    return (IAgentManager) wrapObject(delegate.getManager(className));
   }
 
   /* (non-Javadoc)

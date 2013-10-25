@@ -199,7 +199,7 @@ public abstract class DeviceConnector {
    *         inspected
    * @throws IAgentException
    */
-  public abstract Object getManager(String className) throws IAgentException;
+  public abstract IAgentManager getManager(String className) throws IAgentException;
 
   /**
    * Adds {@link DeviceConnectionListener}. The listener's

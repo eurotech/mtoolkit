@@ -63,14 +63,6 @@ public interface VMManager {
    * @return true if pmp connection is available, false otherwise
    * @throws IAgentException
    */
-  public boolean isVMConnectable() throws IAgentException;
-
-  /**
-   * Returns whether the framework can be connected via PMP connection.
-   *
-   * @return true if pmp connection is available, false otherwise
-   * @throws IAgentException
-   */
   public boolean isVMActive() throws IAgentException;
 
   /**

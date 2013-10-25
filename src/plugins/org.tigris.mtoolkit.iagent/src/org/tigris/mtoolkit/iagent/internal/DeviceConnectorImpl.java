@@ -284,7 +284,7 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.DeviceConnector#getManager(java.lang.String)
    */
-  public Object getManager(String className) throws IAgentException {
+  public IAgentManager getManager(String className) throws IAgentException {
     synchronized (lock) {
       if (!isActive) {
         DebugUtils.info(this, "[getManager] Request for getting Manager [" + className

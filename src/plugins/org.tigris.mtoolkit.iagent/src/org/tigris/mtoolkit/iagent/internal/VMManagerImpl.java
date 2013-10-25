@@ -76,7 +76,23 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
    * @see org.tigris.mtoolkit.iagent.VMManager#isVMActive()
    */
   public boolean isVMActive() throws IAgentException {
-    return isVMConnectable();
+    if (!connector.isActive()) {
+      DebugUtils.info(this, "[getPMPConnection] DeviceConnector is closed");
+      throw new IAgentException("Associated DeviceConnector is closed", IAgentErrors.ERROR_DISCONNECTED);
+    }
+    try {
+      PMPConnection connection = getPMPConnection();
+      if (connection == null || !connection.isConnected()) {
+        DebugUtils.debug(this, "[isVMConnectable] VM is not connectable");
+        return false;
+      } else {
+        DebugUtils.debug(this, "[isVMConnectable] VM is connectable");
+        return true;
+      }
+    } catch (IAgentException e) {
+      DebugUtils.info(this, "[isVMConnectable] VM is not connectable", e);
+      return false;
+    }
   }
 
   /* (non-Javadoc)
@@ -104,29 +120,6 @@ public final class VMManagerImpl implements VMManager, ConnectionListener {
     } else {
       lastRegisteredOutput = null;
       connection.releaseRemoteParserService();
-    }
-  }
-
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.VMManager#isVMConnectable()
-   */
-  public boolean isVMConnectable() throws IAgentException {
-    if (!connector.isActive()) {
-      DebugUtils.info(this, "[getPMPConnection] DeviceConnector is closed");
-      throw new IAgentException("Associated DeviceConnector is closed", IAgentErrors.ERROR_DISCONNECTED);
-    }
-    try {
-      PMPConnection connection = getPMPConnection();
-      if (connection == null || !connection.isConnected()) {
-        DebugUtils.debug(this, "[isVMConnectable] VM is not connectable");
-        return false;
-      } else {
-        DebugUtils.debug(this, "[isVMConnectable] VM is connectable");
-        return true;
-      }
-    } catch (IAgentException e) {
-      DebugUtils.info(this, "[isVMConnectable] VM is not connectable", e);
-      return false;
     }
   }
 
