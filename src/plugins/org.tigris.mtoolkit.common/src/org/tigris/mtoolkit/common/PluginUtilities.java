@@ -773,4 +773,36 @@ public final class PluginUtilities {
     }
     return plugin.getStringVariableManager();
   }
+
+  public static String escapeXML(String s) {
+    StringBuilder result = new StringBuilder(s.length());
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      switch (c) {
+      case '<':
+        result.append("&lt;"); //$NON-NLS-1$
+        break;
+
+      case '>':
+        result.append("&gt;"); //$NON-NLS-1$
+        break;
+
+      case '"':
+        result.append("&quot;"); //$NON-NLS-1$
+        break;
+
+      case '\'':
+        result.append("&apos;"); //$NON-NLS-1$
+        break;
+
+      case '&':
+        result.append("&amp;"); //$NON-NLS-1$
+        break;
+
+      default:
+        result.append(c);
+      }
+    }
+    return result.toString();
+  }
 }
