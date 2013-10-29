@@ -19,11 +19,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
@@ -90,7 +88,6 @@ import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeActionsProvider;
-import org.tigris.mtoolkit.osgimanagement.ISystemBundlesProvider;
 import org.tigris.mtoolkit.osgimanagement.ToolbarIMenuCreator;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.ContentChangeEvent;
@@ -148,8 +145,6 @@ public final class FrameworksView extends ViewPart {
 
   private static final String                       STORAGE_FILE_NAME            = "ModelStorage.xml";                                        //$NON-NLS-1$
 
-  private static final String                       SYSTEM_BUNDLES_EXT_POINT_ID  = "org.tigris.mtoolkit.osgimanagement.systemBundlesProvider";
-
   private static AddAction                          addFrameworkAction;
   private static RemoveFrameworkAction              removeFrameworkAction;
   private static ConnectFrameworkAction             connectAction;
@@ -180,24 +175,6 @@ public final class FrameworksView extends ViewPart {
   private static TreeRoot                           treeRoot;
 
   private String                                    notFoundText                 = null;
-
-  // System bundles providers
-  private static final List<ISystemBundlesProvider> systemBundlesProviders       = new ArrayList<ISystemBundlesProvider>();
-
-  static {
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint extensionPoint = registry.getExtensionPoint(SYSTEM_BUNDLES_EXT_POINT_ID);
-    IConfigurationElement[] elements = extensionPoint.getConfigurationElements();
-    if (elements != null) {
-      for (int i = 0; i < elements.length; i++) {
-        try {
-          systemBundlesProviders.add((ISystemBundlesProvider) elements[i].createExecutableExtension("class"));
-        } catch (CoreException e) {
-          FrameworkPlugin.error("Exception while intializing system bundles provider elements", e);
-        }
-      }
-    }
-  }
 
   // Get current shell
   public static Shell getShell() {
@@ -462,18 +439,6 @@ public final class FrameworksView extends ViewPart {
     toolBar.add(refreshAction);
 
     updateContextMenuStates();
-  }
-
-  public static Set<String> getSystemBundles() {
-    Set<String> systemBundles = new HashSet<String>();
-    for (ISystemBundlesProvider provider : systemBundlesProviders) {
-      Set<String> bundles = provider.getSystemBundlesIDs();
-      if (bundles == null) {
-        continue;
-      }
-      systemBundles.addAll(bundles);
-    }
-    return systemBundles;
   }
 
   // Create custom contributions - tree popup menu

@@ -63,6 +63,7 @@ import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
+import org.tigris.mtoolkit.osgimanagement.SystemBundlesProvider;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
@@ -1268,7 +1269,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   public boolean isSystemBundle(RemoteBundle bundle) {
     if (systemBundlesList == null) {
-      systemBundlesList = FrameworksView.getSystemBundles();
+      systemBundlesList = SystemBundlesProvider.getSystemBundlesIDs();
     }
     try {
       return systemBundlesList.contains(bundle.getSymbolicName());

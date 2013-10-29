@@ -64,6 +64,7 @@ import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemotePackage;
+import org.tigris.mtoolkit.osgimanagement.SystemBundlesProvider;
 import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
@@ -496,7 +497,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   }
 
   private List<String> filterSystemBundles(Map<BundleInfo, InstallationItem> bundlesMap) {
-    final Set<String> installedSystemBundles = FrameworksView.getSystemBundles();
+    final Set<String> installedSystemBundles = SystemBundlesProvider.getSystemBundlesIDs();
     Set<String> skippedBundles = new HashSet<String>();
     for (Iterator<BundleInfo> it = bundlesMap.keySet().iterator(); it.hasNext();) {
       BundleInfo bundle = it.next();
