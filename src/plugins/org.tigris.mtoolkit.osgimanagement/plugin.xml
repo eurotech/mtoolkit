@@ -30,6 +30,14 @@
 		</page>
 	</extension>
 
+
+	<extension
+         point="org.eclipse.core.runtime.preferences">
+		<initializer
+            class="org.tigris.mtoolkit.osgimanagement.internal.preferences.FrameworkPreferencesInitializer">
+		</initializer>
+	</extension>
+
 	<extension
          point="org.eclipse.core.contenttype.contentTypes">
 		<content-type

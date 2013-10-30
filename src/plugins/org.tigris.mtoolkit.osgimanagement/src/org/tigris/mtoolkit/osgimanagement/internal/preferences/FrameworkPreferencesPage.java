@@ -205,6 +205,17 @@ public final class FrameworkPreferencesPage extends PreferencePage implements IW
     store.setValue(MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES, enabled);
   }
 
+  static void initDefaults() {
+    IPreferenceStore store = FrameworkPlugin.getDefault().getPreferenceStore();
+    store.setDefault(MEMENTO_AUTOCONNECT, AUTO_CONNECT_DEFAULT);
+    store.setDefault(MEMENTO_INFO_LOG, LOG_INFO_DEFAULT);
+    store.setDefault(MEMENTO_AUTOSTART_AFTER_INSTALL, AUTO_START_AFTER_INSTALL_DEFAULT);
+    store.setDefault(MEMENTO_USE_ACTIVATION_POLICY, USE_ACTIVATION_POLICY_DEFAULT);
+    store.setDefault(MEMENTO_SHOW_BUNDLE_CATEGORY, SHOW_BUNDLE_CATEGORIES_DEFAULT);
+    store.setDefault(MEMENTO_SHOW_SKIPPED_SYSTEM_BUNDLES, SHOW_SKIPPED_SYSTEM_BUNDLES_DEFAULT);
+    store.setDefault(MEMENTO_AUTO_UPDATE_BUNDLES_ON_INSTALL, AUTO_UPDATE_BUNDLES_DEFAULT);
+  }
+
   private static boolean getBoolean(IPreferenceStore aStore, String aName, boolean aDefault) {
     boolean b = aStore.getDefaultBoolean(aName);
     if (b != aDefault) {
