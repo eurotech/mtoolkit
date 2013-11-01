@@ -66,8 +66,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
   private ServiceTracker        startLevelTrack;
   private ServiceTracker        delegatesTrack;
 
-  private Bundle                systemBundle;
-
   private BundleManagerDelegate defaultDelegate;
 
   /* (non-Javadoc)
@@ -741,9 +739,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
    * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
    */
   public void bundleChanged(BundleEvent event) {
-    if (systemBundle == null) {
-      systemBundle = bc.getBundle(0);
-    }
+    final Bundle systemBundle = bc.getBundle(0);
     if (systemBundle.getState() == Bundle.STOPPING) {
       return; // don't send events when the framework shutting down
     }
