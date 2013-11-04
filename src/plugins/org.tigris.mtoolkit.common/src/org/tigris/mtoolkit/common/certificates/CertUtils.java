@@ -16,6 +16,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +50,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.Constants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.tigris.mtoolkit.common.FileUtils;
+import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.PlatformUtils;
 import org.tigris.mtoolkit.common.ProcessOutputReader;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
@@ -857,5 +861,40 @@ public final class CertUtils {
       }
     }
     return preparedItems;
+  }
+
+  public static Certificate readCertificate(String location, String alias) throws IOException,
+      GeneralSecurityException, NullPointerException {
+    if (location == null || alias == null) {
+      String message = Messages.CertUtils_NotNullAlias;
+      if (location == null) {
+        message = Messages.CertUtils_NotNullLocation;
+      }
+      throw new NullPointerException(message);
+    }
+
+    FileInputStream fis = null;
+    try {
+      KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+      fis = new FileInputStream(location);
+      ks.load(fis, null);
+      if (ks.isKeyEntry(alias)) {
+        Certificate certs[] = ks.getCertificateChain(alias);
+        return certs[0];
+      } else if (ks.isCertificateEntry(alias)) {
+        return ks.getCertificate(alias);
+      } else {
+        throw new GeneralSecurityException(NLS.bind(Messages.dlgCertMan_verifyUnknownAlias, new Object[] {
+          alias
+        }));
+      }
+    } finally {
+      if (fis != null) {
+        try {
+          fis.close();
+        } catch (IOException e) {
+        }
+      }
+    }
   }
 }

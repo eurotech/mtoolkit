@@ -25,16 +25,26 @@ public class Messages {
   public static String        CertificatesPanel_lblCertificates;
   public static String        CertificatesPanel_tblCertColAlias;
   public static String        CertificatesPanel_tblCertColLocation;
+  public static String        CertificatesPanel_tblCertColIssuedTo;
+  public static String        CertificatesPanel_tblCertColIssuedBy;
+  public static String        CertificatesPanel_tblCertColExpirationDate;
+  public static String        CertificatesPanel_lblDetails;
   public static String        CertificatesPanel_lblNoCertificates;
+  public static String        CertificatesPanel_lblKeystoreMissing;
+  public static String        CertificatesPanel_lblErrorData;
   public static String        install_to_menu_label;
   public static String        ManifestUtils_Invalid_JAR_Manifest;
   public static String        AbstractInstallationItemProcessor_Preparing_Items;
+  public static String        CertificateDetails_Not_X509Certificate;
+  public static String        CertUtils_NotNullAlias;
+  public static String        CertUtils_NotNullLocation;
 
   public static String        certs_ColAlias;
   public static String        certs_ColLocation;
   public static String        certs_btnAdd;
   public static String        certs_btnEdit;
   public static String        certs_btnRemove;
+  public static String        cert_btnDetails;
   public static String        certs_lblJarsignerLocation;
 
   public static String        dlgCertMan_titleAdd;
@@ -50,7 +60,14 @@ public class Messages {
   public static String        dlgCertMan_verifyAliasEmpty;
   public static String        dlgCertMan_verifyLocationEmpty;
   public static String        dlgCertMan_verifyLocationNotExist;
+  public static String        dlgCertMan_verifyAliasExist;
+  public static String        dlgCertMan_verifyUnknownAlias;
   public static String        dlgCertMan_browseDlgCaption;
+  public static String        dlgCertMan_labelCertDetails;
+
+  public static String        dlgCertViewer_title;
+  public static String        dlgCertViewer_labelAlias;
+  public static String        dlgCertViewer_labelLocation;
 
   public static String        browseLabel;
 

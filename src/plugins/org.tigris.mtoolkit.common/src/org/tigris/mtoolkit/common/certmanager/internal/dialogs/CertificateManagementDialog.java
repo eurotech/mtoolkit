@@ -11,6 +11,9 @@
 package org.tigris.mtoolkit.common.certmanager.internal.dialogs;
 
 import java.io.File;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.util.Vector;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -32,12 +35,16 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.Messages;
+import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
+import org.tigris.mtoolkit.common.certmanager.internal.preferences.CertDescriptor;
 
 public class CertificateManagementDialog extends TitleAreaDialog {
 
   private String title;
   private String message;
+  private Vector                 allCerts;
+  private ICertificateDescriptor editCert;
 
   private Text txtAlias;
   private Text txtLocation;
@@ -62,16 +69,19 @@ public class CertificateManagementDialog extends TitleAreaDialog {
     "JCECCAKS" //$NON-NLS-1$
   };
 
-  public CertificateManagementDialog(Shell shell, String title, String message) {
+  public CertificateManagementDialog(Shell shell, Vector certs, String title, String message) {
     super(shell);
     Assert.isNotNull(title);
     this.title = title;
     this.message = message;
+    this.allCerts = certs;
+    editCert = null;
   }
 
-  public CertificateManagementDialog(Shell shell, String title,
+  public CertificateManagementDialog(Shell shell, Vector certs, String title,
       ICertificateDescriptor init, String message) {
-    this(shell, title, message);
+    this(shell, certs, title, message);
+    editCert = init;
     alias = init.getAlias();
     storeLocation = init.getStoreLocation();
     storeType = init.getStoreType();
@@ -198,7 +208,8 @@ public class CertificateManagementDialog extends TitleAreaDialog {
   }
 
   private boolean verifyData() {
-    if (txtAlias.getText().trim().length() == 0) {
+    String alias = txtAlias.getText().trim();
+    if (alias.length() == 0) {
       setMessage(Messages.dlgCertMan_verifyAliasEmpty, IMessageProvider.ERROR);
       return false;
     }
@@ -210,6 +221,24 @@ public class CertificateManagementDialog extends TitleAreaDialog {
     File keystore = new File(location);
     if (!keystore.exists() || !keystore.isFile()) {
       setMessage(Messages.dlgCertMan_verifyLocationNotExist, IMessageProvider.ERROR);
+      return false;
+    }
+    for (int i = 0; i < allCerts.size(); i++) {
+      CertDescriptor cert = (CertDescriptor) allCerts.get(i);
+      if (cert.getAlias().equals(alias)) {
+        if ((editCert != null && !editCert.equals(cert)) || editCert == null) {
+          setMessage(Messages.dlgCertMan_verifyAliasExist, IMessageProvider.ERROR);
+          return false;
+        }
+      }
+    }
+    try {
+      Certificate readCertificate = CertUtils.readCertificate(location, alias);
+      if (!(readCertificate instanceof X509Certificate)) {
+        throw new Exception(Messages.CertificateDetails_Not_X509Certificate);
+      }
+    } catch (Exception e) {
+      setMessage(e.getMessage(), IMessageProvider.ERROR);
       return false;
     }
 

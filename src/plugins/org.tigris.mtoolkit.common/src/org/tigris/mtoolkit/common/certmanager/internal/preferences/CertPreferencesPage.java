@@ -11,6 +11,7 @@
 package org.tigris.mtoolkit.common.certmanager.internal.preferences;
 
 import java.util.Iterator;
+import java.util.Vector;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -42,6 +44,8 @@ import org.eclipse.ui.PlatformUI;
 import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 import org.tigris.mtoolkit.common.certificates.CertUtils;
+import org.tigris.mtoolkit.common.certificates.CertificateDetails;
+import org.tigris.mtoolkit.common.certificates.CertificateViewerDialog;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 import org.tigris.mtoolkit.common.certmanager.internal.dialogs.CertificateManagementDialog;
 
@@ -52,6 +56,7 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
   private Button              btnAdd;
   private Button              btnEdit;
   private Button              btnRemove;
+  private Button              btnDetails;
   private Button              btnBrowse;
   private Text                txtJarsignerLocation;
 
@@ -69,7 +74,7 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
 
     Table table = new Table(composite, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
     GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-    gridData.verticalSpan = 3;
+    gridData.verticalSpan = 4;
     gridData.heightHint = 100;
     table.setLayoutData(gridData);
     table.setLinesVisible(true);
@@ -138,6 +143,17 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
       @Override
       public void widgetSelected(SelectionEvent e) {
         removeCertificate();
+      }
+    });
+
+    btnDetails = createButton(composite, Messages.cert_btnDetails);
+    btnDetails.addSelectionListener(new SelectionAdapter() {
+      /* (non-Javadoc)
+       * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+       */
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        viewCertificate();
       }
     });
 
@@ -218,7 +234,14 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
 
   private void addCertificate() {
     Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleAdd,
+    TableItem[] items = certificatesViewer.getTable().getItems();
+    Vector allItems = new Vector();
+    for (int i = 0; i < items.length; i++) {
+      TableItem item = items[i];
+      CertDescriptor data = (CertDescriptor) item.getData();
+      allItems.add(data);
+    }
+    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, allItems, Messages.dlgCertMan_titleAdd,
         Messages.dlgCertMan_message_add);
     if (dialog.open() == Dialog.OK) {
       CertDescriptor cert = new CertDescriptor(CertStorage.getDefault().generateCertificateUid());
@@ -239,7 +262,15 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
     }
     CertDescriptor cert = (CertDescriptor) el;
     Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, Messages.dlgCertMan_titleEdit, cert,
+    TableItem[] items = certificatesViewer.getTable().getItems();
+    Vector allItems = new Vector();
+    for (int i = 0; i < items.length; i++) {
+      TableItem item = items[i];
+      CertDescriptor data = (CertDescriptor) item.getData();
+      allItems.add(data);
+    }
+    CertificateManagementDialog dialog = new CertificateManagementDialog(shell, allItems,
+        Messages.dlgCertMan_titleEdit, cert,
         Messages.dlgCertMan_message_edit);
     if (dialog.open() == Dialog.OK) {
       cert.setAlias(dialog.alias);
@@ -257,6 +288,18 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
     while (it.hasNext()) {
       ICertificateDescriptor cert = (ICertificateDescriptor) it.next();
       (CertStorage.getDefault()).removeCertificate(cert);
+    }
+  }
+
+  private void viewCertificate() {
+    IStructuredSelection selection = (IStructuredSelection) certificatesViewer.getSelection();
+    Iterator it = selection.iterator();
+    while (it.hasNext()) {
+      ICertificateDescriptor cert = (ICertificateDescriptor) it.next();
+      CertificateDetails certDetails = new CertificateDetails(cert);
+      CertificateViewerDialog dialog = new CertificateViewerDialog(certificatesViewer.getControl().getShell(),
+          certDetails);
+      dialog.open();
     }
   }
 
@@ -280,14 +323,17 @@ public final class CertPreferencesPage extends PreferencePage implements IWorkbe
     case 0:
       btnEdit.setEnabled(false);
       btnRemove.setEnabled(false);
+      btnDetails.setEnabled(false);
       return;
     case 1:
       btnEdit.setEnabled(true);
       btnRemove.setEnabled(true);
+      btnDetails.setEnabled(true);
       return;
     default:
       btnEdit.setEnabled(false);
       btnRemove.setEnabled(true);
+      btnDetails.setEnabled(false);
       return;
     }
   }
