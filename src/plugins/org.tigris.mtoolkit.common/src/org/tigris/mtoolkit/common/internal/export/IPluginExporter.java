@@ -19,12 +19,6 @@ public interface IPluginExporter {
   IStatus getResult(); // NO_UCD
 
   String getQualifier(); // NO_UCD
-
-  /**
-   * @since 5.0
-   */
-  IStatus join(long timeout) throws InterruptedException; // NO_UCD
-
   /**
    * @since 5.0
    */

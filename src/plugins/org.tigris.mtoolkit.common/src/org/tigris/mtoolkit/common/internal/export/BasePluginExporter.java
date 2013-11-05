@@ -47,19 +47,6 @@ public abstract class BasePluginExporter implements IPluginExporter {
     return getResult() != null;
   }
 
-  /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.common.internal.export.IPluginExporter#join(long)
-   */
-  public IStatus join(long timeout) throws InterruptedException {
-    long start = System.currentTimeMillis();
-    synchronized (this) {
-      while (result == null && (System.currentTimeMillis() - start < timeout)) {
-        wait(timeout - System.currentTimeMillis() + start);
-      }
-    }
-    return result;
-  }
-
   protected void setResult(IStatus result) {
     synchronized (this) {
       this.result = result;
