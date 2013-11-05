@@ -825,7 +825,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
    * @see org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin#getSystemProperty(java.lang.String)
    */
   public String getSystemProperty(String name) {
-    return bc.getProperty(name);
+    return System.getProperty(name);
   }
 
   /* (non-Javadoc)
