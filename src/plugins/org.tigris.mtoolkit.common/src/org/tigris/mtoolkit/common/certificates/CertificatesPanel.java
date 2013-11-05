@@ -119,9 +119,9 @@ public final class CertificatesPanel {
     });
 
     TableLayout layout = new TableLayout();
-    layout.addColumnData(new ColumnWeightData(40, 160, true));
-    layout.addColumnData(new ColumnWeightData(40, 160, true));
-    layout.addColumnData(new ColumnWeightData(20, 50, true));
+    layout.addColumnData(new ColumnWeightData(120, 160, true));
+    layout.addColumnData(new ColumnWeightData(120, 160, true));
+    layout.addColumnData(new ColumnWeightData(100, 140, true));
     tblCertificates.setLayout(layout);
 
     TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
