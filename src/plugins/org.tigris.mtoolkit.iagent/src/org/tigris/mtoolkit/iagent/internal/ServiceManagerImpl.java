@@ -14,6 +14,7 @@ import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
@@ -29,69 +30,54 @@ import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.spi.PMPConnection;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
-public final class ServiceManagerImpl implements ServiceManager, EventListener, ConnectionListener {
-  private static MethodSignature GET_ALL_REMOTE_SERVICES_METHOD = new MethodSignature("getAllRemoteServices",
-                                                                    new String[] {
+final class ServiceManagerImpl implements ServiceManager, EventListener, ConnectionListener {
+  private static final String       CUSTOM_SERVICE_EVENT           = "iagent_service_event";
+  private static final String       EVENT_TYPE_KEY                 = "type";
+
+  private static MethodSignature    GET_ALL_REMOTE_SERVICES_METHOD = new MethodSignature("getAllRemoteServices",
+                                                                       new String[] {
       MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE
-                                                                    }, true);
-  private static MethodSignature CHECK_FILTER_METHOD            = new MethodSignature("checkFilter", new String[] {
-                                                                  MethodSignature.STRING_TYPE
-                                                                }, true);
+                                                                       }, true);
 
-  private DeviceConnectorImpl    connector;
+  private final DeviceConnectorImpl connector;
 
-  private static final String    CUSTOM_SERVICE_EVENT           = "iagent_service_event";
-  private static final String    EVENT_TYPE_KEY                 = "type";
+  private final List                serviceListeners               = new LinkedList();
 
-  private List                   serviceListeners               = new LinkedList();
-
-  private boolean                addedConnectionListener;
-
-  public ServiceManagerImpl(DeviceConnectorImpl connector) {
+  ServiceManagerImpl(DeviceConnectorImpl connector) {
     if (connector == null) {
       throw new IllegalArgumentException();
     }
     this.connector = connector;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.ServiceManager#getAllRemoteServices(java.lang.String, java.lang.String)
+   */
   public RemoteService[] getAllRemoteServices(String clazz, String filter) throws IAgentException {
     DebugUtils.debug(this, "[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
-    if (filter != null) {
-      String filterCheck = (String) CHECK_FILTER_METHOD.call(getServiceAdmin(getConnection()), new Object[] {
-        filter
-      });
-      if (filterCheck != null) { // invalid filter syntax
-        DebugUtils.info(this, "[getAllRemoteServices] Filter check failed: " + filterCheck);
-        throw new IllegalArgumentException("Invalid Filter Syntax: " + filterCheck);
+    Object result = GET_ALL_REMOTE_SERVICES_METHOD.call(getServiceAdmin(getConnection()), new Object[] {
+        clazz, filter
+    });
+    if (result instanceof Error) {
+      throw new IllegalArgumentException(((Error) result).getMessage());
+    }
+    Dictionary[] servicesProps = (Dictionary[]) result;
+    RemoteService[] services = new RemoteService[(servicesProps == null) ? 0 : servicesProps.length];
+    if (servicesProps != null) {
+      for (int i = 0; i < servicesProps.length; i++) {
+        services[i] = new RemoteServiceImpl(this, servicesProps[i]);
       }
-    }
-    Dictionary[] servicesProps = (Dictionary[]) GET_ALL_REMOTE_SERVICES_METHOD.call(getServiceAdmin(getConnection()),
-        new Object[] {
-            clazz, filter
-        });
-    if (servicesProps == null) {
-      DebugUtils
-          .info(
-              this,
-              "[getAllRemoteServices] Internal error: it seems that filter check either returned invalid result or we interpreted it wrong");
-      throw new IAgentException("Internal error: invalid filter syntax exception", IAgentErrors.ERROR_INTERNAL_ERROR);
-    }
-    RemoteService[] services = new RemoteService[servicesProps.length];
-    for (int i = 0; i < servicesProps.length; i++) {
-      services[i] = new RemoteServiceImpl(this, servicesProps[i]);
     }
     DebugUtils.debug(this, "[getAllRemoteServices] result: " + DebugUtils.convertForDebug(services));
     return services;
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.ServiceManager#addRemoteServiceListener(org.tigris.mtoolkit.iagent.event.RemoteServiceListener)
+   */
   public void addRemoteServiceListener(RemoteServiceListener listener) throws IAgentException {
     DebugUtils.debug(this, "[addRemoteServiceListener] >>> listener: " + listener);
-    synchronized (this) {
-      if (!addedConnectionListener) {
-        connector.getConnectionManager().addConnectionListener(this);
-        addedConnectionListener = true;
-      }
-    }
+    connector.getConnectionManager().addConnectionListener(this);
     synchronized (serviceListeners) {
       if (!serviceListeners.contains(listener)) {
         serviceListeners.add(listener);
@@ -108,6 +94,9 @@ public final class ServiceManagerImpl implements ServiceManager, EventListener, 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.ServiceManager#removeRemoteServiceListener(org.tigris.mtoolkit.iagent.event.RemoteServiceListener)
+   */
   public void removeRemoteServiceListener(RemoteServiceListener listener) throws IAgentException {
     DebugUtils.debug(this, "[removeRemoteServiceListener] >>> listener: " + listener);
     synchronized (serviceListeners) {
@@ -129,6 +118,9 @@ public final class ServiceManagerImpl implements ServiceManager, EventListener, 
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.EventListener#event(java.lang.Object, java.lang.String)
+   */
   public void event(Object event, String eventType) {
     DebugUtils.debug(this, "[event] >>> event: " + event + "; eventType: " + eventType);
     if (eventType.equals(CUSTOM_SERVICE_EVENT)) {
@@ -142,10 +134,9 @@ public final class ServiceManagerImpl implements ServiceManager, EventListener, 
     }
   }
 
-  DeviceConnectorImpl getDeviceConnector() {
-    return connector;
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.spi.ConnectionListener#connectionChanged(org.tigris.mtoolkit.iagent.spi.ConnectionEvent)
+   */
   public void connectionChanged(ConnectionEvent event) {
     if (event.getType() == ConnectionEvent.CONNECTED
         && event.getConnection().getType() == ConnectionManager.PMP_CONNECTION) {
@@ -166,7 +157,7 @@ public final class ServiceManagerImpl implements ServiceManager, EventListener, 
     }
   }
 
-  public void removeListeners() throws IAgentException {
+  void removeListeners() throws IAgentException {
     DebugUtils.debug(this, "[removeListeners] >>>");
     synchronized (serviceListeners) {
       serviceListeners.clear();
@@ -179,6 +170,10 @@ public final class ServiceManagerImpl implements ServiceManager, EventListener, 
       }
     }
     DebugUtils.debug(this, "[removeListeners] Listener successfully removed");
+  }
+
+  DeviceConnectorImpl getDeviceConnector() {
+    return connector;
   }
 
   PMPConnection getConnection() throws IAgentException {

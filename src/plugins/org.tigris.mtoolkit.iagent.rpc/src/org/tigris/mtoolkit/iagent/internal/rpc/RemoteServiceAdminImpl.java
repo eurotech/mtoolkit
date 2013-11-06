@@ -24,6 +24,8 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.tigris.mtoolkit.iagent.Error;
+import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
@@ -43,8 +45,6 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
   private static final Class[] CLASSES                = new Class[] {
                                                         RemoteServiceAdmin.class
                                                       };
-
-  private Bundle               systemBundle;
 
   private final Class[]        filterSupportedClasses = new Class[] {
       int.class, long.class, float.class, double.class, byte.class, short.class, char.class, boolean.class,
@@ -114,30 +114,9 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#checkFilter(java.lang.String)
-   */
-  public String checkFilter(String filter) {
-    if (DebugUtils.DEBUG_ENABLED) {
-      DebugUtils.debug(this, "[checkFilter] >>> filter: " + filter);
-    }
-    try {
-      bc.createFilter(filter);
-      if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "[checkFilter] Filter check is successful");
-      }
-      return null;
-    } catch (InvalidSyntaxException e) {
-      if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "[checkFilter] Unable to create filter", e);
-      }
-      return e.toString();
-    }
-  }
-
-  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin#getAllRemoteServices(java.lang.String, java.lang.String)
    */
-  public Dictionary[] getAllRemoteServices(String clazz, String filter) {
+  public Object getAllRemoteServices(String clazz, String filter) {
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getAllRemoteServices] >>> clazz: " + clazz + "; filter: " + filter);
     }
@@ -145,7 +124,10 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
     try {
       refs = bc.getAllServiceReferences(clazz, filter);
     } catch (InvalidSyntaxException e) {
-      return null;
+      if (DebugUtils.DEBUG_ENABLED) {
+        DebugUtils.debug(this, "[checkFilter] Unable to create filter", e);
+      }
+      return new Error(IAgentErrors.ERROR_INTERNAL_ERROR, DebugUtils.toString(e), DebugUtils.getStackTrace(e));
     }
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[getAllRemoteServices] " + (refs != null ? refs.length : 0) + " services found.");
@@ -311,9 +293,7 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
   }
 
   private void postRemoteEvent(ServiceEvent event) {
-    if (systemBundle == null) {
-      systemBundle = bc.getBundle(0);
-    }
+    final Bundle systemBundle = bc.getBundle(0);
     if (systemBundle.getState() == Bundle.STOPPING) {
       return;
     }

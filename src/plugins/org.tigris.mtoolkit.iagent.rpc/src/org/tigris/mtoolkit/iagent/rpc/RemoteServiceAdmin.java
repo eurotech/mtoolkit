@@ -13,10 +13,9 @@ package org.tigris.mtoolkit.iagent.rpc;
 import java.util.Dictionary;
 
 public interface RemoteServiceAdmin extends RemoteServiceIDProvider {
-
 	public static final String CUSTOM_SERVICE_EVENT = "iagent_service_event";
 
-	public Dictionary[] getAllRemoteServices(String clazz, String filter);
+  public Object getAllRemoteServices(String clazz, String filter);
 
 	public Dictionary getProperties(long id);
 
@@ -25,6 +24,4 @@ public interface RemoteServiceAdmin extends RemoteServiceIDProvider {
 	public long getBundle(long id);
 
 	public boolean isServiceStale(long id);
-
-	public String checkFilter(String filter);
 }
