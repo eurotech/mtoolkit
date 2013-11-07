@@ -12,7 +12,6 @@ package org.tigris.mtoolkit.common.installation;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,13 +27,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressConstants;
 
 public final class InstallToAction extends Action {
-  private final Map                       args;
-  private final List                      items;
+  private final Map<String, Object>       args;
+  private final List<Mapping>             items;
   private final InstallationTarget        target;
   private final InstallationItemProcessor processor;
 
-  public InstallToAction(InstallationItemProcessor processor, Map/*<String,Object>*/args, InstallationTarget target,
-      List/*<Mapping>*/items) {
+  public InstallToAction(InstallationItemProcessor processor, Map<String, Object> args, InstallationTarget target,
+      List<Mapping> items) {
     super(target.getName());
     this.processor = processor;
     this.args = args == null ? Collections.EMPTY_MAP : args;
@@ -61,10 +60,8 @@ public final class InstallToAction extends Action {
         InstallationHistory.getDefault().promoteHistory(target, processor);
         InstallationHistory.getDefault().saveHistory();
 
-        Iterator iterator = items.iterator();
-        List instItems = new ArrayList();
-        while (iterator.hasNext()) {
-          Mapping mapping = (Mapping) iterator.next();
+        List<InstallationItem> instItems = new ArrayList<InstallationItem>();
+        for (Mapping mapping : items) {
           InstallationItem item = selectInstallationItem(mapping.resource, mapping.providerSpecificItems);
           if (item == null) {
             return Status.CANCEL_STATUS;
@@ -74,10 +71,8 @@ public final class InstallToAction extends Action {
             return Status.CANCEL_STATUS;
           }
         }
-        InstallationItem[] items = (InstallationItem[]) instItems.toArray(new InstallationItem[instItems.size()]);
-
+        InstallationItem[] items = instItems.toArray(new InstallationItem[instItems.size()]);
         IStatus status = processor.processInstallationItems(items, args, target, monitor);
-
         monitor.done();
         if (monitor.isCanceled()) {
           return Status.CANCEL_STATUS;
@@ -90,12 +85,12 @@ public final class InstallToAction extends Action {
     job.schedule();
   }
 
-  private InstallationItem selectInstallationItem(final Object resource, final Map items) {
-    final List suitableProviders = new ArrayList();
+  private InstallationItem selectInstallationItem(final Object resource,
+      final Map<InstallationItemProvider, InstallationItem> items) {
+    final List<InstallationItemProvider> suitableProviders = new ArrayList<InstallationItemProvider>();
     String[] supported = processor.getSupportedMimeTypes();
-    for (Iterator it = items.keySet().iterator(); it.hasNext();) {
-      InstallationItemProvider provider = (InstallationItemProvider) it.next();
-      InstallationItem item = (InstallationItem) items.get(provider);
+    for (InstallationItemProvider provider : items.keySet()) {
+      InstallationItem item = items.get(provider);
       String itemMimeType = item.getMimeType();
       for (int i = 0; i < supported.length; i++) {
         if (supported[i].equals(itemMimeType)) {
@@ -110,7 +105,7 @@ public final class InstallToAction extends Action {
           + "' is not capable of installing specified item");
     }
     if (suitableProviders.size() == 1) {
-      return (InstallationItem) items.get(suitableProviders.get(0));
+      return items.get(suitableProviders.get(0));
     }
 
     final InstallationItemProvider[] selected = new InstallationItemProvider[1];
@@ -127,7 +122,7 @@ public final class InstallToAction extends Action {
       }
     });
     if (selected[0] != null) {
-      return (InstallationItem) items.get(selected[0]);
+      return items.get(selected[0]);
     } else {
       return null;
     }
@@ -146,10 +141,10 @@ public final class InstallToAction extends Action {
   }
 
   public static class Mapping {
-    public Object resource;
-    public Map    providerSpecificItems;
+    public Object                                          resource;
+    public Map<InstallationItemProvider, InstallationItem> providerSpecificItems;
 
-    public Mapping(Object resource, Map providerSpecificItems) {
+    public Mapping(Object resource, Map<InstallationItemProvider, InstallationItem> providerSpecificItems) {
       this.resource = resource;
       this.providerSpecificItems = providerSpecificItems;
     }
