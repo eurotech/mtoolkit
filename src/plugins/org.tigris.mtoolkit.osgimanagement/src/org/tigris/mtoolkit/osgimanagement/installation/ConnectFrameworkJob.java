@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -41,30 +42,33 @@ import org.tigris.mtoolkit.common.lm.LM;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.IAgentException;
+import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
+import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.osgimanagement.Util;
+import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
+import org.tigris.mtoolkit.osgimanagement.internal.browser.logic.PMPConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.FrameworkPanel.DeviceTypeProviderElement;
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 final class ConnectFrameworkJob extends Job {
-  private static final List connectingFrameworks = new ArrayList();
+  private static final boolean IAGENT_UI_ACCESS     = "true".equals(Platform.getDebugOption("org.tigris.mtoolkit.osgimanagement/iagent.ui.warn")); //$NON-NLS-1$
 
-  private Framework         fw;
+  private static final List    connectingFrameworks = new ArrayList();
+
+  private final Framework      fw;
 
   ConnectFrameworkJob(Framework framework) {
     super(NLS.bind(Messages.connect_framework, framework.getName()));
     this.fw = framework;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.
-   * IProgressMonitor)
+  /* (non-Javadoc)
+   * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
    */
   @Override
   public IStatus run(final IProgressMonitor monitor) {
@@ -73,9 +77,7 @@ final class ConnectFrameworkJob extends Job {
     } catch (CoreException e) {
       return e.getStatus();
     }
-
     monitor.beginTask(NLS.bind(Messages.connect_framework, fw.getName()), 1);
-
     synchronized (connectingFrameworks) {
       // there is already job for this fw, so wait that job
       // otherwise, start connecting
@@ -103,8 +105,7 @@ final class ConnectFrameworkJob extends Job {
     DeviceConnector connector = fw.getConnector();
     try {
       if (connector != null && connector.isActive()) {
-        FrameworkConnectorFactory.createPMPConnection(connector, (FrameworkImpl) fw, fw.getName(),
-            ((FrameworkImpl) fw).isAutoConnected());
+        createPMPConnection(connector, (FrameworkImpl) fw, fw.getName(), ((FrameworkImpl) fw).isAutoConnected());
       } else {
         IMemento config = ((FrameworkImpl) fw).getConfig();
         String id = null;
@@ -126,7 +127,6 @@ final class ConnectFrameworkJob extends Job {
             break;
           }
         }
-
         if (transportType != null && id != null) {
           if (aConnProps == null) {
             aConnProps = new Hashtable();
@@ -134,7 +134,7 @@ final class ConnectFrameworkJob extends Job {
           IStatus rStatus = null;
           try {
             DeviceConnector conn = DeviceConnector.connect(transportType, id, aConnProps, null);
-            FrameworkConnectorFactory.connectFramework(conn, (FrameworkImpl) fw);
+            connectFramework(conn, (FrameworkImpl) fw);
           } catch (IAgentException e) {
             if (monitor.isCanceled()) {
               return Status.CANCEL_STATUS;
@@ -177,6 +177,64 @@ final class ConnectFrameworkJob extends Job {
     }
   }
 
+  private static void connectFramework(final DeviceConnector connector, FrameworkImpl fw) {
+    DeviceConnector fConnector = connector;
+    if (IAGENT_UI_ACCESS) {
+      // wrap the connector
+      final Display display = PlatformUI.getWorkbench().getDisplay();
+      fConnector = new DeviceConnectorSWTWrapper(connector, display);
+    }
+    final Dictionary connProps = fConnector.getProperties();
+    Boolean temporary = (Boolean) connProps.get("framework-connection-temporary");
+    if (temporary != null && temporary.booleanValue()) {
+      // the connection is only temporary and will be closed shortly
+      return;
+    }
+
+    if (!fConnector.equals(fw.getConnector())) {
+      fw.setConnector(fConnector);
+    }
+
+    FrameworkPlugin.debug("FrameworkPlugin: " + fw.getName() + " was connected with connector: " + fConnector); //$NON-NLS-1$ //$NON-NLS-2$
+    createPMPConnection(fConnector, fw, fw.getName(), fw.isAutoConnected());
+  }
+
+  /**
+   * Creates PMP connection.
+   *
+   * @param connector
+   * @param fw
+   * @param frameworkName
+   * @param autoConnected
+   */
+  private static void createPMPConnection(final DeviceConnector connector, final FrameworkImpl fw,
+      String frameworkName, boolean autoConnected) {
+    boolean pmp = false;
+    try {
+      pmp = ((DeviceConnectorSpi) connector).getConnectionManager().getActiveConnection(
+          ConnectionManager.PMP_CONNECTION) != null;
+    } catch (IAgentException e1) {
+    }
+    final boolean pmpConnected = pmp;
+    // create and add pmp connection listener to fw
+    PMPConnectionListener pmpListener = fw.getPMPConnectionListener();
+    if (pmpListener == null || !connector.equals(pmpListener.getConnector())) {
+      pmpListener = new PMPConnectionListener(fw, frameworkName, connector, autoConnected);
+      fw.setPMPConnectionListener(pmpListener);
+    }
+    final PMPConnectionListener listener = pmpListener;
+    // if pmp connection is available do not force creation but directly connect
+    if (pmpConnected) {
+      listener.connected();
+    } else {
+      try {
+        connector.getVMManager().isVMActive();
+      } catch (IAgentException e) {
+        FrameworkPlugin.processError(e, NLS.bind(Messages.pmp_connect_error_message, fw.getName()), true);
+      }
+    }
+  }
+
   private static void errorProviderNotFound() {
     Display display = PlatformUI.getWorkbench().getDisplay();
     display.syncExec(new Runnable() {
@@ -206,11 +264,11 @@ final class ConnectFrameworkJob extends Job {
         String[] buttons = null;
         if (iagentFile == null) {
           buttons = new String[] {
-              Messages.close_button_label
+            Messages.close_button_label
           };
         } else {
           buttons = new String[] {
-            Messages.close_button_label, Messages.get_iagent_button_label
+              Messages.close_button_label, Messages.get_iagent_button_label
           };
         }
         String message = Messages.connection_failed;
@@ -255,31 +313,30 @@ final class ConnectFrameworkJob extends Job {
           }
         }
       }
+    });
+  }
 
-      private void saveFile(String filePath, InputStream input) {
-        OutputStream output = null;
-        try {
-          File file = new File(filePath);
-          if (file.exists()) {
-            boolean replaceFile = MessageDialog.openQuestion(null, Messages.confirm_replace_title,
-                NLS.bind(Messages.error_file_already_exist, file.toString()));
-            if (replaceFile) {
-              int bytesRead = 0;
-              byte[] buffer = new byte[1024];
-              output = new FileOutputStream(file);
-              while ((bytesRead = input.read(buffer)) != -1) {
-                output.write(buffer, 0, bytesRead);
-              }
-            }
+  private void saveFile(String filePath, InputStream input) {
+    OutputStream output = null;
+    try {
+      File file = new File(filePath);
+      if (file.exists()) {
+        boolean replaceFile = MessageDialog.openQuestion(null, Messages.confirm_replace_title,
+            NLS.bind(Messages.error_file_already_exist, file.toString()));
+        if (replaceFile) {
+          int bytesRead = 0;
+          byte[] buffer = new byte[1024];
+          output = new FileOutputStream(file);
+          while ((bytesRead = input.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead);
           }
-        } catch (IOException ex) {
-          StatusManager.getManager().handle(
-              Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle " + filePath, ex));
-        } finally {
-          FileUtils.close(output);
         }
       }
-    });
-
+    } catch (IOException ex) {
+      StatusManager.getManager().handle(
+          Util.newStatus(IStatus.ERROR, "An error occurred while saving IAgent bundle " + filePath, ex));
+    } finally {
+      FileUtils.close(output);
+    }
   }
 }
