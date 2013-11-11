@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressConstants;
 
-public final class InstallToAction extends Action {
+public class InstallToAction extends Action {
   private final Map<String, Object>       args;
   private final List<Mapping>             items;
   private final InstallationTarget        target;

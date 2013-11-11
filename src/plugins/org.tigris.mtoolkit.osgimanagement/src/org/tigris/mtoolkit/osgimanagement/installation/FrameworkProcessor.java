@@ -86,9 +86,15 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
   private static final FrameworkProcessorExtension       bundlesProcessor           = new BundlesProcessor();
   private static final List<FrameworkProcessorExtension> extensions                 = new ArrayList<FrameworkProcessorExtension>();
 
+  private static final Map<String, Object>               properties;
+
   private boolean                                        useAdditionalProcessors    = true;
 
   static {
+    Map<String, Object> props = new HashMap<String, Object>(1, 1);
+    props.put(InstallationConstants.TESTING_SUPPORTED, Boolean.TRUE);
+    properties = Collections.unmodifiableMap(props);
+
     IExtensionRegistry registry = Platform.getExtensionRegistry();
     IExtensionPoint procExtPoint = registry.getExtensionPoint(EXTENSION_POINT_PROCESSORS);
     IConfigurationElement[] elements = procExtPoint.getConfigurationElements();
@@ -101,6 +107,14 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
         }
       }
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.common.installation.InstallationItemProcessor#getProperties()
+   */
+  @Override
+  public Map<String, Object> getProperties() {
+    return properties;
   }
 
   public boolean getUseAdditionalProcessors() {
@@ -632,8 +646,7 @@ public final class FrameworkProcessor extends AbstractInstallationItemProcessor 
     return null;
   }
 
-  private static void startBundle(final RemoteBundle remoteBundle, IProgressMonitor monitor)
-      throws IAgentException {
+  private static void startBundle(final RemoteBundle remoteBundle, IProgressMonitor monitor) throws IAgentException {
     // Fragment bundles cannot be started
     if (remoteBundle.getType() == RemoteBundle.BUNDLE_TYPE_FRAGMENT) {
       return;

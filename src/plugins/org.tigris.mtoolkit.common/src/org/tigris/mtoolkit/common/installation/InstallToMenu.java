@@ -29,7 +29,7 @@ import org.eclipse.ui.services.IServiceLocator;
 import org.tigris.mtoolkit.common.Messages;
 import org.tigris.mtoolkit.common.installation.InstallToAction.Mapping;
 
-public final class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
+public class InstallToMenu extends CompoundContributionItem implements IWorkbenchContribution {
   private static final IContributionItem[] NO_CONTRIBUTION_ITEMS = new IContributionItem[0];
 
   private ISelectionService                selectionService      = null;
@@ -62,7 +62,7 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
     if (capableProcessors == null || capableProcessors.size() == 0) {
       return NO_CONTRIBUTION_ITEMS;
     }
-    MenuManager menuManager = new MenuManager(Messages.install_to_menu_label);
+    MenuManager menuManager = new MenuManager(getMenuText());
     for (int i = 0; i < capableProcessors.size(); i++) {
       if (i != 0) {
         menuManager.add(new Separator());
@@ -75,11 +75,45 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
     };
   }
 
-  private Action createInstallationAction(InstallationItemProcessor processor, InstallationTarget target, List mappings) {
+  protected String getMenuText() {
+    return Messages.install_to_menu_label;
+  }
+
+  protected boolean isCapable(InstallationItemProcessor processor, List<Mapping> installationMappings) {
+    String[] supportedTypes = processor.getSupportedMimeTypes();
+    for (Mapping mapping : installationMappings) {
+      Map<InstallationItemProvider, InstallationItem> items = mapping.providerSpecificItems;
+      boolean supportedResource = false;
+      for (InstallationItem item : items.values()) {
+        if (hasMatch(item.getMimeType(), supportedTypes)) {
+          supportedResource = true;
+          break;
+        }
+      }
+      if (!supportedResource) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  protected Action createInstallationAction(InstallationItemProcessor processor, InstallationTarget target,
+      List<Mapping> mappings) {
     return new InstallToAction(processor, null, target, mappings);
   }
 
-  private void createActions(final InstallationItemProcessor processor, final List mappings,
+  protected IStructuredSelection getSelection() {
+    ISelection selection = selectionService.getSelection();
+    if (selection == null) {
+      return null;
+    }
+    if (!(selection instanceof IStructuredSelection)) {
+      return null;
+    }
+    return (IStructuredSelection) selection;
+  }
+
+  private void createActions(final InstallationItemProcessor processor, final List<Mapping> mappings,
       final MenuManager menuManager) {
     InstallationTarget[] targets = InstallationHistory.getDefault().getHistory(processor);
     for (int i = 0; i < targets.length; i++) {
@@ -110,17 +144,13 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
   }
 
   private List<Mapping> getInstallationMappings() {
-    ISelection selection = selectionService.getSelection();
+    IStructuredSelection selection = getSelection();
     if (selection == null) {
       return null;
     }
-    if (!(selection instanceof IStructuredSelection)) {
-      return null;
-    }
     final InstallationRegistry instance = InstallationRegistry.getInstance();
-    IStructuredSelection sel = (IStructuredSelection) selection;
     List<Mapping> mappings = new ArrayList<Mapping>();
-    Iterator<Object> resIterator = sel.iterator();
+    Iterator<Object> resIterator = selection.iterator();
     while (resIterator.hasNext()) {
       Object res = resIterator.next();
       Map<InstallationItemProvider, InstallationItem> resItems = instance.getItems(res);
@@ -136,23 +166,7 @@ public final class InstallToMenu extends CompoundContributionItem implements IWo
     final InstallationRegistry instance = InstallationRegistry.getInstance();
     List<InstallationItemProcessor> processors = instance.getProcessors();
     for (InstallationItemProcessor processor : processors) {
-      boolean isCapable = true;
-      String[] supportedTypes = processor.getSupportedMimeTypes();
-      for (Mapping mapping : installationMappings) {
-        Map<InstallationItemProvider, InstallationItem> items = mapping.providerSpecificItems;
-        boolean supportedResource = false;
-        for (InstallationItem item : items.values()) {
-          if (hasMatch(item.getMimeType(), supportedTypes)) {
-            supportedResource = true;
-            break;
-          }
-        }
-        if (!supportedResource) {
-          isCapable = false;
-          break;
-        }
-      }
-      if (isCapable) {
+      if (isCapable(processor, installationMappings)) {
         capableProcessors.add(processor);
       }
     }
