@@ -15,10 +15,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -27,20 +28,21 @@ import java.util.List;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
+import org.tigris.mtoolkit.common.FileUtils;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 public final class InstallationHistory {
-  private static final int           HISTORY_SIZE        = 10;
-  private static final String        STORAGE_FILE        = "installation_history.xml";
-  private static final String        ROOT_TYPE           = "history";
-  private static final String        PROCESSOR_TYPE      = "processor";
-  private static final String        PROCESSOR_NAME_ATTR = "name";
-  private static final String        TARGET_TYPE         = "target";
-  private static final String        TARGET_UID_ATTR     = "uid";
+  private static final int                 HISTORY_SIZE        = 10;
+  private static final String              STORAGE_FILE        = "installation_history.xml";
+  private static final String              ROOT_TYPE           = "history";
+  private static final String              PROCESSOR_TYPE      = "processor";
+  private static final String              PROCESSOR_NAME_ATTR = "name";
+  private static final String              TARGET_TYPE         = "target";
+  private static final String              TARGET_UID_ATTR     = "uid";
 
-  private static InstallationHistory defaultInstance     = null;
+  private static InstallationHistory       defaultInstance     = null;
 
-  private Hashtable                  history             = null;
+  private Dictionary<String, List<String>> history             = null;
 
   private InstallationHistory() {
   }
@@ -68,12 +70,12 @@ public final class InstallationHistory {
    */
   public void promoteHistory(InstallationTarget target, InstallationItemProcessor processor) {
     if (history == null) {
-      history = new Hashtable();
+      history = new Hashtable<String, List<String>>();
     }
 
-    List targets = (List) history.get(processor.getGeneralTargetName());
+    List<String> targets = history.get(processor.getGeneralTargetName());
     if (targets == null) {
-      targets = new ArrayList();
+      targets = new ArrayList<String>();
       targets.add(target.getUID());
       history.put(processor.getGeneralTargetName(), targets);
       return;
@@ -94,33 +96,6 @@ public final class InstallationHistory {
   }
 
   /**
-   * Purges the passed list of target UIDs from targets, that are not valid
-   * anymore for given processor.
-   *
-   * @param targets
-   *          the list of target UIDs to purge
-   * @param processor
-   *          processor to obtain fresh list of available targets
-   */
-  private void purgeTargets(List targetUIDs, InstallationItemProcessor processor) {
-    InstallationTarget[] currentTargets = processor.getInstallationTargets();
-    Iterator iterator = targetUIDs.iterator();
-    while (iterator.hasNext()) {
-      String t = (String) iterator.next();
-      boolean found = false;
-      for (int i = 0; i < currentTargets.length; i++) {
-        if (currentTargets[i].getUID().equals(t)) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        iterator.remove();
-      }
-    }
-  }
-
-  /**
    * Returns list with UIDs (String) that specify most recent targets used. If
    * there is no history for passed processor, empty list is returned.
    *
@@ -128,13 +103,13 @@ public final class InstallationHistory {
    *          processor for which to return history
    * @return list with recent UIDs
    */
-  public List getHistoryUIDs(InstallationItemProcessor processor) {
+  public List<String> getHistoryUIDs(InstallationItemProcessor processor) {
     if (history == null) {
-      return new ArrayList();
+      return Collections.EMPTY_LIST;
     }
-    List targets = (List) history.get(processor.getGeneralTargetName());
+    List<String> targets = history.get(processor.getGeneralTargetName());
     if (targets == null) {
-      return new ArrayList();
+      return Collections.EMPTY_LIST;
     }
     return targets;
   }
@@ -151,12 +126,12 @@ public final class InstallationHistory {
    */
   public InstallationTarget[] getHistory(InstallationItemProcessor processor) {
     int connectedIndex = 0;
-    List recent = getHistoryUIDs(processor);
-    Iterator iterator = recent.iterator();
-    List result = new ArrayList();
+    List<String> recent = getHistoryUIDs(processor);
+    List<InstallationTarget> result = new ArrayList<InstallationTarget>();
     InstallationTarget[] currentTargets = processor.getInstallationTargets();
+    Iterator<String> iterator = recent.iterator();
     while (iterator.hasNext()) {
-      String uid = (String) iterator.next();
+      String uid = iterator.next();
       for (int i = 0; i < currentTargets.length; i++) {
         if (uid.equals(currentTargets[i].getUID())) {
           if (currentTargets[i].isConnected()) {
@@ -174,7 +149,7 @@ public final class InstallationHistory {
         connectedIndex++;
       }
     }
-    return (InstallationTarget[]) result.toArray(new InstallationTarget[result.size()]);
+    return result.toArray(new InstallationTarget[result.size()]);
   }
 
   /**
@@ -184,15 +159,14 @@ public final class InstallationHistory {
     if (history == null) {
       return;
     }
-
-    List processors = InstallationRegistry.getInstance().getProcessors();
+    List<InstallationItemProcessor> processors = InstallationRegistry.getInstance().getProcessors();
     XMLMemento config = XMLMemento.createWriteRoot(ROOT_TYPE);
-    Enumeration en = history.keys();
+    Enumeration<String> en = history.keys();
     while (en.hasMoreElements()) {
-      String processorName = (String) en.nextElement();
+      String processorName = en.nextElement();
       InstallationItemProcessor processor = null;
       for (int i = 0; i < processors.size(); i++) {
-        InstallationItemProcessor candidate = (InstallationItemProcessor) processors.get(i);
+        InstallationItemProcessor candidate = processors.get(i);
         if (candidate.getGeneralTargetName().equals(processorName)) {
           processor = candidate;
           break;
@@ -204,11 +178,11 @@ public final class InstallationHistory {
       }
 
       IMemento processorItem = null;
-      List targets = (List) history.get(processorName);
-      Iterator iterator = targets.iterator();
+      List<String> targets = history.get(processorName);
+      Iterator<String> iterator = targets.iterator();
       InstallationTarget[] currentTargets = processor.getInstallationTargets();
       while (iterator.hasNext()) {
-        String uid = (String) iterator.next();
+        String uid = iterator.next();
         for (int i = 0; i < currentTargets.length; i++) {
           if (uid.equals(currentTargets[i].getUID()) && !currentTargets[i].isTransient()) {
             if (processorItem == null) {
@@ -221,15 +195,15 @@ public final class InstallationHistory {
         }
       }
     }
-
+    OutputStreamWriter writer = null;
     try {
       File configFile = new File(UtilitiesPlugin.getDefault().getStateLocation().toFile(), STORAGE_FILE);
-      FileOutputStream stream = new FileOutputStream(configFile);
-      OutputStreamWriter writer = new OutputStreamWriter(stream, "utf-8");
+      writer = new OutputStreamWriter(new FileOutputStream(configFile), "utf-8");
       config.save(writer);
-      writer.close();
     } catch (IOException e) {
       UtilitiesPlugin.error("Failed to save installation history", e);
+    } finally {
+      FileUtils.close(writer);
     }
   }
 
@@ -238,10 +212,10 @@ public final class InstallationHistory {
    */
   public void restoreHistory() {
     XMLMemento config = null;
+    InputStreamReader reader = null;
     try {
       File configFile = new File(UtilitiesPlugin.getDefault().getStateLocation().toFile(), STORAGE_FILE);
-      InputStream input = new FileInputStream(configFile);
-      InputStreamReader reader = new InputStreamReader(input, "utf-8");
+      reader = new InputStreamReader(new FileInputStream(configFile), "utf-8");
       config = XMLMemento.createReadRoot(reader);
     } catch (FileNotFoundException e) {
       // do nothing
@@ -249,20 +223,22 @@ public final class InstallationHistory {
       UtilitiesPlugin.error("Failed to load installation history", e);
     } catch (WorkbenchException e) {
       UtilitiesPlugin.error("Failed to load installation history", e);
+    } finally {
+      FileUtils.close(reader);
     }
 
     if (config == null) {
       return;
     }
 
-    history = new Hashtable();
+    history = new Hashtable<String, List<String>>();
     IMemento[] processors = config.getChildren(PROCESSOR_TYPE);
     for (int i = 0; i < processors.length; i++) {
       String processorName = processors[i].getString(PROCESSOR_NAME_ATTR);
       if (processorName == null) {
         continue;
       }
-      List targetUids = new ArrayList();
+      List<String> targetUids = new ArrayList<String>();
       IMemento[] targets = processors[i].getChildren(TARGET_TYPE);
       for (int k = 0; k < targets.length; k++) {
         String uid = targets[k].getString(TARGET_UID_ATTR);
@@ -272,6 +248,33 @@ public final class InstallationHistory {
         targetUids.add(uid);
       }
       history.put(processorName, targetUids);
+    }
+  }
+
+  /**
+   * Purges the passed list of target UIDs from targets, that are not valid
+   * anymore for given processor.
+   *
+   * @param targets
+   *          the list of target UIDs to purge
+   * @param processor
+   *          processor to obtain fresh list of available targets
+   */
+  private void purgeTargets(List<String> targetUIDs, InstallationItemProcessor processor) {
+    InstallationTarget[] currentTargets = processor.getInstallationTargets();
+    Iterator<String> iterator = targetUIDs.iterator();
+    while (iterator.hasNext()) {
+      String t = iterator.next();
+      boolean found = false;
+      for (int i = 0; i < currentTargets.length; i++) {
+        if (currentTargets[i].getUID().equals(t)) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        iterator.remove();
+      }
     }
   }
 }
