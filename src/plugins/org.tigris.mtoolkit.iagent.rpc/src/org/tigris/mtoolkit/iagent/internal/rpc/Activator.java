@@ -25,12 +25,10 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServer;
 import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.PMPServiceFactory;
-import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class Activator implements BundleActivator, ServiceTrackerCustomizer {
-  private static final String           EVENT_ADMIN_CLASS      = "org.osgi.service.event.EventAdmin";
   private static final String           DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
 
   private static final int              IAGENT_PMP_PORT        = Integer.getInteger("iagent.pmp.port",
@@ -53,7 +51,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
   private ServiceRegistration           pmpServerReg;
 
   private ServiceTracker                deploymentAdminTrack;
-  private ServiceTracker                eventAdminTracker;
 
   public void start(BundleContext context) throws Exception {
     Activator.context = context;
@@ -72,9 +69,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
     deploymentAdminTrack = new ServiceTracker(context, DEPLOYMENT_ADMIN_CLASS, this);
     deploymentAdminTrack.open(true);
-
-    eventAdminTracker = new ServiceTracker(context, EVENT_ADMIN_CLASS, this);
-    eventAdminTracker.open(true);
 
     serviceAdmin = new RemoteServiceAdminImpl();
     serviceAdmin.register(context);
@@ -118,11 +112,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
       deploymentAdminTrack = null;
     }
 
-    if (eventAdminTracker != null) {
-      eventAdminTracker.close();
-      eventAdminTracker = null;
-    }
-
     if (serviceAdmin != null) {
       serviceAdmin.unregister(context);
       serviceAdmin = null;
@@ -149,9 +138,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
         Object admin = context.getService(arg0);
         registerDeploymentAdmin(admin);
         return admin;
-      } else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
-        setCapability(Capabilities.EVENT_SUPPORT, true);
-        return new Object();
       }
     }
     return null;
@@ -175,10 +161,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
           if (admin != null) {
             registerDeploymentAdmin(admin);
           }
-        }
-      } else if (classes[i].equals(EVENT_ADMIN_CLASS)) {
-        if (eventAdminTracker.getService() == null) {
-          setCapability(Capabilities.EVENT_SUPPORT, false);
         }
       }
     }
@@ -257,11 +239,5 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
       return true;
     }
     return false;
-  }
-
-  private void setCapability(String capability, boolean value) {
-    if (capabilitiesManager != null) {
-      capabilitiesManager.setCapability(capability, new Boolean(value));
-    }
   }
 }

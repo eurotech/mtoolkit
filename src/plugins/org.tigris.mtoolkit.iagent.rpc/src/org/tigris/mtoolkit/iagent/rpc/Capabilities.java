@@ -17,7 +17,7 @@ public final class Capabilities {
 
 	private Capabilities() {
 	}
-	
+
 	/**
 	 * Support for remote applications
 	 */
@@ -27,11 +27,6 @@ public final class Capabilities {
 	 * Support for remote deployment
 	 */
 	public static final String DEPLOYMENT_SUPPORT = "remote.deployment.support"; //$NON-NLS-1$
-
-	/**
-	 * Support for remote events
-	 */
-	public static final String EVENT_SUPPORT = "remote.event.support"; //$NON-NLS-1$
 
 	/**
 	 * Support for remote console
@@ -52,5 +47,5 @@ public final class Capabilities {
 	 * Support for remote capabilities management, i.e. the device is able to
 	 * return information about what is supported.
 	 */
-	public static final String CAPABILITIES_SUPPORT = "remote.capabilities.support"; //$NON-NLS-1$ 
+	public static final String CAPABILITIES_SUPPORT = "remote.capabilities.support"; //$NON-NLS-1$
 }
