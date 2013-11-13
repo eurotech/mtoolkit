@@ -12,6 +12,7 @@ package org.tigris.mtoolkit.iagent.internal.rpc;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -52,6 +53,9 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
   private ServiceTracker                deploymentAdminTrack;
 
+  /* (non-Javadoc)
+   * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+   */
   public void start(BundleContext context) throws Exception {
     Activator.context = context;
     instance = this;
@@ -82,11 +86,8 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
     synchronizer.start();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+  /* (non-Javadoc)
+   * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
   public void stop(BundleContext context) throws Exception {
     unregisterConsole();
@@ -132,7 +133,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
    * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
    */
   public Object addingService(ServiceReference arg0) {
-    String[] classes = (String[]) arg0.getProperty("objectClass");
+    String[] classes = (String[]) arg0.getProperty(Constants.OBJECTCLASS);
     for (int i = 0; i < classes.length; i++) {
       if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
         Object admin = context.getService(arg0);
@@ -153,7 +154,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
    * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, T)
    */
   public void removedService(ServiceReference ref, Object obj) {
-    String[] classes = (String[]) ref.getProperty("objectClass");
+    String[] classes = (String[]) ref.getProperty(Constants.OBJECTCLASS);
     for (int i = 0; i < classes.length; i++) {
       if (classes[i].equals(DEPLOYMENT_ADMIN_CLASS)) {
         if (unregisterDeploymentAdmin(obj)) {
