@@ -15,9 +15,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -127,54 +127,54 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 // TODO:Remove static access to ui widgets and model entries
 public final class FrameworksView extends ViewPart {
-  public static final String                        VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
-                                                                                     + ".frameworkview";                                      //$NON-NLS-1$
-  private static final String                       PROPERTIES_IMAGE_PATH        = "properties.gif";                                          //$NON-NLS-1$
-  private static final String                       UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                                       //$NON-NLS-1$
-  private static final String                       STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                                         //$NON-NLS-1$
-  private static final String                       START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";                                        //$NON-NLS-1$
-  private static final String                       UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";                                    //$NON-NLS-1$
-  private static final String                       INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";                                      //$NON-NLS-1$
-  private static final String                       DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";                                   //$NON-NLS-1$
-  private static final String                       CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";                                      //$NON-NLS-1$
-  private static final String                       REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";                                       //$NON-NLS-1$
-  private static final String                       ADD_ACTION_IMAGE_PATH        = "add_action.gif";                                          //$NON-NLS-1$
-  private static final String                       SEARCH_IMAGE_PATH            = "search_action.gif";                                       //$NON-NLS-1$
-  private static final String                       REFRESH_IMAGE_PATH           = "refresh_action.gif";                                      //$NON-NLS-1$
-  private static final String                       CONSOLE_IMAGE_PATH           = "console.gif";                                             //$NON-NLS-1$
+  public static final String                 VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
+                                                                              + ".frameworkview";        //$NON-NLS-1$
+  private static final String                PROPERTIES_IMAGE_PATH        = "properties.gif";            //$NON-NLS-1$
+  private static final String                UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";         //$NON-NLS-1$
+  private static final String                STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";           //$NON-NLS-1$
+  private static final String                START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";          //$NON-NLS-1$
+  private static final String                UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";      //$NON-NLS-1$
+  private static final String                INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";        //$NON-NLS-1$
+  private static final String                DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";     //$NON-NLS-1$
+  private static final String                CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";        //$NON-NLS-1$
+  private static final String                REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";         //$NON-NLS-1$
+  private static final String                ADD_ACTION_IMAGE_PATH        = "add_action.gif";            //$NON-NLS-1$
+  private static final String                SEARCH_IMAGE_PATH            = "search_action.gif";         //$NON-NLS-1$
+  private static final String                REFRESH_IMAGE_PATH           = "refresh_action.gif";        //$NON-NLS-1$
+  private static final String                CONSOLE_IMAGE_PATH           = "console.gif";               //$NON-NLS-1$
 
-  private static final String                       STORAGE_FILE_NAME            = "ModelStorage.xml";                                        //$NON-NLS-1$
+  private static final String                STORAGE_FILE_NAME            = "ModelStorage.xml";          //$NON-NLS-1$
 
-  private static AddAction                          addFrameworkAction;
-  private static RemoveFrameworkAction              removeFrameworkAction;
-  private static ConnectFrameworkAction             connectAction;
-  private static DisconnectFrameworkAction          disconnectAction;
-  private static InstallBundleAction                installBundleAction;
-  private static UninstallBundleAction              deinstallBundleAction;
-  private static StartBundleAction                  startAction;
-  private static StopBundleAction                   stopAction;
-  private static UpdateBundleAction                 updateBundleAction;
-  private static CommonPropertiesAction             commonPropertiesAction;
-  private static ShowServicePropertiesInTree        showServPropsInTreeAction;
-  private static ShowFrameworkConsole               showConsoleAction;
-  private static RefreshAction                      refreshAction;
-  private static ViewAction                         viewServicesAction;
-  private static ViewAction                         viewBundlesAction;
-  private ShowBundleIDAction                        showBundleIDAction;
-  private GotoServiceAction                         gotoServiceAction;
-  private ShowBundleVersionAction                   showBundleVersionAction;
-  private FindAction                                findAction;
+  private static AddAction                   addFrameworkAction;
+  private static RemoveFrameworkAction       removeFrameworkAction;
+  private static ConnectFrameworkAction      connectAction;
+  private static DisconnectFrameworkAction   disconnectAction;
+  private static InstallBundleAction         installBundleAction;
+  private static UninstallBundleAction       deinstallBundleAction;
+  private static StartBundleAction           startAction;
+  private static StopBundleAction            stopAction;
+  private static UpdateBundleAction          updateBundleAction;
+  private static CommonPropertiesAction      commonPropertiesAction;
+  private static ShowServicePropertiesInTree showServPropsInTreeAction;
+  private static ShowFrameworkConsole        showConsoleAction;
+  private static RefreshAction               refreshAction;
+  private static ViewAction                  viewServicesAction;
+  private static ViewAction                  viewBundlesAction;
+  private ShowBundleIDAction                 showBundleIDAction;
+  private GotoServiceAction                  gotoServiceAction;
+  private ShowBundleVersionAction            showBundleVersionAction;
+  private FindAction                         findAction;
 
-  private final FilterJob                           filterJob                    = new FilterJob();
-  private final ViewerFilter                        filter                       = new FrameworksViewerFilter();
+  private final FilterJob                    filterJob                    = new FilterJob();
+  private final ViewerFilter                 filter                       = new FrameworksViewerFilter();
 
-  private Text                                      filterField;
-  private TreeViewer                                tree;
-  private MenuManager                               mgr;
-  private ToolbarIMenuCreator                       bundlesTB;
-  private static TreeRoot                           treeRoot;
+  private Text                               filterField;
+  private TreeViewer                         tree;
+  private MenuManager                        mgr;
+  private ToolbarIMenuCreator                bundlesTB;
+  private static TreeRoot                    treeRoot;
 
-  private String                                    notFoundText                 = null;
+  private String                             notFoundText                 = null;
 
   // Get current shell
   public static Shell getShell() {
@@ -664,12 +664,13 @@ public final class FrameworksView extends ViewPart {
     if (root == null) {
       return;
     }
-    File configFile = new File(plugin.getStateLocation().toFile(), STORAGE_FILE_NAME);
+    final File configFile = new File(plugin.getStateLocation().toFile(), STORAGE_FILE_NAME);
+    final Model[] children = root.getChildren();
     XMLMemento rootConfig = XMLMemento.createWriteRoot(FrameworkImpl.MEMENTO_ROOT_TYPE);
-    Model[] children = root.getChildren();
-    for (int i = 0; i < root.getSize(); i++) {
-      if (!((FrameworkImpl) children[i]).isAutoConnected()) {
-        IMemento config = ((FrameworkImpl) children[i]).getConfig();
+    for (Model m : children) {
+      final FrameworkImpl fw = (FrameworkImpl) m;
+      if (!fw.isAutoConnected()) {
+        IMemento config = fw.getConfig();
         if (config != null) {
           IMemento child = rootConfig.createChild(FrameworkImpl.MEMENTO_TYPE);
           child.putMemento(config);
@@ -689,11 +690,15 @@ public final class FrameworksView extends ViewPart {
 
   // Restore Tree Model
   public static void restoreModel() {
+    FrameworkPlugin plugin = FrameworkPlugin.getDefault();
+    if (plugin == null) {
+      return;
+    }
+    Reader reader = null;
     XMLMemento memento = null;
     try {
-      File configFile = new File(FrameworkPlugin.getDefault().getStateLocation().toFile(), STORAGE_FILE_NAME);
-      InputStream input = new FileInputStream(configFile);
-      InputStreamReader reader = new InputStreamReader(input, "utf-8"); //$NON-NLS-1$
+      final File configFile = new File(plugin.getStateLocation().toFile(), STORAGE_FILE_NAME);
+      reader = new InputStreamReader(new FileInputStream(configFile), "utf-8"); //$NON-NLS-1$
       memento = XMLMemento.createReadRoot(reader);
     } catch (FileNotFoundException e) {
       // do nothing
@@ -701,6 +706,8 @@ public final class FrameworksView extends ViewPart {
       FrameworkPlugin.processError(e, false);
     } catch (WorkbenchException e) {
       FrameworkPlugin.processError(e, false);
+    } finally {
+      FileUtils.close(reader);
     }
 
     if (memento == null) {
@@ -709,16 +716,14 @@ public final class FrameworksView extends ViewPart {
 
     treeRoot = new TreeRoot(Messages.root_element_name);
 
-    String elementName;
-    FrameworkImpl element;
-    IMemento[] all = memento.getChildren(FrameworkImpl.MEMENTO_TYPE);
-    for (int i = 0; i < all.length; i++) {
-      elementName = all[i].getString(FrameworkImpl.FRAMEWORK_NAME);
+    final IMemento[] children = memento.getChildren(FrameworkImpl.MEMENTO_TYPE);
+    for (IMemento m : children) {
+      String elementName = m.getString(FrameworkImpl.FRAMEWORK_NAME);
       if (elementName == null) {
         continue;
       }
-      element = new FrameworkImpl(elementName, false);
-      element.setConfig(all[i]);
+      FrameworkImpl element = new FrameworkImpl(elementName, false);
+      element.setConfig(m);
       treeRoot.addElement(element);
     }
   }
