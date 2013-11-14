@@ -30,7 +30,6 @@ import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
   public static final String URI            = "uri";
-  public static final String PORT           = "port";
 
   private static final int   FAILURE_RANDOM = 0;
   private static final int   FAILURE_RETRY  = 1;

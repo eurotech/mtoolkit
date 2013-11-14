@@ -14,7 +14,12 @@ public interface PMPPeer {
   /**
    * @since 3.2
    */
-  public static final int DEFAULT_PMP_PORT = 1450;
+  public static final int    DEFAULT_PMP_PORT = 1450;
+
+  /**
+   * @since 3.2
+   */
+  public static final String PORT             = "port";
 
   /**
    * Registers listener to receive events whenever one host is connected or
