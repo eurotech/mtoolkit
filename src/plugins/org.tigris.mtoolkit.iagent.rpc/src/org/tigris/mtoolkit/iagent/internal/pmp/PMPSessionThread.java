@@ -33,7 +33,10 @@ public class PMPSessionThread implements Runnable {
   protected PMPInputStream      is;
   protected String              url;
 
-  protected boolean             running;
+  /**
+   * Indicates that the session is running
+   */
+  protected volatile boolean             running;
 
   private Connection            connection;
   private Socket                socket;
@@ -42,7 +45,7 @@ public class PMPSessionThread implements Runnable {
   /**
    * Indicates that the initial handshake has been passed successfully
    */
-  boolean                       connected                      = false;
+  protected volatile boolean    connected                      = false;
 
   /** current message id & operation id */
   private short                 msgID;

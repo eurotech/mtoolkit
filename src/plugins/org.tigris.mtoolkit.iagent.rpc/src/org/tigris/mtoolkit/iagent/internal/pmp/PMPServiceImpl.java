@@ -27,12 +27,10 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
   }
 
   public void destroy() {
-    synchronized (this) {
-      if (!running) {
-        return;
-      }
-      running = false;
+    if (!running) {
+      return;
     }
+    running = false;
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "Disconnecting Clients ...");
     }
@@ -66,13 +64,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
         DebugUtils.debug(this, "Creating new connection for " + transport);
       }
       Object pmpPort = properties.get(PROP_PMP_PORT);
-      int port = -1;
-      if (pmpPort != null && pmpPort instanceof Integer) {
-        port = ((Integer) pmpPort).intValue();
-      }
-      if (port < 0) {
-        port = DEFAULT_PMP_PORT;
-      }
+      int port = (pmpPort instanceof Integer) ? ((Integer) pmpPort).intValue() : DEFAULT_PMP_PORT;
       PMPSessionThread st = new PMPSessionThread(this, transport.createConnection(port), createSessionId());
       Connection con = st.getConnection();
       con.connect();
