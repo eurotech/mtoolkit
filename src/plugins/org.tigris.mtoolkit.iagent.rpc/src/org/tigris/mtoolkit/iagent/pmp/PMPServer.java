@@ -37,7 +37,12 @@ public interface PMPServer extends PMPPeer {
    */
   public Dictionary getProperties();
 
+  /**
+   * Closes PMP server socket and releases all underlying resources for this
+   * server
+   * 
+   * @return
+   * @since 3.0
+   */
   public void close();
-
-  public boolean isActive();
 }

@@ -28,10 +28,8 @@ import org.tigris.mtoolkit.iagent.pmp.PMPServerFactory;
 import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
-public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
-  /** constant used for the PMP configuration */
+public final class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServiceListener {
   public static final String URI            = "uri";
-
   public static final String PORT           = "port";
 
   private static final int   FAILURE_RANDOM = 0;
@@ -39,14 +37,12 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
   private static final int   FAILURE_FAIL   = 2;
 
   private ServerSocket       socket;
-  protected volatile boolean run;                               // for what's this !?
+  private volatile boolean   running;
 
-  protected String           uri;
-
-  protected int              port           = DEFAULT_PMP_PORT;
+  private String             uri;
+  private int                port           = DEFAULT_PMP_PORT;
 
   private BundleContext      context;
-
   protected Hashtable        eventTypes     = new Hashtable(10);
 
   public Server(BundleContext context, Dictionary config) throws IOException {
@@ -62,72 +58,11 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     context.addServiceListener(this);
   }
 
-  protected void updateProps(Dictionary config) {
-    int tempMaxA = ((Integer) config.get(PMPServerFactory.MAX_ARRAY_PROP)).intValue();
-    int tempMaxS = ((Integer) config.get(PMPServerFactory.MAX_STRING_PROP)).intValue();
-    if (maxArrayLength == tempMaxA && maxStringLength == tempMaxS) {
-      return;
-    }
-    synchronized (connections) {
-      for (Iterator it = connections.iterator(); it.hasNext();) {
-        PMPSessionThread session = (PMPSessionThread) it.next();
-        session.maxA = maxArrayLength;
-        session.maxS = maxStringLength;
-      }
-    }
-  }
-
-  private int determineFailureAction() {
-    String failureActionProp = System.getProperty("iagent.pmp.bindFailureAction");
-    if ("random".equals(failureActionProp)) {
-      return FAILURE_RANDOM;
-    }
-    if ("retry".equals(failureActionProp)) {
-      return FAILURE_RETRY;
-    }
-    if ("fail".equals(failureActionProp)) {
-      return FAILURE_FAIL;
-    }
-    return FAILURE_RANDOM;
-  }
-
-  protected void init() throws IOException {
-    run = true;
-    try {
-      socket = new ServerSocket(port);
-    } catch (IOException e) {
-      int failureAction = determineFailureAction();
-      switch (failureAction) {
-      case FAILURE_RANDOM:
-        if (DebugUtils.DEBUG_ENABLED) {
-          DebugUtils.debug(this, "Failure action set to 'random'. Retrying...");
-        }
-        socket = new ServerSocket(0);
-        port = socket.getLocalPort();
-        break;
-      case FAILURE_RETRY:
-        Integer timeoutProp = Integer.getInteger("iagent.pmp.bindFailureAction.retryTimeout");
-        int timeout = timeoutProp != null ? timeoutProp.intValue() : 10000;
-        if (DebugUtils.DEBUG_ENABLED) {
-          DebugUtils.debug(this, "Failure action set to 'retry'. Retrying with timeout " + timeout);
-        }
-        try {
-          Thread.sleep(timeout);
-        } catch (InterruptedException e1) {
-          throw e;
-        }
-        socket = new ServerSocket(port);
-        break;
-      case FAILURE_FAIL:
-        throw e;
-      }
-    }
-    DebugUtils.info(this, "PMP server listening on " + port);
-    ThreadUtils.createThread(this, "IAgent Server Thread").start();
-  }
-
+  /* (non-Javadoc)
+   * @see java.lang.Runnable#run()
+   */
   public void run() {
-    while (run) {
+    while (running) {
       Socket client;
       try {
         client = socket.accept();
@@ -135,7 +70,7 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
         continue;
       }
       try {
-        if (run) {
+        if (running) {
           if (System.getProperty("pmp.server.timeout") != null) {
             Integer timeout = Integer.getInteger("pmp.server.timeout", 0);
             client.setSoTimeout(timeout.intValue());
@@ -150,13 +85,14 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#close()
+   */
   public void close() {
-    synchronized (this) {
-      if (!run) {
-        return;
-      }
-      run = false;
+    if (!running) {
+      return;
     }
+    running = false;
     closeConnections("PMP Server has been stopped.");
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "Closing PMP Socket for " + uri);
@@ -173,10 +109,9 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     super.close();
   }
 
-  public boolean isActive() {
-    return run;
-  }
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPServer#event(java.lang.Object, java.lang.String)
+   */
   public void event(Object ev, String t) {
     synchronized (eventTypes) {
       Vector ls = (Vector) eventTypes.get(t);
@@ -188,6 +123,34 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.osgi.framework.ServiceListener#serviceChanged(org.osgi.framework.ServiceEvent)
+   */
+  public void serviceChanged(ServiceEvent event) {
+    if (event.getType() == ServiceEvent.UNREGISTERING) {
+      cleanRemoteObjects(event.getServiceReference());
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#getRole()
+   */
+  public String getRole() {
+    return "Server";
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.pmp.PMPServer#getProperties()
+   */
+  public Dictionary getProperties() {
+    Hashtable properties = new Hashtable(1);
+    properties.put(PORT, new Integer(port));
+    return properties;
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#addListener(java.lang.String, org.tigris.mtoolkit.iagent.internal.pmp.PMPSessionThread)
+   */
   protected byte addListener(String evType, PMPSessionThread listener) {
     synchronized (eventTypes) {
       Vector ls = (Vector) eventTypes.get(evType);
@@ -203,6 +166,9 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#removeListener(java.lang.String, org.tigris.mtoolkit.iagent.internal.pmp.PMPSessionThread)
+   */
   protected byte removeListener(String evType, PMPSessionThread listener) {
     synchronized (eventTypes) {
       Vector ls = (Vector) eventTypes.get(evType);
@@ -210,12 +176,18 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#removeListeners(java.util.Vector, org.tigris.mtoolkit.iagent.internal.pmp.PMPSessionThread)
+   */
   protected synchronized void removeListeners(Vector evTypes, PMPSessionThread listener) {
     for (int i = 0; i < evTypes.size(); i++) {
       removeListener((String) evTypes.elementAt(i), listener);
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#getService(java.lang.String, java.lang.String)
+   */
   protected ObjectInfo getService(String clazz, String filter) {
     Object service = null;
     ServiceReference sRef = null;
@@ -253,15 +225,17 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     }
   }
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#ungetService(org.tigris.mtoolkit.iagent.internal.pmp.ObjectInfo)
+   */
   protected void ungetService(ObjectInfo info) {
     context.ungetService((ServiceReference) info.context);
   }
 
   protected void cleanRemoteObjects(ServiceReference sRef) {
     synchronized (connections) {
-      PMPSessionThread session;
       for (Iterator it = connections.iterator(); it.hasNext();) {
-        session = (PMPSessionThread) it.next();
+        PMPSessionThread session = (PMPSessionThread) it.next();
         if (session.connected) {
           session.unregisterService(sRef);
         }
@@ -269,19 +243,67 @@ public class Server extends PMPPeerImpl implements Runnable, PMPServer, AllServi
     }
   }
 
-  public void serviceChanged(ServiceEvent event) {
-    if (event.getType() == ServiceEvent.UNREGISTERING) {
-      cleanRemoteObjects(event.getServiceReference());
+  protected void updateProps(Dictionary config) {
+    int tempMaxA = ((Integer) config.get(PMPServerFactory.MAX_ARRAY_PROP)).intValue();
+    int tempMaxS = ((Integer) config.get(PMPServerFactory.MAX_STRING_PROP)).intValue();
+    if (maxArrayLength == tempMaxA && maxStringLength == tempMaxS) {
+      return;
+    }
+    synchronized (connections) {
+      for (Iterator it = connections.iterator(); it.hasNext();) {
+        PMPSessionThread session = (PMPSessionThread) it.next();
+        session.maxA = maxArrayLength;
+        session.maxS = maxStringLength;
+      }
     }
   }
 
-  public String getRole() {
-    return "Server";
+  private int determineFailureAction() {
+    String failureActionProp = System.getProperty("iagent.pmp.bindFailureAction");
+    if ("random".equals(failureActionProp)) {
+      return FAILURE_RANDOM;
+    }
+    if ("retry".equals(failureActionProp)) {
+      return FAILURE_RETRY;
+    }
+    if ("fail".equals(failureActionProp)) {
+      return FAILURE_FAIL;
+    }
+    return FAILURE_RANDOM;
   }
 
-  public Dictionary getProperties() {
-    Hashtable properties = new Hashtable(1);
-    properties.put(PORT, new Integer(port));
-    return properties;
+  private void init() throws IOException {
+    running = true;
+    try {
+      socket = new ServerSocket(port);
+    } catch (IOException e) {
+      int failureAction = determineFailureAction();
+      switch (failureAction) {
+      case FAILURE_RANDOM:
+        if (DebugUtils.DEBUG_ENABLED) {
+          DebugUtils.debug(this, "Failure action set to 'random'. Retrying...");
+        }
+        socket = new ServerSocket(0);
+        port = socket.getLocalPort();
+        break;
+      case FAILURE_RETRY:
+        Integer timeoutProp = Integer.getInteger("iagent.pmp.bindFailureAction.retryTimeout");
+        int timeout = timeoutProp != null ? timeoutProp.intValue() : 10000;
+        if (DebugUtils.DEBUG_ENABLED) {
+          DebugUtils.debug(this, "Failure action set to 'retry'. Retrying with timeout " + timeout);
+        }
+        try {
+          Thread.sleep(timeout);
+        } catch (InterruptedException e1) {
+          throw e;
+        }
+        socket = new ServerSocket(port);
+        break;
+      case FAILURE_FAIL:
+        throw e;
+      }
+    }
+    DebugUtils.info(this, "PMP server listening on " + port);
+    ThreadUtils.createThread(this, "IAgent Server Thread").start();
   }
 }
