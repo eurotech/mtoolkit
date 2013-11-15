@@ -11,83 +11,57 @@
 package org.tigris.mtoolkit.iagent.internal.utils.log;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class OSGiLog implements Log, ServiceTrackerCustomizer {
-	private BundleContext bc;
-	private LogService logService;
-	private ServiceTracker logTracker;
+public final class OSGiLog implements Log {
+  private final ServiceTracker logTracker;
 
-	public OSGiLog(BundleContext context) {
-		String logServiceClass = LogService.class.getName();
+  public OSGiLog(BundleContext context) {
+    final String logServiceClass = LogService.class.getName();
 
-		if (context == null) {
-			throw new IllegalArgumentException("context is null");
-		}
+    if (context == null) {
+      throw new NullPointerException("context is null");
+    }
 
-		this.bc = context;
+    logTracker = new ServiceTracker(context, logServiceClass, null);
+    logTracker.open();
+  }
 
-		logTracker = new ServiceTracker(context, logServiceClass, this);
-		logTracker.open();
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.utils.log.Log#log(int, java.lang.String, java.lang.Throwable)
+   */
+  public void log(int severity, String msg, Throwable t) {
+    final LogService logService = (LogService) logTracker.getService();
+    if (logService != null) {
+      try {
+        logService.log(getLogServiceSeverity(severity), msg, t);
+      } catch (Exception e) {
+        /* log service instance is invalid */
+        ConsoleLog.getDefault().log(severity, msg, t);
+      }
+    } else {
+      ConsoleLog.getDefault().log(severity, msg, t);
+    }
+  }
 
-	public void log(int severity, String msg, Throwable t) {
-		synchronized (this) {
-			if (logService != null) {
-				try {
-					logService.log(getLogServiceSeverity(severity), msg, t);
-					return;
-				} catch (Exception ex) {
-					// Logging failed
-				}
-			}
-		}
-		ConsoleLog.getDefault().log(severity, msg, t);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.utils.log.Log#close()
+   */
+  public void close() {
+    logTracker.close();
+  }
 
-	public Object addingService(ServiceReference reference) {
-		Object service = bc.getService(reference);
-		synchronized (this) {
-			if (this.logService == null) {
-				this.logService = (LogService) service;
-			}
-		}
-		return service;
-	}
-
-	public void modifiedService(ServiceReference reference, Object service) {
-	}
-
-	public void removedService(ServiceReference reference, Object service) {
-		synchronized (this) {
-			if (this.logService == service) {
-				this.logService = (LogService) logTracker.getService();
-			}
-		}
-		bc.ungetService(reference);
-	}
-
-	public void close() {
-		if (logTracker != null) {
-			logTracker.close();
-			logTracker = null;
-		}
-		bc = null;
-	}
-
-	private static int getLogServiceSeverity(int severity) {
-		switch (severity) {
-		case INFO:
-			return LogService.LOG_INFO;
-		case ERROR:
-			return LogService.LOG_ERROR;
-		case DEBUG:
-			return LogService.LOG_DEBUG;
-		default:
-			return LogService.LOG_ERROR;
-		}
-	}
+  private static int getLogServiceSeverity(int severity) {
+    switch (severity) {
+    case INFO:
+      return LogService.LOG_INFO;
+    case ERROR:
+      return LogService.LOG_ERROR;
+    case DEBUG:
+      return LogService.LOG_DEBUG;
+    default:
+      return LogService.LOG_ERROR;
+    }
+  }
 }
