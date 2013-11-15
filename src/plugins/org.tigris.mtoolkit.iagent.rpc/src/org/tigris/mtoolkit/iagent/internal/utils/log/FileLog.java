@@ -18,7 +18,7 @@ import java.util.Date;
 
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
-public class FileLog implements Log {
+public final class FileLog implements Log {
   private PrintWriter out;
   private final Object lock = new Object();
 
@@ -41,6 +41,7 @@ public class FileLog implements Log {
         }
       } catch (Exception ex) {
         // logging failed
+        ConsoleLog.getDefault().log(severity, msg, t);
       } finally {
         out.flush();
       }

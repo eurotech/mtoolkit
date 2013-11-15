@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.utils.log;
 
-public class ConsoleLog implements Log {
-	private static ConsoleLog instance = new ConsoleLog();
+public final class ConsoleLog implements Log {
+  private static final ConsoleLog instance = new ConsoleLog();
 
-	private Object lock = new Object();
+  private final Object            lock     = new Object();
 
 	private ConsoleLog() {
 		// singleton
@@ -23,6 +23,9 @@ public class ConsoleLog implements Log {
 		return instance;
 	}
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.utils.log.Log#log(int, java.lang.String, java.lang.Throwable)
+   */
 	public void log(int severity, String msg, Throwable e) {
 		if (severity == DEBUG || severity == INFO) {
 			return;
@@ -35,6 +38,9 @@ public class ConsoleLog implements Log {
 		}
 	}
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.utils.log.Log#close()
+   */
 	public void close() {
 	}
 
