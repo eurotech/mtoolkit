@@ -70,6 +70,8 @@ public abstract class AbstractManager implements IAgentManager, ConnectionListen
       }
     } catch (IAgentException e) {
       DebugUtils.error(this, "[dispose] Exception while disposing application manager", e);
+    } finally {
+      getConnectionManager().removeConnectionListener(this);
     }
   }
 
