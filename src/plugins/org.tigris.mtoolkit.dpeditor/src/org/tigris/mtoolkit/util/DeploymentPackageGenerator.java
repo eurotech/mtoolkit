@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipException;
 
@@ -119,7 +120,7 @@ public class DeploymentPackageGenerator {
         dpName = dppFile.getBuildInfo().getBuildLocation() + File.separator + dppFile.getBuildInfo().getDpFileName();
       }
       jos = new JarOutputStream(new FileOutputStream(dpName));
-      JarEntry je = new JarEntry("META-INF/MANIFEST.MF");
+      JarEntry je = new JarEntry(JarFile.MANIFEST_NAME);
       jos.putNextEntry(je);
       jos.write(manifest.getBytes());
       byte[] buffer = new byte[4096];
