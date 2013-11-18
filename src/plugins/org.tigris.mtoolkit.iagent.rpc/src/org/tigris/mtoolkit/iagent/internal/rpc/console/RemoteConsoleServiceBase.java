@@ -53,7 +53,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
     registration = context.registerService(RemoteConsole.class.getName(), this, null);
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(true));
+      capMan.setCapability(Capabilities.CONSOLE_SUPPORT, Boolean.TRUE);
     }
   }
 
@@ -62,7 +62,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
     restoreSystemOutputs();
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.CONSOLE_SUPPORT, new Boolean(false));
+      capMan.setCapability(Capabilities.CONSOLE_SUPPORT, Boolean.FALSE);
     }
   }
 

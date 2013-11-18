@@ -82,7 +82,7 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
 
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(true));
+      capMan.setCapability(Capabilities.SERVICE_SUPPORT, Boolean.TRUE);
     }
 
     if (DebugUtils.DEBUG_ENABLED) {
@@ -103,7 +103,7 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
 
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.SERVICE_SUPPORT, new Boolean(false));
+      capMan.setCapability(Capabilities.SERVICE_SUPPORT, Boolean.FALSE);
     }
 
     this.bc = null;

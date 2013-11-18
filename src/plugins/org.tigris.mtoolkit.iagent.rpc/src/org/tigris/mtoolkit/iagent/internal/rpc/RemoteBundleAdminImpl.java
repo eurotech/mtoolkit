@@ -129,7 +129,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.BUNDLE_SUPPORT, new Boolean(false));
+      capMan.setCapability(Capabilities.BUNDLE_SUPPORT, Boolean.FALSE);
     }
 
     this.bc = null;

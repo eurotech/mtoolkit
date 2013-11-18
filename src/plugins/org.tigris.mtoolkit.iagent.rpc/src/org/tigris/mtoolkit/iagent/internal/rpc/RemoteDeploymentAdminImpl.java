@@ -101,7 +101,7 @@ public final class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin impleme
 
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.DEPLOYMENT_SUPPORT, new Boolean(true));
+      capMan.setCapability(Capabilities.DEPLOYMENT_SUPPORT, Boolean.TRUE);
     }
 
     if (DebugUtils.DEBUG_ENABLED) {
@@ -129,7 +129,7 @@ public final class RemoteDeploymentAdminImpl extends AbstractRemoteAdmin impleme
 
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.DEPLOYMENT_SUPPORT, new Boolean(false));
+      capMan.setCapability(Capabilities.DEPLOYMENT_SUPPORT, Boolean.FALSE);
     }
 
     this.context = null;

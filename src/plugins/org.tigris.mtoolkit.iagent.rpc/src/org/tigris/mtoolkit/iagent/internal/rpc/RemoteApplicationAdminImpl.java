@@ -71,7 +71,7 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
   private ServiceTracker      applicationTracker;
   private ServiceTracker      handlesTracker;
   private volatile boolean    suppressEventFiring      = false;
-  private volatile boolean    applicationSupport       = false;
+  private volatile boolean     applicationSupport       = false;
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
@@ -112,7 +112,7 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
       handlesTracker.close();
       handlesTracker = null;
     }
-    setApplicationSupport(false);
+    setApplicationSupport(Boolean.FALSE);
     this.bc = null;
   }
 
@@ -196,7 +196,7 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
    */
   public Object addingService(ServiceReference reference) {
     if (!applicationSupport) {
-      setApplicationSupport(true);
+      setApplicationSupport(Boolean.TRUE);
     }
     Object service = bc.getService(reference);
     if (!suppressEventFiring) {
@@ -355,11 +355,11 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
     }
   }
 
-  private void setApplicationSupport(boolean enabled) {
-    applicationSupport = enabled;
+  private void setApplicationSupport(Boolean enabled) {
+    applicationSupport = enabled.booleanValue();
     RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
     if (capMan != null) {
-      capMan.setCapability(Capabilities.APPLICATION_SUPPORT, new Boolean(enabled));
+      capMan.setCapability(Capabilities.APPLICATION_SUPPORT, enabled);
     }
   }
 
