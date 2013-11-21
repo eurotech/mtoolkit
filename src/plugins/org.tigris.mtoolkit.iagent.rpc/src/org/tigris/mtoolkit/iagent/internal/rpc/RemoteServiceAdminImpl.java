@@ -29,8 +29,6 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
-import org.tigris.mtoolkit.iagent.rpc.Capabilities;
-import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
@@ -80,11 +78,6 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
       }
     }
 
-    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-    if (capMan != null) {
-      capMan.setCapability(Capabilities.SERVICE_SUPPORT, Boolean.TRUE);
-    }
-
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[register] Remote Service Admin Registered.");
     }
@@ -99,11 +92,6 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
     if (registration != null) {
       registration.unregister();
       registration = null;
-    }
-
-    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-    if (capMan != null) {
-      capMan.setCapability(Capabilities.SERVICE_SUPPORT, Boolean.FALSE);
     }
 
     this.bc = null;

@@ -35,7 +35,6 @@ import org.tigris.mtoolkit.iagent.internal.tcp.ConnectionManagerImpl;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 import org.tigris.mtoolkit.iagent.spi.AbstractConnection;
 import org.tigris.mtoolkit.iagent.spi.ConnectionEvent;
@@ -336,11 +335,9 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
               props.put(property, devCapabilities.get(property));
             }
           }
-          props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.TRUE);
         }
       } catch (Exception e) {
         DebugUtils.error(this, "Failed to get Remote Capabilities", e);
-        props.put(Capabilities.CAPABILITIES_SUPPORT, Boolean.FALSE);
       }
     }
     return props;

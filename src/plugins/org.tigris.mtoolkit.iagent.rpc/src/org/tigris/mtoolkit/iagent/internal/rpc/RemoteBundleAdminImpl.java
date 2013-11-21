@@ -44,9 +44,7 @@ import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
-import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteBundleAdmin;
-import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.spi.BundleManagerDelegate;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
@@ -96,11 +94,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 
     bc.addBundleListener(this);
 
-    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-    if (capMan != null) {
-      capMan.setCapability(Capabilities.BUNDLE_SUPPORT, Boolean.TRUE);
-    }
-
     if (DebugUtils.DEBUG_ENABLED) {
       DebugUtils.debug(this, "[register] Remote Bundle Admin Registered.");
     }
@@ -126,11 +119,6 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
     }
 
     bc.removeBundleListener(this);
-
-    RemoteCapabilitiesManager capMan = Activator.getCapabilitiesManager();
-    if (capMan != null) {
-      capMan.setCapability(Capabilities.BUNDLE_SUPPORT, Boolean.FALSE);
-    }
 
     this.bc = null;
     if (DebugUtils.DEBUG_ENABLED) {

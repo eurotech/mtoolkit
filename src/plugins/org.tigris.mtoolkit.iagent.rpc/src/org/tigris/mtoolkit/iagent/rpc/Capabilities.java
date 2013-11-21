@@ -32,20 +32,4 @@ public final class Capabilities {
 	 * Support for remote console
 	 */
 	public static final String CONSOLE_SUPPORT = "remote.console.support"; //$NON-NLS-1$
-
-	/**
-	 * Support for remote bundle management
-	 */
-	public static final String BUNDLE_SUPPORT = "remote.bundle.support"; //$NON-NLS-1$
-
-	/**
-	 * Support for remote service management
-	 */
-	public static final String SERVICE_SUPPORT = "remote.service.support"; //$NON-NLS-1$
-
-	/**
-	 * Support for remote capabilities management, i.e. the device is able to
-	 * return information about what is supported.
-	 */
-	public static final String CAPABILITIES_SUPPORT = "remote.capabilities.support"; //$NON-NLS-1$
 }

@@ -260,14 +260,9 @@ public final class DPModelProvider implements ContentTypeModelProvider, RemoteDP
     if (remoteProperties == null) {
       return false;
     }
-    Object support = remoteProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-    if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
+    Object support = remoteProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
+    if (support != null && Boolean.parseBoolean((support.toString()))) {
       return true;
-    } else {
-      support = remoteProperties.get(Capabilities.DEPLOYMENT_SUPPORT);
-      if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
-        return true;
-      }
     }
     return false;
   }

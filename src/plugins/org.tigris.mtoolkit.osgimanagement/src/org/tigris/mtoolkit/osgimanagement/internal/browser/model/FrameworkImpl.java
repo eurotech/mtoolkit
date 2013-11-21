@@ -57,14 +57,10 @@ import org.tigris.mtoolkit.iagent.RemoteBundle;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteBundleListener;
-import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent;
-import org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceEvent;
 import org.tigris.mtoolkit.iagent.event.RemoteServiceListener;
-import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.osgimanagement.ContentTypeModelProvider;
 import org.tigris.mtoolkit.osgimanagement.SystemBundlesProvider;
-import org.tigris.mtoolkit.osgimanagement.Util;
 import org.tigris.mtoolkit.osgimanagement.installation.FrameworkConnectorFactory;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
@@ -77,9 +73,7 @@ import org.tigris.mtoolkit.osgimanagement.model.FrameworkConnectionListener;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
-public final class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener,
-    RemoteDevicePropertyListener, IAdaptable {
-
+public final class FrameworkImpl extends Framework implements RemoteBundleListener, RemoteServiceListener, IAdaptable {
   public static final String    FRAMEWORK_NAME                = "framework_name_key";            //$NON-NLS-1$
   public static final String    TRANSPORT_PROVIDER_ID         = "transport_type_key";            //$NON-NLS-1$
 
@@ -110,10 +104,8 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   private PMPConnectionListener connectionListener;
 
   // flag indicates user has forced disconnect action
-  private boolean               userDisconnect                = false;
+  private volatile boolean      userDisconnect                = false;
 
-  private boolean               supportBundles                = false;
-  private boolean               supportServices               = false;
   private IMemento              configs;
 
   private Set<String>           systemBundlesList;
@@ -184,50 +176,16 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   private void addRemoteListeners() {
     try {
-      connector.addRemoteDevicePropertyListener(this);
       DeploymentManager deploymentManager = connector.getDeploymentManager();
-      if (supportBundles) {
-        deploymentManager.addRemoteBundleListener(this);
-      }
-      if (supportServices) {
-        connector.getServiceManager().addRemoteServiceListener(this);
-      }
+      deploymentManager.addRemoteBundleListener(this);
+      connector.getServiceManager().addRemoteServiceListener(this);
     } catch (IAgentException e) {
       FrameworkPlugin.processError(e, connector, userDisconnect);
     }
   }
 
-  private void updateSupportedModels() {
-    if (connector != null) {
-      Dictionary remoteProperties;
-      Object support;
-      try {
-        remoteProperties = connector.getRemoteProperties();
-        support = remoteProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-      } catch (IAgentException e) {
-        support = null;
-        remoteProperties = new Hashtable();
-      }
-
-      if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
-        supportBundles = true;
-        supportServices = true;
-      } else {
-        support = remoteProperties.get(Capabilities.BUNDLE_SUPPORT);
-        if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
-          supportBundles = true;
-        }
-        support = remoteProperties.get(Capabilities.SERVICE_SUPPORT);
-        if (support != null && Boolean.valueOf(support.toString()).booleanValue()) {
-          supportServices = true;
-        }
-      }
-    }
-  }
-
   private void removeRemoteListeners() {
     try {
-      connector.removeRemoteDevicePropertyListener(this);
       DeploymentManager deploymentManager = connector.getDeploymentManager();
       if (deploymentManager != null) {
         deploymentManager.removeRemoteBundleListener(this);
@@ -296,7 +254,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
           if (sMonitor.isCanceled()) {
             return false;
           }
-          updateSupportedModels();
           addRemoteListeners();
           updateElement();
           buildModel(sMonitor);
@@ -365,8 +322,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     }
     systemBundlesList = null;
     ServiceObject.usedInHashFWs.remove(this);
-    supportBundles = false;
-    supportServices = false;
   }
 
   public Bundle findBundleForService(long id) throws IAgentException {
@@ -451,10 +406,8 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
         addElement((Model) servicesViewVector.elementAt(i));
       }
     } else {
-      if (supportBundles) {
         Model bundlesNode = getBundlesNode();
         addElement(bundlesNode);
-      }
     }
     updateElement();
     for (int i = 0; i < modelProviders.size(); i++) {
@@ -722,9 +675,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
           updateBundleNodes(rBundle);
         }
       } catch (IAgentException ex) {
-        // ignore bundle installed exceptions, we will receive
-        // uninstalled
-        // event shortly
+        // ignore bundle installed exceptions, we will receive uninstalled event shortly
         if (ex.getErrorCode() != IAgentErrors.ERROR_BUNDLE_UNINSTALLED
             && ex.getErrorCode() != IAgentErrors.ERROR_DISCONNECTED
             && ex.getErrorCode() != IAgentErrors.ERROR_CANNOT_CONNECT) {
@@ -898,7 +849,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
                 });
               }
             }
-            updateSupportedModels();
             connectMonitor.worked(FrameworkConnectorFactory.CONNECT_PROGRESS_CONNECTING);
             buildModel(sMonitor);
             updateContextMenuStates();
@@ -1060,9 +1010,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
    * @throws IAgentException
    */
   private void addBundles(SubMonitor sMonitor) throws IAgentException {
-    if (!supportBundles) {
-      return;
-    }
     DeviceConnector connector = getConnector();
     if (connector == null) {
       return;
@@ -1100,9 +1047,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   private void addBundlesBySnapshot(SubMonitor sMonitor) throws IAgentException {
-    if (!supportBundles) {
-      return;
-    }
     DeviceConnector connector = getConnector();
     if (connector == null) {
       return;
@@ -1321,9 +1265,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   private void addServices(SubMonitor sMonitor) throws IAgentException {
-    if (!supportServices) {
-      return;
-    }
     SubMonitor monitor = sMonitor.newChild(1);
     monitor.setTaskName("Deploy services info");
     for (int i = 0; i < servicesVector.size(); i++) {
@@ -1340,10 +1281,7 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
     addServiceNodes(servObj, bundle/* , true */);
   }
 
-  private void addServiceNodes(ServiceObject servObj, Bundle bundle/*
-                                                                   * , boolean
-                                                                   * first
-                                                                   */) throws IAgentException {
+  private void addServiceNodes(ServiceObject servObj, Bundle bundle) throws IAgentException {
     if (bundle.getState() == org.osgi.framework.Bundle.ACTIVE
         || bundle.getState() == org.osgi.framework.Bundle.STARTING
         || bundle.getRemoteBundle().getState() == org.osgi.framework.Bundle.ACTIVE
@@ -1479,77 +1417,6 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyListener#devicePropertiesChanged(org.tigris.mtoolkit.iagent.event.RemoteDevicePropertyEvent)
-   */
-  public void devicePropertiesChanged(RemoteDevicePropertyEvent e) throws IAgentException {
-    if (e.getType() == RemoteDevicePropertyEvent.PROPERTY_CHANGED_TYPE) {
-      boolean enabled = ((Boolean) e.getValue()).booleanValue();
-      Object property = e.getProperty();
-      if (Capabilities.BUNDLE_SUPPORT.equals(property)) {
-        if (enabled) {
-          Job addJob = new Job(Messages.retrieve_bundles_info) {
-            /* (non-Javadoc)
-             * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-             */
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-              int total = FrameworkConnectorFactory.CONNECT_PROGRESS_BUNDLES;
-              SubMonitor sMonitor = SubMonitor.convert(monitor, total);
-              sMonitor.setTaskName(Messages.retrieve_bundles_info);
-              try {
-                addBundles(sMonitor);
-              } catch (IAgentException e) {
-                return Util.handleIAgentException(e);
-              } finally {
-                sMonitor.done();
-              }
-              return Status.OK_STATUS;
-            }
-          };
-          addJob.schedule();
-        } else {
-          connector.getDeploymentManager().removeRemoteBundleListener(this);
-          bundles.removeChildren();
-          removeElement(bundles);
-          bundles = null;
-          supportBundles = false;
-        }
-      }
-      if (Capabilities.SERVICE_SUPPORT.equals(property)) {
-        if (enabled) {
-          supportServices = true;
-          Job addJob = new Job(Messages.retrieve_services_info) {
-            /* (non-Javadoc)
-             * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-             */
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-              int total = FrameworkConnectorFactory.CONNECT_PROGRESS_SERVICES;
-              SubMonitor sMonitor = SubMonitor.convert(monitor, total);
-              sMonitor.setTaskName(Messages.retrieve_services_info);
-              try {
-                connector.getServiceManager().addRemoteServiceListener(FrameworkImpl.this);
-                retrieveServicesInfo(connector.getDeploymentManager().listBundles(), sMonitor);
-                addServices(sMonitor);
-              } catch (IAgentException e) {
-                return Util.handleIAgentException(e);
-              } finally {
-                sMonitor.done();
-              }
-              return Status.OK_STATUS;
-            }
-          };
-          addJob.schedule();
-        } else {
-          connector.getServiceManager().removeRemoteServiceListener(this);
-          // TODO remove services nodes
-          supportServices = false;
-        }
-      }
-    }
-  }
-
-  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.osgimanagement.model.Framework#getConfig()
    */
   @Override
@@ -1578,10 +1445,9 @@ public final class FrameworkImpl extends Framework implements RemoteBundleListen
 
   protected void obtainModelProviders() {
     modelProviders.clear();
-    IExtensionRegistry registry = Platform.getExtensionRegistry();
-    IExtensionPoint extensionPoint = registry
+    final IExtensionRegistry registry = Platform.getExtensionRegistry();
+    final IExtensionPoint extensionPoint = registry
         .getExtensionPoint("org.tigris.mtoolkit.osgimanagement.contentTypeExtensions");
-
     obtainModelProviderElements(extensionPoint.getConfigurationElements(), modelProviders);
   }
 

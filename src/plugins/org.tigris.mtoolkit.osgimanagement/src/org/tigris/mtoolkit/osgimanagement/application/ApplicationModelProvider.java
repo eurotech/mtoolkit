@@ -199,14 +199,9 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
     if (remoteProperties == null) {
       return false;
     }
-    Object support = remoteProperties.get(Capabilities.CAPABILITIES_SUPPORT);
-    if (support == null || !Boolean.valueOf(support.toString()).booleanValue()) {
+    Object support = remoteProperties.get(Capabilities.APPLICATION_SUPPORT);
+    if (support != null && Boolean.parseBoolean(support.toString())) {
       return true;
-    } else {
-      support = remoteProperties.get(Capabilities.APPLICATION_SUPPORT);
-      if (support != null && Boolean.parseBoolean(support.toString())) {
-        return true;
-      }
     }
     return false;
   }
@@ -261,7 +256,6 @@ public final class ApplicationModelProvider implements ContentTypeModelProvider,
           break;
         }
       } catch (IAgentException e) {
-        // TODO handle exception
         e.printStackTrace();
       }
     }
