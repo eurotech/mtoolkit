@@ -35,8 +35,9 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
   private static final int              IAGENT_PMP_PORT        = Integer.getInteger("iagent.pmp.port",
                                                                    PMPPeer.DEFAULT_PMP_PORT).intValue();
 
-  private static Activator              instance;
-  private static BundleContext          context;
+  private static volatile Activator     instance;
+
+  private BundleContext                 context;
 
   private PMPServer                     pmpServer;
 
@@ -57,9 +58,10 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
-    Activator.context = context;
     instance = this;
-    DebugUtils.initialize(context);
+    this.context = context;
+
+    DebugUtils.initialize(this.context);
 
     synchronizer = new EventSynchronizerImpl(context);
 
@@ -69,7 +71,12 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
     bundleAdmin = new RemoteBundleAdminImpl();
     bundleAdmin.register(context);
 
-    registerApplicationAdmin(context);
+    try {
+      applicationAdmin = new RemoteApplicationAdminImpl();
+      applicationAdmin.register(context);
+    } catch (Throwable t) {
+      applicationAdmin = null;
+    }
 
     deploymentAdminTrack = new ServiceTracker(context, DEPLOYMENT_ADMIN_CLASS, this);
     deploymentAdminTrack.open(true);
@@ -77,7 +84,19 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
     serviceAdmin = new RemoteServiceAdminImpl();
     serviceAdmin.register(context);
 
-    registerConsole(context);
+    // always trying mBS console first
+    try {
+      console = new ProSystRemoteConsole();
+      console.register(context);
+    } catch (Throwable t) {
+      // trying Equinox console
+      try {
+        console = new EquinoxRemoteConsole();
+        console.register(context);
+      } catch (Throwable t1) {
+        console = null;
+      }
+    }
 
     pmpServiceReg = context.registerService(PMPService.class.getName(), PMPServiceFactory.getDefault(), null);
     pmpServer = PMPServerFactory.createServer(context, IAGENT_PMP_PORT, null);
@@ -90,7 +109,10 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
   public void stop(BundleContext context) throws Exception {
-    unregisterConsole();
+    if (console != null) {
+      console.unregister();
+      console = null;
+    }
 
     pmpServerReg.unregister();
     pmpServer.close();
@@ -106,7 +128,10 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
       bundleAdmin = null;
     }
 
-    unregisterApplicationAdmin(context);
+    if (applicationAdmin != null) {
+      applicationAdmin.unregister(context);
+      applicationAdmin = null;
+    }
 
     if (deploymentAdminTrack != null) {
       deploymentAdminTrack.close();
@@ -125,10 +150,8 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 
     DebugUtils.dispose();
     instance = null;
-    Activator.context = null;
   }
 
-  // TODO: Rework dependency support
   /* (non-Javadoc)
    * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
    */
@@ -176,46 +199,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
   }
 
   public static BundleContext getBundleContext() {
-    return context;
-  }
-
-  private synchronized void registerConsole(BundleContext context) {
-    // always trying mBS console first
-    try {
-      console = new ProSystRemoteConsole();
-      console.register(context);
-    } catch (Throwable t) {
-      // trying Equinox console
-      try {
-        console = new EquinoxRemoteConsole();
-        console.register(context);
-      } catch (Throwable t1) {
-        console = null;
-      }
-    }
-  }
-
-  private synchronized void unregisterConsole() {
-    if (console != null) {
-      console.unregister();
-      console = null;
-    }
-  }
-
-  private void registerApplicationAdmin(BundleContext context) {
-    try {
-      applicationAdmin = new RemoteApplicationAdminImpl();
-      applicationAdmin.register(context);
-    } catch (Throwable t) {
-      applicationAdmin = null;
-    }
-  }
-
-  private void unregisterApplicationAdmin(BundleContext context) {
-    if (applicationAdmin != null) {
-      applicationAdmin.unregister(context);
-      applicationAdmin = null;
-    }
+    return instance != null ? instance.context : null;
   }
 
   private boolean registerDeploymentAdmin(Object admin) {
