@@ -128,33 +128,26 @@ public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase {
   private Framework getEquinoxFramework(BundleContext context) {
     Bundle bundle = context.getBundle();
     if (bundle instanceof AbstractBundle) {
-      Framework framework = (Framework) getFieldValue(bundle, "framework");
+      Framework framework = (Framework) getFieldValue(AbstractBundle.class, bundle, "framework");
       return framework;
     } else {
       return null;
     }
   }
 
-  private Object getFieldValue(Object obj, String fieldName) {
-    Class c = obj.getClass();
+  private Object getFieldValue(Class c, Object obj, String fieldName) {
     Field f = null;
     try {
       f = c.getDeclaredField(fieldName);
+      f.setAccessible(true);
       return f.get(obj);
     } catch (NoSuchFieldException e) {
-      // TODO: Add logging
       e.printStackTrace();
       return null;
     } catch (IllegalAccessException e) {
-      f.setAccessible(true);
-      try {
-        return f.get(obj);
-      } catch (IllegalAccessException e1) {
-        // TODO: Add logging
-        e1.printStackTrace();
-        return null;
-      }
+      e.printStackTrace();
     }
+    return null;
   }
 
   private Object invokeConstructor(Class clazz, Object parameter) throws Exception {
