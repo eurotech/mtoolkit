@@ -10,53 +10,87 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.rpc.console;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.eclipse.osgi.framework.internal.core.AbstractBundle;
-import org.eclipse.osgi.framework.internal.core.Framework;
-import org.eclipse.osgi.framework.internal.core.FrameworkCommandProvider;
-import org.osgi.framework.Bundle;
+import org.eclipse.osgi.framework.console.ConsoleSession;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.tigris.mtoolkit.iagent.internal.pmp.InvocationThread;
+import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
+import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
 
 public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase {
-  private ServiceTracker           providersTrack;
-  private BundleContext            context;
-  private FrameworkCommandProvider frameworkProvider;
-  private boolean                  fwProviderInitializationTried = false;
+  private BundleContext context;
+  protected final Map   consoles = new HashMap();
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#register(org.osgi.framework.BundleContext)
    */
   public void register(BundleContext bundleContext) {
     // make sure we are on equinox
-    Framework.class.getName();
+    ConsoleSession.class.getName();
     this.context = bundleContext;
-    providersTrack = new ServiceTracker(bundleContext, CommandProvider.class.getName(), null);
     super.register(bundleContext);
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#unregister()
+   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#doReleaseConsole(org.tigris.mtoolkit.iagent.pmp.PMPConnection)
    */
-  public void unregister() {
-    super.unregister();
-    providersTrack.close();
+  protected void doReleaseConsole(PMPConnection conn) {
+    super.doReleaseConsole(conn);
+    EquinoxConsoleSession console;
+    synchronized (consoles) {
+      console = (EquinoxConsoleSession) consoles.get(conn);
+    }
+    if (console != null) {
+      console.close();
+    }
   }
 
   /* (non-Javadoc)
-   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#registerOutput(org.tigris.mtoolkit.iagent.pmp.RemoteObject)
+   * @see org.tigris.mtoolkit.iagent.rpc.RemoteConsole#registerOutput(org.tigris.mtoolkit.iagent.pmp.RemoteObject)
    */
   public void registerOutput(RemoteObject remoteObject) throws PMPException {
     super.registerOutput(remoteObject);
-    printPrompt();
+    PMPConnection conn = InvocationThread.getContext().getConnection();
+    EquinoxConsoleSession console;
+    synchronized (consoles) {
+      console = (EquinoxConsoleSession) consoles.get(conn);
+      if (console != null) {
+        console.close();
+      }
+      console = new EquinoxConsoleSession(new ConsoleInputStream(), newSystemOut);
+      consoles.put(conn, console);
+    }
+    context.registerService(ConsoleSession.class.getName(), console, null);
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#replaceSystemOutputs()
+   */
+  protected synchronized void replaceSystemOutputs() {
+    if (!replacedSystemOutputs) {
+      if (newSystemOut == null) {
+        newSystemOut = new PrintStream(new RedirectedSystemOutput(null, dispatchers));
+      }
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.internal.rpc.console.RemoteConsoleServiceBase#restoreSystemOutputs()
+   */
+  protected synchronized void restoreSystemOutputs() {
+    //Used to handle system output stream which is not redirected to parser service
+    if (replacedSystemOutputs) {
+      newSystemOut = null;
+      replacedSystemOutputs = false;
+    }
   }
 
   /* (non-Javadoc)
@@ -64,113 +98,104 @@ public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase {
    */
   public void executeCommand(String line) {
     try {
-      if (line == null || line.trim().length() == 0) {
+      if (line == null) {
         return;
       }
-      providersTrack.open();
-      Object[] providers;
-      providers = getCommandProviders();
-      CommandInterpreter interpreter = new EquinoxCommandInterpreter(line, providers, this);
-      String nextLine = interpreter.nextArgument();
-      if (nextLine != null) {
-        interpreter.execute(nextLine);
+      line = line.trim();
+      if (line.length() == 0) {
+        return;
+      }
+      PMPConnection conn = InvocationThread.getContext().getConnection();
+      EquinoxConsoleSession console;
+      synchronized (consoles) {
+        console = (EquinoxConsoleSession) consoles.get(conn);
+      }
+      if (console != null) {
+        console.sendCommand(line + System.getProperty("line.separator"));
       }
     } finally {
       printPrompt();
     }
   }
 
-  private Object[] getCommandProviders() {
-    Object[] providers;
-    synchronized (providersTrack) {
-      providers = providersTrack.getServices();
-      if (!fwProviderInitializationTried) {
-        fwProviderInitializationTried = true;
-        boolean frameworkProviderRegistered = false;
-        if (providers != null) {
-          for (int i = 0; i < providers.length; i++) {
-            if (providers[i] instanceof FrameworkCommandProvider) {
-              frameworkProviderRegistered = true;
-              break;
-            }
-          }
-        }
-        if (!frameworkProviderRegistered) {
-          try {
-            Framework fw = getEquinoxFramework(context);
-            if (fw != null) {
-              frameworkProvider = (FrameworkCommandProvider) invokeConstructor(FrameworkCommandProvider.class, fw);
-              if (frameworkProvider != null) {
-                try {
-                  // the mistake is correct (it is
-                  // "intialize", not "initialize")
-                  invokeMethod(frameworkProvider, "intialize");
-                } catch (Exception e) {
-                  // On 3.6 method is called start()
-                  invokeMethod(frameworkProvider, "start");
-                }
-              }
-            }
-          } catch (Throwable e) {
-            // TODO: Add logging
-            e.printStackTrace();
-          }
-        }
-      }
-    }
-    return providers;
-  }
-
   private void printPrompt() {
     print(System.getProperty("line.separator") + "osgi> ");
   }
 
-  private Framework getEquinoxFramework(BundleContext context) {
-    Bundle bundle = context.getBundle();
-    if (bundle instanceof AbstractBundle) {
-      Framework framework = (Framework) getFieldValue(AbstractBundle.class, bundle, "framework");
-      return framework;
-    } else {
-      return null;
-    }
-  }
+  private static class EquinoxConsoleSession extends ConsoleSession {
+    private final ConsoleInputStream in;
+    private final OutputStream       out;
 
-  private Object getFieldValue(Class c, Object obj, String fieldName) {
-    Field f = null;
-    try {
-      f = c.getDeclaredField(fieldName);
-      f.setAccessible(true);
-      return f.get(obj);
-    } catch (NoSuchFieldException e) {
-      e.printStackTrace();
-      return null;
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
+    public EquinoxConsoleSession(ConsoleInputStream in, OutputStream out) {
+      this.in = in;
+      this.out = out;
     }
-    return null;
-  }
 
-  private Object invokeConstructor(Class clazz, Object parameter) throws Exception {
-    try {
-      Constructor c = clazz.getConstructor(new Class[] {
-        parameter.getClass()
-      });
-      return c.newInstance(new Object[] {
-        parameter
-      });
-    } catch (InvocationTargetException e) {
-      if (e.getTargetException() instanceof Exception) {
-        throw (Exception) e.getTargetException();
+    /* (non-Javadoc)
+     * @see org.eclipse.osgi.framework.console.ConsoleSession#doClose()
+     */
+    protected void doClose() {
+      try {
+        in.close();
+      } catch (IOException e1) {
       }
-      // TODO: Add logging
-      e.getTargetException().printStackTrace();
-      return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.osgi.framework.console.ConsoleSession#getInput()
+     */
+    public InputStream getInput() {
+      return in;
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.osgi.framework.console.ConsoleSession#getOutput()
+     */
+    public OutputStream getOutput() {
+      return out;
+    }
+
+    public void sendCommand(String cmd) {
+      byte[] cmdBytes = cmd.getBytes();
+      in.sendCommand(cmdBytes);
     }
   }
 
-  private static Object invokeMethod(Object obj, String methodName) throws Exception {
-    Method method = obj.getClass().getDeclaredMethod(methodName, null);
-    method.setAccessible(true);
-    return method.invoke(obj, null);
+  private static class ConsoleInputStream extends InputStream {
+    private final byte[]         SINGLE_BYTE = new byte[1];
+    private final CircularBuffer cb          = new CircularBuffer();
+
+    /* (non-Javadoc)
+     * @see java.io.InputStream#read()
+     */
+    public int read() throws IOException {
+      int bytesRead = cb.read(SINGLE_BYTE);
+      return (bytesRead == 1) ? SINGLE_BYTE[0] : -1;
+    }
+
+    /* (non-Javadoc)
+     * @see java.io.InputStream#read(byte[], int, int)
+     */
+    public int read(byte b[], int off, int len) throws IOException {
+      return cb.read(b, off, len);
+    }
+
+    /* (non-Javadoc)
+     * @see java.io.InputStream#read(byte[])
+     */
+    public int read(byte b[]) throws IOException {
+      return read(b, 0, b.length);
+    }
+
+    /* (non-Javadoc)
+     * @see java.io.InputStream#close()
+     */
+    public void close() throws IOException {
+      cb.release();
+    }
+
+    public void sendCommand(byte[] cmdBytes) {
+      cb.write(cmdBytes, 0, cmdBytes.length);
+    }
   }
 }

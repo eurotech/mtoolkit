@@ -80,8 +80,8 @@ class PMPEventsManager implements Runnable {
   }
 
   public void stopEvents() {
-    go = false;
     synchronized (this) {
+      go = false;
       notify();
     }
   }

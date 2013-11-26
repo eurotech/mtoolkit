@@ -80,10 +80,12 @@ public final class DebugUtils {
     }
 
     // Third - try org.osgi.service.log.LogService
-    try {
-      log = new OSGiLog(context);
-      return;
-    } catch (Throwable t) { // Continue with other loggers
+    if (context != null) {
+      try {
+        log = new OSGiLog(context);
+        return;
+      } catch (Throwable t) { // Continue with other loggers
+      }
     }
 
     // Fourth - logging to console

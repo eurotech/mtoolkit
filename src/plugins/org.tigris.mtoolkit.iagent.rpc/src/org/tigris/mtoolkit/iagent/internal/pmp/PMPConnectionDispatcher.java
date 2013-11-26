@@ -40,8 +40,9 @@ class PMPConnectionDispatcher implements Runnable {
 						waiting = true;
 						try {
 							wait();
-							if (!go && first == null)
-								return;
+							if (!go && first == null) {
+                return;
+              }
 						} catch (Exception exc) {
 							continue;
 						} finally {
@@ -63,8 +64,8 @@ class PMPConnectionDispatcher implements Runnable {
 	}
 
 	protected void stopEvent() {
-		go = false;
 		synchronized (this) {
+      go = false;
 			notify();
 		}
 	}
@@ -72,8 +73,9 @@ class PMPConnectionDispatcher implements Runnable {
 	private ConnectionEvent getEvent(boolean one) {
 		ConnectionEvent tmp = first;
 		first = first.next;
-		if (one)
-			last = null;
+		if (one) {
+      last = null;
+    }
 		return tmp;
 	}
 

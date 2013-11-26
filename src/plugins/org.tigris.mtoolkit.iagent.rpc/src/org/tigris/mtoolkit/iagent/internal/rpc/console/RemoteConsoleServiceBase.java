@@ -41,13 +41,13 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
 
   private ServiceRegistration  registration;
 
-  private final Map            dispatchers           = new HashMap();
+  protected final Map          dispatchers           = new HashMap();
 
-  private PrintStream          oldSystemOut;
-  private PrintStream          newSystemOut;
-  private PrintStream          oldSystemErr;
-  private PrintStream          newSystemErr;
-  private boolean              replacedSystemOutputs = false;
+  protected PrintStream        oldSystemOut;
+  protected PrintStream        newSystemOut;
+  protected PrintStream        oldSystemErr;
+  protected PrintStream        newSystemErr;
+  protected boolean            replacedSystemOutputs = false;
 
   public void register(BundleContext context) {
     registration = context.registerService(RemoteConsole.class.getName(), this, null);
@@ -160,7 +160,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
     }
   }
 
-  private synchronized void replaceSystemOutputs() {
+  protected synchronized void replaceSystemOutputs() {
     //Used to handle system output stream which is not redirected to parser service
     if (!replacedSystemOutputs) {
       if (newSystemOut == null) {
@@ -181,7 +181,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
     }
   }
 
-  private synchronized void restoreSystemOutputs() {
+  protected synchronized void restoreSystemOutputs() {
     //Used to handle system output stream which is not redirected to parser service
     if (replacedSystemOutputs) {
       if (System.out == newSystemOut) {
@@ -258,7 +258,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
     }
   }
 
-  private static final class RedirectedSystemOutput extends OutputStream {
+  protected static final class RedirectedSystemOutput extends OutputStream {
     private final byte[]       singleByte = new byte[1];
     private final Map          dispatchers;
     private final OutputStream base;

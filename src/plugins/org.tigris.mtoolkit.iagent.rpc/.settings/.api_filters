@@ -8,11 +8,12 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="src/org/tigris/mtoolkit/iagent/internal/rpc/console/EquinoxCommandInterpreter.java" type="org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxCommandInterpreter">
-        <filter id="574619656">
+    <resource path="src/org/tigris/mtoolkit/iagent/internal/rpc/console/EquinoxRemoteConsole.java" type="org.tigris.mtoolkit.iagent.internal.rpc.console.EquinoxRemoteConsole">
+        <filter id="640712815">
             <message_arguments>
-                <message_argument value="CommandInterpreter"/>
-                <message_argument value="EquinoxCommandInterpreter"/>
+                <message_argument value="ConsoleSession"/>
+                <message_argument value="EquinoxRemoteConsole"/>
+                <message_argument value="close()"/>
             </message_arguments>
         </filter>
     </resource>
