@@ -10,17 +10,17 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.common.certmanager.internal.preferences;
 
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.tigris.mtoolkit.common.certificates.ICertificateDescriptor;
 
-final class CertContentProvider implements IStructuredContentProvider, ICertificateListener {
+final class CertContentProvider implements ITreeContentProvider, ICertificateListener {
   private CertStorage storage;
-  private TableViewer tableViewer;
+  private TreeViewer  treeViewer;
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+   * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
    */
   public Object[] getElements(Object inputElement) {
     if (inputElement instanceof CertStorage) {
@@ -30,7 +30,7 @@ final class CertContentProvider implements IStructuredContentProvider, ICertific
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+   * @see org.eclipse.jface.viewers.ITreeContentProvider#dispose()
    */
   public void dispose() {
     if (storage == null) {
@@ -41,7 +41,7 @@ final class CertContentProvider implements IStructuredContentProvider, ICertific
   }
 
   /* (non-Javadoc)
-   * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+   * @see org.eclipse.jface.viewers.ITreeContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
    */
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     if (oldInput instanceof CertStorage) {
@@ -51,17 +51,44 @@ final class CertContentProvider implements IStructuredContentProvider, ICertific
       storage = (CertStorage) newInput;
       storage.addListener(this);
     }
-    if (viewer instanceof TableViewer) {
-      tableViewer = (TableViewer) viewer;
+    if (viewer instanceof TreeViewer) {
+      treeViewer = (TreeViewer) viewer;
     }
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
+   */
+  public Object[] getChildren(Object parentElement) {
+    if (parentElement instanceof CertStorage) {
+      return ((CertStorage) parentElement).getCertificates();
+    }
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
+   */
+  public Object getParent(Object element) {
+    if (element instanceof CertStorage) {
+      return element;
+    }
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
+   */
+  public boolean hasChildren(Object element) {
+    return false;
   }
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.common.certmanager.internal.preferences.ICertificateListener#certificateAdded(org.tigris.mtoolkit.common.certificates.ICertificateDescriptor)
    */
   public void certificateAdded(ICertificateDescriptor cert) {
-    if (tableViewer != null) {
-      tableViewer.add(cert);
+    if (treeViewer != null) {
+      treeViewer.refresh();
     }
   }
 
@@ -69,8 +96,8 @@ final class CertContentProvider implements IStructuredContentProvider, ICertific
    * @see org.tigris.mtoolkit.common.certmanager.internal.preferences.ICertificateListener#certificateRemoved(org.tigris.mtoolkit.common.certificates.ICertificateDescriptor)
    */
   public void certificateRemoved(ICertificateDescriptor cert) {
-    if (tableViewer != null) {
-      tableViewer.remove(cert);
+    if (treeViewer != null) {
+      treeViewer.refresh();
     }
   }
 
@@ -78,8 +105,9 @@ final class CertContentProvider implements IStructuredContentProvider, ICertific
    * @see org.tigris.mtoolkit.common.certmanager.internal.preferences.ICertificateModifyListener#certificateChanged(org.tigris.mtoolkit.common.certificates.ICertificateDescriptor)
    */
   public void certificateChanged(ICertificateDescriptor cert) {
-    if (tableViewer != null) {
-      tableViewer.update(cert, null);
+    if (treeViewer != null) {
+      treeViewer.update(cert, null);
+      treeViewer.refresh();
     }
   }
 
@@ -87,8 +115,8 @@ final class CertContentProvider implements IStructuredContentProvider, ICertific
    * @see org.tigris.mtoolkit.common.certmanager.internal.preferences.ICertificateListener#certificateStorageRefreshed()
    */
   public void certificateStorageRefreshed() {
-    if (tableViewer != null) {
-      tableViewer.refresh();
+    if (treeViewer != null) {
+      treeViewer.refresh();
     }
   }
 }

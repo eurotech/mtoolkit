@@ -19,53 +19,63 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
 import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.tigris.mtoolkit.common.Messages;
+import org.tigris.mtoolkit.common.gui.FilteredCheckboxTree;
+import org.tigris.mtoolkit.common.gui.FilteredCheckboxTree.FilterableCheckboxTreeViewer;
 import org.tigris.mtoolkit.common.images.UIResources;
 
 public final class CertificatesPanel {
-  private static final String MTOOLKIT_PAGE_ID       = "org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"; //$NON-NLS-1$
+  private static final String  MTOOLKIT_PAGE_ID       = "org.tigris.mtoolkit.common.certmanager.internal.preferences.CertPreferencesPage"; //$NON-NLS-1$
   /**
    * @since 5.0
    */
-  public static final int     EVENT_CONTENT_MODIFIED = 1;
+  public static final int      EVENT_CONTENT_MODIFIED = 1;
 
-  private Composite           signContentGroup;
-  private Label               lblCertificates;
-  private Table               tblCertificates;
-  private CheckboxTableViewer certificatesViewer;
-  private Button              detailsButton;
-  private Link                link;
-  private Set                 listeners              = new HashSet();
+  private Composite            signContentGroup;
+  private Label                lblCertificates;
+  private FilteredCheckboxTree tree;
+  private TreeViewer           viewer;
+  private Tree                 treeControl;
+  private Button               detailsButton;
+  private Link                 link;
+  private Set                  listeners              = new HashSet();
+  private Image                iconCertMissing;
 
   public CertificatesPanel(Composite parent, int horizontalSpan, int verticalSpan) {
     this(parent, horizontalSpan, verticalSpan, GridData.FILL_BOTH);
@@ -83,6 +93,9 @@ public final class CertificatesPanel {
       ((Group) signContentGroup).setText(Messages.CertificatesPanel_signContentGroup);
     }
     initContent(horizontalSpan, verticalSpan, style);
+    final Image iconCert = UIResources.getImage(UIResources.CERTIFICATE_ICON);
+    ImageDescriptor overlay = UIResources.getImageDescriptor(UIResources.OVR_ERROR_ICON);
+    iconCertMissing = new DecorationOverlayIcon(iconCert, overlay, IDecoration.BOTTOM_LEFT).createImage();
   }
 
   private void initContent(int horizontalSpan, int verticalSpan, int style) {
@@ -99,14 +112,111 @@ public final class CertificatesPanel {
     lblCertificates.setLayoutData(gridData);
 
     // Certificates table
-    int stl = SWT.SINGLE | SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION;
-    tblCertificates = new Table(signContentGroup, stl);
-    gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-    gridData.heightHint = 60;
-    tblCertificates.setLayoutData(gridData);
-    tblCertificates.setLinesVisible(true);
-    tblCertificates.setHeaderVisible(true);
-    tblCertificates.addSelectionListener(new SelectionAdapter() {
+    final int treeStyle = SWT.BORDER | SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.VIRTUAL | style;
+    PatternFilter patternFilter = new PatternFilter() {
+      @Override
+      protected boolean isLeafMatch(Viewer viewer, Object element) {
+        ILabelProvider labelProvider = (ILabelProvider) ((StructuredViewer) viewer).getLabelProvider();
+        String text = null;
+        if (labelProvider instanceof CellLabelProvider && element instanceof CertificateDetails) {
+          Control viewerControl = viewer.getControl();
+          if (viewerControl instanceof Tree) {
+            int columnCount = ((Tree) viewerControl).getColumnCount();
+            for (int i = 0; i < columnCount; i++) {
+              text = CertificatesPanel.this.getColumnText(element, i);
+              if (text == null) {
+                return false;
+              }
+              if (wordMatches(text)) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+    };
+    patternFilter.setIncludeLeadingWildcard(true);
+    tree = new FilteredCheckboxTree(signContentGroup, treeStyle, patternFilter);
+    viewer = tree.getViewer();
+    treeControl = (Tree) viewer.getControl();
+    treeControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+    treeControl.setLinesVisible(true);
+    treeControl.setHeaderVisible(true);
+    viewer.setUseHashlookup(true);
+    viewer.setLabelProvider(new LabelProvider());
+    viewer.setContentProvider(new ITreeContentProvider() {
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+       */
+      public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+      }
+
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.IContentProvider#dispose()
+       */
+      public void dispose() {
+      }
+
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
+       */
+      public boolean hasChildren(Object element) {
+        return false;
+      }
+
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
+       */
+      public Object getParent(Object element) {
+        if (element instanceof CertificateDetails) {
+          return ((CertificateDetails) element).getCertificateDescriptor();
+        }
+        return null;
+      }
+
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
+       */
+      public Object[] getChildren(Object parentElement) {
+        if (parentElement instanceof CertificateDetails[]) {
+          return getElements(parentElement);
+        }
+        return new Object[0];
+      }
+
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
+       */
+      public Object[] getElements(Object inputElement) {
+        if (inputElement instanceof CertificateDetails[]) {
+          return ((CertificateDetails[]) inputElement);
+        }
+        return new Object[0];
+      }
+    });
+    viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+      /* (non-Javadoc)
+       * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+       */
+      public void selectionChanged(SelectionChangedEvent event) {
+        updateButtonState();
+      }
+    });
+
+    final TreeColumn tc1 = new TreeColumn(treeControl, SWT.LEFT);
+    tc1.setWidth(170);
+    tc1.setText(Messages.CertificatesPanel_tblCertColIssuedTo);
+
+    final TreeColumn tc2 = new TreeColumn(treeControl, SWT.LEFT);
+    tc2.setWidth(160);
+    tc2.setText(Messages.CertificatesPanel_tblCertColIssuedBy);
+
+    final TreeColumn tc3 = new TreeColumn(treeControl, SWT.LEFT);
+    tc3.setWidth(130);
+    tc3.setText(Messages.CertificatesPanel_tblCertColExpirationDate);
+
+    treeControl.addSelectionListener(new SelectionAdapter() {
       /* (non-Javadoc)
        * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
        */
@@ -115,31 +225,6 @@ public final class CertificatesPanel {
         if (e.detail == SWT.CHECK) {
           fireModifyEvent();
         }
-      }
-    });
-
-    TableLayout layout = new TableLayout();
-    layout.addColumnData(new ColumnWeightData(120, 160, true));
-    layout.addColumnData(new ColumnWeightData(120, 160, true));
-    layout.addColumnData(new ColumnWeightData(100, 140, true));
-    tblCertificates.setLayout(layout);
-
-    TableColumn column = new TableColumn(tblCertificates, SWT.LEFT);
-    column.setText(Messages.CertificatesPanel_tblCertColIssuedTo);
-    column = new TableColumn(tblCertificates, SWT.LEFT);
-    column.setText(Messages.CertificatesPanel_tblCertColIssuedBy);
-    column = new TableColumn(tblCertificates, SWT.LEFT);
-    column.setText(Messages.CertificatesPanel_tblCertColExpirationDate);
-
-    certificatesViewer = new CheckboxTableViewer(tblCertificates);
-    certificatesViewer.setContentProvider(new ArrayContentProvider());
-    certificatesViewer.setLabelProvider(new CertLabelProvider());
-    certificatesViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-      /* (non-Javadoc)
-       * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-       */
-      public void selectionChanged(SelectionChangedEvent event) {
-        updateButtonState();
       }
     });
 
@@ -168,9 +253,8 @@ public final class CertificatesPanel {
    *          list with certificate ids or <code>null</code>
    */
   public void initialize(List signUids) {
-    certificatesViewer.setAllChecked(false);
     CertificateDetails[] certDetails = getCertificateDetails(CertUtils.getCertificates());
-    certificatesViewer.setInput(certDetails);
+    viewer.setInput(certDetails);
     if (certDetails == null || certDetails.length == 0) {
       setNoCertificatesAvailable();
     } else {
@@ -178,13 +262,15 @@ public final class CertificatesPanel {
         disposeNoCertificatesAvailableState();
       }
       if (signUids != null) {
+        FilterableCheckboxTreeViewer treeViewer = ((FilterableCheckboxTreeViewer) viewer);
         for (int i = 0; i < certDetails.length; i++) {
           if (signUids.contains(certDetails[i].getCertificateDescriptor().getUid())) {
-            certificatesViewer.setChecked(certDetails[i], true);
+            treeViewer.setChecked(certDetails[i], true);
           }
         }
       }
     }
+    tree.resetFilter();
   }
 
   private CertificateDetails[] getCertificateDetails(ICertificateDescriptor[] certificates) {
@@ -201,9 +287,13 @@ public final class CertificatesPanel {
 
   public List getSignCertificateUids() {
     List signUids = new ArrayList();
-    Object[] checkedCerts = certificatesViewer.getCheckedElements();
-    for (int i = 0; i < checkedCerts.length; i++) {
-      signUids.add(((CertificateDetails) checkedCerts[i]).getCertificateDescriptor().getUid());
+    if (viewer instanceof FilterableCheckboxTreeViewer) {
+      Object[] checkedElements = ((FilterableCheckboxTreeViewer) viewer).getCheckedElements();
+      if (checkedElements != null) {
+        for (int i = 0; i < checkedElements.length; i++) {
+          signUids.add(((CertificateDetails) checkedElements[i]).getCertificateDescriptor().getUid());
+        }
+      }
     }
     return signUids;
   }
@@ -230,7 +320,7 @@ public final class CertificatesPanel {
    * @since 6.1
    */
   public void setEditable(boolean editable) {
-    certificatesViewer.getControl().setEnabled(editable);
+    viewer.getControl().setEnabled(editable);
   }
 
   private void fireModifyEvent() {
@@ -282,9 +372,6 @@ public final class CertificatesPanel {
     lblCertificates.setVisible(visible);
     ((GridData) lblCertificates.getLayoutData()).exclude = !visible;
 
-    tblCertificates.setVisible(visible);
-    ((GridData) tblCertificates.getLayoutData()).exclude = !visible;
-
     detailsButton.setVisible(visible);
     ((GridData) detailsButton.getLayoutData()).exclude = !visible;
   }
@@ -311,83 +398,115 @@ public final class CertificatesPanel {
   }
 
   private void updateButtonState() {
-    IStructuredSelection selection = (IStructuredSelection) certificatesViewer.getSelection();
-    detailsButton.setEnabled(selection.size() == 1);
+    IStructuredSelection treeSelection = (IStructuredSelection) viewer.getSelection();
+    detailsButton.setEnabled(treeSelection.size() == 1);
   }
 
   protected void showCertificateInfo() {
-    Object data = ((IStructuredSelection) certificatesViewer.getSelection()).getFirstElement();
+    Object data = ((IStructuredSelection) viewer.getSelection()).getFirstElement();
     if (data instanceof CertificateDetails) {
       CertificateDetails certDetails = (CertificateDetails) data;
-      CertificateViewerDialog dialog = new CertificateViewerDialog(certificatesViewer.getControl().getShell(),
-          certDetails);
+      CertificateViewerDialog dialog = new CertificateViewerDialog(viewer.getControl().getShell(), certDetails);
       dialog.open();
     }
   }
 
-  private class CertLabelProvider extends LabelProvider implements ITableLabelProvider {
-    private Image iconCertMissing;
-
-    public CertLabelProvider() {
-      super();
-      final Image iconCert = UIResources.getImage(UIResources.CERTIFICATE_ICON);
-      ImageDescriptor overlay = UIResources.getImageDescriptor(UIResources.OVR_ERROR_ICON);
-      iconCertMissing = new DecorationOverlayIcon(iconCert, overlay, IDecoration.BOTTOM_LEFT).createImage();
+  private Image getColumnImage(Object element, int columnIndex) {
+    if (columnIndex > 0) {
+      return null;
     }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-     */
-    public Image getColumnImage(Object element, int columnIndex) {
-      if (columnIndex > 0) {
-        return null;
-      }
-      if (!(element instanceof CertificateDetails)) {
-        return null;
-      }
-      CertificateDetails cert = (CertificateDetails) element;
-      Throwable ex = cert.getError();
-      File keystore = new File(cert.getCertificateDescriptor().getStoreLocation());
-      if (!keystore.exists() || !keystore.isFile() || ex != null) {
-        return iconCertMissing;
-      }
-      return UIResources.getImage(UIResources.CERTIFICATE_ICON);
+    if (!(element instanceof CertificateDetails)) {
+      return null;
     }
+    ICertificateDescriptor cert = ((CertificateDetails) element).getCertificateDescriptor();
+    File keystore = new File(cert.getStoreLocation());
+    if (!keystore.exists() || !keystore.isFile()) {
+      return iconCertMissing;
+    }
+    return UIResources.getImage(UIResources.CERTIFICATE_ICON);
+  }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-     */
-    public String getColumnText(Object element, int columnIndex) {
-      if (!(element instanceof CertificateDetails)) {
-        return null;
-      }
-      CertificateDetails cert = (CertificateDetails) element;
-      switch (columnIndex) {
-      case 0:
-        String issuedTo = cert.getIssuedTo();
-        if (issuedTo == null) {
-          Throwable error = cert.getError();
-          if (error != null && error instanceof FileNotFoundException) {
-            return Messages.CertificatesPanel_lblKeystoreMissing;
-          }
-          return Messages.CertificatesPanel_lblErrorData;
+  private String getColumnText(Object element, int columnIndex) {
+    if (!(element instanceof CertificateDetails)) {
+      return null;
+    }
+    CertificateDetails cert = (CertificateDetails) element;
+    switch (columnIndex) {
+    case 0:
+      String issuedTo = cert.getIssuedTo();
+      if (issuedTo == null) {
+        Throwable error = cert.getError();
+        if (error != null && error instanceof FileNotFoundException) {
+          return Messages.CertificatesPanel_lblKeystoreMissing;
         }
-        return issuedTo;
-      case 1:
-        return cert.getIssuedBy();
-      case 2:
-        return cert.getExpirationData();
-      default:
-        return null;
+        return Messages.CertificatesPanel_lblErrorData;
       }
+      return issuedTo;
+    case 1:
+      return cert.getIssuedBy();
+    case 2:
+      return cert.getExpirationData();
+    default:
+      return null;
+    }
+  }
+
+  private class ToolTipLabelProvider extends CellLabelProvider implements ILabelProvider {
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
+     */
+    public Image getImage(Object element) {
+      return getColumnImage(element, 0);
     }
 
     /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.BaseLabelProvider#dispose()
+     * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
+     */
+    public String getText(Object element) {
+      return getColumnText(element, 0);
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.CellLabelProvider#update(org.eclipse.jface.viewers.ViewerCell)
      */
     @Override
-    public void dispose() {
-      iconCertMissing.dispose();
+    public void update(ViewerCell cell) {
+    }
+  }
+
+  private class LabelProvider extends ToolTipLabelProvider {
+
+    public Image getColumnImage(Object element, int columnIndex) {
+      return CertificatesPanel.this.getColumnImage(element, columnIndex);
+    }
+
+    public String getColumnText(Object element, int columnIndex) {
+      return CertificatesPanel.this.getColumnText(element, columnIndex);
+    }
+
+    /* (non-Javadoc)
+     * @see org.eclipse.jface.viewers.StyledCellLabelProvider#update(org.eclipse.jface.viewers.ViewerCell)
+     */
+    @Override
+    public void update(ViewerCell cell) {
+      Object element = cell.getElement();
+      int columnIndex = cell.getColumnIndex();
+      String text = getColumnText(element, columnIndex);
+      if (columnIndex == 0) {
+        int pos = text.indexOf(' ');
+        if (pos > 0) {
+          String name = text.substring(0, pos);
+          List styles = new ArrayList();
+          TextStyle style = new TextStyle();
+          styles.add(new StyleRange(0, name.length(), style.foreground, style.background));
+          styles.add(new StyleRange(name.length() + 1, text.length(), Display.getCurrent().getSystemColor(
+              SWT.COLOR_DARK_GRAY), style.background));
+          cell.setStyleRanges((StyleRange[]) styles.toArray(new StyleRange[styles.size()]));
+        }
+      }
+      cell.setText(text);
+      cell.setImage(getColumnImage(element, columnIndex));
     }
   }
 }
