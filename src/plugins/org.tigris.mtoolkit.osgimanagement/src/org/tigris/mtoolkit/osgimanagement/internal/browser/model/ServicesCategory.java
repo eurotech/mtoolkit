@@ -14,14 +14,10 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class ServicesCategory extends Model {
-  public static final int      REGISTERED_SERVICES = 0;
-  public static final int      USED_SERVICES       = 1;
+  public static final int REGISTERED_SERVICES = 0;
+  public static final int USED_SERVICES       = 1;
 
-  public static final String[] nodes               = {
-      Messages.registered_services, Messages.services_in_use
-                                                   };
-
-  private int                  type;
+  private int             type;
 
   public ServicesCategory(int type) {
     super(getTitle(type));
@@ -32,10 +28,14 @@ public final class ServicesCategory extends Model {
     return type;
   }
 
-  private static String getTitle(int type) {
-    if ((type > 2) || (type < 0)) {
-      type = 0;
+  public static String getTitle(int type) {
+    switch (type) {
+    case REGISTERED_SERVICES:
+      return Messages.registered_services;
+    case USED_SERVICES:
+      return Messages.services_in_use;
+    default:
+      return Messages.registered_services;
     }
-    return nodes[type];
   }
 }

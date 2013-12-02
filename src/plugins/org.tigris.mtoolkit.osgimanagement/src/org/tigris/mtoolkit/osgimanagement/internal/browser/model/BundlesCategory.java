@@ -14,14 +14,10 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.model.Model;
 
 public final class BundlesCategory extends Model {
-  public static final int       REGISTERED = 0;
-  public static final int       IN_USE     = 1;
+  public static final int REGISTERED = 0;
+  public static final int IN_USE     = 1;
 
-  private final int             type;
-  private static final String[] nodes      = {
-
-      Messages.registered_in, Messages.used_by
-                                           };
+  private final int       type;
 
   public BundlesCategory(int type) {
     super(getTitle(type));
@@ -33,10 +29,13 @@ public final class BundlesCategory extends Model {
   }
 
   private static String getTitle(int type) {
-    if ((type > 2) || (type < 0)) {
-      type = 0;
+    switch (type) {
+    case REGISTERED:
+      return Messages.registered_in;
+    case IN_USE:
+      return Messages.used_by;
+    default:
+      return Messages.registered_in;
     }
-    return nodes[type];
   }
-
 }

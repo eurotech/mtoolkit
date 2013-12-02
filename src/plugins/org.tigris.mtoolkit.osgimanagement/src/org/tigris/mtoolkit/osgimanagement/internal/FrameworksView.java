@@ -97,7 +97,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.model.BundlesCategory
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.Category;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ObjectClass;
-import org.tigris.mtoolkit.osgimanagement.internal.browser.model.ServicesCategory;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.TreeRoot;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.AddAction;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action.CommonPropertiesAction;
@@ -1050,8 +1049,8 @@ public final class FrameworksView extends ViewPart {
   }
 
   private boolean isTextFound(String text, String searchFor) {
-    return (text.indexOf(searchFor) != -1 && !text.equals(ServicesCategory.nodes[0]) && !text
-        .equals(ServicesCategory.nodes[1]));
+    return (text.indexOf(searchFor) != -1 && !text.equals(Messages.registered_services) && !text
+        .equals(Messages.services_in_use));
   }
 
   public final class ActionsProviderElement {
