@@ -28,7 +28,7 @@ public final class ServicesCategory extends Model {
     return type;
   }
 
-  public static String getTitle(int type) {
+  private static String getTitle(int type) {
     switch (type) {
     case REGISTERED_SERVICES:
       return Messages.registered_services;
