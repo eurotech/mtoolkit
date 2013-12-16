@@ -372,6 +372,9 @@ public final class CertificatesPanel {
     lblCertificates.setVisible(visible);
     ((GridData) lblCertificates.getLayoutData()).exclude = !visible;
 
+    tree.setVisible(visible);
+    ((GridData) tree.getLayoutData()).exclude = !visible;
+
     detailsButton.setVisible(visible);
     ((GridData) detailsButton.getLayoutData()).exclude = !visible;
   }
