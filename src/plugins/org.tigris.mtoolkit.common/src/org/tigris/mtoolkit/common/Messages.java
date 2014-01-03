@@ -39,6 +39,8 @@ public class Messages {
   public static String        CertUtils_NotNullAlias;
   public static String        CertUtils_NotNullLocation;
 
+  public static String        CommonPreferencePage_WrongExtenstionClass;
+
   public static String        certs_ColAlias;
   public static String        certs_ColLocation;
   public static String        certs_btnAdd;
