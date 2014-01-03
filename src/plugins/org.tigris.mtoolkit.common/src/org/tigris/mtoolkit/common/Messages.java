@@ -23,8 +23,6 @@ public class Messages {
   public static String        plugin_exporter_not_compatible;
   public static String        CertificatesPanel_signContentGroup;
   public static String        CertificatesPanel_lblCertificates;
-  public static String        CertificatesPanel_tblCertColAlias;
-  public static String        CertificatesPanel_tblCertColLocation;
   public static String        CertificatesPanel_tblCertColIssuedTo;
   public static String        CertificatesPanel_tblCertColIssuedBy;
   public static String        CertificatesPanel_tblCertColExpirationDate;
