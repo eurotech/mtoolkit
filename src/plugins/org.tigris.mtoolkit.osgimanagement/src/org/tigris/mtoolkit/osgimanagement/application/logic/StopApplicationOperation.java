@@ -9,7 +9,7 @@
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
 /**
- * 
+ *
  */
 package org.tigris.mtoolkit.osgimanagement.application.logic;
 
@@ -20,19 +20,26 @@ import org.eclipse.osgi.util.NLS;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.osgimanagement.application.model.Application;
 
+public final class StopApplicationOperation extends RemoteApplicationOperation {
 
-public class StopApplicationOperation extends RemoteApplicationOperation {
-	
-	public StopApplicationOperation(Application application) {
-		super("Stop Application", application);
-	}
+  public StopApplicationOperation(Application application) {
+    super("Stop Application", application);
+  }
 
-	protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
-		getApplication().getRemoteApplication().stop();
-		return Status.OK_STATUS;
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractRemoteModelOperation#doOperation(org.eclipse.core.runtime.IProgressMonitor)
+   */
+  @Override
+  protected IStatus doOperation(IProgressMonitor monitor) throws IAgentException {
+    getApplication().getRemoteApplication().stop();
+    return Status.OK_STATUS;
+  }
 
-	protected String getMessage(IStatus operationStatus) {
-		return NLS.bind("Application {0} stop failed", getApplication().toString());
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.osgimanagement.model.AbstractRemoteModelOperation#getMessage(org.eclipse.core.runtime.IStatus)
+   */
+  @Override
+  protected String getMessage(IStatus operationStatus) {
+    return NLS.bind("Application {0} stop failed", getApplication().toString());
+  }
 }
