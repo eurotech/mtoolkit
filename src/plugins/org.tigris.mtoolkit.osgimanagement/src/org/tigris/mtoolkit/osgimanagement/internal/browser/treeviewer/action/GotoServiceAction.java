@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
+import java.util.Iterator;
+
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -27,6 +29,17 @@ import org.tigris.mtoolkit.osgimanagement.model.Model;
 public final class GotoServiceAction extends AbstractFrameworkTreeElementAction<ObjectClass> {
   public GotoServiceAction(ISelectionProvider provider, String text) {
     super(false, ObjectClass.class, provider, text);
+  }
+
+  /* (non-Javadoc)
+   * @see org.eclipse.jface.action.Action#run()
+   */
+  @Override
+  public void run() {
+    Iterator<Model> iterator = getStructuredSelection().iterator();
+    while (iterator.hasNext()) {
+      execute((ObjectClass) iterator.next());
+    }
   }
 
   /* (non-Javadoc)
