@@ -4,7 +4,6 @@ android.rsmaccess
 android.widgets
 com.prosyst.mbs.android.xml
 com.prosyst.mbs.impl.services.container.android
-com.prosyst.tools.iagent.vmmanager.android
 org.tigris.mtoolkit.iagent.rpc
 com.prosyst.mbs.system_bundle
 com.prosyst.mbs.osgilib
