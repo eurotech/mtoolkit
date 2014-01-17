@@ -247,20 +247,28 @@ public final class FileUtils {
     return file;
   }
 
-  public static void close(Closeable stream) {
-    if (stream != null) {
+  public static void close(Closeable... streams) {
+    for (Closeable c : streams) {
+      if (c == null) {
+        continue;
+      }
       try {
-        stream.close();
+        c.close();
       } catch (IOException e) {
+        //This exception is to be ignored
       }
     }
   }
 
-  public static void close(ZipFile zip) {
-    if (zip != null) {
+  public static void close(ZipFile... zips) {
+    for (ZipFile zip : zips) {
+      if (zip == null) {
+        continue;
+      }
       try {
         zip.close();
       } catch (IOException e) {
+        //This exception is to be ignored
       }
     }
   }
