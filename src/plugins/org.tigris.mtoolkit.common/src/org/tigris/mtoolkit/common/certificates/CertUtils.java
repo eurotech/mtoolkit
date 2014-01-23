@@ -188,6 +188,41 @@ public final class CertUtils {
     return (String) properties.get(InstallationConstants.CERT_KEY_PASS + DT + id);
   }
 
+  public static Certificate readCertificate(String location, String alias) throws IOException,
+      GeneralSecurityException, NullPointerException {
+    if (location == null || alias == null) {
+      String message = Messages.CertUtils_NotNullAlias;
+      if (location == null) {
+        message = Messages.CertUtils_NotNullLocation;
+      }
+      throw new NullPointerException(message);
+    }
+
+    FileInputStream fis = null;
+    try {
+      KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+      fis = new FileInputStream(location);
+      ks.load(fis, null);
+      if (ks.isKeyEntry(alias)) {
+        Certificate certs[] = ks.getCertificateChain(alias);
+        return certs[0];
+      } else if (ks.isCertificateEntry(alias)) {
+        return ks.getCertificate(alias);
+      } else {
+        throw new GeneralSecurityException(NLS.bind(Messages.dlgCertMan_verifyUnknownAlias, new Object[] {
+          alias
+        }));
+      }
+    } finally {
+      if (fis != null) {
+        try {
+          fis.close();
+        } catch (IOException e) {
+        }
+      }
+    }
+  }
+
   /**
    * Method for signing InstallationItem instances as they must contain a
    * java.io.File instance that will be signed. Files can be JAR and DP files.
@@ -861,40 +896,5 @@ public final class CertUtils {
       }
     }
     return preparedItems;
-  }
-
-  public static Certificate readCertificate(String location, String alias) throws IOException,
-      GeneralSecurityException, NullPointerException {
-    if (location == null || alias == null) {
-      String message = Messages.CertUtils_NotNullAlias;
-      if (location == null) {
-        message = Messages.CertUtils_NotNullLocation;
-      }
-      throw new NullPointerException(message);
-    }
-
-    FileInputStream fis = null;
-    try {
-      KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-      fis = new FileInputStream(location);
-      ks.load(fis, null);
-      if (ks.isKeyEntry(alias)) {
-        Certificate certs[] = ks.getCertificateChain(alias);
-        return certs[0];
-      } else if (ks.isCertificateEntry(alias)) {
-        return ks.getCertificate(alias);
-      } else {
-        throw new GeneralSecurityException(NLS.bind(Messages.dlgCertMan_verifyUnknownAlias, new Object[] {
-          alias
-        }));
-      }
-    } finally {
-      if (fis != null) {
-        try {
-          fis.close();
-        } catch (IOException e) {
-        }
-      }
-    }
   }
 }
