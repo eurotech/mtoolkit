@@ -50,13 +50,9 @@ public final class FileUtils {
           file.mkdirs();
         } else {
           file.getParentFile().mkdirs();
-          byte[] buf = new byte[1024];
           FileOutputStream outputStream = new FileOutputStream(file);
           try {
-            int len;
-            while ((len = zis.read(buf)) > 0) {
-              outputStream.write(buf, 0, len);
-            }
+            copy(zis, outputStream);
           } finally {
             close(outputStream);
           }
@@ -144,11 +140,7 @@ public final class FileUtils {
   private static void addStreamToArchive(String name, InputStream in, ZipOutputStream zip) throws IOException {
     ZipEntry newEntry = new ZipEntry(name);
     zip.putNextEntry(newEntry);
-    byte[] buf = new byte[4096];
-    int read;
-    while ((read = in.read(buf)) != -1) {
-      zip.write(buf, 0, read);
-    }
+    copy(in, zip);
   }
 
   private static String getEntryName(File archiveBase, File file, String prefix) throws IOException {
@@ -183,11 +175,7 @@ public final class FileUtils {
       FileInputStream in = new FileInputStream(file);
       try {
         zos.putNextEntry(new ZipEntry(name));
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-          zos.write(buf, 0, len);
-        }
+        copy(in, zos);
         zos.closeEntry();
       } finally {
         close(in);
@@ -237,11 +225,7 @@ public final class FileUtils {
     FileOutputStream stream = null;
     try {
       stream = new FileOutputStream(file);
-      byte[] buf = new byte[4096];
-      int read;
-      while ((read = input.read(buf)) != -1) {
-        stream.write(buf, 0, read);
-      }
+      copy(input, stream);
     } finally {
       close(stream);
     }
