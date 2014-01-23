@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -270,6 +271,14 @@ public final class FileUtils {
       } catch (IOException e) {
         //This exception is to be ignored
       }
+    }
+  }
+
+  public static void copy(InputStream in, OutputStream out) throws IOException {
+    byte[] buf = new byte[2048];
+    int read = -1;
+    while ((read = in.read(buf)) != -1) {
+      out.write(buf, 0, read);
     }
   }
 }
