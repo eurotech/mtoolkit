@@ -324,12 +324,8 @@ final class ConnectFrameworkJob extends Job {
         boolean replaceFile = MessageDialog.openQuestion(null, Messages.confirm_replace_title,
             NLS.bind(Messages.error_file_already_exist, file.toString()));
         if (replaceFile) {
-          int bytesRead = 0;
-          byte[] buffer = new byte[1024];
           output = new FileOutputStream(file);
-          while ((bytesRead = input.read(buffer)) != -1) {
-            output.write(buffer, 0, bytesRead);
-          }
+          FileUtils.copy(input, output);
         }
       }
     } catch (IOException ex) {

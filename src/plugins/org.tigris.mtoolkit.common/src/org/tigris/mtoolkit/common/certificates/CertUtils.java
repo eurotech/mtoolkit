@@ -738,12 +738,8 @@ public final class CertUtils {
   }
 
   private static void copyBytes(InputStream in, OutputStream out, boolean closeIn, boolean closeOut) throws IOException {
-    byte[] buf = new byte[1024];
-    int len;
     try {
-      while ((len = in.read(buf)) > 0) {
-        out.write(buf, 0, len);
-      }
+      FileUtils.copy(in, out);
     } finally {
       if (closeIn) {
         FileUtils.close(in);
