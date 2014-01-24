@@ -53,7 +53,7 @@ public final class SocketTransport implements Transport {
    * @see java.lang.Object#toString()
    */
   public String toString() {
-    return "Socket Transport: " + host;
+    return getClass().getName() + ':' + host;
   }
 
 }

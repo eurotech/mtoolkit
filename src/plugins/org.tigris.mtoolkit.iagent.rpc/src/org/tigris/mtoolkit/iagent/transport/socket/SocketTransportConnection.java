@@ -25,7 +25,7 @@ import org.tigris.mtoolkit.iagent.transport.TransportConnection;
  * @since 3.0
  */
 public final class SocketTransportConnection implements TransportConnection {
-  private static final String     IAGENT_LOCAL_ADDRESS_PROP = "iagent.pmp.local.address";
+  private static final String     IAGENT_LOCAL_ADDRESS_PROP = "iagent.pmp.local.address"; //$NON-NLS-1$
 
   private static volatile boolean preJava14EE               = false;
 
@@ -54,30 +54,21 @@ public final class SocketTransportConnection implements TransportConnection {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.tigris.mtoolkit.iagent.transport.TransportConnection#getInputStream()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.TransportConnection#getInputStream()
    */
   public InputStream getInputStream() throws IOException {
     return socket.getInputStream();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.tigris.mtoolkit.iagent.transport.TransportConnection#getOutputStream
-   * ()
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.TransportConnection#getOutputStream()
    */
   public OutputStream getOutputStream() throws IOException {
     return socket.getOutputStream();
   }
 
-  /*
-   * (non-Javadoc)
-   *
+  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.transport.TransportConnection#close()
    */
   public synchronized void close() {
@@ -93,9 +84,7 @@ public final class SocketTransportConnection implements TransportConnection {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
+  /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.transport.TransportConnection#isClosed()
    */
   public synchronized boolean isClosed() {
@@ -105,13 +94,11 @@ public final class SocketTransportConnection implements TransportConnection {
     return isSocketClosed(socket);
   }
 
-  /*
-   * (non-Javadoc)
-   *
+  /* (non-Javadoc)
    * @see java.lang.Object#toString()
    */
   public String toString() {
-    return "SocketTransportConnection: " + host + ":" + port;
+    return getClass().getName() + ':' + host + ':' + port;
   }
 
   private static boolean isSocketClosed(Socket socket) {
@@ -119,7 +106,7 @@ public final class SocketTransportConnection implements TransportConnection {
       return false;
     }
     try {
-      Method m = socket.getClass().getMethod("isClosed", (Class[]) null);
+      Method m = socket.getClass().getMethod("isClosed", (Class[]) null); //$NON-NLS-1$
       return ((Boolean) m.invoke(socket, null)).booleanValue();
     } catch (NoSuchMethodException e) {
       preJava14EE = true;

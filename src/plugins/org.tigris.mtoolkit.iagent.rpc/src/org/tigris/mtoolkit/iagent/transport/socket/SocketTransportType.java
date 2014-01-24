@@ -18,18 +18,26 @@ import org.tigris.mtoolkit.iagent.transport.TransportType;
 /**
  * @since 3.0
  */
-public class SocketTransportType implements TransportType {
+public final class SocketTransportType implements TransportType {
+	private static final String TYPE_ID = "socket"; //$NON-NLS-1$
 
-	private static final String TYPE_ID = "socket";
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.TransportType#listAvailable()
+   */
 	public List listAvailable() {
 		return null;
 	}
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.TransportType#openTransport(java.lang.String)
+   */
 	public Transport openTransport(String id) {
 		return new SocketTransport(this, id);
 	}
 
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.transport.TransportType#getTypeId()
+   */
 	public String getTypeId() {
 		return TYPE_ID;
 	}
