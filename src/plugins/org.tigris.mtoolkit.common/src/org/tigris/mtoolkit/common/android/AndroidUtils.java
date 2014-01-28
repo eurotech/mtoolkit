@@ -17,8 +17,10 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -36,6 +38,12 @@ import org.tigris.mtoolkit.common.ProcessOutputReader;
 import org.tigris.mtoolkit.common.UtilitiesPlugin;
 
 public final class AndroidUtils {
+
+  /**
+   * Key for dex conversion option specifying whether to keep .class files. The
+   * value should be of type Boolean.
+   */
+  public static final String    OPTION_KEEP_CLASSES       = "keep.classes"; //$NON-NLS-1$
 
   private static final String[] DEX_COMPATIBLE_EXTENSIONS = new String[] {
       ".jar", ".zip"
@@ -58,18 +66,45 @@ public final class AndroidUtils {
    *           in case of error
    */
   public static void convertToDex(File file, File outputFile, IProgressMonitor monitor) throws IOException {
+    convertToDex(file, outputFile, null, monitor);
+  }
+
+  /**
+   * Converts jar file to dex format.
+   * 
+   * @param file
+   *          the file to be converted.
+   * @param outputFile
+   *          the result file. The file extension of outputFile must be one of
+   *          supported by dx tool.
+   * @param options
+   *          additional options controlling the conversion process. Can be
+   *          null.
+   * @param monitor
+   *          the progress monitor.
+   * @throws IOException
+   *           in case of error
+   * @see #OPTION_KEEP_CLASSES
+   * @since 6.2
+   */
+  public static void convertToDex(File file, File outputFile, Map options, IProgressMonitor monitor) throws IOException {
     File dxToolFile = getDxToolLocation();
 
     if (dxToolFile == null) {
       throw new IOException("Unable to find DEX tool. Check whether Android SDK location is set in preferences.");
     }
 
+    boolean keepClasses = (options != null) && Boolean.TRUE.equals(options.get(OPTION_KEEP_CLASSES));
+
     List command = new ArrayList();
-    command.add("java");
-    command.add("-jar");
+    command.add("java");//$NON-NLS-1$
+    command.add("-jar");//$NON-NLS-1$
     command.add(dxToolFile.getAbsolutePath());
-    command.add("--dex");
-    command.add("--output=" + outputFile.getAbsolutePath());
+    command.add("--dex");//$NON-NLS-1$
+    if (keepClasses) {
+      command.add("--keep-classes");//$NON-NLS-1$
+    }
+    command.add("--output=" + outputFile.getAbsolutePath());//$NON-NLS-1$
     command.add(file.getAbsolutePath());
 
     Process process;
@@ -352,15 +387,18 @@ public final class AndroidUtils {
   private static File getDxToolLocation() {
     String androidSDK = getAndroidSdkLocation();
 
-    File dxToolFile = null;
-    String dxTool = null;
-    dxTool = MessageFormat.format("{0}/platform-tools/lib/dx.jar", new Object[] {
+    if (androidSDK == null) {
+      return null;
+    }
+
+    String dxTool = MessageFormat.format("{0}/platform-tools/lib/dx.jar", new Object[] {
       androidSDK
     });
-    dxToolFile = new File(dxTool);
+    File dxToolFile = new File(dxTool);
     if (dxToolFile.exists()) {
       return dxToolFile;
     }
+
     String[] androidPlatforms = getAndroidPlatforms(androidSDK);
     for (int i = 0; i < androidPlatforms.length; i++) {
       String androidPlatform = androidPlatforms[i];
@@ -372,6 +410,29 @@ public final class AndroidUtils {
         return dxToolFile;
       }
     }
+
+    // Try Android SDK 4 format
+    File buildToolsDir = new File(androidSDK, "build-tools");
+    if (buildToolsDir.exists() && buildToolsDir.isDirectory()) {
+      File[] children = buildToolsDir.listFiles();
+      List<String> versionNames = new ArrayList<String>();
+      for (int i = 0; i < children.length; i++) {
+        if (children[i].isDirectory()) {
+          versionNames.add(children[i].getName());
+        }
+      }
+      Collections.sort(versionNames);
+      for (String version : versionNames) {
+        dxTool = MessageFormat.format("{0}/build-tools/{1}/lib/dx.jar", new Object[] {
+            androidSDK, version
+        });
+        dxToolFile = new File(dxTool);
+        if (dxToolFile.exists()) {
+          return dxToolFile;
+        }
+      }
+    }
+
     return null;
   }
 }
