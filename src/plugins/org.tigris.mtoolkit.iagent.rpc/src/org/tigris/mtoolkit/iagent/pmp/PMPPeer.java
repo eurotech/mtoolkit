@@ -19,7 +19,7 @@ public interface PMPPeer {
   /**
    * @since 3.2
    */
-  public static final String PORT             = "port";
+  public static final String PORT             = "port"; //$NON-NLS-1$
 
   /**
    * Registers listener to receive events whenever one host is connected or

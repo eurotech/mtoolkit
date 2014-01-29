@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.internal.threadpool.ThreadPool;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPPeer;
@@ -85,7 +86,7 @@ public class PMPPeerImpl implements PMPPeer {
   }
 
   public String getRole() {
-    return "Peer";
+    return Messages.getString("PMPPeerImpl.Name"); //$NON-NLS-1$
   }
 
   /* (non-Javadoc)
