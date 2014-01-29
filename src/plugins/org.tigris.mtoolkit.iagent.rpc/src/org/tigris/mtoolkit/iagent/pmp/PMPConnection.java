@@ -15,7 +15,7 @@ package org.tigris.mtoolkit.iagent.pmp;
  * remote Framework.
  */
 public interface PMPConnection {
-  public static final String FRAMEWORK_DISCONNECTED = "framework_disconnected_event";
+  public static final String FRAMEWORK_DISCONNECTED = "framework_disconnected_event"; //$NON-NLS-1$
 
   /**
    * Gets reference to a service registered in the Framework.

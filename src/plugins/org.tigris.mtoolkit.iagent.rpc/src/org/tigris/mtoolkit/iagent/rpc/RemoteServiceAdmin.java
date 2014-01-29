@@ -13,7 +13,7 @@ package org.tigris.mtoolkit.iagent.rpc;
 import java.util.Dictionary;
 
 public interface RemoteServiceAdmin extends RemoteServiceIDProvider {
-	public static final String CUSTOM_SERVICE_EVENT = "iagent_service_event";
+	public static final String CUSTOM_SERVICE_EVENT = "iagent_service_event"; //$NON-NLS-1$
 
   public Object getAllRemoteServices(String clazz, String filter);
 

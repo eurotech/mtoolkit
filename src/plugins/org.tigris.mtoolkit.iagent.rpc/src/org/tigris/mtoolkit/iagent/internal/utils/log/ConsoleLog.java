@@ -47,13 +47,13 @@ public final class ConsoleLog implements Log {
 	private static String getSeverityString(int severity) {
 		switch (severity) {
 		case INFO:
-			return "[I]";
+			return "[I]"; //$NON-NLS-1$
 		case ERROR:
-			return "[E]";
+			return "[E]"; //$NON-NLS-1$
 		case DEBUG:
-			return "[D]";
+			return "[D]"; //$NON-NLS-1$
 		default:
-			return "[E]";
+			return "[E]"; //$NON-NLS-1$
 		}
 	}
 }
