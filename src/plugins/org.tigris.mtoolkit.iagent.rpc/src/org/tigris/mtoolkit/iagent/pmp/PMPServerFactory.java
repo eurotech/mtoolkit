@@ -16,16 +16,17 @@ import java.util.Hashtable;
 
 import org.osgi.framework.BundleContext;
 import org.tigris.mtoolkit.iagent.internal.pmp.Server;
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 
 public final class PMPServerFactory {
   /** constant used for the pmp configuration */
-  public static final String   MAX_STRING_PROP = "iagent.pmp.server.maxstringlength";
+  public static final String   MAX_STRING_PROP = "iagent.pmp.server.maxstringlength"; //$NON-NLS-1$
 
   /** constant used for the pmp configuration */
-  public static final String   MAX_ARRAY_PROP  = "iagent.pmp.server.maxarraylength";
+  public static final String   MAX_ARRAY_PROP  = "iagent.pmp.server.maxarraylength"; //$NON-NLS-1$
 
   /** constant used for the pmp configuration */
-  public static final String   TIMEOUT_PROP    = "iagent.pmp.server.timeout";
+  public static final String   TIMEOUT_PROP    = "iagent.pmp.server.timeout"; //$NON-NLS-1$
 
   private static final Integer MAX_STRING      = Integer.getInteger(MAX_STRING_PROP, 255);
   private static final Integer MAX_ARRAY       = Integer.getInteger(MAX_ARRAY_PROP, 300000);
@@ -38,7 +39,7 @@ public final class PMPServerFactory {
     if (props == null) {
       props = new Hashtable();
     }
-    final String uri = "tcp://:" + String.valueOf(port);
+    final String uri = "tcp://:" + String.valueOf(port); //$NON-NLS-1$
     props.put(Server.URI, uri);
     props.put(Server.PORT, new Integer(port));
     if (props.get(PMPServerFactory.TIMEOUT_PROP) == null) {
@@ -53,7 +54,7 @@ public final class PMPServerFactory {
     try {
       return new Server(context, props);
     } catch (IOException exc) {
-      String msg = "Error creating transport configuration for " + uri;
+      String msg = Messages.getString("PMPServerFactory_CreateConfigErr") + uri; //$NON-NLS-1$
       throw new PMPException(msg, exc);
     }
   }

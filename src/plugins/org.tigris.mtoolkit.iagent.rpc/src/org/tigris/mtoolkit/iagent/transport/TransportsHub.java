@@ -11,13 +11,15 @@
 package org.tigris.mtoolkit.iagent.transport;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.util.LightServiceRegistry;
 
 public class TransportsHub {
-  private static final String         TRANSPORTS_REGISTRY_FILE = "transports.properties";
+  private static final String         TRANSPORTS_REGISTRY_FILE = "transports.properties"; //$NON-NLS-1$
   private static LightServiceRegistry transportsRegistry;
 
   public static Transport openTransport(String type, String id) throws IOException {
@@ -41,7 +43,10 @@ public class TransportsHub {
     if (extender instanceof TransportType) {
       return (TransportType) extender;
     }
-    throw new IllegalArgumentException("unable to find transport type " + type);
+    final String errMsg = Messages.getString("TransportsHub_TransportNotFoundErr");//$NON-NLS-1$
+    throw new IllegalArgumentException(MessageFormat.format(errMsg, new Object[] {
+      type
+    }));
   }
 
   private static LightServiceRegistry getServiceRegistry() {
