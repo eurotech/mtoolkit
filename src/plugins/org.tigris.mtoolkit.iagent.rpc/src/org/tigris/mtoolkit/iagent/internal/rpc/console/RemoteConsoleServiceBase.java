@@ -23,6 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.internal.pmp.InvocationThread;
 import org.tigris.mtoolkit.iagent.internal.rpc.Activator;
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
 import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
@@ -204,11 +205,11 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
     private volatile boolean running = true;
 
     public WriteDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject object) throws PMPException {
-      dispatcherThread = ThreadUtils.createThread(this, "Remote Console Dispatcher");
+      dispatcherThread = ThreadUtils.createThread(this, Messages.getString("RemoteConsoleServiceBase_Name")); //$NON-NLS-1$
       this.conn = conn;
       this.buffer = buffer;
       this.object = object;
-      method = object.getMethod("write", new String[] {
+      method = object.getMethod("write", new String[] { //$NON-NLS-1$
           byte[].class.getName(), Integer.TYPE.getName(), Integer.TYPE.getName()
       });
     }

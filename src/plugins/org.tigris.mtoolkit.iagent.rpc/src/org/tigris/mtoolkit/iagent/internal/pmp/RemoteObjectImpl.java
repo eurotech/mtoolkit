@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
-import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 /**
  * The client side representation of an object located on the Framework.
@@ -35,14 +35,14 @@ class RemoteObjectImpl implements RemoteObject {
   /**
    * Dynamically gets references to all the methods of the object associated
    * with this RemoteObject.
-   * 
+   *
    * @return The references to the object's methods.
    * @exception PMPException
    *              If an IOException or protocol error occurred.
    */
   public RemoteMethod[] getMethods() throws PMPException {
     if (!c.connected) {
-      throw new PMPException("PMPConnection closed");
+      throw new PMPException(Messages.getString("RemoteObjectImpl_ConnClosedErr")); //$NON-NLS-1$
     }
     return c.getMethods(this);
   }
@@ -50,7 +50,7 @@ class RemoteObjectImpl implements RemoteObject {
   /**
    * Gets a reference to a method of the object associated with this
    * RemoteObject.
-   * 
+   *
    * @param name
    *          the method's name
    * @param args
@@ -62,10 +62,10 @@ class RemoteObjectImpl implements RemoteObject {
    */
   public RemoteMethod getMethod(String name, String[] args) throws PMPException {
     if (name == null || name.length() == 0) {
-      throw new PMPException("Incorrect method name");
+      throw new PMPException(Messages.getString("RemoteObjectImpl_MNameErr")); //$NON-NLS-1$
     }
     if (!c.connected) {
-      throw new PMPException("PMPConnection closed");
+      throw new PMPException(Messages.getString("RemoteObjectImpl_ConnClosedErr")); //$NON-NLS-1$
     }
     return c.getMethod(this, name, args);
   }
@@ -73,7 +73,7 @@ class RemoteObjectImpl implements RemoteObject {
   /**
    * Disposes the resources allocated for the remote object so that it would be
    * no longer usable.
-   * 
+   *
    * @exception PMPException
    *              if an IOException or protocol error occurred.
    */
@@ -85,16 +85,13 @@ class RemoteObjectImpl implements RemoteObject {
     c.dispose(IOR);
   }
 
-  protected void finalize() {
+  /* (non-Javadoc)
+   * @see java.lang.Object#finalize()
+   */
+  protected void finalize() throws Throwable {
     if (c == null) {
       return;
     }
-    try {
-      if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(c, "FINILIZE CALLED" + IOR);
-      }
-      dispose();
-    } catch (Exception exc) {
-    }
+    dispose();
   }
 }

@@ -13,6 +13,7 @@ package org.tigris.mtoolkit.iagent.internal.utils.log;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 
 public final class OSGiLog implements Log {
   private final ServiceTracker logTracker;
@@ -21,7 +22,7 @@ public final class OSGiLog implements Log {
     final String logServiceClass = LogService.class.getName();
 
     if (context == null) {
-      throw new NullPointerException("context is null");
+      throw new NullPointerException(Messages.getString("OSGiLog_NullCtxErr")); //$NON-NLS-1$
     }
 
     logTracker = new ServiceTracker(context, logServiceClass, null);

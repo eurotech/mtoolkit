@@ -111,7 +111,7 @@ public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase {
         console = (EquinoxConsoleSession) consoles.get(conn);
       }
       if (console != null) {
-        console.sendCommand(line + System.getProperty("line.separator"));
+        console.sendCommand(line + System.getProperty("line.separator")); //$NON-NLS-1$
       }
     } finally {
       printPrompt();
@@ -119,7 +119,7 @@ public final class EquinoxRemoteConsole extends RemoteConsoleServiceBase {
   }
 
   private void printPrompt() {
-    print(System.getProperty("line.separator") + "osgi> ");
+    print(System.getProperty("line.separator") + "osgi> "); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   private static class EquinoxConsoleSession extends ConsoleSession {

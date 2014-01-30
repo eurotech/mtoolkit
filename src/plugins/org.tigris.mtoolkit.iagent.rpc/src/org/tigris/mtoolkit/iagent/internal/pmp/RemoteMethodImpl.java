@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteMethod;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;
@@ -58,7 +59,7 @@ class RemoteMethodImpl implements RemoteMethod {
 
 	/**
 	 * Executes the method on the server.
-	 * 
+	 *
 	 * @param args
 	 *            parameters' values
 	 * @param serflag
@@ -72,7 +73,9 @@ class RemoteMethodImpl implements RemoteMethod {
 	 */
 	public Object invoke(Object[] args, boolean serflag, Class clazz) throws PMPException {
 		if (!c.connected)
-			throw new PMPException("PMP Service stoped");
+     {
+      throw new PMPException(Messages.getString("RemoteMethodImpl_ServiceStoppedErr")); //$NON-NLS-1$
+    }
 		if (clazz != null) {
 			loader = clazz.getClassLoader();
 		}
@@ -81,14 +84,16 @@ class RemoteMethodImpl implements RemoteMethod {
 
 	public Object invoke(Object[] args, boolean serflag) throws PMPException {
 		if (!c.connected)
-			throw new PMPException("PMP Service stoped");
+     {
+      throw new PMPException(Messages.getString("RemoteMethodImpl_ServiceStoppedErr")); //$NON-NLS-1$
+    }
 		return c.invoke(args, argTypes, serflag, ro.IOR, methodID, returnType, loader, changed, c);
 	}
 
 	/**
 	 * Changes the return type of the method. This can be used to read the
 	 * method's result in a different object than the original return type.
-	 * 
+	 *
 	 * @param newReturnType
 	 *            The new return type class name.
 	 */
@@ -102,7 +107,7 @@ class RemoteMethodImpl implements RemoteMethod {
 	/**
 	 * Changes the return type of the method. Use this method if the new return
 	 * type can't be found in the system class path.
-	 * 
+	 *
 	 * @param newReturnType
 	 *            The new return type class name.
 	 */

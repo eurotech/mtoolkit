@@ -12,9 +12,10 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 
 import java.io.IOException;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 
-class PMPAnswer {
+final class PMPAnswer {
   public boolean               connected     = false; // ok - connect
   protected int                objID         = -1;   // ok - getReference, invoke
   protected int                methodID      = -1;   // ok - getMethod
@@ -83,8 +84,8 @@ class PMPAnswer {
       }
     }
     if (!received) {
-      c.disconnect("Connection Lost", true);
-      throw new IOException("Connection Lost");
+      c.disconnect(Messages.getString("PMPAnswer_ConnLostErr"), true); //$NON-NLS-1$
+      throw new IOException(Messages.getString("PMPAnswer_ConnLostErr")); //$NON-NLS-1$
     }
   }
 
