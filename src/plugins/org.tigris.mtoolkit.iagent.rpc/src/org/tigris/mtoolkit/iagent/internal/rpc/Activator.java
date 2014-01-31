@@ -30,9 +30,9 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class Activator implements BundleActivator, ServiceTrackerCustomizer {
-  private static final String           DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin";
+  private static final String           DEPLOYMENT_ADMIN_CLASS = "org.osgi.service.deploymentadmin.DeploymentAdmin"; //$NON-NLS-1$
 
-  private static final int              IAGENT_PMP_PORT        = Integer.getInteger("iagent.pmp.port",
+  private static final int              IAGENT_PMP_PORT        = Integer.getInteger("iagent.pmp.port", //$NON-NLS-1$
                                                                    PMPPeer.DEFAULT_PMP_PORT).intValue();
 
   private static volatile Activator     instance;
