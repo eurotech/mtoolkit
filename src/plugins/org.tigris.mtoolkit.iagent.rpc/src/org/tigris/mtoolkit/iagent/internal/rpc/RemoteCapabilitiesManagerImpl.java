@@ -23,9 +23,9 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesProvider;
 
 public final class RemoteCapabilitiesManagerImpl extends AbstractRemoteAdmin implements RemoteCapabilitiesManager {
-  private static final String  PROPERTY_EVENT         = "iagent_property_event";
-  private static final String  EVENT_CAPABILITY_NAME  = "capability.name";
-  private static final String  EVENT_CAPABILITY_VALUE = "capability.value";
+  private static final String  PROPERTY_EVENT         = "iagent_property_event"; //$NON-NLS-1$
+  private static final String  EVENT_CAPABILITY_NAME  = "capability.name"; //$NON-NLS-1$
+  private static final String  EVENT_CAPABILITY_VALUE = "capability.value"; //$NON-NLS-1$
 
   private static final Class[] CLASSES                = new Class[] {
       RemoteCapabilitiesProvider.class, RemoteCapabilitiesManager.class

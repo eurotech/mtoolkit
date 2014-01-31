@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class FileLog implements Log {
@@ -24,7 +25,7 @@ public final class FileLog implements Log {
 
   public FileLog(File logFile) throws IOException {
     if (logFile == null) {
-      throw new IllegalArgumentException("logFile is null");
+      throw new NullPointerException(Messages.getString("FileLog_NullFileErr")); //$NON-NLS-1$
     }
     out = new PrintWriter(new FileWriter(logFile.getAbsolutePath(), true));
   }
@@ -35,7 +36,7 @@ public final class FileLog implements Log {
   public void log(int severity, String msg, Throwable t) {
     synchronized (lock) {
       try {
-        out.println(getDateTime() + " " + getSeverityString(severity) + msg);
+        out.println(getDateTime() + " " + getSeverityString(severity) + msg); //$NON-NLS-1$
         if (t != null) {
           out.println(DebugUtils.getStackTrace(t));
         }
@@ -62,13 +63,13 @@ public final class FileLog implements Log {
   private static String getSeverityString(int severity) {
     switch (severity) {
     case INFO:
-      return "[I]";
+      return "[I]"; //$NON-NLS-1$
     case ERROR:
-      return "[E]";
+      return "[E]"; //$NON-NLS-1$
     case DEBUG:
-      return "[D]";
+      return "[D]"; //$NON-NLS-1$
     default:
-      return "[E]";
+      return "[E]"; //$NON-NLS-1$
     }
   }
 }

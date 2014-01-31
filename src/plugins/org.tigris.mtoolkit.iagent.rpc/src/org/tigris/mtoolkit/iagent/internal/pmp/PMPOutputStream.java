@@ -17,6 +17,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
+
 class PMPOutputStream extends OutputStream {
 
 	private PMPSessionThread c;
@@ -110,7 +112,7 @@ class PMPOutputStream extends OutputStream {
 	/** writes a message in the underlying OutputStream */
 	private void flush(boolean last) throws IOException {
 		if (closed) {
-      throw new IOException("Disconnected");
+      throw new IOException(Messages.getString("PMPOutputStream_DisConn")); //$NON-NLS-1$
     }
 		if (last) {
 			buffer[dataOffset - 1] = (byte) 1;
@@ -192,7 +194,7 @@ class PMPOutputStream extends OutputStream {
 		}
 		if (checkClosed && closed) {
 			if (ioExc == null) {
-        ioExc = new IOException("Disconnected");
+        ioExc = new IOException(Messages.getString("PMPOutputStream_DisConn")); //$NON-NLS-1$
       }
 			throw ioExc;
 		}
@@ -216,7 +218,7 @@ class PMPOutputStream extends OutputStream {
 				closed = true;
 				for (Iterator it = answers.values().iterator(); it.hasNext();) {
 					PMPAnswer tmp = (PMPAnswer) it.next();
-					tmp.errMsg = "Connection is closed";
+          tmp.errMsg = Messages.getString("PMPOutputStream_ConnClosed"); //$NON-NLS-1$
 					tmp.finish();
 					// tmp.free();
 					tmp = null;
@@ -237,7 +239,7 @@ class PMPOutputStream extends OutputStream {
 				PMPAnswer answer = (PMPAnswer) it.next();
 				if (answer.waiting) {
 					try {
-						answer.errMsg = "Connection is closing: " + msg;
+            answer.errMsg = Messages.getString("PMPOutputStream_ConClosing") + msg; //$NON-NLS-1$
 						answer.finish();
 						closed = true;
 						c.disconnect(msg, false);

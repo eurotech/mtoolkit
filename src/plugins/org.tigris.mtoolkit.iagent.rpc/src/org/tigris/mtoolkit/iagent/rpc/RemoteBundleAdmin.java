@@ -24,27 +24,27 @@ public interface RemoteBundleAdmin extends RemoteServiceIDProvider {
   /**
    * Key for bundle id. The value is of type Long.
    */
-  public static final String KEY_BUNDLE_ID               = "bundle.id";
+  public static final String KEY_BUNDLE_ID               = "bundle.id"; //$NON-NLS-1$
 
   /**
    * Key for bundle headers. The value is of type Dictionary.
    */
-  public static final String KEY_BUNDLE_HEADERS          = "bundle.headers";
+  public static final String KEY_BUNDLE_HEADERS          = "bundle.headers"; //$NON-NLS-1$
 
   /**
    * Key for bundle state. The value is of type Integer.
    */
-  public static final String KEY_BUNDLE_STATE            = "bundle.state";
+  public static final String KEY_BUNDLE_STATE            = "bundle.state"; //$NON-NLS-1$
 
   /**
    * Key for registered services. The value is of type Dictionary[].
    */
-  public static final String KEY_REGISTERED_SERVICES     = "registered.services";
+  public static final String KEY_REGISTERED_SERVICES     = "registered.services"; //$NON-NLS-1$
 
   /**
    * Key for used services. The value is of type Dictionary[].
    */
-  public static final String KEY_USED_SERVICES           = "used.services";
+  public static final String KEY_USED_SERVICES           = "used.services"; //$NON-NLS-1$
 
   long getBundleByLocation(String location);
 
