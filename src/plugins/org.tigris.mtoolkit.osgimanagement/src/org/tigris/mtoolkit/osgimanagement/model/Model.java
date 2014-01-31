@@ -254,8 +254,9 @@ public abstract class Model implements Comparable<Object>, IActionFilter {
   }
 
   protected synchronized boolean select(Model model) {
-    if (getParent() != null) {
-      return getParent().select(model);
+    final Model parent2 = getParent();
+    if (parent2 != null) {
+      return parent2.select(model);
     }
     return false;
   }
