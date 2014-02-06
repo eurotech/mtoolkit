@@ -435,7 +435,7 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
   }
 
   private Dictionary cloneDictionary(Dictionary source) {
-    Dictionary dest = new Hashtable();
+    Dictionary dest = new Hashtable(source.size(), 1f);
     for (Enumeration en = source.keys(); en.hasMoreElements();) {
       Object k = en.nextElement();
       dest.put(k, source.get(k));
