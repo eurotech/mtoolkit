@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -45,7 +44,6 @@ import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.spi.ConnectionManager;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 import org.tigris.mtoolkit.osgimanagement.Util;
-import org.tigris.mtoolkit.osgimanagement.internal.DeviceConnectorSWTWrapper;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworksView;
 import org.tigris.mtoolkit.osgimanagement.internal.Messages;
@@ -56,8 +54,6 @@ import org.tigris.mtoolkit.osgimanagement.internal.browser.properties.ui.Framewo
 import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 final class ConnectFrameworkJob extends Job {
-  private static final boolean IAGENT_UI_ACCESS     = "true".equals(Platform.getDebugOption("org.tigris.mtoolkit.osgimanagement/iagent.ui.warn")); //$NON-NLS-1$
-
   private static final List    connectingFrameworks = new ArrayList();
 
   private final Framework      fw;
@@ -177,13 +173,7 @@ final class ConnectFrameworkJob extends Job {
     }
   }
 
-  private static void connectFramework(final DeviceConnector connector, FrameworkImpl fw) {
-    DeviceConnector fConnector = connector;
-    if (IAGENT_UI_ACCESS) {
-      // wrap the connector
-      final Display display = PlatformUI.getWorkbench().getDisplay();
-      fConnector = new DeviceConnectorSWTWrapper(connector, display);
-    }
+  private static void connectFramework(final DeviceConnector fConnector, FrameworkImpl fw) {
     final Dictionary connProps = fConnector.getProperties();
     Boolean temporary = (Boolean) connProps.get("framework-connection-temporary");
     if (temporary != null && temporary.booleanValue()) {

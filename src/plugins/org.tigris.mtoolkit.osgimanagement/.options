@@ -2,5 +2,3 @@
 
 # Turns on/off debugging of OSGI management
 org.tigris.mtoolkit.osgimanagement/debug=false
-# Turns on/off checks of UI thread to IAgent API methods
-org.tigris.mtoolkit.osgimanagement/iagent.ui.warn=false
