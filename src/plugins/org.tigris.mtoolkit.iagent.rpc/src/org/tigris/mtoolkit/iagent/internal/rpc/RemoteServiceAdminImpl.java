@@ -33,26 +33,27 @@ import org.tigris.mtoolkit.iagent.rpc.RemoteServiceAdmin;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements RemoteServiceAdmin, AllServiceListener {
-  private static final String  EVENT_TYPE_KEY         = "type";
-  private static final Integer SERVICE_REGISTERED     = new Integer(1 << 0);
-  private static final Integer SERVICE_MODIFIED       = new Integer(1 << 1);
-  private static final Integer SERVICE_UNREGISTERED   = new Integer(1 << 2);
+  private static final String       EVENT_TYPE_KEY         = "type";
+  private static final Integer      SERVICE_REGISTERED     = new Integer(1 << 0);
+  private static final Integer      SERVICE_MODIFIED       = new Integer(1 << 1);
+  private static final Integer      SERVICE_UNREGISTERED   = new Integer(1 << 2);
+  private static final Dictionary[] NO_REFS_PROPS          = new Dictionary[0];
 
-  private static final boolean TRACK_SERVICES_DEBUG   = Boolean.getBoolean("iagent.debug.services");
+  private static final boolean      TRACK_SERVICES_DEBUG   = Boolean.getBoolean("iagent.debug.services");
 
-  private static final Class[] CLASSES                = new Class[] {
-                                                        RemoteServiceAdmin.class
-                                                      };
+  private static final Class[]      CLASSES                = new Class[] {
+                                                             RemoteServiceAdmin.class
+                                                           };
 
-  private final Class[]        filterSupportedClasses = new Class[] {
+  private final Class[]             filterSupportedClasses = new Class[] {
       int.class, long.class, float.class, double.class, byte.class, short.class, char.class, boolean.class,
       Integer.class, Long.class, Float.class, Double.class, Byte.class, Short.class, Character.class, Boolean.class,
       String.class
-                                                      };
-  private BundleContext        bc;
-  private ServiceRegistration  registration;
+                                                           };
+  private BundleContext             bc;
+  private ServiceRegistration       registration;
 
-  private final Map            services               = new Hashtable();
+  private final Map                 services               = new Hashtable();
 
   /* (non-Javadoc)
    * @see org.tigris.mtoolkit.iagent.rpc.Remote#remoteInterfaces()
@@ -344,7 +345,7 @@ public final class RemoteServiceAdminImpl extends AbstractRemoteAdmin implements
 
   static Dictionary[] convertReferences(ServiceReference[] refs) {
     if (refs == null) {
-      return new Dictionary[0];
+      return NO_REFS_PROPS;
     }
     Dictionary[] refsProps = new Dictionary[refs.length];
     for (int i = 0; i < refs.length; i++) {

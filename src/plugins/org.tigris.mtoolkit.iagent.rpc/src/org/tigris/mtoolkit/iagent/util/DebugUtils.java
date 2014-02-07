@@ -30,6 +30,8 @@ public final class DebugUtils {
   private static final String     NL                 = System.getProperty("line.separator");  //$NON-NLS-1$
   public static final boolean     DEBUG_ENABLED      = Boolean.getBoolean(PROP_DEBUG_ENABLED);
 
+  private static final Class[]    NO_ARGS            = new Class[0];
+
   private static volatile Log     log;
   private static volatile boolean initialized        = false;
 
@@ -252,7 +254,7 @@ public final class DebugUtils {
     StringBuffer err = new StringBuffer();
     err.append(e.toString());
     try {
-      Method cause = e.getClass().getMethod("getCause", new Class[0]);
+      Method cause = e.getClass().getMethod("getCause", NO_ARGS);
       if (cause != null) {
         Object ex = cause.invoke(e, new Object[0]);
         if (ex != null) {
@@ -272,7 +274,7 @@ public final class DebugUtils {
     e.printStackTrace(new PrintWriter(sw));
     err.append(sw.toString());
     try {
-      Method cause = e.getClass().getMethod("getCause", new Class[0]);
+      Method cause = e.getClass().getMethod("getCause", NO_ARGS);
       if (cause != null) {
         Object ex = cause.invoke(e, new Object[0]);
         if (ex instanceof Throwable) {

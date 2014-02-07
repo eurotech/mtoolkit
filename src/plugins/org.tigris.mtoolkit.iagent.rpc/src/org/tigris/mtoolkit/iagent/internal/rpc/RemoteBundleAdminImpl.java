@@ -54,6 +54,8 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
   public static final String    EVENT_TYPE_KEY      = "type";
   public static final String    EVENT_BUNDLE_ID_KEY = "bundle.id";
 
+  private static final long[]   NO_BUNDLES          = new long[0];
+
   private static final Class[]  CLASSES             = new Class[] {
                                                       RemoteBundleAdmin.class
                                                     };
@@ -655,7 +657,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       if (DebugUtils.DEBUG_ENABLED) {
         DebugUtils.debug(this, "[getFragmentBundles] No packageAdmin");
       }
-      return new long[0];
+      return NO_BUNDLES;
     }
     Bundle[] fragmentBundles = admin.getFragments(bundle);
     long[] bids = convertBundlesToIds(fragmentBundles);
@@ -685,7 +687,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
       if (DebugUtils.DEBUG_ENABLED) {
         DebugUtils.debug(this, "[getHostBundles] No packageAdmin");
       }
-      return new long[0];
+      return NO_BUNDLES;
     }
     Bundle[] hostBundles = admin.getHosts(bundle);
     long[] bids = convertBundlesToIds(hostBundles);
@@ -929,7 +931,7 @@ public final class RemoteBundleAdminImpl extends AbstractRemoteAdmin implements 
 
   static long[] convertBundlesToIds(Bundle[] bundles) {
     if (bundles == null) {
-      return new long[0];
+      return NO_BUNDLES;
     }
     long[] bids = new long[bundles.length];
     for (int i = 0; i < bundles.length; i++) {
