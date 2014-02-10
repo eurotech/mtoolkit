@@ -32,12 +32,12 @@ public class EventData {
 	}
 
 	public String toString() {
-		return "EventData[event="
+		return "EventData[event=" //$NON-NLS-1$
 						+ (conEvent instanceof Dictionary	? DebugUtils.convertForDebug((Dictionary) conEvent)
 															: conEvent)
-						+ "; type="
+						+ "; type=" //$NON-NLS-1$
 						+ eventType
-						+ "]";
+						+ "]"; //$NON-NLS-1$
 	}
 
 }

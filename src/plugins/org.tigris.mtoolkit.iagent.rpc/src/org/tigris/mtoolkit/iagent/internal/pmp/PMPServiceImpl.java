@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent.internal.pmp;
 
+import java.text.MessageFormat;
 import java.util.Dictionary;
 
+import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.PMPService;
 import org.tigris.mtoolkit.iagent.transport.Transport;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
-public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
+public final class PMPServiceImpl extends PMPPeerImpl implements PMPService {
   protected volatile boolean running = false;
 
   public PMPServiceImpl() {
@@ -32,9 +34,9 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
     }
     running = false;
     if (DebugUtils.DEBUG_ENABLED) {
-      DebugUtils.debug(this, "Disconnecting Clients ...");
+      DebugUtils.debug(this, Messages.getString("PMPServiceImpl_Disconnecting")); //$NON-NLS-1$
     }
-    closeConnections("PMP Service has been stopped.");
+    closeConnections(Messages.getString("PMPServiceImpl_ServiceStopped")); //$NON-NLS-1$
     if (connDispatcher != null) {
       connDispatcher.stopEvent();
     }
@@ -49,7 +51,7 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
    * @see org.tigris.mtoolkit.iagent.internal.pmp.PMPPeerImpl#getRole()
    */
   public String getRole() {
-    return "Client";
+    return Messages.getString("PMPServiceImpl_RoleName"); //$NON-NLS-1$
   }
 
   /* (non-Javadoc)
@@ -57,11 +59,12 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
    */
   public PMPConnection connect(Transport transport, Dictionary properties) throws PMPException {
     if (!running) {
-      throw new PMPException("Stopping pmpservice");
+      throw new PMPException(Messages.getString("PMPServiceImpl_Stopping")); //$NON-NLS-1$
     }
     try {
       if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "Creating new connection for " + transport);
+        DebugUtils.debug(this,
+            MessageFormat.format(Messages.getString("PMPServiceImpl_CreateConn"), new Object[] { transport})); //$NON-NLS-1$
       }
       Object pmpPort = properties.get(PROP_PMP_PORT);
       int port = (pmpPort instanceof Integer) ? ((Integer) pmpPort).intValue() : DEFAULT_PMP_PORT;
@@ -72,7 +75,8 @@ public class PMPServiceImpl extends PMPPeerImpl implements PMPService {
       return con;
     } catch (Exception exc) {
       if (DebugUtils.DEBUG_ENABLED) {
-        DebugUtils.debug(this, "Error creating connection for " + transport, exc);
+        DebugUtils.debug(this,
+            MessageFormat.format(Messages.getString("PMPServiceImpl_ErrCreateConn"), new Object[] { transport})); //$NON-NLS-1$
       }
       if (exc instanceof PMPException) {
         throw (PMPException) exc;

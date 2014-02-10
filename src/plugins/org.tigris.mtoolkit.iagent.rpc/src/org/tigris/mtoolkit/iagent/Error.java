@@ -119,7 +119,7 @@ public final class Error implements Externalizable {
    * @see java.lang.Object#toString()
    */
   public String toString() {
-    return "Error[code=" + code + ";message=" + message + ";details=" + details + "]";
+    return "Error[code=" + code + ";message=" + message + ";details=" + details + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
   }
 
   /* (non-Javadoc)
