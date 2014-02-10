@@ -23,59 +23,64 @@ import org.tigris.mtoolkit.iagent.spi.MethodSignature;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 public final class RemoteBundleImpl implements RemoteBundle {
-  private static MethodSignature GET_SIGNER_CERTIFICATES_METHOD  = new MethodSignature("getSignerCertificates",
+  private static final MethodSignature GET_SIGNER_CERTIFICATES_METHOD  = new MethodSignature("getSignerCertificates",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature IS_SIGNER_TRUSTED_METHOD        = new MethodSignature("isSignerTrusted",
+  private static final MethodSignature IS_SIGNER_TRUSTED_METHOD        = new MethodSignature("isSignerTrusted",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_BUNDLE_STATE_METHOD         = new MethodSignature("getBundleState",
+  private static final MethodSignature GET_BUNDLE_STATE_METHOD         = new MethodSignature("getBundleState",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_BUNDLE_LAST_MODIFIED_METHOD = new MethodSignature("getBundleLastModified",
+  private static final MethodSignature GET_BUNDLE_LAST_MODIFIED_METHOD = new MethodSignature("getBundleLastModified",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_BUNDLE_HEADERS_METHOD       = new MethodSignature("getBundleHeaders",
+  private static final MethodSignature GET_BUNDLE_HEADERS_METHOD       = new MethodSignature("getBundleHeaders",
                                                                      new String[] {
       "long", MethodSignature.STRING_TYPE
                                                                      }, true);
-  private static MethodSignature GET_BUNDLE_LOCATION_METHOD      = new MethodSignature("getBundleLocation",
+  private static final MethodSignature GET_BUNDLE_LOCATION_METHOD      = new MethodSignature("getBundleLocation",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature START_BUNDLE_METHOD             = new MethodSignature("startBundle", new String[] {
+  private static final MethodSignature START_BUNDLE_METHOD             = new MethodSignature("startBundle",
+                                                                           new String[] {
       "long", "int"
                                                                  }, true);
-  private static MethodSignature STOP_BUNDLE_METHOD              = new MethodSignature("stopBundle", new String[] {
+  private static final MethodSignature STOP_BUNDLE_METHOD              = new MethodSignature("stopBundle",
+                                                                           new String[] {
       "long", "int"
                                                                  }, true);
-  private static MethodSignature UPDATE_BUNDLE_METHOD            = new MethodSignature("updateBundle", new String[] {
+  private static final MethodSignature UPDATE_BUNDLE_METHOD            = new MethodSignature("updateBundle",
+                                                                           new String[] {
       "long", MethodSignature.INPUT_STREAM_TYPE
                                                                  }, true);
-  private static MethodSignature UNINSTALL_BUNDLE_METHOD         = new MethodSignature("uninstallBundle",
+  private static final MethodSignature UNINSTALL_BUNDLE_METHOD         = new MethodSignature("uninstallBundle",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_BUNDLE_NAME_METHOD          = new MethodSignature("getBundleSymbolicName",
+  private static final MethodSignature GET_BUNDLE_NAME_METHOD          = new MethodSignature("getBundleSymbolicName",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature RESOLVE_BUNDLES_METHOD          = new MethodSignature("resolveBundles", new String[] {
+  private static final MethodSignature RESOLVE_BUNDLES_METHOD          = new MethodSignature("resolveBundles",
+                                                                           new String[] {
                                                                    long[].class.getName()
                                                                  }, true);
-  private static MethodSignature GET_REGISTERED_SERVICES_METHOD  = new MethodSignature("getRegisteredServices",
+  private static final MethodSignature GET_REGISTERED_SERVICES_METHOD  = new MethodSignature("getRegisteredServices",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_USING_SERVICES_METHOD       = new MethodSignature("getUsingServices",
+  private static final MethodSignature GET_USING_SERVICES_METHOD       = new MethodSignature("getUsingServices",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_FRAGMENT_BUNDLES_METHOD     = new MethodSignature("getFragmentBundles",
+  private static final MethodSignature GET_FRAGMENT_BUNDLES_METHOD     = new MethodSignature("getFragmentBundles",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_HOST_BUNDLES_METHOD         = new MethodSignature("getHostBundles",
+  private static final MethodSignature GET_HOST_BUNDLES_METHOD         = new MethodSignature("getHostBundles",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_BUNDLE_TYPE_METHOD          = new MethodSignature("getBundleType",
+  private static final MethodSignature GET_BUNDLE_TYPE_METHOD          = new MethodSignature("getBundleType",
                                                                      MethodSignature.BID_ARGS, true);
-  private static MethodSignature GET_BUNDLE_HEADER_METHOD        = new MethodSignature("getBundleHeader", new String[] {
+  private static final MethodSignature GET_BUNDLE_HEADER_METHOD        = new MethodSignature("getBundleHeader",
+                                                                           new String[] {
       "long", MethodSignature.STRING_TYPE, MethodSignature.STRING_TYPE
                                                                  }, true);
-  private static MethodSignature GET_BUNDLE_START_LEVEL_METHOD   = new MethodSignature("getBundleStartLevel",
+  private static final MethodSignature GET_BUNDLE_START_LEVEL_METHOD   = new MethodSignature("getBundleStartLevel",
                                                                      new String[] {
                                                                        "long"
                                                                      }, true);
   // should not serialize because resource could be big and sending will block the communication
-  private static MethodSignature GET_BUNDLE_RESOURCE_METHOD      = new MethodSignature("getBundleResource",
+  private static final MethodSignature GET_BUNDLE_RESOURCE_METHOD      = new MethodSignature("getBundleResource",
                                                                      new String[] {
       "long", MethodSignature.STRING_TYPE, Dictionary.class.getName()
                                                                      }, false);
-  private static MethodSignature IS_BUNDLE_SIGNED_METHOD         = new MethodSignature("isBundleSigned",
+  private static final MethodSignature IS_BUNDLE_SIGNED_METHOD         = new MethodSignature("isBundleSigned",
                                                                      MethodSignature.BID_ARGS, true);
 
   private Long                   id;
