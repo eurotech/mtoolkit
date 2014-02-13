@@ -15,34 +15,47 @@ import java.util.Map;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteApplication;
 
-public class RemoteApplicationImpl implements RemoteApplication {
+public final class RemoteApplicationImpl implements RemoteApplication {
+  private final String                 applicationID;
+  private final ApplicationManagerImpl appManager;
 
-	private ApplicationManagerImpl appManager = null;
-	private String applicationID = null;
+  public RemoteApplicationImpl(ApplicationManagerImpl applicationManager, String applicationID) {
+    this.applicationID = applicationID;
+    this.appManager = applicationManager;
+  }
 
-	public RemoteApplicationImpl(ApplicationManagerImpl applicationManager, String applicationID) {
-		this.applicationID = applicationID;
-		this.appManager = applicationManager;
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.RemoteApplication#start(java.util.Map)
+   */
+  public void start(Map properties) throws IAgentException {
+    appManager.startApplication(applicationID, properties);
+  }
 
-	public void start(Map properties) throws IAgentException {
-		appManager.startApplication(applicationID, properties);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.RemoteApplication#stop()
+   */
+  public void stop() throws IAgentException {
+    appManager.stopApplication(applicationID);
+  }
 
-	public void stop() throws IAgentException {
-		appManager.stopApplication(applicationID);
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.RemoteApplication#getApplicationId()
+   */
+  public String getApplicationId() throws IAgentException {
+    return applicationID;
+  }
 
-	public String getApplicationId() throws IAgentException {
-		return applicationID;
-	}
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.RemoteApplication#getState()
+   */
+  public String getState() throws IAgentException {
+    return appManager.getApplicationState(applicationID);
+  }
 
-	public String getState() throws IAgentException {
-		return appManager.getApplicationState(applicationID);
-	}
-	
-	public Map getProperties() throws IAgentException {
-		return appManager.getApplicationProperties(applicationID);
-	}
-
+  /* (non-Javadoc)
+   * @see org.tigris.mtoolkit.iagent.RemoteApplication#getProperties()
+   */
+  public Map getProperties() throws IAgentException {
+    return appManager.getApplicationProperties(applicationID);
+  }
 }
