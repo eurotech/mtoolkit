@@ -325,7 +325,6 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
    */
   public void event(Object event, String evType) {
     try {
-      DebugUtils.debug(this, "[event] >>> event: " + event + "; type: " + evType);
       if (DEVICE_PROPERTY_EVENT.equals(evType)) {
         Dictionary eventProps = (Dictionary) event;
         String capabilityName = (String) eventProps.get(EVENT_CAPABILITY_NAME);
@@ -338,7 +337,6 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
   }
 
   public AbstractConnection getConnection(int type, boolean create) throws IAgentException {
-    DebugUtils.debug(this, "[getConnection] >>> create: " + create);
     ConnectionManager connectionManager = getConnectionManager();
     AbstractConnection connection = connectionManager.getActiveConnection(type);
     if (connection == null && create) {
@@ -362,7 +360,6 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
     //In case we already have PMP port connect to PMP directly
     final Integer pmpPort = (Integer) props.get(PMPService.PROP_PMP_PORT);
     if (pmpPort != null || !connectImmeadiate.booleanValue()) {
-      DebugUtils.debug(this, "[connect] Connect directly to PMP");
       connect0(ConnectionManager.PMP_CONNECTION, monitor);
     }
     if (connectImmeadiate.booleanValue()) {
@@ -389,7 +386,6 @@ public final class DeviceConnectorImpl extends DeviceConnector implements EventL
         throw new IAgentException("Unable to create connection", IAgentErrors.ERROR_CANNOT_CONNECT);
       }
     }
-    DebugUtils.debug(this, "[connect] connection: " + connection);
   }
 
   private void checkCancel(IAProgressMonitor monitor) throws IAgentException {
