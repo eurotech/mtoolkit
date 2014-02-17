@@ -23,7 +23,6 @@ public class RemoteBundleTest extends DeploymentTestCase {
 
   RemoteBundle bundle;
 
-
   protected void setUp() throws Exception {
     super.setUp();
     bundle = installBundle("test.bundle.b1_1.0.0.jar");
@@ -200,6 +199,11 @@ public class RemoteBundleTest extends DeploymentTestCase {
       fail("Should throw IllegalStateException");
     } catch (IAgentException e) {
     }
+  }
+
+  public void testSignature() throws IAgentException {
+    assertNotNull("The bundle should be non-null", bundle);
+    assertTrue("Installed bundle must be signed", bundle.isBundleSigned());
   }
 
   public void testIllegalStateUpdate() throws IAgentException {
