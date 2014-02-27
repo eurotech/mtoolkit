@@ -48,6 +48,11 @@ import org.tigris.mtoolkit.osgimanagement.internal.Messages;
 import org.tigris.mtoolkit.osgimanagement.internal.browser.model.FrameworkImpl;
 
 public final class InstallBundleOperation {
+
+  private static final int    CANCEL  = 1;
+  private static final int    INSTALL = 2;
+  private static final int    UPDATE  = 3;
+
   private final FrameworkImpl framework;
 
   public InstallBundleOperation(FrameworkImpl framework) {
@@ -56,14 +61,12 @@ public final class InstallBundleOperation {
 
   public RemoteBundle installBundle(File bundle, boolean autoUpdate, IProgressMonitor monitor) throws IAgentException {
     InputStream input = null;
-    RemoteBundle rBundle[] = null;
+    RemoteBundle rBundles[] = null;
     ZipFile zip = null;
     InputStream zis = null;
-    final boolean autoUpdateBundles = autoUpdate;
     try {
       int work = (int) bundle.length();
       monitor.beginTask(Messages.install_bundle, work);
-      input = new ProgressInputStream(new FileInputStream(bundle), monitor);
       DeviceConnector connector = framework.getConnector();
       if (connector == null) {
         FrameworkPlugin.processError("Connection lost", true);
@@ -81,68 +84,68 @@ public final class InstallBundleOperation {
       String version = ManifestUtils.getBundleVersion(headers);
 
       // check if already installed
-      final boolean update[] = new boolean[] {
-        false
-      };
-      final boolean install[] = new boolean[] {
-        false
-      };
+      boolean installAllowed = true;
       if (symbolicName != null) {
-        rBundle = connector.getDeploymentManager().getBundles(symbolicName, version);
-        if (rBundle != null) {
-          update[0] = true;
+        rBundles = connector.getDeploymentManager().getBundles(symbolicName, version);
+        if (rBundles != null) {
+          installAllowed = false;
         } else {
-          rBundle = connector.getDeploymentManager().getBundles(symbolicName, null);
-          if (rBundle != null) {
-            if (rBundle.length == 1 && autoUpdateBundles) {
-              update[0] = true;
-            } else {
-              install[0] = true;
-            }
-          }
+          rBundles = connector.getDeploymentManager().getBundles(symbolicName, null);
         }
       }
-      if (rBundle != null && framework.isSystemBundle(rBundle[0])) {
+      if (rBundles != null && framework.isSystemBundle(rBundles[0])) {
         throw new IllegalArgumentException("Bundle " + symbolicName + " is system");
       }
 
       // install if missing
-      if (!update[0] && !install[0]) {
+      if (rBundles == null) {
         Set bundleIds = new HashSet();
         bundleIds.addAll(framework.getBundlesKeys());
-        rBundle = new RemoteBundle[1];
         DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");
-        rBundle[0] = connector.getDeploymentManager().installBundle(
+        input = new ProgressInputStream(new FileInputStream(bundle), monitor);
+        RemoteBundle newBundle = connector.getDeploymentManager().installBundle(
             "remote:" + bundle.getName() + "." + df.format(new Date()), input);
         // check again if already installed
-        if (bundleIds.contains(new Long(rBundle[0].getBundleId()))) {
-          update[0] = true;
+        if (!bundleIds.contains(new Long(newBundle.getBundleId()))) {
+          return newBundle;
+        } else {
+          // close the old input stream and try again
+          FileUtils.close(input);
+          input = null;
+          rBundles = new RemoteBundle[] {
+            newBundle
+          };
         }
       }
+
       // bundle already exists, in which case, we need to update it
-      if (rBundle != null && (update[0] || install[0])) {
-        // close the old input stream and try again
-        FileUtils.close(input);
-        final Object rBundles[] = rBundle;
-        int bundleIndex;
-        if (!install[0] && autoUpdateBundles) {
-          bundleIndex = 0;
-        } else {
-          bundleIndex = showUpdateBundleDialog(symbolicName, version, update, install, rBundles)[0];
-        }
-        if (install[0]) {
-          monitor.beginTask(Messages.install_bundle, work);
-          DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");
-          rBundle[0] = connector.getDeploymentManager().installBundle(
-              "remote:" + bundle.getName() + "." + df.format(new Date()),
-              new ProgressInputStream(new FileInputStream(bundle), monitor));
-        } else if (update[0]) {
-          monitor.beginTask(Messages.update_bundle, work);
-          input = new ProgressInputStream(new FileInputStream(bundle), monitor);
-          rBundle[bundleIndex].update(input);
-        } else {
-          rBundle = null;
-        }
+      int action;
+      int bundleIndex;
+
+      if (rBundles.length == 1 && autoUpdate) {
+        action = UPDATE;
+        bundleIndex = 0;
+      } else {
+        int selectedIndex[] = new int[] {
+          0
+        };
+        action = showUpdateBundleDialog(symbolicName, version, installAllowed, selectedIndex, rBundles);
+        bundleIndex = selectedIndex[0];
+      }
+
+      if (action == INSTALL) {
+        monitor.beginTask(Messages.install_bundle, work);
+        DateFormat df = new SimpleDateFormat("yyyyMMdd-hhmmssSSS");
+        input = new ProgressInputStream(new FileInputStream(bundle), monitor);
+        return connector.getDeploymentManager().installBundle(
+            "remote:" + bundle.getName() + "." + df.format(new Date()), input);
+      } else if (action == UPDATE) {
+        monitor.beginTask(Messages.update_bundle, work);
+        input = new ProgressInputStream(new FileInputStream(bundle), monitor);
+        rBundles[bundleIndex].update(input);
+        return rBundles[bundleIndex];
+      } else {
+        return null;
       }
     } catch (IOException e) {
       throw new IllegalArgumentException(NLS.bind(Messages.update_file_not_found, bundle.getName()), e);
@@ -151,14 +154,14 @@ public final class InstallBundleOperation {
       FileUtils.close(zis);
       FileUtils.close(zip);
     }
-    return (rBundle == null) ? null : rBundle[0];
   }
 
-  private int[] showUpdateBundleDialog(final String symbolicName, final String version, final boolean[] update,
-      final boolean[] install, final Object[] rBundles) {
-    final int selected[] = new int[] {
-      0
+  private int showUpdateBundleDialog(final String symbolicName, final String version, final boolean installAllowed,
+      final int[] selectedIndex, final Object[] rBundles) {
+    final int result[] = new int[] {
+      InstallBundleOperation.CANCEL
     };
+
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       public void run() {
         TitleAreaDialog updateDialog = new TitleAreaDialog(FrameworksView.getShell()) {
@@ -188,7 +191,7 @@ public final class InstallBundleOperation {
             });
             list.setLayoutData(new GridData(GridData.FILL_BOTH));
             String title = "Bundle \"" + symbolicName + "\" is already installed!";
-            if (install[0]) {
+            if (installAllowed) {
               title += "\nInstall version " + version + ", or select bundle to update.";
             }
             setTitle(title);
@@ -202,32 +205,32 @@ public final class InstallBundleOperation {
             updateButton = createButton(parent, IDialogConstants.CLIENT_ID + 2, "Update", false);
             updateButton.setEnabled(list.getSelectionIndex() != -1);
             createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, true);
-            if (!install[0]) {
+            if (!installAllowed) {
               installButton.setEnabled(false);
             }
           }
 
           @Override
           protected void buttonPressed(int buttonId) {
-            selected[0] = list.getSelectionIndex();
-            setReturnCode(buttonId);
+            selectedIndex[0] = list.getSelectionIndex();
+            switch (buttonId) {
+            case IDialogConstants.CLIENT_ID + 1:
+              setReturnCode(InstallBundleOperation.INSTALL);
+              break;
+            case IDialogConstants.CLIENT_ID + 2:
+              setReturnCode(InstallBundleOperation.UPDATE);
+              break;
+            default:
+              setReturnCode(InstallBundleOperation.CANCEL);
+              break;
+            }
             close();
           }
-
         };
-        int updateResult = updateDialog.open();
-        if (updateResult == IDialogConstants.CLIENT_ID + 1) {
-          install[0] = true;
-          update[0] = false;
-        } else if (updateResult == IDialogConstants.CLIENT_ID + 2) {
-          update[0] = true;
-          install[0] = false;
-        } else {
-          install[0] = false;
-          update[0] = false;
-        }
+
+        result[0] = updateDialog.open();
       }
     });
-    return selected;
+    return result[0];
   }
 }
