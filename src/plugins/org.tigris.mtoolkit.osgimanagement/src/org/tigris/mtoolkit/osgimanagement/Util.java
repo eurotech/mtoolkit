@@ -150,4 +150,22 @@ public class Util {
     }
     return msg;
   }
+
+  /**
+   * Returns all created frameworks.
+   *
+   * @return all created frameworks, or <code>null</code> if there are no
+   *         frameworks
+   */
+  public static Framework[] getFrameworks() {
+    FrameworkImpl[] fws = FrameworksView.getFrameworks();
+    if (fws == null) {
+      return new Framework[0];
+    }
+    Framework[] result = new Framework[fws.length];
+    for (int i = 0; i < fws.length; i++) {
+      result[i] = fws[i];
+    }
+    return result;
+  }
 }
