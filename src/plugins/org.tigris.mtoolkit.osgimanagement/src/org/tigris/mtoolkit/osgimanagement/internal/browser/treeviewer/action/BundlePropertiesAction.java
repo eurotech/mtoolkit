@@ -12,9 +12,7 @@ package org.tigris.mtoolkit.osgimanagement.internal.browser.treeviewer.action;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -23,6 +21,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -30,6 +29,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.gui.PropertiesDialog;
 import org.tigris.mtoolkit.iagent.IAgentException;
@@ -159,46 +160,20 @@ public final class BundlePropertiesAction extends AbstractFrameworkTreeElementAc
 
   protected static Dictionary parseHeaders(Dictionary headers) {
     ArrayList<String> parsedHeaders = new ArrayList<String>();
-    parsedHeaders.add("Export-Package");
-    parsedHeaders.add("Import-Package");
-    parsedHeaders.add("Require-Bundle");
-    Enumeration keys = headers.keys();
-    while (keys.hasMoreElements()) {
-      Object key = keys.nextElement();
-      if (parsedHeaders.contains(key.toString())) {
-        String value = headers.get(key).toString();
-        headers.put(key, parseText(value));
+    parsedHeaders.add(Constants.EXPORT_PACKAGE);
+    parsedHeaders.add(Constants.IMPORT_PACKAGE);
+    parsedHeaders.add(Constants.REQUIRE_BUNDLE);
+    for (int i = 0; i < parsedHeaders.size(); i++) {
+      String header = parsedHeaders.get(i);
+      Object value = headers.get(header);
+      if (value != null) {
+        try {
+          ManifestElement[] parseHeader = ManifestElement.parseHeader(header, value.toString());
+          headers.put(header, parseHeader);
+        } catch (BundleException e) {
+        }
       }
     }
     return headers;
-  }
-
-  protected static ArrayList<String> parseText(String text) {
-    ArrayList<String> parseValue = new ArrayList<String>();
-    String comma = ",";
-    if (text.indexOf(comma) != -1) {
-      StringTokenizer tokenizer = new StringTokenizer(text, comma);
-      StringBuffer buf = new StringBuffer();
-      boolean addToBuffer = false;
-      while (tokenizer.hasMoreTokens()) {
-        String token = tokenizer.nextToken();
-        if (!addToBuffer && (token.indexOf("version=\"(") != -1 || token.indexOf("version=\"[") != -1)) {
-          addToBuffer = true;
-          buf = new StringBuffer();
-          buf.append(token);
-          continue;
-        }
-        if (addToBuffer) {
-          buf.append(comma);
-          buf.append(token);
-          token = buf.toString();
-          addToBuffer = false;
-        }
-        parseValue.add(token);
-      }
-    } else {
-      parseValue.add(text);
-    }
-    return parseValue;
   }
 }
