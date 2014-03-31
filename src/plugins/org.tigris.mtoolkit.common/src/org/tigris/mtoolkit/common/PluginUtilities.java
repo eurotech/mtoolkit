@@ -28,6 +28,7 @@ import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IconAndMessageDialog;
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -749,6 +750,16 @@ public final class PluginUtilities {
     Version bundleVersion = getBundleVersion(bundleName);
     Version compatibleRange = new Version(version);
     return compatibleRange.compareTo(bundleVersion) <= 0;
+  }
+
+  public static void setButtonWidthHint(Button button) {
+    Object data = button.getLayoutData();
+    if (data instanceof GridData) {
+      GridData gd = (GridData) data;
+      PixelConverter converter = new PixelConverter(button);
+      int widthHint = converter.convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
+      gd.widthHint = Math.max(widthHint, button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
+    }
   }
 
   /**
