@@ -35,6 +35,7 @@ import org.eclipse.ui.progress.IProgressConstants;
 import org.tigris.mtoolkit.common.PluginUtilities;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
+import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationTarget;
 import org.tigris.mtoolkit.console.ConsoleManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
@@ -62,7 +63,6 @@ import org.tigris.mtoolkit.osgimanagement.model.Framework;
 
 public final class ActionsManager {
   private static final String JAR_FILTER = "*.jar";                   //$NON-NLS-1$
-  private static final String MIME_JAR   = "application/java-archive"; //$NON-NLS-1$
 
   private ActionsManager() {
   }
@@ -108,7 +108,7 @@ public final class ActionsManager {
         IStatus status = Status.OK_STATUS;
         List items = new ArrayList();
         for (int i = 0; i < files.length; i++) {
-          InstallationItem item = new BaseFileItem(files[i], MIME_JAR);
+          InstallationItem item = new BaseFileItem(files[i], InstallationItemProcessor.MIME_JAR);
           items.add(item);
           if (monitor.isCanceled()) {
             break;

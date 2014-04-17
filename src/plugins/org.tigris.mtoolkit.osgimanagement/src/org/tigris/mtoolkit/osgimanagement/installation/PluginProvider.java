@@ -38,6 +38,7 @@ import org.tigris.mtoolkit.common.certificates.CertUtils;
 import org.tigris.mtoolkit.common.export.PluginExportManager;
 import org.tigris.mtoolkit.common.images.UIResources;
 import org.tigris.mtoolkit.common.installation.InstallationItem;
+import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 import org.tigris.mtoolkit.common.installation.InstallationItemProvider;
 import org.tigris.mtoolkit.osgimanagement.internal.FrameworkPlugin;
 
@@ -63,7 +64,7 @@ public final class PluginProvider implements InstallationItemProvider {
      * @see org.tigris.mtoolkit.common.installation.InstallationItem#getMimeType()
      */
     public String getMimeType() {
-      return "application/java-archive";
+      return InstallationItemProcessor.MIME_JAR;
     }
 
     /* (non-Javadoc)

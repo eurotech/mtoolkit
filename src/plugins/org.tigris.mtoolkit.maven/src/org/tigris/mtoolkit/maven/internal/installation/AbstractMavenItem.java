@@ -17,12 +17,13 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.tigris.mtoolkit.common.installation.BaseFileItem;
+import org.tigris.mtoolkit.common.installation.InstallationItemProcessor;
 
 public abstract class AbstractMavenItem extends BaseFileItem {
   protected MavenInstallationItemProvider mavenProvider;
 
   protected AbstractMavenItem(MavenInstallationItemProvider provider) {
-    super(null, "application/java-archive");
+    super(null, InstallationItemProcessor.MIME_JAR);
     this.mavenProvider = provider;
   }
 
@@ -38,13 +39,14 @@ public abstract class AbstractMavenItem extends BaseFileItem {
   /**
    * Note: no validation is done, whether the artifact actually exist at the
    * specified location.
-   * 
+   *
    * @param artifact
    */
   protected void setGeneratedArtifact(File artifact) {
-    if (this.baseFile != null)
+    if (this.baseFile != null) {
       throw new IllegalStateException("Cannot set generated artifact location twice for Maven installation item: "
           + getDisplayName());
+    }
     this.baseFile = artifact;
   }
 
