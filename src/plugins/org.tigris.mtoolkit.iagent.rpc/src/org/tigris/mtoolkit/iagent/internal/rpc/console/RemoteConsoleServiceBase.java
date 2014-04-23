@@ -139,9 +139,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
       }
     }
     dispatcher.buffer.write(buf, off, len);
-    synchronized (dispatcher) {
-      dispatcher.notifyAll();
-    }
+    dispatcher.notifyMe();
   }
 
   protected WriteDispatcher createDispatcher(PMPConnection conn, CircularBuffer buffer, RemoteObject remoteObject)
@@ -210,8 +208,8 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
       this.buffer = buffer;
       this.object = object;
       method = object.getMethod("write", new String[] { //$NON-NLS-1$
-          byte[].class.getName(), Integer.TYPE.getName(), Integer.TYPE.getName()
-      });
+              byte[].class.getName(), Integer.TYPE.getName(), Integer.TYPE.getName()
+          });
     }
 
     public void start() {
@@ -253,8 +251,15 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
       }
     }
 
-    public synchronized void finish() {
+    synchronized void finish() {
       running = false;
+      notifyAll();
+    }
+
+    synchronized void notifyMe() {
+      if (running) {
+        running = true;
+      }
       notifyAll();
     }
   }
@@ -295,9 +300,7 @@ public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole,
         for (Iterator it = dispatchers.values().iterator(); it.hasNext();) {
           WriteDispatcher dispatcher = (WriteDispatcher) it.next();
           dispatcher.buffer.write(var0, var1, var2);
-          synchronized (dispatcher) {
-            dispatcher.notifyAll();
-          }
+          dispatcher.notifyMe();
         }
       }
     }
