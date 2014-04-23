@@ -126,54 +126,53 @@ import org.tigris.mtoolkit.osgimanagement.model.SimpleNode;
 
 // TODO:Remove static access to ui widgets and model entries
 public final class FrameworksView extends ViewPart {
-  public static final String                 VIEW_ID                      = FrameworkPlugin.PLUGIN_ID
-                                                                              + ".frameworkview";        //$NON-NLS-1$
-  private static final String                PROPERTIES_IMAGE_PATH        = "properties.gif";            //$NON-NLS-1$
-  private static final String                UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";         //$NON-NLS-1$
-  private static final String                STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";           //$NON-NLS-1$
-  private static final String                START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";          //$NON-NLS-1$
-  private static final String                UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";      //$NON-NLS-1$
-  private static final String                INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";        //$NON-NLS-1$
-  private static final String                DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";     //$NON-NLS-1$
-  private static final String                CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";        //$NON-NLS-1$
-  private static final String                REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";         //$NON-NLS-1$
-  private static final String                ADD_ACTION_IMAGE_PATH        = "add_action.gif";            //$NON-NLS-1$
-  private static final String                SEARCH_IMAGE_PATH            = "search_action.gif";         //$NON-NLS-1$
-  private static final String                REFRESH_IMAGE_PATH           = "refresh_action.gif";        //$NON-NLS-1$
-  private static final String                CONSOLE_IMAGE_PATH           = "console.gif";               //$NON-NLS-1$
+  public static final String          VIEW_ID                      = FrameworkPlugin.PLUGIN_ID + ".frameworkview"; //$NON-NLS-1$
+  private static final String         PROPERTIES_IMAGE_PATH        = "properties.gif";                            //$NON-NLS-1$
+  private static final String         UPDATE_BUNDLE_IMAGE_PATH     = "update_bundle.gif";                         //$NON-NLS-1$
+  private static final String         STOP_BUNDLE_IMAGE_PATH       = "stop_bundle.gif";                           //$NON-NLS-1$
+  private static final String         START_BUNDLE_IMAGE_PATH      = "start_bundle.gif";                          //$NON-NLS-1$
+  private static final String         UNINSTALL_BUNDLE_IMAGE_PATH  = "uninstall_bundle.gif";                      //$NON-NLS-1$
+  private static final String         INSTALL_BUNDLE_IMAGE_PATH    = "install_bundle.gif";                        //$NON-NLS-1$
+  private static final String         DISCONNECT_ACTION_IMAGE_PATH = "disconnect_action.gif";                     //$NON-NLS-1$
+  private static final String         CONNECT_ACTION_IMAGE_PATH    = "connect_action.gif";                        //$NON-NLS-1$
+  private static final String         REMOVE_ACTION_ACTION_PATH    = "remove_action.gif";                         //$NON-NLS-1$
+  private static final String         ADD_ACTION_IMAGE_PATH        = "add_action.gif";                            //$NON-NLS-1$
+  private static final String         SEARCH_IMAGE_PATH            = "search_action.gif";                         //$NON-NLS-1$
+  private static final String         REFRESH_IMAGE_PATH           = "refresh_action.gif";                        //$NON-NLS-1$
+  private static final String         CONSOLE_IMAGE_PATH           = "console.gif";                               //$NON-NLS-1$
 
-  private static final String                STORAGE_FILE_NAME            = "ModelStorage.xml";          //$NON-NLS-1$
+  private static final String         STORAGE_FILE_NAME            = "ModelStorage.xml";                          //$NON-NLS-1$
 
-  private static AddAction                   addFrameworkAction;
-  private static RemoveFrameworkAction       removeFrameworkAction;
-  private static ConnectFrameworkAction      connectAction;
-  private static DisconnectFrameworkAction   disconnectAction;
-  private static InstallBundleAction         installBundleAction;
-  private static UninstallBundleAction       deinstallBundleAction;
-  private static StartBundleAction           startAction;
-  private static StopBundleAction            stopAction;
-  private static UpdateBundleAction          updateBundleAction;
-  private static CommonPropertiesAction      commonPropertiesAction;
-  private static ShowServicePropertiesInTree showServPropsInTreeAction;
-  private static ShowFrameworkConsole        showConsoleAction;
-  private static RefreshAction               refreshAction;
-  private static ViewAction                  viewServicesAction;
-  private static ViewAction                  viewBundlesAction;
-  private ShowBundleIDAction                 showBundleIDAction;
-  private GotoServiceAction                  gotoServiceAction;
-  private ShowBundleVersionAction            showBundleVersionAction;
-  private FindAction                         findAction;
+  private AddAction                   addFrameworkAction;
+  private RemoveFrameworkAction       removeFrameworkAction;
+  private ConnectFrameworkAction      connectAction;
+  private DisconnectFrameworkAction   disconnectAction;
+  private InstallBundleAction         installBundleAction;
+  private UninstallBundleAction       deinstallBundleAction;
+  private StartBundleAction           startAction;
+  private StopBundleAction            stopAction;
+  private UpdateBundleAction          updateBundleAction;
+  private CommonPropertiesAction      commonPropertiesAction;
+  private ShowServicePropertiesInTree showServPropsInTreeAction;
+  private ShowFrameworkConsole        showConsoleAction;
+  private RefreshAction               refreshAction;
+  private ViewAction                  viewServicesAction;
+  private ViewAction                  viewBundlesAction;
+  private ShowBundleIDAction          showBundleIDAction;
+  private GotoServiceAction           gotoServiceAction;
+  private ShowBundleVersionAction     showBundleVersionAction;
+  private FindAction                  findAction;
 
-  private final FilterJob                    filterJob                    = new FilterJob();
-  private final ViewerFilter                 filter                       = new FrameworksViewerFilter();
+  private final FilterJob             filterJob                    = new FilterJob();
+  private final ViewerFilter          filter                       = new FrameworksViewerFilter();
 
-  private Text                               filterField;
-  private TreeViewer                         tree;
-  private MenuManager                        mgr;
-  private ToolbarIMenuCreator                bundlesTB;
-  private static TreeRoot                    treeRoot;
+  private Text                        filterField;
+  private TreeViewer                  tree;
+  private MenuManager                 mgr;
+  private ToolbarIMenuCreator         bundlesTB;
+  private static TreeRoot             treeRoot;
 
-  private String                             notFoundText                 = null;
+  private String                      notFoundText                 = null;
 
   // Get current shell
   public static Shell getShell() {
@@ -526,7 +525,9 @@ public final class FrameworksView extends ViewPart {
       return;
     }
     IStructuredSelection selection = (IStructuredSelection) tree.getSelection();
-
+    if (selection == null) {
+      return;
+    }
     connectAction.updateState(selection);
     disconnectAction.updateState(selection);
     refreshAction.updateState(selection);
@@ -547,13 +548,11 @@ public final class FrameworksView extends ViewPart {
     showConsoleAction.updateState(selection);
 
     DeviceConnector connector = null;
-    if (selection != null) {
-      Model model = (Model) selection.getFirstElement();
-      if (model != null) {
-        Framework fw = model.findFramework();
-        if (fw != null) {
-          connector = fw.getConnector();
-        }
+    Model model = (Model) selection.getFirstElement();
+    if (model != null) {
+      Framework fw = model.findFramework();
+      if (fw != null) {
+        connector = fw.getConnector();
       }
     }
 
