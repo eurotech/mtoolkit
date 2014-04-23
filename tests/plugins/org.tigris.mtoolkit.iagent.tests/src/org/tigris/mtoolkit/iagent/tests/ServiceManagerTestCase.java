@@ -13,8 +13,6 @@ package org.tigris.mtoolkit.iagent.tests;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.AssertionFailedError;
-
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteService;
 import org.tigris.mtoolkit.iagent.ServiceManager;
@@ -141,12 +139,13 @@ public class ServiceManagerTestCase extends DeploymentTestCase {
     }
   }
 
-  protected static void assertEquals(String message, Object[] expected, Object[] actual) {
+  protected void assertEquals(String message, Object[] expected, Object[] actual) {
     if (expected == actual) {
       return;
     }
     if (expected == null || actual == null) {
-      throw new AssertionFailedError("Expected " + expected + ", but was " + actual);
+      failNotSame(null, expected, actual);
+      return;
     }
     assertEquals(message, expected.length, actual.length);
     for (int i = 0; i < actual.length; i++) {
