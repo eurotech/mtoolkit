@@ -66,7 +66,7 @@ public final class CertificatesGroup {
     }
   }
 
-  public class CertLabelProvider extends LabelProvider {
+  private class CertLabelProvider extends LabelProvider {
     /* (non-Javadoc)
      * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
      */
@@ -109,7 +109,7 @@ public final class CertificatesGroup {
     }
   }
 
-  public ITreeContentProvider   cpCertificatesGroup = new ITreeContentProvider() {
+  private ITreeContentProvider  cpCertificatesGroup = new ITreeContentProvider() {
                                                       /* (non-Javadoc)
                                                        * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
                                                        */
