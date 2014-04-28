@@ -8,6 +8,10 @@
 	<property tree:value="iagent.log.file">
 		<prop-value>iagent.log</prop-value>
 	</property>
+	
+	<property tree:value="iagent.pmp.response.timeout">
+		<prop-value>30000</prop-value>
+	</property>
 
 	<bundle tree:value="../bundles/fw.eventadmin.jar">
 		<action>install&amp;start</action>

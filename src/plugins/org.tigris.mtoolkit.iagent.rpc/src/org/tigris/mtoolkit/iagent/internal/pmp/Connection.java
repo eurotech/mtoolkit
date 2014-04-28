@@ -21,10 +21,13 @@ import org.tigris.mtoolkit.iagent.util.DebugUtils;
  * getting references to the services registered in the Framework.
  */
 class Connection implements PMPConnection {
-  private static final String   EMPTY_STRING         = new String();
-  private static final String[] EMPTY_ARGUMENT_TYPES = new String[0];
+  private static final String   EMPTY_STRING                 = new String();
+  private static final String[] EMPTY_ARGUMENT_TYPES         = new String[0];
 
-  protected volatile boolean    connected            = false;
+  private static final int      PMP_RESPONSE_DEFAULT_TIMEOUT = Integer.getInteger("iagent.pmp.response.timeout", 10000)
+                                                                 .intValue();
+
+  protected volatile boolean    connected                    = false;
 
   protected PMPInputStream      is;
   protected PMPOutputStream     os;
@@ -45,7 +48,7 @@ class Connection implements PMPConnection {
       os.write(PMPSessionThread.CONNECT);
       PMPData.writeInt(is.timeout, os);
       os.end(true);
-      answer.get((is.timeout == 0) ? 10000 : is.timeout);
+      answer.get((is.timeout == 0) ? PMP_RESPONSE_DEFAULT_TIMEOUT : is.timeout);
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new PMPException(ex.getMessage(), ex);
