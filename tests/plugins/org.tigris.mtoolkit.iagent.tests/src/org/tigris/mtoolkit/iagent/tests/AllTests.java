@@ -20,12 +20,15 @@ public class AllTests {
     // $JUnit-BEGIN$
     suite.addTestSuite(ApplicationManagerTest.class);
     suite.addTestSuite(RemoteApplicationTest.class);
-    suite.addTestSuite(DeploymentManagerTest.class);
     suite.addTestSuite(RemoteBundleTest.class);
     suite.addTestSuite(RemoteBundleListenerTest.class);
     suite.addTestSuite(RemoteCapabilitiesTest.class);
+    /*
+      DP installation hangs on PERC
+    suite.addTestSuite(DeploymentManagerTest.class);
     suite.addTestSuite(RemoteDPTest.class);
     suite.addTestSuite(RemoteDPListenerTest.class);
+    */
     suite.addTestSuite(ServiceManagerTest.class);
     suite.addTestSuite(RemoteServiceTest.class);
     suite.addTestSuite(RemoteServiceListenerTest.class);
@@ -33,5 +36,4 @@ public class AllTests {
     // $JUnit-END$
     return suite;
   }
-
 }
