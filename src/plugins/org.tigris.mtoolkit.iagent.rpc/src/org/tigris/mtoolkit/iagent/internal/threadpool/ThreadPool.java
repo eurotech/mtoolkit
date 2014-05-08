@@ -11,7 +11,7 @@
 package org.tigris.mtoolkit.iagent.internal.threadpool;
 
 import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
-import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
+import org.tigris.mtoolkit.iagent.util.ThreadUtils;
 
 public class ThreadPool {
   protected static final String WORKER_NAME = Messages.getString("ThreadPool_WorkerName"); //$NON-NLS-1$

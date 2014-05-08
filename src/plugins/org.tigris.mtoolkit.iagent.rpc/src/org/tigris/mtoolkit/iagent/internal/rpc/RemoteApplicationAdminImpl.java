@@ -33,7 +33,6 @@ import org.tigris.mtoolkit.iagent.Error;
 import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.event.EventData;
 import org.tigris.mtoolkit.iagent.event.EventSynchronizer;
-import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
 import org.tigris.mtoolkit.iagent.rpc.AbstractRemoteAdmin;
 import org.tigris.mtoolkit.iagent.rpc.Capabilities;
 import org.tigris.mtoolkit.iagent.rpc.RemoteApplicationAdmin;
@@ -280,7 +279,7 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
       return null;
     } catch (Exception e) {
       if (e instanceof ApplicationException) {
-        return new Error(ExceptionCodeHelper.fromApplicationExceptionCode(((ApplicationException) e).getErrorCode()),
+        return new Error(fromApplicationExceptionCode(((ApplicationException) e).getErrorCode()),
             "Application start failed: " + DebugUtils.toString(e), DebugUtils.getStackTrace(e));
       } else {
         return new Error(IAgentErrors.ERROR_APPLICATION_UNKNOWN, "Application start failed: " + DebugUtils.toString(e),
@@ -469,6 +468,14 @@ public final class RemoteApplicationAdminImpl extends AbstractRemoteAdmin implem
       return result;
     } else {
       return obj;
+    }
+  }
+
+  private static int fromApplicationExceptionCode(int code) {
+    if (code < 1) {
+      return IAgentErrors.ERROR_APPLICATION_UNKNOWN;
+    } else {
+      return IAgentErrors.ERROR_APPLICATION_UNKNOWN - code;
     }
   }
 

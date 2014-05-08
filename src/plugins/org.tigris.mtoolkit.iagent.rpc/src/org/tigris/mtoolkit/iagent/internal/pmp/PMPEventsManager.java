@@ -13,10 +13,10 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
+import org.tigris.mtoolkit.iagent.util.ThreadUtils;
 
 /**
  * This implementation uses the PMP Service to receive remote events.

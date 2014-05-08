@@ -20,7 +20,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.tigris.mtoolkit.iagent.internal.pmp.InvocationThread;
-import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
 import org.tigris.mtoolkit.iagent.pmp.RemoteObject;

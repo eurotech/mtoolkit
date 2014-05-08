@@ -13,9 +13,9 @@ package org.tigris.mtoolkit.iagent.internal.pmp;
 import java.util.Vector;
 
 import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
-import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnectionListener;
+import org.tigris.mtoolkit.iagent.util.ThreadUtils;
 
 final class PMPConnectionDispatcher implements Runnable {
 

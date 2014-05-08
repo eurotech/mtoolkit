@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.tigris.mtoolkit.iagent;
 
-import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
 
 /**
  * Instrumentation Agent error codes.
@@ -230,8 +229,20 @@ public class IAgentErrors {
    * @return the converted code or 0 if the code isn't originating from
    *         DeploymentException
    */
-  public static int toDeploymentExceptionCode(int iAgentCode) {
-    return ExceptionCodeHelper.toDeploymentExceptionCode(iAgentCode);
+  public static int toDeploymentExceptionCode(int code) {
+    if (code < IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN && code > -9000) {
+      return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN - code;
+    } else {
+      return 0;
+    }
+  }
+
+  public static int fromDeploymentExceptionCode(int code) {
+    if (code < 1) {
+      return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN;
+    } else {
+      return IAgentErrors.ERROR_DEPLOYMENT_UNKNOWN - code;
+    }
   }
 
   private IAgentErrors() {

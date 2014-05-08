@@ -8,13 +8,12 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.internal.utils;
+package org.tigris.mtoolkit.iagent.util;
 
 import java.lang.reflect.Constructor;
 import java.text.MessageFormat;
 
 import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
-import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
 /**
  * @since 3.1

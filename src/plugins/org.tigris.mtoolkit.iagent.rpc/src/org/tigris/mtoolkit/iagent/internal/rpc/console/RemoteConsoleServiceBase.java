@@ -24,8 +24,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.tigris.mtoolkit.iagent.internal.pmp.InvocationThread;
 import org.tigris.mtoolkit.iagent.internal.rpc.Activator;
 import org.tigris.mtoolkit.iagent.internal.rpc.Messages;
-import org.tigris.mtoolkit.iagent.internal.utils.CircularBuffer;
-import org.tigris.mtoolkit.iagent.internal.utils.ThreadUtils;
 import org.tigris.mtoolkit.iagent.pmp.EventListener;
 import org.tigris.mtoolkit.iagent.pmp.PMPConnection;
 import org.tigris.mtoolkit.iagent.pmp.PMPException;
@@ -36,6 +34,7 @@ import org.tigris.mtoolkit.iagent.rpc.Remote;
 import org.tigris.mtoolkit.iagent.rpc.RemoteCapabilitiesManager;
 import org.tigris.mtoolkit.iagent.rpc.RemoteConsole;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
+import org.tigris.mtoolkit.iagent.util.ThreadUtils;
 
 public abstract class RemoteConsoleServiceBase implements Remote, RemoteConsole, EventListener {
   private static final Integer OFFSET                = new Integer(0);

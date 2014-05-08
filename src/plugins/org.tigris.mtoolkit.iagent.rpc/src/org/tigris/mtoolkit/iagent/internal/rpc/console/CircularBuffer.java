@@ -8,10 +8,9 @@
  * Contributors:
  *     ProSyst Software GmbH - initial API and implementation
  *******************************************************************************/
-package org.tigris.mtoolkit.iagent.internal.utils;
+package org.tigris.mtoolkit.iagent.internal.rpc.console;
 
-public class CircularBuffer {
-
+class CircularBuffer {
   private byte[]       buffer   = new byte[4096];
   private int          cbOffset = 0;
   private volatile int cbLength = 0;

@@ -16,7 +16,7 @@ import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.tigris.mtoolkit.iagent.Error;
-import org.tigris.mtoolkit.iagent.internal.utils.ExceptionCodeHelper;
+import org.tigris.mtoolkit.iagent.IAgentErrors;
 import org.tigris.mtoolkit.iagent.rpc.spi.DeploymentManagerDelegate;
 import org.tigris.mtoolkit.iagent.util.DebugUtils;
 
@@ -36,7 +36,7 @@ public final class DefaultDeploymentManagerDelegate implements DeploymentManager
 			DeploymentPackage dp = dpAdmin.installDeploymentPackage(in);
 			return dp;
 		} catch (DeploymentException e) {
-			return new Error(ExceptionCodeHelper.fromDeploymentExceptionCode(e.getCode()),
+      return new Error(IAgentErrors.fromDeploymentExceptionCode(e.getCode()),
 					"Failed to install deployment package: " + DebugUtils.toString(e), DebugUtils.getStackTrace(e));
 		}
 	}
@@ -51,7 +51,7 @@ public final class DefaultDeploymentManagerDelegate implements DeploymentManager
 				dp.uninstall();
 				return Boolean.TRUE;
 			} catch (DeploymentException e) {
-				return new Error(ExceptionCodeHelper.fromDeploymentExceptionCode(e.getCode()),
+        return new Error(IAgentErrors.fromDeploymentExceptionCode(e.getCode()),
 						"Failed to uninstall deployment package: " + DebugUtils.toString(e),
 						DebugUtils.getStackTrace(e));
 			}
@@ -61,7 +61,7 @@ public final class DefaultDeploymentManagerDelegate implements DeploymentManager
 				boolean result = dp.uninstallForced();
 				return result ? Boolean.TRUE : Boolean.FALSE;
 			} catch (DeploymentException e) {
-				return new Error(ExceptionCodeHelper.fromDeploymentExceptionCode(e.getCode()),
+        return new Error(IAgentErrors.fromDeploymentExceptionCode(e.getCode()),
 						"Failed to uninstall deployment package: " + DebugUtils.toString(e),
 						DebugUtils.getStackTrace(e));
 			}
