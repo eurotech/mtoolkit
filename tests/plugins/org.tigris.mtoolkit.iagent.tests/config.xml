@@ -27,21 +27,6 @@
 		</feature>
 	</bundle>
 
-	<bundle tree:value="../bundles/osgimobile.deploymentadmin.jar">
-		<action>install&amp;start</action>
-		<feature tree:value="loader.type">
-			<feature-value>jar</feature-value>
-		</feature>
-	</bundle>
-
-
-	<bundle tree:value="../bundles/osgimobile.autoconfig.jar">
-		<action>install&amp;start</action>
-		<feature tree:value="loader.type">
-			<feature-value>jar</feature-value>
-		</feature>
-	</bundle>
-
 	<bundle tree:value="../bundles/fw.swadmin.jar">
 		<action>install&amp;start</action>
 		<feature tree:value="loader.type">
@@ -55,14 +40,6 @@
 			<feature-value>jar</feature-value>
 		</feature>
 	</bundle>
-
-	<bundle tree:value="../bundles/osgimobile.swadmin.ext.deploymentpackage.jar">
-		<action>install&amp;start</action>
-		<feature tree:value="loader.type">
-			<feature-value>jar</feature-value>
-		</feature>
-	</bundle>
-
 
 	<bundle tree:value="../bundles/osgimobile.oatimpl.jar">
 		<action>install&amp;start</action>
