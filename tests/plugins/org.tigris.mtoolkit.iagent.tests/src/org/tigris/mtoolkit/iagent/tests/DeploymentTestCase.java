@@ -23,7 +23,6 @@ import org.tigris.mtoolkit.iagent.DeploymentManager;
 import org.tigris.mtoolkit.iagent.DeviceConnector;
 import org.tigris.mtoolkit.iagent.IAgentException;
 import org.tigris.mtoolkit.iagent.RemoteBundle;
-import org.tigris.mtoolkit.iagent.RemoteDP;
 import org.tigris.mtoolkit.iagent.spi.DeviceConnectorSpi;
 
 public class DeploymentTestCase extends TestCase {
@@ -37,7 +36,6 @@ public class DeploymentTestCase extends TestCase {
   protected DeviceConnector     connector;
   protected DeviceConnectorSpi  connectorSpi;
   protected DeploymentManager   commands;
-  private Set                   deploymentPackages             = new HashSet();
   private Set                   bundles                        = new HashSet();
 
   protected void setUp() throws Exception {
@@ -48,24 +46,10 @@ public class DeploymentTestCase extends TestCase {
     // its spi
     connectorSpi = (DeviceConnectorSpi) connector;
     commands = connector.getDeploymentManager();
-
-    deploymentPackages.clear();
     bundles.clear();
   }
 
   protected void tearDown() throws Exception {
-    for (Iterator it = deploymentPackages.iterator(); it.hasNext();) {
-      String dpName = (String) it.next();
-      RemoteDP dp = commands.getDeploymentPackage(dpName);
-      if (dp != null && !dp.isStale()) {
-        try {
-          dp.uninstall(true);
-        } catch (IAgentException e) {
-          e.printStackTrace();
-        }
-      }
-    }
-
     RemoteBundle[] remoteBundles = commands.listBundles();
     for (Iterator it = bundles.iterator(); it.hasNext();) {
       String bLocation = (String) it.next();
@@ -79,19 +63,7 @@ public class DeploymentTestCase extends TestCase {
         }
       }
     }
-
     connector.closeConnection();
-  }
-
-  protected RemoteDP installDeploymentPackage(String dpLocation, String dpName) throws IAgentException {
-    return installDeploymentPackage(dpLocation);
-  }
-
-  protected RemoteDP installDeploymentPackage(String dpLocation) throws IAgentException {
-    InputStream input = getClass().getClassLoader().getResourceAsStream(dpLocation);
-    RemoteDP dp = commands.installDeploymentPackage(input);
-    deploymentPackages.add(dp.getName());
-    return dp;
   }
 
   protected RemoteBundle installBundle(String bundleResource) throws IAgentException {
