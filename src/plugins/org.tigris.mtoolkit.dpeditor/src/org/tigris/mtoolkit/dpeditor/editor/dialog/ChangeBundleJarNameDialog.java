@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
-import org.eclipse.pde.internal.ui.elements.DefaultContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -454,7 +453,7 @@ public class ChangeBundleJarNameDialog extends Dialog implements
 	 * Content provider which mediates between the viewer's model and the viewer
 	 * itself.
 	 */
-	class TableContentProvider extends DefaultContentProvider implements
+	class TableContentProvider implements
 			IStructuredContentProvider {
 		public Object[] getElements(Object parent) {
 			if (parent instanceof Vector) {

@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
-import org.eclipse.pde.internal.ui.elements.DefaultContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.KeyAdapter;
@@ -301,7 +300,7 @@ public class CertificatesSection extends DPPFormSection implements
 	 * A content provider mediates between the viewer's model and the viewer
 	 * itself.
 	 */
-	class TableContentProvider extends DefaultContentProvider implements
+	class TableContentProvider implements
 			IStructuredContentProvider {
 		/**
 		 * Returns the elements to display in the viewer when its input is set
