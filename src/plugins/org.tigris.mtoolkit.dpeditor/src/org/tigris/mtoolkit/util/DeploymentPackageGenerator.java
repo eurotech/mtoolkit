@@ -564,7 +564,7 @@ public class DeploymentPackageGenerator {
 			}
 		}
 
-		antFile.append("  <jar destfile=\"" + calculateRelative(getPath(projectRootPath, (dppFile.getBuildInfo().getBuildLocation() + File.separator + dppFile.getBuildInfo().getDpFileName()))) + "\" manifest=\"" + calculateRelative(antPath + File.separator + stripDP(dppFile.getBuildInfo().getDpFileName()) + "_manifest.mf") + "\">" + nl);
+		antFile.append("  <jar filesonly=\"true\" destfile=\"" + calculateRelative(getPath(projectRootPath, (dppFile.getBuildInfo().getBuildLocation() + File.separator + dppFile.getBuildInfo().getDpFileName()))) + "\" manifest=\"" + calculateRelative(antPath + File.separator + stripDP(dppFile.getBuildInfo().getDpFileName()) + "_manifest.mf") + "\">" + nl);
 		for (int i = 0; i < bundleInfos.size(); i++) {
 			BundleInfo bInfo = (BundleInfo) bundleInfos.elementAt(i);
 			if (!fixPack || !bInfo.isMissing()) {
